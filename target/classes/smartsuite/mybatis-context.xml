@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+				http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd" default-lazy-init="true">
+	
+	
+	<util:properties id="mybatisConfigurationProperties">
+		<prop key="dialectClass">smartsuite.mybatis.dialect.PostgreSQLDialect</prop>
+	</util:properties>
+
+	<bean id="sqlSessionFactory"
+		class="smartsuite.mybatis.ReconfigurableSqlSessionFactoryBean"
+		p:configurationProperties-ref="mybatisConfigurationProperties"
+		p:configLocation="classpath:mybatis.xml"
+		p:dataSource-ref="dataSource">
+		<property name="mapperLocations">
+			<array>
+				<value>classpath:smartsuite/mappers/oracle/approval/*.xml</value>
+				<value>classpath:smartsuite/mappers/oracle/common/*.xml</value>
+				<value>classpath:smartsuite/mappers/oracle/cms/*.xml</value>
+				<value>classpath:smartsuite/mappers/oracle/edoc/*.xml</value>
+				<value>classpath:smartsuite/mappers/docusign/*.xml</value>
+				<value>classpath:smartsuite/mappers/blockchain/*.xml</value>
+				<value>classpath:smartsuite/mappers/oracle/esourcing/*.xml</value>
+				<value>classpath:smartsuite/mappers/oracle/example/*.xml</value>
+				<value>classpath:smartsuite/mappers/oracle/infra/*.xml</value>
+				<value>classpath:smartsuite/mappers/oracle/pro/*.xml</value>
+				<value>classpath:smartsuite/mappers/oracle/shared/*.xml</value>
+				<value>classpath:smartsuite/mappers/oracle/search/*.xml</value>
+				<value>classpath:smartsuite/mappers/oracle/srm/*.xml</value>
+				<value>classpath:smartsuite/mappers/publicpro/*.xml</value>
+				<value>classpath:smartsuite/mappers/oracle/workplace/*.xml</value>
+				<value>classpath:smartsuite/mappers/portal/*.xml</value>
+				<value>classpath:smartsuite/mappers/se/*.xml</value>
+				<value>classpath:smartsuite/myapp/mapper/appstore/*.xml</value> 
+				<value>classpath:smartsuite/mappers/calendar/*.xml</value>
+				<value>classpath:smartsuite/hint/mapper/*.xml</value>
+				<value>classpath:smartsuite/memo/mapper/*.xml</value>
+				<value>classpath:smartsuite/messagesource/mapper/*.xml</value>
+				<value>classpath:smartsuite/log/mapper/*.xml</value>
+				<value>classpath:smartsuite/scheduler/mapper/*.xml</value>
+				<value>classpath:smartsuite/upload/mapper/*.xml</value>
+				<value>classpath:smartsuite/ifproxy/mapper/*.xml</value>
+				<value>classpath:smartsuite/portal/mapper/*.xml</value>
+				<value>classpath:smartsuite/dashboard/mapper/*.xml</value>
+				<value>classpath:smartsuite/license/mapper/*.xml</value>
+				<value>classpath:smartsuite/librarymanagement/mapper/*.xml</value>
+				<value>classpath:smartsuite/mappers/qmsCommon/*.xml</value>
+				<value>classpath:smartsuite/mappers/qmsCms/*.xml</value>
+				<value>classpath:smartsuite/mappers/improvemng/*.xml</value>
+				<value>classpath:smartsuite/mappers/fourM/*.xml</value>
+				<value>classpath:smartsuite/mappers/pastQuality/*.xml</value>
+				<value>classpath:smartsuite/mappers/law/*.xml</value>
+			</array> 
+		</property> 
+	</bean>
+		
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+		<constructor-arg index="1" value="BATCH" />
+	</bean>
+	
+	<!-- Logging 제외  (use actualDataSource) -->
+	<bean id="noLoggingSqlSessionFactory"
+		class="org.mybatis.spring.SqlSessionFactoryBean"
+		p:configurationProperties-ref="mybatisConfigurationProperties"
+		p:configLocation="classpath:mybatis.xml"
+		p:dataSource-ref="actualDataSource">
+		<property name="mapperLocations">
+			<array>
+				<value>classpath:smartsuite/log/mapper/*.xml</value>
+			</array>
+		</property>
+	</bean>
+	<bean id="noLoggingSqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="noLoggingSqlSessionFactory" />
+		<constructor-arg index="1" value="BATCH" />
+	</bean>
+		
+</beans>

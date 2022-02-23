@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="multiLang">
+
+	<!-- 다국어관리 목록을 조회한다. -->
+	<select id="findListMultiLang" resultType="map">
+	/* multiLang.findListMultiLang */
+           SELECT SYS_ID
+                 ,BUNDLE_NAME
+                 ,LOCALE
+                 ,MESSAGE_KEY
+                 ,MESSAGE
+                 ,LASTUPDATED
+             FROM ESFRSLN
+            WHERE SYS_ID = #{g.tenant}
+		<if test='p.locale != null and p.locale != ""'>
+              AND LOCALE = #{p.locale}
+		</if>
+		<if test='p.message_key != null and p.message_key != ""'>
+			<bind name="messageKeyPattern" value="'%' + p.message_key + '%'" />
+              AND MESSAGE_KEY LIKE #{messageKeyPattern}
+		</if>
+		<if test='p.message != null and p.message != ""'>
+			<bind name="messagePattern" value="'%' + p.message + '%'" />
+			AND MESSAGE LIKE #{messagePattern}
+		</if>
+		 ORDER BY MESSAGE_KEY 
+	</select>
+	
+	<!-- 다국어관리 INSERT -->
+	<insert id="insertMultiLang">
+	/* multiLang.insertMultiLang */
+	       INSERT INTO ESFRSLN
+	       (
+             SYS_ID
+            ,LOCALE
+            ,MESSAGE_KEY
+            ,MESSAGE
+            ,LASTUPDATED
+	       )
+	       VALUES
+	       (
+             #{g.tenant}
+            ,#{p.locale}
+            ,#{p.message_key}
+            ,#{p.message}
+            ,#{g.now}
+	       )
+	       /* 'ON CONFLICT'는 PostgreSQL 9.5부터 지원. */
+	       ON CONFLICT (SYS_ID, BUNDLE_NAME, LOCALE, MESSAGE_KEY) 
+	       DO UPDATE
+	             SET MESSAGE = excluded.MESSAGE
+	                ,LASTUPDATED = excluded.LASTUPDATED
+	</insert>
+	
+	<!-- 다국어관리 UPDATE -->
+	<update id="updateMultiLang">
+	/* multiLang.updateMultiLang */
+	       UPDATE ESFRSLN
+	          SET MESSAGE     = #{p.message}
+	             ,LASTUPDATED = #{g.now}
+	        WHERE SYS_ID      = #{g.tenant}
+	          AND BUNDLE_NAME = #{p.bundle_name}
+	          AND LOCALE      = #{p.locale}
+	          AND MESSAGE_KEY = #{p.message_key}
+	</update>
+	
+	<!-- 다국어관리 DELETE -->
+	<delete id="deleteMultiLang">
+	/* multiLang.deleteMultiLang */
+	       DELETE 
+	         FROM ESFRSLN
+	        WHERE SYS_ID      = #{g.tenant}
+	          AND BUNDLE_NAME = #{p.bundle_name}
+	          AND LOCALE      = #{p.locale}
+	          AND MESSAGE_KEY = #{p.message_key}
+	</delete>
+	
+	<!-- 다국어관리 message 목록을 조회한다. -->
+	<select id="findMessageList" resultType="map">
+	/* multiLang.findMessageList */
+           SELECT CDDT.SYS_ID
+                 ,'MESSAGE' AS BUNDLE_NAME
+                 ,CDDT.DTL_CD AS LOCALE
+                 ,#{p.message_key} AS MESSAGE_KEY
+                 ,LN.MESSAGE
+             FROM ESACDDT CDDT 
+  LEFT OUTER JOIN ESFRSLN LN ON
+                  LN.SYS_ID = CDDT.SYS_ID
+              AND LN.BUNDLE_NAME = #{p.bundle_name}
+              AND LN.MESSAGE_KEY = #{p.message_key}
+              AND LN.LOCALE = CDDT.DTL_CD 
+            WHERE CDDT.SYS_ID = #{g.tenant}
+              AND CDDT.GRP_CD = 'C002'
+              AND CDDT.STS != 'D'
+              AND CDDT.USE_YN = 'Y'
+		 ORDER BY CDDT.SORT_ORD, CDDT.DTL_CD
+	</select>
+	
+	<!-- 다국어관리 데이터 존재 여부 확인. -->
+	<select id="isExistMessage" resultType="map">
+	/* multiLang.isExistMessage */
+           SELECT 1
+             FROM ESFRSLN
+            WHERE SYS_ID = #{g.tenant}
+              AND LOCALE = #{p.locale}
+              AND MESSAGE_KEY = #{p.message_key}
+	</select>
+	
+</mapper>

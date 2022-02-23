@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="approvalLineMng">
+	<select id="findAprvLineMasterList" resultType="map">
+	/* approvalLineMng.findAprvLineMasterList : 결재선 마스터 조회 */
+		SELECT
+			APRVLN_MASTER_ID,
+			DRFTEMP,
+			APRVLN_TIT,
+			APRVLN_SORTORD
+		FROM	ESGFAVA
+		WHERE	SYS_ID = #{g.tenant}
+			AND DRFTEMP = #{g.username}	
+		ORDER BY MOD_DT DESC		
+	</select>
+	
+	<select id="findAprvLineMasterDetailList" resultType="map">
+	/* approvalLineMng.findAprvLineMasterDetailList : 결재선 내용 조회 */
+		SELECT
+			B.APRVLN_MASTER_ID,
+			B.APRVEMP_ID,
+			B.APRVEMP_TYPECD,
+			B.APRVEMP_SORTORD
+			,USR.POS_CD AS aprvemp_pos_cd
+			, (SELECT CODE.DTL_CD_NM FROM ESACDDL CODE
+				WHERE CODE.SYS_ID = #{g.tenant} AND CODE.GRP_CD = 'C005' AND CODE.DTL_CD = USR.POS_CD
+				AND CODE.LANG_CD = #{g.locale} ) AS aprvemp_pos_nm
+			,USR.USR_NM AS aprvemp_usr_nm
+			,DEPT.DEPT_CD AS aprvemp_dept_cd
+			,DEPT.DEPT_NM AS aprvemp_dept_nm
+		FROM	ESGFAVA A
+			INNER JOIN ESGFAVB B
+				ON	A.SYS_ID = B.SYS_ID
+				AND A.APRVLN_MASTER_ID = B.APRVLN_MASTER_ID
+			LEFT OUTER JOIN	ESAUSER USR		/* USR : 사용자 */
+					ON (B.SYS_ID = USR.SYS_ID
+							AND B.APRVEMP_ID = USR.USR_ID)
+			INNER JOIN ESAOGMG CMP                   /* CMP : 조직 */
+		        ON USR.SYS_ID = CMP.SYS_ID
+			       AND USR.COMP_CD = CMP.ORG_CD 
+			       AND CMP.ORG_TYP_CD = 'COMPANY'
+			       AND CMP.STS != 'D'
+     		 LEFT OUTER JOIN ESAOGDP DEPT             /* DEPT : 부서 */
+		        ON USR.SYS_ID = DEPT.SYS_ID
+			       AND USR.COMP_CD = DEPT.ORG_CD
+			       AND USR.DEPT_CD = DEPT.DEPT_CD
+			       AND CMP.ORG_TYP_CD = DEPT.ORG_TYP_CD
+			       AND DEPT.STS != 'D'
+		WHERE B.SYS_ID = #{g.tenant}
+		  AND A.APRVLN_MASTER_ID = #{p.aprvln_master_id}
+		ORDER BY B.APRVEMP_SORTORD ASC
+	</select>
+	
+	<insert id="insertAprvLineMaster">
+		/* approvalLineMng.insertAprvLineMaster : 결재선 마스터 등록 */
+		INSERT	INTO ESGFAVA(
+			SYS_ID,
+			APRVLN_MASTER_ID,
+			DRFTEMP,
+			APRVLN_CLSCD,
+			APRVLN_TIT,
+			APRVLN_SORTORD,
+			STS,
+			REG_ID,
+			REG_DT,
+			MOD_ID,
+			MOD_DT
+			)
+		VALUES (
+			#{g.tenant},
+			#{g.uuid},
+			#{g.username},
+			'',
+			#{p.aprvln_tit},
+			#{p.aprvln_sortord},
+			'C',
+			#{g.username},
+			#{g.now},
+			#{g.username},
+			#{g.now}
+		)
+	</insert>
+	
+	<insert id="insertAprvLineDetail">
+	/* approvalLineMng.insertAprvLineDetail : 결재선 내용 추가 */
+		INSERT INTO ESGFAVB(
+			SYS_ID,
+			APRVLN_MASTER_ID,
+			APRVEMP_ID,
+			APRVEMP_TYPECD,
+			APRVEMP_SORTORD,
+			STS,
+			REG_ID,
+			REG_DT,
+			MOD_ID,
+			MOD_DT
+		)
+		VALUES 
+		(
+			#{g.tenant},
+			#{p.aprvln_master_id},
+			#{p.aprvemp_id},
+			#{p.aprvemp_typecd},
+			#{p.aprvemp_sortord},
+			'C',
+			#{g.username},
+			#{g.now},
+			#{g.username},
+			#{g.now}
+		)
+	</insert>
+
+	<update id="updateAprvLineMaster">
+	/* approvalLineMng.updateAprvLineMaster : 결재선 마스터 수정 */
+		UPDATE ESGFAVA
+		<set>
+			<if test="p.aprvln_tit != null">
+				APRVLN_TIT = #{p.aprvln_tit},
+			</if>
+			<if test="p.aprvln_sortord != null and p.aprvln_sortord !=''">
+				APRVLN_SORTORD = #{p.aprvln_sortord},
+			</if>
+			STS = 'U',
+			MOD_ID = #{g.username},
+			MOD_DT = #{g.now}
+		</set>
+		WHERE SYS_ID = #{g.tenant}
+		AND APRVLN_MASTER_ID = #{p.aprvln_master_id}
+	</update>
+	
+	<update id="updateAprvLineDetail">
+		/* approvalLineMng.updateAprvLineDetail : 결재선 내용 수정 */
+		UPDATE ESGFAVB
+		<set>
+			APRVEMP_TYPECD = #{p.aprvemp_typecd},
+			APRVEMP_SORTORD = #{p.aprvemp_sortord},
+			STS = 'U',
+			MOD_ID = #{g.username},
+			MOD_DT = #{g.now}
+		</set>
+		WHERE SYS_ID = #{g.tenant}
+			AND APRVLN_MASTER_ID = #{p.aprvln_master_id}
+			AND APRVEMP_ID = #{p.aprvemp_id}
+	</update>
+	<delete id="deleteAprvLineMasterDetailList">
+		/* approvalLineMng.deleteAprvLineMasterDetailList : 결재선 마스터 내용 삭제 */
+		DELETE FROM ESGFAVB
+		WHERE SYS_ID = #{g.tenant}
+		AND APRVLN_MASTER_ID = #{p.aprvln_master_id}
+		AND APRVEMP_ID IN
+			<foreach collection="p.deleteds" item="item" separator="," open="(" close=")">
+                   #{item.aprvemp_id}
+             </foreach>
+	</delete>
+	
+	<delete id="deleteAprvLineMasterDetail">
+		/* approvalLineMng.deleteAprvLineMasterDetail : 결재선 마스터 내용 삭제 */
+		DELETE FROM ESGFAVB
+		WHERE SYS_ID = #{g.tenant}
+		AND APRVLN_MASTER_ID IN	
+			<foreach collection="p.deleteds" item="item" separator="," open="(" close=")">
+                   #{item.aprvln_master_id}
+             </foreach>
+	</delete>
+	
+	
+	<delete id="deleteAprvLineMasterList">
+	/* approvalLineMng.deleteAprvLineMasterList : 결재선 마스터 리스트 삭제 */
+		DELETE FROM ESGFAVA
+		WHERE	SYS_ID = #{g.tenant}
+		AND APRVLN_MASTER_ID IN
+               <foreach collection="p.deleteds" item="item" separator="," open="(" close=")">
+                   #{item.aprvln_master_id}
+               </foreach>
+	</delete>
+	
+</mapper>

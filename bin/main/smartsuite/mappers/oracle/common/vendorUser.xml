@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="vendorUser">
+	<!-- 협력사 사용자 목록 조회 -->
+	<select id="findListVendorUser" resultType="map">
+    /* vendorUser.findListVendorUser : 협력사 사용자 목록 조회 */	
+           SELECT a.SYS_ID				/* 시스템 아이디 */ 
+                 ,a.COMP_CD				/* 회사 코드 */
+                 ,a.USR_ID				/* 사용자 아이디 */ 
+                 ,a.USR_NM				/* 사용자 명 */
+                 ,a.USR_EN_NM			/* 사용자 영문 명 */ 
+                 ,a.EMAIL				/* 이메일 */
+                 ,a.MOBILE_NO			/* 휴대폰 번호 */ 
+                 ,a.PHONE_NO			/* 전화 번호 */
+                 ,a.FAX_NO				/* 팩스 번호 */
+                 ,a.MAIL_RECEIVED_YN	/* 메일 수신 여부 */
+                 ,a.SMS_RECEIVED_YN		/* SMS 수신 여부 */
+                 ,a.ACC_LOCK_YN
+                 ,a.PW_MOD_DT			/* 암호 변경 일시 */
+                 ,a.LAST_LOGIN_DT		/* 최종 로그인 일시 */
+                 ,b.VD_CD  				/* 협력사 코드 */
+                 ,b.ERP_VD_CD           /* ERP 코드 */
+                 ,b.VD_NM				/* 협력사 명 */
+                 ,b.VD_EN_NM			/* 협력사 영문 명 */ 
+              FROM ESAUSER a
+        INNER JOIN ESMVDGL b
+                ON b.SYS_ID = a.SYS_ID
+               AND b.VD_CD  = a.VD_CD
+             WHERE 1=1
+               AND a.USR_CLS = 'S' /* 협력사 */
+               AND a.STS	!= 'D' /* 상태 */ 
+               AND a.SYS_ID = #{g.tenant}
+		<if test="p.vd_cd != null and p.vd_cd != ''">
+			<bind name="searchPattern" value="'%' + p.vd_cd + '%'" />
+               AND UPPER(b.VD_CD) LIKE UPPER(#{searchPattern})
+		</if>
+		<if test="p.vd_nm != null and p.vd_nm != ''">
+			<bind name="searchPattern" value="'%' + p.vd_nm + '%'" />
+               AND UPPER(b.VD_NM) LIKE UPPER(#{searchPattern})
+		</if>
+		<if test="p.usr_id != null and p.usr_id != ''">
+       		<bind name="userIdPattern" value="'%' + p.usr_id + '%'" />
+               AND UPPER(a.USR_ID) LIKE UPPER(#{userIdPattern})
+		</if>
+		<if test="p.usr_nm != null and p.usr_nm != ''">
+			<bind name="usernamePattern" value="'%' + p.usr_nm + '%'" />
+               AND UPPER(a.USR_NM) LIKE UPPER(#{usernamePattern})
+		</if>
+          ORDER BY a.USR_ID, a.USR_NM DESC
+    </select>
+    
+    <!-- 협력사 사용자 조회 -->
+    <select id="findInfoVendorUser" resultType="map">
+    /* vendorUser.findInfoVendorUser : 협력사 사용자 조회 */	
+           SELECT a.SYS_ID				/* 시스템 아이디 */ 
+                 ,a.COMP_CD				/* 회사 코드 */
+                 ,a.USR_ID				/* 사용자 아이디 */ 
+                 ,a.USR_NM				/* 사용자 명 */
+                 ,a.USR_EN_NM			/* 사용자 영문 명 */
+                 ,a.USE_YN				/* 사용 여부 */
+                 ,a.EMAIL				/* 이메일 */
+                 ,a.MOBILE_NO			/* 휴대폰 번호 */
+                 ,a.PHONE_NO			/* 전화 번호 */
+                 ,a.FAX_NO				/* 팩스 번호 */
+                 ,a.MAIL_RECEIVED_YN	/* 메일 수신 여부 */
+                 ,a.SMS_RECEIVED_YN		/* SMS 수신 여부 */
+                 ,a.ACC_LOCK_YN
+                 ,a.PW_MOD_DT			/* 암호 변경 일시 */
+                 ,a.LAST_LOGIN_DT		/* 최종 로그인 일시 */
+                 ,b.VD_CD  				/* 협력사 코드 */
+                 ,b.ERP_VD_CD    		/* ERP 코드 */
+                 ,b.VD_NM				/* 협력사 명 */
+                 ,b.VD_EN_NM			/* 협력사 영문 명 */
+                 ,'N' AS PW_EXPIRED_YN  /* 비밀번호 만료 여부 */
+                 ,a.TIMEZONE_CD
+              FROM ESAUSER a
+        INNER JOIN ESMVDGL b
+                ON b.SYS_ID = a.SYS_ID
+               AND b.VD_CD  = a.VD_CD
+             WHERE 1=1
+               AND a.USR_CLS = 'S' /* 협력사 */
+               AND a.STS	!= 'D' /* 상태 */
+               AND a.SYS_ID = #{g.tenant}
+               AND a.USR_ID = #{p.usr_id}
+          ORDER BY a.USR_ID
+    </select>
+    
+    <!-- 계정잠김 해제 -->
+    <update id="saveInfoAccLockYn">
+    /* vendorUser.saveInfoAccLockYn : 계정잠김해제 */
+    	UPDATE ESAUSER
+    	   SET ACC_LOCK_YN = 'N'
+    	      ,PW_MISS_CNT = 0
+    	      ,MOD_ID = #{g.username}
+			  ,MOD_DT = #{g.now}
+    	 WHERE SYS_ID = #{g.tenant}
+    	   AND USR_ID = #{p.usr_id}
+    </update>
+    
+</mapper>

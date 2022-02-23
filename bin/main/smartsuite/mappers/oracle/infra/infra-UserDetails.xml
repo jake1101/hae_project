@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="infra-UserDetails">
+
+	<select id="getUserDetails" resultType="smartsuite.security.userdetails.User">
+		SELECT USR_ID USERNAME, PW AS PASSWORD
+		  FROM ESAUSER
+		WHERE USR_ID = #{p}
+		AND SYS_ID = #{g.tenant}
+	</select>
+	
+	<select id="getSessionUserInfo" parameterType="String"  resultType="map">
+    /* infra-UserDetails.getSessionUserInfo */
+    SELECT US.USR_ID
+         , US.COMP_CD
+         , CASE WHEN 'ko_KR' = #{g.locale} THEN OG.ORG_NM
+                ELSE OG.ORG_EN_NM
+           END AS COMP_NM
+         , US.USR_NM
+         , US.USR_EN_NM
+         , US.USR_CLS
+         , US.JOB_ROLE
+         , US.JOB_CD 
+         , US.POS_CD
+		 , (SELECT A.DTL_CD_NM FROM ESACDDL A
+			WHERE A.SYS_ID = #{g.tenant} AND A.GRP_CD = 'C005' AND A.DTL_CD = US.POS_CD
+			AND A.LANG_CD = #{g.locale} ) AS POS_NM
+         , US.EMP_NO
+         , US.DEPT_CD
+         , DP.DEPT_NM
+         , US.MOBILE_NO
+         , US.PHONE_NO
+         , US.FAX_NO
+         , US.EMAIL
+         , US.ACC_EXPIRE_YN
+         , US.ACC_LOCK_YN
+         , US.PW_MOD_REQUIRE_YN
+         , US.PRE_LOGIN_DT
+         , US.PRE_LOGIN_IP
+         , US.LAST_LOGIN_DT
+         , US.LAST_LOGIN_IP
+         , US.USE_YN
+         , US.PW_INIT_YN
+         , US.PW_MOD_DT
+         , US.MAIL_RECEIVED_YN
+         , US.SMS_RECEIVED_YN
+         , US.PROPERTY->'websocket'->>'use' AS WS_USE
+         , US.PROPERTY->'websocket'->'receiveHour'->>'from' AS WS_FROM_HR
+         , US.PROPERTY->'websocket'->'receiveHour'->> 'to' AS WS_TO_HR
+         , US.PROPERTY->'mail'->>'use' AS MAIL_USE
+         , US.PROPERTY->'mail'->'receiveHour'->>'from' AS MAIL_FROM_HR
+         , US.PROPERTY->'mail'->'receiveHour'->>'to' AS MAIL_TO_HR
+         , US.PROPERTY->'sms'->>'use' AS SMS_USE
+         , US.PROPERTY->'sms'->'receiveHour'->>'from' AS SMS_FROM_HR
+         , US.PROPERTY->'sms'->'receiveHour'->>'to'   AS SMS_TO_HR
+         , US.TIMEZONE_CD
+         ,(select dtl_cd_attr_val from ESADTAT where grp_cd='C025' and dtl_cd =US.TIMEZONE_CD) AS TIMEZONE_NM
+         -- 권한이 있는 디폴트 사이트(운영사)를 보여줌
+         ,US.SITE_ID AS USR_SITE_ID
+         ,CASE WHEN US.SITE_ID IS NOT NULL AND US.SITE_ID = ANY(v4.FN_GET_ALL_SITE_IDS_BY_ID(US.USR_ID,'Y')) THEN US.SITE_ID ELSE C.ID END AS SITE_ID
+         ,CASE WHEN US.SITE_ID IS NOT NULL AND US.SITE_ID = ANY(v4.FN_GET_ALL_SITE_IDS_BY_ID(US.USR_ID,'Y')) THEN A.NAME ELSE C.NAME END   AS SITE_NAME
+         ,CASE WHEN US.SITE_ID IS NOT NULL AND US.SITE_ID = ANY(v4.FN_GET_ALL_SITE_IDS_BY_ID(US.USR_ID,'Y')) THEN B.ID ELSE D.ID END       AS COMPANY_ID
+         ,CASE WHEN US.SITE_ID IS NOT NULL AND US.SITE_ID = ANY(v4.FN_GET_ALL_SITE_IDS_BY_ID(US.USR_ID,'Y')) THEN B.NAME ELSE D.NAME END   AS COMPANY_NAME
+         ,CASE WHEN US.SITE_ID IS NOT NULL AND US.SITE_ID = ANY(v4.FN_GET_ALL_SITE_IDS_BY_ID(US.USR_ID,'Y')) THEN B.PROPERTY->>'attGrpCode' ELSE D.PROPERTY->>'attGrpCode' END AS ATT_GRP_CODE
+         ,US.COMPANY_ID AS USER_COMPANY_ID
+         ,US.ACCESS_LEVEL
+         ,US.HOME_TYP
+      FROM ESAUSER US
+      LEFT OUTER JOIN ESAOGMG OG
+        ON US.SYS_ID = OG.SYS_ID
+       AND US.COMP_CD = OG.ORG_CD
+       AND OG.ORG_TYP_CD = 'COMPANY'
+       AND OG.STS != 'D'
+      LEFT OUTER JOIN ESAOGDP DP
+        ON US.SYS_ID = DP.SYS_ID
+       AND US.COMP_CD = DP.ORG_CD
+       AND US.DEPT_CD = DP.DEPT_CD
+       AND DP.STS != 'D'
+      LEFT OUTER JOIN SITE A
+        ON A.ID = US.SITE_ID
+      LEFT OUTER JOIN COMPANY B
+        ON B.ID = A.COMPANY_ID
+      LEFT OUTER JOIN SITE C
+        ON C.ID = ANY(v4.FN_GET_ALL_SITE_IDS_BY_ID(US.USR_ID,'Y'))
+      LEFT OUTER JOIN COMPANY D
+        ON D.ID = C.COMPANY_ID
+     WHERE US.SYS_ID = #{g.tenant} 
+       AND US.USR_ID = #{p}
+       AND US.STS != 'D'
+  ORDER BY A.ID
+          ,C.SORT_ORDER
+          ,C.NAME
+     LIMIT 1
+    </select>
+	
+	<select id="getUserAuthInfo" parameterType="String"  resultType="map">
+		SELECT
+			PW_MISS_CNT
+			, PW_INIT_YN
+			, LAST_LOGIN_DT
+			, LAST_LOGIN_IP
+			, ACC_EXPIRE_YN
+			, ACC_LOCK_YN
+			, PW_MOD_REQUIRE_YN
+			, PRE_LOGIN_DT
+			, PRE_LOGIN_IP
+		  FROM ESAUSER
+		WHERE usr_id = #{p}
+		AND SYS_ID = #{g.tenant}
+	</select>	
+
+	<update id="updateAuthFail">
+		UPDATE ESAUSER
+			SET PW_MISS_CNT = #{p.pw_miss_cnt}
+			  , ACC_LOCK_YN = #{p.acc_lock_yn}
+		WHERE USR_ID = #{p.usr_id}
+		AND SYS_ID = #{g.tenant}
+	</update>
+	
+	<update id="updatePwdModify">
+		UPDATE ESAUSER
+			SET PW_MOD_REQUIRE_YN = 'Y'
+		WHERE USR_ID = #{p}
+	</update>
+	
+	<update id="updateExtraLoginInfo">
+		UPDATE ESAUSER
+			SET LAST_LOGIN_IP = #{p.last_login_ip}
+			, LAST_LOGIN_DT = #{g.now}
+			, PW_MISS_CNT = 0
+		WHERE USR_ID = #{g.username}
+		AND SYS_ID = #{g.tenant}
+	</update>	
+	
+	<select id="getSessionUserAuthorities" resultType="org.springframework.security.core.authority.SimpleGrantedAuthority">
+    /* infra-UserDetails.getSessionUserAuthorities */
+        SELECT AA.ROLE_CD AS "ROLE"
+          FROM ( /* user-role   union all   dept-role */
+                 SELECT AURP.ROLE_CD   /* 사용자-권한 */
+                   FROM ESAAURP AURP
+                  INNER JOIN
+                        ESAAURH AURH
+                     ON (    AURP.SYS_ID    = AURH.SYS_ID
+                         AND AURP.ROLE_CD   = AURH.ROLE_CD
+                        )
+                  WHERE AURP.SYS_ID     = #{g.tenant}
+                    AND AURP.USR_ID     = #{p.usr_id}
+                <if test="p.usr_cls != null and p.usr_cls eq 'B'.toString()">
+                    AND AURP.COMP_CD    = #{p.comp_cd}
+                </if>
+                    AND AURH.USE_YN     = 'Y'
+                    AND AURP.STS        != 'D'
+                    AND AURH.STS        != 'D'
+                <if test="p.dept_cd != null and p.dept_cd != ''">
+                
+                  UNION ALL
+                 
+                 SELECT AURD.ROLE_CD   /* 부서-권한 */
+                   FROM ESAAURD AURD
+                  INNER JOIN
+                        ESAAURH AURH
+                     ON (    AURD.SYS_ID   = AURH.SYS_ID
+                         AND AURD.ROLE_CD  = AURH.ROLE_CD
+                        )
+                  WHERE AURD.SYS_ID        = #{g.tenant}
+                    AND AURD.DEPT_CD       = #{p.dept_cd}
+                    AND AURH.USE_YN        = 'Y'
+                    AND AURD.STS           != 'D'
+                    AND AURH.STS           != 'D'
+                    AND EXISTS ( SELECT 1
+                                   FROM ESAOGDP OGDP
+                                  WHERE OGDP.SYS_ID     = AURD.SYS_ID
+                                    AND OGDP.ORG_TYP_CD = AURD.ORG_TYP_CD
+                                    AND OGDP.ORG_CD     = AURD.ORG_CD
+                                    AND OGDP.DEPT_CD    = AURD.DEPT_CD
+                                    AND OGDP.USE_YN     = 'Y'
+                                    AND OGDP.STS        != 'D' )
+                </if>
+               ) AA
+         GROUP BY AA.ROLE_CD
+	</select>
+</mapper>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dashboard">
+    
+    <select id="getPtwReqList" resultType="map">
+    /* dashboard.getPtwReqList */
+           SELECT a.ID
+                 ,a.SITE_ID
+                 ,b.ID
+                 ,b.REQ_USER_TYPE
+                 ,b.REQ_USER_ID
+                 ,b.APPR_USER_ID
+                 ,TO_CHAR(b.REQ_DT, 'MM/DD') AS REQ_DT    -- 신청일
+                 ,d.NAME      AS VENDOR_NM -- 신청업체
+                 ,a.NAME      AS PTW_NM    -- 안전작업명
+                 ,e.DTL_CD_NM AS STATUS_NM -- 상태[IOT006]
+                 ,TO_CHAR(b.APPR_DT, 'MM/DD') AS APPR_DT  -- 승인일
+             FROM PTW a
+       INNER JOIN PTW_REQ b
+               ON b.PTW_ID = a.ID
+              AND b.status != 'temp'
+       INNER JOIN WORKER c
+               ON c.ID = b.REQ_USER_ID::int
+       INNER JOIN VENDOR d
+               ON d.ID = c.VENDOR_ID
+       INNER JOIN ESACDDL e
+               ON e.GRP_CD = 'IOT006'
+              AND e.LANG_CD = 'ko_KR'
+              AND e.DTL_CD = b.STATUS
+            WHERE a.USE_FLAG = 'Y'
+              AND a.SITE_ID  = #{p.siteId}
+              AND b.REQ_DT >= NOW()::date - interval '7 day'
+         ORDER BY b.REQ_DT DESC
+    </select>
+    
+    <select id="getPlaceChart1" resultType="map">
+    /* dashboard.getPlaceChart1 */
+           SELECT a.ID
+                 ,a.NAME   AS TARGET_NAME
+                 ,COUNT(*) AS CNT
+             FROM PTW a
+       INNER JOIN PTW_REQ b
+               ON b.PTW_ID = a.ID
+              AND b.status != 'temp'
+            WHERE a.USE_FLAG = 'Y'
+              AND a.SITE_ID = 1
+              AND b.REQ_DT >= NOW()::date - interval '7 day'
+         GROUP BY a.ID
+                 ,a.NAME
+    </select>
+    
+    <select id="getDeliverTagInfo" resultType="map">
+    /* dashboard.getDeliverTagInfo */
+           SELECT SUM(CASE WHEN TYPE IN ('tag', 'vehicle') AND TARGET_ID IS NOT NULL THEN 1 ELSE 0 END) AS CNT1
+                 ,SUM(CASE WHEN TYPE IN ('tag', 'vehicle') AND TARGET_ID IS NULL THEN 1 ELSE 0 END) AS CNT2
+                 ,SUM(CASE WHEN TYPE IN ('tag', 'vehicle') THEN 1 ELSE 0 END) AS CNT3
+                 ,SUM(CASE WHEN TYPE IN ('mobile_worker', 'mobile_vehicle') AND TARGET_ID IS NOT NULL THEN 1 ELSE 0 END) AS CNT4
+                 ,SUM(CASE WHEN TYPE IN ('mobile_worker', 'mobile_vehicle') AND TARGET_ID IS NULL THEN 1 ELSE 0 END) AS CNT5
+                 ,SUM(CASE WHEN TYPE IN ('mobile_worker', 'mobile_vehicle') THEN 1 ELSE 0 END) AS CNT6
+             FROM SENSOR a
+            WHERE SITE_ID = #{p.siteId}
+              AND USE_FLAG = 'Y'
+	</select>
+	
+	<select id="getPlaceChart2" resultType="map">
+	/* dashboard.getPlaceChart2 */
+	       SELECT A.TARGET_NAME
+	             ,A.CNT
+<!-- 	             ,'' AS TNAMES -->
+	         FROM (
+	                SELECT JOB_TYPE_NAME AS TARGET_NAME
+	                      ,COUNT(*)      AS CNT
+	                  FROM ATTEND_LOG
+	                 WHERE SITE_ID     = #{p.siteId}
+	                   AND ATTEND_DATE = current_date
+	              GROUP BY JOB_TYPE_NAME
+	              ORDER BY CNT DESC, TARGET_NAME
+	                 LIMIT 4
+	              ) A
+	        UNION ALL
+	       SELECT '기타' AS TARGET_NAME
+	             ,SUM(CNT) AS CNT
+<!-- 	             ,STRING_AGG(TARGET_NAME, ',') AS TNAMES -->
+	         FROM (
+	                SELECT JOB_TYPE_NAME AS TARGET_NAME
+	                      ,COUNT(*)      AS CNT
+	                  FROM ATTEND_LOG
+	                 WHERE SITE_ID     = #{p.siteId}
+	                   AND ATTEND_DATE = current_date
+	              GROUP BY JOB_TYPE_NAME
+	              ORDER BY CNT DESC,TARGET_NAME
+	                OFFSET 4
+	              ) B
+	</select>
+	
+	<select id="getPlaceChart3" resultType="map">
+	/* dashboard.getPlaceChart3 */
+	       SELECT C.DTL_CD_NM AS TARGET_NAME
+	             ,COUNT(*) AS CNT
+	         FROM SENSOR a
+	   INNER JOIN VEHICLE b
+	           ON b.ID = a.TARGET_ID
+	   INNER JOIN ESACDDL c
+	           ON c.SYS_ID  = #{g.tenant}
+	          AND c.LANG_CD = #{g.locale}
+	          AND c.DTL_CD = b.TYPE
+	        WHERE a.SITE_ID = #{p.siteId}
+	          AND a.USE_FLAG = 'Y'
+	          AND a.TYPE IN ('vehicle', 'mobile_vehicle')
+	          AND a.TARGET_ID IS NOT NULL
+	     GROUP BY C.DTL_CD_NM
+	     ORDER BY CNT DESC
+	</select>
+</mapper>

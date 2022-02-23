@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+				http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd" default-lazy-init="true">
+
+		
+	<!-- sc-upload 기본설정 -->
+	<bean class="smartsuite.upload.core.config.SCUploadConfiguration">
+		<!-- bytes,KB,MB,GB,TB,PB,EB -->
+		<property name="maxFileSize" value="20MB"></property>
+		<property name="maxTotalFileSize" value="100MB"></property>
+		<property name="extension" value="jpg,gif,png,tif,bmp,txt,xls,doc,ppt,xlsx,docx,pptx,rtf,gul,hwp,pdf,mht,eml,zip,mp4"></property>
+	</bean>
+	
+	<!-- CommonMultipartResolver 를 확장하여 MultipartFileValidator 를 사용할 수 있도록 구현한
+        클래스 입니다. -->
+    <bean id="multipartResolver" class="smartsuite.upload.spring.web.multipart.SimpleMultipartResolver">
+        <property name="defaultEncoding" value="utf-8" />
+        <!-- validator 가 필요하면 아래와 같이 추가 -->
+        <property name="validator">
+        	<bean class="smartsuite.upload.spring.web.multipart.validator.CompositeMultipartFileValidator">
+        		<property name="validators">
+        			<list>
+			            <bean class="smartsuite.upload.spring.web.multipart.validator.MultipartFileExtensionValidator">
+			            	<!-- 허용가능한 확장자 -->
+			            	<property name="allowedExtensions" value="jpg,gif,png,tif,bmp,txt,xls,doc,ppt,xlsx,docx,pptx,rtf,gul,hwp,pdf,mht,eml,zip,mp4"></property>
+			            </bean>
+			            <bean class="smartsuite.upload.spring.web.multipart.validator.MultipartFileMaxSizeValidator">
+			            	<property name="maxFileSize" value="100MB"></property>
+			            </bean>
+        			</list>
+        		</property>
+        	</bean>
+        </property>
+        <!-- Multipart 파라미터중 id 값에 포함할 수 없는 문자(파일 확장자 및 separator 패턴)에 대한 예외처리 클래스
+        <property name="parameterValidator">
+        	<bean class="smartsuite.upload.spring.web.multipart.validator.MultipartInvalidIdParameterValidator"></bean>
+        </property> -->
+    </bean>
+    <!-- 첨부파일 아이디를 암,복호화 해주는 클래스 -->
+    <bean class="smartsuite.upload.spring.web.encryption.SimpleHttpSessionFileItemEncryptor"></bean>
+    <!-- 첨부파일의 mime type 을 확인할 수 있는 유틸 클래스 입니다. -->
+    <bean class="smartsuite.upload.core.util.MIMETypeUtil">
+        <property name="mimetypes">
+            <!-- upload-core 라이브러리에 포함된 mime type 프로퍼티 -->
+            <util:properties
+                location="classpath:smartsuite/upload/properties/mime-types.properties" />
+        </property>
+    </bean>
+    
+    <!-- 파일다운로드 로그 -->
+    <bean class="smartsuite.upload.core.aop.UploadLoggingAdvisor"></bean>
+     
+    <!-- MultipartFile 을 포함한 MultipartFileItem 을 생성해주는 팩토리 클래스  -->
+    <bean class="smartsuite.upload.spring.web.multipart.factory.SimpleMultipartFileItemFactory"></bean>
+     
+    <!-- FileDto 팩토리 클래스 -->
+    <bean class="smartsuite.upload.core.factory.SimpleFileDtoFactory"></bean>
+    
+    <!-- Mybatis 용 퍼시스터 클래스 -->
+    <bean id="filePersister" class="smartsuite.upload.core.persist.SimpleMybatisFilePersister"></bean>
+    
+    <!-- FileStore 클래스 -->
+    <bean id="fileStore" class="smartsuite.upload.core.store.SimpleFileSystemFileStore">
+		<property name="location">
+			<!-- 날짜 포맷으로 저장소 경로를 사용하도록 설정(root 폴더는 OS 의 임시폴더 입니다.) -->
+			<bean class="smartsuite.upload.core.store.ParameterizedLocation">
+				<!-- rootLocation 설정 추가 (file.properties) -->
+				<property name="rootLocation" value="#{file['file.upload.path']}"></property>
+				<property name="parametrizedPaths">
+					<list>
+						<bean class="smartsuite.upload.core.store.DateFormatPath">
+							<constructor-arg name="format" value="yyyy" />
+						</bean>
+						<bean class="smartsuite.upload.core.store.DateFormatPath">
+                        	<constructor-arg name="format" value="MM" />
+						</bean>
+						<bean class="smartsuite.upload.core.store.DateFormatPath">
+                        	<constructor-arg name="format" value="dd" />
+						</bean>
+					</list>
+				</property>
+			</bean>
+		</property>
+	</bean>
+	
+    <!-- FileService 인터페이스를 클래스로 chain 기법을 통하여 로직을 처리할 수 있는 클래스 -->
+    <bean id="fileService" class="smartsuite.upload.core.service.SimpleChainedFileServiceImpl">
+        <property name="filePersister" ref="filePersister"></property>
+        <property name="fileServiceChains">
+            <list>
+                <bean class="smartsuite.upload.core.store.SimpleFileSystemChainHandler">
+                    <property name="fileStore" ref="fileStore" />
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <bean class="smartsuite.upload.core.config.SMARTSuiteUploadConfiguration">
+    	<property name="isInMemoryStream" value="false"></property>
+	</bean>
+
+</beans>
