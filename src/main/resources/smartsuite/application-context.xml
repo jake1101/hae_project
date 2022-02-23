@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"	
+	xmlns:context="http://www.springframework.org/schema/context"	
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:encryption="http://www.jasypt.org/schema/encryption"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+		http://www.jasypt.org/schema/encryption
+        http://www.jasypt.org/schema/encryption/jasypt-spring31-encryption-1.xsd
+        http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
+        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd" 
+        default-lazy-init="true">
+				
+	<!-- properties 설정 -->
+	<import resource="classpath:smartsuite/properties-context.xml"/>
+	<!-- properties 설정 -->
+	
+	<!-- 기본 설정 -->
+	<import resource="classpath:smartsuite/mybatis-context.xml"/>
+	<!-- 기본 설정 -->
+	
+	<!-- transaction 및 sqlSessionFactory 설정 -->
+	<import resource="classpath:smartsuite/transaction-context.xml"/>
+	<!-- transaction 및 sqlSessionFactory 설정 -->
+	
+	<!-- modules -->
+	<context:component-scan base-package="
+	                                      smartsuite.*.web,
+										  smartsuite.security,
+										  smartsuite.tenancy,
+										  smartsuite.app"
+										   use-default-filters="false">
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Service" />
+	</context:component-scan>
+	<!-- modules -->
+	
+	<!-- quartz -->
+	<import resource="classpath:smartsuite/quartz-context.xml"/>
+	<!-- quartz -->
+	
+	<!-- attachment -->
+	<import resource="classpath:smartsuite/attachment-context.xml"/>
+	<!-- attachment -->
+	
+	<!-- captcha 인증 -->
+	<bean id="captchaGenerator" class="smartsuite.security.captcha.CaptchaGenerator"/>
+	<!-- captcha -->
+	
+	<!-- ehcach -->
+	<cache:annotation-driven cache-manager="cacheManager" />
+	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcacheManager"/>
+	<bean id="ehcacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="classpath:ehcache.xml"/>
+	
+	
+	<!-- restTemplate -->
+	<bean id="restTemplate" class="org.springframework.web.client.RestTemplate"/>
+	
+	<!-- Gson -->
+	<bean id="gsonBuilder" class="com.google.gson.GsonBuilder"/>
+	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject" ref="gsonBuilder"/>
+		<property name="targetMethod" value="disableHtmlEscaping"/>
+	</bean>
+	<bean id="gson" class="com.google.gson.Gson" factory-bean="gsonBuilder" factory-method="create"/>
+	
+	
+	<!-- ehcach --> 
+	
+	<!-- tenancy -->
+	<import resource="classpath:smartsuite/tenancy-context.xml"/>
+	<!-- tenancy -->
+	
+	<!-- concurrent -->
+	<import resource="classpath:smartsuite/concurrent-context.xml"/>
+	<!-- concurrent -->
+	
+	<!-- qlik -->
+    <import resource="classpath*:smartsuite/qlik-context.xml"/>
+    <!-- qlik -->
+    
+    <!-- blockchain -->
+    <import resource="classpath*:smartsuite/blockchain-context.xml"/>
+    
+    <!-- docusign -->
+    <import resource="classpath*:smartsuite/docusign-context.xml"/>
+    
+    <!-- search -->
+    <import resource="classpath*:smartsuite/search-context.xml"/>
+    
+    <!-- edoc -->
+    <import resource="classpath*:smartsuite/edoc-context.xml"/>
+</beans>

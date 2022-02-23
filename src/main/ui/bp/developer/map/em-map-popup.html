@@ -1,0 +1,25 @@
+<link rel="import" href="./shared/es-source-viewer.html">
+<link rel="import" href="./es-map-popup.html">
+
+<dom-module id="em-map-popup">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+	<template>
+		<sc-panel class="vbox flex-5" collapsible="false" title-text="팝업 띄우기">
+           <es-map-popup id="map"></es-map-search>
+        </sc-panel>
+        <sc-panel class="vbox flex-5" collapsible="false" title-text="Source Viewer">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/map/es-map-popup.html"></es-source-viewer>
+        </sc-panel>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-map-popup'
+		});
+	</script>
+</dom-module>

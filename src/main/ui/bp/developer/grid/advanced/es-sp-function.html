@@ -1,0 +1,109 @@
+<dom-module id="es-sp-function">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" editable="{{gridEditable}}" row-style-function="onRowStyle">
+			<sc-grid-columns>
+			    <sc-data-column data-field="colunm_1"   header-text="colunm_1"              width="150" text-align="left"   editable="true" ></sc-data-column>
+			    <sc-data-column data-field="colunm_2"   header-text="colunm_2(editable fn)" width="150" text-align="left"   item-editable-function="onItemEditble" required="true"></sc-data-column>
+			    <sc-data-column data-field="colunm_3"   header-text="colunm_3(lable fn)"    width="150" text-align="left"   item-label-function="onItemLabel" editable="true" required="true"></sc-data-column>
+			    <sc-data-column data-field="colunm_4"   header-text="colunm_4(style fn)"    width="150" text-align="left"   item-style-function="onItemStyle" editable="false"></sc-data-column>
+			    <sc-data-column data-field="colunm_5"   header-text="colunm_5(style fn)"    width="150" text-align="left"   item-style-function="onItemStyle2" editable="false"></sc-data-column>
+			</sc-grid-columns>
+        </sc-grid>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-sp-function',
+            
+            properties : {
+                resultList: {
+                    type:Array
+                },
+                gridEditable: {
+                	type:Object,
+                	value:true
+                }
+            },
+
+            onItemEditble : function(data, item){
+                if(data["colunm_1"] === 'Test 1'){
+                    return true;
+                }
+                return false;
+            },
+            onItemLabel: function(data, item){
+                if(data["colunm_3"] == "A"){
+                    return "A 입니다."
+                }else if(data["colunm_3"] == "B"){
+                    return "B 입니다."
+
+                }else if(data["colunm_3"] == "C"){
+                    return "C 입니다."
+
+                }else if(data["colunm_3"] == "D"){
+                    return "D입니다."
+                }
+
+                return "모르겠다.";
+            }, 
+
+            onItemStyle: function(data, item){
+                if(data["colunm_3"] === "A"){
+                    return {
+                             fontStyle: "italic",
+                             align: "left",
+                             fontSize: 16,
+                             fontColor : "#FF0000",
+                             fontWeight : "bold",
+                             iconUrl : "img/icon_re.gif"
+                            };
+                }
+                if(data["colunm_3"] === "B"){
+                    return {
+                             fontStyle: "underline",
+                             align: "right",
+                             fontSize: 16,
+                             fontColor : "#FF0000",
+                             fontWeight : "bold",
+                             iconUrl : "img/icon_re.gif",
+                             paddingLeft : 30
+                            };
+                }
+                if(data["colunm_3"] === "C"){
+                    return {
+                             fontWeight : "bold",
+                             align: "center",
+                             fontSize: 20,
+                             fontColor : "#ff111111",
+                            };
+                }
+                return null;
+            },            
+            
+            onItemStyle2: function(data, item){
+            
+                return null;
+            }, 
+            onRowStyle : function(data){
+                if(data["colunm_3"] == "C"){
+                    return {
+                                "background": "#00D8FF"
+                            }
+                }
+            },
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

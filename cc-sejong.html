@@ -1,0 +1,969 @@
+<dom-module id="cc-sejong">
+	<style>
+		.tree-combo-box{
+			position: absolute;
+		    left: 60px;
+		    top: 15px;
+		    z-index: 2;
+		}
+ 		.onGroundBtn {
+			position:relative !important;	
+			margin: 4px;
+			z-index: 99 !important;
+		}
+		#modelGroupPanel {
+			position:absolute; 
+			width:200px;
+			background-color: #eeeeff;
+			padding : 3px;
+			opacity: 0.8;
+			border-radius: 3px;
+			top: 4px;
+    		left: 4px;
+    		z-index: 2;
+		}
+		#modelGroupTable {
+			cursor:pointer;
+		}
+		.modelGroupTr {
+			padding : 1px;
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+			border : 3px solid #eeeeff;
+			border-left : none;
+		}
+		.modelGroupTd {
+			padding-left : 7px;
+		}
+		.modelGroupInput{
+			cursor:pointer;
+		}
+		
+		.selectedRow {
+			background-color : #99ccff;
+		}
+	</style>
+	
+	
+	<template>
+		<!-- 레이어그룹 콤보 조회 -->
+		<sc-ajax id="findLayerGroup"	url="findLayerGroup.do"	on-response="completeFindListLayerGroup"	body="{{searchParam}}"	last-response="{{layerGroupList}}"></sc-ajax>
+		<!-- 레이어 그룹 저장 -->
+		<sc-ajax id="saveListLayerGroup"	url="saveListLayerGroup.do"	on-response="completeSaveListLayerGroup"></sc-ajax>
+		<!-- 레이어 그룹 삭제 -->
+		<sc-ajax id="deleteListLayerGroup"	url="deleteListLayerGroup.do"	on-response="completeDeleteListLayerGroup"></sc-ajax>
+		<!--  -->
+		<sc-ajax id="findGridPositionList" url="findGridPositionList.do" 	body="{{searchParam}}" last-response="{{result}}" on-response="setWorker"></sc-ajax>
+		
+		<!-- 3D Canvas 영역 Start -->
+		<div id="container" class="canvasDiv">
+			<div class="threeBtnGroup vbox">
+				<div id="cameraBtn" class="customBtn cameraBtn tooltip tooltip-left" hidden={{!editable}} on-click="cameraBtnClick" tooltip-text="카메라 위치 저장">
+					<i class="xi-focus-weak xi-icon svgCenter"></i>
+				</div>
+				<div id="cameraDeleteBtn" class="customBtn cameraDeleteBtn tooltip tooltip-left"  hidden={{!editable}} on-click="cameraDeleteBtnClick" tooltip-text="카메라 위치 해제">
+					<i class="xi-focus-frame xi-icon svgCenter"></i>
+				</div>
+				<div id="onGroundBtn" class="customToggleBtn onGroundBtn tooltip tooltip-left" on-click="onGroundBtnClick" tooltip-text="잔디 표시 여부" active="true">
+					<i class="ri-global-fill"></i>
+				</div>
+			</div>
+			<div class="tree-combo-box" hidden={{treeHidden}}>
+				<sc-tree-combobox-field id="groupCombo" items="{{hierachGroupInfoList}}" enable-check-box-only-childs="false" value="{{layerGroupIds}}" 
+					display-field="name" value-field="id"  on-change="onSelectGroup">
+				</sc-tree-combobox-field>				
+			</div>
+			<div id = "modelGroupPanel" hidden="{{panelHidden}}">
+				<div class="flex vbox">
+					<sc-button style = "float:right;"text = "{{selectedItem}}" on-click="applyToSelectedLayerGroup"></sc-button>
+				</div>
+				<div class="vspace-5"></div>
+				<div class="flex" style="display:flex; justify-content : space-between;">
+					<sc-button class="flex"  text = "전체선택" on-click="onCheckAll"></sc-button>
+					<div class="hspace-5"></div>
+					<sc-button class="flex"  text = "전체표시" on-click="onSelectAll"></sc-button>
+				</div>
+				<div class="vspace-5"></div>
+				<div class = "flex vbox" style ="max-height:calc(80vh - 100px); min-height:25px; overflow:auto;">
+					<table id = "modelGroupTable">
+						<tbody>
+		                   <template is="dom-repeat" items="{{modelGroupList}}" on-dom-change = "initMouseEvent">
+		                      <tr class="modelGroupTr">
+		                         <th>
+									<input type="checkbox" class="modelGroupInput"  data="{{item.name}}"/>
+		                         </th>
+		                         <td class="modelGroupTd selectedRow"  data="{{item.name}}">{{item.name}}</td>
+		                      </tr>
+		                   </template>
+		                </tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<!-- 3D Canvas 영역 End -->
+		
+		<!-- 3D 구역 설정 Grid Start -->
+		<sc-grid id="layerGroupGrid" on-item-click="onItemClick" selection-able-function="onSelectionAbleFunction" is-tree="true" include-rowstate-data="{{editable}}"
+			editable={{editable}} on-button-click ="onButtonClick" title="구역" use-state="{{editable}}" use-selection="{{editable}}">
+	        <cc-grid-toolbar>
+	            <sc-button text="펼침"		on-click="onExpandAll"		auth-r></sc-button>
+	       		<sc-button text="접기"		on-click="onCollapseAll"	auth-r></sc-button>
+				<sc-button text="현재노드추가"	on-click="onAddCurrentRow"	auth-s hidden="{{!editable}}"></sc-button>
+				<sc-button text="하위노드추가"	on-click="onAddChildRow"	auth-s hidden="{{!editable}}"></sc-button>
+	            <sc-button text="그룹구역삭제"	on-click="deleteGroup"		auth-s hidden="{{!editable}}"></sc-button>
+	            <sc-button text="저장"		on-click="onSaveLayerGroup"	auth-s hidden="{{!editable}}"></sc-button>
+	        </cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-data-column data-field="name" required="true" editable="true" header-text="구역명" width="180" text-align="center" style-name="link"></sc-data-column>
+				<sc-data-column data-field="layerOrder" editable="true" header-text="순서" width="50" text-align="center" visible="{{editable}}"></sc-data-column>
+				<sc-combobox-column data-field="parentId" editable="true" header-text="상위구역" width="70" text-align="center" domain-only-or-empty="true"
+					domain-only="true" display-field="name" value-field="id" item-sort-type="desc" items="{{layerGroupList}}"></sc-combobox-column>
+				<sc-data-column data-field="cameraPosition" header-text="카메라 위치" width="140" text-align="left" item-label-function="setCameraLabel" visible="{{editable}}"></sc-data-column>
+				<sc-radio-column data-field="selected" data-type="text" header-text="기본값" width="60" text-align="center"  editable=true></sc-radio-column>
+				<sc-checkbox-column data-field="isUnderground" data-type="text" header-text="지하" width="60" text-align="center"  editable=true display-checkbox=false></sc-checkbox-column>
+            </sc-grid-columns>
+            <sc-grid-fields>
+				<sc-grid-field data-field="id"></sc-grid-field>
+				<sc-grid-field data-field="siteId"></sc-grid-field>
+				<sc-grid-field data-field="parentId"	data-type="object"></sc-grid-field>
+				<sc-grid-field data-field="property"	data-type="object"></sc-grid-field>
+				<sc-grid-field data-field="models"		data-type="object"></sc-grid-field>
+				<sc-grid-field data-field="children"	data-type="object"></sc-grid-field>
+			</sc-grid-fields>
+      	</sc-grid>
+		<!-- 3D 구역 설정 Grid End -->
+		
+		<div id="threeTooltip" class="listTooltip" hidden>
+			<div id="tooltipClose" class="close" on-click="closeTooltip">x</div>
+			<ul id="tooltip"></ul>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is: "cc-sejong",
+	        properties : {
+	        	rayThree : {
+	        		type: Object,
+	                value: function(){
+	                	return;
+                	}
+            	},
+            	searchParam : {
+	            	type : Object,
+	            	value : function(){
+	            		return {
+	            			limitTimeMinute : 30,
+		            		siteId : SCMdiManager.searchParam.site_id
+		            	}
+	            	}
+		        },
+		        start:{
+					type : Array,
+					value : function(){
+						 return [
+							{label: "미진행", value:false},
+							{label: "진행", value:true}
+						  ];
+					}
+                },
+				selectedItem : {
+					type : String,
+					value : function(){
+	            		return "왼쪽의 구역을 선택하세요";
+	            	}
+	            }
+	         },
+	         /*** initialize & load Start ***/
+	         // 초기 3D 시작
+	         initThree : function(){
+				var me = this;
+				
+				var loader = new THREE.TextureLoader();
+				var groundTexture = loader.load( 'ui/lib/threejs/img/grasslight-big.jpg' );
+				groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+				groundTexture.repeat.set(512, 512);
+				groundTexture.anisotropy = 16;
+				groundTexture.encoding = THREE.sRGBEncoding;
+				
+				var groundMaterial = new THREE.MeshLambertMaterial( { map: groundTexture } );
+				
+				const geometry = new THREE.PlaneGeometry( 20000, 20000 );
+				
+				var ground = new THREE.Mesh( geometry, groundMaterial );
+				ground.rotation.x = - Math.PI / 2;
+				ground.receiveShadow = true;
+				me.rayThree.scene.add(ground);
+				me.ground = ground;
+				
+				var soilTexture = loader.load( 'ui/lib/threejs/img/soil.jpg' );
+				soilTexture.wrapS = soilTexture.wrapT = THREE.RepeatWrapping;
+				soilTexture.repeat.set(1024, 1024);
+				soilTexture.encoding = THREE.sRGBEncoding;
+				
+				var soilMaterial = new THREE.MeshLambertMaterial( { map: soilTexture } );
+				
+				var soil = new THREE.Mesh( geometry, soilMaterial );
+				soil.rotation.x = - Math.PI / 2;
+				soil.position.y = -10;
+				soil.receiveShadow = true;
+				me.rayThree.scene.add(soil);
+				
+				var sejongLight = new THREE.AmbientLight(0xFFFFFF, 0.7);
+				me.rayThree.scene.add(sejongLight);
+
+				UT.request(me.$.findLayerGroup);
+				if(me.noSetWorker != true) {
+					UT.request(me.$.findGridPositionList);					
+				}
+		     },
+	         /*** initialize & load End ***/
+
+	         /*** RequestComplete Start ***/
+	         // 레이어 조회 완료
+		     completeFindListLayerGroup : function(){
+				var me= this;
+				var layerGroupList = me.layerGroupList;
+				if(layerGroupList == null) return;
+				
+            	for(var i=0; i<layerGroupList.length; i++){
+            		var layerGroup = layerGroupList[i];
+            		if(layerGroup.property!=null){
+            			layerGroup.selected = UT.defVal(layerGroup.property.selected,"N");
+            			layerGroup.isUnderground = UT.defVal(layerGroup.property.isUnderground,"N");
+                		if(layerGroup.property.modelNames!=null){
+            				layerGroup.modelCount = layerGroup.property.modelNames.length;
+                		}  
+            		}
+            		if(!isNaN(layerGroup.parentId)){
+            			layerGroup.parentId = Number(layerGroup.parentId);
+            		}
+            	}
+            	
+                var selectedId = 0;
+                
+                layerGroupList.filter(function (e) {
+            	  return e.property && e.property.selected == "Y";
+            	}).forEach(function (e) {
+            	  return selectedId = e.id;
+            	});
+
+				var hier = new CCHierachicalData();
+                var hierachiDatas = hier.HierachyTransformByKey(me.layerGroupList, "id", "parentId", "children", 0, null, true);
+                hierachiDatas.name = "전체";
+                me.set("hierachGroupInfoList", [hierachiDatas]);
+
+                me.set("layerGroupIds", [selectedId]);
+                $("#groupCombo").val([selectedId]).trigger("change");
+                
+                if(me.rayThree.modelGroup != null) {
+					me.rayThree.modelGroup.clear();                	
+                }
+				if(UT.isEmpty(me.layerGroupList)) {
+	            	me.models.children.forEach(function(e){
+						var model = e.clone();
+						me.onAddCurrentRow(model);
+					});
+            	}
+				else {
+                	var gridList = new Array();
+	            	var allNames = [];
+	            	me.models.children.forEach(function(e){
+	            		e.name = e.userData.name;
+						allNames.push(e.userData.name);
+					});
+	            	me.allNames = allNames;
+	            	me.set("modelGroupList", me.models.children);
+	            	me.layerGroupList.forEach(function(e){
+		            	
+// 						var item = UT.copy(e);
+						if(e.name == "공사현황"){
+							me.addModel(e);
+							me.initItem = e;
+						}
+						if(e.parentId == 0) e.parentId = null;
+
+						gridList.push(e);
+					});
+
+					var hier = new CCHierachicalData();
+					var hierachiDatas = hier.HierachyTransformByKey(gridList, "id", "parentId", "children", null, "layerOrder", true);
+					me.$.layerGroupGrid.setHierachyDataProvider(hierachiDatas, "children");
+					me.$.layerGroupGrid.expand(0, false);
+					
+					setTimeout(function(){						
+						me.selectGridRow(me.initItem);
+					}, 300);
+				}
+			},
+			// 레이어 리스트 저장 완료
+			completeSaveListLayerGroup : function(e,res){
+				var me = this,
+				message = "STD.N2400"; // 저장하였습니다.
+		
+	            if(res.response.result_status === 'S'){
+	           	 UT.alert(message, function(){
+	           		 UT.request(me.$.findLayerGroup);
+	                  });
+	            } else {
+	                message = res.response.result_message;
+	                UT.alert(message);
+	            }
+			},
+			// 레이어 삭제 완료
+			completeDeleteListLayerGroup : function(e,res){
+				var me = this,
+             	message = "STD.N2500"; // 삭제하였습니다.
+
+	           if(res.response.result_status === 'S'){
+	          	 UT.alert(message, function(){
+	          		 UT.request(me.$.findLayerGroup);
+	                 });
+	           } else {
+	               message = res.response.result_message;
+	               UT.alert(message);
+	           }
+			},
+			/*** RequestComplete End ***/
+			
+			/*** Btn Event Start ***/
+			// 잔디 표시 || 지하 확인 여부
+			onGroundBtnClick : function(isUnderground){
+				var me = this;
+				if(isUnderground != null && isUnderground !='N' && isUnderground != 'Y'){
+					if(me.$.onGroundBtn.classList.contains('active')){
+						me.$.onGroundBtn.classList.remove('active');
+						me.$.onGroundBtn.setAttribute('tooltip-text', '잔디 지우기');
+						me.rayThree.scene.add(me.ground);					
+					}
+					else{
+						me.$.onGroundBtn.classList.add('active');
+						me.$.onGroundBtn.setAttribute('tooltip-text', '잔디 표시');
+						me.rayThree.scene.remove(me.ground);
+					}					
+				}
+				else{
+					if(isUnderground == "Y"){
+						me.$.onGroundBtn.classList.add('active');
+						me.$.onGroundBtn.setAttribute('tooltip-text', '잔디 표시');
+						me.rayThree.scene.remove(me.ground);
+					}
+					else{
+						me.$.onGroundBtn.classList.remove('active');
+						me.$.onGroundBtn.setAttribute('tooltip-text', '잔디 지우기');
+						me.rayThree.scene.add(me.ground);	
+					}
+				}
+			},
+			//잔디 제거
+			offGround : function(){
+				var me = this;
+				if(!me.$.onGroundBtn.classList.contains('active')){
+					me.onGroundBtnClick();					
+				}
+			},
+			// 카메러 위치 저장
+			cameraBtnClick : function(){
+				var me = this;
+				var nodeIndex = me.$.layerGroupGrid.getCurrentCell().nodeIndex;
+				var provider = me.$.layerGroupGrid.getDataProvider();
+				var property = provider.getItemAt(nodeIndex).property;
+		
+				property.cameraPosition = me.rayThree.getCameraPosition();
+				provider.setItemAt(nodeIndex, {property:property});
+				provider.setItemState(nodeIndex, "updated");
+				me.$.layerGroupGrid.refresh();
+			},
+			// 카메라 위치 삭제
+			cameraDeleteBtnClick : function(){
+				var me = this;
+				var nodeIndex = me.$.layerGroupGrid.getCurrentCell().nodeIndex;
+				var provider = me.$.layerGroupGrid.getDataProvider();
+				var property = provider.getItemAt(nodeIndex).property;
+		
+				if(property.cameraPosition){
+					delete property.cameraPosition;
+					provider.setItemAt(nodeIndex, {property:property});
+					provider.setItemState(nodeIndex, "updated");
+					me.$.layerGroupGrid.refresh();
+				}
+			},
+			// 레이어 그룹 선택
+			onSelectGroup : function(e){
+				var me = this;
+				var selectedItem;
+				if(e == null) return;
+				if(e.property != null){
+					selectedItem = e;
+					me.onGroundBtnClick(e.property.isUnderground);
+				}
+				else {
+					selectedItem = e.target.selectedItems[0];					
+				}
+				if(selectedItem != null){
+					var ids = [];
+					ids.push(selectedItem.id * 1);
+					function findId(layerGroup){
+						if(layerGroup.children == null || layerGroup.children.length == 0){
+							return;
+						}
+						for(var i in layerGroup.children){
+							ids.push(layerGroup.children[i].id);						
+							findId(layerGroup.children[i]);
+						}						
+					};
+					findId(selectedItem);
+					me.setWorker(ids);					
+				}
+				if(selectedItem != null && selectedItem.name == "전체") {
+					var item = {};
+					item.property = {};
+					item.property.modelNames = me.allNames;
+					me.addModel(item);
+				}
+				else {
+					me.addModel(selectedItem);					
+				}
+			},
+			/*** Btn Event End ***/
+			
+			/*** Grid Event Start ***/
+			// 그리드 클릭
+			onItemClick : function(e){
+				var me = this;
+				
+				if(e.isSearch){
+					for(var i in me.layerGroupList){
+						var layerGroup = me.layerGroupList[i];
+						if(layerGroup.id == e.id){
+							me.onSelectGroup(layerGroup);
+							return;
+						}
+					}
+				}
+				
+				var data = e.detail.data;
+				var item = e.detail.item;
+				me.selectedItem = data.name + " 구역에 적용";
+				if(item.dataField == 'name'){
+					var camera = data.property.cameraPosition;
+					if(camera) me.rayThree.setCameraPosition(camera);
+					me.selectGridRow(data);
+					me.onSelectGroup(data);
+// 					me.addModel(e.detail.data);
+// 					me.setWorker(e.detail.data.id);
+// 					me.onGroundBtnClick(data.property.isUnderground);						
+				}
+			},
+			onSelectionAbleFunction: function(data){
+				return UT.isEmpty(data.model);
+			},
+			setCameraLabel: function(e){
+				if(e.property.cameraPosition){
+					var camera = e.property.cameraPosition.camera;
+					var position = 'x : '+ camera.x.toFixed(0)+ ', y : '+ camera.y.toFixed(0)+ ', z : '+ camera.z.toFixed(0);
+					return position;
+				}
+			},
+			// 현재노드추가
+            onAddCurrentRow: function() {
+                var me = this,
+                    grid = me.$.layerGroupGrid,
+                    provider = me.$.layerGroupGrid.getDataProvider();
+
+                cell = grid.getCurrentCell();
+                var parentIndex = (cell === null) ? -1 : provider.getParentIndex(cell.nodeIndex);
+                var parentItem = {};
+                if(parentIndex > -1){
+                    parentItem = provider.getParentItem(cell.nodeIndex);
+                }
+
+                var searchParam = this.get("searchParam");
+                var data = {
+                	id : -1,
+               		siteId : searchParam.siteId,   // 회사
+   	                areaId : searchParam.areaId, // 사용여부
+                    parentId: (parentIndex > -1) ? parentItem.id: 0,
+                    modelCount : 0 ,
+                    property : {"modelNames" : [] }
+                };
+
+                provider.addChildItem(parentIndex, data);
+            },
+            // 하위 노드 추가
+            onAddChildRow: function() {
+                var me = this,
+                    grid = me.$.layerGroupGrid,
+                    provider = grid.getDataProvider();
+
+                cell = grid.getCurrentCell();
+                
+                if(cell === null) {
+                	UT.alert("STD.N1600");
+                	return;
+                }
+                
+                var parentIndex = cell.nodeIndex;
+                var parentItem = {};
+                if(parentIndex > -1){
+                    parentItem = provider.getItemAt(parentIndex);
+                }
+
+                if (parentIndex < 0) { // 현재 노드가 없으면 하위 노드 추가를 할 수 없다.
+                	UT.alert("STD.N1600");
+                    return;
+                }
+                
+                if(provider.getItemState(parentIndex) == "created"){
+                    UT.alert("STD.N1800"); // 신규 노드에는 하위노드를 추가할 수 없습니다.
+                    return;
+                }
+                
+                var searchParam = this.get("searchParam");
+                var data = {
+                	id : -1,
+               		siteId : searchParam.siteId,   // 회사
+   	                areaId : searchParam.areaId, // 사용여부
+              		parentId: (parentIndex > -1) ? parentItem.id: 0,
+              		modelCount : 0,
+                   	property : {"modelNames" : []}
+                };
+                
+
+                var newNodeIndex = provider.addChildItem(cell.nodeIndex, data);
+                grid.expand(parentIndex);
+                grid.setCurrentCell({nodeIndex: newNodeIndex});
+            },
+			onExpandAll:function(){
+				var me = this;
+				me.$.layerGroupGrid.expandAll();
+			},
+			onCollapseAll:function(){
+				var me = this;
+	            me.$.layerGroupGrid.collapseAll();
+			},
+			onSaveLayerGroup : function(){
+				var me = this;				
+				var grid = me.$.layerGroupGrid;
+				var provider = grid.getDataProvider();
+				var upsertItems = provider.getUpdateItems().concat(provider.getNewItems());
+		
+				if(!upsertItems || upsertItems.length === 0) {
+					UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+					return;
+				}
+		
+				for(var i in upsertItems){
+					if(upsertItems[i].property==null){
+						upsertItems[i].property = {};
+					}
+					upsertItems[i].model =null;
+					upsertItems[i].models =null;
+					upsertItems[i].property.isStart = upsertItems[i].isStart;
+					upsertItems[i].property.isUnderground = upsertItems[i].isUnderground;
+					upsertItems[i].property.selected = upsertItems[i].selected;
+				}
+				
+				me.$.saveListLayerGroup.body = {"upsertItems" : upsertItems};
+
+				UT.request(me.$.saveListLayerGroup);
+			},
+			deleteGroup : function(){
+				var me = this;				
+				var grid = me.$.layerGroupGrid;
+				var provider = grid.getDataProvider();
+				var selectionItems = provider.selectionCheckedItems();
+				
+				if (selectionItems.length === 0) {
+					UT.alert("STD.N1600");
+					return;
+				}
+				
+				UT.confirm("STD.N1300", function() {
+					var deleted = provider.removeItems();
+					me.$.deleteListLayerGroup.body = {
+						deleteItems : deleted
+					};
+					UT.request(me.$.deleteListLayerGroup);
+				});
+			},
+			/*** Grid Event End ***/
+	        
+			/*** 3D funtion Start ***/
+			showModel : function(index){
+				var me = this;
+				var data = me.$.layerGroupGrid.getDataProvider().getItemAt(index);
+				var child = me.$.layerGroupGrid.getDataProvider().getChildIndexes(index);
+				  
+				child.forEach(function(e){
+					me.showModel(e);
+				});
+			},
+			showModelByLayerGroupId(id){
+				var me = this;
+	
+				var index = me.$.layerGroupGrid.searchItem("id", id).itemIndex;
+				var data = me.$.layerGroupGrid.getDataProvider().getItemAt(index);
+				 
+				me.showModel(index);
+	
+				me.ground.visible = !data.isUnderground;
+			},
+			addModel : function(item){
+				var me = this;
+				if(me.rayThree != null) me.rayThree.modelGroup.clear();
+				if(UT.isEmpty(item)) return;
+				var names = item.property.modelNames;
+				item.models = [];
+				if(names == null) return;
+            	names.forEach(function(e){
+					var model = me.models.getObjectByName(e);
+					if(model != null){
+// 						item.models.push(model.clone());
+						me.rayThree.addModel(model.clone())
+					}
+				});
+				if(item.property.cameraPosition){
+					this.rayThree.setCameraPosition(item.property.cameraPosition);
+				}
+// 				item.models.forEach(function(e){
+// 					if(e) me.rayThree.addModel(e)
+// 				});
+			},
+			/*** 3D funtion End ***/
+			
+			/*** layer funtion End ***/
+         	// 마우스 이벤트 설정
+            initMouseEvent: function(){
+            	var me = this;
+                $(".modelGroupTd")
+                  .mousedown(function () {
+                    me.isMouseDown = true;
+                    var bool = this.classList.contains("selectedRow");
+                    var td = this;
+           			var model = me.models.getObjectByName(td.data).clone();
+            		if(bool){
+            			td.classList.remove("selectedRow");
+            			var x = me.rayThree.modelGroup.getObjectByName(td.data);
+            			me.rayThree.modelGroup.remove(x);
+            		}else{
+            			td.classList.add("selectedRow");
+            			me.rayThree.addModel(model);
+            		}
+            		
+                    return false; // prevent text selection
+                  })
+                  .mouseover(function () {
+                    if (me.isMouseDown) {
+                    	var bool = this.classList.contains("selectedRow");
+                    	 var td = this;
+                    	 var model = me.models.getObjectByName(td.data).clone();
+                    	if(bool){
+                			td.classList.remove("selectedRow");
+                			var x = me.rayThree.modelGroup.getObjectByName(td.data);
+                			me.rayThree.modelGroup.remove(x);
+                		}else{
+                			td.classList.add("selectedRow");
+                			td.classList.add("selectedRow");
+                			me.rayThree.addModel(model);
+                		}
+                    }
+                  })
+                  .bind("selectstart", function () {
+                    return false; // prevent text selection in IE
+                  });
+                
+                $(".modelGroupInput")
+                  .mousedown(function () {
+                    me.isMouseDown = true;
+                    this.checked = !this.checked;
+                    return false; // prevent text selection
+                  })
+                  .mouseover(function () {
+                    if (me.isMouseDown) {
+	                    this.checked = !this.checked;
+                    }
+                  })
+                  .bind("selectstart", function () {
+                    return false; // prevent text selection in IE
+                  })
+                  .click(function(){
+                	 return false;
+                  });
+
+                $(document)
+                  .mouseup(function () {
+                    me.isMouseDown = false;
+                  });
+            },
+			applyToSelectedLayerGroup : function(){
+				var me = this;
+				var modelGroupInput = document.getElementsByClassName("modelGroupInput");
+				var modelNames = [];
+				for(var i=0; i<modelGroupInput.length; i++){
+					if(modelGroupInput[i].checked == true){
+						modelNames.push(modelGroupInput[i].data);
+					}
+				}
+				var provider = me.$.layerGroupGrid.getDataProvider();
+				var grid = me.$.layerGroupGrid;
+				var updated = provider.getItemAt(grid.getCurrentCell().nodeIndex);
+				updated.property.modelNames = modelNames;
+				updated.property.modelCount = modelNames.length;
+				if(grid.getCurrentCell()){
+// 					provider.setItemAt(grid.getCurrentCell().nodeIndex, {"property" : {"modelNames":modelNames}, "modelCount" : modelNames.length});
+					provider.setItemState(grid.getCurrentCell().nodeIndex, "updated");
+					provider.setItemAt(grid.getCurrentCell().nodeIndex, updated);
+				}else{
+					UT.alert("왼쪽의 구역을 선택해주세요.");
+				}
+				
+				var provider = me.$.layerGroupGrid.getDataProvider();
+				var grid = me.$.layerGroupGrid;
+				var rowData = provider.getItemAt(grid.getCurrentCell().nodeIndex);
+				me.addModel(updated);
+				me.selectGridRow(rowData);
+				
+			},
+			onCheckAll : function(bool){
+				var me = this;
+				if(typeof bool !="boolean"){
+					me.isCheckAll = !me.isCheckAll;
+					bool = me.isCheckAll 
+				}
+				var inputs = document.getElementsByClassName("modelGroupInput");
+				for (var i =0; i<inputs.length; i++){
+					inputs[i].checked = bool; 
+				}
+				
+			},
+			onSelectAll : function(bool){
+				var me = this;
+				if(typeof bool !="boolean"){
+					me.isSelectAll = !me.isSelectAll;
+					bool = me.isSelectAll; 
+				}
+				var tds = document.getElementsByClassName("modelGroupTd");
+				for (var i =0; i<tds.length; i++){
+					if(bool){
+						tds[i].classList.add("selectedRow");
+					}else{
+						tds[i].classList.remove("selectedRow"); 
+					}
+				}
+				if(bool){
+					var item = {};
+					item.property = {};
+					item.property.modelNames = me.allNames;
+					me.addModel(item);
+				}else{
+					me.rayThree.modelGroup.clear()
+				}
+			},
+			selectGridRow : function(rowData){
+				var me = this;
+				if(rowData.property){
+					// 왼쪽 체크 박스 제어
+					var selectedModelNames = rowData.property.modelNames?rowData.property.modelNames:[];
+					var modelGroupInput = document.getElementsByClassName("modelGroupInput");
+					for(var i=0; i<modelGroupInput.length; i++){
+						if(selectedModelNames.indexOf(modelGroupInput[i].data)!=-1){
+							modelGroupInput[i].checked = true;
+						}else{
+							modelGroupInput[i].checked = false;
+						}
+					}
+					
+					// 오른쪽 이름 클래스 지정 및 3D모델 뷰 컨트롤
+					var tds = document.getElementsByClassName("modelGroupTd");
+					for (var i =0; i<tds.length; i++){
+						var isExist = selectedModelNames.includes(tds[i].data);
+						if(isExist){
+							tds[i].classList.add("selectedRow"); 
+						}else{
+							tds[i].classList.remove("selectedRow"); 
+						}
+					}
+					var modelGroupList = me.models;
+					for(var i=0; i<modelGroupList.length;i++){
+						var isExist = selectedModelNames.includes(modelGroupList[i].name);	
+						modelGroupList[i].visible = isExist;
+					}
+				}
+			},
+			/*** layer funtion End ***/
+			
+			/******/
+			focusTarget : function(positionId) {
+				var me = this;
+
+				var layerGroupList = me.get("layerGroupList");
+				var target;
+				for(var i in this.result.positions){
+					if(this.result.positions[i].positionId == positionId){
+						target = this.result.positions[i];
+						if(target.layerGroupId == null) return;
+					}
+				}
+				
+				var layer;
+				var layerId = target.layerGroupId;
+				
+				layerGroupList.forEach(function(el){
+					if(el.id == layerId){
+						layer = el;
+						return;
+					}
+				})
+				
+				if(me.$.groupCombo){
+					me.$.groupCombo.set("selectedItems",[layer]);					
+				}
+				
+				var layerIds = [layerId];
+				
+				me.setWorker(layerIds);
+				me.onGroundBtnClick(layer.property.isUnderground);
+				
+				setTimeout(function(){
+					var targetPosition = me.rayThree.scene.getObjectByName('workergroup_'+positionId).position;
+					var position = {
+						camera : {x:0, y:targetPosition.y + 150, z:0},
+						target : {x:0, y:targetPosition.y, z:0}
+					}
+					
+					me.rayThree.setCameraPosition(position);
+	
+					var id = target.positionId;
+					var tag = $("#countTooltip_"+id);
+			   		var check = setInterval(function(){
+						if(tag.length > 0){
+							var cnt = 0;
+							function animate(){
+								cnt ++;
+				    			tag.find(".countLabel")
+				        			.animate({'background-color' : '#ff0000c7'}, 400)
+				        			.animate({'background-color' : '#333333c7'}, 400, animate)
+				        		if(cnt > 10){
+				        			tag.find(".countLabel").stop(true, true);
+				        			tag.find(".countLabel").css('background-color', '');
+				        			return;
+				        		}
+							}
+							animate();
+				            clearInterval(check);
+						}            			
+					},100)
+				}, 100);
+			},
+			setWorker : function(layerIds){
+				var me = this;
+				var positions = [];
+				if(this.result == null) return;
+				if(layerIds != null && layerIds.type != "response"){
+					for(var i in this.result.positions){
+						if(layerIds.includes(this.result.positions[i].layerGroupId)){
+							positions.push(this.result.positions[i]);
+						}
+					}
+				}
+				else {
+					positions = this.result.positions;
+				}
+				if(UT.isNotEmpty(this.result)){	 //API 변경 필요
+					this.rayThree.setWorker(positions, function(e){
+						me.openTooltip(e);
+					});
+				}
+				me.parent.gridData = me.result.gridData.workerList;
+			},
+			openTooltip : function(e){
+				var me = this;
+				var id = e.getAttribute('positionId');
+				var div = me.$.threeTooltip;
+				div.hidden = false;
+
+				div.addEventListener("wheel", function(event){
+					event.stopPropagation();
+				});
+				
+				var tooltip = me.$.tooltip;
+				tooltip.innerHTML = '';	// 초기화
+				
+				me.$.tooltipClose.data = 'countTooltip_'+id;
+
+				var list = [];
+				for(var i in me.result.gridData.workerList){
+					var one = me.result.gridData.workerList[i];
+					if(id == one.positionId){
+						list.push(one);
+					}
+				}
+				
+				for(var i in list){
+					var item = list[i];
+					var li = document.createElement("li");
+					if(item.emergency == "1") li.className = 'emergency';
+					li.innerHTML = item.vendorName +" [" + item.targetJobName + "] "+item.targetName;
+					li.data = item.sensorId;
+					li.id = "worker_"+item.sensorId;
+					li.positionId = item.positionId;
+					
+					li.onclick = function(e){
+						if(me.parent.is == "ep-three-view"){
+							me.parent.focusGrid(e, item);
+						}
+						else if(me.parent.is == "es-sejong-dashboard"){
+							me.parent.searchWorkerPopup(item.targetId);							
+						}
+						e.stopPropagation();
+					}
+					
+					tooltip.appendChild(li);
+				}
+
+				e.appendChild(div);
+			},
+			closeTooltip : function(e){
+				$('#'+e.target.data).removeClass('active');
+				$('#'+e.target.data+' .countLabel').removeClass('active');
+				e.target.parentElement.remove();
+				e.stopPropagation();
+	        },
+            showWorkerTooltip : function(positionId, targetId){
+                var me = this;
+
+                me.hideWorkerTooltip();
+            	var target = me.querySelector("#countTooltip_"+positionId);
+            	target.classList.add('active');
+
+            	var selectedLabel = target.firstElementChild;
+            	selectedLabel.classList.add('active');
+            	me.openTooltip(selectedLabel);
+
+            	me.querySelector("#worker_"+targetId).classList.add('selected');
+            	me.$.tooltip.scrollTo(0, me.querySelector("#worker_"+targetId).offsetTop-30);
+            },
+            hideWorkerTooltip : function(){
+            	var me = this;
+
+                // 이전 선택 초기화
+            	var label = me.querySelector(".countTooltip.active");
+            	if(UT.isObject(label)){
+            		label.firstElementChild.classList.remove('active');
+            		label.classList.remove('active');
+            		me.querySelector(".listTooltip").hidden = true;
+            	}
+            },
+            refresh : function(){
+            	var me = this;
+				UT.request(me.$.findLayerGroup);
+				UT.request(me.$.findGridPositionList);
+            }
+			/******/
+		});
+	</script>
+</dom-module>

@@ -1,0 +1,44 @@
+<dom-module id="es-tab2-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+    	<!-- 조회 -->
+    	<sc-ajax id="findDetail"
+				 url="json/tab2.json"
+				 last-response="{{resultList}}">
+	    </sc-ajax>
+    	
+    	<sc-grid id="gridPanel" class="flex" data-provider="{{resultList}}" editable="false" use-selection="false" use-state="false">
+			<cc-grid-toolbar>
+			</cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-data-column	data-field="chr_nm"			header-text="담당자명"		width="80"	></sc-data-column>
+				<sc-data-column	data-field="chr_dept"		header-text="담당자부서"	width="100"	></sc-data-column>
+				<sc-data-column	data-field="chr_job"		header-text="담당자직책"	width="100"	></sc-data-column>
+				<sc-data-column	data-field="chr_email"		header-text="이메일"		width="130"	></sc-data-column>
+				<sc-data-column	data-field="chr_phone_no"	header-text="전화번호"		width="100"	></sc-data-column>
+			</sc-grid-columns>
+		</sc-grid>
+    </template>
+    <script>
+    Polymer({
+    	is : "es-tab2-sample",
+    	properties : {
+    		resultList : {
+    			type : Array,
+    			value : function() {
+    				return []
+    			}
+    		}
+    	},
+    	initialized : function() {
+			var me = this;
+    		
+    		UT.request(me.$.findDetail);
+    	}
+    });
+    </script>
+</dom-module>

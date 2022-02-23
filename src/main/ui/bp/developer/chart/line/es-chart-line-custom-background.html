@@ -1,0 +1,205 @@
+<dom-module id="es-chart-line-custom-background">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-line-custom-background',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "type": "line",
+				"palettes":[{
+					"name": "color1",
+			        "alpha": 1.0,
+					"fills": ["#f8bd19", "#008ee4", "#33bdda", "#e44a00", "#6baa01", "#583e78"]
+				}, {
+			        "name": "lines1",
+			        "width": 3,
+			        "strokes": ["#f8bd19", "#008ee4", "#33bdda", "#e44a00", "#6baa01", "#583e78"]
+			    }, {
+			        "name": "lines2",
+			        "width": 1,
+			        "strokes": ["#f8bd19", "#008ee4", "#33bdda", "#e44a00", "#6baa01", "#583e78"]
+			    }],
+			    "styles": {
+			        "fill": "linear,#6DA5DB,#406181,90"
+			    },
+			    "title": {
+			        "text": "% of visitors who added as Favorite",
+			        "styles": {
+			            "color": "#fff",
+			            "fontSize": 14,
+			            "fontBold": true,
+			            "paddingBottom": 0
+			        }
+			    },
+				"titlePane": {
+					"styles": {
+						"padding": 4
+					}
+				},
+			    "plotArea": {
+			        "styles": {
+			            "border": "#fff,2px"
+			        },
+			        "animations": [{
+			            "property": "seriesMask"
+			        }]
+			    },
+			    "xAxes": {
+			        "title": "",
+			        "tick": {
+			            "styles": {
+			                "line": null,
+			                "color": "#fff",
+			                "textRotation": -90,
+			                "paddingLeft": 10,
+			                "paddingRight": 2
+			            }
+			        },
+			        "grid": {
+			            "visible": true,
+			            "tickLocation": "value",
+			            "styles": {
+			                "line": "#fff,1px,dashed"
+			            }
+			        },
+			        "styles": {
+			            "line": "#ddd"
+			        }
+			    },
+			    "yAxes": {
+			        "title": false,
+			        "styles": {
+			            "line": null
+			        },
+			        "grid": {
+			            "hideEndLine": true,
+			            "styles": {
+			                "line": "#ddd"
+			            }
+			        },
+			        "tick": {
+			            "lineLength": 0,
+			            "styles": {
+			                "color": "#fff",
+			                "numberScale": 3,
+			                "suffix": "%",
+			                "paddingLeft": 10,
+			                "paddingRight": 4
+			            }
+			        }
+			    },
+			    "series": [{
+			        "items": [
+			            {
+			                "label": "Jan",
+			                "value": "34"
+			            },
+			            {
+			                "label": "Feb",
+			                "value": "44"
+			            },
+			            {
+			                "label": "Mar",
+			                "value": "48"
+			            },
+			            {
+			                "label": "Apr",
+			                "value": "54"
+			            },
+			            {
+			                "label": "May",
+			                "value": "60"
+			            },
+			            {
+			                "label": "Jun",
+			                "value": "70"
+			            },
+			            {
+			                "label": "Jul",
+			                "value": "58"
+			            },
+			            {
+			                "label": "Aug",
+			                "value": "62"
+			            },
+			            {
+			                "label": "Sep",
+			                "value": "54"
+			            },
+			            {
+			                "label": "Oct",
+			                "value": "45"
+			            },
+			            {
+			                "label": "Nov",
+			                "value": "39"
+			            },
+			            {
+			                "label": "Dec",
+			                "value": "23"
+			            }
+			        ],
+			        "label": {
+			            "visible": false,
+			            "position": "far",
+			            "offsetX": -2,
+			            "styles": {
+			                "fontSize": "11",
+			                "color": "#333"
+			            }
+			        },
+			        "styles": {
+			            "line": "#BBDA00,2px",
+			            "fill": "#BBDA00",
+						"border": "#fff",
+			            "shadow": '#777',
+			            "shapeSize": 9,
+						"hover": {
+							"fillBrightness": 1.5
+						}
+			       	},
+					"animations": [{
+					}],
+					"itemAnimations": [{
+					}],
+			        "tooltip": {
+			            "text": "${label}, ${value}",
+			            "styles": {
+			                "fill": "#00396d",
+			                "color": "#fff",
+			                "fontSize": 10,
+			                "shadow": null,
+			                "borderRadius": 0,
+			                "paddingTop": 2,
+			                "paddingBottom": 2,
+			                "paddingLeft": 5,
+			                "paddingRight": 5
+			            }
+			        }
+				}],
+			    "legend": false
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

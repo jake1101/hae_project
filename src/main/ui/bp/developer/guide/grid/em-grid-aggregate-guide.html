@@ -1,0 +1,44 @@
+<sc-link rel="import" href="es-grid-aggregate-sample.html"></sc-link>
+<sc-link rel="import" href="es-grid-aggregate-description.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-grid-aggregate-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="hbox flex" title-text="그리드 데이터 집계">
+            <es-grid-aggregate-description class="fit flex"></es-grid-aggregate-description>
+            <es-grid-aggregate-sample id="sample" class="box flex"></es-grid-aggregate-sample>
+        </sc-panel>
+        <es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-grid-aggregate-guide',
+		properties : {
+			srcList : {
+                type : Array,
+                value : function() {
+                    return [{
+                        title        : "es-grid-aggregate-sample.html",
+                        i18nDisabled : true,
+                        extension    : "html",
+                        url          : "/ui/bp/developer/guide/grid/es-grid-aggregate-sample.html"
+                    }, {
+                    	title        : "item-cntr-list.json",
+                    	i18nDisabled : true,
+                    	extension    : "json",
+                    	url          : "/ui/bp/developer/guide/grid/json/item-cntr-list.json"
+                    }]
+                }
+            }
+		},
+		initialized : function() {
+			
+		}
+	});
+	</script>
+</dom-module>

@@ -1,0 +1,58 @@
+<!--
+gp system rotate animation
+-->
+
+<!--
+`<gp-rotateY-animation>` animates the transform of an element from
+`rotateY(0deg) ~ rotateY(180deg)` to `none`.
+The `transformOrigin` defaults to `0 50%`.
+
+Configuration:
+```
+{
+  name: 'gp-rotateY180-animation',
+  node: <node>,
+  transformOrigin: <transform-origin>,
+  timing: <animation-timing>
+}
+```
+-->
+
+<script>
+
+  Polymer({
+
+    is: 'gp-rotate-right-left-animation',   
+    
+
+    behaviors: [
+		Polymer.NeonAnimationBehavior
+    ],
+
+    configure: function(config) {
+    	var node  = config.node
+         
+         this.setPrefixedProperty(node, 'transformOrigin', '50% 50%');
+         
+         this._effect = new KeyframeEffect(node, [
+					{
+                	  'transform' : 'rotateY(-180deg)',
+                	  'opacity' : '0' 
+                	 
+                   },
+                  {
+                	   'transform' : 'rotateY(0deg)',
+                	   'opacity' : '1' 
+                  }     
+                 
+          ], this.timingFromConfig(config));
+         
+         return this._effect;
+     
+    },
+    
+    
+
+  });
+
+</script>

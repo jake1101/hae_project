@@ -1,0 +1,93 @@
+<dom-module id="es-grid-validation-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-grid id="gridPanel" class="h-150" editable="true" collasible="true"
+				use-selection="false">
+			<cc-grid-toolbar title-text="Grid 유효성 체크">
+				<sc-button text="init data" on-click="onInitData" i18n-disabled></sc-button>
+				<sc-button text="validate"	on-click="onCheckValidation" i18n-disabled></sc-button>
+			</cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-data-column		data-field="name"		header-text="이름"		width="60"></sc-data-column>
+				<sc-data-column		data-field="eng_score"	header-text="영어점수"	width="60"	editable="true"	text-align="right"	data-type="number"
+									format-type="rate" validator-type="score"></sc-data-column>
+				<sc-data-column		data-field="mat_score"	header-text="수학점수"	width="60"	editable="true"	text-align="right"	data-type="number"
+									validator-type="score"></sc-data-column>
+				<sc-combobox-column	data-field="grade"		header-text="종합등급"	width="60"	editable="true"	text-align="center"
+									items="[[grades]]"		display-field="label"	value-field="data"
+									validator-function="gridValidatorFn" required="true"></sc-combobox-column>
+				<sc-data-column		data-field="salary"	header-text="연봉"	width="100"	editable="true"	text-align="right"
+									 format-type="amt"  validator-type="amt"></sc-data-column>
+				<sc-data-column		data-field="rem"		header-text="비고"		editable="true"	width="150"
+									max-length="20"			required="true"></sc-data-column>
+			</sc-grid-columns>
+		</sc-grid>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-grid-validation-sample',
+		properties : {
+			resultList : {
+				type : Array,
+				value : function() {
+					return [
+						{name : "김길동", eng_score:0, mat_score:0, salary: 0},
+						{name : "박길동", eng_score:0, mat_score:0, salary: 0},
+						{name : "최길동", eng_score:0, mat_score:0, salary: 0}
+					]
+				}
+			},
+			grades : {
+				type : Array,
+				value : function() {
+					return [
+						{data:"A", label:"A등급"},
+						{data:"B", label:"B등급"},
+						{data:"C", label:"C등급"},
+						{data:"F", label:"F등급"},
+					]
+				}
+			}
+		},
+		initialized : function() {
+			this.onInitData();
+		},
+		onInitData : function() {
+			var me = this;
+			
+			me.$.gridPanel.setDataProvider(UT.copy(me.resultList));
+		},
+		// grid validate
+		onCheckValidation : function() {
+			var me = this, grid = me.$.gridPanel;
+			
+			if(!grid.validate()) {
+				UT.alert("STD.E0000");
+				console.log("errors", grid.getErrors());
+			}
+		},
+		// grid validator-function
+		gridValidatorFn : function(headerText, dataField, data) {
+			var me = this, grid = me.$.gridPanel;
+			
+			if(dataField === "grade") {
+				var grade = data[dataField];
+				
+				if(UT.isNotEmpty(grade)) {
+					var avgScore = ( (data.eng_score || 0) + (data.mat_score || 0) ) / 2;
+					if(grade === "A" && (avgScore < 70)) {
+						return "평균 70점 미만의 점수로는 A등급으로 조정이 불가합니다.";
+					} else if(grade === "F" && (avgScore >= 50)) {
+						return "평균 50점 이상의 점수로는 F등급으로 조정이 불가합니다.";
+					}
+				}
+			}
+			return true;
+		}
+	});
+	</script>
+</dom-module>

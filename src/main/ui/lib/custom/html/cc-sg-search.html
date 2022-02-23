@@ -1,0 +1,167 @@
+<!-- 
+/**
+ * 소싱그룹 검색 자동완성 text-field 커스텀 태그
+ *
+ *     <cc-sg-search class="w-150" value="{{value값}}" search-result="{{결과Object}}" result-field="fieldName" result-value="{{결과단건ValueBind}}" oper_org_cd="{{ArrayType or Object}}" link_typ="SOGO"></cc-sg-search>
+ *
+ * @element cc-sg-search
+ *
+ *
+ * @attribute value 해당 텍스트 필드 input value binding <br>
+ * [string] [optional] 
+ *
+ *
+ * @attribute search-result  검색 결과 object값 <br>
+ * [string] [optional]
+ *
+ *
+ * @attribute result-field  단건으로 검색결과가 필요할 경우 검색 결과 object에 field <br>
+ * [string] [optional]
+ *
+ *
+ * @attribute result-value search-field에서 지정한 결과 object의 field의 value <br>
+ * [boolean] [optional]
+ *
+ *
+ * @attribute label-disabled label text가 보이지않도록 처리 <br>
+ * [boolean] [optional]
+ *
+  * @attribute linkTyp 연결유형<br>
+ * [string] [optional]
+ *
+ */
+-->
+<!-- 
+ author : mgPark
+ Since 2016. 5. 18.
+ 변경이력 : [2016. 5. 03.] mgPark 최초작성
+-->
+<sc-link rel="import" href="../../../bp/srm/shared/ep-sg-list.html" lazy></sc-link>
+<dom-module id="cc-sg-search">
+    <style>
+        :host {
+            display : table;
+        }
+        :host > * {
+            vertical-align : middle;        
+            display: table-cell;
+        }    
+    </style>
+    <template>
+       <sc-text-field class$="[[class]]" value="{{value}}" placeholder$="[[placeholder]]" on-enter="onFind" trigger-cls="search" on-trigger-click="onFind"></sc-text-field>
+    </template>
+    <script>
+        Polymer({
+            is : 'cc-sg-search',
+            properties : {
+                value : {
+                    type : Object,
+                    notify: true,
+                    observer : 'valueChanged'
+                },
+                autoComFlage : {
+                    type : Boolean,
+                    value : false
+                },
+                searchResult : {
+                    type : Object,
+                    value : function(){
+                        return {};
+                    },
+                    observer : 'searchResultChanged',
+                    notify: true
+                },
+                resultField : {
+                    type : String,
+                    value : 'value'
+                },
+                resultValue : {
+                    type : Object,
+                    notify: true
+                },
+                labelDisabled : {
+                    type : Boolean,
+                    value : false,
+                    observer : 'labelDisabledChanged'
+                },
+                linkTyp : {
+                    type : String,
+                    value : ''
+                }
+            },
+            //최초 호출
+            attached : function(){
+            },
+    
+            //label 표시 처리
+            labelDisabledChanged : function(newValue, oldValue){
+                var me = this;
+                if(!newValue){
+                    var module = document.createElement('sc-label');
+                    module.i18nDisabled = true;
+                    Polymer.dom(me.root).appendChild(module);
+                    
+                    for(var i=0; i < me.classList.length; i++){
+                        var str = me.classList[i].toString();
+                        if(str.indexOf("w-") > -1){
+                            // cc-sg-search의 width 속성 class가 cc-sg-search에 적용되고, sc-text-field는 100%로 채워짐
+                            // sc-label의 width 확보를 위해 cc-sg-search의 width 속성 class를 제거하고 sc-text-field로 이동 (임시)
+                            me.classFollows(str, me.children[0], me);
+                        }
+                    }
+                }
+                
+            },
+            
+            // 결과  변경시 label표시 처리
+            searchResultChanged: function(newValue, oldValue) {
+                var me = this;
+                if(me.children[1]){
+                    me.children[1].text = newValue.sg_cd || "";
+                }
+            },
+            
+            //값 변경시 result값 clear처리
+            valueChanged : function(newValue, oldValue) {
+                var me = this;
+                if(!me.autoComFlage){
+                    me.set("searchResult",{});
+                    me.set("resultValue",'');
+                }
+                me.set("autoComFlage", false);
+            },
+            
+            onFind : function(){
+                var me = this;
+                if(!me.get("operOrgCd")){
+                    UT.alert("STD.3400");
+                    return;
+                }
+                var defaultParam = {
+                        comp_cd : SCSessionManager.currentUser.comp_cd,
+                        oper_org_cd : me.get("operOrgCd"),
+                        link_typ : me.get("linkTyp") ? me.get("linkTyp") : '',
+                        sg_nm : me.get("value")
+                };
+                //소싱그룹 검색 팝업을 호출한다.
+               	var sgPopup = UT.popup("ep-sg-list", me, 650, 500,{
+                    "selected-items": function(popup, e) {
+                        var result = e.detail[0];
+                        //결과값 처리하는 callback
+                        me.set("autoComFlage",true);
+                        if(me.get("resultField")){
+                            me.set("resultValue", result[me.resultField]);
+                        }
+                        me.set("searchResult", result);
+                        me.set("value", result.sg_nm);
+                        me.fire("result", result);
+                        me.set("autoComFlage", false);
+                        popup.close();
+                    }
+                });
+                sgPopup.show();
+                sgPopup.getWindowContent().load({singleSelect : true, defaultParam : defaultParam});
+            }
+        });
+    </script>
+</dom-module>

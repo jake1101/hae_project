@@ -1,0 +1,28 @@
+<dom-module id="es-sub-tab1-validation-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<sc-label text="서브탭1" i18n-disabled></sc-label>
+	</template>
+
+	<script>
+        Polymer({
+            is: 'es-sub-tab1-validation-sample',
+            properties: {
+                isLoaded: {
+                    type: Boolean,
+                    value: true
+                }
+            },
+
+            isValidFn: function (validParam) {
+                return true;
+            }
+
+        });
+	</script>
+</dom-module>

@@ -1,0 +1,56 @@
+<sc-link rel="import" href="es-vehicle-management.html"></sc-link>
+<sc-link rel="import" href="es-vehicle-info.html"></sc-link>
+<sc-link rel="import" href="es-location.html"></sc-link>
+<sc-link rel="import" href="es-driver.html"></sc-link>
+
+<dom-module id="em-vehicle-management">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<div class="hbox flex">
+			<es-vehicle-management id="vehicleList" class="flex" on-init-vehicle="onInitVehicle" on-find-vehicleinfo="onFindVehicleinfo" on-clear="onClear"></es-vehicle-management>
+			<div class="hspace-10"></div>
+			<sc-tab-navigation id="tabNavi"  class="flex">
+	            <es-vehicle-info id="vehicleInfo" title-text="기본정보"  on-find-list="onFindVehicleList"></es-vehicle-info>
+<!-- 	            <es-location id="location" title-text="운행이력" ></es-location> -->
+	            <es-driver id="driver" title-text="운전자이력" ></es-driver>
+	        </sc-tab-navigation>
+        </div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-vehicle-management',
+			
+			onFindVehicleinfo: function(e, data) {
+                var me = this;
+                console.log(data);
+                me.$.vehicleInfo.load(data);
+//                 me.$.location.load(data);
+                me.$.driver.load(data);
+            },
+            onFindVehicleList: function() {
+                var me = this;
+                me.$.vehicleList.onSearch();
+            },
+            
+            onInitVehicle: function() {
+                var me  = this;
+
+                me.$.vehicleInfo.initVehicle();
+//                 me.$.location.clear();
+                me.$.driver.clear();
+                
+                me.$.tabNavi.selectItem(me.$.vehicleInfo);
+
+            },
+		});
+	</script>
+
+
+</dom-module>

@@ -1,0 +1,83 @@
+<!-- 
+
+## 주소 검색 
+
+http://openapi.epost.go.kr에서 제공하는 API를 활용하여 주소를 검색하는 예제입니다. 
+
+서버단은 smartsuit.app.shared.SharedController.findZipcode에 구현되어 있습니다. 
+ 
+sc-text-field의 자세한 사항은 [sc-component docs](/bower_components/starter-kit/index.html#!/docs/sc-component&sc-text-field)를 참고하시기 바랍니다.
+ -->
+<sc-link rel="import" href="../../../shared/ep-zipcode.html"></sc-link>
+<dom-module id="es-zip-code-ex-1">
+
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+    
+    <template>
+		<table class="tb-form">
+			<tr>
+				<td>
+					<sc-text-field class="w-100" max-length="18" trigger-cls="search" on-trigger-click="onPopupZipcode" on-change="onChangeZipCode" value="{{basicInfo.post_no}}"></sc-text-field>
+					<sc-text-field class="w-300" value="{{basicInfo.dtl_addr_1}}" max-length="128" readonly="true"></sc-text-field>
+					<sc-text-field class="w-300" value="{{basicInfo.dtl_addr_2}}" max-length="128"></sc-text-field>
+					<sc-label text="API유형" i18n-disabled></sc-label>
+					<sc-radio-group-field value="{{basicInfo.api_typ}}">
+						<sc-radio-field label="API(*기본값)" input-value="API" i18n-disabled></sc-radio-field>
+						<sc-radio-field label="DB" input-value="DB" i18n-disabled></sc-radio-field>
+					</sc-radio-group-field>
+				</td>
+			</tr>
+		</table>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-zip-code-ex-1',
+            properties:{
+            	/*기본정보 data binding 객체*/
+                basicInfo: {
+                    type: Object,
+                    value : function(){
+                        return {};
+                    }
+                }
+            },
+            
+            setValue: function() {
+            	var me = this;
+            	
+            	me.set("basicInfo.post_no", "17754");
+            	me.set("basicInfo.dtl_addr_1", "서울 당산");
+            	me.set("basicInfo.dtl_addr_2", "세부주소");
+            	me.set("basicInfo.api_typ","API");
+            },
+            
+            onPopupZipcode: function() {
+                var me = this;
+                
+               	var zipCodePopup = UT.popup("ep-zipcode", me, 650, 500, {
+       				'selected-items' : function(popup, e) {
+       					var selected = e.detail[0];
+       					me.set("basicInfo.post_no", selected.post_no);
+                        me.set("basicInfo.dtl_addr_1", selected.addr);
+       				}
+       			}, {titleText : "우편번호검색"});
+                zipCodePopup.getWindowContent().load({api_typ : me.get("basicInfo.api_typ")});
+                zipCodePopup.show();
+            },
+            
+            onChangeZipCode: function(){
+            	var me = this;
+            	
+            	me.set("basicInfo.post_no", "");
+            	me.set("basicInfo.dtl_addr_1", "");
+            	me.set("basicInfo.dtl_addr_2", "");
+            }
+		});
+	</script>
+
+</dom-module>

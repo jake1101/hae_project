@@ -1,0 +1,60 @@
+<dom-module id="widget-iframe">
+    <style>
+        
+    </style>
+
+    <template>
+    	<div class="widgetIframe" style="width:100%;height:100%;position:absolute"> 
+    		<iframe  src$="{{iframeUrl}}" width="100%" height="100%" frameborder="no" scrolling="no"></iframe>
+    	</div>
+    </template>
+    <script>
+        Polymer({
+            is: "widget-iframe",
+            properties: {
+            	iframeUrl:{
+     				type:String
+     			}
+            }, 
+    		getContent : function(){
+    		    if(!this._iframe){
+    		    	this._iframe = this.querySelector('.widgetIframe');
+    		    }
+    		    return this._iframe;
+    		},
+    		createContent : function(template){
+    			var me =  this;
+    			me.template = template;
+    			me.contentData = template.contents;
+    			if(me.template.mode == 'setting'){
+	    			me.iframeUrl = me.contentData.iframeUrl;
+    			}
+    		},
+    		getWidgetTempalte : function(){
+    			var me = this;
+    			return me.template;
+    		},
+    		getIframe: function(){
+    			var me =  this;
+    			return me.querySelector('iframe');
+    		},
+			refresh: function(){
+    			var me = this;
+    			me.getIframe().src =  me.contentData.iframeUrl;
+    		},
+    		resize : function(widget_content){
+    			var container = this.getContent(),
+    			 widgetHeaderHeight = widget_content.headerHeight;
+    			if(container){
+    				container.style.width = widget_content.widget_width +'px';
+    				container.style.height = (widget_content.widget_height - widgetHeaderHeight)+'px';
+    			}
+    		},
+    		contentResize: function(){
+    			
+    		}
+    		
+    		
+    	});
+    </script>
+</dom-module>

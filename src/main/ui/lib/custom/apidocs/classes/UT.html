@@ -1,0 +1,4684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>UT - API</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="icon" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+                <h1><img src="../assets/css/logo.png" title="API" width="117" height="52"></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.0.1</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+                    <h2 class="off-left">APIs</h2>
+                    <div id="api-tabview" class="tabview">
+                        <ul class="tabs">
+                            <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-elements">Elements</a></li>
+                            <li><a href="#api-modules">Modules</a></li>
+                        </ul>
+                
+                        <div id="api-tabview-filter">
+                            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+                        </div>
+                
+                        <div id="api-tabview-panel">
+                            <ul id="api-classes" class="apis classes">
+                                <li><a href="../classes/DEF.html">DEF</a></li>
+                                <li><a href="../classes/EDITOR.html">EDITOR</a></li>
+                                <li><a href="../classes/GRID.html">GRID</a></li>
+                                <li><a href="../classes/I18N.html">I18N</a></li>
+                                <li><a href="../classes/MSG.html">MSG</a></li>
+                                <li><a href="../classes/UPLOAD.html">UPLOAD</a></li>
+                                <li><a href="../classes/UT.html">UT</a></li>
+                                <li><a href="../classes/VALID.html">VALID</a></li>
+                            </ul>
+                
+                                <ul id="api-elements" class="apis elements">
+                                    <li><a href="../elements/cc-approval-summary.html">&lt;cc-approval-summary&gt;</a></li>
+                                    <li><a href="../elements/cc-dept-search.html">&lt;cc-dept-search&gt;</a></li>
+                                    <li><a href="../elements/cc-editor.html">&lt;cc-editor&gt;</a></li>
+                                    <li><a href="../elements/cc-from-to-date.html">&lt;cc-from-to-date&gt;</a></li>
+                                    <li><a href="../elements/cc-linked-vender.html">&lt;cc-linked-vender&gt;</a></li>
+                                    <li><a href="../elements/cc-multi-text-field.html">&lt;cc-multi-text-field&gt;</a></li>
+                                    <li><a href="../elements/cc-operorg-combobox-field.html">&lt;cc-operorg-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-operorg-multi-combobox-field.html">&lt;cc-operorg-multi-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-purc-grp.html">&lt;cc-purc-grp&gt;</a></li>
+                                    <li><a href="../elements/cc-sg-search.html">&lt;cc-sg-search&gt;</a></li>
+                                    <li><a href="../elements/cc-sp-operorg-combobox-field.html">&lt;cc-sp-operorg-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-sp-operorg-multi-combobox-field.html">&lt;cc-sp-operorg-multi-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-upload.html">&lt;cc-upload&gt;</a></li>
+                                    <li><a href="../elements/cc-user-search.html">&lt;cc-user-search&gt;</a></li>
+                                </ul>
+                
+                            <ul id="api-modules" class="apis modules">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+                    Show:
+                    <label for="api-show-inherited">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </div>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<h1>UT Class</h1>
+<div class="box meta">
+
+
+        <div class="foundat">
+            Defined in: <a href="../files/js_util.js.html#l1"><code>js\util.js:1</code></a>
+        </div>
+
+
+</div>
+
+
+<div class="box intro">
+    <p>Util</p>
+
+</div>
+
+
+<div id="classdocs" class="tabview">
+    <ul class="api-class-tabs">
+        <li class="api-class-tab index"><a href="#index">Index</a></li>
+
+            <li class="api-class-tab methods"><a href="#methods">Methods</a></li>
+    </ul>
+
+    <div>
+        <div id="index" class="api-class-tabpanel index">
+            <h2 class="off-left">Item Index</h2>
+
+                <div class="index-section methods">
+                    <h3>Methods</h3>
+
+                    <ul class="index-list methods">
+                            <li class="index-item method">
+                                <a href="#method_ajax">ajax</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_alert">alert</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_autoCompleteObject">autoCompleteObject</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_checkAuth">checkAuth</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_closest">closest</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_completeDelete">completeDelete</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_completeRequest">completeRequest</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_completeSave">completeSave</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_confirm">confirm</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_copy">copy</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_createModule">createModule</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_createWindow">createWindow</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_createWindowByMenuId">createWindowByMenuId</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_enter">enter</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_failureMessage">failureMessage</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_formatDate">formatDate</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_formatString">formatString</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_generateUUID">generateUUID</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_getAuthList">getAuthList</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_getMenuId">getMenuId</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_invalidData">invalidData</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_isArray">isArray</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_isBoolean">isBoolean</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_isDate">isDate</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_isEmpty">isEmpty</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_isFunction">isFunction</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_isNumber">isNumber</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_isObject">isObject</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_isString">isString</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_onDelete">onDelete</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_popup">popup</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_popupApproval">popupApproval</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_popupAttach">popupAttach</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_popupJsp">popupJsp</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_popupSelectObject">popupSelectObject</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_promise">promise</a>
+
+                            </li>
+                            <li class="index-item method deprecated">
+                                <a href="#method_promiseCodes">promiseCodes</a>
+
+                                    <span class="flag deprecated">deprecated</span>
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_removeModule">removeModule</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_request">request</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_save">save</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_toDate">toDate</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_toNumber">toNumber</a>
+
+                            </li>
+                    </ul>
+                </div>
+
+
+
+        </div>
+
+            <div id="methods" class="api-class-tabpanel">
+                <h2 class="off-left">Methods</h2>
+
+<div id="method_ajax" class="method item">
+    <h3 class="name"><code>ajax</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>url</code>
+                </li>
+                <li class="arg">
+                        <code>param</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[completeCallback(res)]</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[element]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l588"><code>js\util.js:588</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>sc-ajax 실행</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">url</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>URL</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">param</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>서버로 전송할 파라미터</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[completeCallback(res)]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>실행 완료 후 콜백 함수</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">res</code>
+                                    <span class="type">Object</span>
+
+                                <div class="param-description">
+                                    <p>서버로 부터 전송되는 실행 결과 정보</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[element]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>ajax 가 포함될 element (메뉴 권한 체크를 해야하는 경우 필수)</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    UT.ajax(&quot;saveList.do&quot;, param, function() {
+        ...
+    }, me);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_alert" class="method item">
+    <h3 class="name"><code>alert</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>message</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[okCallback]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l91"><code>js\util.js:91</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>alert dialog</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">message</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>출력할 메시지</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[okCallback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>ok 버튼 클릭 후 콜백 함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    UT.alert(&quot;Hello World!&quot;);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_autoCompleteObject" class="method item">
+    <h3 class="name"><code>autoCompleteObject</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>popupTagName</code>
+                </li>
+                <li class="arg">
+                        <code>element</code>
+                </li>
+                <li class="arg">
+                        <code>param</code>
+                </li>
+                <li class="arg">
+                        <code>selectedCallback(selected)</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l932"><code>js\util.js:932</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>자동완성 객체 검색
+<strong>ep-user-list</strong>: 사용자검색, <strong>ep-job-list</strong>:구매그룹검색, <strong>ep-dept-list</strong>: 부서 검색</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">popupTagName</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>팝업으로 사용할 tag name</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">element</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>element</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">param</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>데이터 검색 파라미터</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">selectedCallback(selected)</code>
+                        <span class="type">Function</span>
+
+
+                    <div class="param-description">
+                        <p>검색된(선택된) 데이터를 리턴하는 콜백 함수</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">selected</code>
+                                    <span class="type">Object</span>
+
+                                <div class="param-description">
+                                    <p>검색된(선택된) 데이터</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[singleSelect=true]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>객체의 단일 선택 여부</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[selectAfterClose=true]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>검색 결과가 복수 일 경우 팝업에서 선택 후 창 닫기</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[width=650]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>팝업 가로 크기</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[height=500]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>팝업 세로 크기</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    UT.autoCompleteObject(&quot;ep-module&quot;, me, {&quot;usr_nm&quot;: me.value}, function(result) {
+        ...
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_checkAuth" class="method item">
+    <h3 class="name"><code>checkAuth</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>element</code>
+                </li>
+                <li class="arg">
+                        <code>selector</code>
+                </li>
+                <li class="arg">
+                        <code>funcCd</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l8"><code>js\util.js:8</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>권한에 따른 element 노드 삭제</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">element</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>element</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">selector</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>삭제할 css selector</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">funcCd</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>기능 코드</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    UT.cehckAuth(me, &quot;auth-r', DEF.READ);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_closest" class="method item">
+    <h3 class="name"><code>closest</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>element</code>
+                </li>
+                <li class="arg">
+                        <code>selector</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1361"><code>js\util.js:1361</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>부모를 탐색하며 selector와 동일한 엘리먼트를 찾아줌</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">element</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">selector</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Object</span>:
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_completeDelete" class="method item">
+    <h3 class="name"><code>completeDelete</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>result</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[successCallback]</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[failureCallback]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l494"><code>js\util.js:494</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>UT.onDelete 에 대한 요청 완료</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">result</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>서버에서의 처리 결과</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[successCallback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>처리결과가 성공이었을 때 콜백 함수</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[failureCallback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>처리결과가 실패였을 때 콜백 함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function(e, res) {
+    var me = this;
+    UT.completeDelete(res.response, function() {
+        ...
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_completeRequest" class="method item">
+    <h3 class="name"><code>completeRequest</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>options</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l400"><code>js\util.js:400</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>UT.request 에 대한 요청 완료</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">options</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>옵션</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">result</code>
+                                    <span class="type">Object</span>
+
+                                <div class="param-description">
+                                    <p>서버에서의 처리 결과 result.result_status 가 S 이면 성공, 나머지는 실패</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[success]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>성공시 처리</p>
+
+                                </div>
+
+                                    <ul class="params-list">
+                                        <li class="param">
+                                                <code class="param-name optional">[message]</code>
+                                                <span class="type">String</span>
+                                                <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                            <div class="param-description">
+                                                성공시 메시지
+                                            </div>
+                                        </li>
+                                        <li class="param">
+                                                <code class="param-name optional">[callback]</code>
+                                                <span class="type">Function</span>
+                                                <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                            <div class="param-description">
+                                                성공시 호출될 콜백 함수
+                                            </div>
+                                        </li>
+                                    </ul>
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[failure]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>실패시 처리</p>
+
+                                </div>
+
+                                    <ul class="params-list">
+                                        <li class="param">
+                                                <code class="param-name optional">[message]</code>
+                                                <span class="type">String</span>
+                                                <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                            <div class="param-description">
+                                                실패시 메시지
+                                            </div>
+                                        </li>
+                                        <li class="param">
+                                                <code class="param-name optional">[callback]</code>
+                                                <span class="type">Function</span>
+                                                <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                            <div class="param-description">
+                                                실패시 호출될 콜백 함수
+                                            </div>
+                                        </li>
+                                    </ul>
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function(result) {
+    var me = this;
+    UT.completeRequest({
+        result: result,
+        success: {
+            message: I18N.translate(MSG[&quot;N1500&quot;]),
+            callback: function() {
+                ...
+            }
+        },
+        failure: {
+            message: UT.failureMessage(result),
+            callback: function() {
+                ...
+            }
+        }
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_completeSave" class="method item">
+    <h3 class="name"><code>completeSave</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>result</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[successCallback]</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[failureCallback]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l464"><code>js\util.js:464</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>UT.save 에 대한 요청 완료</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">result</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>서버에서의 처리 결과</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[successCallback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>처리결과가 성공이었을 때 콜백 함수</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[failureCallback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>처리결과가 실패였을 때 콜백 함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function(e, res) {
+    var me = this;
+    UT.completeSave(res.response, function() {
+        ...
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_confirm" class="method item">
+    <h3 class="name"><code>confirm</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>message</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[yesCallback]</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[noCallback]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l112"><code>js\util.js:112</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>confirm dialog</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">message</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>출력할 메시지</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[yesCallback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>ok 버튼 클릭 후 콜백 함수</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[noCallback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>no 버튼 클릭 후 콜백 함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    UT.confirm(&quot;Hello World!&quot;, function() {
+        // yes
+        ...
+    }, function() {
+        // no
+        ...
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_copy" class="method item">
+    <h3 class="name"><code>copy</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>object</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l555"><code>js\util.js:555</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>clone object</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">object</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>복사할 대상 object</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Object</span>:
+                    <p>new object</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function(param) {
+    var me = this;
+    me.set(&quot;findInfo.param&quot;, UT.copy(param));
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_createModule" class="method item">
+    <h3 class="name"><code>createModule</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>parentNode</code>
+                </li>
+                <li class="arg">
+                        <code>moduleTagName</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[cssName]</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[authList]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l39"><code>js\util.js:39</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>화면 생성 및 상위노드에 추가</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">parentNode</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>상위 노드</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">moduleTagName</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>모듈 태그 명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[cssName]</code>
+                        <span class="type">String</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>css class 명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[authList]</code>
+                        <span class="type">Array</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>권한</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Object</span>:
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    var detail = UT.createModule(me.$.pages, &quot;es-module&quot;, &quot;vbox&quot;);
+    detail.addEventListener(&quot;attached&quot;, function() {
+        ...
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_createWindow" class="method item">
+    <h3 class="name"><code>createWindow</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>menuId</code>
+                </li>
+                <li class="arg">
+                        <code>menuName</code>
+                </li>
+                <li class="arg">
+                        <code>menuUrl</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1458"><code>js\util.js:1458</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>메뉴 생성</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">menuId</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>메뉴아이디</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">menuName</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>메뉴명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">menuUrl</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>메뉴URL</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_createWindowByMenuId" class="method item">
+    <h3 class="name"><code>createWindowByMenuId</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>menuId</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1431"><code>js\util.js:1431</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>menuId를 통해 메뉴생성</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">menuId</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>메뉴아이디</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_enter" class="method item">
+    <h3 class="name"><code>enter</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>element</code>
+                </li>
+                <li class="arg">
+                        <code>callback</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1340"><code>js\util.js:1340</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>input element에서 enter key가 눌렸을 때의 이벤트</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">element</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">callback</code>
+                        <span class="type">Function</span>
+
+
+                    <div class="param-description">
+                        <p>enter key가 눌린 후 콜백 함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_failureMessage" class="method item">
+    <h3 class="name"><code>failureMessage</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>result</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l524"><code>js\util.js:524</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>서버로의 요청 결과에 대한 실패 메시지</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">result</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>서버에서의 처리 결과</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    UT.completeRequest({
+        result: result,
+        ...
+        failure: {
+            message: UT.failureMessage(result)
+        }
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_formatDate" class="method item">
+    <h3 class="name"><code>formatDate</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>date</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[format=DEF.styles.formatDate.datetimeFormat]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">String</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l979"><code>js\util.js:979</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>date를 format의 형태로 출력한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">date</code>
+                        <span class="type">Date | Number</span>
+
+
+                    <div class="param-description">
+                        <p>날짜 객체 | 날짜의 time값</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[format=DEF.styles.formatDate.datetimeFormat]</code>
+                        <span class="type">String</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>변환할 format</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">String</span>:
+                    <p>변환된 문자열</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    UT.formatDate(new Date(), &quot;yyyy/MM/dd&quot;); // 2016/04/20
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_formatString" class="method item">
+    <h3 class="name"><code>formatString</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>string</code>
+                </li>
+                <li class="arg">
+                        <code>values</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">String</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1034"><code>js\util.js:1034</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>string에 values를 replace 한다</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">string</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>대상 문자열</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">values</code>
+                        <span class="type">String | Array</span>
+
+
+                    <div class="param-description">
+                        <p>바꿀 문자열</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">String</span>:
+                    <p>replace 된 문자열</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    UT.formatString(&quot;{0} / {1}&quot;, &quot;a&quot;, &quot;b&quot;);                       // a / b
+    UT.formatString(&quot;{0} / {1}&quot;, [&quot;a&quot;, &quot;b&quot;]);                     // a / b
+    UT.formatString(&quot;{name} / {value}&quot;, {name: &quot;a&quot;, value: &quot;b&quot;}); // a / b
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_generateUUID" class="method item">
+    <h3 class="name"><code>generateUUID</code></h3>
+
+        <span class="paren">()</span>
+
+        <span class="returns-inline">
+            <span class="type">String</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l622"><code>js\util.js:622</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>uuid 만들기</p>
+
+    </div>
+
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">String</span>:
+                    <p>uuid</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    var uuid = UT.generateUUID();
+    ...
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_getAuthList" class="method item">
+    <h3 class="name"><code>getAuthList</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>element</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Array</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1413"><code>js\util.js:1413</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>현재 화면의 authList를 return</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">element</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Array</span>:
+                    <p>authList</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_getMenuId" class="method item">
+    <h3 class="name"><code>getMenuId</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>element</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">String</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1383"><code>js\util.js:1383</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>현재 화면의 MenuId를 return</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">element</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">String</span>:
+                    <p>menuId</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_invalidData" class="method item">
+    <h3 class="name"><code>invalidData</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>data</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[validator]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Boolean</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l146"><code>js\util.js:146</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>일반 데이터의 유효성 검사</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">data</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>검사할 변수들이 포함된 객체</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[validator]</code>
+                        <span class="type">Array</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>유효성 검사 항목</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Boolean</span>:
+                    <p>true - 유효하지 않음</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    if (UT.invalidData(me.get(&quot;findList.param&quot;))) {
+        return;
+    }
+    ...
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_isArray" class="method item">
+    <h3 class="name"><code>isArray</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>object</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Boolean</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1186"><code>js\util.js:1186</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Array 여부</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">object</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Boolean</span>:
+                    <p>true is array</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    if (UT.isArray(dataRows)) {
+        ...
+    }
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_isBoolean" class="method item">
+    <h3 class="name"><code>isBoolean</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>object</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Boolean</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1225"><code>js\util.js:1225</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Boolean 여부</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">object</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Boolean</span>:
+                    <p>true is boolean</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    me.set(&quot;singleSelect&quot;, UT.isBoolean(options.singleSelect) ? options.singleSelect : false);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_isDate" class="method item">
+    <h3 class="name"><code>isDate</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>object</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Boolean</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1300"><code>js\util.js:1300</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Date 여부</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">object</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Boolean</span>:
+                    <p>true is date</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    if (UT.isDate(param)) {
+        ...
+    }
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_isEmpty" class="method item">
+    <h3 class="name"><code>isEmpty</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>object</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Boolean</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1319"><code>js\util.js:1319</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>데이터의 empty 여부
+<br>
+string일 경우 trim 후 empty 검사한다</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">object</code>
+                        <span class="type">String | Array</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Boolean</span>:
+                    <p>true is empty</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    if (!UT.isEmpty(item)) {
+        ...
+    }
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_isFunction" class="method item">
+    <h3 class="name"><code>isFunction</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>object</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Boolean</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1261"><code>js\util.js:1261</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Function 여부</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">object</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Boolean</span>:
+                    <p>true is function</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    if (UT.isFunction(callback)) {
+        callback.call(this);
+    }
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_isNumber" class="method item">
+    <h3 class="name"><code>isNumber</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>object</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Boolean</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1242"><code>js\util.js:1242</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Number 여부</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">object</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Boolean</span>:
+                    <p>true is number</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    if (UT.isNumber(count)) {
+        ...
+    }
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_isObject" class="method item">
+    <h3 class="name"><code>isObject</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>object</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Boolean</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1279"><code>js\util.js:1279</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Object 여부
+<br>
+(주의: null 도 object이지만, 편의상 null 은 object에서 제외 한다)</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">object</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Boolean</span>:
+                    <p>true is object</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    if (UT.isObject(options.defaultParam)) {
+        me.set(&quot;findList.param&quot;, options.defaultParam);
+    }
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_isString" class="method item">
+    <h3 class="name"><code>isString</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>object</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Boolean</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1206"><code>js\util.js:1206</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>String 여부</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">object</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Boolean</span>:
+                    <p>true is string</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    if (UT.isString(usrId)) {
+        ...
+    }
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_onDelete" class="method item">
+    <h3 class="name"><code>onDelete</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>ajax</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l371"><code>js\util.js:371</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>삭제 요청 - &quot;삭제하시겠습니까?&quot; 메시지 출력</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">ajax</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>sc-ajax 객체</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[message]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>&quot;삭제하시겠습니까?&quot; 와 다른 메시지를 출력하는 경우.</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[onResponse(res)]</code>
+                                    <span class="type">Function</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>삭제 완료 후 콜백 함수</p>
+
+                                </div>
+
+                                    <ul class="params-list">
+                                        <li class="param">
+                                                <code class="param-name">res</code>
+                                                <span class="type">Object</span>
+
+                                            <div class="param-description">
+                                                처리 결과 정보
+<pre>
+&lt;sc-ajax url="url" on-response="func">&lt;/sc_ajax>
+on-response 에 함수를 지정한 경우        : 해당 함수에서 UT.completeDelete를 호출해줘야 한다.
+on-response 에 함수를 지정하지 않은 경우 : options.onResponse 을 정의하여 response를 받을 수 있다
+</pre>
+                                            </div>
+                                        </li>
+                                    </ul>
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    UT.onDelete(me.$.deleteInfo);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_popup" class="method item">
+    <h3 class="name"><code>popup</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>popupTagName</code>
+                </li>
+                <li class="arg">
+                        <code>element</code>
+                </li>
+                <li class="arg">
+                        <code>width</code>
+                </li>
+                <li class="arg">
+                        <code>height</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[events]</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l643"><code>js\util.js:643</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>팝업
+<br>
+팝업의 close 이벤트는 기본적으로 설정된다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">popupTagName</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>팝업으로 사용할 tag name</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">element</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>element</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">width</code>
+                        <span class="type">Number</span>
+
+
+                    <div class="param-description">
+                        <p>가로크기</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">height</code>
+                        <span class="type">Number</span>
+
+
+                    <div class="param-description">
+                        <p>세로크기</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[events]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>팝업에서 발생되는 event의 리스너 목록,</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>팝업 설정 옵션</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[modal=true]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>모달 여부</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[maximizable=false]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>최대화 여부</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[draggable=true]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>이동 여부</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[resizable=false]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>리사이징 여부</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[collapsible=false]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>접기/펴기 여부</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    UT.popup(&quot;ep-approval&quot;, me, 900, 800, {
+        &quot;attached&quot;: function(popup, e) {
+            popup.getContent().setParam({
+                app_id: param.app_id || &quot;&quot;,
+                aprv_id: param.aprv_id || &quot;&quot;,
+                aprv_typcd: param.aprv_typcd || &quot;&quot;
+            });
+        },
+        &quot;saved-approval&quot;: function(popup, e) {
+            if (UT.isFunction(savedCallback)) {
+                savedCallback.call(this, e.detail);
+            }
+        }
+    }, {maximizable: true});
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_popupApproval" class="method item">
+    <h3 class="name"><code>popupApproval</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>element</code>
+                </li>
+                <li class="arg">
+                        <code>param</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[savedCallback(stsCd)]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l789"><code>js\util.js:789</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>결재 팝업</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">element</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>element</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">param</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>결재 팝업으로 전달할 파라미터</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[app_id]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>해당 모듈의 APP 아이디(신규작성시)</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[aprv_typcd]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>결재 유형코드(신규작성시)</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[aprv_id]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>결재 아이디</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[savedCallback(stsCd)]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>결재 작성시(resultView=false) 결재정보가 저장된 후 콜백 함수</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">stsCd</code>
+                                    <span class="type">String</span>
+
+                                <div class="param-description">
+                                    <p>결재상태코드</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    UT.popupApproval(me, {aprv_id: data.aprv_id}, function() {
+        ...
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_popupAttach" class="method item">
+    <h3 class="name"><code>popupAttach</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>element</code>
+                </li>
+                <li class="arg">
+                        <code>grpCd</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[savedCallback(result)]</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l833"><code>js\util.js:833</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>첨부파일 업로드 팝업
+<br>
+콜백함수로부터 첨부파일 그룹코드와 파일 개수가 전달된다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">element</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>element</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">grpCd</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>첨부파일 그룹코드</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[savedCallback(result)]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>파일 저장 후 콜백 함수</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">result</code>
+                                    <span class="type">Object</span>
+
+                                <div class="param-description">
+                                    <p>콜백함수로부터 전달 되는 파라미터 - (예) {grp_cd: &quot;xxx&quot;, file_count: 2}</p>
+
+                                </div>
+
+                                    <ul class="params-list">
+                                        <li class="param">
+                                                <code class="param-name">grp_cd</code>
+                                                <span class="type">String</span>
+
+                                            <div class="param-description">
+                                                첨부파일 그룹코드
+                                            </div>
+                                        </li>
+                                        <li class="param">
+                                                <code class="param-name">file_count</code>
+                                                <span class="type">Number</span>
+
+                                            <div class="param-description">
+                                                업로드된 파일 총 수
+                                            </div>
+                                        </li>
+                                    </ul>
+                            </li>
+                        </ul>
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>업로더 설정 옵션</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[maxTotalFileCount=0]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>객최대 파일 개수, 0 : 제한없음.</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[maxTotalFileSize=0]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>업로드 될 파일의 총 용량. 단위 - B(byte), KB(kilobyte), MB(megabyte), GB(gigabyte)</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    me.gridView.onDataCellClicked = function(grid, cell) {
+        var fieldName = cell.fieldName;
+        if(fieldName == &quot;field1&quot;){
+            UT.popupAttach(me, me.data.field2, function(result) {
+                grid.setValues(cell.itemIndex, {
+                    field2: result.grp_cd,
+                    field1: result.file_count
+                }, true);
+            });
+        }
+    };
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_popupJsp" class="method item">
+    <h3 class="name"><code>popupJsp</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>url</code>
+                </li>
+                <li class="arg">
+                        <code>element</code>
+                </li>
+                <li class="arg">
+                        <code>width</code>
+                </li>
+                <li class="arg">
+                        <code>height</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[events]</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l716"><code>js\util.js:716</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>팝업
+<br>
+scpopup에 iframe을 이용하여 jsp, html등 파일을 호출한다.
+호출된 jsp에서 팝업창을 제어할 수 있도록 closePopup 펑션 추가</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">url</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>호출할 파일 url</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">element</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>element</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">width</code>
+                        <span class="type">Number</span>
+
+
+                    <div class="param-description">
+                        <p>가로크기</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">height</code>
+                        <span class="type">Number</span>
+
+
+                    <div class="param-description">
+                        <p>세로크기</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[events]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>팝업에서 발생되는 event의 리스너 목록,</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>팝업 설정 옵션</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[modal=true]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>모달 여부</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[maximizable=false]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>최대화 여부</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[draggable=true]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>이동 여부</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[resizable=false]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>리사이징 여부</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[collapsible=false]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>접기/펴기 여부</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    UT.popupJsp(&quot;test.jsp&quot;, me, 900, 800, {maximizable: true});
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_popupSelectObject" class="method item">
+    <h3 class="name"><code>popupSelectObject</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>popupTagName</code>
+                </li>
+                <li class="arg">
+                        <code>element</code>
+                </li>
+                <li class="arg">
+                        <code>selectedCallback(selected)</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l883"><code>js\util.js:883</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>객체 선택 팝업</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">popupTagName</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>팝업으로 사용할 tag name</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">element</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>element</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">selectedCallback(selected)</code>
+                        <span class="type">Function</span>
+
+
+                    <div class="param-description">
+                        <p>선택된 데이터를 리턴하는 콜백 함수</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">selected</code>
+                                    <span class="type">Object</span>
+
+                                <div class="param-description">
+                                    <p>선택된 데이터</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[singleSelect=false]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>객체의 단일 선택 여부</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[selectAfterClose=true]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>검색 결과가 복수 일 경우 팝업에서 선택 후 창 닫기</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[width=650]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>팝업 가로 크기</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[height=500]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>팝업 세로 크기</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[dataRows=rows]</code>
+                                    <span class="type">Array</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>팝업의 그리드에 전달할 row 데이터</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[defaultParam=param]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>팝업 검색 파라미터</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    UT.popupSelectObject(&quot;ep-module&quot;, me, function(selected) {
+        ...
+        me.onAdd(selected);
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_promise" class="method item">
+    <h3 class="name"><code>promise</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>elements</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[loadedCallback]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1078"><code>js\util.js:1078</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>promise 처리</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">elements</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>sc-service-group 과 같이 service() 함수를 가지는 element 이거나, Promise 를 리턴하는 함수</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[loadedCallback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>elements 가 모두 load 된 후 콜백 함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    UT.promise([me.$.codes, me.$.editor, me.$.upload], function() {
+        me.setupGrid();
+        ...
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_promiseCodes" class="method item deprecated">
+    <h3 class="name"><code>promiseCodes</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>codes</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[loadedCallback]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+        <span class="flag deprecated" title="Use &#x27;UT.promise&#x27; instead.">deprecated</span>
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1056"><code>js\util.js:1056</code></a>
+        </p>
+
+
+            <p>Deprecated: Use &#x27;UT.promise&#x27; instead.</p>
+
+    </div>
+
+    <div class="description">
+        <p>코드 로드
+sc-service-group 요청 및 요청완료를 promise로 반환한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">codes</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>sc-service-group</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[loadedCallback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>sc-service-group이 모두 load 된 후 콜백 함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_removeModule" class="method item">
+    <h3 class="name"><code>removeModule</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>parentNode</code>
+                </li>
+                <li class="arg">
+                        <code>event</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l75"><code>js\util.js:75</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>상위 노드에서 화면 삭제</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">parentNode</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>삭제할 객체의 상위 객체</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">event</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>이벤트 객체</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function(e) {
+    var me = this;
+    UT.removeModule(me.$.pages, e);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_request" class="method item">
+    <h3 class="name"><code>request</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>ajax</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[responseCallback(res)]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l195"><code>js\util.js:195</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>ajax 요청</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">ajax</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>sc-ajax 객체</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[responseCallback(res)]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>삭제 완료 후 콜백 함수</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">res</code>
+                                    <span class="type">Object</span>
+
+                                <div class="param-description">
+                                    <p>처리 결과 정보</p>
+<pre>
+&lt;sc-ajax url="url" on-response="func">&lt;/sc_ajax>
+on-response 에 함수를 지정하지 않은 경우 : responseCallback 을 정의하여 response를 받을 수 있다
+</pre>
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    UT.request(me.$.findInfo);
+}
+someFunction: function() {
+    var me = this;
+    UT.request(me.$.findInfo, function(e, res) {
+        ...
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_save" class="method item">
+    <h3 class="name"><code>save</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>ajax</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l234"><code>js\util.js:234</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>save 요청 - &quot;저장하시겠습니까?&quot; 메시지 출력</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">ajax</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>sc-ajax 객체</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[message]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>&quot;저장하시겠습니까?&quot; 와 다른 메시지를 출력하는 경우.</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[onResponse(res)]</code>
+                                    <span class="type">Function</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>저장 완료 후 콜백 함수</p>
+
+                                </div>
+
+                                    <ul class="params-list">
+                                        <li class="param">
+                                                <code class="param-name">res</code>
+                                                <span class="type">Object</span>
+
+                                            <div class="param-description">
+                                                결과 정보
+<pre>
+&lt;sc-ajax url="url" on-response="func">&lt;/sc_ajax>
+on-response 에 함수를 지정한 경우        : 해당 함수에서 UT.completeSave를 호출해줘야 한다.
+on-response 에 함수를 지정하지 않은 경우 : options.onResponse 을 정의하여 response를 받을 수 있다
+</pre>
+                                            </div>
+                                        </li>
+                                    </ul>
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[confirm=true]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>UT.confirm 수행 여부</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[cancelCallback]</code>
+                                    <span class="type">Function</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>confrim 에서 취소 했을 때 콜백 함수</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[attachGrpCdNames]</code>
+                                    <span class="type">String | Array</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>첨부파일 처리시. ajax.body 내에 저장될 grp_cd 필드</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[attachUploadIds]</code>
+                                    <span class="type">String | Array</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>첨부파일 처리시. 업로드 Id</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    me.$.saveInfo.body = {
+        attachGrpCdNames: attNo,                // 첨부파일
+        attachUploadIds: me.$.upload.getId(),   // 첨부파일
+        message: message,
+        cancelCallback: function() {
+            ...
+        }
+    };
+    UT.save(me.$.saveInfo);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_toDate" class="method item">
+    <h3 class="name"><code>toDate</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>str</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[format=DEF.styles.formatDate.datetimeFormat]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Date</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1132"><code>js\util.js:1132</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>format 형태의 string을 date 로 변환한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">str</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>날짜 string</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[format=DEF.styles.formatDate.datetimeFormat]</code>
+                        <span class="type">String</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>str의 format</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Date</span>:
+                    <p>변환된 date</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    UT.toDate(&quot;20160420&quot;, &quot;yyyyMMdd&quot;); // 2016/04/20
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_toNumber" class="method item">
+    <h3 class="name"><code>toNumber</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>s</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Number</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_util.js.html#l1118"><code>js\util.js:1118</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>숫자형으로.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">s</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Number</span>:
+                    <p>n : param 이 숫자형이 아니면 0</p>
+
+            </div>
+        </div>
+
+
+</div>
+            </div>
+
+
+
+    </div>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="role">
+    <select id="findListRole" resultType="map">
+    /* role.findListRole 전체 롤 목록 조회 */
+        SELECT
+            ROLE_CD
+            ,ROLE_NM
+            ,ROLE_EN_NM
+            ,USE_YN
+            ,API_FLAG
+            ,REM
+            ,CONCAT(CONCAT((SELECT COUNT(SYS_ID) FROM ESAAURM WHERE SYS_ID = RH.SYS_ID AND ROLE_CD = RH.ROLE_CD) 
+            ,(SELECT COUNT(SYS_ID) FROM ESAAURP WHERE SYS_ID = RH.SYS_ID AND ROLE_CD = RH.ROLE_CD))
+            ,(SELECT COUNT(SYS_ID) FROM ESAAURD WHERE SYS_ID = RH.SYS_ID AND ROLE_CD = RH.ROLE_CD)) AS MAP_CNT 
+        FROM ESAAURH RH
+        WHERE
+            SYS_ID = #{g.tenant}
+        AND STS != 'D'
+        <if test="p.role_nm != null and p.role_nm != ''">
+            <bind name="namePattern" value="'%' + p.role_nm + '%'" />
+            AND (UPPER(RH.ROLE_NM) like UPPER(#{namePattern})
+                    OR UPPER(RH.ROLE_EN_NM) LIKE UPPER(#{namePattern})
+            )
+        </if>
+        <if test="p.role_cd != null and p.role_cd != ''">
+            <bind name="namePattern2" value="'%' + p.role_cd + '%'" />
+            AND UPPER(RH.ROLE_CD) LIKE UPPER(#{namePattern2})
+        </if>
+     ORDER BY ROLE_CD
+    </select>
+
+    <select id="findRoleByCode" resultType="java.util.Map">
+    /* 삭제 필요 */    
+        SELECT
+        ROLE.ROLE_CD
+        ,
+        ROLE.ROLE_NM
+        , ROLE.USE_YN
+        FROM ESAAURH ROLE
+        WHERE
+        ROLE.SYS_ID =
+        #{g.tenant}
+        AND ROLE_CD = #{p}
+    </select>
+
+    <select id="findListRoleUser" resultType="map">
+    /* 롤 별 사용자 권한 확인 findListRoleUser*/
+        SELECT 
+              U.USR_ID
+            , U.USR_NM
+            , U.COMP_CD
+            , U.DEPT_CD
+            , CASE WHEN RP.ROLE_CD IS NULL OR RP.ROLE_CD = '' THEN 'N' ELSE 'Y' END AS USE_YN
+            , DP.DEPT_NM
+<!--             , MG.ORG_NM AS COMP_NM -->
+            , COMPANY.NAME AS COMP_NM
+            FROM ESAUSER U
+            LEFT OUTER JOIN ESAAURP RP
+            ON (
+                U.SYS_ID = RP.SYS_ID
+                AND U.USR_ID = RP.USR_ID
+                AND U.COMP_CD = RP.COMP_CD
+                AND RP.ROLE_CD = #{p.role_cd}
+            )
+            LEFT OUTER JOIN ESAOGDP DP
+            ON (
+                U.SYS_ID = DP.SYS_ID
+                AND DP.ORG_TYP_CD = 'COMPANY'
+                AND U.COMP_CD = DP.ORG_CD
+                AND U.DEPT_CD = DP.DEPT_CD
+            )
+<!--             LEFT OUTER JOIN ESAOGMG MG -->
+<!--             ON ( -->
+<!--                 U.SYS_ID = MG.SYS_ID -->
+<!--                 AND MG.ORG_TYP_CD = 'COMPANY' -->
+<!--                 AND U.COMP_CD = MG.ORG_CD -->
+<!--             ) -->
+			LEFT OUTER JOIN COMPANY COMPANY
+			ON U.COMPANY_ID = COMPANY.ID
+            WHERE U.SYS_ID = #{g.tenant}
+            <if test="p.usr_nm != null and p.usr_nm != ''">
+                <bind name="namePattern" value="'%' + p.usr_nm + '%'" />
+                AND UPPER(u.usr_nm) like UPPER(#{namePattern})
+            </if>
+            <if test="p.usr_id != null and p.usr_id != ''">
+                <bind name="namePattern3" value="'%' + p.usr_id + '%'" />
+                AND UPPER(U.USR_ID) like UPPER(#{namePattern3})
+            </if>
+<!--             <if test="p.dept_nm != null and p.dept_nm != ''"> -->
+<!--                 <bind name="namePattern2" value="'%' + p.dept_nm + '%'" /> -->
+<!--                 AND UPPER(DP.DEPT_NM) like UPPER(#{namePattern2}) -->
+<!--             </if> -->
+<!--             <if test="p.comp_cd != null and p.comp_cd != ''"> -->
+<!--                 AND U.COMP_CD = #{p.comp_cd} -->
+<!--             </if> -->
+            	AND U.USR_CLS = 'B'
+    </select>    
+
+    <insert id="insertRoleUser">
+        INSERT INTO ESAAURP
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            SYS_ID,
+            ROLE_CD,
+            COMP_CD,
+            USR_ID,
+            <if test="p.rem != null and p.rem != ''">
+                REM,
+            </if>
+            STS,
+            REG_ID,
+            REG_DT,
+            MOD_ID,
+            MOD_DT,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{g.tenant},
+            #{p.role_cd},
+            #{p.comp_cd},
+            #{p.usr_id},
+            <if test="p.rem != null and p.rem != ''">
+                #{p.rem},
+            </if>
+            'C',
+            #{g.username},
+            #{g.now},
+            #{g.username},
+            #{g.now},
+        </trim>
+    </insert>
+
+    <insert id="insertRoleMenu">
+    /*insertRoleMenu*/
+        INSERT INTO ESAAURM
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            SYS_ID,
+            ROLE_CD,
+            MENU_CD,
+            REG_ID,
+            REG_DT,
+            MOD_ID,
+            MOD_DT,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{g.tenant},
+            #{p.role_cd},
+            #{p.menu_cd},
+            #{g.username},
+            #{g.now},
+            #{g.username},
+            #{g.now},
+        </trim>
+    </insert>
+    
+    <delete id="deleteRoleMenu">
+        DELETE
+        FROM ESAAURM
+        WHERE
+        SYS_ID = #{g.tenant}
+        AND
+        ROLE_CD = #{p.role_cd}
+        <if test="p.menu_cd != null and p.menu_cd != ''">
+            AND MENU_CD = #{p.menu_cd}
+        </if>
+    </delete>
+    
+    <delete id="deleteRoleUser">
+        DELETE FROM ESAAURP
+        WHERE SYS_ID = #{g.tenant}
+        AND
+        ROLE_CD = #{p.role_cd}
+        <if test="p.usr_id != null and p.usr_id != ''">
+            AND USR_ID = #{p.usr_id}
+        </if>
+    </delete>
+
+    <delete id="deleteRoleDept">
+        DELETE FROM ESAAURD
+        WHERE SYS_ID = #{g.tenant}
+        AND
+        ROLE_CD = #{p.role_cd}
+        <if test="p.dept_cd != null and p.dept_cd != ''">
+            AND DEPT_CD = #{p.dept_cd}
+        </if>
+        <if test="p.org_cd != null and p.org_cd != ''">
+            AND ORG_CD = #{p.org_cd}
+        </if>
+        <if test="p.org_typ_cd != null and p.org_typ_cd != ''">
+            AND ORG_TYP_CD = #{p.org_typ_cd}
+        </if>
+    </delete>
+
+    <delete id="deleteRole">
+        DELETE
+        FROM ESAAURH
+        WHERE SYS_ID = #{g.tenant}
+        AND
+        ROLE_CD = #{p.role_cd}
+    </delete>
+    
+    <select id="findListRoleDept" resultType="java.util.Map">
+    /*findListRoleDept */
+        SELECT
+           MM.UP_DEPT_CD,
+           MM.SYS_ID,
+           MM.DEPT_CD,
+           MM.DEPT_NM,
+           MM.ORG_CD,
+           MM.ORG_TYP_CD,
+           RM.ROLE_CD,
+           CASE WHEN RM.ROLE_CD IS NULL OR RM.ROLE_CD = '' THEN 'N' ELSE 'Y' END AS USE_YN,
+           MG.ORG_CD AS COMP_CD,
+           MG.ORG_NM AS COMP_NM,
+           CASE WHEN MM.UP_DEPT_CD = 'ROOT'
+                THEN ''
+                ELSE DP.DEPT_NM
+           END AS UP_DEPT_NM
+       FROM ESAOGDP MM
+       INNER JOIN ESAOGMG MG
+       ON (
+           MM.SYS_ID = MG.SYS_ID
+           AND MM.ORG_TYP_CD = MG.ORG_TYP_CD
+           AND MM.ORG_CD = MG.ORG_CD
+       )
+       LEFT OUTER JOIN ESAAURD RM
+       ON (
+           MM.SYS_ID = RM.SYS_ID
+           AND MM.ORG_CD = RM.ORG_CD
+           AND MM.ORG_TYP_CD = RM.ORG_TYP_CD
+           AND MM.DEPT_CD = RM.DEPT_CD            
+           AND RM.ROLE_CD = #{p.role_cd}
+       )
+       LEFT OUTER JOIN ESAOGDP DP
+       ON (
+           MM.SYS_ID = DP.SYS_ID
+           AND MM.ORG_CD = DP.ORG_CD
+           AND MM.ORG_TYP_CD = DP.ORG_TYP_CD
+           AND MM.UP_DEPT_CD = DP.DEPT_CD
+       )
+       WHERE MM.SYS_ID = #{g.tenant}
+           AND MM.STS != 'D'
+           AND MM.USE_YN = 'Y'
+       <if test="p.comp_cd != null and p.comp_cd !=''">
+           AND MG.ORG_CD = #{p.comp_cd}
+       </if>
+    </select>
+
+    <insert id="insertRoleDept">
+    /*insertRoleDept*/
+        INSERT INTO ESAAURD
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            SYS_ID,
+            ROLE_CD,
+            ORG_TYP_CD,
+            ORG_CD,
+            DEPT_CD,
+            <if test="p.rem != null">
+                REM,
+            </if>
+            STS,
+            REG_ID,
+            REG_DT,
+            MOD_ID,
+            MOD_DT,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{g.tenant},
+            #{p.role_cd},
+            #{p.org_typ_cd},
+            #{p.org_cd},
+            #{p.dept_cd},
+            <if test="p.rem != null">
+                #{p.rem},
+            </if>
+            'C',
+            #{g.username},
+            #{g.now},
+            #{g.username},
+            #{g.now},
+        </trim>
+    </insert>
+    
+    <insert id="insertRole">
+    /*insertRole */
+        INSERT INTO ESAAURH
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            SYS_ID,
+            ROLE_CD,
+            <if test="p.role_nm != null and p.role_nm != ''">
+                ROLE_NM,
+            </if>
+            <if test="p.role_en_nm != null and p.role_en_nm != ''">
+                ROLE_EN_NM,
+            </if>
+                USE_YN,
+                API_FLAG,
+            <if test="p.rem != null and p.rem != ''">
+                REM,
+            </if>
+            STS,
+            REG_ID,
+            REG_DT,
+            MOD_ID,
+            MOD_DT,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{g.tenant},
+            #{p.role_cd},
+            <if test="p.role_nm != null and p.role_nm != ''">
+                #{p.role_nm},
+            </if>
+            <if test="p.role_en_nm != null and p.role_en_nm != ''">
+                #{p.role_en_nm},
+            </if>
+                #{p.use_yn},
+                #{p.api_flag},
+            <if test="p.rem != null and p.rem != ''">
+                #{p.rem},
+            </if>
+            'C',
+            #{g.username},
+            #{g.now},
+            #{g.username},
+            #{g.now},
+        </trim>
+    </insert>
+    
+    <update id="updateRole">
+    /*updateRole */
+        UPDATE ESAAURH RH
+        <set>
+            <if test="p.role_nm != null and p.role_nm != ''">
+                ROLE_NM = #{p.role_nm},
+            </if>
+            <if test="p.role_en_nm != null and p.role_en_nm != ''">
+                ROLE_EN_NM = #{p.role_en_nm},
+            </if>
+            USE_YN = #{p.use_yn},
+            API_FLAG = #{p.api_flag},
+                REM = #{p.rem},
+            <choose>
+                <when test="p.sts =null or p.sts = '' or p.sts !='D'">
+                    STS = 'U',
+                </when>
+                <otherwise>
+                    STS = 'D',
+                </otherwise>
+            </choose>
+            MOD_ID = #{g.username},
+            MOD_DT = #{g.now}
+        </set>
+        <where>
+            RH.SYS_ID = #{g.tenant}
+            AND RH.ROLE_CD = #{p.role_cd}
+        </where>
+    </update>
+    
+    <select id="findListRoleMenu" resultType="map">
+    /*findListRoleMenu */
+    	SELECT MM.UP_MENU_CD
+              , MM.SYS_ID
+              , MM.MENU_CD
+              , MM.USR_CLS
+              , MM.MENU_TYP
+              , MM.MD_CLS
+              , MM.SORT_ORD
+              , ML.MENU_NM
+              , ML.LANG_CD
+              , ML.MENU_CD AS ML_MENU_CD
+              , RM.ROLE_CD
+              , CASE 
+                WHEN RM.ROLE_CD IS NULL OR RM.ROLE_CD = '' THEN 'N' 
+                ELSE 'Y' 
+                END AS USE_YN
+           FROM ESAAUMM MM
+           LEFT OUTER JOIN ESAAUML ML
+             ON MM.SYS_ID = ML.SYS_ID
+            AND MM.MENU_CD = ML.MENU_CD
+            <if test="p.lang_cd != null and p.lang_cd != ''">
+            AND ML.LANG_CD = #{p.lang_cd}
+            </if>
+           LEFT OUTER JOIN ESAAURM RM
+             ON MM.SYS_ID = RM.SYS_ID
+            AND MM.MENU_CD = RM.MENU_CD            
+            AND RM.ROLE_CD = #{p.role_cd}
+          WHERE MM.SYS_ID = #{g.tenant}
+            AND MM.STS != 'D'
+            <if test="p.usr_cls != null and p.usr_cls != ''">
+            AND MM.USR_CLS = #{p.usr_cls}
+            </if>
+            AND MM.USE_YN = 'Y'
+            ORDER BY MM.SORT_ORD
+    </select>
+    
+    <select id="findListRoleMenuWithMenuFunc" resultType="map">
+    /* role.findListRoleMenuWithMenuFunc */
+           SELECT MM.UP_MENU_CD
+                 ,MM.SYS_ID
+                 ,MM.MENU_CD
+                 ,MAX(MM.USR_CLS)  AS USR_CLS
+                 ,MAX(MM.SORT_ORD) AS SORT_ORD
+                 ,MAX(ML.MENU_NM)  AS MENU_NM
+                 ,MAX(ML.LANG_CD)  AS LANG_CD
+                 ,MAX(ML.MENU_CD)  AS ML_MENU_CD
+                 ,#{p.role_cd}     AS ROLE_CD
+                 ,MAX(CASE WHEN RF.FUNC_CD = 'R' THEN 'Y' ELSE 'N' END) AS R_USE_YN -- 조회
+                 ,MAX(CASE WHEN RF.FUNC_CD = 'S' THEN 'Y' ELSE 'N' END) AS S_USE_YN -- 저장
+                 ,MAX(CASE WHEN RF.FUNC_CD = 'E' THEN 'Y' ELSE 'N' END) AS E_USE_YN -- 엑셀
+                 ,MAX(CASE WHEN RF.FUNC_CD = 'P' THEN 'Y' ELSE 'N' END) AS P_USE_YN -- 프린트
+             FROM ESAAUMM MM -- 메뉴
+  LEFT OUTER JOIN ESAAUML ML -- 메뉴명
+               ON ML.SYS_ID  = MM.SYS_ID 
+              AND ML.MENU_CD = MM.MENU_CD
+              AND ML.LANG_CD = #{p.lang_cd}
+  LEFT OUTER JOIN ESAAUMF A -- 메뉴기능
+               ON A.SYS_ID  = MM.SYS_ID
+              AND A.MENU_CD = MM.MENU_CD
+  LEFT OUTER JOIN ESAAURF RF -- 롤메뉴기능
+               ON RF.SYS_ID  = A.SYS_ID
+              AND RF.MENU_CD = A.MENU_CD
+              AND RF.ROLE_CD = #{p.role_cd}
+              AND RF.FUNC_CD = A.FUNC_CD
+            WHERE MM.SYS_ID  = #{g.tenant}
+              AND MM.USR_CLS = #{p.usr_cls}
+              AND MM.STS != 'D'
+              AND MM.USE_YN = 'Y'
+         GROUP BY MM.UP_MENU_CD
+                , MM.SYS_ID
+                , MM.MENU_CD
+                , MM.SORT_ORD
+         ORDER BY MM.SORT_ORD
+    </select>
+    
+    <insert id="insertCallPattern">
+    /* insertCallPattern */
+    	INSERT INTO ESAAUMS
+     	<trim prefix="(" suffix=")" suffixOverrides=",">
+            SYS_ID,
+            MENU_CD,
+            CALL_PTRN,
+            REG_ID,
+            REG_DT
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{g.tenant},
+            #{p.menu_cd},
+            #{p.call_ptrn},
+            #{g.username},
+            #{g.now}
+        </trim>
+    </insert>
+    
+    <select id="selectCallPattern" resultType="map">
+    /* selectCallPattern */
+    SELECT MENU_CD
+    	 , CALL_PTRN
+     FROM ESAAUMS
+    WHERE SYS_ID = #{g.tenant}
+      AND MENU_CD = #{p.menu_cd}
+      AND CALL_PTRN = #{p.call_ptrn}
+    </select>
+    
+    <select id="findListRoleSite" resultType="map">
+    /* role.findListRoleSite */
+           SELECT t1.ID
+                 ,t1.NAME
+                 ,t2.SITE_ID
+                 ,t2.ROLE_CD
+                 ,CASE WHEN t2.SITE_ID IS NULL THEN 'N' 
+                       ELSE 'Y' 
+                   END AS USE_YN
+             FROM SITE t1
+  LEFT OUTER JOIN ESA_ROLE_SITE t2
+               ON t2.SYS_ID  = #{g.tenant}
+              AND t2.ROLE_CD = #{p.role_cd}
+              AND t2.SITE_ID = t1.ID
+            WHERE t1.USE_FLAG = 'Y'
+		<if test="p.site_nm != null and p.site_nm != ''">
+			<bind name="namePattern" value="'%' + p.site_nm + '%'" />
+              AND t1.NAME ILIKE #{namePattern}
+		</if>
+         ORDER BY t1.NAME
+    </select>
+    
+    <insert id="insertRoleSite">
+        INSERT INTO ESA_ROLE_SITE
+        ( 
+          SYS_ID
+         ,SITE_ID
+         ,ROLE_CD
+         ,REM
+         ,STS
+         ,REG_ID
+         ,REG_DT
+        )
+        VALUES
+        (
+          #{g.tenant}
+         ,#{p.id}
+         ,#{p.role_cd}
+         ,#{p.rem}
+         ,'C'
+         ,#{g.username}
+         ,#{g.now}
+        )
+    </insert>
+    
+    <delete id="deleteRoleSite">
+           DELETE
+             FROM ESA_ROLE_SITE
+            WHERE SYS_ID  = #{g.tenant}
+              AND SITE_ID = #{p.id}
+              AND ROLE_CD = #{p.role_cd}
+    </delete>
+</mapper>

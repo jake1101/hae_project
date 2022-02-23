@@ -1,0 +1,359 @@
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 공종코드 관리
+    ** @Description     : 
+    ** @Author          : jh.Park
+    ** @Create Date     : 2021-09-07
+    ** @History         : 2021-09-07 jhPark 최초작성
+    ******************************************************************************************
+-->
+
+
+<dom-module id="es-const-type-list">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-request-group init></sc-request-group>
+        <!-- 목록 조회 -->
+        <sc-ajax id="findConstTypeList"	url="findConstTypeList.do" body="{{searchParam}}" on-response="completeFindConstTypeList"></sc-ajax>
+        <!-- 목록 저장 -->
+        <sc-ajax id="saveConstType" url="saveConstType.do" on-response="completeSaveConstType"></sc-ajax>
+        <!-- 목록 삭제 -->
+        <sc-ajax id="deleteConstType" url="deleteConstType.do" on-response="completeDeleteConstType"></sc-ajax>
+
+        <!-- 권한 -->
+        <cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<div class="vbox flex">
+	        <sc-grid id="gridConstType" is-tree="true" class="flex" on-selection-checked="onSelectionChecked"
+	                 on-item-click="onDataCellClicked" on-item-edit-end="onItemEditEnd" editable="true">
+	            <cc-grid-toolbar>
+	                <sc-button text="펼침"		on-click="onExpandAll"     auth-r></sc-button>
+	                <sc-button text="접기"		on-click="onCollapseAll"   auth-r></sc-button>
+	                <sc-button text="현재노드추가" 	on-click="onAddCurrentRow" auth-s></sc-button>
+	                <sc-button text="하위노드추가"	on-click="onAddChildRow"   auth-s></sc-button>
+	                <sc-button text="삭제"		on-click="onDeleteConstType"    auth-s></sc-button>
+	                <sc-button text="저장"		on-click="onSaveConstType"      auth-s></sc-button>
+	            </cc-grid-toolbar>
+	            <sc-grid-columns>
+	                <sc-data-column	data-field="constNm"		header-text="공종코드명"	width="250"	text-align="left" 	required="true" max-length="100" editable="true"></sc-data-column>
+	                <sc-data-column	data-field="siteTypeString"	header-text="현장 유형"		width="100"	text-align="center" required="true" max-length="100" ></sc-data-column>
+	                <sc-data-column	data-field="constCd"		header-text="공종코드"		width="100"	text-align="center" required="true" max-length="18"	 item-editable-function="onMenuCdEditable" item-style-function="onMenuCdStyle"></sc-data-column>
+	                <sc-data-column	data-field="description"	header-text="공종설명"		width="500"	text-align="left" 					max-length="100" ></sc-data-column>
+	                <sc-data-column	data-field="orderIdx"		header-text="정렬"		width="50"	text-align="center" 				max-length="4" editable="true" data-type="number"></sc-data-column>
+	                <sc-checkbox-column	data-field="useFlag"	header-text="사용여부"		width="70"	editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+	            </sc-grid-columns>
+	            <sc-grid-fields>
+	                <sc-grid-field	data-field="tree"			data-type="text"></sc-grid-field>
+	                <sc-grid-field	data-field="siteId"			data-type="number"></sc-grid-field>
+	                <sc-grid-field	data-field="siteType"		data-type="text"></sc-grid-field>
+	                <sc-grid-field	data-field="upperConstCd"	data-type="text"></sc-grid-field>
+	                <sc-grid-field	data-field="createdId"		data-type="text"></sc-grid-field>
+	            </sc-grid-fields>
+	        </sc-grid>
+	     </div>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: "es-const-type-list",
+            properties: {
+            	searchParam : {
+    				type : Object,
+    				value : function() {
+    					return {
+    						siteId : SCMdiManager.searchParam.site_id
+    					};
+    				}
+            	},
+            	findConstTypeList: {
+                    type: Object,
+                    value: function() {
+                        return {
+                            info: {},
+                            param: {}
+                        };
+                    }
+                },
+            },
+
+            formulas:{
+            },
+            
+            /** 초기화 Start **/
+            // 화면 생성 완료
+            initialized: function() {
+                var me = this;
+                me.onFindConstTypeList();
+            },
+            /** 초기화 End **/
+            
+            			/** API 관련 Start **/
+			// 공종 코드 리스트 조회 완료
+            completeFindConstTypeList: function(e, res) {
+                var me = this;
+				var result = res.response;
+				
+                var hier = new CCHierachicalData();
+                var hierachiDatas = hier.HierachyTransformByKey(result, "constCd", "upperConstCd", "children", "ROOT", null, true);
+                me.$.gridConstType.setHierachyDataProvider(hierachiDatas, "children");
+                me.$.gridConstType.expandAll();
+                me.applyFormula();
+            },
+            // 고종 코드 저장 완료
+            completeSaveConstType: function(e, res) {
+                var me = this,
+                    result = res.response;
+
+                if(result.result_status === 'S'){
+                    UT.alert("STD.N2400", function(){ // 저장하였습니다.
+                    	sessionStorage.selected_menu_id =SCMdiManager.activatedWindow().id;
+                        me.reload();
+                    });
+                } else {
+                    UT.alert(result.result_message);
+                }
+            },
+            // 공종 코드 삭제 완료
+            completeDeleteConstType: function(e, res) {
+                var me = this,
+                    message = "STD.N2500"; // 삭제하였습니다.
+
+                UT.alert(message, function(){
+                    me.onFindConstTypeList();
+                });
+            },
+            /** API 관련 End**/
+            
+            /** API 이벤트 Start **/
+			// 공종 코드 리스트 조회
+            onFindConstTypeList: function() {
+                var me = this;
+                UT.request(me.$.findConstTypeList);
+            },
+            // 공종 코드 저장
+            onSaveConstType: function() {
+                var me = this;
+				var message = "STD.N1200" // 저장 하시겠습니까?
+				var provider = this.$.gridConstType.getDataProvider();
+
+                //그리드 validation
+                if(!me.$.gridConstType.validate()){
+                    UT.alert("STD.E0000");
+                    return;
+                }
+				var created = provider.getNewItems()
+				var updated = provider.getUpdateItems();
+				
+				//변경사항 유무 검사
+				if(created.length + updated.length == 0){
+					UT.alert("변경 사항이 없습니다.");
+					return;
+				}
+				
+				// 공종 코드 중복 검사
+				for(var i in created){
+					var c = created[i];
+					var x = provider.findNodeIndexes({constCd : c.constCd});
+					if(x.length > 1){
+						UT.alert("STD.ADM1039");
+						return;
+					}
+				}
+
+                UT.confirm(message, function() {
+                    me.$.saveConstType.body = {
+						insertList: created,
+                        updateList: updated
+                    };
+                    UT.request(me.$.saveConstType);
+                });
+            },
+            //공종 코드 삭제
+            onDeleteConstType: function() {
+                var me = this;
+				var message = "STD.N1300"; // 삭제 하시겠습니까?
+				var provider = this.$.gridConstType.getDataProvider();
+                var checked = provider.selectionCheckedIndexes();
+                if (checked && checked.length > 0) {
+                    UT.confirm(message, function() {
+                        var deleted = provider.removeItems();
+                        if(UT.isNotEmpty(deleted)){
+                            me.$.deleteConstType.body = {
+                                deleteConst: deleted
+                            };
+                            UT.request(me.$.deleteConstType);
+                        }
+                    });
+                }
+                else{
+                    UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+                }
+            },
+            /** API 이벤트 End **/
+            
+            /** 기타 이벤트 Start **/
+            // 펼침
+            onExpandAll:function(){
+                var me = this;
+                me.$.gridConstType.expandAll();
+            },
+            // 접기
+            onCollapseAll:function(){
+                var me = this;
+                me.$.gridConstType.collapseAll();
+            },
+            // 현재노드추가
+            onAddCurrentRow: function() {
+                var me = this;
+				var grid = me.$.gridConstType;
+				var provider = me.$.gridConstType.getDataProvider();
+
+                var cell = grid.getCurrentCell();
+                var parentIndex = (cell === null) ? -1 : provider.getParentIndex(cell.nodeIndex);
+                var parentItem = {};
+                if(parentIndex > -1){
+                    parentItem = provider.getParentItem(cell.nodeIndex);
+                }
+                else{
+                	parentItem = provider.getItemAt(cell.nodeIndex);
+                }
+
+                var data = {
+					siteTypeString: parentItem.siteTypeString,
+					upperConstCd: (parentIndex > -1) ? parentItem.constCd: "ROOT",
+					siteId: SCMdiManager.searchParam.site_id,
+					constCd: (parentIndex > -1) ? parentItem.constCd: "",
+					description: (parentIndex > -1) ? parentItem.description + " - ": "",
+					useFlag: "Y"
+                };
+
+                provider.addChildItem(parentIndex, data);
+            },
+            // 하위 노드 추가
+            onAddChildRow: function() {
+                var me = this;
+				var grid = me.$.gridConstType;
+				var provider = me.$.gridConstType.getDataProvider();
+
+                cell = grid.getCurrentCell();
+                
+                if(cell === null) {
+                	UT.alert("STD.N1600");
+                	return;
+                }
+                
+                var parentIndex = cell.nodeIndex;
+                var parentItem = {};
+                if(parentIndex > -1){
+                    parentItem = provider.getItemAt(parentIndex);
+                }
+
+                if (parentIndex < 0) { // 현재 노드가 없으면 하위 노드 추가를 할 수 없다.
+                	UT.alert("STD.N1600");
+                    return;
+                }
+                
+                if(provider.getItemState(parentIndex) == "created"){
+                    UT.alert("STD.N1800"); // 신규 노드에는 하위노드를 추가할 수 없습니다.
+                    return;
+                }
+                
+                var data = {
+   					siteTypeString: parentItem.siteTypeString,
+   					upperConstCd: (parentIndex > -1) ? parentItem.constCd: "ROOT",
+   					siteId: SCMdiManager.searchParam.site_id,
+   					constCd: (parentIndex > -1) ? parentItem.constCd: "",
+   					description: (parentIndex > -1) ? parentItem.description + " - ": "",
+   					useFlag: "Y"
+                };
+
+                var newNodeIndex = provider.addChildItem(cell.nodeIndex, data);
+                grid.expand(parentIndex);
+                grid.setCurrentCell({nodeIndex: newNodeIndex});
+            },
+            /** 기타 이벤트 End **/
+            
+            /** 미지정 function Start **/
+            onMenuCdStyle: function(data, item){
+                var me = this,
+                    provider = me.$.gridConstType.getDataProvider();
+                
+                //crerate상태일때는 메뉴코드 style 지정안함.
+                if(provider.getItemState(item.nodeIndex) == "created"){
+                	return {};
+                }
+                var childIndexes = provider.getChildIndexes(item.nodeIndex);
+                if( !childIndexes || childIndexes.length === 0 ){
+                    return {
+                        fontWeight: "bold",
+                        fontColor: "#0e006f"
+                    };
+                }
+            },
+            // 그룹코드 속성 : 속성코드 editable 제어
+            onMenuCdEditable: function(data, item) {
+                var me = this,
+                    provider = me.$.gridConstType.getDataProvider();
+                return (provider.getItemState(item.nodeIndex) == "created");
+            },
+            onSelectionChecked: function(event){
+                var me = this,detail = event.detail,
+                    checked = detail.checked,  //체크하여 변경된값
+                    nodeIndex = detail.nodeIndex;
+                if(checked){
+                	// selectionChild(nodeIndex, checked, recursive, checkableOnly);
+                	me.$.gridConstType.expand(nodeIndex, true);
+                    me.$.gridConstType.selectionChild(nodeIndex, checked, true);
+                }else{
+                	me.$.gridConstType.expand(nodeIndex, true);
+                	me.$.gridConstType.selectionChild(nodeIndex, checked, false);
+                }
+            },
+            onDataCellClicked: function(e){
+                var me = this,
+                    item = e.detail.item,
+                    data = e.detail.data,
+                    provider = this.$.gridConstType.getDataProvider();
+
+                if (provider.getItemState(item.nodeIndex) === "created") {
+                    return;
+                }
+				var childIndexes = provider.getChildIndexes(item.nodeIndex);
+				if (item.dataField=== "menu_cd" && (!childIndexes || childIndexes.length === 0)) { // leaf 노드
+					me.fire("selected-menu", data);
+				}
+            },
+            //공종 코드명 변경시 공종 설명 자동으로 변경
+            onItemEditEnd: function(e){
+            	var me = this;
+            	var item = e.detail.item;
+            	var data = e.detail.data;
+            	var provider = e.detail.provider;
+            	var newValue = e.detail.newValue;
+            	var description = data.description;
+            	
+            	
+                if (item.dataField=== "constNm" ){
+                	var newDescription;
+                	if (provider.getItemState(item.nodeIndex) === "created") {
+		            	newDescription = description + newValue;
+                    }
+                	else {
+                		var OldDescription = description.substring(0, description.lastIndexOf("-") + 2);
+		            	newDescription = OldDescription + newValue;
+                	}
+	            	provider.setItemAt(item.nodeIndex, {description: newDescription})
+                }
+            }
+            /** 미지정 function End **/
+        });
+    </script>
+
+</dom-module>

@@ -1,0 +1,129 @@
+<dom-module id="es-sp-format">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" editable="true">
+                <sc-grid-columns>
+                    <sc-data-column data-field="colunm_1"   header-text="colunm_1"  width="150" text-align="left"   editable="false" ></sc-data-column>
+                    <sc-combobox-column data-field="currency"  header-text="COMBO1"    width="80"  text-align="center" editable="true"  items="{{code}}" display-field="label" value-field="data"></sc-combobox-column>
+                    <sc-data-column data-field="colunm_2" item-label-function="itemLabelFunction"  header-text="colunm_2(amt)"  width="150" text-align="left"   editable="true" data-type="number" ></sc-data-column>
+                    <sc-data-column data-field="colunm_3"   header-text="colunm_3(price)"  width="150" text-align="left"   editable="true"    format-type="amt"   data-type="number" ></sc-data-column>
+                    <sc-data-column data-field="colunm_4"   header-text="colunm_4(qty)"  width="150" text-align="left"   editable="true"    format-type="qty"   data-type="number" ></sc-data-column>
+
+                </sc-grid-columns>
+        </sc-grid>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-sp-format',
+            
+            properties : {
+                resultList: {
+                    type:Array
+                },
+                code:{
+                    type:Array,
+                    value : [
+                        {label:"USD", data:"USD"},
+                        {label:"KRW", data:"KRW"},
+                        {label:"JPY", data:"JPY"},
+                        {label:"VND", data:"VND"}
+                    ]
+                }
+            },
+            attached : function(){
+                this.setCustomFormatter();
+            },
+            setCustomFormatter : function(){
+                var customFormatters = [{
+                    name : 'number',
+                    format : function(value) {
+                        return numeral(value).format(this.defaultFormat);
+                    },
+                    defaultFormat : '0'
+                },{
+                    name : 'amt',
+                    format : function(value) {
+                        return numeral(value).format(this.defaultFormat);
+                    },
+                    defaultFormat : '0,00.00'
+                }, {
+                    name : 'rate',
+                    format : function(value) {
+                        return numeral(value).format(this.defaultFormat);
+                    },
+                    defaultFormat : '0'
+                }, {
+                    name : 'qty',
+                    format : function(value) {
+                        return numeral(value).format(this.defaultFormat);
+                    },
+                    defaultFormat : '0,0.000'
+                },{
+                    name : 'score',
+                    format : function(value){
+                        return numeral(value).format(this.defaultFormat);
+                    },
+                    defalutFormat : '0'
+                },{
+                    name : 'KRW',
+                    format : function(value){
+                        return "₩"+numeral(value).format(this.defaultFormat);
+                    },
+                    defalutFormat : '0,0.00'
+                },{
+                    name : 'USD',
+                    format : function(value){
+                        return "$"+numeral(value).format(this.defaultFormat);
+                    },
+                    defalutFormat : '$0,0.00'
+                },{
+                    name : 'AMD',
+                    format : function(value){
+                        return "€"+numeral(value).format(this.defaultFormat);
+                    },
+                    defalutFormat : '0,0.00'
+                },{
+                    name : 'CNY',
+                    format : function(value){
+                        return "¥"+numeral(value).format(this.defaultFormat);
+                    },
+                    defalutFormat : '0,0.00'
+                },{
+                    name : 'JPY',
+                    format : function(value){
+                        return "¥"+numeral(value).format(this.defaultFormat);
+                    },
+                    defalutFormat : '0,0.00'
+                }];
+                
+                for(var i=0, item; item = customFormatters[i]; i++){
+                    SCFormatter.factory(item);
+                }
+             },
+            itemLabelFunction: function(data, item, provider){
+
+                var result = Polymer.$Formatter.format(data.currency, data[item.dataField]);
+                if(result){
+                    return result;    
+                }else{
+                    return data[item.dataField];
+                }
+                
+            }
+
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

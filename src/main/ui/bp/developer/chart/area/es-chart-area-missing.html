@@ -1,0 +1,105 @@
+<dom-module id="es-chart-area-missing">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-area-missing',
+		properties: {
+			
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "name": "Highcharts:Area with missing points",
+			    "type": "area",
+			    "palettes":[{
+			        "name": "lines",
+			        "alpha": 1.0,
+			        "strokes": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }, {
+			        "name": "fills",
+			        "alpha": 0.5,
+			        "fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }, {
+			        "name": "fills2",
+			        "fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }],
+			    "title": "Fruit consumption *",
+			    "footerPane": {
+			        "items": [{
+			            "text": "* Jane\'s banana consumption is unknown",
+			            "right": 2,
+			            "styles": {
+			                "padding": "6, 2"
+			            }
+			        }]
+			    },
+			    "plotArea": {
+			        "animations": [{
+			            "property": "seriesMask"
+			        }]
+			    },
+			    "xAxes": {
+			        "categories": [
+			            'Apples', 'Pears', 'Oranges', 'Bananas',
+			            'Grapes', 'Plums', 'Strawberries', 'Raspberries'
+			        ]
+			    },
+			    "yAxes": {
+			        "title": "Y-Axis",
+			        "tick": {
+			            "styles": {
+			            }
+			        }
+			    },
+			    "series": [{
+			        "name": "John",
+			        "lineType": "curved",
+			        "items": [
+			            0, 1, 4, 4, 5, 2, 3, 7
+			        ],
+			        "label": false,
+			        "styles": {
+			            "line": "p(lines:0)",
+			            "fill": "p(fills:0)",
+			            "marker": {
+			                "shapeName": "circle",
+			                "fill": "p(fills2:0)",
+			            }
+			        }
+			    }, {
+			        "name": "Jane",
+			        "items": [
+			            1, 0, 3, null, 3, 1, 2, 1
+			        ],
+			        "label": false,
+			        "styles": {
+			            "line": "p(lines:1)",
+			            "fill": "p(fills:1)",
+			            "marker": {
+			                "shapeName": "diamond",
+			                "fill": "p(fills2:1)",
+			            }
+			        }
+			    }],
+			    "legend": {
+			        "position": "floating",
+			        "layout": "vertical",
+			        "left": 100,
+			        "top": 100,
+			        "styles": {
+			            "border": "#333"
+			        },
+			        "itemStyles": {
+			            "fontBold": true
+			        }
+			    }
+			});
+		}
+	});
+	</script>
+</dom-module>

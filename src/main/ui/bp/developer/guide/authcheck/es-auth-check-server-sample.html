@@ -1,0 +1,46 @@
+<script src="/ui/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+
+<dom-module id="es-auth-check-server-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-ajax id="findSampleSource"
+				 url="/ui/bp/developer/guide/authcheck/source/auth-check-controller-java.txt"
+				 method="GET"
+				 handle-as="text">
+		</sc-ajax>
+		
+		<sc-panel class="vbox flex">
+			<sc-container id="editor" flexible="false" class="flex"></sc-container>
+		</sc-panel>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-auth-check-server-sample',
+		properties : {
+			editor : {
+				type : Object,
+				value : null
+			}
+		},
+		initialized : function() {
+			var me = this;
+			
+			UT.request(me.$.findSampleSource, function(e, res) {
+				var result = res.response;
+				
+				var editor = ace.edit(me.$.editor._contentEl);
+				me.editor = editor;
+				editor.setTheme("ace/theme/crimson_editor");
+	        	editor.getSession().setMode("ace/mode/java");
+	        	editor.setValue(result);
+	        	editor.selection.clearSelection();
+	        	editor.gotoLine(0);
+			});
+		}
+	});
+	</script>
+</dom-module>

@@ -1,0 +1,89 @@
+<sc-link rel="import" href="es-vendor-list.html"></sc-link>
+<sc-link rel="import" href="es-vendor-mgnt-list.html"></sc-link>
+<sc-link rel="import" href="es-vendor-attr-list.html"></sc-link>
+
+<dom-module id="em-vendor-management">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    	
+    	
+    	<div class="hbox flex">
+	        <es-vendor-list id="menuList" on-selected-menu="onSelectedMenu" on-find-vendorinfo="onFindVendorInfo"  on-init-vendor="onInitVendor" on-init-vendor-mgnt="onInitVendorMgnt" class="flex-7"></es-vendor-list>
+	        <div class="hspace-10"></div>
+	        <div class="vbox flex-3">
+	        	<es-vendor-mgnt-list id="vendor_mgnt" on-find-vendorattr="onFindVendorAttr"   on-init-vendor="onInitVendor" class="flex-5"></es-vendor-mgnt-list>
+	        	<div class="vspace-10"></div>
+	        	<es-vendor-attr-list id="vendor_attr" on-find-vendormgnt="onFindVendorMgnt" class="flex-5" ></es-vendor-attr-list>	        
+	        </div>
+    	</div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'em-vendor-management',
+            properties: {
+            	menuInfo : {
+	            	type: Object,
+	            	value: function(){
+	            		return {};
+	            	}
+            	},
+            	mgntInfo : {
+	            	type: Object,
+	            	value: function(){
+	            		return {};
+	            	}
+            	}
+            },
+            
+            onFindVendorInfo: function(e, data) {
+                var me = this;
+                me.$.vendor_mgnt.load(data);
+                me.set("mgntInfo",data);
+            },
+            
+            onFindVendorAttr: function(e, data) {
+                var me = this;
+                me.$.vendor_attr.load(data);
+                
+            },
+            onFindVendorMgnt: function() {
+                var me = this;
+                me.$.vendor_mgnt.load(me.mgntInfo);
+            },
+            
+            // 메뉴가 선택됨
+            onSelectedMenu: function(e, data) {
+                var me = this;
+                me.set("menuInfo",data);
+                me.$.funcList.load(data);
+                me.$.menufuncList.load(data);
+            },
+            //기능이 수정됨
+            onSavedFunc: function(){
+            	var me = this;
+            	var menuInfo = me.get("menuInfo");
+            	 me.$.menufuncList.load(menuInfo);
+            },
+            
+            onInitVendor: function(data) {
+                var me  = this;
+                me.$.vendor_attr.initVendor(data);
+            },
+            
+            onInitVendorMgnt : function(data){
+            	var me  = this;
+                me.$.vendor_mgnt.clear();
+                me.$.vendor_attr.initVendor(data);
+            }
+
+        });
+    </script>
+
+</dom-module>

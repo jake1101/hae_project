@@ -1,0 +1,60 @@
+<!--
+	그리드 내에 combobox Editor를 사용하게 할 수있는 column으로
+	items에 코드값을 삽입하여 콤보박스 list를 설정할 수 있고,
+	text-readonly 프로퍼티를 이용하여 키입력을 통해 데이터를 선택 할 수 있다.
+ -->
+
+<dom-module id="es-sp-combo">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" editable="true">
+        	<cc-grid-toolbar>
+       			<sc-button text="조회" on-click="onSearch"></sc-button>
+       		</cc-grid-toolbar>
+                <sc-grid-columns>
+                    <sc-data-column     data-field="colunm_1"   header-text="colunm_1"  width="150" text-align="left"   editable="true" ></sc-data-column>
+                    <sc-combobox-column data-field="combo_1"    header-text="COMBO1"    width="80"  text-align="center" editable="true"  display-field="label" value-field="data" items="{{code}}" placeholder="선택" text-readonly="false"></sc-combobox-column>
+                    <sc-combobox-column data-field="combo_2"    header-text="COMBO2"    width="80"  text-align="center" editable="true"  display-field="label" value-field="data" items="{{code}}" ></sc-combobox-column>                    
+                    <sc-combobox-column data-field="combo_3"    header-text="COMBO3(domain-only)"    width="150"  text-align="center" editable="true"  display-field="label" value-field="data" items="{{code}}" placeholder="선택하시오" text-readonly="false" domain-only="false"></sc-combobox-column>                    
+                </sc-grid-columns>
+        </sc-grid>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-sp-combo',
+            
+            properties : {
+                resultList: {
+                    type:Array
+                },
+                code:{
+                    type:Array,
+                    value : [
+                        {label:"데이터1", data:'A', relation : 'Test 1'},
+                        {label:"데이터2", data:'B', relation : 'Test 2'},
+                        {label:"데이터3", data:'C', relation : 'Test 2'},
+                        {label:"데이터4", data:'D', relation : 'Test 3'},
+                        {label:"데이터5", data:'E', relation : 'Test 3'},
+                    ]  
+                }
+            },
+            
+            onSearch : function(){
+            	this.fire('search');
+            },            
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

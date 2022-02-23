@@ -1,0 +1,419 @@
+<!--
+	일정 그룹 추가 팝업
+ -->
+<dom-module id="smartsuite-calendar-add-group-popup">
+	<style>
+		:host {
+            @apply(--calendar-vbox-layout);
+        }
+        
+        .colorPickerWrapper {
+        	padding:4px;
+        }
+        
+        .borderPlus {
+            background-color: #fcfcfc;
+    		border: 1px solid #b8b8b8;
+        }
+        
+        .calendar-user-grid-panel .grid-container {
+            height: 162px !important;
+        }
+	</style>
+
+	<template>
+		<!--
+			AJAX 통신 
+		 -->
+		<!-- 그룹에 연관된 매핑정보를 가져오기 위한 쿼리 -->
+		<sc-ajax id="calendarMappingInfo" url="getGroupMappingInfo.do" on-response="onResponseGrid"></sc-ajax>
+		<!-- 그룹 저장 -->
+		<sc-ajax id="saveGroup" url="saveGroup.do" on-response="onResponseSaveGroup"></sc-ajax>
+	
+		<!--
+			화면 
+		 -->
+		<div class="calendar-vbox calendar-flex" style="padding:2px;">
+	
+			<!-- 확정 버튼 그룹 -->
+			<sc-toolbar calss="page-title">
+				<sc-spacer></sc-spacer>
+				<sc-button text="저장" class="complete-btn borderPlus" hidden="[[!flags.isNew]]" on-click="onClickSaveGroupInfo"></sc-button>
+				<sc-button text="수정" class="complete-btn borderPlus" hidden="[[!flags.isModify]]" on-click="onClickSaveGroupInfo"></sc-button>
+				<sc-button text="닫기" class="complete-btn borderPlus" on-click="onClose"></sc-button>
+			</sc-toolbar>
+		
+			<!-- 일정 그룹 기본 설정 -->
+  			<table class="calendar-tb-form calendar-flex">
+  				<tr>
+	  				<th width="100"><sc-label text="제목"></th>
+  					<td>
+  						<sc-text-field id="grpNm" style="width:224px;" value="{{groupInfo.grp_nm}}" disabled="{{flags.isReadOnly}}" required="true" maxlength="64"></sc-text-field>
+  					</td>
+  				</tr>
+	
+	  			<tr>
+  					<th width="100"><sc-label text="그룹 색상"></sc-label></th>
+  					<td>
+  						<div id="colorSet" class="colorPickerWrapeer" style="width:224px;display:inline-block;">
+  							<smartsuite-color-picker id="colorPicker"></smartsuite-color-picker>
+  						</div>
+  					</td>
+  				</tr>
+       		</table>
+       	
+       		<div class="vspace-5" hidden="{{flags.isReadOnly}}"></div>
+       	
+       		<!-- 그룹에 대한 부가 설명 -->
+       		<sc-panel title="부가 설명" class="calendar-flex" hidden="{{flags.isReadOnly}}">
+				<sc-textarea-field value="{{groupInfo.grp_desc}}" maxlength="512" style="height:80px;"></sc-text-field>
+       		</sc-panel>
+       	
+       		<div class="vspace-5" hidden="{{flags.isReadOnly}}"></div>
+        
+        	<!-- 공유 대상에 대한 화면 -->
+        	<sc-panel title="공유 대상" class="sharedPanel flex-2" hidden="[[flags.isReadOnly]]">
+        		<sc-tab-navigation class="flex" style="height:100%;" selected="0">
+        		
+        			<!-- 사용자 공유 탭 -->
+        			<div id="user" title="사용자" style="height:100%;">
+        				<div style="padding:2px;">
+        					<sc-button text="추가" class="complete-btn borderPlus" on-click="onClickAddUser"></sc-button>
+    						<sc-button text="삭제" class="complete-btn borderPlus" on-click="onClickDelUser"></sc-button>
+        				</div>
+  						
+						<sc-grid id="userGridPanel" class="calendar-user-grid-panel" data-provider="{{connectedInfo.userData}}" style="width:100%;height:calc(100% - 33px);">
+							<sc-grid-columns>
+   								<sc-data-column header-text="사용자 아이디" data-field="usr_id" width="100" text-align="left"></sc-data-column>
+   								<sc-data-column header-text="사용자 명" data-field="usr_nm" width="100"></sc-data-column>
+   							</sc-grid-columns>
+   							
+   							<sc-grid-fields>
+   								<sc-grid-field data-field="usr_id" data-type="text" ></sc-grid-field>
+   								<sc-grid-field data-field="usr_nm" data-type="text"></sc-grid-field>
+   							</sc-grid-fields>
+   						</sc-grid>
+        			</div>
+        			
+        			<!-- 부서 공유 탭 -->
+        			<div id="dept" title="부서" style="height:100%;">
+        				<div style="padding:2px;">
+        					<sc-button text="추가" class="complete-btn borderPlus" on-click="onClickAddDept"></sc-button>
+    						<sc-button text="삭제" class="complete-btn borderPlus" on-click="onClickDelDept"></sc-button>
+        				</div>
+        				
+        				<sc-grid id="deptGridPanel" class="calendar-user-grid-panel" data-provider="{{connectedInfo.deptData}}" style="width:100%;height:calc(100% - 33px);">
+							<sc-grid-columns>
+   								<sc-data-column header-text="부서 코드" data-field="dept_cd" width="100" text-align="left"></sc-data-column>
+   								<sc-data-column header-text="부서 명" data-field="dept_nm" width="100"></sc-data-column>
+   							</sc-grid-columns>
+   							
+   							<sc-grid-fields>
+   								<sc-grid-field data-field="dept_cd" data-type="text" ></sc-grid-field>
+   								<sc-grid-field data-field="dept_nm" data-type="text"></sc-grid-field>
+   							</sc-grid-fields>
+   						</sc-grid>
+        			</div>
+        		</sc-tab-navigation>
+        	</sc-panel>
+       	</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is: 'smartsuite-calendar-add-group-popup',
+			
+			properties: {
+				// 사용할 플래그 모음
+				flags: {
+					type: Object
+				},
+				
+				// 비교를 위한 기본 정보
+				originInfo: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				},
+				
+				// 팝업에서 설정할 값들
+				groupInfo: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				},
+				
+				// 공유자 정보
+				connectedInfo: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				}
+			},
+			
+			// 팝업의 초기화 과정
+            initPopup: function(defaultData) {
+            	var me = this;
+            	
+            	// 색상정보 설정
+            	me.$.colorPicker.colorPresetData = CalendarData.colorData;
+            	
+            	// 기본정보 설정
+            	me.set('groupInfo', UT.copy(defaultData));
+            	
+            	// 비교용 데이터
+            	me.originInfo = defaultData ? defaultData: {};
+            	
+            	// 기본 그룹일 경우의 설정
+            	if(me.groupInfo.is_default === '1') {
+            		me.set('flags', {
+            			isReadOnly: true,
+            			isNew: false,
+            			isModify: false
+            		});
+            	} else {
+                	if(me.groupInfo.grp_id) {
+                		me.set('flags', {
+                			isReadOnly: false,
+                			isNew: false,
+                			isModify: true
+                		});
+                		me.$.calendarMappingInfo.body = { grp_id: defaultData.grp_id };
+                    	me.$.calendarMappingInfo.generateRequest();	
+                	} else {
+                		me.set('flags', {
+                			isReadOnly: false,
+                			isNew: true,
+                			isModify: false
+                		});
+                	}
+            	}
+            	
+            	// 읽기 전용일 경우 (기본 그룹, 비 소유 공유 그룹)
+            	if(me.isReadyOnly) {
+            		me.$.colorPicker.disable();
+            	}
+            	
+            	// 컬러 설정
+            	me.$.colorPicker.selectColor(me.groupInfo.grp_color);
+            	
+            	if(me.flags.isReadOnly) {
+            		this.parentElement.style.overflow = 'hidden';
+            	}
+            },
+            
+            // 부서 추가 버튼
+            onClickAddDept: function() {
+            	var me = this;
+            	var size = CalendarData.size.deptListPopup;
+            	var popupEl = UT.popup('smartsuite-dept-list', me, size.width, size.height, {
+            		'selected-items': function(event, result) {
+            			var resultData = result.detail;
+						var dp = me.$.deptGridPanel.getDataProvider(); 
+               			me.addList2Grid(resultData, me.$.deptGridPanel, 'dept_cd');
+            		}
+            	}, {
+            		title: me.translate("부서 검색")
+            	});
+            	popupEl.show();
+            },
+			
+			// 유저 추가 버튼
+			onClickAddUser: function() {
+				var me = this;
+				var size = CalendarData.size.userListPopup;
+				
+				//사용자 검색 팝업을 호출한다.
+                var popupEl = UT.popup('smartsuite-user-list', me, size.width, size.height, {
+                	'selected-items': function(event, result) {
+                		var resultData = result.detail;
+						var dp = me.$.userGridPanel.getDataProvider(); 
+               			me.addList2Grid(resultData, me.$.userGridPanel, 'usr_id');
+                	}
+                }, {
+                	title: me.translate("사용자 검색")
+                });
+                popupEl.show();
+			},
+			
+			// 팝업으로 그리드에 데이터를 넣을시, 그리드에 만약 값이 존재한다면 넣지 않도록 하는 로직
+			addList2Grid: function(selected, gridPanel, id_nm) {
+				var dp = gridPanel.getDataProvider();
+				var rows = dp.getItems();
+				
+				if (selected.length > 0) {
+					for (var i = 0; i < selected.length; i++) {
+						var exist = false;
+						for(var j = 0; j < rows.length; j++){
+							if(rows[j][id_nm] === selected[i][id_nm]) {
+								exist = true;
+								break;
+							}
+						}
+						if(!exist) {
+							dp.addItem(selected[i]);
+						}
+					}
+				}
+			},
+            
+            // 공유 정보를 가져온다.
+            onResponseGrid: function(response) {
+            	var me = this;
+            	var result = response.detail.response;
+            	
+            	// 기존 데이터 보존
+            	me.originInfo.target_users = result ? result.target_users: [];
+            	me.originInfo.target_depts = result ? result.target_depts: [];
+            	
+            	// 그룹에 매핑된 유저, 부서, 직무, 협력사 정보를 그리드에 설정
+            	me.set('connectedInfo.userData', result.target_users);
+            	me.set('connectedInfo.deptData', result.target_depts);
+				/*var dp = me.$.userGridPanel.getDataProvider(); 
+       			me.addList2Grid(result.target_users, me.$.userGridPanel, 'usr_id');
+       			dp = me.$.deptGridPanel.getDataProvider();
+       			me.addList2Grid(result.target_depts, me.$.deptGridPanel, 'dept_cd');*/
+            },
+            
+            // 선택한 유저를 삭제한다.
+            onClickDelUser: function() {
+            	var me = this;
+            	me.delCheckedRowInGrid(me.$.userGridPanel);
+            },
+            
+         	// 선택한 부서를 삭제한다.
+            onClickDelDept: function() {
+            	var me = this;
+            	me.delCheckedRowInGrid(me.$.deptGridPanel);
+            },
+            
+            // 그리드 내의 선택된 아이템을 모두 삭제함
+            delCheckedRowInGrid: function(gridView) {
+            	var me = this;
+            	var dp = gridView.getDataProvider();
+            	dp.removeItems(true);
+            },
+            	
+            // 그룹 정보 설정 - grp_nm, grp_desc 는 element에서 값이 2 way bind 됨
+			setGroupInfo: function() {
+				var me = this;
+				
+				// 비교에 사용하는 빈값은  빈 문자열로 수정
+				for(var index in me.originInfo) {
+            		if(!me.originInfo[index])
+            			me.originInfo[index] = '';
+            	}  
+            	
+				// color 정보: sc-color-picker에서 가져옴
+				var selectedColorInfo = me.$.colorPicker.getColor();
+				me.groupInfo.grp_color = selectedColorInfo.eventColor;
+				me.groupInfo.grp_font_color = selectedColorInfo.fontColor;
+				me.groupInfo.grp_border_color = selectedColorInfo.borderColor;
+				
+            	// 공유할 대상: realgrid에서 가져옴
+            	me.groupInfo.target_users = me.$.userGridPanel.getDataProvider().getItems();
+				me.groupInfo.target_depts = me.$.deptGridPanel.getDataProvider().getItems();
+			},
+            
+            
+            // =================================
+            // 그룹 저장, 닫기 버튼
+            // =================================
+
+            // 그룹 저장 버튼
+            onClickSaveGroupInfo: function() {
+            	var me = this;
+            	
+            	// 입력된 값을 가져와서 me.group에 설정함
+            	me.setGroupInfo();
+            	
+            	// 필수값 체크
+    			if (!me.validate()) {
+    				UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return;
+                }
+            	
+            	// 수정일 경우 체크를 수행한다.
+            	if(!me.isNew && me.isSame(me.groupInfo, me.originInfo)) {
+            		SCAlert.show(me.translate('스케줄 그룹 수정'), me.translate("변경 사항이 없습니다."));
+            		return;
+            	}
+            	
+            	// 데이터 저장
+            	var title = me.flags.isNew ? me.translate("스케줄 저장"): me.translate("스케줄 수정");
+            	var message = me.flags.isNew ? me.translate("저장 하시겠습니까?"): me.translate("수정 하시겠습니까?");
+    			SCAlert.confirm(title, message, function(btn){
+					if(btn === 'yes'){
+		            	me.$.saveGroup.body = me.groupInfo;
+		            	me.$.saveGroup.generateRequest();
+					}
+    			});
+            },
+			
+            // 그룹 추가 취소 버튼
+			onClose: function(){
+				var me = this;
+				me.fire("close");
+			},
+			
+			/**
+			 * 변경 사항 체크
+			 */
+			isSame: function(a, b) {
+				var me = this;
+				var isSame = false;
+				
+				// 기본 데이터 비교
+				if(a.grp_id !== b.grp_id) return false;
+				if(a.grp_nm !== b.grp_nm) return false;
+				if(a.grp_color !== b.grp_color) return false;
+				if(a.grp_desc !== b.grp_desc) return false;
+				if(a.grp_font_color !== b.grp_font_color) return false;
+				if(a.grp_border_color !== b.grp_border_color) return false;
+				
+				// 그리드 데이터 비교
+				var gridCompareResult = true;
+				gridCompareResult = me.gridCompare(a.target_users, b.target_users);
+				if(!gridCompareResult) return false;
+				gridCompareResult = me.gridCompare(a.target_depts, b.target_depts);
+				if(!gridCompareResult) return false;
+				
+				return true;
+			},
+			
+			/**
+			 * 그리드 비교
+			 */
+			gridCompare: function(gridDataA, gridDataB) {
+				if(gridDataA.length != gridDataB.length) return false;
+				
+				for(var i = 0; i < gridDataA.length; i++) {
+					for(var index in gridDataA[i]) {
+						if(gridDataA[i][index] !== gridDataB[i][index]) {
+							return false;
+						}
+					}
+				}
+				return true;
+			},
+
+			/**
+			 * 저장 결과
+			 */
+			onResponseSaveGroup: function(response) {
+				var me = this;
+				var result = response.detail.response;
+				if(result.result_status === 'S') {
+					UT.alert('그룹이 저장되었습니다.');
+					me.fire('result');
+					me.onClose();
+				} else {
+					UT.alert('문제가 발생하였습니다. 다시 시도해 주십시오');
+				}
+			}
+		});
+	</script>
+</dom-module>

@@ -1,0 +1,41 @@
+<sc-link rel="import" href="es-aprvreceipt-list.html"></sc-link>
+
+<dom-module id="em-aprvreceipt">
+
+    <style>
+        :host {
+            @apply(--fit-layout);
+        }
+    </style>
+
+    <template>
+        
+        <es-aprvreceipt-list id="aprvreceiptList"></es-aprvreceipt-list>
+        
+    </template>
+    
+    <script>
+        Polymer({
+            is: "em-aprvreceipt",
+            initialized : function(e) {
+            	var me = this;
+            	
+            	// 타 모듈에서 mdi.createWindow 를 통해 화면 open 하는 경우
+            	var param = me.params;
+            	
+            	// aprv_typcd 값이 넘어오는 경우
+            	if(UT.isNotEmpty(param.aprv_typcd)) {
+            		// 목록 조회
+					me.$.aprvreceiptList.load({
+           				aprv_typcd      : param.aprv_typcd,	// 결재유형
+           				aprv_stscd      : param.aprv_stscd,	// 진행상태
+           				crnt_aprvemp_yn : "Y",				// 현재 결재자 여부
+           				from_rpt_dt     : null,				// 결재상신일자 조회조건 시작일
+           				to_rpt_dt       : null				// 결재상신일자 조회조건 종료일
+            		});
+            	}
+            }
+        });
+    </script>
+
+</dom-module>

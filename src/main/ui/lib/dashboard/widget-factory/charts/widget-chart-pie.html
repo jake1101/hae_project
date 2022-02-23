@@ -1,0 +1,57 @@
+<dom-module id="widget-chart-pie">
+    <script>
+   		 WidgetChartPie =  Polymer({
+	            is: "widget-chart-pie",
+	    		getSeriesData : function(datas,labels){
+	    			var compressDatas = {},color;
+	    			datas.forEach(function(data,index){
+	    				for(var key in data){
+	    					compressDatas[key] = Number(data[key]);
+	    				}
+	    			});
+	    			var series = [],index = 0;
+	    			for(var key in compressDatas){
+	    				var serie = {fieldName :key, name: labels[index].name, y :compressDatas[key]};
+	    				if(color = labels[index].color){
+	    					serie.color = color;
+	    				}
+	    				series.push(serie);
+	    				index++;
+	    			}
+	    			return series;
+	    		},
+	    		getTemplate : function(template,datas){
+	    			var me = this, content = template.contents;
+	    			var series = me.getSeriesData(datas,content.series);
+	    			var chartTemplate = {
+	        			    chart : {
+	        			        type: content.type,
+	        			        options3d: {
+	            		            enabled : content.options3d.enabled,
+	            		            alpha   : content.options3d.alpha,
+	            		            beta    : content.options3d.beta 
+	            		        },
+	            		        plotBackgroundColor: null,
+	            		        plotBorderWidth: null
+	        			    },
+	        			    title : {
+	        			        text: content.title
+	        			    },
+	        			    yAxis : {
+	        			        min : 0,
+	        			        title : {
+	        			            text : null
+	        			        }
+	        			    },
+	        			    tooltip:{
+	        			    	enabled : false
+	        			    },
+	        			    legend : content.legend ||{},
+	        			    plotOptions: content.plotOptions,
+	        			    series:  [{name:'pie',data :series }]
+	        			}
+	    			return chartTemplate;
+	    		}
+    	});
+    </script>
+</dom-module>

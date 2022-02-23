@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="fraction" format="1">
+  <advance width="815"/>
+  <unicode hex="2044"/>
+  <outline>
+    <contour>
+      <point x="99" y="131" type="line"/>
+      <point x="59" y="159" type="line"/>
+      <point x="698" y="1183" type="line"/>
+      <point x="739" y="1155" type="line"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.typemytype.robofont.layerData</key>
+      <dict>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

@@ -1,0 +1,456 @@
+<sc-link rel="import" href="../../../iot/condition/ep-danger-map.html"></sc-link>
+<!--
+    ******************************************************************************************
+    ** Description    : cc-map-container
+    ** Author          : jhkim 
+    ** Create Date   : 2020.03.03
+    ** History          : 2020.03.03 jhkim 최초작성
+    ******************************************************************************************
+-->
+<dom-module id="cc-map-container">
+    <style>
+    	:host {
+            @apply(--vbox-layout);
+            font-family:'Noto Sans KR';
+        }
+    </style>
+    <template>
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+        <div class="map vbox flex-5">
+        	<sc-button id="baseMap" class="baseMapControl road" on-click="changeBaseMap"></sc-button>
+	        <sc-button class="targetBtn" on-click="moveToTarget" hidden="[[moveToTargetHidden]]" tooltip="현장으로 이동"></sc-button>
+        	<div class="areaDraw" hidden="{{drawToolHidden}}">
+	        	<sc-button id="areaDrawBtn" class="areaDrawBtn" on-click="areaDrawBtnClick" toggles="true" tooltip="자유형 영역 그리기"></sc-button>
+        	</div>
+        	<div class="circleDraw" hidden="{{drawToolHidden}}">
+	        	<sc-button id="circleDrawBtn" class="circleDrawBtn" on-click="circleDrawBtnClick" toggles="true" tooltip="원형 영역 그리기"></sc-button>
+        	</div>
+	        <sc-button class="wmsBtn" on-click="wmsBtnClick" hidden="[[wmsHidden]]" toggles="true" tooltip="wms 보이기"></sc-button>
+	        <sc-button id="dangerBtn" class="dangerBtn" on-click="dangerBtnClick" hidden="[[dangerHidden]]" toggles="true" tooltip="위험지역 보이기"></sc-button>
+	        <sc-button class="dangerDrawBtn" on-click="dangerDrawBtnClick" hidden="[[dangerHidden]]" tooltip="위험지역 생성"></sc-button>
+	        <sc-button id="gridBtn" class="gridBtn" on-click="gridBtnClick" hidden="[[gridHidden]]" toggles="true" tooltip="목록 보이기"></sc-button>
+	        <sc-button id="filterBtn" class="filterBtn" on-click="filterBtnClick" hidden="[[filterHidden]]" toggles="true" tooltip="검색조건 보이기"></sc-button>
+        	<div class="viewControl" id="viewControl" hidden="[[viewDisplayHidden]]">
+		        <sc-button class="viewBtn" id ="viewBtn" on-click="viewBtnClick" hidden="[[viewDisplayHidden]]" toggles="true" on-mouseenter="showViewPanel" on-mouseout="hideViewPanel"></sc-button>
+				<div class="viewPanel" hidden={{viewPanelHidden}} on-mouseover="showViewPanel"  on-mouseleave="hideViewPanel">
+					<table>
+						<tr>
+							<th><sc-label text="현장" on-click="labelClick" for="site" className="site" id="siteLabel"></sc-label></th>
+							<td>
+								<sc-checkbox-group-field id="site" value="{{display.site}}" on-checkchange="changeViewDisplay"  items="{{display.mode}}"></sc-checkbox-group-field>
+							</td>
+						</tr>
+						<tr>
+							<th><sc-label text="앵커" on-click="labelClick" for="anchor" id="anchorLabel"></sc-label></th>
+							<td>
+								<sc-checkbox-group-field id="anchor" value="{{display.anchor}}" on-checkchange="changeViewDisplay" items="{{display.mode}}"></sc-checkbox-group-field>
+							</td>
+						</tr>
+						<tr>
+							<th><sc-label text="영역" on-click="labelClick" for="area" id="areaLabel"></sc-label></th>
+							<td>
+								<sc-checkbox-group-field id="area" value="{{display.area}}" on-checkchange="changeViewDisplay" items="{{display.mode}}"></sc-checkbox-group-field>
+							</td>
+						</tr>
+						<tr>
+							<th><sc-label text="건물" on-click="labelClick" for="building" id="buildingLabel"></sc-label></th>
+							<td>
+								<sc-checkbox-group-field id="building" value="{{display.building}}" on-checkchange="changeViewDisplay" items="{{display.mode}}"></sc-checkbox-group-field>
+							</td>
+						</tr>
+					</table>
+				</div>				
+			</div>
+		</div>
+    </template>
+    <script>
+        Polymer({
+            is: "cc-map-container",
+			properties : {
+				moveToTargetHidden : false,
+				showViewLabel :{
+                    type: Boolean,
+                    value: function(){
+                        return false;
+                    }
+                },
+				showViewMarker :{
+                    type: Boolean,
+                    value: function(){
+                        return false;
+                    }
+                },
+                viewDisplayHidden :{
+                    type: Boolean,
+                    value: function(){
+                        return false;
+                    }
+                },
+                viewPanelHidden :{
+                    type: Boolean,
+                    value: function(){
+                        return true;
+                    }
+                },
+                dangerHidden :{
+                    type: Object,
+                    value: function(){
+                        return true;
+                    }
+                },
+                gridHidden :{
+                    type: Object,
+                    value: function(){
+                        return true;
+                    }
+                },
+                filterHidden :{
+                    type: Object,
+                    value: function(){
+                        return true;
+                    }
+                },
+                autoStart :{
+                    type: Object,
+                    value: function(){
+                        return true;
+                    }
+                },
+                wmsHidden : false,
+                drawToolHidden :{
+                    type: Object,
+                    value: function(){
+                        return true;
+                    }
+                },
+                siteId : {
+                    type : Object,
+                    value : function(){
+						return {};
+                    }
+                },
+				searchParam : {
+	            	type : Object,
+	            	value : function(){
+	            		return {
+		            		siteId : SCMdiManager.searchParam.site_id		            		
+		            	}
+	            	}
+		        },
+				wmsInfo: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+	            areaList :{ 								
+	            	type : Array,
+	            	value : function(){
+	            		return []
+	            	}
+	            },
+	            dangerList :{ 								
+	            	type : Array,
+	            	value : function(){
+	            		return []
+	            	}
+	            },
+                display : {
+					type : Object,
+					value : function(){
+						return {
+							site : [],
+							anchor : [],
+							area : [],
+							building : [],
+							areaTypes : ['site', 'anchor', 'area', 'building'],
+							mode : [	
+                   				{value : "showLine", label : "라인 표시"},
+                   				{value : "showBackground", label : "배경 표시"},
+                   				{value : "showMarker", label : "이름 표시"}
+                       		]
+						};
+					}
+				},
+                map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+                lon:Number,
+	            lat:Number
+			},
+			attached : function(){
+				if(this.autoStart){
+					this.start();
+				}
+	        },
+	        start : function(){
+		        if(!this.showViewLabel){ 
+					var mode = this.display.mode.splice(0,2);
+			        this.set('display.mode', mode);
+		        }
+		        if(!UT.isEmpty(this.siteId)) this.set("searchParam.siteId", this.siteId);
+				if(!this.wmsHidden) this.request("findWmsInfo.do", "wmsInfo");
+				if(!this.viewDisplayHidden) this.request("findSiteArea.do", "areaList");
+				if(!this.dangerHidden) this.request("findDangerArea.do", "dangerList");
+				this.$.viewControl.addEventListener('mouseover',this.showViewPanel(e));
+				this.map = loadMap(this);
+
+				if(!this.wmsHidden && this.wmsInfo){
+					if(this.wmsInfo.resultCode == "SUCCESS"){
+						createWmsLayer(this);
+					}else{
+						this.wmsHidden = true;
+					}
+				}
+				
+		        if(!this.viewDisplayHidden && this.areaList){
+		        	createViewLayer(this);
+		        	this.hideViewPanel();
+				}
+
+				if(!this.dangerHidden && this.dangerList){
+					createDangerLayer(this);
+				}
+
+				if(!this.drawToolHidden){
+					createDrawLayer(this);
+
+					this.map.drawControl.events.register('featureadded', this, function (e) {
+						this.map.drawControl.deactivate();
+						this.$.areaDrawBtn.classList.remove('ItemActive');
+						this.$.areaDrawBtn.active = false;
+						this.fire("featureadded", e);
+			        });
+			        
+					this.map.drawReqularControl.events.register('featureadded', this, function (e) {
+						this.map.drawReqularControl.deactivate();
+						this.$.circleDrawBtn.classList.remove('ItemActive');
+						this.$.circleDrawBtn.active = false;
+						
+						this.fire("featureadded", e);
+			        });
+				}
+		    },
+		    request : function(url, object){
+			    var me = this;
+		    	$.ajax({
+			    	type:'post',
+			      	url : "/ui/lib/custom/html/"+url,
+			      	data : JSON.stringify(me.searchParam),
+			      	dataType: "json",
+			      	async : false,
+			      	timeout: 100000,
+			      	beforeSend : function(xhr){
+			        	xhr.setRequestHeader("Content-Type","application/json;charset=UTF-8");
+			            xhr.setRequestHeader("x-csrf-token", SCPreloader.csrf().csrf);
+			        },
+			        success : function(data) {  
+			        	me.set(object, data);
+			        },
+			        fail : function(){
+						UT.alert("STD.E9999");
+				    }
+			   	});
+			},
+			changeBaseMap : function(e){
+				if(e.target.classList.contains("road")){
+					this.map.setBaseLayer(this.map.baseSatelliteLayer);
+					this.map.hybridLayer.setVisibility(true);
+					e.target.classList.add('sky');
+					e.target.classList.remove('road');
+					this.changeFontColor("#f3f3f3");
+				}else{
+					this.map.setBaseLayer(this.map.baseVectorLayer);
+					this.map.hybridLayer.setVisibility(false);
+					e.target.classList.add('road');
+					e.target.classList.remove('sky');
+					this.changeFontColor("#3c3c3c");
+				}
+			},
+			changeFontColor : function(color){
+				var markers = this.map.viewLayer.getFeaturesByAttribute("type", "marker");
+				for(var i in markers){
+					var e = markers[i];
+					e.style.fontColor = color;
+				}
+				this.map.viewLayer.redraw();
+			},
+			moveToTarget : function(e){
+				if(this.map.target.CLASS_NAME == 'OpenLayers.Bounds'){
+					this.map.zoomToExtent(this.map.target);
+				}else{
+					this.map.setCenter(this.map.target, 17);
+				}
+			},
+			showViewPanel : function(e){
+				this.viewPanelHidden = false;
+			},
+			hideViewPanel : function(e){
+				this.viewPanelHidden = true;
+			},
+			viewBtnClick : function(e){
+				(e.target.active)?e.target.classList.add('ItemActive'):e.target.classList.remove('ItemActive');
+				var value = (e.target.active)?['showLine', 'showBackground', 'showMarker']:[];
+				var fields = this.querySelectorAll('sc-checkbox-group-field');
+				for(var i in fields){
+					var a = fields[i];
+					a.value = value;
+				}
+			},
+			areaDrawBtnClick : function(e){
+				var me = this;
+				if(this.$.circleDrawBtn.classList.contains('ItemActive')){
+					this.$.circleDrawBtn.classList.remove('ItemActive');
+					this.$.circleDrawBtn.active = false;
+	        		me.map.drawReqularControl.deactivate();
+			    }
+
+				this.map.events.clearMouseCache();
+				
+	        	if(me.map.drawLayer.features.length > 0){
+	           		UT.confirm("이미 생성된 영역이 있습니다.\n영역을 다시 생성 하시겠습니까?", 
+	    	           		function(){
+	           					e.target.classList.add('ItemActive');
+	           					me.map.drawLayer.removeAllFeatures();
+	           					me.map.drawControl.activate();
+	           					me.fire("init-area");
+    	          			});
+                }else{
+                	e.target.classList.add('ItemActive');
+                	me.map.drawControl.activate();
+                }
+			},
+			circleDrawBtnClick : function(e){
+				var me = this;
+				if(this.$.areaDrawBtn.classList.contains('ItemActive')){
+					this.$.areaDrawBtn.classList.remove('ItemActive');
+					this.$.areaDrawBtn.active = false;
+					me.map.drawControl.deactivate();
+			    }
+
+				this.map.events.clearMouseCache();
+				
+	        	if(me.map.drawLayer.features.length > 0){
+	           		UT.confirm("이미 생성된 영역이 있습니다.\n영역을 다시 생성 하시겠습니까?", 
+	    	           		function(){
+	           					e.target.classList.add('ItemActive');
+	           					me.map.drawLayer.removeAllFeatures();
+	           					me.map.drawReqularControl.activate();
+	           					me.fire("init-area");
+    	          			});
+                }else{
+                	e.target.classList.add('ItemActive');
+                	me.map.drawReqularControl.activate();
+                }
+			},
+			wmsBtnClick : function(e){
+				this.map.wmsLayer.setVisibility(e.target.active);
+				(e.target.active)?e.target.classList.add('ItemActive'):e.target.classList.remove('ItemActive');
+				e.target.title = (e.target.active)?"wms 숨기기":"wms 보이기"; 
+			},
+			dangerBtnClick : function(e){
+				(e.target.active)?e.target.classList.add('ItemActive'):e.target.classList.remove('ItemActive');
+				e.target.title = (e.target.active)?"위험지역 숨기기":"위험지역 보이기"; 
+				this.dangerLayerRedraw()
+			},
+			dangerLayerRedraw : function(e){
+				this.map.removeLayer(this.map.dangerLayer);
+				this.request("findDangerArea.do", "dangerList");
+				createDangerLayer(this);
+				this.map.dangerLayer.setVisibility(this.$.dangerBtn.active);
+			},
+			dangerDrawBtnClick : function(e){
+				var me = this;
+				var dangerPopup = UT.popup("ep-danger-map", this, 1400, 800,{
+					'close' : function(popup) {
+						popup.close();
+						me.dangerLayerRedraw();
+						me.fire("danger-popup-close");
+					}
+				},{resizable:false});
+				dangerPopup.show();
+				dangerPopup.getWindowContent().load(null);
+			},
+			gridBtnClick : function(e){
+				(e.target.active)?e.target.classList.add('ItemActive'):e.target.classList.remove('ItemActive');
+				e.target.title = (e.target.active)?"목록 숨기기":"목록 보이기";
+				this.domHost.$.gridDiv.hidden= !e.target.active;
+				this.map.updateSize();
+				if(e.target.active){
+					this.domHost.$.gridWorkerPanel.refresh();
+					this.domHost.$.gridVehiclePanel.refresh();
+					this.domHost.$.tabNavi.doContentElementResize();
+				}
+			},
+			filterBtnClick : function(e){
+				(e.target.active)?e.target.classList.add('ItemActive'):e.target.classList.remove('ItemActive');
+				e.target.title = (e.target.active)?"검색조건 숨기기":"검색조건 보이기";
+				this.domHost.$.filterDiv.hidden= !e.target.active;
+				this.map.updateSize();
+				this.domHost.$.tabNavi.doContentElementResize();
+			},
+			changeViewDisplay : function(e){		// 영역 표시 변경
+				var type = e.target.parentNode.parentNode.id;
+				var displayMode = this.display[type];
+				var features = this.map.viewLayer.getFeaturesByAttribute("areaType", type);
+
+				var showLabel =  this.showViewLabel;
+				
+				for(var i in features){
+					var e = features[i];
+					if(displayMode.length > 0){	// 표시
+						if(e.attributes.type == 'polygon'){
+							e.style.display = 'show';
+							e.style.strokeOpacity = (displayMode.indexOf("showLine") >= 0)?1:0;
+							e.style.fillOpacity = (displayMode.indexOf("showBackground") >= 0)?0.2:0;
+						}else if(e.attributes.type == 'marker'){
+							if(displayMode.indexOf("showMarker") >= 0 && showLabel){
+								e.style.display = 'show';
+							}else{
+								e.style.display = 'none';
+							}
+						}else{
+							e.style.display = 'show';
+						}
+					}else{
+						e.style.display = 'none';
+					}
+				}
+
+				var chkCnt = 0;
+				var classList = this.$.viewBtn.classList;
+
+				var fields = this.querySelectorAll('sc-checkbox-group-field');
+				Array.prototype.forEach.call(fields, function (a) {
+					chkCnt =chkCnt+a.value.length;
+				});
+				
+				if(chkCnt == 0){
+					this.$.viewBtn.active = false;
+					classList.remove('ItemActive');
+				}else{
+					classList.add('ItemActive');
+					if (chkCnt == this.querySelectorAll('sc-checkbox-group-field').length){
+						this.$.viewBtn.active = true;
+					}
+				}
+				
+				this.map.viewLayer.redraw();
+
+				this.fire("change-view-display", e);
+			},
+			labelClick: function(e){
+				var type = e.currentTarget.for;
+				var scgf = this.querySelector("#"+type);
+				scgf.value = (this.display[type].length == this.display.mode.length)?[]:['showLine', 'showBackground', 'showMarker'];
+			}
+		});
+	</script>
+</dom-module>

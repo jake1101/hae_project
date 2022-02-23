@@ -1,0 +1,165 @@
+<!-- 
+/**
+ * 부서검색 자동완성 text-field 커스텀 태그
+ *
+ *     <cc-dept-search class="w-150" value="{{value값}}" search-result="{{결과Object}}" result-field="fieldName" result-value="{{결과단건ValueBind}}"></cc-dept-search>
+ *
+ * @element cc-dept-search
+ *
+ *
+ * @attribute value 해당 텍스트 필드 input value binding <br>
+ * [string] [optional] 
+ *
+ *
+ * @attribute search-result  검색 결과 object값 <br>
+ * [string] [optional]
+ *
+ *
+ * @attribute result-field  단건으로 검색결과가 필요할 경우 검색 결과 object에 field <br>
+ * [string] [optional]
+ *
+ *
+ * @attribute result-value search-field에서 지정한 결과 object의 field의 value <br>
+ * [boolean] [optional]
+ *
+ *
+ * @attribute label-disabled label text가 보이지않도록 처리 <br>
+ * [boolean] [optional]
+ *
+ *
+ */
+-->
+<!-- 
+ author : Yeon-u Kim
+ Since 2016. 4. 14.
+ 변경이력 : [2016. 4. 14.] Yeon-u Kim 최초작성
+-->
+<sc-link rel="import" href="../../../bp/shared/ep-dept-list.html" lazy></sc-link>
+<dom-module id="cc-dept-search">
+    <style>
+        :host {
+            display : table;
+            width : 100%;
+        }
+        :host > * {
+            vertical-align : middle;        
+            display: table-cell;
+        }    
+    </style>
+    <template>
+       <sc-text-field class$="[[class]]" value="{{value}}" placeholder$="[[placeholder]]" on-enter="onFindDept" on-keydown="onKeyDown" trigger-cls="search" on-trigger-click="onShowPopupFindDept" maxLength="200" disabled="[[disabled]]"></sc-text-field>
+    </template>
+    <script>
+        Polymer({
+            is : 'cc-dept-search',
+            properties : {
+                value : {
+                    type : Object,
+                    notify: true,
+                    observer : 'valueChanged'
+                },
+                autoComFlage : {
+                    type : Boolean,
+                    value : false
+                },
+                searchResult : {
+                    type : Object,
+                    value : function(){
+                        return {
+                            dept_cd : ''
+                        };
+                    },
+                    observer : 'searchResultChanged',
+                    notify: true
+                },
+                resultField : {
+                    type : String,
+                    value : 'value'
+                },
+                resultValue : {
+                    type : Object,
+                    notify: true
+                },
+                labelDisabled : {
+                    type : Object,
+                    value : function(){
+                        return false;    
+                    },
+                    observer : 'labelDisabledChanged'
+                }
+            },
+            //최초 호출
+            attached : function(){
+            },
+    
+            //label 표시 처리
+            labelDisabledChanged : function(newValue, oldValue){
+                var me = this;
+                if(!newValue){
+                    var module = document.createElement('sc-label');
+                    module.i18nDisabled = true;
+                    Polymer.dom(this.root).appendChild(module);
+                }
+            },
+            
+            //결과  변경시 label표시 처리
+            searchResultChanged: function(newValue, oldValue) {
+            	var me = this;
+                if(this.children[1]){
+                    this.children[1].text=newValue.dept_cd || "";
+                }
+            },
+            
+            //값 변경시 result값 clear처리
+            valueChanged : function(newValue, oldValue) {
+                if(!this.autoComFlage){
+                    this.set("searchResult",{});
+                    this.set("resultValue",'');
+                }
+                this.set("autoComFlage",false);
+            },
+            //팝업 호출
+            onShowPopupFindDept : function(){
+                var me = this;
+                var deptPopup = me.createPopup();
+                deptPopup.show();
+                deptPopup.getWindowContent().load({singleSelect:true, defaultParam:{org_cd:SCSessionManager.currentUser.comp_cd, dept_nm:me.value}});
+            },
+            createPopup: function(){
+            	var me = this;
+               	return UT.popup('ep-dept-list', me, 650, 500, {
+               		'selected-items' : function(popup, e) {
+               			var result = e.detail[0];
+               			
+               			me.set("autoComFlage", true);
+                           if(me.resultField) {
+                               me.set("resultValue", result[me.resultField]);
+                           }
+                           me.set("searchResult", result);
+                           me.set("value", result.dept_nm);
+                           me.fire("result", result);
+                           me.set("autoComFlage", false);
+                           popup.close();
+               		}
+               	}, {titleText : "부서검색"});
+            },
+            //자동완성
+            onFindDept : function(){
+                var me = this;
+                //자동완성 함수 시작
+                var deptPopup = me.createPopup();
+                deptPopup.show();
+                deptPopup.getWindowContent().load({singleSelect:true, defaultParam:{org_cd:SCSessionManager.currentUser.comp_cd, dept_nm:me.value},autoComplete : true});
+            },
+            
+         	// 사용자의 keydown
+            onKeyDown: function(e) {
+                var me = this;
+                
+                if(this.children[1] && !UT.isSpecialKeyDown(e)){
+                    this.children[1].text="";
+                }
+            }
+        });
+    </script>
+</dom-module>

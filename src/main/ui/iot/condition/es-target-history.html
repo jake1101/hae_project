@@ -1,0 +1,663 @@
+<sc-link rel="import" href="ep-target-find.html"></sc-link>
+<dom-module id="es-target-history">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 현장 이력 조회
+        ** @Description		: 현장상황정보 > 현장 이력 조회
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.02.25
+        ** @History 		: 2020.08.10 jhkim openlayers 버전업
+        ******************************************************************************************
+    -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+            overflow:hidden !important;
+        }
+        .cc-search-container{
+        	padding-right : 15px;
+        }
+    </style>
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		<!-- 공통코드 조회-->
+		<sc-request-group id="codes" init>
+			<sc-code-group>
+				<sc-code code="IOT003" value="{{codes.targetType}}"></sc-code>
+			</sc-code-group>
+			<!-- 협력사 조회 -->
+			<sc-ajax url="findListVendor.do"  last-response="{{codes.vendorList}}" body="{{searchParam}}"></sc-ajax>
+		</sc-request-group>
+		<!-- 대상 목록 조회 -->
+		<sc-ajax id ="findSiteTargetList" url="findSiteTargetList.do" last-response="{{targetComboList}}" body="{{searchParam}}" on-response="completeFindSiteTargetList"></sc-ajax>
+		<!-- 대상 출근일 조회 -->
+		<sc-ajax id ="findTargetSignalDate" url="findTargetSignalDate.do" body="{{searchParam}}" on-response="completeFindTargetSignalDate" ></sc-ajax>
+		<!-- 대상 목록 이력 조회 -->
+		<sc-ajax id ="findTargetHistory" url="findTargetHistory.do" last-response="{{targetHistory}}" body="{{searchParam}}" on-response="completeFindTargetHistory"></sc-ajax>
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<cc-search-container on-search="onSearch" auth-r>
+			<table validation-group="search">
+				<colgroup>
+					<col style="width:60px">
+					<col style="width:170px">
+					<col style="width:110px">
+					<col style="width:150px">
+					<col style="width:80px">
+					<col style="width:270px">
+					<col style="width:100px">
+					<col style="width:150px">
+					<col style="width:70px">
+					<col>
+				</colgroup>
+				<tr>
+					<th><sc-label text="협력사"></sc-label></th>
+					<td>
+						<sc-combobox-field id="vendorCombo" placeholder="전체선택" style="min-width:100px"
+								items="{{codes.vendorList}}" display-field="name" value-field="id" input-clear="false" 
+								value="{{searchParam.vendorId}}" on-select="changeTargetList" >
+	                    </sc-combobox-field>
+					</td>
+					<th><sc-label text="표시대상 유형"></sc-label></th>
+					<td>
+						<sc-combobox-field id="targetTypeCombo" placeholder="전체선택" style="min-width:100px"
+								items="{{codes.targetType}}" display-field="label" value-field="data" input-clear="false"
+								value="{{searchParam.targetType}}" on-select="changeTargetList">
+	                    </sc-combobox-field>
+					</td>
+					<th><sc-label text="표시대상"></sc-label></th>
+					<td>
+						<sc-combobox-field  id="targetCombo" class="w-250" placeholder="{{targetPlaceholder}}" input-clear="false"
+								items="{{targetList}}" display-field="label" value-field="targetId"  on-select="selectTarget"
+								value="{{searchParam.targetId}}" required = "true">
+	                    </sc-combobox-field>
+					</td>
+					<td>
+						<sc-checkbox-field label="미교부 포함" on-checkchange="changeTargetList" id="includeNotMapping" input-value="{{searchParam.includeNotMapping}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+					</td>
+					<td>
+						<sc-checkbox-field label="사용중지 포함" on-checkchange="changeTargetList" id="includeNotUse" input-value="{{searchParam.includeNotUse}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+					</td>
+					<th><sc-label text="수신시간"></sc-label></th>
+					<td>
+<!-- 						<sc-date-field value="{{searchParam.startDt}}" display-format="yyyy-MM-dd" style="width : 120px;"></sc-date-field> -->
+						<sc-month-field value="{{searchParam.ym}}" string-format="YYYY-MM" style="width : 80px;" string-date ="true" on-select="selectTarget"></sc-month-field>
+						<sc-combobox-field  id="dateCombo"  style="width:70px; margin-left:3px;" input-clear="false"
+								items="{{locDateList}}" display-field="label" value-field="value"  on-select="onSearch" title="대상 선택 후 대상의 위치 기록이 있는 날짜만 선택가능 합니다." 
+								value="{{searchParam.date}}" required = "true">
+	                    </sc-combobox-field>
+    					<span style="margin:0 8px"></span>
+						<sc-number-field style="width : 51px;" value="{{startHH}}" min-value="0" max-value="23" default-value="0"></sc-number-field>
+    					<span style="margin:0 2px"> : </span>
+    					<sc-number-field style="width : 51px;" value="{{startmm}}" min-value="0" max-value="59"  default-value="0"></sc-number-field>
+    					~
+	            		<sc-number-field style="width : 51px;" value="{{endHH}}" min-value="0" max-value="23" default-value="23"></sc-number-field>
+    					<span style="margin:0 2px"> : </span>
+    					<sc-number-field style="width : 51px;" value="{{endmm}}" min-value="0" max-value="59" default-value="59"></sc-number-field>
+					</td>
+				</tr>
+			</table>
+		</cc-search-container>
+		<div class="vspace-5"></div>
+		<div class="hbox flex-9" >
+			<div class = "vbox flex">
+				<cc-ol-map-container id="mapContainer"></cc-ol-map-container>
+			</div>
+			<div class="hspace-10"></div>
+			<sc-grid id="gridHistoryPanel" class="w-500" sortable="false" data-provider="{{historyList}}"
+				use-state ="false" use-selection="true" selection-style="singleRow" selection-able-function="isSelection"
+				show-selection-header="true" on-item-click="onItemClick" on-selection-checked="onSelectionChk" on-item-all-checked ="itemAllChecked">
+		        <cc-grid-toolbar>
+	            </cc-grid-toolbar>
+		        <sc-grid-columns>
+		            <sc-image-column  width="70"    header-text="수신상태"   image-change-function="onImageChange"   image-display ="auto" ></sc-image-column>
+		            <sc-date-column 	width="130"  	header-text="수신시간" 	data-field="signalDt" 	 	text-align="center" 	display-format = "yyyy/MM/dd HH:mm:ss"></sc-date-column>
+		            <sc-data-column 	width="130" 	header-text="위치"   		data-field="areaName"		text-align="center"></sc-data-column>
+		       		<sc-data-column 	width="90" 	header-text="배터리(%)"   		data-field="battery"		text-align="center"></sc-data-column>
+		        </sc-grid-columns>
+		        <sc-grid-fields>
+		       	 	<sc-grid-field data-field="iconImage"></sc-grid-field>
+                    <sc-grid-field data-field="index" 		data-type="number"></sc-grid-field>
+                    <sc-grid-field data-field="selected" 	data-type="boolean"></sc-grid-field>
+                    <sc-grid-field data-field="marker" 	data-type="object"></sc-grid-field>
+                    <sc-grid-field data-field="popup" 		data-type="object"></sc-grid-field>
+                    <sc-grid-field data-field="geoJson"	data-type="object"></sc-grid-field>
+                </sc-grid-fields>
+	        </sc-grid>
+		</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+		Polymer({
+			is : 'es-target-history',
+			properties:{
+				// 공통코드
+				codes : {
+	               	type : Object,
+	               	value : function(){
+		               	return	{
+			               	 vendorList : []				// 협력사 목록
+		               	    ,targetType : []				// 표시 유형
+                   			,allSelect : {id : null, data : null, name : "전체선택", label : "전체선택"}
+                   			,targetSearch : {targetId : -1, label : "표시대상 찾기"}
+		               	};
+	               	},
+	               	reset: false
+	            },
+	            targetPlaceholder : {
+					type : String,
+					value : function(){
+						return "표시대상을 선택해주세요"
+					}
+		        },
+	            targetList :{ 				
+	            	type : Array,
+	            	value : function(){
+	            		return [];
+	            	}
+	            },
+	            searchParam : {
+	            	type : Object,
+	            	value : function(){
+	            		var startDt = new Date();
+		            	startDt.setHours(0,0,0,0);
+		            	var endDt = new Date();
+		            	endDt.setHours(23,59,59,999);
+	            		return {
+		            		siteId : SCMdiManager.searchParam.site_id,
+		            		startDt : startDt,
+		            		ym : startDt,
+		            		endDt : endDt   
+		            	}
+	            	}
+		        },
+		        historyList :{ 				
+	            	type : Array,
+	            	value : function(){
+	            		return [];
+	            	}
+	            },
+		        startRowNum : Number,
+		        endRowNum : Number,
+		        focusRowNum : Number,
+		        isEventPrevent : Boolean,
+		    	 // 지도
+                map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                }
+			},
+			initialized : function(){
+				var me = this;
+				me.isEventPrevent = false;
+
+				me.codes.vendorList.unshift(me.codes.allSelect);
+
+				if(me.codes.targetType[0].label != "전체선택"){
+					var targetType = UT.copy(me.codes.targetType);
+					targetType.unshift(me.codes.allSelect);
+
+					me.set("codes.targetType", targetType);
+				}
+
+				me.$.gridHistoryPanel.loadStyles({
+			        body: {
+			              checked: {  //체크될때 로우색상지정
+			                  background: "#96F56E"
+			              }
+			          }
+			    });
+				
+				me.map = me.$.mapContainer.map;
+				
+				createVectorSourceLayer(me.map, 'route');
+				createVectorSourceLayer(me.map, 'marker');
+				createVectorSourceLayer(me.map, 'highlight');
+				createVectorSourceLayer(me.map, 'selected');
+
+   				me.map.get('marker_layer').declutter_ = true;
+   				me.map.get('marker_layer').setStyle(me.markerStyleFunction);
+   				me.map.get('highlight_layer').setStyle(me.highlightStyleFunction);
+   				me.map.get('highlight_layer').declutter_ = true;
+   				me.map.get('selected_layer').setStyle(me.highlightStyleFunction);
+   				me.map.get('selected_layer').declutter_ = true;
+
+   				me.map.on('pointermove', function(e) {		// 지도 마우스 오버 이벤트
+					me.map.removeOverlay(me.map.getOverlayById('targetPopup'));
+					me.map.get('highlight_source').clear();
+					
+					if(me.map.hasFeatureAtPixel(e.pixel)){
+			    		me.map.getTargetElement().style.cursor = '';
+						var selected = null;
+
+						me.map.forEachFeatureAtPixel(e.pixel, function(f) {
+			  		    	selected = f;
+			  		    	return true;
+			  		  	});
+
+				    	if (selected) {
+					        if(selected.get('icon')){			
+								me.highlightMarker(selected);
+							}
+				    	}
+					}
+				});
+
+   				me.map.on('click', function(e) {			// 지도 클릭 이벤트
+			    	var selected = null;
+			    	me.map.get('selected_source').clear();
+
+			    	me.map.forEachFeatureAtPixel(e.pixel, function(f) {
+		  		    	selected = f;
+		  		    	return true;
+		  		  	});
+
+			    	if (selected) {
+			    		if(selected.get('icon')){
+   			  		  		var object = selected.get('targetInfo');
+	   			  		  	var grid = me.$.gridHistoryPanel;
+
+	   			  			grid.searchItem("index", object.index);
+	   			  			me.map.get('selected_source').addFeature(selected);
+	   			  			
+	   			  		}else if(selected.get('type') == 'marker'){			// 영역 마커 이벤트
+		   			  		me.showAreaPopup(selected);
+					   	}
+			    	}
+			    });
+		       	
+				UT.requestNotUseLoading(me.$.findSiteTargetList);
+			},
+			highlightMarker : function(feature){
+				var me = this;
+				me.map.get('highlight_source').clear();
+				var data = feature.get('targetInfo');
+				me.map.getTargetElement().style.cursor = 'pointer';
+
+				var overlays = me.map.getOverlays().getArray();
+				while(overlays.length > 0){
+					me.map.removeOverlay(overlays[0]);
+				}
+
+				me.map.get('highlight_source').addFeature(feature);
+
+				var text =  '<div id="arrow"></div><div id="text">('+feature.getId()+') '+data.signalDt+'</br>'+data.areaName+'</div>';
+				
+    	      	var popup = document.createElement("div");
+				popup.classList.add('targetPopup');
+				popup.innerHTML=text;
+
+				var overlay = new ol.Overlay({
+					id : 'targetPopup',
+					element : popup,
+					positioning : 'bottom-center',
+					offset : [0,-20],
+					position : feature.getGeometry().getCoordinates()
+				});
+				
+				me.map.addOverlay(overlay);
+			}, 
+			selectTarget : function(e){
+				var me = this;
+				if(e.target.value < 0){
+					var findPopup = UT.popup('ep-target-find', me, 720, 400, {
+							'close' : function(popup, event) {
+								me.isEventPrevent = true;
+								me.$.vendorCombo.value = event.target.$.vendorCombo.value;
+								me.$.targetTypeCombo.value = event.target.$.targetTypeCombo.value;
+								me.$.targetCombo.value = event.target.searchParam.targetId;
+								me.$.includeNotMapping.value = (event.target.searchParam.includeNotMapping=='Y');
+								me.$.includeNotUse.value = (event.target.searchParam.includeNotUse=='Y');
+								
+								me.isEventPrevent = false;
+								UT.requestNotUseLoading(me.$.findSiteTargetList);
+// 								me.onSearch();
+								me.onSearchTargetSignalDate();
+							}
+						}, {titleText : me.translate("표시대상 찾기")});
+					findPopup.show();
+					findPopup.getWindowContent().load(me.codes.vendorList, me.$.vendorCombo.value, me.codes.targetType, me.$.targetTypeCombo.value, me.$.includeNotMapping.value , me.$.includeNotUse.value );
+					
+					me.$.targetCombo.selectedItem = null;
+					me.$.gridHistoryPanel.dataProvider = [];
+					me.startRowNum= null;
+					me.endRowNum = null;
+					me.clearMap();
+				}else{
+// 					me.onSearch();
+					me.onSearchTargetSignalDate();
+				}
+			},
+			onSearchTargetSignalDate : function(){
+				var me = this;
+				var item =me.$.targetCombo.selectedItem;
+				if(item){
+					me.searchParam.targetType = item.targetType;
+				}
+				
+				UT.request(me.$.findTargetSignalDate);
+			},
+			completeFindTargetSignalDate : function(e,res){
+				var me = this;
+				var dayArray = res.response;
+				console.log(dayArray);
+				// dayArray= [1,2,3,4,5];
+				var dayObjectArray = [];
+				var selectedVal;
+				if(dayArray!=null && dayArray.length > 0){
+					dayArray.forEach(function(el, index){
+						var dayObject = {};
+						el += "";
+						if(el.length==1) el = "0"+el;
+						dayObject.value = el;
+						var week = ['(일)', '(월)', '(화)', '(수)', '(목)', '(금)', '(토)'];
+						dayObject.label = el + week[new Date(me.searchParam.ym + "-" + el).getDay()];
+						dayObjectArray.push(dayObject);
+						if(index==dayArray.length-1) selectedVal = el; 
+					})					
+				}
+				me.set("locDateList", dayObjectArray);
+				me.set("searchParam.date", selectedVal);
+			},
+			
+			onSearch : function(){
+				var me = this;
+
+				if(!me.$.targetCombo.value || me.$.targetCombo.value < 0){
+					UT.alert("표시대상을 선택해주세요");
+					return;
+				}
+				
+				// yshong 추가작업
+				if(me.searchParam.date == undefined){
+					UT.alert("수신시간에서 월 선택, 일자 선택 후 검색하여야 합니다. <br/>선택한 월에 대상의 기록이 없다면 선택 가능 일자가 없을 수도 있습니다.");
+					return;
+				}
+				me.searchParam.startDt = new Date(me.searchParam.ym + "-" + me.searchParam.date);
+				// 끝
+				
+				
+				me.searchParam.startDt.setHours(me.startHH,me.startmm,0,0);
+				me.searchParam.endDt = new Date(me.searchParam.startDt.getTime());
+				me.searchParam.endDt.setHours(me.endHH,me.endmm,0,0);
+				
+				
+				var item =me.$.targetCombo.selectedItem;
+				if(item){
+					me.searchParam.targetType = item.targetType;
+					UT.requestNoDefault(me.$.findTargetHistory);
+				}else{
+					me.targetList = [];
+					me.$.gridHistoryPanel.dataProvider = [];
+				}
+
+				me.startRowNum= null;
+				me.endRowNum = null;
+				me.clearMap();
+			},
+			changeTargetList : function(){
+				if(!this.isInitialized) return;
+				var me = this;
+				if(me.isEventPrevent) return;
+				me.searchParam.targetId = null;
+				me.set("locDateList", null);
+				me.set("searchParam.date",null);
+				me.clearMap();
+				UT.requestNotUseLoading(me.$.findSiteTargetList);
+			},
+			completeFindSiteTargetList : function(){
+				if(!this.isInitialized) return;
+				var me = this;
+				me.$.gridHistoryPanel.dataProvider = [];
+				var list = me.targetComboList;
+				list.unshift(me.codes.targetSearch);
+				me.targetList = list;
+				if(list.length > 0){
+					me.$.targetCombo.value=me.searchParam.targetId;
+					me.targetPlaceholder = "표시대상을 선택해주세요";
+				}else{
+					me.targetPlaceholder = "검색결과가 없습니다";
+				}
+			},
+			completeFindTargetHistory : function(){
+				var me = this;
+				me.map.set('lastGeo', null);
+				var color = targetColor[me.searchParam.targetType];
+				var routeStyle = [
+   					new ol.style.Style({stroke: new ol.style.Stroke({ color: "#ffffff", width: 10})}),
+   					new ol.style.Style({stroke: new ol.style.Stroke({ color: color, width: 6})}),
+   					new ol.style.Style({stroke: new ol.style.Stroke({ color: '#ffffff', width: 1, lineDash: [4,4]})})
+   				];
+   				me.map.get('route_layer').setStyle(routeStyle);
+				if(me.targetHistory){
+					var historyList = me.targetHistory;
+					console.log(historyList);
+					for(var i in historyList){
+						historyList[i].index = i; 
+						historyList[i].selected = false; 
+						if(historyList[i].geoJson){
+							if(!historyList[i].areaName){
+								historyList[i].areaName = "영역외";
+							}
+							if(UT.isEmpty(me.map.get('lastGeo'))){			// 마지막 위치 표시
+								var feature = geoJson.readFeature(historyList[i].geoJson);
+								
+								feature.setId(parseInt(i)+1);
+				    	   		feature.set('targetInfo', historyList[i]);
+
+				    	   		var center = ol.proj.fromLonLat(historyList[i].geoJson.coordinates);
+								me.map.getView().setCenter(center);
+
+		   			  			me.map.get('selected_source').addFeature(feature);
+		   			  			
+					       		me.map.set('lastGeo', parseInt(i));
+					       	}
+						}else{
+							historyList[i].areaName = "위치정보 없음";
+						}
+					}
+					me.historyList = historyList;
+
+					setTimeout(function() {
+						me.$.gridHistoryPanel.searchItem("index", me.map.get('lastGeo'));
+					}, 400);
+				}else{
+					me.historyList = [];
+				}
+			},
+			clearMap : function(){
+				if(!this.isInitialized) return;
+				var me = this;
+				me.map.get('route_source').clear();
+				me.map.get('marker_source').clear();
+				me.map.get('selected_source').clear();
+			},
+			isSelection : function(data){
+				return (data.geoJson);
+			},
+			onItemClick : function(e){
+				var me = this,
+				data = e.detail.data;
+
+				me.map.get('selected_source').clear();
+				
+				if(UT.isEmpty(data.geoJson)){return;}
+
+				var center = ol.proj.fromLonLat(data.geoJson.coordinates);
+				me.map.getView().setCenter(center);
+
+				feature = geoJson.readFeature(data.geoJson);
+				feature.setId(data.index+1);
+				feature.set('targetInfo', data);
+				
+				me.map.get('selected_source').addFeature(feature);
+			},
+			onSelectionChk : function(e){
+				var me = this;
+				if(me.isEventPrevent) return;
+				me.isEventPrevent = true;
+
+				var data = e.detail.data;  
+
+				var idx = data.index * 1;
+				
+				var startNo = me.startRowNum;
+				var endNo = me.endRowNum;
+				
+				if(UT.isEmpty(startNo)){		//start 없을때
+					startNo = idx;
+					endNo = idx;				    
+				}else{
+					if(UT.isEmpty(endNo)){
+						if(startNo <= idx){
+							endNo = idx;
+						}else{
+							endNo = startNo;
+							startNo = idx;
+						}
+					}else{
+						if(idx == startNo || idx == endNo){
+							startNo = null;
+							endNo = null;
+							me.historyList[idx].selected = false;
+						}else if(idx < startNo){
+							startNo = idx;
+						}else{
+							endNo = idx;
+						}
+					}
+				}
+
+				var last = me.$.gridHistoryPanel.getDataProvider().getItemSize()-1;
+				if(startNo==0 && endNo ==last){
+					me.redrawGrid(startNo, endNo, false);
+				}else{
+					me.redrawGrid(startNo, endNo, true);
+				}
+
+				me.isEventPrevent = false;
+			},
+			itemAllChecked : function(e){
+				var me = this;
+				if(me.isEventPrevent) return;
+				me.isEventPrevent = true;
+				var check = e.detail.checked;
+				if(check){
+					me.redrawGrid(0,me.$.gridHistoryPanel.getDataProvider().getItemSize()-1 , false);
+				}else{
+					me.redrawGrid(null, null, false);
+				}
+				me.isEventPrevent = false;
+			},
+			changeIconVisible : function(e){
+				if(!this.isInitialized) return;
+				var me = this;
+				me.map.get('marker_layer').setVisible(me.$.showIcon.value);
+			},
+			redrawGrid : function(startNo, endNo, flag){
+				var me = this;
+
+				if(!UT.isEmpty(me.startRowNum)){
+					for(var i=me.startRowNum; i<=me.endRowNum; i++){
+						me.historyList[i].selected = false;
+						if(flag){
+					    	me.$.gridHistoryPanel.selectionCheck(i, false);
+						}
+					}
+				}
+				me.clearMap();
+				
+				me.startRowNum = startNo;
+				me.endRowNum = endNo;
+				
+				if(!UT.isEmpty(me.startRowNum) && !UT.isEmpty(me.endRowNum)){
+					var provider = me.$.gridHistoryPanel.getDataProvider();
+					var routes = [];
+					var markers = [];
+					
+					for(var i = me.startRowNum; i <= me.endRowNum; i++){
+						me.historyList[i].selected = true;
+						if(provider.getItemAt(i).geoJson){
+							me.$.gridHistoryPanel.selectionCheck(i, true);
+							var route = ol.proj.fromLonLat(provider.getItemAt(i).geoJson.coordinates);
+							routes.push(route);
+							var marker = geoJson.readFeature(provider.getItemAt(i).geoJson);
+							marker.setId(provider.getItemAt(i).index+1);
+							marker.set('targetInfo', provider.getItemAt(i));
+							if(me.get('type') == 'unmapping'){
+								marker.get('targetInfo').targetType = 'unmapping';
+							}
+							marker.set('icon', true);
+							markers.push(marker);
+						}
+					}
+
+					if(UT.isNotEmpty(markers)){
+						me.map.get('marker_source').addFeatures(markers);
+					}
+					if(UT.isNotEmpty(routes)){
+						var routeFeature = new ol.Feature({
+						    geometry: new ol.geom.LineString(routes),
+						});
+						me.map.get('route_source').addFeature(routeFeature);
+					}
+				}
+			},
+			markerStyleFunction : function (feature){
+				var me = this;
+				var data = feature.get('targetInfo');
+
+				var markerStyle = new ol.style.Style({
+   	                image: new ol.style.Circle({
+   	                    radius: 10,
+   	                    stroke: new ol.style.Stroke({color: targetColor[data.targetType],width : 2}),
+   	                    fill: new ol.style.Fill({color: '#F5F1E8'})
+   	                }),
+   	                text: new ol.style.Text({
+   	                    text: feature.getId()+'',
+   	                 	font:'500 10px Noto Sans KR',
+   	                    fill: new ol.style.Fill({color: targetColor[data.targetType]})
+   	                })
+   	            });
+   	            
+				return markerStyle;
+			},
+			highlightStyleFunction : function (feature){
+				var me = this;
+				var data = feature.get('targetInfo');
+
+				var markerStyle = new ol.style.Style({
+   	                image: new ol.style.Circle({
+   	                    radius: 10,
+   	                    stroke: new ol.style.Stroke({color: targetColor[data.targetType],width : 2}),
+   	                    fill: new ol.style.Fill({color: targetColor[data.targetType]})
+   	                }),
+   	                text: new ol.style.Text({
+   	                    text: feature.getId()+'',
+   	                 	font:'500 10px Noto Sans KR',
+   	                    fill: new ol.style.Fill({color: '#FFFFFF'})
+   	                })
+   	            });
+   	            
+				return markerStyle;
+			},
+			onImageChange: function(data, item){
+	            return '/ui/assets/img/marker/' +data.iconImage;
+	        }
+		});
+	</script>
+</dom-module>

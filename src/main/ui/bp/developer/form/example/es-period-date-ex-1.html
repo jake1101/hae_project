@@ -1,0 +1,48 @@
+<!-- 
+
+## 날짜 기간 
+
+
+- **from-value** 와 **to-value**를 통해 기간을 입력할 수 있습니다. 
+
+- **default-from-value**와 **default-to-value**를 이용하여 기본값을 설정할 수 있습니다.
+
+- **string-date**을 true로 주면 value를 date type으로 받을 수 있습니다. (default: false) 
+
+자세한 사항은 [sc-component docs](/bower_components/starter-kit/index.html#!/docs/sc-component&sc-period-date-field)를 참고하시기 바랍니다. 
+
+ -->
+
+<dom-module id="es-period-date-ex-1">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<sc-period-date-field from-value="{{baseInfo.from_date}}" to-value="{{baseInfo.to_date}}" default-from-value="-7d" default-to-value="0d" string-date="true"></sc-period-date-field>
+	</template>
+
+	<script>
+		Polymer({
+			is: 'es-period-date-ex-1',
+			properties: {
+			    baseInfo: {
+			        type: Object,
+					value: function () {
+
+                    }
+				}
+			},
+			
+			setValue: function() {
+				var me = this;
+				
+            	me.set("from_date", "20120608");
+            	me.set("to_date", "20150810");
+            }
+		});
+	</script>
+
+</dom-module>

@@ -1,0 +1,136 @@
+<dom-module id="ep-door-list">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<!-- 코드 조회-->
+		<sc-request-group init>
+			<sc-code-group>
+				<sc-code code="IOT002" value="{{codes.yn}}" ></sc-code>
+			</sc-code-group>
+			
+			<!-- 조회조건 Site 콤보 데이터 조회 -->
+			<sc-ajax url="findListSiteCombo.do" last-response="{{codes.siteList}}"></sc-ajax>
+		</sc-request-group>
+		
+		<sc-ajax
+				id="findListDoor"
+				url="findListDoor.do"
+				body="{{searchParam}}"
+				last-response="{{resultList}}">
+		</sc-ajax>
+		
+		<div class="vbox flex">
+			<cc-search-container on-search="onSearch" auth-r>
+				<table>
+					<colgroup>
+						<col style="width:120px"></col>
+						<col></col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="Site"></sc-label></th>
+						<td>
+							<sc-combobox-field items="{{codes.siteList}}" display-field="label" value-field="data" 
+		                        value="{{searchParam.siteId}}"
+		                        required="true" disabled="true">
+		                    </sc-combobox-field>
+						</td>
+					</tr>
+				</table>
+			</cc-search-container>
+			
+			<div class="vspace-10"> </div>
+			
+			<sc-grid id="gridPanel" data-provider="{{resultList}}" editable="true" class="flex" on-item-click="onItemClick">
+				<cc-grid-toolbar>
+                	<sc-button text="선택" on-click="onSelectedList"></sc-button>
+            	</cc-grid-toolbar>
+            	
+				<sc-grid-columns>
+					<sc-data-column data-field="node_id"      header-text="DOOR ID"     width="100" text-align="center"   editable="false"></sc-data-column>
+					<sc-data-column data-field="name"         header-text="DOOR 명" 	width="300" text-align="left"   editable="false"></sc-data-column>
+					<sc-data-column data-field="sts"     	  header-text="상태"        width="100" text-align="center" editable="false"></sc-data-column>
+					<sc-combobox-column data-field="use_flag"  header-text="사용여부"   width="80"  text-align="center" editable="false" 
+						display-field="label" value-field="data" items="{{codes.yn}}"></sc-combobox-column>
+				</sc-grid-columns>
+				<sc-grid-fields>
+					<sc-grid-field data-field="id"></sc-grid-field>
+					<sc-grid-field data-field="siteId"></sc-grid-field>
+				</sc-grid-fields>
+			</sc-grid>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'ep-door-list',
+			
+			properties:{
+				//팝업 타이틀 지정
+				titleText: {
+					type: String,
+					value: function () {
+						return "DOOR 목록";
+					}
+				},
+				codes: {
+                    type : Object,
+                    reset : false,
+                    value : function() {
+                        return {};
+                    }
+                },
+	         	// 조회 결과 리스트
+                resultList: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                }
+			},
+			
+			load: function(param){
+				var me = this;
+				me.set('searchParam' , param);
+				me.onSearch();
+			},
+            onEnterSearch: function(){
+                var me = this;
+
+                me.onSearch();
+            },
+
+            onSearch : function() {
+                var me = this;
+                
+                me.set("resultList", []);
+
+                if(!me.validate('search')){
+                    UT.alert("STD.E0000");
+                    return false;
+                }
+
+                UT.request(me.$.findListDoor);
+            },
+            
+            onSelectedList: function() {
+                var me = this;
+                var provider = me.$.gridPanel.getDataProvider();
+            	var selected = provider.selectionCheckedItems();
+            	
+            	if(selected.length > 0) {
+                    me.fire('selected-items', selected);
+                    
+				} else {
+					UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+				}
+            	
+            }
+            
+		});
+	</script>
+
+
+</dom-module>

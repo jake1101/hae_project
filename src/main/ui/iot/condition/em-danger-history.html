@@ -1,0 +1,30 @@
+<sc-link rel="import" href="es-danger-history.html"></sc-link>
+
+<dom-module id="em-danger-history">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 위험지역 이력
+        ** @Description		: 현장상황정보 > 위험지역 이력
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.03.03
+        ** @History 		: 2020.03.03 jhkim 최초작성
+        ******************************************************************************************
+    -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<es-danger-history class="flex"></es-danger-history>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-danger-history'
+		});
+	</script>
+
+</dom-module>

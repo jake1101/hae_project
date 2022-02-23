@@ -1,0 +1,137 @@
+<!-- 
+각 컬럼은 Editor를 사용할 수있게 하고, itemEditorFunction를 통해 sc-data-column에서 다양한 에디터를 활용 할 수있게 한다.
+
+itemEditorFunction 을 추가하여 editor를 동적으로 사용할 수 있도록 하였습니다.
+itemEditorFunction
+parameter : data, item
+return object
+
+
+property	비고
+type : 
+	- multiline 	: 멀티라인 text editor(기존 useMultiLine 과 동일)
+	- number		:숫자만 입력가능한 에디터
+	- date		: date picker사용
+	- list		:combobox editor
+	- mask		:입력제한이 사용된 editor EditMask
+	
+items : type이 list인 경우 사용될 목록
+valueField :	type이 list인 경우 items배열 중 value 값의 프로퍼티
+displayField	type이 list인 경우 items배열 중 display 값의 프로퍼티
+dateFormat	type이 date인 경우 값이 저장될 date format
+inputMask	type이 mask인 사용될 입력제한 문자 참고자료 EditMask
+
+동적 에디터를 사용할 경우 lookup이 해당 컬럼에 설정되지 않아 mask, list 에디터를 사용하더라도 실제 값이 셋팅된다.  
+
+ -->
+
+
+<dom-module id="es-sp-editors">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" editable="{{gridEditable}}" >
+        	<cc-grid-toolbar>
+        		<sc-button text="조회" on-click="onSearch"></sc-button>
+        	</cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-data-column 	data-field="colunm_6"   header-text="line" width="200" text-align="left"   editable="true" ></sc-data-column>
+				<sc-data-column 	data-field="colunm_1"   header-text="multiLine" width="200" text-align="left"   editable="true" use-multi-line="true"></sc-data-column>
+			    <sc-data-column 	data-field="colunm_2"   header-text="동적에디터" width="200" text-align="left"   editable="true" item-editor-function="onItemEditor"></sc-data-column>
+			    <sc-combobox-column data-field="colunm_3"   header-text="combobox(에디터 선택)" width="200"  text-align="center" editable="true"     display-field="label" value-field="data" items="{{items}}"></sc-combobox-column>
+			    <sc-checkbox-column data-field="check_3"   header-text="checkbox"  width="150"    editable="true" checked-value="true" un-checked-value="false"></sc-checkbox-column>
+			    <sc-date-column 	data-field="colunm_4"   header-text="date" width="200" text-align="left"   editable="true" ></sc-date-column>
+			    <sc-data-column 	data-field="colunm_5"   header-text="number" width="200" text-align="right"   editable="true"  data-type="number" format-type="amt"></sc-data-column>
+			</sc-grid-columns>
+        </sc-grid>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-sp-editors',
+            
+            properties : {
+                resultList: {
+                    type:Array
+                },
+                gridEditable: {
+                	type:Object,
+                	value:true
+                },
+               items:{
+                    type:Array,
+                    value : [
+                        {label:"list Editor1", data:'A'},
+                        {label:"line Editor", data:'B'},
+                        {label:"Multiline Editor", data:'C'},
+                        {label:"Date Editor", data:'D'},
+                        {label:"Number Editor", data:'E'},
+                        {label:"Mask Editor2", data:'F'},
+                        {label:"line Editor2", data:'G'},
+                    ]  
+                },
+                code1:{
+                    type:Array,
+                    value : [
+                        {label:"데이터1", data:'A'},
+                        {label:"데이터2", data:'B'},
+                        {label:"데이터3", data:'C'},
+                        {label:"데이터4", data:'D'},
+                        {label:"데이터5", data:'E'},
+                    ]  
+                },
+                code2:{
+                    type:Array,
+                    value : [
+                        {label:"코드1", data:'A'},
+                        {label:"코드2", data:'B'},
+                        {label:"코드3", data:'C'},
+                        {label:"코드4", data:'D'},
+                        {label:"코드5", data:'E'},
+                    ]  
+                }
+            },
+            onSearch : function(){
+            	this.fire('search');
+            },
+
+            onItemEditor : function(data, item){
+            	if(data["colunm_3"] == "A"){
+                    return {type:"list", items:this.code1, valueField:"data", displayField:"label"};
+                    
+                }else if(data["colunm_3"] == "B"){
+                	return {type:"line"};
+
+                }else if(data["colunm_3"] == "C"){
+                	return {type:"multiline"};
+
+                }else if(data["colunm_3"] == "D"){
+                	return {type:"date"};
+                	
+                }else if(data["colunm_3"] == "E"){
+                	return {type:"number"};
+                	
+                }else if(data["colunm_3"] == "F"){
+                	return {type:"mask", inputMask : "9999-9999"};
+                	
+                }else if(data["colunm_3"] == "G"){
+                	return {type:"list", items:this.code2, valueField:"data", displayField:"label"};                	
+                }
+            	
+                
+                return false;
+            }
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

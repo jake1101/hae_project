@@ -1,0 +1,331 @@
+<dom-module id="es-dev-chart-linear-gauge-renderer">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--fit-layout);
+        }
+    </style>
+
+    <!--  화면 구성 시작-->
+    <template>
+    	<div id="grdMain" class="fit"></div>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-dev-chart-linear-gauge-renderer',
+            
+            	attached: function(){
+                	this.exampleView().init();
+                },
+                
+                exampleView : function (strings) {
+                    var view;
+                    var dsMain;
+                    var grdMain;
+                    
+                    return view = {
+                        init: function () {
+                        	
+                        	var fields = [{
+                                "fieldName": "region"
+                            },{
+                                "fieldName": "subregion"
+                            },{
+                                "fieldName": "country"
+                            },{
+                                "fieldName": "city_station"
+                            },{
+                                "fieldName": "pm10",
+                                "dataType": "number"
+                            }, {
+                                "fieldName": "pm25",
+                                "dataType": "number"
+                            }, {
+                                "fieldName": "stations"
+                            }, {
+                                "fieldName": "description"
+                            }];
+                            dsMain = DataLudi.createGridDataSet();
+                            dsMain.setFields(fields);
+                        	
+                            var columns = [{
+                                "name": "grpRegions",
+                                "width": 130,
+                                "header": "Regions",
+                                "childHeadersVisible": false,
+                                "childFootersVisible": false,
+                                "columns": [{
+                                    "name": "colLabels",
+                                    "layout": "vertical",
+                                    "width": 60,
+                                    "columns": [{
+                                        "type": "label",
+                                        "text": "Region",
+                                        "styles": {
+                                            "textAlignment": "far",
+                                            "fontSize": 11,
+                                            "fontItalic": true,
+                                            "paddingRight": 5,
+                                            "background": "#08000000"
+                                        }
+                                    }, {
+                                        "type": "label",
+                                        "text": "Subregion",
+                                        "styles": {
+                                            "textAlignment": "far",
+                                            "fontSize": 11,
+                                            "fontItalic": true,
+                                            "paddingRight": 5,
+                                            "background": "#08000000"
+                                        }
+                                    }, {
+                                        "type": "label",
+                                        "text": "Country",
+                                        "styles": {
+                                            "textAlignment": "far",
+                                            "fontSize": 11,
+                                            "fontItalic": true,
+                                            "paddingRight": 5,
+                                            "background": "#08000000"
+                                        }
+                                    }]
+                                }, {
+                                    "name": "colRegions",
+                                    "layout": "vertical",
+                                    "width": 70,
+                                    "columns": [{
+                                        "fieldName": "region",
+                                        "styles": {
+                                        }
+                                    }, {
+                                        "fieldName": "subregion",
+                                        "styles": {
+                                        }
+                                    }, {
+                                        "fieldName": "country",
+                                        "styles": {
+                                        }
+                                    }]
+                                }]
+                            }, {
+                                "name": "colCity",
+                                "fieldName": "city_station",
+                                "header": "City/Station",
+                                "width": 80,
+                                "styles": {
+                                    "textWrap": "normal"
+                                }
+                            },{
+                                "name": "comPm25",
+                                "fieldName": "pm25",
+                                "width": 170,
+                                "styles": {
+                                    "textAlignment": "far",
+                                    "fontSize": 14,
+                                    "color": "#008",
+                                    "shapeInactiveColor": "#10000000",
+                                    "shapeColor": "#80000088",
+                                    "padding": 4,
+                                    "numberFormat": "#,##0.0"
+                                },
+                                "dynamicStyles": [{
+                                    "expressions": [
+                                        "value > 40",
+                                        "value > 20"
+                                    ],
+                                    "styles": [{
+                                        "shapeColor": "#a0aa0000",
+                                        "color": "#800"
+                                    }, {
+                                        "shapeColor": "#a000aa00",
+                                        "color": "#080"
+                                    }]
+                                }],
+                                "header": {
+                                    "text": "PM 2.5"
+                                },
+                                "footer": {
+                                    "expression": "avg",
+                                    "styles": {
+                                        "fontSize": 14,
+                                        "numberFormat": "#,##0.0"
+                                    },
+                                    "dynamicStyles": [{
+                                        "expressions": [
+                                            "value > 40",
+                                            "value > 20"
+                                        ],
+                                        "styles": [{
+                                            "borderLeft": null,
+                                            "background": "#40ff0000",
+                                            "color": "#080"
+                                        }, {
+                                            "borderLeft": null,
+                                            "background": "#4000ff00",
+                                            "color": "#008"
+                                        }]
+                                    }]
+                                },
+                                "renderer": {
+                                    "type": "linearGauge",
+                                    "startValue": 0,
+                                    "endValue": 80,
+                                    "thickness": 9,
+                                    "valueThickness": 0.5,
+                                    "valueLocation": "top",
+                                    "ranges": [{
+                                        "label": "good",
+                                        "endValue": 20,
+                                        "background": "#30000000"
+                                    }, {
+                                        "label": "normal",
+                                        "startValue": 20,
+                                        "endValue": 40,
+                                        "background": "#20000000"
+                                    }, {
+                                        "label": "bad",
+                                        "startValue": 40,
+                                        "endValue": 80,
+                                        "background": "#10000000"
+                                    }],
+                                    "scale": {
+                                        "ticks": [0, 20, 40, 80],
+                                        "tickLength": 0,
+                                        "lineStroke": null
+                                    }
+                                }
+                            },{
+                                "name": "colPm10",
+                                "fieldName": "pm10",
+                                "width": 170,
+                                "styles": {
+                                    "textAlignment": "far",
+                                    "fontSize": 14,
+                                    "color": "#008",
+                                    "shapeInactiveColor": "#ffffff",
+                                    "shapeColor": "#a00000aa",
+                                    "padding": 4,
+                                    "numberFormat": "#,##0.0"
+                                },
+                                "dynamicStyles": [{
+                                    "expressions": [
+                                        "value > 70",
+                                        "value > 40"
+                                    ],
+                                    "styles": [{
+                                        "shapeColor": "#a0aa0000",
+                                        "color": "#800"
+                                    }, {
+                                        "shapeColor": "#a000aa00",
+                                        "color": "#080"
+                                    }]
+                                }]/**,
+                                "header": {
+                                    "text": "PM 10"
+                                },
+                                "footer": {
+                                    "expression": "avg",
+                                    "styles": {
+                                        "fontSize": 14,
+                                        "numberFormat": "#,##0.0"
+                                    },
+                                    "dynamicStyles": [{
+                                        "expressions": [
+                                            "value > 70",
+                                            "value > 40"
+                                        ],
+                                        "styles": [{
+                                            "shapeColor": "#a0aa0000",
+                                            "color": "#800"
+                                        }, {
+                                            "shapeColor": "#a000aa00",
+                                            "color": "#080"
+                                        }]
+                                    }]
+                                }*/,
+                                "renderer": {
+                                    "type": "linearGauge",
+                                    "startValue": 0,
+                                    "endValue": 130,
+                                    "thickness": 10,
+                                    "valueThickness": 0.5,
+                                    "ranges": [{
+                                        "label": "good",
+                                        "endValue": 40,
+                                        "background": "#10000000"
+                                    }, {
+                                        "label": "normal",
+                                        "startValue": 40,
+                                        "endValue": 70,
+                                        "background": "#20000000"
+                                    }, {
+                                        "label": "bad",
+                                        "startValue": 70,
+                                        "endValue": 130,
+                                        "background": "#30000000"
+                                    }],
+                                    "scale": {
+                                        "ticks": [0, 40, 70, 130],
+                                        "tickLength": 0,
+                                        "lineStroke": null
+                                    }
+                                },
+                                "animations": [{
+                                    "property": "value",
+                                    "duration": 1000
+                                }]
+                            }];
+                            grdMain = DataLudi.createGridView('grdMain', null);
+                            grdMain.setColumns(columns);
+                            grdMain.setDataSource(dsMain);
+
+                            grdMain.checkBar().setVisible(false);
+                            grdMain.effectOptions().setAnimationEnabled(true);
+                            grdMain.autoFill().setEnabled(true);
+                            grdMain.header().head().setPopupMenu({
+                                label: 'DataLudi Grid Version',
+                                callback: function () { alert(DataLudi.getVersion()); }
+                            });
+                            
+                            /* grdMain.loadStyles({
+                                selection: {
+                                    background: "#11000000",
+                                    border: "#88000000,1"
+                                }
+                            }); */
+                            
+                            this.loadData(dsMain);
+                        	
+                        },
+                        
+                        loadData: function (ds) {
+                            $.ajax({
+                    			url: "http://helpme.emro.co.kr/repo/grid/resource/data/ambient_air_pollution_who_2014.csv",
+                    			dataType: 'text',
+                    			success: function (data) {
+                    				new DataLudi.DataLoader(ds).load("csv", data, {
+                    					start: 1,
+                    					quoted: true
+                    				});
+                    				$("#rowCount").css("color", "blue").text(ds.rowCount().toLocaleString());
+                    			},
+                    			error: function (xhr, status, error) {
+                    				var err = status + ', ' + error;
+                    				alert("jQuery ajax() Failed: " + err);
+                    			}
+                        	});
+                        }
+                    };  
+                }
+            
+            
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

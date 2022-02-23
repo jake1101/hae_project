@@ -1,0 +1,505 @@
+<script src="/ui/lib/threejs/js/Water.js"></script>
+<dom-module id="cc-fd">
+	<template>
+		<div id="container" class="canvasDiv">
+			<div class="threeBtnGroup vbox">
+				<div id="cameraBtn" class="customBtn cameraBtn tooltip tooltip-right" hidden={{!editable}} on-click="cameraBtnClick" tooltip-text="카메라 위치 저장">
+					<i class="xi-focus-weak xi-icon svgCenter"></i>
+				</div>
+				<div id="cameraDeleteBtn" class="customBtn cameraDeleteBtn tooltip tooltip-right"  hidden={{!editable}} on-click="cameraDeleteBtnClick" tooltip-text="카메라 위치 해제">
+					<i class="xi-focus-frame xi-icon svgCenter"></i>
+				</div>
+			</div>
+		</div>
+		
+		<!-- 레이어그룹 콤보 조회 -->
+		<sc-ajax id="findLayerGroup"
+			url="findLayerGroup.do"
+			body="{{searchParam}}"
+			last-response="{{layerGroupList}}"
+			on-response="completeFindListLayerGroup">
+		</sc-ajax>
+		
+		<!-- 레이어 그룹 저장 -->
+		<sc-ajax
+				id="saveListLayerGroup"
+				url="saveListLayerGroup.do"
+				on-response="completeSaveListLayerGroup">
+		</sc-ajax>
+		
+		<!-- 레이어 그룹 삭제 -->
+		<sc-ajax
+				id="deleteListLayerGroup"
+				url="deleteListLayerGroup.do"
+				on-response="completeDeleteListLayerGroup">
+		</sc-ajax>
+		
+		<sc-ajax id="findGridPositionList" url="findGridPositionList.do" 	body="{{searchParam}}" last-response="{{result}}" on-response="setWorker"></sc-ajax>
+		
+		<sc-grid id="layerGroupGrid" on-item-click="onItemClick" selection-able-function="onSelectionAbleFunction" on-item-edit-end="editLayerGrid" editable=true use-state="{{editable}}" use-selection="false">
+	        <cc-grid-toolbar>
+	            <sc-button text="저장" on-click="onSaveLayerGroup" auth-s></sc-button>
+	        </cc-grid-toolbar>
+             <sc-grid-columns>
+                 <sc-data-column data-field="name" required="true" editable={{editable}} header-text="구역명" width="180" text-align="center" style-name="link"></sc-data-column>
+                 <sc-data-column data-field="layerOrder" editable="true" header-text="순서" width="50" text-align="center" visible="{{editable}}"></sc-data-column>
+                 <sc-combobox-column data-field="casenCount" editable="true" header-text="casen 층 수" width="70" text-align="center" domain-only-or-empty="true"  domain-only="true"
+                 	display-field="value" value-field="value" items="{{casenCombo}}" item-editable-function="casenEditable"></sc-combobox-column>
+                 <sc-data-column data-field="cameraPosition" header-text="카메라 위치" width="120" text-align="center" item-label-function="setCameraLabel" visible="{{editable}}"></sc-data-column>
+            </sc-grid-columns>
+            <sc-grid-fields>
+				<sc-grid-field data-field="id"></sc-grid-field>
+				<sc-grid-field data-field="parentId" data-type="object"></sc-grid-field>
+				<sc-grid-field data-field="siteId"></sc-grid-field>
+				<sc-grid-field data-field="areaId"></sc-grid-field>
+				<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+				<sc-grid-field data-field="model" data-type="object"></sc-grid-field>
+			</sc-grid-fields>
+      	</sc-grid>
+      	
+		<div id="threeTooltip" class="listTooltip" hidden>
+			<div id="tooltipClose" class="close" on-click="closeTooltip">x</div>
+			<ul id="tooltip"></ul>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is: "cc-fd",
+	        properties : {
+	        	rayThree : {
+	        		type: Object,
+	                value: function(){
+	                	return;
+                	}
+            	},
+            	searchParam : {
+	            	type : Object,
+	            	value : function(){
+	            		return {
+	            			limitTimeMinute : 30,
+		            		siteId : SCMdiManager.searchParam.site_id
+		            	}
+	            	}
+		        }, 
+            	casenCombo:{
+					type : Array,
+					value : function(){
+						 return [
+							{value:0},
+							{value:1},
+							{value:2},
+							{value:3},
+							{value:4},
+							{value:5},
+							{value:6},
+							{value:7},
+							{value:8},
+							{value:9}
+						  ];
+					}
+                },
+                casenList : {
+                	type : Array,
+					value : function(){return[];}
+                }
+	         },
+	         onSelectionAbleFunction: function(data){
+				 return UT.isEmpty(data.model);
+             },
+	         setCameraLabel: function(e){
+				if(e.property.cameraPosition){
+					var camera = e.property.cameraPosition.camera;
+					var position = 'x : '+ camera.x.toFixed(0)+ ', y : '+ camera.y.toFixed(0)+ ', z : '+ camera.z.toFixed(0);
+					return position;
+				}
+			 },
+			 onItemClick : function(e){
+		         var me = this,	
+		         data = e.detail.data,
+		         item = e.detail.item;
+
+		         if(item.dataField == 'name'){
+					 var camera = data.property.cameraPosition;
+					 if(camera){
+						me.rayThree.setCameraPosition(camera);
+					}
+			     }
+	         },
+	         editLayerGrid : function(event, detail){
+				 var me = this;
+				 if(detail.item.dataField == 'casenCount'){
+					detail.data.property.casenCount = detail.data.casenCount;
+					me.initLayerGroup(me.$.layerGroupGrid.getDataProvider().getItems());
+				 }
+			 },
+			 casenEditable : function (data, item){
+				 return UT.isNotEmpty(data.property.casen);
+			 },
+		     initThree : function(){
+		        var me = this;
+
+		        gloader.load('casen_hole.glb', function(casenModel){
+					gloader.loaded['casen'] = casenModel;
+					
+					me.casenGroup = new THREE.Group();
+					me.rayThree.scene.add(me.casenGroup);
+						
+			        me.setBackground();
+			        UT.request(me.$.findLayerGroup);
+		        });
+				if(me.noSetWorker != true) {
+					UT.request(me.$.findGridPositionList);					
+				}
+		     },
+	         setBackground : function(){
+		         var me = this;
+		         var scene = this.rayThree.scene;
+		 		 var camera = this.rayThree.camera;
+		 		 var renderer = this.rayThree.renderer;
+		 		 var labelRenderer = this.rayThree.labelRenderer;
+
+		 		this.rayThree.labelControls.maxPolarAngle = Math.PI * 0.495;
+
+				 const waterGeometry = new THREE.PlaneGeometry( 10000, 10000 );
+
+				 var water = new Water(
+						 waterGeometry,
+						{
+							textureWidth: 512,
+							textureHeight: 512,
+							waterNormals: new THREE.TextureLoader().load( 'ui/lib/threejs/img/waternormals.jpg', 
+									function (texture) {
+										texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+									} ),
+							sunDirection: new THREE.Vector3(),
+							sunColor: 0xffffff,
+							waterColor: 0x001e0f,
+							distortionScale: 3.7
+						}
+					);
+
+				 water.rotation.x = - Math.PI / 2;
+				 scene.add(water);
+
+				 this.rayThree.render = function () {
+					 const time = performance.now() * 0.001;
+				 	 water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
+				 	 renderer.render(scene, camera);
+					 labelRenderer.render(scene, camera);
+				 };
+	         },
+	         completeFindListLayerGroup : function(){
+		         var me = this;
+		         me.rayThree.modelGroup.clear();
+				 if(UT.isEmpty(me.layerGroupList)){
+	            	me.models.children.forEach(function(e){
+					var model = e.clone();
+						me.onAddCurrentRow(model);
+					});
+            	}else{
+            		me.layerGroupList.forEach(function(item){
+            			var name = item.property.modelName;
+						var model = me.models.getObjectByName(name);
+						
+						if(UT.isNotEmpty(model) && UT.isEmpty(item.property.casen)){
+						 	item.model = model.clone();
+							me.addModel(item);
+						}else{
+							me.addCasen(item.property);
+						}
+                	});
+
+            		me.$.layerGroupGrid.setDataProvider(me.layerGroupList);
+            	}
+	         },
+	     	 // 현재노드추가
+	           onAddCurrentRow: function(model) {
+	               var me = this,
+	               grid = me.$.layerGroupGrid,
+	               provider = me.$.layerGroupGrid.getDataProvider();
+
+	               var searchParam = this.get("searchParam");
+	               var data = {
+		               	id : -1,
+	              		siteId : searchParam.siteId, 
+	  	                areaId : searchParam.areaId,
+	                    model : model,
+	                    name : model.name||'',
+	                    property : {"modelName" : model.name}
+	               };
+
+	               me.addModel(data);
+	               provider.addItem(data);
+	          },
+	         addModel  : function(modelInfo){
+		     	var name = modelInfo.property.modelName;
+				if(name =='background'){
+					modelInfo.model.position.y = modelInfo.model.position.y - 0.2;
+					if(modelInfo.property.cameraPosition){
+						this.rayThree.setCameraPosition(modelInfo.property.cameraPosition);
+					}
+				}
+				this.rayThree.addModel(modelInfo.model);
+		     },
+		     addCasen : function(casenInfo){
+			     var me = this;
+		    	 var count = casenInfo.casenCount;
+				 var position = casenInfo.casen;
+				 var casenModel = gloader.loaded['casen'].scene.clone();
+				 casenModel.position.set(position.x, position.y, position.z);
+				 for(var i =0; i<count; i++){
+					 var casen = casenModel.clone();
+					 casen.position.y = position.y+1*i;
+					 me.casenGroup.add(casen);
+				 }
+			 },
+			 initLayerGroup : function(layerList){
+				 var me = this;
+				 me.clearCasen();
+             	 me.setCasen(layerList);
+			 },
+			 clearCasen : function(){
+				 var me = this;
+				 me.casenGroup.clear();
+			 },
+			 setCasen : function(layerList){
+				 var me = this;
+				 layerList.forEach(function(e){
+					 if(UT.isNotEmpty(e.property.casen)){
+						 me.addCasen(e.property);
+					 }
+				 });
+			 },
+			 onSaveLayerGroup : function(){
+				var me = this;				
+				var grid = me.$.layerGroupGrid;
+				var provider = grid.getDataProvider();
+				var upsertItems = provider.getUpdateItems().concat(provider.getNewItems());
+
+				if(!upsertItems || upsertItems.length === 0) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+
+				for(var i in upsertItems){
+					if(upsertItems[i].property==null){
+						upsertItems[i].property = {};
+					}
+					upsertItems[i].model =null;
+				}
+				
+				me.$.saveListLayerGroup.body = {"upsertItems" : upsertItems};
+				
+				UT.request(me.$.saveListLayerGroup);
+			},
+			completeSaveListLayerGroup : function(e,res){
+				 var me = this,
+				 message = "STD.N2400"; // 저장하였습니다.
+
+	             if(res.response.result_status === 'S'){
+	            	 UT.alert(message, function(){
+	            		 UT.request(me.$.findLayerGroup);
+                    });
+	             } else {
+	                 message = res.response.result_message;
+	                 UT.alert(message);
+	             }
+			},
+			focusTarget : function(positionId) {
+				var me = this;
+
+				var layerGroupList = me.get("layerGroupList");
+				var target;
+				for(var i in this.result.positions){
+					if(this.result.positions[i].positionId == positionId){
+						target = this.result.positions[i];
+						if(target.layerGroupId == null) return;
+					}
+				}
+				
+				if(target == null){
+					return UT.alert("대상의 위치 정보가 없습니다.");
+				}
+				
+				var layer;
+				var layerId = target.layerGroupId;
+				
+				layerGroupList.forEach(function(el){
+					if(el.id == layerId){
+						layer = el;
+						return;
+					}
+				})
+				
+				if(me.$.groupCombo){
+					me.$.groupCombo.set("selectedItems",[layer]);					
+				}
+				
+				var layerIds = [layerId];
+				
+				me.setWorker(layerIds);
+// 				me.onGroundBtnClick(layer.property.isUnderground);
+				
+				setTimeout(function(){
+					var targetPosition = me.rayThree.scene.getObjectByName('workergroup_'+positionId).position;
+					var position = {
+						camera : {x:0, y:targetPosition.y + 150, z:0},
+						target : {x:0, y:targetPosition.y, z:0}
+					}
+					
+					me.rayThree.setCameraPosition(position);
+	
+					var id = target.positionId;
+					var tag = $("#countTooltip_"+id);
+			   		var check = setInterval(function(){
+						if(tag.length > 0){
+							var cnt = 0;
+							function animate(){
+								cnt ++;
+				    			tag.find(".countLabel")
+				        			.animate({'background-color' : '#ff0000c7'}, 400)
+				        			.animate({'background-color' : '#333333c7'}, 400, animate)
+				        		if(cnt > 10){
+				        			tag.find(".countLabel").stop(true, true);
+				        			tag.find(".countLabel").css('background-color', '');
+				        			return;
+				        		}
+							}
+							animate();
+				            clearInterval(check);
+						}            			
+					},100)
+				}, 100);
+			},
+			setWorker : function(layerIds){
+				var me = this;
+				var positions = [];
+				if(this.result == null) return;
+				if(layerIds != null && layerIds.type != "response"){
+					for(var i in this.result.positions){
+						if(layerIds.includes(this.result.positions[i].layerGroupId)){
+							positions.push(this.result.positions[i]);
+						}
+					}
+				}
+				else {
+					positions = this.result.positions;
+				}
+				if(UT.isNotEmpty(this.result)){	 //API 변경 필요
+					this.rayThree.setWorker(positions, function(e){
+						me.openTooltip(e);
+					});
+				}
+				me.parent.gridData = me.result.gridData.workerList;
+			},
+			openTooltip : function(e){
+				var me = this;
+				var id = e.getAttribute('positionId');
+				var div = me.$.threeTooltip;
+				div.hidden = false;
+
+				div.addEventListener("wheel", function(event){
+					event.stopPropagation();
+				});
+				
+				var tooltip = me.$.tooltip;
+				tooltip.innerHTML = '';	// 초기화
+				
+				me.$.tooltipClose.data = 'countTooltip_'+id;
+
+				var list = [];
+				for(var i in me.result.gridData.workerList){
+					var one = me.result.gridData.workerList[i];
+					if(id == one.positionId){
+						list.push(one);
+					}
+				}
+				
+				for(var i in list){
+					var item = list[i];
+					var li = document.createElement("li");
+					if(item.emergency == "1") li.className = 'emergency';
+					li.innerHTML = item.vendorName +" [" + item.targetJobName + "] "+item.targetName;
+					li.data = item.sensorId;
+					li.id = "worker_"+item.sensorId;
+					li.positionId = item.positionId;
+					
+					li.onclick = function(e){
+						if(me.parent.is == "ep-three-view"){
+							me.parent.focusGrid(e, item);
+						}
+						else if(me.parent.is == "es-sejong-dashboard"){
+							me.parent.searchWorkerPopup(item.targetId);							
+						}
+						e.stopPropagation();
+					}
+					
+					tooltip.appendChild(li);
+				}
+
+				e.appendChild(div);
+			},
+			closeTooltip : function(e){
+				$('#'+e.target.data).removeClass('active');
+				$('#'+e.target.data+' .countLabel').removeClass('active');
+				e.target.parentElement.remove();
+				e.stopPropagation();
+	        },
+            showWorkerTooltip : function(positionId, targetId){
+                var me = this;
+
+                me.hideWorkerTooltip();
+            	var target = me.querySelector("#countTooltip_"+positionId);
+            	target.classList.add('active');
+
+            	var selectedLabel = target.firstElementChild;
+            	selectedLabel.classList.add('active');
+            	me.openTooltip(selectedLabel);
+
+            	me.querySelector("#worker_"+targetId).classList.add('selected');
+            	me.$.tooltip.scrollTo(0, me.querySelector("#worker_"+targetId).offsetTop-30);
+            },
+            hideWorkerTooltip : function(){
+            	var me = this;
+
+                // 이전 선택 초기화
+            	var label = me.querySelector(".countTooltip.active");
+            	if(UT.isObject(label)){
+            		label.firstElementChild.classList.remove('active');
+            		label.classList.remove('active');
+            		me.querySelector(".listTooltip").hidden = true;
+            	}
+            },
+            refresh : function(){
+            	var me = this;
+				UT.request(me.$.findLayerGroup);
+				UT.request(me.$.findGridPositionList);
+            },
+			// 카메러 위치 저장
+			cameraBtnClick : function(){
+				var me = this;
+				var rowIndex = me.$.layerGroupGrid.getCurrentCell().rowIndex;
+				var provider = me.$.layerGroupGrid.getDataProvider();
+				var property = provider.getItemAt(rowIndex).property;
+		
+				property.cameraPosition = me.rayThree.getCameraPosition();
+				provider.setItemAt(rowIndex, {property:property});
+				provider.setItemState(rowIndex, "updated");
+				me.$.layerGroupGrid.refresh();
+			},
+			// 카메라 위치 삭제
+			cameraDeleteBtnClick : function(){
+				var me = this;
+				var rowIndex = me.$.layerGroupGrid.getCurrentCell().rowIndex;
+				var provider = me.$.layerGroupGrid.getDataProvider();
+		
+				if(property.cameraPosition){
+					delete property.cameraPosition;
+					provider.setItemAt(rowIndex, {property:property});
+					provider.setItemState(rowIndex, "updated");
+					me.$.layerGroupGrid.refresh();
+				}
+			},
+	    });
+	</script>
+</dom-module>

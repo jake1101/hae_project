@@ -1,0 +1,54 @@
+<dom-module id="es-bignumber-description">
+	<style>
+		table, th, td {
+			border:1px solid black;
+			border-collapse:collapse;
+			box-sizing: border-box;
+			padding: 3px;
+		}
+		th {
+			background-color:lightgray
+		}
+	</style>
+	<template>
+
+<pre>
+Javascript에서는 일정 수준 이상의 큰 숫자를 다루지 못한다.
+ExtendedObjectMapperFactoryBean에서는 객체를 JSON으로 변형해주는 Serializer작업을 할 때
+안전한 숫자 이상이라면 자동으로 해당 자료형을 문자열 형태로 변경한다
+(Javascript에서 안전한 숫자 https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER)
+
+1) 그리드 정렬 문제
+그리드에서 문자열 형태로 값이 들어가 정렬을 하게 되면 문자 정렬이 된다.
+sortCompareFunction API를 사용하면 정렬 기준을 변경할 수 있다.
+
+큰 숫자 정렬 로직은 공통으로 사용하기 위해 UT.sortBigNumber에 등록되어 있다.
+
+2) 그리드 합계 계산 문제
+문자열 형태의 값이 있을 경우 aggregateFunction API를 이용하여 합계를 구할 수 있다
+</pre>
+
+		<table>
+			<tr>
+				<th>property</th>
+				<th>type</th>
+				<th>설명</th>
+			</tr>
+			<tr>
+				<td>sortCompareFunction</td>
+				<td>Function<br/>default : none<br/>return : Integer</td>
+				<td>text 필드에 연결된 컬럼을 정렬할 때, 두 셀값을 비교하기 위해 호출하는 콜백함수. val1, val2 두 값을 비교해서 val1이 크면 1, val2가 크면 -1, 그렇지 않으면 0을 리턴해야 한다. </td>
+			</tr>
+			<tr>
+				<td>aggregateFunction</td>
+				<td>Function<br/>default : none</td>
+				<td>합계, 소계에서 표시할 값을 리턴하는 콜백함수. 데이터 변경, 필터링등 합계 계산이 다시 필요한 시점에 호출된다.</td>
+			</tr>
+		</table>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-bignumber-description'
+	});
+	</script>
+</dom-module>

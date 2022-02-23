@@ -1,0 +1,124 @@
+<dom-module id="es-tab1-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+    	<!-- 조회 -->
+    	<sc-ajax id="findDetail"
+				 url="json/tab1.json"
+				 last-response="{{data}}">
+	    </sc-ajax>
+	    
+    	<sc-panel title-text="운영조직정보" collapsible="true">
+    		<table class="tb-form">
+				<colgroup>
+	        		<col style="width:130px"/>
+	        		<col/>
+	        	</colgroup>
+				<tr>
+					<th>
+						<sc-label text="운영조직"></sc-label>
+					</th>
+					<td>
+						<sc-text-field class="w-100" value="{{data.oper_org_nm}}" readonly></sc-text-field>
+					</td>
+				</tr>
+				<tr>
+					<th>
+	                    <sc-label text="거래상태/유형"></sc-label>
+	                </th>
+	                <td>
+	                    <div class="field-box">
+	                        <sc-text-field class="w-80" value="{{data.tradsts_nm}}" disabled="true"></sc-text-field>
+	                        <sc-text-field class="w-80" value="{{data.reg_typ_nm}}" disabled="true" style="margin-left:5px"></sc-text-field>
+	                    </div>
+	                </td>
+				</tr>
+				<tr>
+                    <th>
+                    	<sc-label text="거래시작일"></sc-label>
+                    </th>
+                    <td>
+                    	<sc-date-field class="w-100" value="{{data.trad_start_date}}" string-date="true" disabled="true"></sc-date-field>
+                    </td>
+				</tr>
+				<tr>
+                    <th>
+                    	<sc-label text="최초거래시작일"></sc-label>
+                    </th>
+                    <td>
+                    	<sc-date-field class="w-100" value="{{data.fst_trad_start_date}}" string-date="true" disabled="true"></sc-date-field>
+                    </td>
+                </tr>
+			</table>
+    	</sc-panel>
+		<sc-panel title-text="기본정보" collapsible="true">
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:130px"/>
+	        		<col/>
+	        	</colgroup>
+				<tr>
+					<th>
+                        <sc-label text ="협력사코드"></sc-label>
+                    </th>
+                    <td>
+                        <sc-text-field class="w-100" value="{{data.erp_vd_cd}}" readonly></sc-text-field>
+                    </td>
+				</tr>
+				<tr>
+                    <th>
+                        <sc-label text="협력사명"></sc-label>
+                    </th>
+                    <td>
+                        <sc-text-field value="{{data.vd_nm}}" readonly></sc-text-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <sc-label text="사업자등록번호"></sc-label>
+                    </th>
+                    <td>
+                        <sc-text-field value="{{data.biz_reg_no}}" readonly></sc-text-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th rowspan="2">
+                        <sc-label text="회사주소"></sc-label>
+                    </th>
+                    <td>
+                    	<div class="field-box" style="width:100%">
+                    		<sc-text-field class="w-100" value="{{data.post_no}}" readonly></sc-text-field>
+                    		<sc-text-field value="{{data.dtl_addr_1}}" readonly style="margin-left:2px"></sc-text-field>
+                    	</div>
+                    </td>
+                </tr>
+                <tr>
+                   	<td>
+                   		<sc-text-field value="{{data.dtl_addr_2}}" readonly></sc-text-field>
+                   	</td>
+                </tr>
+			</table>
+		</sc-panel>
+    </template>
+    <script>
+    Polymer({
+    	is : "es-tab1-sample",
+    	properties : {
+    		data : {
+    			type : Object,
+    			value : function() {
+    				return {}
+    			}
+    		}
+    	},
+    	initialized : function() {
+			var me = this;
+			
+    		UT.request(me.$.findDetail);
+    	}
+    });
+    </script>
+</dom-module>

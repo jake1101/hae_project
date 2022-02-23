@@ -1,0 +1,124 @@
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 운행 지역 관리
+    ** @Description     : 사토지 및 회피저역
+    ** @Author          : jhPark
+    ** @Create Date     : 2021-09-17
+    ** @History         : 2021-09-17 jhPark 최초작성
+    ******************************************************************************************
+-->
+<sc-link rel="import" href="es-landfill-management.html"></sc-link>
+<sc-link rel="import" href="es-restraint-list.html"></sc-link>
+
+<dom-module id="em-land">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		<!-- 코드 조회-->
+		<sc-request-group init>
+			<sc-code-group>
+				<sc-code code="IOT004" value="{{typList}}"></sc-code>
+			</sc-code-group>
+		</sc-request-group>
+			
+		<!-- 사토지 및 운행 제한 지역 조회 -->
+		<sc-ajax id="findListDriveArea" 	url="findListDriveArea.do"	on-response="completeFindListDriveArea"	body="{{searchParam}}"></sc-ajax>
+		<!-- 운행 지역 삭제 -->
+		<sc-ajax id="deleteDriveArea" 	url="deleteDriveArea.do"	on-response="completeDeleteDriveArea"></sc-ajax>
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<cc-page-title-bar></cc-page-title-bar>
+
+		<div class="vbox flex">
+			<!-- 검색 영역 Start -->
+			<cc-search-container on-search="onSearch" auth-r>
+				<table>
+					<colgroup>
+						<col style="width:80px">
+						<col style="width:200px">
+						<col style="width:80px">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="유형"></sc-label></th>
+						<td>
+							<sc-radio-group-field value={{searchParam.searchType}} on-change="onSearch">
+								<sc-radio-field label="사토지" input-value="landfill"></sc-radio-field>
+								<sc-radio-field label="운행 제한 지역" input-value="restrictions"></sc-radio-field>
+							</sc-radio-group-field>
+						</td>
+						<th><sc-label text="이름" ></sc-label></th>
+						<td>
+							<sc-text-field value={{searchParam.title}}></sc-text-field>
+						</td>
+					</tr>
+				</table>
+			</cc-search-container>
+			<!-- 검색 영역 End -->
+			<div class="vspace-10"></div>
+			
+			<sc-pages id="pages" class="vbox flex" selected-index="0">
+				<es-landfill-management id="landfill" class="flex"></es-landfill-management>
+				
+				<template>
+					<es-restraint-list id="restraint"></es-restraint-list>
+				</template>
+			</sc-pages>
+		</div>
+
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "em-land",
+            properties : {
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {
+                        	siteId : SCMdiManager.searchParam.site_id
+                        };
+                    }
+                },
+            },
+            initialized : function(){
+            	var me = this;
+            	me.onSearch();
+            },
+            //화면 전환 함수
+            onSearch : function() {
+	    		var me = this;
+	    		if(me.searchParam.searchType == "restrictions") {
+		    		me.$.pages.selectItem(me.$.restraint);
+		    		me.$.restraint.load(me.searchParam.title);
+	    		}
+	    		else {
+		    		me.$.pages.selectItem(me.$.landfill);
+		    		me.$.landfill.load();
+	    		}
+	    	},
+        });
+	</script>
+
+</dom-module>

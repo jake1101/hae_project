@@ -1,0 +1,248 @@
+<dom-module id="es-dev-chart-linear-gauge-renderer-tag">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    
+    	<sc-ajax id="findListPr"
+            url="../ambient_air_pollution_who_2014.json"
+            last-response="{{resultList}}"
+            on-response="completefindListPr"
+            >
+        </sc-ajax>
+    	
+    	<sc-grid id="gridChartPanel" class="flex" 
+    			 editable="false"
+    			 use-selection="false"
+    			 use-state="false"
+    			 row-height="60"
+				 data-provider="{{resultList}}"
+				 >
+
+			<sc-grid-columns>
+				<sc-data-column 	data-field="city/station"	header-text="City/Station"	width="80"	text-align="center" ></sc-data-column>
+				
+				<!-- [Linear Gauge Renderer]
+					1. styles : 기본 컬럼 스타일.
+					2. dynamic-styles : value값을 통한 동적 스타일 적용.
+					3. animations : 애니메이션 효과 설정값. 실제 애니메이션은  gridView.effectOptions().setAnimationEnabled(true)을 해야 동작.
+				-->
+				<sc-chart-column 	data-field="pm25"			header-text="PM 2.5"	width="170"	text-align="left" 
+									styles="{{linearColumnStyle25}}"
+									dynamic-styles="{{linearColumnDynamicStyle25}}"
+									animations="{{linearAnimation}}">
+					<!-- [Cell Renderer]
+						 type이 linearGauge인 경우, 다음과 같은 설정값이 존재함.
+						 1. start-value : 시작값
+						 2. end-value : 마지막값
+						 3. thickness : start - end 범위에 대한 두께
+						 4. value-thickness : 실제 값에 대한 두께
+						 5. value-location : 실제 값에 대한 Linear Gauge가 표시될 위치
+						 6. ranges : 범위별 동적 스타일 적용 
+						 7. scale-ticks : start - end 범위 수치화
+						 8. scale-tick-length : start - end 범위 표시 두께(기본값 5)
+					 -->
+					<chart-cell-renderer type="linearGauge" 
+										 start-value="0" 
+										 end-value="80"
+										 thickness="9"
+										 value-thickness="0.3"
+										 value-location="top"
+										 ranges="{{ranges25}}"
+										 scale-ticks="0,20,40,80"
+										 scale-tick-length="0"
+										 >
+					</chart-cell-renderer>
+				</sc-chart-column>
+				<sc-chart-column 	data-field="pm10"			header-text="PM 10"		width="170"	text-align="center" 
+									styles="{{linearColumnStyle10}}"
+									dynamic-styles="{{linearColumnDynamicStyle10}}"
+									animations="{{linearAnimation}}">
+					<chart-cell-renderer type="linearGauge" 
+										 start-value="0" 
+										 end-value="130"
+										 thickness="10"
+										 value-thickness="0.5"
+										 ranges="{{ranges10}}"
+										 scale-ticks="0,40,70,130"
+										 scale-tick-length="5"
+										 >
+					</chart-cell-renderer>
+				</sc-chart-column>
+				<sc-data-column 	data-field="monitoring_stations"		header-text="Monitoring Stations"	width="300"	text-align="center"></sc-data-column>
+			</sc-grid-columns>
+		</sc-grid>
+		
+		
+    	
+    </template>
+    
+    <script>
+        
+        Polymer({
+            is: 'es-dev-chart-linear-gauge-renderer-tag',
+            
+            properties: {
+            	
+            	resultList: {
+            		type: Array,
+            		value: []
+            	},
+            	
+            	chart: {
+            		type: Object,
+            		value: function(){
+            			return {
+            				result: {}
+            			}
+            		}
+            	},
+            	
+            	/** Linear Gauge 애니메이션 속성 */
+            	linearAnimation: {
+            		type: Array,
+            		value: [{
+                        "property": "value",
+                        "duration": 1000
+                    }] 
+            	},
+            	
+            	/** 범위 */
+            	ranges25: {
+            		type: Array,
+            		value: [{
+                        "label": "good",
+                        "endValue": 20,
+                        "background": "#30000000" // ARGB(투명도 + RGB)
+                    }, {
+                        "label": "normal",
+                        "startValue": 20,
+                        "endValue": 40,
+                        "background": "#20000000"
+                    }, {
+                        "label": "bad",
+                        "startValue": 40,
+                        "endValue": 80,
+                        "background": "#10000000"
+                    }]
+            	},
+            	
+            	ranges10: {
+            		type: Array,
+            		value: [{
+                        "label": "good",
+                        "endValue": 40,
+                        "background": "#10000000"
+                    }, {
+                        "label": "normal",
+                        "startValue": 40,
+                        "endValue": 70,
+                        "background": "#20000000"
+                    }, {
+                        "label": "bad",
+                        "startValue": 70,
+                        "endValue": 130,
+                        "background": "#30000000"
+                    }]
+            	},
+            	
+            	/** 기본 Style */
+            	linearColumnStyle25: {
+            		type: Object,
+            		value: {
+            			"textAlignment": "far",
+            			"fontSize": 14,
+            			"color": "#008",
+            			"shapeInactiveColor": "#10000000", // 'start - end' Linear Gauge Color
+            			"shapeColor": "#80000088", // 값에 대한 Linear Gauge Color
+            			"padding": 4,
+            			"numberFormat": "#,##0.0"
+            		}
+            	},
+            	
+            	linearColumnStyle10: {
+            		type:Object,
+            		value: {
+                        "textAlignment": "far",
+                        "fontSize": 14,
+                        "color": "#008",
+                        "shapeInactiveColor": "#ffffff",
+                        "shapeColor": "#a00000aa",
+                        "padding": 4,
+                        "numberFormat": "#,##0.0"
+            		}
+            	},
+            	
+            	/** [Dynamic Style] 
+            		expressions와 styles간의 index를 맞추어야 함
+            	*/
+            	linearColumnDynamicStyle25: {
+            		type:Array,
+            		value: [{
+                       "expressions": [
+                           "value > 70",
+                           "value > 40"
+                       ],
+                       "styles": [{
+                    	   /** 'value > 70' */
+                           "shapeColor": "#a0aa0000",
+                           "color": "#800"
+                       }, {
+                    	   /** 'value > 40' */
+                           "shapeColor": "#a000aa00",
+                           "color": "#080"
+                       }]
+                   }]
+            	},
+            	
+            	linearColumnDynamicStyle10: {
+            		type:Object,
+            		value: [{
+	                    "expressions": [
+	                        "value > 70",
+	                        "value > 40"
+	                    ],
+	                    "styles": [{
+	                        "shapeColor": "#a0aa0000",
+	                        "color": "#800"
+	                    }, {
+	                        "shapeColor": "#a000aa00",
+	                        "color": "#080"
+	                    }]
+	                }]
+            	}
+
+            },
+            
+            attached: function(){
+            	this.loadData();
+            },
+            
+            loadData: function () {
+                /** gridView가 생성되지 않은 경우 */
+                this.async(function(){
+                	if(!this.$.gridChartPanel._gridView){
+                		arguments.callee();
+                	}else{
+                		/** Animation Enabled */
+                    	this.$.gridChartPanel._gridView.effectOptions().setAnimationEnabled(true);
+                    	this.$.findListPr.generateRequest();
+                	}
+				}.bind(this), 1);
+            },
+            
+            completefindListPr: function(e, res){
+            	/** Source Viewer의 data값 set */
+            	this.domHost.$.viewer.setData(JSON.stringify(res.response, null, "\t"));
+            }
+            
+            
+            
+        });
+    </script>
+
+</dom-module>

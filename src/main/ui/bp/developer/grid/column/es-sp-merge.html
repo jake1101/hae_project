@@ -1,0 +1,79 @@
+<!--
+
+	row를 merge를 할 수 있는 방식은 column에 mergeable 속성을 true로 설정하는 방식이다.
+	해당 방식은 row가 정열되지 있지 않은 상태이기 때문에 단순히 같은 값이 나열된 row을 병합만 해준다.
+	
+	정열 및 grouping을 하기위해서는 row-group-columns에 grouping을 진행할 column을 array형식으로 지정을 해 주면
+	정열 및 grouping을 진행한다. 
+	해당 방식은 사용하면   row-group-columns에 지정된 컬럼은 맨 앞으로 배치된다.
+ -->
+
+
+
+<dom-module id="es-sp-merge">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" editable="true" row-group-columns="{{group}}">
+        	<cc-grid-toolbar>
+        		<sc-button text="조회" on-click="onSearch"></sc-button>
+        		<sc-button text="그룹(column1, column2)" on-click="onGroup" ></sc-button>
+        		<sc-button text="병합(column1, column2)" on-click="onMerge" ></sc-button>
+        	</cc-grid-toolbar> 
+                <sc-grid-columns>
+                    <sc-data-column data-field="colunm_1"   header-text="colunm_1"  width="150" text-align="left"   editable="true" mergeable="{{mergeable}}" ></sc-data-column>
+                    <sc-data-column data-field="colunm_2"   header-text="colunm_2"  width="150" text-align="left"   editable="true" mergeable="{{mergeable}}" ></sc-data-column>
+                    <sc-data-column data-field="colunm_3"   header-text="colunm_3"  width="150" text-align="left"   editable="false"    format-type="amt"   data-type="number"></sc-data-column>
+                    <sc-data-column data-field="colunm_4"   header-text="colunm_4"  width="150" text-align="left"   editable="true" ></sc-data-column>
+                    <sc-checkbox-column data-field="colunm_5"   header-text="colunm_4"  width="150" text-align="left"   editable="true" ></sc-checkbox-column>
+                </sc-grid-columns>
+        </sc-grid>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-sp-merge',
+            
+            properties : {
+                resultList: {
+                    type:Array
+                },
+                group:{
+                	type:Array,
+                	value : function(){
+                        return [];
+                    }
+                },
+                mergeable:{
+                	type:Object,
+                	value:true
+                }
+            },
+            
+            onMerge: function(data, item){
+            	this.group = [];
+            	this.mergeable = true;
+            },
+            onGroup: function(data, item){
+            	this.group = ['colunm_1', 'colunm_2'];
+            	this.mergeable = false;
+            },
+            onSearch : function(){
+            	this.fire('search');
+            }
+            
+            
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

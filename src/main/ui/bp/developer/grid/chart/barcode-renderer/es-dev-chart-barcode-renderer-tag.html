@@ -1,0 +1,96 @@
+<dom-module id="es-dev-chart-barcode-renderer-tag">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    
+    	<sc-ajax id="findListPr"
+            url="../mlbteams.json"
+            last-response="{{resultList}}"
+            on-response="completefindListPr"
+            >
+        </sc-ajax>
+    	
+    	<sc-grid id="gridChartPanel" class="flex" 
+    			 editable="false"
+    			 use-selection="false"
+    			 use-state="false"
+    			 row-height="60"
+				 data-provider="{{resultList}}"
+				 >
+
+			<sc-grid-columns>
+				<sc-data-column 	data-field="name"			header-text="Team"		width="150"	text-align="center"></sc-data-column>
+				
+				<!-- sc-chart-column의 renderer속성에 'barcode39', 'barcode128' 명시. 디폴트 바코드 색상은 '#000000'이며, 변경을 원할 시 default-shape-color속성 사용 -->
+				<sc-chart-column 	data-field="name"			header-text="Team128"	width="320"	text-align="center" 
+									renderer="barcode39"></sc-chart-column>
+				<sc-data-column 	data-field="abbreviation"	header-text="Abbr"		width="50"	text-align="center"></sc-data-column>
+				
+				<!-- 스타일 속성을 통해, 색상 지정 -->
+				<sc-chart-column 	data-field="abbreviation"	header-text="Abbr39"	width="100"	text-align="center" 
+									renderer="barcode39" styles="{{barcodeStyles39}}"></sc-chart-column>
+				<sc-chart-column 	data-field="abbreviation"	header-text="Abbr128"	width="100"	text-align="center" 
+									renderer="barcode128" styles="{{barcodeStyles128}}"></sc-chart-column>
+									
+				<sc-data-column 	data-field="division"		header-text="Division"	width="80"	text-align="center"></sc-data-column>
+			</sc-grid-columns>
+		</sc-grid>
+		
+    	
+    </template>
+    
+    <script>
+        
+        Polymer({
+            is: 'es-dev-chart-barcode-renderer-tag',
+            
+            properties: {
+            	
+            	resultList: {
+            		type: Array,
+            		value: []
+            	},
+            	
+            	/** 바코드 스타일 */
+            	barcodeStyles39: {
+            		type: Object,
+            		value: {
+            			"shapeColor": "#ff000088"
+            		}
+            	},
+            	
+            	/** 바코드 스타일 */
+            	barcodeStyles128: {
+            		type: Object,
+            		value: {
+            			"shapeColor": "#ff880000"
+            		}
+            	}
+            	
+            },
+            
+            attached: function(){
+            	this.loadData();
+            },
+            
+            loadData: function () {
+                this.$.findListPr.generateRequest();
+            },
+            
+            completefindListPr: function(e, res){
+            	/** Source Viewer의 data값 set */
+            	this.domHost.$.viewer.setData(JSON.stringify(res.response, null, "\t"));
+            }
+            
+            
+            
+        });
+    </script>
+<!--  Polymer script �� -->
+
+</dom-module>

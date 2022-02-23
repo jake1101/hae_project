@@ -1,0 +1,33 @@
+<sc-link rel="import" href="../../../shared/es-source-viewer.html"></sc-link>
+<sc-link rel="import" href="es-dev-chart-group-footer.html"></sc-link>
+<sc-link rel="import" href="es-dev-chart-group-footer-tag.html"></sc-link>
+<dom-module id="em-dev-chart-group-footer">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+	<template>
+        <sc-panel class="vbox flex-5" collapsible="false" title-text="Grouping Footer 차트 표현">
+           <es-dev-chart-group-footer-tag id="chartColumnTag" title="차트 Group Footer 태그화"></es-dev-chart-group-footer-tag>
+<!-- 			<es-dev-chart-group-footer id="chartColumn" title="차트 Group Footer" class="fit"></es-dev-chart-group-footer> -->
+        </sc-panel>	
+        <sc-panel class="vbox flex-5" collapsible="false" title-text="Source Viewer">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/grid/chart/group-footer/es-dev-chart-group-footer-tag.html"></es-source-viewer>
+        </sc-panel>
+    </template>
+
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'em-dev-chart-group-footer'
+            
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

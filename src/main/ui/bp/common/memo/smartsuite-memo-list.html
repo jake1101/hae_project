@@ -1,0 +1,1767 @@
+<!-- <script src="../../../..ui/assets/css/smartsuite-memo-util.js" defer></script> -->
+<link rel="import" href="smartsuite-memo-detail.html">
+<link rel="import" href="smartsuite-memo-tag.html">
+<link rel="import" href="smartsuite-memo-tag-mgt.html">
+<link rel="import" href="smartsuite-memo-sharing.html">
+<link rel="import" href="smartsuite-memo-shared-data.html">
+<link rel="import" href="resources/lib/color-picker/color-picker.html">
+<link rel="import" href="resources/lib/color-picker/color-picker-box.html">
+<link rel="import" href="/../ui/assets/img/memo/smartsuite-memo-background.png">
+
+
+<dom-module id="smartsuite-memo-list">
+<!--
+	******************************************************************************************
+	** @Program-name 	: 메모 목록 팝업
+	** @Description		: 
+	** @Author 			: jHuh
+	** @Create Date 	: 2016.10.10
+	** @History 		: 2016.10.10 jHuh 최초작성
+	******************************************************************************************
+--> 
+	<style>
+		:host {    
+			@apply(--vbox-layout);
+			min-height: 100%;
+			background-image: url(/ui/assets/img/memo/smartsuite-memo-background.png);
+			background-repeat: repeat;
+			overflow: auto;
+		}
+   	</style>
+   	
+    <template>
+<!-- 
+	************************************************************************************************************
+	* Service Area
+	************************************************************************************************************
+-->
+    	<!-- 현재 로그인한 사용자의 모든 메모 조회 -->
+	    <sc-ajax id="findListAllMemo"
+    		 url="findListAllMemo.do"
+             last-response="{{memoInfo}}"
+             on-response="completeFindListAllMemo" auth-disabled>
+		</sc-ajax>
+		
+		<!-- 현재 로그인한 사용자의 메모 조회 -->
+	    <sc-ajax id="findListMyMemo"
+    		 url="findListMyMemo.do"
+             last-response="{{memoInfo}}"
+             on-response="completeFindListMyMemo">
+		</sc-ajax>
+		
+		<!-- 검색어 입력으로 메모 조회 -->
+	    <sc-ajax id="findListByKeyword"
+    		 url="findListByKeyword.do"
+    		 body="{{search.param}}"
+             last-response="{{memoInfo}}"
+             on-response="completeFindListByKeyword">
+		</sc-ajax>
+		
+		<!-- 현재 로그인한 사용자의 공유 메모 조회 -->
+	    <sc-ajax id="findListSharedMemo"
+    		 url="findListSharedMemo.do"
+             last-response="{{memoInfo}}"
+             on-response="completeFindListSharedMemo">
+		</sc-ajax>
+		
+		<!-- 메모 추가 -->
+    	<sc-ajax id="insertMemo"
+    		 url="insertMemo.do"
+             body="{{insertParam}}"
+             on-response="completeInsertMemo">
+		</sc-ajax>
+		
+		<!-- 중요 메모 조회 -->
+	    <sc-ajax id="findListImptMemo"
+    		 url="findListImptMemo.do"
+             last-response="{{memoInfo}}"
+             on-response="completeFindListImptMemo">
+		</sc-ajax>
+		
+		<!-- 삭제된 메모 조회 -->
+	    <sc-ajax id="findListDeletedMemo"
+    		 url="findListDeletedMemo.do"
+             last-response="{{memoInfo}}"
+             on-response="completeFindListDeletedMemo">
+		</sc-ajax>
+		
+		<!-- 메모 삭제 (삭제 후 휴지통으로 이동) -->
+		<sc-ajax id="deleteMemo"
+    		 url="deleteMemo.do"
+             body="{{deleteParam}}"
+             on-response="completeDeleteMemo">
+		</sc-ajax>
+		
+		<!-- 메모 업데이트 -->
+		<sc-ajax id="updateMemoImpt"
+    		 url="updateMemoImpt.do"
+             body="{{memoImptParam}}">
+		</sc-ajax>
+		
+		<!-- 메모 업데이트 -->
+		<sc-ajax id="updateMemoDashboard"
+    		 url="updateMemoDashboard.do"
+             body="{{memoImptParam}}">
+		</sc-ajax>
+
+		<!-- 사용자가 등록한 태그 조회 -->
+		<sc-ajax id="findListTag"
+    		 url="findListTag.do"
+    		 body="{{findList.param}}"
+             last-response="{{findTagInfo}}"
+             on-response="completeFindTag">
+		</sc-ajax>
+		
+		<!-- 태그별 메모 조회 -->
+    	<sc-ajax id="findListMemoByTag"
+    		 url="findListMemoByTag.do"
+    		 body="{{tagInfo}}"
+             last-response="{{findMemoInfo}}"
+             on-response="completeFindMemoByTag">
+		</sc-ajax>
+		
+		<!-- 메모 태그 추가 -->
+		<sc-ajax id="updateTag"
+    		 url="updateTag.do"
+    		 body="{{updateTagParam}}"
+    		 on-response="completeUpdateTag">
+		</sc-ajax>
+		
+		<!-- 메모 태그 삭제 -->
+		<sc-ajax id="deleteTag"
+    		 url="deleteTag.do"
+             body="{{deleteTagParam}}"
+             on-response="completeDeleteTag">
+		</sc-ajax>
+		
+		<!-- 휴지통 내 메모 복원 -->
+		<sc-ajax id="restoreMemo"
+    		 url="restoreMemo.do"
+             body="{{restoreParam}}"
+             on-response="completRestoreMemo">
+		</sc-ajax>
+		
+		<!-- 휴지통 비우기 -->
+		<sc-ajax id="emptyTrash"
+    		 url="emptyTrash.do"
+             body="{{emptyTrashParam}}"
+             on-response="completeEmptyTrash">
+		</sc-ajax>
+		
+		<!-- 메모 공유 설정 -->
+		<sc-ajax id="manageSharedInfo"
+    		 url="manageSharedInfo.do"
+             body="{{shareParam}}">
+		</sc-ajax>
+<!--  
+	************************************************************************************************************
+	* UI Area
+	************************************************************************************************************
+-->	
+		<!-- 메모 팝업 -->
+		<div class="memo">
+			<!-- 메모 탑 메뉴 -->
+			<div class="memo-topmenu" id="memoTopMenu">
+				<!-- 메모 팝업 상단 툴바 -->
+				<sc-toolbar class="smartsuite-memo-toolbar">
+					<sc-button class="smartsuite-memo-menuList-btn fa fa-bars" title="메뉴" on-click="onManageSideNav"></sc-button>		
+	            	<sc-label class="smartsuite-memo-toolbar-title" text="{{toolbarText.title}}" i18n-disabled></sc-label>
+	           	 	<sc-spacer></sc-spacer>
+	           	 	<sc-button class="smartsuite-memo-back-btn" icon-cls="smartsuite-memo-close" on-click="onLoadPrevPage" hidden="[[!formula('sFieldReadOnly')]]"></sc-button>
+	           	 	<sc-text-field class="smartsuite-memo-searchField" value="{{search.param.keyword}}" placeholder="제목혹은내용으로검색하세요" maxlength="64" on-enter="onSearchMemo" trigger-cls="smartsuite-memo-search" on-trigger-click="onSearchMemo" readonly="[[formula('sFieldReadOnly')]]"></sc-text-field>
+	           	 	<sc-button class="smartsuite-memo-toolbar-buttons" text="메모작성" on-click="onAddMemo" hidden="[[!formula('addMemoBtn')]]"></sc-button>
+	           	 	<sc-button class="smartsuite-memo-toolbar-buttons" text="휴지통비우기" on-click="onEmptyTrash" hidden="[[!formula('emptyTrsBtn')]]"></sc-button>
+	            	<sc-button class="smartsuite-memo-toolbar-buttons" text="태그삭제" on-click="onDeleteTag" hidden="[[!formula('delTagBtn')]]"></sc-button>
+	            </sc-toolbar>
+			</div>
+			<!-- 메모 목록 클릭 시 보여지는 사이드 메뉴 -->
+			<nav class="smartsuite-memo-sidenav" style="display:none" id="memoSideNav">
+				<a href="javascript:void(0);" id="sideNavCls"><sc-button class="smartsuite-memo-side-btn" icon-cls="smartsuite-memo-close"></sc-button></a>
+				<div class="memo-ln"></div> 
+				<a href="javascript:void(0);" id="sideNavAll"><sc-button class="smartsuite-memo-side-btn" icon-cls="smartsuite-memo-allmemo"></sc-button><span class="allMemoSN"></span></a>
+				<div class="memo-ln"></div> 
+				<a href="javascript:void(0);" id="sideNavImpt"><sc-button class="smartsuite-memo-side-btn" icon-cls="smartsuite-memo-bookmark"></sc-button><span class="imptMemoSN"></span></a>
+				<div class="memo-ln"></div>
+				<a href="javascript:void(0);" id="sideNavMyMemo"><sc-button class="smartsuite-memo-side-btn" icon-cls="smartsuite-memo-mymemo"></sc-button><span class="myMemoSN"></span></a>
+				<div class="memo-ln"></div>
+				<a href="javascript:void(0);" id="sideNavShare"><sc-button class="smartsuite-memo-side-btn" icon-cls="smartsuite-memo-share" ></sc-button><span class="sharedMemoSN"></span></a>
+				<div class="memo-ln"></div>
+				<a href="javascript:void(0);" id="sideNavTag"><sc-button class="smartsuite-memo-side-btn" icon-cls="smartsuite-memo-folder"></sc-button><span class="memoTagSN"></span></a>
+				<div class="memo-ln"></div>
+				<a href="javascript:void(0);" id="sideNavTrash"><sc-button class="smartsuite-memo-side-btn" icon-cls="smartsuite-memo-trash"></sc-button><span class="trashSN"></span></a>
+				<div class="memo-ln"></div>
+			</nav>
+			<!-- 메모 태그 클릭 시 보여지는 태그 사이드 메뉴 -->
+			<div id="sideNav">
+			</div>
+			<!-- 구분선 -->
+			<div class="memo-hr"></div>
+	        <!-- 메모 핀 내 메모 데이터가 보여지는 부분 -->
+			<div id="memoColumns">
+				<!-- 메모 추가 버튼 클릭 시 보여지는 메모 기본 폼 -->
+				<div class="pin" id="memoDefaultForm">
+		        	<p><sc-text-field id="title" value="{{newMemoInfo.memo_title}}" placeholder="메모제목을작성해주세요" maxlength="64"></sc-text-field></p>
+		        	<p><sc-textarea-field id="content" value="{{newMemoInfo.memo_content}}" placeholder="메모내용을작성해주세요" maxlength="512"></sc-textarea-field></p>
+		        	<p><sc-filter-multi-combobox-field items="{{tagList}}" value="{{newMemoTagList}}" placeholder="등록된태그없음"></sc-filter-multi-combobox-field></p>
+		        	<p class="smartsuite-memo-tableTagBtn"><sc-button text="태그관리" class="smartsuite-memo-sharing-mgt-btn" on-click="onClickTagMgt"></sc-button></p>
+		        	<p id="colorSet" style="padding:4px;">
+	  						<color-picker id="colorPicker"></color-picker>
+	  					</p>
+		        	<div class="smartsuite-memo-bottom-menu">
+						<sc-button class="smartsuite-memo-importance-btn-selected fa fa-star" title="중요메모" on-click="onCheckNewMemoImp" hidden="[[!formula('imptBtn')]]"></sc-button>
+						<sc-button class="smartsuite-memo-importance-btn fa fa-star-o" title="중요메모" on-click="onCheckNewMemoImp" hidden="[[formula('imptBtn')]]"></sc-button>
+		        		<sc-button class="smartsuite-memo-share-btn fa fa-share-alt" title="메모공유" on-click="onClickSharingNewMemo"></sc-button>
+		        	</div>
+		        	<div class="memo-ln"></div>
+		        	<div class="smartsuite-memo-new-buttons">
+		        		<sc-button class="smartsuite-memo-complete-newBtn" text="완료" on-click="onComplete"></sc-button>
+		        		<sc-button class="smartsuite-memo-complete-newBtn" text="취소" on-click="onCancel"></sc-button>
+		        	</div>
+				</div>
+				<!-- 메모 데이터 조회 후 보여주는 부분 -->
+				<div id="existMemo">
+				</div>
+			</div>
+		</div>
+	</template>
+<!--  
+	************************************************************************************************************
+	* Script Area
+	************************************************************************************************************
+-->		
+	<script>
+		Polymer({
+			is : 'smartsuite-memo-list',
+			
+			properties: {
+				/**
+				 * 메모 팝업 툴바 내 검색 필드에 입력된 값
+				 * @type {Object}
+				 */
+				search: {
+                    type: Object,
+                    value: function(){
+                        return {
+                        	param: {}
+                        };
+                    }
+                },
+                
+				/**
+				 * 메모 팝업 내 툴바에 보여지는 텍스트
+				 * @type {Object}
+				 */
+				toolbarText: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+	            },
+	            
+				/**
+				 * findListAllMemo.do 의 파라미터로 조회해온 메모 데이터 변수
+				 * @type {Object}
+				 */
+	            memoInfo: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+	            },
+	            
+	            /**
+				 * 새 메모 추가 시 입력된 메모 정보를 담고 있음
+				 * @type {Object}
+				 */
+	            newMemoInfo: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+	            },
+	            
+	            /**
+	             * 메모 태그 검색 인자
+	             * @type {Object}
+	             */
+	            findList: {
+                    type: Object,
+                    value: function(){
+                        return {
+                            param: {}
+                        };
+                    }
+                },
+                
+	            /**
+				 * 태그 별 모아보기를 위한 변수
+				 * @type {Object}
+				 */
+	            tagInfo:{
+	            	type: Object,
+					value: function() {
+						return {
+							tag_nm: null
+						};
+					}	
+	            },
+	            
+	            /**
+				 * insertMemo.do 의 파라미터로 추가될 메모에 대한 정보를 담고 있음
+				 * @type {Object}
+				 */
+	            insertParam : {
+					type: Object,
+					value: function() {
+						return {
+							memo_title: null,
+							memo_content: null,
+							memo_imp: 0,
+							memo_dashboard : 0,
+							background_color: null
+						};
+					}
+	            },
+	            
+	            /**
+				 * ESAMTGM 테이블에서 조회해온 데이터 (findListMemoByTag.do 로 조회해온 데이터)
+				 * @type {Object}
+				 */
+				findMemoInfo: {
+					type: Object,
+					value: function() {
+						return {
+							memo_id: null
+						};
+					}
+	            },
+	            
+	            /**
+				 * 사용자가 등록한 태그 데이터
+				 * @type {Object}
+				 */
+	            findTagInfo: {
+	            	type: Object,
+					value: function() {
+						return {};
+					}
+	            },
+	            
+				/**
+				 * 메모 클릭 시 해당 메모에 대한 정보를 smartsuite-memo-detail 팝업으로 넘겨주기 위한 변수
+				 * @type {Object}
+				 */
+	            selectedMemo: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+	            },
+	            
+	            /**
+				 * 태그 버튼 클릭 시 해당 memo_id 를 smartsuite-memo-tag 팝업으로 넘겨주기 위한 변수
+				 * @type {Object}
+				 */
+	            selectedTag: {
+	            	type: Object,
+					value: function() {
+						return {
+							memo_id: null
+						};
+					}
+	            },
+	            
+	            /**
+				 * updateMemoImpt.do 의 파라미터로 중요 메모 여부에 대한 정보를 담고 있음
+				 * @type {Object}
+				 */
+	            memoImptParam: {
+					type: Object,
+					value: function() {
+						return {
+							memo_id: null,
+							memo_imp: 0,
+							memo_dashboard : 0 
+						};
+					}
+	            },
+	            
+	            /**
+				 * deleteMemo.do 의 파라미터로 삭제된 메모의 memo_id, shared_yn 을 담고 있음
+				 * @type {Object}
+				 */
+	            deleteParam: {
+					type: Object,
+					value: function() {
+						return {
+							memo_id: null,
+							ownMemo_yn: 0,
+							shared_yn: 0
+						};
+					}
+	            },
+	            
+	            /**
+				 * deleteTagParam.do 의 파라미터로 삭제된 태그의 tag_nm 을 담고 있음
+				 * @type {Object}
+				 */
+	            deleteTagParam: {
+	            	type: Object,
+					value: function() {
+						return {
+							tag_nm: []
+						};
+					}
+	            },
+	            
+	            /**
+				 * updateTag.do 의 파라미터로 해당 메모 id와 추가될 태그 정보를 담고 있음
+				 * @type {Object}
+				 */
+	            updateTagParam : {
+	            	type: Object,
+					value: function() {
+						return {
+							memo_id: null,							
+							tag_nm: []
+						};
+					}
+	            },
+	            
+	            /**
+				 * restoreMemo.do 의 파라미터로 복원된 메모의 memo_id 를 담고 있음
+				 * @type {Object}
+				 */
+	            restoreParam: {
+					type: Object,
+					value: function() {
+						return {
+							memo_id: null
+						};
+					}
+	            },
+	            
+	            /**
+				 * emptyTrash.do 의 파라미터로 물리적으로 삭제될 메모의 memo_id 리스트를 담고 있음
+				 * @type {Object}
+				 */
+	            emptyTrashParam: {
+	            	type: Object,
+					value: function() {
+						return {
+							memo_id: []
+						};
+					}
+	            },
+	            
+	            /**
+				 * manageSharedInfo.do 의 파라미터로 공유할 메모의 memo_id 와 usr_id 를 담고 있음
+				 * @type {Object}
+				 */
+	            shareParam: {
+					type: Object,
+					value: function() {
+						return {
+							usr_id: [],
+							memo_id: null
+						};
+					}
+	            },
+	            
+	            /**
+				 * 사용자가 등록한 모든 태그 정보
+				 * @type {Array}
+				 */
+	            tagList: {
+	            	type: Array,
+	            	value: function(){
+	            		return [];
+	            	}
+				},
+	            
+				/**
+				 * 메모에 등록된 태그
+				 * @type {Array}
+				 */
+	            newMemoTagList: {
+	            	type: Array,
+	            	value: function(){
+	            		return [];
+	            	}
+	            },
+	            
+	            /**
+				 * 새 메모 추가 시 기본 배경색 지정
+				 * @type {String}
+				 */
+	            defaultColor: {
+	            	type: String,
+	            	value: "#f4edaf"
+	            },
+	            
+	            /**
+				 * 새 메모 추가가 완료되었는지 판단
+				 * @type {Object}
+				 */
+	            isFinished: {
+	            	type: Object,
+	            	value: false
+	            },
+	            
+	            /**
+				 * 중요 메모 아이콘 클릭 시 아이콘 변경을 위해 중요 메모 여부를 담고 있음
+				 * @type {Object}
+				 */
+	            isImptMemo: {
+	            	type: Object,
+	            	value: false
+	            },
+	            /**
+				 * 대쉬보드 아이콘 클릭 시 아이콘 변경을 위해 대쉬보드 등록 여부를 담고 있음
+				 * @type {Object}
+				 */
+	            isDashboardMemo: {
+	            	type: Object,
+	            	value: false
+	            },
+	            
+	            /**
+				 * 공유 메모 여부를 담고 있음
+				 * @type {Object}
+				 */
+	            isSharedMemo: {
+	            	type: Object,
+	            	value: false
+	            },
+
+	            
+	            /**
+				 * memoSideNav 의 활성화 여부
+				 * @type {Object}
+				 */
+	            isOpened: {
+	            	type: Object,
+	            	value: false
+	            },
+	            
+	            /**
+				 * memoTagSideNav 의 활성화 여부
+				 * @type {Object}
+				 */
+	            isOpenedTagNav: {
+	            	type: Object,
+	            	value: false	            	
+	            },
+	            
+	            /**
+				 * 최초 메모 등록 체크
+				 * @type {Object}
+				 */
+	            isFirstMemo: {
+	            	type: Object,
+	            	value: false	            	
+	            },
+	            
+	            /**
+				 * 새 메모 여부 체크
+				 * @type {Object}
+				 */
+	            isNewMemo: {
+	            	type: Object,
+	            	value: false	            	
+	            },
+	            
+	            /**
+				 * 검색 페이지 여부
+				 * @type {Object}
+				 */
+	            isSearchPage: {
+	            	type: Object,
+	            	value: false
+	            },
+	            
+	            /**
+				 * 현재 접속한 사용자 아이디
+				 * @type {String}
+				 */
+	            currentUserId: {
+	            	type: String,
+	            	value: ""
+	            },
+	            
+	            /**
+				 * 현재 로드된 페이지 (all, imp, shr, mym, del)
+				 * @type {String}
+				 */
+	            currentPage: {
+	            	type: String,
+	            	value: ""
+	            }
+			},
+			
+			formulas: {
+				addMemoBtn : function() {
+					return (this.currentPage !== "tag" && this.currentPage !=="del" && !this.isSearchPage);
+				},
+				
+				emptyTrsBtn : function() {
+					return (this.currentPage ==="del");
+				},
+				
+				delTagBtn : function() {
+					return (this.currentPage ==="tag");
+				},
+				
+				imptBtn : function() {
+					return (this.isImptMemo);
+				},
+				
+				sFieldReadOnly : function() {
+					return (this.isSearchPage);
+				}
+			},
+
+			attached : function() {
+				var allMemoSpan = this.querySelector(".allMemoSN"),
+					imptMemoSpan = this.querySelector(".imptMemoSN"),
+					myMemoSpan = this.querySelector(".myMemoSN"),
+					sharedMemoSpan = this.querySelector(".sharedMemoSN"),
+					tagSpan = this.querySelector(".memoTagSN"),
+					trashSpan = this.querySelector(".trashSN");
+				
+				this.$.colorPicker.colorPresetData = MemoData.colorData;
+				
+				allMemoSpan.innerHTML = this.translate("모든 메모");
+				imptMemoSpan.innerHTML = this.translate("중요 메모");
+				myMemoSpan.innerHTML = this.translate("내 메모");
+				sharedMemoSpan.innerHTML = this.translate("공유 메모");
+				tagSpan.innerHTML = this.translate("메모 태그");
+				trashSpan.innerHTML = this.translate("휴지통");
+				
+				this.load();
+			},
+			
+			load : function() {
+				this.currentUserId = SCSessionManager.currentUser.usr_id;
+				this.querySelector("#memoDefaultForm").style.display = 'none';
+				this.onShowAllMemo();
+				this.addListenerToSideNav();
+			},
+			
+			/**
+			* <a> 태그로 구성된 사이드 메뉴에 click listener 추가
+			*/
+			addListenerToSideNav : function() {
+				var me = this;
+				var anchor_cls = this.querySelector("#sideNavCls");
+			    anchor_cls.onclick = function() {
+			    	me.querySelector("#memoSideNav").style.display = "none";
+			    	me.querySelector("#memoTopMenu").style.display = "block";
+			    	me.isOpened = false;
+				}
+			    
+				var anchor_all = this.querySelector("#sideNavAll");
+			    anchor_all.onclick = function() {
+			    	me.onShowAllMemo();
+			    	me.isOpened = true;
+			    	me.onManageSideNav();
+			    	me.clearNewMemoForm();
+				}
+			    
+			    var anchor_mine = this.querySelector("#sideNavMyMemo");
+			    anchor_mine.onclick = function() {
+			    	me.onShowMyMemo();
+			    	me.isOpened = true;
+			    	me.onManageSideNav();
+			    	me.clearNewMemoForm();
+				}
+			    
+			    var anchor_share = this.querySelector("#sideNavShare");
+			    anchor_share.onclick = function() {
+			    	me.onShowSharedMemo();
+			    	me.isOpened = true;
+			    	me.onManageSideNav();
+			    	me.clearNewMemoForm();
+			    }
+			    
+			    var anchor_impt = this.querySelector("#sideNavImpt");
+			    anchor_impt.onclick = function() {			    	
+			    	me.onShowImptMemo();
+		    		me.isOpened = true;
+		    		me.onManageSideNav();
+		    		me.clearNewMemoForm();
+		    	}
+			    
+			    var anchor_tag = this.querySelector("#sideNavTag");
+			    anchor_tag.onclick = function() {
+			    	me.onShowMemoTag();
+			    	me.isOpened = true;
+			    	me.onManageSideNav();
+			    	me.clearNewMemoForm();
+			    }
+			    
+			    var anchor_trash = this.querySelector("#sideNavTrash");
+			    anchor_trash.onclick = function() {			    	
+			    	me.onShowDeletedMemo();
+			    	me.isOpened = true;
+			    	me.onManageSideNav();
+			    	me.clearNewMemoForm();
+		    	}
+			},
+
+			/**
+			* 사이드 메뉴 활성화 / 비활성화
+			*/
+			onManageSideNav : function () {
+				this.clearTagElements();
+				this.clearSearchField();
+				if(!this.isOpened) {
+					this.querySelector("#memoTopMenu").style.display = "none";
+			   	 	this.querySelector("#memoSideNav").style.display = "block";
+			   		this.querySelector("#memoSideNav").style.height = this.clientHeight+'px';
+			   	 	this.isOpened = true;
+			   	 	if(this.querySelector("#memoTagSideNav")){
+			   	 		this.querySelector("#memoTagSideNav").style.display = "none";
+			   	 	}
+				}
+				else {
+					this.querySelector("#memoTopMenu").style.display = "block";
+					this.querySelector("#memoSideNav").style.display = "none";
+					this.isOpened = false;
+					if(this.querySelector("#memoTagSideNav")){
+			   	 		this.querySelector("#memoTagSideNav").style.display = "block";
+			   	 		this.querySelector("#memoTagSideNav").style.height = this.clientHeight+'px';
+			   	 	}
+				}
+			},
+			
+			/**
+			* 검색 (현재 로드된 메모 데이터 내에서 검색)
+			*/ 
+			onSearchMemo : function() {
+				if(!this.search.param.keyword){
+					memoUtil.alert(this.translate("검색어를 입력해주세요."));	
+					return;
+				}
+				this.clearNewMemoForm();
+				
+				var copiedMemo = this.memoInfo,
+					key = this.search.param.keyword,
+					searchedList = [];
+				
+				this.clearMemoElements();
+				this.setToolbarTitle(this.translate("검색 결과"));
+				this.isSearchPage = true;
+				
+				for(var i=0; i<copiedMemo.length; i++){
+					var title = copiedMemo[i].memo_title,
+						content = copiedMemo[i].memo_content;
+					
+					if(title.indexOf(key) > -1 || content.indexOf(key) > -1){
+			            var data = {};
+			            
+			            data.memo_id = copiedMemo[i].memo_id;
+			            data.memo_title = copiedMemo[i].memo_title;
+			            data.memo_content = copiedMemo[i].memo_content;
+			            data.memo_imp = copiedMemo[i].memo_imp;
+			            data.memo_dashboard = copiedMemo[i].memo_dashboard;
+			            
+			            if(copiedMemo[i].shared_yn){
+			            	data.shared_yn = copiedMemo[i].shared_yn;
+			            	data.regId = copiedMemo[i].reg_id;
+			            }
+			            
+			            data.background_color = copiedMemo[i].background_color;
+			            
+			            // 상세 팝업 호출 시 memoInfo 에 해당 메모 데이터 값을 할당하기 위함
+			            searchedList.push(copiedMemo[i]);
+			            
+			            // 실제 엘리먼트 생성 함수 호출
+			            this.drawMemoElements(data, false, data.shared_yn);
+					}
+				}
+				this.memoInfo = searchedList;
+				
+				this.applyFormula();
+				
+				if(this.isFirstMemo){
+					this.querySelector("#memoColumns").style.height = "";
+					this.isFirstMemo = false;
+				}
+				
+				this.isSearchPage = false;
+			},
+			
+			/**
+			* 중요 메모 데이터 조회 후 보여줌
+			*/ 
+			onShowImptMemo : function() {
+				this.currentPage = "imp";
+				this.clearMemoElements();
+				
+				memoUtil.request(this.$.findListImptMemo);
+				
+				this.setToolbarTitle(this.translate("중요 메모"));
+				this.applyFormula();
+			},
+			
+			/**
+			* 전체 메모 데이터 조회 후 보여줌
+			*/
+			onShowAllMemo : function() {
+				this.currentPage = "all";
+				this.clearMemoElements();
+				
+				memoUtil.request(this.$.findListAllMemo);
+				
+				this.setToolbarTitle(this.translate("모든 메모"));
+				this.applyFormula();
+			},
+			
+			/**
+			* 나만의 메모 데이터 조회 후 보여줌
+			*/
+			onShowMyMemo : function() {
+				this.currentPage = "mym";
+				this.clearMemoElements();
+				
+				memoUtil.request(this.$.findListMyMemo);
+				
+				this.setToolbarTitle(this.translate("내 메모"));
+				this.applyFormula();
+			},
+			
+			/**
+			* 공유 메모 데이터 조회 후 보여줌
+			*/
+			onShowSharedMemo : function(){
+				this.currentPage = "shr";
+				this.clearMemoElements();
+				
+				memoUtil.request(this.$.findListSharedMemo);
+
+				this.setToolbarTitle(this.translate("공유 메모"));
+				this.applyFormula();
+			},
+			
+			/**
+			* 메모 태그 데이터 조회 후 보여줌
+			*/
+			onShowMemoTag : function(){
+				this.currentPage = "tag";
+				if(this.memoParam){
+					this.isNewMemo = false;
+					memoUtil.request(this.$.findListTag);
+
+					this.setToolbarTitle(this.translate("메모 태그"));
+					this.applyFormula();
+				}
+			},
+			
+			/**
+			* 휴지통 (삭제된 메모 보여줌)
+			*/
+			onShowDeletedMemo : function() {
+				this.currentPage = "del";
+				this.clearMemoElements();
+				
+				memoUtil.request(this.$.findListDeletedMemo);
+				
+				this.setToolbarTitle(this.translate("휴지통"));
+				this.applyFormula();
+			},
+			
+			/**
+			* 메모 추가 버튼 클릭 시 메모 추가 핀 보여줌
+			*/
+			onAddMemo : function() {
+				this.isNewMemo = true;
+				memoUtil.request(this.$.findListTag);
+				// 새 메모 등록 시 깨짐 현상 방지. 임시 height 설정.
+				if(this.querySelector("#memoColumns").clientHeight < 220) {
+					this.querySelector("#memoColumns").style.height = '225px';
+					this.isFirstMemo = true;
+				}
+				// 새 메모 추가 버튼 클릭 시 최초에만 memo_id 생성
+				if(!this.isFinished){
+					this.newMemoInfo.memo_id = memoUtil.generateUUID();
+					this.isFinished = true;
+				}
+				// 새 메모 추가를 위한 폼 제공
+				this.querySelector("#memoDefaultForm").style.display = 'block';
+			},
+			
+			/**
+			* 메모 추가 취소 버튼 클릭 시 메모 추가 핀 숨김
+			*/
+			onCancel : function() {
+				this.clearNewMemoForm();
+			},
+			
+			/**
+			* 메모 추가 완료 버튼 클릭 시 메모 추가
+			*/
+			onComplete : function() {
+				// 메모 추가 validation
+				if(!this.newMemoInfo.memo_title) {
+					memoUtil.alert(this.translate("메모 제목을 작성해주세요."));
+					return;
+				}
+				else if(!this.newMemoInfo.memo_content){
+					memoUtil.alert(this.translate("메모 내용을 작성해주세요."));
+					return;
+				}
+				
+				this.set("insertParam.memo_id", this.newMemoInfo.memo_id);
+				this.set("insertParam.memo_title", this.newMemoInfo.memo_title);
+				this.set("insertParam.memo_content", this.newMemoInfo.memo_content);
+				this.set("insertParam.memo_imp", this.isImptMemo === true ? 1 : 0);
+				this.set("insertParam.memo_dashboard", this.isDashboardMemo === true ? 1 : 0);
+				this.set("insertParam.shared_yn", this.isSharedMemo === true ? 1 : 0);
+				if(this.$.colorPicker.getColor().eventColor) {					
+					this.set("insertParam.background_color", this.$.colorPicker.getColor().eventColor);
+				}
+				else {
+					this.set("insertParam.background_color", this.defaultColor);
+				}
+
+				memoUtil.request(this.$.insertMemo);
+				
+				this.set("updateTagParam.memo_id", this.newMemoInfo.memo_id);
+				this.set("updateTagParam.tag_nm", this.newMemoTagList);
+				
+				memoUtil.request(this.$.updateTag);
+				
+				if(!memoUtil.isEmpty(this.shareParam)){
+					memoUtil.request(this.$.manageSharedInfo);
+				}
+			},
+			
+			/*
+			* 태그 삭제
+			*/
+			onDeleteTag : function() {
+				var me = this;
+				
+				memoUtil.confirm(me.translate("이 태그를 삭제하고 모든 메모에서 삭제합니다. 메모는 삭제되지 않습니다."), function(btn) {
+					me.deleteTagParam.tag_nm[0] = me.tagInfo.tag_nm;
+					
+                    memoUtil.request(me.$.deleteTag);
+               	});
+			},
+			
+			/**
+			* 휴지통 비우기 (해당 메모 물리적 삭제)
+			*/
+			onEmptyTrash : function() {
+				var me = this;
+
+				memoUtil.confirm(me.translate("휴지통을 비우시겠습니까? 휴지통에 있는 모든 메모가 완전히 삭제됩니다."), function(btn) {
+					for(var i = 0, j = 0; i < me.memoInfo.length; i++){
+						if(me.memoInfo[i].delete_yn == 1){
+							me.emptyTrashParam.memo_id[j] = me.memoInfo[i].memo_id;
+							// 휴지통 내 메모 delete_yn 값 2로 세팅 (0: 일반 메모, 1: 휴지통 내 메모, 2: 물리적 삭제된 메모)
+							me.memoInfo[i].delete_yn = 2;
+							j++;
+						}
+					}
+					
+                    memoUtil.request(me.$.emptyTrash);
+               	});
+			},
+			
+			onLoadPrevPage : function() {
+				this.clearSearchField();
+				this.loadOpenedPage();
+				this.applyFormula();
+			},
+			
+			/**
+			* 메모 핀 내 텍스트 (제목 & 내용) 클릭 시 상세 팝업 호출
+			* @param {Element} divArea 클릭 된 메모 핀 엘리먼트
+			*/
+			onClickListener : function(divArea) {
+				var me = this;
+
+				divArea.onclick = function() {
+					for(var i = 0; i < me.memoInfo.length; i++){
+						if(me.memoInfo[i].memo_id === divArea.id){
+							me.set("selectedMemo", memoUtil.copy(me.memoInfo[i]));
+							break;
+						}
+					}
+					
+					var memoPopup = memoUtil.popup("smartsuite-memo-detail", me, 420, 275, {  
+						"load-completed": function(popup, e) {
+			   	        	popup.getContent().setParam(me.selectedMemo);
+			   	        },
+			   	        "close": function(popup, e) {
+			   	        	//팝업 reload 혹은 추가된 메모만 load
+			   	        	me.clearSearchField();
+			   	        	me.loadOpenedPage();
+			   	        	memoPopup.classList.remove('smartsuite-memo-popup');
+			            }
+			   	    }, {title: me.translate("메모"),
+			   	    	resizable : false,
+			  			modal: false});
+					
+					memoPopup.classList.add('smartsuite-memo-popup');
+					memoPopup.show();
+				};
+			},
+			
+			/**
+			* side navigator 되돌아가기 버튼 클릭 시 호출
+			* @param {Element} aTag 되돌아가기 버튼 엘리먼트
+			*/
+			onExitTagNav : function(aTag) {
+				var me = this;
+				
+				aTag.onclick = function() {
+					me.applyFormula();
+					me.querySelector("#memoTagSideNav").style.display = "none";
+					me.querySelector("#memoSideNav").style.display = "block";
+					me.isOpened = true;
+					me.isOpenedTagNav = false;
+			    	me.currentPage = "all";
+				}
+			},
+			
+			/**
+			* side navigator 내 메모 태그 클릭 시 호출
+			* @param {Element} aTag 클릭 된 메모 태그 엘리먼트
+			*/
+			onTagNavClickListener : function(aTag) {
+				var me = this;
+				
+				aTag.onclick = function() {
+					me.applyFormula();
+					me.clearMemoElements();
+					me.isOpened = true;
+					me.isOpenedTagNav = true;
+					me.onManageSideNav();
+					me.tagInfo.tag_nm = aTag.id;
+					memoUtil.request(me.$.findListMemoByTag);
+					me.set("toolbarText.title", me.tagInfo.tag_nm);
+				}
+
+			},
+			
+			/**
+			* 메모 내 태그 아이콘 클릭 시 호출
+			* @param {Element} tagBtn 메모 핀 내 태그 버튼 엘리먼트
+			*/
+			onClickTagBtn : function(tagBtn) {
+				var me = this;
+				
+				for(var i = 0; i < me.memoInfo.length; i++){
+					if(me.memoInfo[i].memo_id === tagBtn.id){
+						me.set("selectedTag", memoUtil.copy(me.memoInfo[i]));
+						break;
+					}
+				}
+				
+				var memoPopup = memoUtil.popup("smartsuite-memo-tag", me, 420, 180, {  
+					"load-completed": function(popup, e) {
+		   	        	popup.getContent().setParam(me.selectedTag);
+		   	        },
+		   	        "close": function(popup, e) {
+		   	        	//팝업 reload 혹은 추가된 메모만 load
+		   	        	me.loadOpenedPage();
+		   	        	memoPopup.classList.remove('smartsuite-memo-popup');
+		            }
+		   	    }, {title: me.translate("메모 태그"),
+		   	    	resizable : false,
+		  			modal: false});
+				
+				memoPopup.classList.add('smartsuite-memo-popup');
+				memoPopup.show();
+			},
+			
+			/**
+			* 공유 아이콘 클릭 시 호출
+			* @param {Element} shareBtn 메모 핀 내 공유 버튼 엘리먼트
+			*/
+			onClickShareBtn : function(shareBtn) {
+				var me = this;
+				
+				var memoPopup = memoUtil.popup("smartsuite-memo-sharing", me, 420, 240, {  
+					"load-completed": function(popup, e) {
+		   	        	popup.getContent().setParam(shareBtn.id, false);
+		   	        },
+		   	        "close": function(popup, e) {
+		   	        	//팝업 reload 혹은 추가된 메모만 load
+		   	        	me.loadOpenedPage();
+		   	        	memoPopup.classList.remove('smartsuite-memo-popup');
+		            }
+		   	    }, {title: me.translate("메모 공유"),
+		   	    	resizable : false,
+		   	    	modal: false});
+
+				memoPopup.classList.add('smartsuite-memo-popup');
+				memoPopup.show();
+			},
+			
+			/**
+			* 메모 복원 버튼 클릭 시 일반 메모로 위치 이동
+			* @param {Element} restoreBtn 메모 핀 내 복원 버튼 엘리먼트
+			*/
+			onClickRestoreBtn : function(restoreBtn){
+				var me = this;
+				var idx = 0;
+				memoUtil.confirm(me.translate("메모를 복원하시겠습니까?"), function(btn) {
+					for(var i = 0; i < me.memoInfo.length; i++){
+						if(me.memoInfo[i].memo_id === restoreBtn.id){
+							me.memoInfo[i].delete_yn = 0;
+							idx = i;
+							break;
+						}
+					}
+					me.set("restoreParam.memo_id", me.memoInfo[idx].memo_id);
+					memoUtil.request(me.$.restoreMemo);
+               	});
+			},
+			
+			/**
+			* 메모 완전 삭제 버튼 클릭 시 메모 물리적 삭제
+			* @param {Element} cmplDelBtn 메모 핀 내 삭제 버튼 엘리먼트
+			*/
+			onClickCmplDelBtn : function(cmplDelBtn){
+				var me = this;
+				var idx = 0;
+				memoUtil.confirm(me.translate("메모를 완전히 삭제하시겠습니까?"), function(btn) {
+					for(var i = 0, j = 0; i < me.memoInfo.length; i++){
+						if(me.memoInfo[i].memo_id === cmplDelBtn.id){
+							me.emptyTrashParam.memo_id[0] = me.memoInfo[i].memo_id;
+							// 해당 메모 delete_yn 값 2로 세팅 (0: 일반 메모, 1: 휴지통 내 메모, 2: 물리적 삭제된 메모)
+							me.memoInfo[i].delete_yn = 2;
+							break;
+						}
+					}
+					memoUtil.request(me.$.emptyTrash);
+               	});
+			},
+			
+			/**
+			* 태그 관리 버튼 클릭 시 호출
+			*/
+			onClickTagMgt : function() {
+				var me = this;
+				
+				var memoPopup = memoUtil.popup("smartsuite-memo-tag-mgt", me, 420, 420, {
+		   	        "close": function(popup, e) {
+		   	        	memoUtil.request(me.$.findListTag);
+		   	        	memoPopup.classList.remove('smartsuite-memo-popup');		   	        	
+		            }
+		   	    }, {title: me.translate("태그 관리"),
+		   	    	resizable : false});
+				
+				memoPopup.classList.add('smartsuite-memo-popup');
+				memoPopup.show();
+			},
+			
+			/**
+			* 중요 메모 아이콘 클릭 시 해당 아이콘 및 해당 값 변경
+			* @param {Element} importantBtn 메모 핀 내 중요 메모 체크 버튼 엘리먼트
+			*/
+			onCheckImportance : function(importantBtn) {
+				var idx = 0;
+				for(var i = 0; i < this.memoInfo.length; i++){
+					if(this.memoInfo[i].memo_id === importantBtn.id){
+						this.memoInfo[i].memo_imp == 1 ? this.isImptMemo = true : this.isImptMemo = false;
+						this.isImptMemo === true ? this.memoInfo[i].memo_imp = 0 : this.memoInfo[i].memo_imp = 1;
+						idx = i;
+						break;
+					}
+				}
+				
+				// 중요 메모 아이콘 변경
+				if(this.isImptMemo) {
+					importantBtn.setAttribute('class','smartsuite-memo-importance-btn fa fa-star-o');
+				}
+				else {
+					importantBtn.setAttribute('class','smartsuite-memo-importance-btn-selected fa fa-star');
+				}			
+				
+				// 중요도 설정 업데이트
+				this.set("memoImptParam.memo_id", this.memoInfo[idx].memo_id);
+				this.set("memoImptParam.memo_imp", this.memoInfo[idx].memo_imp);
+				memoUtil.request(this.$.updateMemoImpt);
+				
+				// 기본값으로 다시 세팅
+				this.isImptMemo = false;
+			},
+			/**
+			* 대쉬보드 등록 아이콘 클릭 시 해당 아이콘 및 해당 값 변경
+			* @param {Element} importantBtn 메모 핀 내 중요 메모 체크 버튼 엘리먼트
+			*/
+			onCheckDashBoard : function(dashBoardBtn) {
+				var idx = 0;
+				for(var i = 0; i < this.memoInfo.length; i++){
+					if(this.memoInfo[i].memo_id === dashBoardBtn.id){
+						this.memoInfo[i].memo_dashboard == 1 ? this.isDashboardMemo = true : this.isDashboardMemo = false;
+						this.isDashboardMemo === true ? this.memoInfo[i].memo_dashboard = 0 : this.memoInfo[i].memo_dashboard = 1;
+						idx = i;
+						break;
+					}
+				}
+				// 아이콘 변경
+				if(this.isDashboardMemo) {
+					dashBoardBtn.setAttribute('class','smartsuite-memo-importance-btn fa fa-star-o');
+				}
+				else {
+					dashBoardBtn.setAttribute('class','smartsuite-memo-importance-btn-selected fa fa-star');
+				}			
+				
+				// 중요도 설정 업데이트
+				this.set("memoImptParam.memo_id", this.memoInfo[idx].memo_id);
+				this.set("memoImptParam.memo_dashboard", this.memoInfo[idx].memo_dashboard); //2
+				memoUtil.request(this.$.updateMemoDashboard);
+				
+				// 기본값으로 다시 세팅
+				this.isDashboardMemo = false;
+			},
+			
+			/**
+			* 삭제 버튼 클릭 시 메모 삭제
+			* @param {Element} deleteBtn 메모 핀 내 삭제 버튼 엘리먼트
+			*/
+			onDeleteMemo : function(deleteBtn) {
+				var me = this;
+				var idx = 0;
+				
+				memoUtil.confirm(me.translate("메모를 삭제하시겠습니까?"), function(btn) {
+					for(var i = 0; i < me.memoInfo.length; i++){
+						if(me.memoInfo[i].memo_id === deleteBtn.id){
+							me.set("deleteParam.memo_id", deleteBtn.id);
+							me.set("deleteParam.shared_yn", me.memoInfo[i].shared_yn);
+							me.memoInfo[i].reg_id === me.currentUserId ? me.set("deleteParam.ownMemo_yn", 1) : me.set("deleteParam.ownMemo_yn", 0);
+							idx = i;
+							break;
+						}
+					}
+					
+					me.memoInfo[idx].delete_yn = 1;
+					
+                    memoUtil.request(me.$.deleteMemo);
+               	});
+			},
+			
+			/**
+			* 중요 메모 아이콘 클릭 시 해당 아이콘으로 변경
+			*/
+			onCheckNewMemoImp : function() {
+				this.isImptMemo = !(this.isImptMemo);
+				this.applyFormula();
+			},
+			
+			/**
+			* 새 메모 공유 여부 설정
+			*/
+			onClickSharingNewMemo : function() {
+				var me = this;
+				
+				var memoPopup = memoUtil.popup("smartsuite-memo-sharing", me, 420, 240, {  
+					"load-completed": function(popup, e) {
+		   	        	popup.getContent().setParam(me.newMemoInfo.memo_id, true);
+		   	        },
+		   	        
+		   	     	"share-setting-completed" : function(popup, e) {
+		   	     		me.set('shareParam', e.detail);
+					},
+					
+		   	        "close": function(popup, e) {
+		   	        	//팝업 reload 혹은 추가된 메모만 load
+		   	        	//me.loadOpenedPage();
+		   	        	memoPopup.classList.remove('smartsuite-memo-popup');
+		            }
+		   	    }, {title: me.translate("메모 공유"),
+		   	    	resizable : false,
+		   	    	modal: false});
+
+				memoPopup.classList.add('smartsuite-memo-popup');
+				memoPopup.show();
+			},
+			
+			/**
+			* 메모 엘리먼트 생성 (findListAllMemo.do 에서 response 로 받아온 메모 데이터 memoInfo 에 대하여 엘리먼트 생성. 그 후 화면에 그려주는 함수 호출)
+			* @param {Boolean} showImptMemo 중요 메모를 보여줄 것인지 여부
+			* @param {Boolean} showDeletedMemo 삭제된 메모를 보여줄 것인지 여부
+			*/
+			createMemoElements : function(showImptMemo, showDeletedMemo) {
+				for(var i=0; i<this.memoInfo.length; i++){
+					// 중요 메모 or 모든 메모를 보여줄 것인지 체크
+					if(showImptMemo && this.memoInfo[i].memo_imp != 1){
+						continue;
+					} 
+					if(showDeletedMemo && this.memoInfo[i].delete_yn != 1){
+						continue;
+					}
+					else if(!showDeletedMemo && this.memoInfo[i].delete_yn != 0) {
+						continue;
+					}
+		            var data = {};
+		            
+		            var modTime = this.memoInfo[i].mod_dt;
+					var month = modTime.getUTCMonth()+1;
+					this.memoInfo.mod_dt = modTime.getUTCFullYear() + '/' + month + '/' + modTime.getUTCDate() + ' ' + modTime.getHours() + ':' + modTime.getMinutes() + ':' + modTime.getSeconds();
+					
+		            
+		            
+		           // console.log(this.memoInfo[i]);
+		            data.memo_id = this.memoInfo[i].memo_id;
+		            data.memo_title = this.memoInfo[i].memo_title;
+		            data.memo_content = this.memoInfo[i].memo_content;
+		            data.memo_imp = this.memoInfo[i].memo_imp;
+		            data.memo_dashboard = this.memoInfo[i].memo_dashboard;
+		            data.memo_mod_dt=this.memoInfo.mod_dt;
+		            if(this.memoInfo[i].shared_yn){
+		            	data.shared_yn = this.memoInfo[i].shared_yn;
+		            	data.regId = this.memoInfo[i].reg_id;
+		            }
+		            data.background_color = this.memoInfo[i].background_color;
+		            
+		            // 실제 엘리먼트 생성 함수 호출
+		            this.drawMemoElements(data, showDeletedMemo, data.shared_yn);
+				}
+				if(this.isFirstMemo){
+					this.querySelector("#memoColumns").style.height = "";
+					this.isFirstMemo = false;
+				}
+			},
+			
+			/**
+			* 메모 엘리먼트 동적 생성하여 화면에 보여줌
+			* @param {Object} data 생성될 메모 데이터
+			* @param {Boolean} isDeleted 삭제 여부 (해당 메모가 휴지통에 위치한 것인지 구분하기 위한 변수)
+			*/
+			drawMemoElements : function(data, isDeleted, isShared) {
+				var me = this;
+				var target = this.$.existMemo;
+				var pin, aTag, ln, memoTitle, memoContent,memoModDt, memoRegId, memoBottomMenu, shareBtn, tagBtn, importantBtn, deleteBtn , restoreBtn, cmplDelBtn;
+				var dashBoardBtn;
+				 
+				// memoColumns 내 메모 pin에 메모가 정보가 저장됨. (메모 개수만큼 메모 pin이 생성됨)  
+				pin = document.createElement('div');
+				pin.setAttribute('class','pin');
+				pin.style.backgroundColor = data.background_color;
+				
+				// 메모 내용과 하단의 버튼을 구분하기 위한 선
+				ln = document.createElement('div');
+				ln.setAttribute('class', 'memo-ln');
+				
+				// 메모 내용 혹은 제목 클릭 시 메모 상세 팝업 호출을 위한 a 태그.(a 태그 내에 제목과 내용이 추가됨)
+				aTag = document.createElement('a');
+				aTag.setAttribute('href','javascript:void(0);');
+				aTag.setAttribute('class','fill-div');
+				aTag.setAttribute('id',data.memo_id);
+				
+				this.onClickListener(aTag);
+				
+				// 메모 제목
+				memoTitle = document.createElement('p');
+				memoTitle.setAttribute('class','smartsuite-memo-title');
+				memoTitle.innerText = data.memo_title;
+				
+				// 메모 내용
+				memoContent = document.createElement('p');
+				memoContent.setAttribute('class','smartsuite-memo-content');
+				memoContent.innerText = data.memo_content;
+
+				// 메모 등록자
+				memoRegId = document.createElement('div');
+				memoRegId.setAttribute('class','smartsuite-memo-register');
+				
+				
+				//메모 날짜
+				memoModDt = document.createElement('p');
+				memoModDt.setAttribute('class','smartsuite-memo-content');
+				memoModDt.setAttribute('style',' text-align: right ; font-weight:bold;');
+				memoModDt.innerText = data.memo_mod_dt;
+
+				// 자신이 작성한 공유 메모가 아닌 경우, 등록자를 보여줌
+				if(isShared == 1 && data.regId !== me.currentUserId){
+					memoRegId.innerText = "- "+data.regId+" -";
+				}
+				
+				// 메모 하단 영역으로, 버튼을 추가하기 위한 div
+				memoBottomMenu = document.createElement('div');
+				memoBottomMenu.setAttribute('class','smartsuite-memo-bottom-menu');
+								
+				// 삭제된 메모(휴지통)인 경우, 메모 하단 영역에 일반 메모와는 다른 버튼이 보여짐
+				if(isDeleted){
+					restoreBtn = document.createElement('sc-button');
+					restoreBtn.setAttribute('class','smartsuite-memo-restore-btn fa fa-refresh');
+					restoreBtn.setAttribute('id',data.memo_id);
+					restoreBtn.setAttribute('title','메모 복원');
+					restoreBtn.onclick = function(){
+						me.onClickRestoreBtn(restoreBtn);
+					}
+					
+					cmplDelBtn = document.createElement('sc-button');
+					cmplDelBtn.setAttribute('class','smartsuite-memo-delete-btn fa fa-trash');
+					cmplDelBtn.setAttribute('id',data.memo_id);
+					cmplDelBtn.setAttribute('title','완전 삭제');
+					cmplDelBtn.onclick = function(){
+						me.onClickCmplDelBtn(cmplDelBtn);
+					}
+					
+					Polymer.dom(memoBottomMenu).appendChild(restoreBtn); 
+					Polymer.dom(memoBottomMenu).appendChild(cmplDelBtn); 
+				}
+				else { 
+					shareBtn = document.createElement('sc-button');
+					shareBtn.setAttribute('class','smartsuite-memo-share-btn fa fa-share-alt');
+					shareBtn.setAttribute('id',data.memo_id);
+					shareBtn.setAttribute('title','메모 공유');
+					shareBtn.onclick = function(){
+						me.onClickShareBtn(shareBtn);
+					}
+					
+					tagBtn = document.createElement('sc-button');
+					tagBtn.setAttribute('class','smartsuite-memo-tag-btn fa fa-tags');
+					tagBtn.setAttribute('id',data.memo_id);
+					tagBtn.setAttribute('title','메모 태그');
+					tagBtn.onclick = function(){
+						me.onClickTagBtn(tagBtn);
+					}
+					
+					importantBtn = document.createElement('sc-button');
+					if(data.memo_imp == 1){
+						importantBtn.setAttribute('class','smartsuite-memo-importance-btn-selected fa fa-star');
+						importantBtn.setAttribute('title','중요 메모 해제');
+					}
+					else {
+						importantBtn.setAttribute('class','smartsuite-memo-importance-btn fa fa-star-o');
+						importantBtn.setAttribute('title','중요 메모 선택');
+					}
+					importantBtn.setAttribute('id',data.memo_id);
+					importantBtn.onclick = function(){				
+						me.onCheckImportance(importantBtn);
+					}
+	
+					deleteBtn = document.createElement('sc-button');
+					deleteBtn.setAttribute('class','smartsuite-memo-delete-btn fa fa-trash');
+					deleteBtn.setAttribute('id',data.memo_id);
+					deleteBtn.setAttribute('title','메모 삭제');
+					deleteBtn.onclick = function(){
+						me.onDeleteMemo(deleteBtn);
+					}
+
+// 					dashBoardBtn = document.createElement('sc-button');
+// 					if(data.memo_dashboard == 1){
+// 						dashBoardBtn.setAttribute('class','smartsuite-memo-importance-btn-selected fa fa-star');
+// 						dashBoardBtn.setAttribute('title','대쉬보드 등록 해제');
+// 					}
+// 					else {
+// 						dashBoardBtn.setAttribute('class','smartsuite-memo-importance-btn fa fa-star-o'); //이미지 등 CSS 수정 예정
+// 						dashBoardBtn.setAttribute('title','대쉬보드 등록');
+// 					}
+// 					dashBoardBtn.setAttribute('id',data.memo_id);
+// 					dashBoardBtn.onclick = function(){				
+// 						me.onCheckDashBoard(dashBoardBtn);
+// 					}
+// 					Polymer.dom(memoBottomMenu).appendChild(dashBoardBtn);
+
+					Polymer.dom(memoBottomMenu).appendChild(importantBtn);
+					Polymer.dom(memoBottomMenu).appendChild(shareBtn); 
+					Polymer.dom(memoBottomMenu).appendChild(tagBtn); 
+					Polymer.dom(memoBottomMenu).appendChild(deleteBtn); 
+				}
+				
+				Polymer.dom(aTag).appendChild(memoTitle);
+				Polymer.dom(aTag).appendChild(memoContent);
+				Polymer.dom(aTag).appendChild(memoModDt);
+				
+				Polymer.dom(pin).appendChild(aTag);
+				if(isShared == 1 && data.regId !== me.currentUserId){
+					Polymer.dom(pin).appendChild(memoRegId);
+				}
+				Polymer.dom(pin).appendChild(ln);
+				Polymer.dom(pin).appendChild(memoBottomMenu);
+				Polymer.dom(target).appendChild(pin);
+			},
+
+			/**
+			* side navigator 에 메모 태그 엘리먼트 동적 생성하여 화면에 보여줌
+			* @param {Object} data 생성될 메모 태그 데이터
+			*/
+			createMemoTagNav : function(data) {
+				var target = this.$.sideNav;
+				var tagSideNav, aTag, hLine, closeBtn;		
+				
+				if(data.length == 0) {
+					memoUtil.alert(this.translate("등록된 태그가 없습니다."));
+				}
+				else {			    	
+					this.isOpened = true;
+					this.onManageSideNav();
+					
+			    	// 메모 사이드 메뉴가 보여질 경우, 탑 메뉴는 히든 처리함
+			    	this.querySelector("#memoTopMenu").style.display = "none";
+
+			    	// 메모 태그 사이드 메뉴 최상위 태그
+					tagSideNav = document.createElement('nav');
+					tagSideNav.setAttribute('class','smartsuite-memo-tag-sidenav');
+					tagSideNav.setAttribute('style','display:block');
+					tagSideNav.setAttribute('id', 'memoTagSideNav');
+					
+					aTag = document.createElement('a');
+					aTag.setAttribute('href', 'javascript:void(0);');
+					aTag.setAttribute('id', 'sideNavCls');
+					
+					closeBtn = document.createElement('sc-button');
+					closeBtn.setAttribute('class', 'smartsuite-memo-side-title-btn');
+					closeBtn.setAttribute('icon-cls', 'smartsuite-memo-close');
+					closeBtn.setAttribute('text', '메모 태그');
+					
+					hLine = document.createElement('div'); 
+					hLine.setAttribute('class', 'memo-ln');
+					
+					this.onExitTagNav(aTag);
+					
+					Polymer.dom(aTag).appendChild(closeBtn);
+					Polymer.dom(tagSideNav).appendChild(aTag);
+					Polymer.dom(tagSideNav).appendChild(hLine);
+					
+					for(var i=0, len=data.length; i<len; i++){
+						aTag = document.createElement('a');
+						
+						aTag.setAttribute('href', 'javascript:void(0);');
+						aTag.setAttribute('id', data[i].tag_nm);
+						aTag.innerText = data[i].tag_nm;
+						
+						hLine = document.createElement('div'); 
+						hLine.setAttribute('class', 'memo-ln');
+						
+						this.onTagNavClickListener(aTag);
+	
+						Polymer.dom(tagSideNav).appendChild(aTag);
+						Polymer.dom(tagSideNav).appendChild(hLine);
+					}
+					
+					Polymer.dom(target).appendChild(tagSideNav);
+					this.querySelector("#memoTagSideNav").style.height = this.clientHeight+'px';
+				}
+			},
+			
+			/**
+			* 화면에 로드되어 있는 메모 데이터 초기화 (화면에서 변경 전 메모 데이터 제거)
+			*/
+			clearMemoElements : function() {
+				var target = this.$.existMemo;
+				
+				while(target.hasChildNodes()){
+					target.removeChild(target.firstChild);
+				}
+				
+				this.memoInfo = {};
+			},
+			
+			/*
+			* 새 메모 추가 폼 초기화
+			*/
+			clearNewMemoForm : function(){
+				this.newMemoInfo = {};
+				this.isImptMemo = false;
+				this.isDashboardMemo = false;
+				this.isFinished = false;
+				this.isSharedMemo = false;
+				this.applyFormula();
+				this.querySelector("#memoDefaultForm").style.display = 'none';
+			},
+			
+			/**
+			* side navigator 에 로드되어 있는 태그 데이터 초기화
+			*/
+			clearTagElements : function() {
+				var target = this.$.sideNav;
+				
+				while(target.hasChildNodes()){
+					target.removeChild(target.firstChild);
+				}
+
+				this.memoInfo = {};
+			},
+			
+			clearSearchField : function() {
+				var sField = this.querySelector(".smartsuite-memo-searchField");
+				sField.$.input.value = "";
+			},
+			
+			/**
+			* 로드되었던 페이지 정보를 전달받아 해당 페이지 호출 
+			*/
+			loadOpenedPage : function(){
+				if(this.currentPage === "imp"){
+					this.onShowImptMemo();
+				}
+				else if(this.currentPage === "mym"){
+					this.onShowMyMemo();
+				}
+				else if(this.currentPage === "tag"){
+					this.applyFormula();
+					this.clearMemoElements();
+					this.isOpened = true;
+					this.isOpenedTagNav = true;
+					this.onManageSideNav();
+					this.set("toolbarText.title", this.tagInfo.tag_nm);
+					memoUtil.request(this.$.findListMemoByTag);
+				}
+				else if(this.currentPage === "shr"){
+					this.onShowSharedMemo();
+				}
+				else if(this.currentPage === "del"){
+					this.onShowDeletedMemo();
+				}
+				else{
+					this.onShowAllMemo();
+				}
+			},
+			
+			/**
+			* 메모 팝업 툴바 타이틀 설정
+			* @param {String} text 메모 타이틀 텍스트
+			*/
+			setToolbarTitle : function(text) {
+				this.set("toolbarText.title", this.translate(text));
+			},
+			
+			/**
+			* 메모 조회 성공 시 호출
+			*/
+			completeFindListAllMemo: function(e, res){
+				this.memoParam = this.memoInfo;
+				
+	            if(this.memoInfo){
+	            	this.createMemoElements(false, false);
+	            }
+			},
+			
+			/**
+			* 검색을 통한 메모 조회 성공 시 호출
+			*/
+			completeFindListByKeyword: function(e, res){
+				if(this.memoInfo){
+	            	this.createMemoElements(false, false);
+	            }
+			},
+			
+			/**
+			* 내 메모 조회 성공 시 호출
+			*/
+			completeFindListMyMemo: function(e, res){
+	            if(this.memoInfo){
+	            	this.createMemoElements(false, false);
+	            }
+			},
+			
+			/**
+			* 공유 메모 조회 성공 시 호출
+			*/
+			completeFindListSharedMemo: function(e, res){
+	            if(this.memoInfo){
+	            	this.createMemoElements(false, false);
+	            }
+			},
+			
+			/**
+			* 휴지통 내에 있는 삭제된 메모 조회 성공 시 호출
+			*/
+			completeFindListDeletedMemo: function(e, res){
+	            if(this.memoInfo){
+	            	this.createMemoElements(false, true);
+	            }
+			},
+			
+			/**
+			* 중요 메모 조회 성공 시 호출
+			*/
+			completeFindListImptMemo: function(e, res){
+	            if(this.memoInfo){
+	            	this.createMemoElements(true, false);
+	            }
+			},
+			
+			/**
+			* 새 메모 추가 성공 시 호출
+			*/
+			completeInsertMemo: function(e, res){
+				memoUtil.alert(this.translate("메모가 추가되었습니다."));
+				
+				this.clearNewMemoForm();
+				this.loadOpenedPage();
+			},
+			
+			/**
+			* 메모 삭제 성공 시 호출
+			*/ 
+			completeDeleteMemo : function(e, res){
+	            memoUtil.alert(this.translate("메모가 삭제되었습니다."));
+	            this.loadOpenedPage();
+			},
+
+			/**
+			* 태그 데이터 조회 성공 시 호출
+			*/ 
+			completeFindTag : function(e, res){
+				if(this.isNewMemo){
+					var tags = [];
+					for(var i = 0, len = this.findTagInfo.length; i < len; i++){
+						tags.push({text : this.findTagInfo[i].tag_nm, value : this.findTagInfo[i].tag_nm});
+					}
+					this.tagList = tags;
+				}
+				else {
+					this.createMemoTagNav(this.findTagInfo);
+				}
+	        },
+	        
+	        /**
+			* 태그 별 메모 데이터 조회 성공 시 호출
+			*/
+	        completeFindMemoByTag: function(e, res){
+				this.clearTagElements();
+	            this.clearMemoElements();
+				if(this.findMemoInfo){
+					this.memoInfo = this.findMemoInfo;
+					this.createMemoElements(false, false);
+	            }
+	        },
+	        
+			/**
+			* 태그 삭제 성공 시 호출
+			*/ 
+			completeDeleteTag : function(e, res){
+	            memoUtil.alert(this.translate("태그가 삭제되었습니다."));
+	            this.onShowAllMemo();
+			},
+			
+			/**
+			* 메모 복원 성공 시 호출
+			*/
+			completRestoreMemo : function(e, res){
+				this.onShowDeletedMemo();
+	            memoUtil.alert(this.translate("메모가 복원되었습니다."));
+			},
+			
+			/**
+			* 휴지통 비우기 성공 시 호출
+			*/
+			completeEmptyTrash : function(e, res){
+				this.onShowDeletedMemo();
+			},
+			
+			/**
+			 * 새 메모에 태그 추가 완료 시 호출
+			 */
+			completeUpdateTag : function(e, res){
+				this.newMemoTagList = [];
+			},
+			
+			_destroy : function() {
+				this.fire('close');
+	        } 
+		});
+	</script>
+</dom-module>

@@ -1,0 +1,453 @@
+﻿<link rel="import" href="smartsuite-calendar-popup-behavior.html">
+
+<!--
+	일정 추가 팝업
+ -->
+<dom-module id="smartsuite-calendar-add-schedule-popup">
+	<style>
+		:host {
+            @apply(--calendar-vbox-layout);
+            width: 100%;
+            height: 100%;
+        }
+	</style>
+
+	<template>
+		<!--
+			AJAX 통신 
+		 -->
+		<!-- 스케줄 저장 -->
+		<sc-ajax id="saveSchedule" url="saveSchedule.do" on-response="onResponseSaveSchedule"></sc-ajax>
+		<!-- 스케줄 업데이트 -->
+		<sc-ajax id="updateSchedule" url="updateSchedule.do" on-response="onResponseSaveSchedule"></sc-ajax>
+		<!-- 스케줄 삭제 -->
+		<sc-ajax id="deleteSchedule" url="deleteSchedule.do" on-response="onResponseDeleteSchedule"></sc-ajax>
+	
+		<!-- 
+			화면
+		 -->
+		<div class="page-flex" style="padding: 2px;">
+			<!-- 확정 버튼 그룹 -->
+			<sc-toolbar class="page-title">
+				<sc-spacer></sc-spacer>
+				<sc-button-group class="groupParent" hidden="{{!flags.isOwner}}">
+					<sc-button text="수정" class="complete-btn borderPlus" on-click="onClickAddSchedule" hidden="{{flags.isNew}}"></sc-button>
+					<sc-button text="삭제" class="complete-btn borderPlus" on-click="onClickDeleteSchedule" hidden="{{flags.isNew}}"></sc-button>
+					<sc-button text="저장" class="complete-btn borderPlus" on-click="onClickAddSchedule" hidden="{{!flags.isNew}}"></sc-button>
+				</sc-button-group>
+				<sc-button text="닫기" class="complete-btn borderPlus" on-click="onClose"></sc-button>
+			</sc-toolbar>
+		
+			<!-- 일정 그룹 기본 설정 -->
+  			<table class="calendar-tb-form">
+  				<!-- 본 스케줄의 일정 이름 정보 -->
+	  			<tr>
+  					<th width="100"><sc-label text="일정명"></th>
+  					<td>
+	  					<sc-text-field value="{{scheduleInfo.sched_nm}}" required="true" disabled="{{!flags.isOwner}}" maxlength="64"></sc-text-field>
+  					</td>
+  				</tr>
+  				
+  				<!-- 본 스케줄의 일정 장소 정보 -->
+  				<tr>
+  					<th width="100"><sc-label text="장소"></th>
+           			<td>
+           				<sc-text-field disabled="{{!flags.isOwner}}" value="{{scheduleInfo.sched_loc}}" maxlength="64"></sc-text-field>
+           			</td>
+  				</tr>
+           		
+           		<!-- 본 스케줄의 일정 시작 정보 -->
+           		<tr>
+           			<th width="100"><sc-label text="일정시작"></th>
+  					<td>
+  						<div class="setDate">
+  							<div>
+	  							<sc-date-field id="startDate" style="width:100px;" disabled="[[!flags.allowTime]]" required="true" value="{{scheduleInfo.start_date}}"></sc-date-field>
+  							</div>
+  							<div class="timeSelector">
+	  							<smartsuite-timepicker id="startTime" disabled="[[!flags.allowTime]]"></smartsuite-timepicker>
+  							</div>
+  						</div>
+  					</td>
+  				</tr>
+  			
+  				<!-- 본 스케줄의 일정 종료 정보 -->	
+  				<tr>	
+  					<th width="100"><sc-label text="일정종료"></th>
+  					<td>
+  						<div class="setDate">
+  							<div>
+								<sc-date-field id="endDate" style="width:100px;" required="true" disabled="[[!flags.allowTime]]" value="{{scheduleInfo.end_date}}"></sc-date-field>
+							</div>
+							<div class="timeSelector">
+								<smartsuite-timepicker id="endTime" disabled="[[!flags.allowTime]]"></smartsuite-timepicker>
+							</div>
+  						</div>
+  					</td>
+           		</tr>
+           		
+           		<!-- 본 스케줄의 알람 정보 -->
+           		<tr>
+           			<th width="100"><sc-label text="알람"></th>
+           			<td>
+           				<div style="display:calendar-flex;">
+           					<sc-combobox-field id="noticeValue" disabled="[[!flags.isOwner]]" display-field="label" value-field="data" items="[[noticeItemList]]" value="{{scheduleInfo.notice}}"></sc-combobox-field>
+           				</div>
+           			</td>
+           		</tr>
+           		
+           		<!-- 본 스케줄의 반복 정보 -->
+           		<tr>
+           			<th width="100"><sc-label text="반복"></th>
+           			<td>
+           				<div>
+           					<div style="border-bottom:1px dotted silver;margin-bottom:3px;">
+           						<div style="display:table;">
+           							<div style="display:table-cell;"><sc-checkbox-field value="{{useRepeat}}"></sc-checkbox-field></div>
+           							<div style="display:table-cell;vertical-align:top;"><sc-label text="반복 사용"></sc-label></div>
+           						</div>
+           					</div>
+           					<div>
+           						<sc-combobox-field id="repeatClass" required="{{useRepeat}}" disabled="[[!useRepeat]]" value="{{scheduleInfo.repeat}}" style="width:35%;" display-field="label" value-field="data" items="[[repeatTermList]]"></sc-combobox-field>
+           						[[translate("마다")]]
+           						<sc-date-field style="width:37%;" required="{{useRepeat}}" disabled="[[!useRepeat]]" value="{{scheduleInfo.repeat_end}}"></sc-date-field>
+           						[[translate("까지")]]
+           					</div>
+           				</div>
+           			</td>
+           		</tr>
+           		
+           		<!-- 본 스케줄의 소속 그룹 -->
+           		<tr>
+           			<th width="100"><sc-label text="소속 그룹"></th>
+           			<td>
+           				<div style="width: 100%; height: 100%; display:calendar-flex;">
+           					<div style="padding-top:1px;padding-bottom:1px;width:100%;">
+           						<sc-combobox-field id="selectedGroup" required="true" disabled="[[!flags.isOwner]]" 
+           							style="width:100%;height:100%;" 
+           							items="[[groupList]]" display-field="label" value-field="data"
+           							value="{{scheduleInfo.grp_id}}">
+           						</sc-combobox-field>
+           					</div>
+           				</div>
+           			</td>
+           		</tr>
+       		</table>
+       		
+       		<div class="vspace-5"></div>
+       		
+       		<!-- 부가 설정 항목 -->
+       		<div>
+       			<sc-panel title="부가설명">
+   					<sc-textarea-field class="addDesc" disabled="{{!flags.isOwner}}" value="{{scheduleInfo.sched_desc}}" maxlength="512" style="height:80px;"></sc-text-field>
+       			</sc-panel>
+       		</div>
+   		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is: 'smartsuite-calendar-add-schedule-popup',
+			
+			properties: {
+				// 비교를 위한 최초정보 저장
+				originInfo: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				},
+				
+				// 팝업에 설정된 스케줄 정보
+				scheduleInfo: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				},
+				
+				// 팝업 내에서 사용할 플래그 변수
+				flags: {
+					type: Object,
+					value: function() {
+						return {
+							isNew: false,			// 신규 여부
+							isOwner: false,		// 소유 여부
+							allowTime: true
+						};
+					}
+				},
+				
+				// 보여줄 그룹 이름 리스트 
+				groupList: {
+					type: Array
+				},
+				
+				// 반복 주기 리스트
+				repeatTermList: {
+					type: Array
+				},
+				
+				// 알람 조건 리스트
+				noticeItemList: {
+					type: Array
+				},
+				
+				// 반복 사용 여부
+				useRepeat: {
+					type: Object,
+					value: function() {
+						return false;
+					},
+					observer: '_onChangeUseRepeat'
+				},
+				
+				// 지속 알람
+				useNotice: {
+					type: Object,
+					value: function() {
+						return false;
+					}
+				}
+			},
+						
+			// 팝업 초기화
+			initPopup: function(scheduleInfo, groupList) {
+				var me = this;
+				
+				// 번역된 콤보박스 값
+				var translatedRepeatData = UT.copy(CalendarData.repeatData);
+				for(var i = 0; i < translatedRepeatData.length; i++) {
+					translatedRepeatData[i].label = me.translate(translatedRepeatData[i].label);
+				}
+				var translatedNoticeData = UT.copy(CalendarData.noticeData);
+				for(var i = 0; i < translatedNoticeData.length; i++) {
+					translatedNoticeData[i].label = me.translate(translatedNoticeData[i].label);
+				}
+				
+				// 반복, 알람 콤보박스 값을 넣음
+				me.set('repeatTermList', CalendarData.repeatData);
+				for(var i = 0; i < CalendarData.noticeData.length; i++) {
+					CalendarData.noticeData[i].data = '' + CalendarData.noticeData[i].data; 
+				}
+				me.set('noticeItemList', CalendarData.noticeData);
+				
+				// 일정 데이터가 있을 때.
+				if(scheduleInfo.scheduleInfo) {
+					var copiedScheduleInfo = scheduleInfo.scheduleInfo.origin;
+					me.set('originInfo', UT.copy(copiedScheduleInfo));
+					me.set('scheduleInfo', UT.copy(copiedScheduleInfo));
+					
+					// 소유 여부 체크
+					var isOwner = false;
+					for(var i = 0; i < groupList.ownGroup.length; i++) {
+						if(groupList.ownGroup[i].data === copiedScheduleInfo.grp_id) {
+							isOwner = true;
+							break;
+						}
+					}
+					
+					// 반복 일정 여부
+					if(copiedScheduleInfo.repeat_end) {
+						me.set('useRepeat', true);
+					}
+					
+					// datefield 관련하여 0이되는 문제가 있으므로 임시로 세팅함
+					me.set('scheduleInfo.start_date', new Date(copiedScheduleInfo.start_date.getTime()));
+					me.set('scheduleInfo.end_date', new Date(copiedScheduleInfo.end_date.getTime()));
+					me.set('flags.isOwner', isOwner);
+					me.set('flags.allowTime', (!copiedScheduleInfo.repeat || copiedScheduleInfo.repeat_root === copiedScheduleInfo.sched_id));
+					
+					// 반복 키가 문자열일 경우
+					if(me.scheduleInfo.repeat && typeof(me.scheduleInfo.repeat) === 'string') {
+						me.set('scheduleInfo.repeat', parseFloat(me.scheduleInfo.repeat));
+					}
+					
+					// 사용 가능한 그룹설정
+					me.set('groupList', isOwner ? groupList.ownGroup: groupList.sharedGroup);
+				} 
+				
+				// 일정 데이터가 없을때
+				else {
+					var year = scheduleInfo.date.year();
+					year = (year/10) >= 1 ? year: '0' + year;
+					var month = scheduleInfo.date.month() + 1;
+					month = (month/10) >= 1 ? month: '0' + month;
+					var date = scheduleInfo.date.date();
+					date = (date/10) >= 1 ? date: '0' + date;
+					var startDate = moment(year + '-' + month + '-' + date + ' 09:00:00');
+					var endDate = moment(year + '-' + month + '-' + date + ' 18:00:00');
+					me.set('scheduleInfo', {
+						grp_id: groupList.ownGroup[0].data,
+						start_date: startDate.toDate(),
+						end_date: endDate.toDate() 
+					});
+					
+					// datefield 관련하여 0이되는 문제가 있으므로 임시로 세팅함
+					me.set('scheduleInfo.start_date', startDate.toDate());
+					me.set('scheduleInfo.end_date', endDate.toDate());
+					me.set('flags.isNew', true);
+					me.set('flags.isOwner', true);
+					
+					// 사용 가능 그룹 설정
+					me.set('groupList', groupList.ownGroup);
+				}
+				
+				// time picker에 시간 설정 - sc-date-field로 날짜 선택시 자동으로 0시 0분 0초로 초기화 하므로 2-way bind 사용 안함
+				me.$.startTime.setTime(
+					me.scheduleInfo.start_date.getHours(), 
+					me.scheduleInfo.start_date.getMinutes()
+				);
+				me.$.endTime.setTime(
+					me.scheduleInfo.end_date.getHours(), 
+					me.scheduleInfo.end_date.getMinutes()
+				);
+				
+				// 알람이 없을 경우
+				if(!me.scheduleInfo.notice) {
+					me.set('scheduleInfo.notice', me.noticeItemList[0].data);
+				}
+			},
+			
+			// 반복 설정 변경시
+			_onChangeUseRepeat: function(newValue, oldValue) {
+				var me = this;
+				if(oldValue === true && newValue === false) {
+					me.set('scheduleInfo.repeat', undefined);
+					me.set('scheduleInfo.repeat_end', undefined);
+				}
+			},
+			
+			// 스케줄 저장
+			onClickAddSchedule: function() {
+				var me = this;
+				
+				// 시간값 체크 - datefield가 시간값을 초기화 시킴
+				var startTime = me.$.startTime.getTime();
+				var endTime = me.$.endTime.getTime();
+				if(isNaN(startTime.hours) || isNaN(startTime.minutes) 
+						|| isNaN(endTime.hours) || isNaN(endTime.minutes)) {
+					UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return;
+				}
+				
+				// datefield에서 시간값을 초기화 시키므로 다시 변경
+				me.scheduleInfo.start_date.setHours(startTime.hours);
+				me.scheduleInfo.start_date.setMinutes(startTime.minutes);
+				me.scheduleInfo.end_date.setHours(endTime.hours);
+				me.scheduleInfo.end_date.setMinutes(endTime.minutes);
+				
+				// 기본 입력 필드 체크
+				if (!me.validate()) {
+    				UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return;
+                }
+				
+				// 일정 시간 체크
+				if(me.scheduleInfo.start_date.getTime() >= me.scheduleInfo.end_date.getTime()) {
+					UT.alert('일정 시작 시간이 종료시간보다 빠릅니다.');
+					return;
+				}
+				
+				// 일정 반복 체크
+				var scheduleTime = me.scheduleInfo.end_date.getTime() - me.scheduleInfo.start_date.getTime();
+				if(me.scheduleInfo.repeat_term && Math.abs(me.scheduleInfo.repeat_term) < scheduleTime) {
+					UT.alert('반복 주기가 일정 기간보다 짧습니다.');
+					return;
+				}
+				
+				// 반복 종료일 체크
+				if(me.scheduleInfo.repeat_end && me.scheduleInfo.repeat_end.getTime() < me.scheduleInfo.end_date.getTime()) {
+					UT.alert('반복 종료일이 일정 종료일보다 빠릅니다.');
+					return;
+				}
+				
+				// 계산하여 데이터를 넣는 부분
+				// 반복 관련 데이터 설정
+				if(me.scheduleInfo.repeat_term) {
+					me.scheduleInfo.repeat = me.$.repeatClass.items[me.$.repeatClass.selectedIndex].label;
+				}
+				
+				// 알람 관련 데이터 설정
+				if(me.$.noticeValue.selectedIndex !== 0) {
+					me.scheduleInfo.notice_date = new Date(me.scheduleInfo.start_date.getTime() - me.$.noticeValue.value);
+				} else {
+					me.scheduleInfo.notice_date = null;
+				}
+				me.scheduleInfo.notice = parseInt(me.scheduleInfo.notice);				
+				
+				// 신규 값일 경우
+				if(me.flags.isNew) {
+					UT.confirm('저장하시겠습니까?', function() {
+						me.$.saveSchedule.body = me.scheduleInfo;
+						me.$.saveSchedule.generateRequest();
+					});
+				} else {
+					// 수정 메세지
+					UT.confirm('수정하시겠습니까?', function() {
+						me.$.updateSchedule.body = me.scheduleInfo;
+						me.$.updateSchedule.generateRequest();
+					});
+				}
+			},
+			
+			// 스케줄 삭제
+			onClickDeleteSchedule: function() {
+				var me = this;
+				
+				if(me.scheduleInfo.repeat || (!me.scheduleInfo.repeat && me.originInfo.repeat)) {
+					UT.confirm('반복 그룹에 해당되는 모든 일정이 삭제됩니다.<br>계속하시겠습니까?', function() {
+						me.$.deleteSchedule.body = { 
+							sched_id: me.scheduleInfo.sched_id,
+							target: me.scheduleInfo.repeat_root ? me.scheduleInfo.repeat_root: me.scheduleInfo.sched_id  
+						};
+						me.$.deleteSchedule.generateRequest();
+					});
+				}
+				
+				// 삭제 확인 alert 띄움
+				else {
+					UT.confirm(me.translate("삭제 하시겠습니까?"), function(){
+						me.$.deleteSchedule.body = { sched_id: me.scheduleInfo.sched_id };
+						me.$.deleteSchedule.generateRequest();
+		            });	
+				}
+			},
+			
+			// 팝업 종료
+			onClose: function(){
+				var me = this;
+				me.fire("close");
+			},
+			
+			// 일정 저장 결과
+			onResponseSaveSchedule: function(response) {
+				var me = this;
+				var result = response.detail.response;
+				if(result.result_status === 'S') {
+					var msg = me.flags.isNew ? '저장되었습니다.': '수정되었습니다.';
+					UT.alert(msg);
+					me.onClose();
+					me.fire('result');
+				} else {
+					UT.alert('문제가 발생하였습니다. 다시 시도해 주십시오');
+				}
+			},
+			
+			// 일정 삭제 결과
+			onResponseDeleteSchedule: function(response) {
+				var me = this;
+				var result = response.detail.response;
+				if(result.result_status === 'S') {
+					UT.alert('삭제되었습니다.');
+					me.onClose();
+					me.fire('result');
+				} else {
+					UT.alert('문제가 발생하였습니다. 다시 시도해 주십시오');
+				}
+			},
+			
+			behaviors: [Polymer.SmartsuiteCalendarPopupBehavior]
+		});
+	</script>
+</dom-module>

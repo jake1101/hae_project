@@ -1,0 +1,77 @@
+<script>
+	Polymer.SmartsuiteCalendarPopupBehaviorImpl = {
+			
+		/**
+		 * 스케줄 팝업을 띄운다.
+		 */
+		openScheduleInfoPopup: function(scheduleInfo, groupList) {
+			var me = this;
+			var size = CalendarData.size.scheduleInfoPopup;
+			// 
+			var popupEl = UT.popup('smartsuite-calendar-add-schedule-popup', me, size.width, 500, {
+				// 스케줄 추가 또는 수정 요청
+				"result": function(popup, e) {
+					me.fire('refresh');
+				}
+			},{
+				resizable: false	
+			});
+			popupEl.title = me.translate('스케줄 정보');
+			popupEl.getContent().initPopup(scheduleInfo, groupList);
+			popupEl.show();
+		},
+		
+		/**
+		 * 그룹 팝업을 띄움
+		 */
+		openGroupInfoPopup: function(groupInfo) {
+			var me = this;
+			
+			// 사이즈 설정 - 기본그룹은 높이를 다르게 함
+			var size = CalendarData.size.groupInfoPopup;
+			var popupWidth = size.width;
+			var popupHeight = (groupInfo && groupInfo.is_default) ? size.defaultInfoHeight : size.height;
+			
+			// 팝업을 띄움
+			var popupEl = UT.popup('smartsuite-calendar-add-group-popup', me, popupWidth, popupHeight, {
+				
+				// 그룹 업데이트 이벤트
+				'result': function(popup, e) {
+					me.fire('refresh');
+				}
+			}, {
+				resizable: false
+			});
+			popupEl.title = me.translate('스케줄 그룹 정보');
+			var groupDescData = groupInfo ? groupInfo: { is_new: true };
+			popupEl.getContent().initPopup(groupDescData);
+			popupEl.show();
+		},
+		
+		/**
+		 * 검색 팝업을 띄움
+		 */
+		openSearchPopupInBehavior: function(groupList) {
+			var me = this;
+			var size = CalendarData.size.searchPopup;
+			var popupEl = UT.popup('smartsuite-calendar-search-popup', me, size.width, size.height, 
+				{
+					'result': function(event, data) {
+						me.$.calendarView.setDate(data.detail.start_date);
+					}
+				}, 
+				{
+					resizable: false
+				}
+			);
+			
+			popupEl.title = me.translate('스케줄 검색');
+			popupEl.getContent().initPopup(groupList);
+			popupEl.show();
+		}
+	};
+	
+	Polymer.SmartsuiteCalendarPopupBehavior = [
+		Polymer.SmartsuiteCalendarPopupBehaviorImpl
+	];
+</script>

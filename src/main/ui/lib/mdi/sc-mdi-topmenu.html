@@ -1,0 +1,549 @@
+<dom-module id="sc-mdi-topmenu">
+	<template>
+		<div id="topMenuListDiv" class="topMenuListDiv" style="width:90%"></div>
+		<div id="topMenuSubListDiv" class="topSubMenuListDiv"></div>
+ 		<div id="topMenuLeftScroll" class="topMenuLeftScroll"><span></span></div>
+ 		<div id="topMenuRightScroll" class="topMenuRightScroll"><span></span></div> 
+		<!--<div id="utilAreaResize" class="utilAreaUp"><span></span></div> -->
+	</template>
+	
+	<script>
+		Polymer({
+			
+	    	is: 'sc-mdi-topmenu',
+	    	
+	    	behaviors: [
+				Polymer.SCSelectableBehavior
+			],
+	    	
+	    	properties: {
+	    		
+	    		_visible : {
+	    			type : Boolean,
+	    			value : true
+	    		},
+	    		
+	    		className: {
+	    			type: String
+	    		},
+				
+				treeMenuList: {
+					type: Array,
+			        observer: '_treeMenuListChanged',
+					notify: true
+				},
+				
+				menuDirectionLeft:{
+					type: Boolean
+				},
+				
+				selectedItem : {
+					type : Object,
+					observer : '_selectedItemChanged'
+				},
+				
+				subMenuOnMouseOver:{
+					type: Boolean,
+					value : false
+				},
+				
+				_beginParentMenuId: {
+					type: String
+				},
+				
+				_boundOnCaptureClick: {
+			    	type: Function,
+			        value: function() {
+			        	return this._onCaptureClick.bind(this);
+			        }
+			    },
+			    
+			    currentEl:{
+			    	type: Object,
+			    	observer : '_selectedItemChanged'
+			    },
+
+				//마우스 누르고 있을 때 True
+                _mouseStillDown: {
+	    		    type: Boolean,
+					value: false
+				},
+
+				//동일한 Cavas Context를 사용한다
+				context: {
+	    		    type: Object,
+					value: function() {
+	    		        return document.createElement('canvas').getContext('2d');
+					}
+				},
+
+                //최대 넓이를 저장한다
+                cachingWidthObj: {
+                    type: Object,
+                    value: function() {
+                        return {};
+                    }
+                }
+			},
+			
+			listeners: {
+				"topMenuListDiv.click": "itemClickHandler",
+				"topMenuSubListDiv.mouseover": "subMenuitemOverHandler",
+				"topMenuSubListDiv.tap": "subMenuitemClickHandler",
+				"topMenuLeftScroll.down": "_topMenuLeftScrollDownHandler",
+				"topMenuRightScroll.down": "_topMenuRightScrollDownHandler",
+                "topMenuLeftScroll.up": "_topMenuScrollUpHandler",
+                "topMenuRightScroll.up": "_topMenuScrollUpHandler",
+// 				"utilAreaResize.click": "utilAreaResizeClickHandler"
+			},
+			
+			observers: [
+	        	
+	        ],
+	        
+			get _scopeCssViaAttr() {
+				return false;	
+			},
+
+			//Method를 사용한다
+            measureText: function (text) {
+                var me = this;
+                if (text) {
+                    me.context.font = 'bold 13px 맑은 고딕, Malgun Gothic, dotum,돋움, Arial';
+                    return me.context.measureText(text);
+                }
+                return 0;
+            },
+
+            getMaxWidth: function(nodes){
+                var me = this,
+                    node = Polymer.$Util.isString(nodes) ? me.getSubMenuList(nodes) : nodes;
+
+                if(!node || node.length < 1){
+                    return;
+                }
+
+                var firstNode = node[0];
+                //부모 노드의 MaxWidth가 Caching 되어 있으면 바로 리턴
+                var cachingWidth = me.cachingWidthObj[firstNode.parent_menu_id];
+                if(cachingWidth) {
+					return cachingWidth;
+				}
+
+                var maxWidth = me.measureText(firstNode.menu_nm).width;
+                for(var i=1, len=node.length; i<len; i++) {
+                    var currentWidth = me.measureText(node[i].menu_nm).width;
+                    maxWidth = currentWidth > maxWidth ? currentWidth: maxWidth;
+				}
+
+				//부모 노드 ID로 캐싱
+                me.cachingWidthObj[firstNode.parent_menu_id] = maxWidth;
+
+                return maxWidth;
+            },
+			
+			generateTopMenuList: function(parentID, imgUrl) {
+				var me = this;
+
+				return me.treeMenuList.map(function(node){
+					var exists = (Object.prototype.toString.call(node['sub_menu_list']) === '[object Array]' && node['sub_menu_list'].length > 0); 
+					return '<li id="'+node.menu_id+'" ' + (exists ? 'class="expandable"' : '') + ' is-menu-item="Y"><a><span>' + node.menu_nm + '</span>'+'</a></li>' ;
+				});
+			},
+			
+			generateTreeSubMenuList: function(childNodes, imgUrl, maxWidth) {
+				var me = this;
+				return childNodes.map(function(node){
+					var exists = (Object.prototype.toString.call(node['sub_menu_list']) === '[object Array]' && node['sub_menu_list'].length > 0); 
+					var subMenuMaxWidth;
+					if(exists){
+						subMenuMaxWidth = me.getMaxWidth(node.sub_menu_list);
+					}
+			        var subMenu = (exists) ? '<ul style="display:none;">'+ me.generateTreeSubMenuList(node.sub_menu_list, imgUrl, subMenuMaxWidth).join('') + '</ul>' : "";
+			    	
+			        return '<li id="'+node.menu_id+'" ' + (exists ? 'class="expandable"' : '') + ' is-menu-item="Y"><a><span style="width:'+maxWidth+'px;">' + node.menu_nm + '</span>'+(subMenu ? '<img src="'+imgUrl+'" alt="rightArrow" />':'')+'</a>'+subMenu+'</li>' ;
+				});
+			},
+	        
+	        _selectedItemChanged : function(newitem, olditem) {
+	        	if(olditem){
+	        		this.toggleClass('selected', false, olditem);
+	        	}        	
+	        	if(newitem){
+	        		this.toggleClass('selected', true, newitem);
+	        		var scrollLeft = menuBar.scrollLeft;
+	        		var left = newitem.getBoundingClientRect().left-222;
+	        		var right = newitem.getBoundingClientRect().right-244;
+	        		var menuBarRight = menuBar.getBoundingClientRect().right-244;
+	        		if(left < 0){
+	        			menuBar.scrollLeft += left;	
+	        		}
+	        		if(right > menuBarRight){
+	        			menuBar.scrollLeft += right-menuBarRight; 
+	        		}
+	        	}
+	        },
+	        
+	        subMenuitemClickHandler: function(event) {
+				var parentElement = event.target;		
+				while(parentElement) {
+					if(parentElement.getAttribute('is-menu-item') == 'Y') {
+						this.selectMenu(this.getMenuNode(parentElement.getAttribute('id')));
+						break;
+					}
+					parentElement = parentElement.parentElement;
+				}	
+			},
+			subMenuitemOverHandler: function(event) {
+				var container = Polymer.dom(this.$.container);
+				var scMdi = SCMdiManager.getMdi();
+				if(scMdi.mdiUseLeftMenu){
+					return;
+				}
+				
+				this._toggleListeners(false);
+				this._toggleListeners(true);
+				
+				var target = event.target;
+				var parentNav = this.closest(target, 'ul');
+				var li;
+				
+				if (parentNav !== undefined && parentNav === target) {
+					return;
+				} else {
+					li = this.closest(target, 'li');
+					if(!li){ return; }
+					if (li.getAttribute('class') !== undefined && li.classList.contains('expandable')) {
+                        var expandedList = parentNav.querySelectorAll('li.expanded')
+						if(expandedList) {
+                            for(var i=0,len=expandedList.length; i<len; i++) {
+                                expandedList[i].querySelector('ul').style['display'] = 'none';
+                                expandedList[i].classList.remove('expanded');
+							}
+						}
+
+						var currentWidth = parseInt(parentNav.getBoundingClientRect().left)+parentNav.offsetWidth+li.offsetWidth
+						if(this.offsetWidth < currentWidth){
+							this.menuDirectionLeft = true;
+						}else{
+							this.menuDirectionLeft = false;
+						}
+						li.classList.add('expanded');
+						li.querySelector('ul').style['display'] = 'inline-block';
+						if(this.menuDirectionLeft){
+// 							li.querySelector('ul').style['left'] = '-' +li.querySelector('ul').getBoundingClientRect().width + "px"; // RAYCOM 수정 : 주석처리
+
+						}else{
+							li.querySelector('ul').style['left'] = '';
+						}
+						document.addEventListener('tap', this.documentTapHandler, true);
+					} else {
+						if(parentNav.querySelector('li.expanded')) {
+							parentNav.querySelector('li.expanded').querySelector('ul').style['display'] = 'none';
+							parentNav.querySelector('li.expanded').classList.remove('expanded');
+						}
+					}
+				}
+			},
+			
+			itemClickHandler: function(event) {
+                this.fire("sc-mdi-topmenu-tap", event);
+
+				var container = Polymer.dom(this.$.container);
+				var scMdi = SCMdiManager.getMdi();
+
+				var target = event.target;
+				var li;
+				var imgUrl = "img/arw_right.png";
+				
+				imgUrl = Polymer.ResolveUrl.resolveUrl(imgUrl, this._template.ownerDocument.baseURI);
+				
+				li = this.closest(target, 'li');
+				if(!li){ return; }
+				this.currentEl = li;
+
+				var menu = this.getMenuNode(li.getAttribute('id'));
+				if(menu && menu.menu_url) {
+				 	this.selectMenu(menu);
+				 	return;
+				}
+
+				if(!scMdi.$.mdiLeftMenu.menuClose){
+					this.subMenuitemClickHandler(event);
+					return;
+				}
+				this._toggleListeners(false);
+				this._toggleListeners(true);
+				
+				var maxWidth = this.getMaxWidth(li.id);
+				var subMenuList = this.getSubMenuList(li.id);
+				if(!subMenuList){
+					this._clearTopMenuSubList();
+					return;
+				}
+				menuSubListHtml = this.generateTreeSubMenuList(subMenuList, imgUrl, maxWidth);
+				Polymer.dom(Polymer.dom(this.root).querySelector("#topMenuSubListDiv")).innerHTML = '<ul id="topMenuSubList">'+ menuSubListHtml.join('') +'</ul>';
+
+				var left = li.getBoundingClientRect().left - 320, // RAYCOM 수정 (탑메뉴 위치 조정) : li.getBoundingClientRect().left,
+                    top = li.getBoundingClientRect().height;
+
+				var scroll = window.scrollX || window.pageXOffset; // RAYCOM 수정(IE에서 탑서브메뉴 위치)
+				left = left + scroll;
+				
+				var subList = Polymer.dom(this.root).querySelector("#topMenuSubList");     
+
+				subList.style['left'] = left+"px";
+				subList.style['top'] = top+"px";
+				subList.style['display'] = "";
+				document.addEventListener('tap', this.documentTapHandler, true);			
+				this.listen(this.$.topMenuListDiv, 'mouseover', 'itemOverHandler');
+				
+			},
+			
+			itemOverHandler: function(event) {
+				var container = Polymer.dom(this.$.container);
+				
+				var target = event.target;
+				
+				var li;
+				var imgUrl = "img/arw_right.png";
+				
+				imgUrl = Polymer.ResolveUrl.resolveUrl(imgUrl, this._template.ownerDocument.baseURI);
+				
+				li = this.closest(target, 'li');
+				if(!li){ return; }
+				this.currentEl = li;
+
+				var scMdi = SCMdiManager.getMdi();
+				if(scMdi.mdiUseLeftMenu){
+					return;
+				}
+				
+				this._toggleListeners(false);
+				this._toggleListeners(true);
+				
+				var maxWidth = this.getMaxWidth(li.id);
+				var subMenuList = this.getSubMenuList(li.id);
+				if(!subMenuList){
+					this._clearTopMenuSubList();
+					return;
+				}
+				menuSubListHtml = this.generateTreeSubMenuList(subMenuList, imgUrl, maxWidth);
+				Polymer.dom(Polymer.dom(this.root).querySelector("#topMenuSubListDiv")).innerHTML = '<ul id="topMenuSubList">'+ menuSubListHtml.join('') +'</ul>';
+				var left = li.getBoundingClientRect().left - 320, // RAYCOM 수정 (탑메뉴 위치 조정) : li.getBoundingClientRect().left,
+				    top = li.getBoundingClientRect().height;
+
+				var scroll = window.scrollX || window.pageXOffset; // RAYCOM 수정(IE에서 탑서브메뉴 위치)
+				left = left + scroll;
+				
+				Polymer.dom(this.root).querySelector("#topMenuSubList").style['left'] = left+"px";
+				Polymer.dom(this.root).querySelector("#topMenuSubList").style['top'] = top+ "px";
+				Polymer.dom(this.root).querySelector("#topMenuSubList").style['display'] = "";
+				document.addEventListener('tap', this.documentTapHandler, true);			
+				
+			},	
+			
+			selectMenu: function(menuItem) {
+				this.fire('menu-click', menuItem);
+			},
+			
+			closest: function(el, selector) {
+				
+				while(el) {
+					if(el.nodeName == '#document-fragment'){
+						return null;
+					}				
+					if(Polymer.DomApi.matchesSelector.call(el, selector)) {
+						return el;	
+					} else {
+						el = Polymer.dom(el).parentNode;	
+					}	
+				}
+			},
+	
+			_toggleListener: function(enable, node, event, boundListener, capture) {
+				if (enable) {
+			    	if (event === 'tap') {
+			        	Polymer.Gestures.add(document, 'tap', null);
+			        }
+			        node.addEventListener(event, boundListener, capture);
+				} else {
+			        if (event === 'tap') {
+			          Polymer.Gestures.remove(document, 'tap', null);
+			        }
+			        node.removeEventListener(event, boundListener, capture);
+				}
+			},
+			
+			_toggleListeners: function(opened) {
+		    	this._toggleListener(opened, document, 'tap', this._boundOnCaptureClick, true);
+			},
+			
+			_clearTopMenuSubList : function(){
+				var topMenuSubList = Polymer.dom(this.root).querySelector("#topMenuSubListDiv");
+				for(var i=0; i < topMenuSubList.childNodes.length; ++i) {
+					topMenuSubList.removeChild(topMenuSubList.childNodes[i]);
+				}
+			},
+			
+			_onCaptureClick: function(event) {
+				
+				var target = event.target;
+				var li = this.closest(target, 'li');
+
+				//확장 가능한 메뉴라면 true를 반환, 일반 메뉴라면 false를 반환
+				var isMenuLi = [li, this.currentEl].every(function(ele) {
+                    return ele ? Array.prototype.indexOf.call(ele.classList, "expandable") > -1 : false;
+                });
+
+				//최상위 또는 자식이 있는 메뉴
+				if((li === this.currentEl) || isMenuLi){
+					return;
+				}
+				
+				this._toggleListeners(false);
+				if(!this.subMenuOnMouseOver){
+					this.unlisten(this.$.topMenuListDiv, 'mouseover', 'itemOverHandler');	
+				}
+
+                this.fire("sc-mdi-topmenu-un-tap", event);
+				this._clearTopMenuSubList();
+			},
+			
+			_treeMenuListChanged : function(newValue, oldValue){
+				if(!newValue || typeof newValue === "undefined" || newValue.length < 1)
+				{
+					return;
+				}
+				
+				var imgUrl = "img/arw_right.png",
+					menuListHtml = '',
+					sHtml = '';
+				
+				
+				imgUrl = Polymer.ResolveUrl.resolveUrl(imgUrl, this._template.ownerDocument.baseURI);
+				this._beginParentMenuId = newValue[0].parent_menu_id;
+				
+				if(newValue.length > 0) {
+					menuListHtml = this.generateTopMenuList(this._beginParentMenuId, imgUrl);
+				}
+				sHtml = '<ul class="mdiTopMenu" id="menuBar">'+menuListHtml.join('')+ '</ul>'
+				Polymer.dom(Polymer.dom(this.root).querySelector("#topMenuListDiv")).innerHTML = sHtml;
+			},
+			
+			getSubMenuList: function(menuId){
+				return this.getMenuNode(menuId)["sub_menu_list"];
+			},
+			
+			getRootMenuNode: function(menuId){
+				if(!menuId){
+					return;
+				}
+				
+				var menu = this.getMenuNode(menuId);
+				
+				if(!menu){
+					return;
+				}
+				
+				return (menu.menu_id === menu.root_menu_id ? menu : this.getMenuNode(menu.root_menu_id));
+			},
+			
+			getMenuNode: function(menuId){
+				var menuNode = this.menuNodeMap[menuId];
+				if(menuNode){
+					return menuNode;
+				}
+				var getNode = function(nodes, id, keyName, childKeyName){
+					var result;
+					for(var i=0, child; child = nodes[i]; i++) {
+						if(child[keyName] === id) {
+							return child;
+						}
+						else{
+							if(!child[childKeyName]){
+								continue;
+							}
+							result = arguments.callee(child[childKeyName], id, keyName, childKeyName) || result;
+							if(result){
+								return result;
+							}
+						}
+					}
+					return result;
+				};
+				
+				return getNode(this.treeMenuList, menuId, "menu_id", "sub_menu_list"); 
+			},
+
+			/**
+			 * Left scroll 마우스 누를 때
+			 * */
+            _topMenuLeftScrollDownHandler: function(event) {
+                this._mouseStillDown = true;
+                this._topMenuScroll(-30);
+            },
+
+            /**
+             * Right scroll 마우스 누를 때
+             * */
+            _topMenuRightScrollDownHandler: function(event) {
+                this._mouseStillDown = true;
+                this._topMenuScroll(30);
+            },
+
+            /**
+             * 마우스를 눌렀다가 떼었을 때
+             * */
+            _topMenuScrollUpHandler: function(event) {
+                this._mouseStillDown = false;
+            },
+
+            /**
+             * Top Menu 스크롤 이동
+             * */
+            _topMenuScroll: function(pixel) {
+                clearInterval(this.interval);	//기존 interval 초기화
+
+                if(this._mouseStillDown) {
+                    menuBar.scrollLeft += pixel; //스크롤 이동
+                    this.interval = setInterval(this._topMenuScroll.bind(this, pixel), 80);	//재실행
+                }
+            },
+
+			ready: function() {
+				if(this.subMenuOnMouseOver){
+					this.listen(this.$.topMenuListDiv, 'mouseover', 'itemOverHandler');	
+				}
+			},
+			
+			utilAreaResizeClickHandler : function(event){
+				var me = this;
+				if(me._visible) {
+					me._visible = false;
+					this.$.utilAreaResize.classList.remove('utilAreaUp');
+					this.$.utilAreaResize.classList.add('utilAreaDown');
+				} else{
+					me._visible = true;
+					this.$.utilAreaResize.classList.remove('utilAreaDown');
+					this.$.utilAreaResize.classList.add('utilAreaUp');
+				}
+				this.fire('utilarea-resize');
+			},
+			
+			_destroy: function(){
+				this._visible = null;
+				this.className = null;
+				this.treeMenuList = null;
+				this.menuDirectionLeft = null;
+				this.selectedItem = null;
+				this.subMenuOnMouseOver = null;
+				this._beginParentMenuId = null;
+				this._boundOnCaptureClick = null;
+				this.currentEl = null;
+                this._mouseStillDown = null;
+			}
+
+	  	});
+	</script>
+</dom-module>

@@ -1,0 +1,112 @@
+<dom-module id="es-chart-pie-basic">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-pie-basic',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "name": "Highcharts:Pie chart",
+			    "width": 500,
+			    "type": "pie",
+			    "title": "Browser market shares January, 2015 to May, 2015",
+			    "palettes":[{
+			        "name": "color1",
+			        "alpha": 1.0,
+			        "fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }, {
+			        "name": "lines1",
+			        "alpha": 1.0,
+			        "strokes": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }],
+			    "xAxes": {
+			    },
+			    "yAxes": {
+			    },
+			    "series": [{
+			        "name": "Brands",
+			        "valueField": "y",
+			        "labelField": "name",
+			        "labelOffset": 20,
+			        "items": [
+			            {
+			                "name": 'Microsoft Internet Explorer',
+			                "y": 56.33
+			            }, {
+			                "name": 'Chrome',
+			                "y": 24.03,
+			                "sliced": true
+			            }, {
+			                "name": 'Firefox',
+			                "y": 10.38
+			            }, {
+			                "name": 'Safari',
+			                "y": 4.77
+			            }, {
+			                "name": 'Opera',
+			                "y": 0.91
+			            }, {
+			                "name": 'Proprietar"y" or Undetectable',
+			                "y": 0.2
+			            }
+			        ],
+			        "label": {
+			            "styles": {
+			                "fontSize": 12
+			            }
+			        },
+			        "styles": {
+			            "fill": "p(color1:index)",
+			            "line": "p(lines1:index)"
+			        },
+			        "animations": [{
+			            "property": "radius"
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }],
+			    "legend": {
+			        "visible": false,
+			        "position": "floating",
+			        "left": 70,
+			        "top": 70,
+			        "layout": "vertical",
+			        "styles": {
+			            "border": "#999",
+			            "paddingLeft": 11,
+			            "paddingRight": 11,
+			            "paddingTop": 5,
+			            "paddingBottom": 5,
+			            "fill": null
+			        },
+			        "itemStyles": {
+			            "fontBold": true
+			        }
+			    }
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

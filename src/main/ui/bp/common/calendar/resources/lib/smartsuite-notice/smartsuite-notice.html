@@ -1,0 +1,169 @@
+<sc-link rel="import" href="smartsuite-notice-content.html"></sc-link>
+
+<dom-module id="smartsuite-notice">
+	<style>
+		.scNoticeAlert {
+			color : white;
+			font-weight : bold;
+			font-size : 14px;
+		}
+		
+		.scNoticeAlert:hover {
+			opacity : 0.5;
+		}
+	</style>
+	
+	<template>
+		<sc-ajax 
+			id="getAlertSchedule" url="../../../readyToGetSchedule.do"
+			on-response="onResponseAlertSchedule">
+		</sc-ajax>
+		
+		<div id="alertIcon"></div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'smartsuite-notice',
+			
+			properties : {
+				/**
+				 * 알람 스케줄 리스트
+				 */
+				alertScheduleList : {
+					type : Object,
+					value : function() {
+						return {};
+					}
+				},
+
+				/**
+				 * 현재 반복 일정의 아이디
+				 */
+				intervalId : {
+					type : Object
+				},
+				
+				timerId : {
+					type : Object
+				},
+				
+				doAlert : {
+					type : Boolean,
+					value : function() {
+						return false;
+					}
+				}
+			},
+
+            listeners: {
+                'tap': 'onClickAlertList'
+            },
+			
+			/**
+			 * 알람을 위한 주기적 요청을 시작한다.
+			 */
+			startInterval : function() {
+				var me = this;
+				
+				var date = new Date();
+				me.timerId = setTimeout(function() {
+					me.intervalId = setInterval(function() {
+						me.requestAlertSchedule();
+					}, 60 * 1000);
+					me.requestAlertSchedule();	
+				}, (60 - date.getSeconds()) * 1000);
+			},
+			
+			/**
+			 * 알람 스케줄 요청
+			 */
+			requestAlertSchedule : function() {
+				var me = this;
+				me.$.getAlertSchedule.body = {
+						usr_id : SCSessionManager.currentUser.usr_id,
+						dept_cd : SCSessionManager.currentUser.dept_cd,
+						vd_cd : SCSessionManager.currentUser.vd_cd,
+						purc_grp_cd : SCSessionManager.currentUser.purc_grp_cd ? SCSessionManager.currentUser.purc_grp_cd : null,
+						current_date : new Date()
+				};
+				me.$.getAlertSchedule.generateRequest();
+			},
+			
+			/**
+			 * 알람을 위한 주기적 요청을 정지한다.
+			 */
+			stopInterval : function() {
+				var me = this;
+				clearInterval(me.intervalId);
+			},
+			
+			stopTimer : function() {
+				var me = this;
+				clearTimeout(me.timerId);
+			},
+			
+			/**
+			 * 알람을 받았을 경우
+			 */
+			onResponseAlertSchedule : function(response) {
+				var me = this;
+				var scheduleList  = response.detail.response;
+				if(scheduleList.length !== 0) {
+					for(var i = 0; i < scheduleList.length; i++) {
+						if(!me.alertScheduleList[scheduleList[i].sched_id]) {
+							me.alertScheduleList[scheduleList[i].sched_id] = scheduleList[i];
+							me.$.alertIcon.style.visibility = '';
+							me.$.alertIcon.style.color = 'red';
+						}
+					}
+				}
+			},
+			
+			/**
+			 * 알람 아이콘을 클릭했을 경우
+			 */
+			onClickAlertList : function() {
+				var me = this;
+				me.$.alertIcon.style.color = '';
+				
+				var popupEl = UT.popup('smartsuite-notice-content', me, 450, 200, {
+						/**
+						 * 팝업 초기화
+						 */
+						'init-popup': function(popup, e) {
+							var newItems = {};
+							for(var index in me.alertScheduleList) {
+								newItems[index] = me.alertScheduleList[index];
+							}
+							me.alertScheduleList = {};
+							popup.getContent().initPopup(newItems, me.doAlert);
+						},
+						
+						/**
+						 * 팝업 결과
+						 */
+						'result' : function(event, data) {
+							me.doAlert = data.detail.doAlert;
+							if(me.doAlert) {
+								me.startInterval();
+							} else {
+								if(me.intervalId) {
+									me.stopInterval();
+									me.intervalId = undefined;
+								}
+								if(me.timerId) {
+									me.stopTimer();
+									me.timerId = undefined;
+								}
+							}
+						}
+					}, {
+                        resizable : false
+                    });
+                popupEl.title = me.translate('알람 스케줄 목록');
+                popupEl.show();
+			}
+		});
+	</script>
+</dom-module>

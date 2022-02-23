@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>js\def.js - API</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="icon" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+                <h1><img src="../assets/css/logo.png" title="API" width="117" height="52"></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.0.1</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+                    <h2 class="off-left">APIs</h2>
+                    <div id="api-tabview" class="tabview">
+                        <ul class="tabs">
+                            <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-elements">Elements</a></li>
+                            <li><a href="#api-modules">Modules</a></li>
+                        </ul>
+                
+                        <div id="api-tabview-filter">
+                            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+                        </div>
+                
+                        <div id="api-tabview-panel">
+                            <ul id="api-classes" class="apis classes">
+                                <li><a href="../classes/DEF.html">DEF</a></li>
+                                <li><a href="../classes/EDITOR.html">EDITOR</a></li>
+                                <li><a href="../classes/GRID.html">GRID</a></li>
+                                <li><a href="../classes/I18N.html">I18N</a></li>
+                                <li><a href="../classes/MSG.html">MSG</a></li>
+                                <li><a href="../classes/UPLOAD.html">UPLOAD</a></li>
+                                <li><a href="../classes/UT.html">UT</a></li>
+                                <li><a href="../classes/VALID.html">VALID</a></li>
+                            </ul>
+                
+                                <ul id="api-elements" class="apis elements">
+                                    <li><a href="../elements/cc-approval-summary.html">&lt;cc-approval-summary&gt;</a></li>
+                                    <li><a href="../elements/cc-dept-search.html">&lt;cc-dept-search&gt;</a></li>
+                                    <li><a href="../elements/cc-editor.html">&lt;cc-editor&gt;</a></li>
+                                    <li><a href="../elements/cc-from-to-date.html">&lt;cc-from-to-date&gt;</a></li>
+                                    <li><a href="../elements/cc-linked-vender.html">&lt;cc-linked-vender&gt;</a></li>
+                                    <li><a href="../elements/cc-multi-text-field.html">&lt;cc-multi-text-field&gt;</a></li>
+                                    <li><a href="../elements/cc-operorg-combobox-field.html">&lt;cc-operorg-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-operorg-multi-combobox-field.html">&lt;cc-operorg-multi-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-purc-grp.html">&lt;cc-purc-grp&gt;</a></li>
+                                    <li><a href="../elements/cc-sg-search.html">&lt;cc-sg-search&gt;</a></li>
+                                    <li><a href="../elements/cc-sp-operorg-combobox-field.html">&lt;cc-sp-operorg-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-sp-operorg-multi-combobox-field.html">&lt;cc-sp-operorg-multi-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-upload.html">&lt;cc-upload&gt;</a></li>
+                                    <li><a href="../elements/cc-user-search.html">&lt;cc-user-search&gt;</a></li>
+                                </ul>
+                
+                            <ul id="api-modules" class="apis modules">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+                    Show:
+                    <label for="api-show-inherited">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </div>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<h1 class="file-heading">File: js\def.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * 공통 속성을 정의한다
+ *
+ * @class DEF
+ */
+var DEF = {
+    /**
+     * 성공 - 서버에서 데이터 처리 후 결과 코드
+     *
+     * @property SUCCESS
+     * @type String
+     */
+    SUCCESS: &quot;S&quot;,
+
+    /**
+     * 실패 - 서버에서 데이터 처리 후 결과 코드
+     *
+     * @property FAIL
+     * @type String
+     */
+    FAIL: &quot;E&quot;,
+
+    /**
+     * 데이터 중복 - 서버에서 데이터 처리 후 결과 코드
+     *
+     * @property DUPLICATED
+     * @type String
+     */
+    DUPLICATED: &quot;D&quot;,
+
+    /**
+     * 데이터 사용중 - 서버에서 데이터 처리 후 결과 코드
+     *
+     * @property USED
+     * @type String
+     */
+    USED: &quot;U&quot;,
+
+    /**
+     * 권한코드 - 조회
+     *
+     * @property READ
+     * @type String
+     */
+    READ : &quot;R&quot;,
+
+    /**
+     * 권한코드 - 저장
+     *
+     * @property SAVE
+     * @type String
+     */
+    SAVE : &quot;S&quot;,
+
+    /**
+     * 권한코드 - 결재
+     *
+     * @property APPROVAL
+     * @type String
+     */
+    APPROVAL : &quot;A&quot;,
+    /**
+     * RFX 실패
+     *
+     */
+    RFX_ERR : &quot;RFX_END&quot;,
+    /**
+     * RFX 포기
+     */
+    RFX_REJECT : &quot;RFX_REJECT&quot;,
+    // 그리드에서 사용하는 styles 정의
+    styles: {
+        /**
+         * 편집가능 컬럼 스타일
+         *
+         * @property styles.editable
+         * @type Object
+         */
+        editable: {
+            id: &quot;editable&quot;,
+            editable: true,
+            background: &quot;#f1ffff&quot;
+        },
+
+        /**
+         * 편집불가능 컬럼 스타일
+         *
+         * @property styles.readonly
+         * @type Object
+         */
+        readonly: {
+            id: &quot;readonly&quot;,
+            editable: false,
+            background: &quot;#ffffff&quot;
+        },
+
+        /**
+         * action 컬럼 스타일
+         *
+         * @property styles.actionable
+         * @type Object
+         */
+        actionable: {
+            id: &quot;actionable&quot;,
+            fontBold: true,
+            foreground: &quot;#0e006f&quot;
+        },
+
+        /**
+         * Y/N으로 구분되는 컬럼의 format 스타일
+         *
+         * @property styles.formatYn
+         * @type Object
+         */
+        formatYn: {
+            booleanFormat: &quot;Y:N&quot;,
+            textAlignment: &quot;center&quot;
+        },
+
+        /**
+         * 정수 숫자 컬럼의 format (콤마) 스타일
+         *
+         * @property styles.formatInteger
+         * @type Object
+         */
+        formatInteger: {
+            numberFormat: &quot;#,000&quot;,
+            textAlignment: &quot;far&quot;
+        },
+
+        /**
+         * 소수점 숫자 컬럼의 format (콤마) 스타일
+         *
+         * @property styles.formatDecimal
+         * @type Object
+         */
+        formatDecimal: {
+            numberFormat: &quot;#,000.00&quot;,
+            textAlignment: &quot;far&quot;
+        },
+
+        /**
+         * 날짜 format 스타일
+         *
+         * @property styles.formatDate
+         * @type Object
+         */
+        formatDate: {
+            datetimeFormat: &quot;yyyy/MM/dd&quot;,
+            textAlignment: &quot;center&quot;
+        },
+
+        /**
+         * 날짜 시간 format 스타일
+         *
+         * @property styles.formatDatetime
+         * @type Object
+         */
+        formatDatetime: {
+            datetimeFormat: &quot;yyyy/MM/dd HH:mm:ss&quot;,
+            textAlignment: &quot;center&quot;
+        },
+
+        /**
+         * Y/N으로 구분되는 checkbox 컬럼의 disabled 스타일
+         *
+         * @property styles.disabledCheckboxYn
+         * @type Object
+         */
+        disabledCheckboxYn: {
+            background: &quot;#fafafa&quot;,
+            figureBackground: &quot;#cdcdcd&quot;,         // checked=true 일 때, 체크표시 색
+            figureInactiveBackground: &quot;#fafafa&quot;, // checked=false 일 때, 체크표시 색
+            renderer: &quot;disabledCheckboxYn&quot;       // renderer.disabledCheckboxYn 의 id
+        },
+
+        /**
+         * 데이터 저장을 위해 서버로 전송하는 포맷 스타일
+         *
+         * @property styles.outputFormat
+         * @type Object
+         */
+        outputFormat: {
+            datetimeFormat: &quot;yyyyMMdd&quot; // 그리드 달력
+        },
+
+        // 그리드의 icon 컬럼에 사용되는 icons 스타일 정의
+        icons: {
+            /**
+             * icons 없음
+             *
+             * @property styles.icons.empty
+             * @type Object
+             */
+            empty: {
+                iconIndex: -1
+            },
+
+            /**
+             * 검색 icon
+             *
+             * @property styles.icons.search
+             * @type Object
+             */
+            search: {
+                iconIndex: 0, // icons.images의 index
+                iconLocation: &quot;center&quot;
+            },
+
+            /**
+             * 링크 icon
+             *
+             * @property styles.icons.link
+             * @type Object
+             */
+            link: {
+                iconIndex: 1,  // icons.images의 index
+                iconLocation: &quot;center&quot;
+            },
+
+            /**
+             * 첨부파일 icon
+             *
+             * @property styles.icons.attach
+             * @type Object
+             */
+            attach: {
+                iconIndex: 2,  // icons.images의 index
+                iconLocation: &quot;right&quot;
+            },
+
+            /**
+             * 필수컬럼 icon
+             *
+             * @property styles.icons.required
+             * @type Object
+             */
+            required: {
+                iconIndex: 3,  // icons.images의 index
+                iconLocation: &quot;left&quot;,
+                iconOffset: -2,
+                iconPadding: 1
+            }
+        }
+    },
+
+    // 그리드 renderer 정의
+    renderer: {
+        /**
+         * Y/N으로 구분되는 checkbox 컬럼 renderer
+         *
+         * @property renderer.checkboxYn
+         * @type Object
+         */
+        checkboxYn: {
+            id: &quot;checkboxYn&quot;,
+            type: &quot;check&quot;,
+            shape: &quot;box&quot;,
+            editable: true,
+            startEditOnClick: true,
+            trueValues: &quot;Y&quot;,
+            falseValues: &quot;N&quot;,
+            labelPosition: &quot;center&quot;
+        },
+
+        /**
+         * DEF.renderer.checkboxYn 의 disabled(editable=false) renderer
+         *
+         * @property renderer.disabledCheckboxYn
+         * @type Object
+         */
+        disabledCheckboxYn: {
+            id: &quot;disabledCheckboxYn&quot;,
+            type: &quot;check&quot;,
+            shape: &quot;box&quot;,
+            editable: false,
+            trueValues: &quot;Y&quot;,
+            falseValues: &quot;N&quot;,
+            labelPosition: &quot;center&quot;
+        }
+    },
+
+    /**
+     * 그리드에서 사용하는 icons 정보 정의
+     *
+     * @property icons
+     * @type Object
+     */
+    icons: {
+        id: &quot;icons&quot;,
+        path: &quot;../../../../../ui/assets/img/grid/&quot;,
+        images: [
+            &quot;icon_search.png&quot;,
+            &quot;icon_link.png&quot;,
+            &quot;icon_attach.png&quot;,
+            &quot;icon_required.png&quot;
+        ]
+    },
+
+    // 그리드에서 사용하는 editor(편집) 정보 정의
+    editor: {
+        /**
+         * 콤보박스 컬럼 editor
+         *
+         * @property editor.combobox
+         * @type Object
+         */
+        combobox: {
+            type: &quot;dropdown&quot;,
+            dropDownCount: 10,  // 속성에 표시될 목록의 수
+            textReadOnly: true, // 키보드로 입력이 안되고 선택만 가능하게 된다
+            domainOnly: true    // 목록에 있는 값들만 지정할 수 있는지의 여부, true시 목록 이외의 값은 지정할 수 없다.
+        },
+
+        /**
+         * 정수 숫자 입력 컬럼 editor
+         *
+         * @property editor.integer
+         * @type Object
+         */
+        integer: {
+            type: &quot;number&quot;,
+            maxLength: 0,       // 입력할 수 있는 문자의 최대 개수. 0으로 지정하면 제한이 없다
+            positiveOnly: true, // 양수값만 입력할 수 있다
+            integerOnly: true   // 정수만 입력할 수 있다.
+        },
+
+        /**
+         * 소수점 숫자 입력 컬럼 editor
+         *
+         * @property editor.decimal
+         * @type Object
+         */
+        decimal: {
+            type: &quot;number&quot;,
+            maxLength: 0,       // 입력할 수 있는 문자의 최대 개수. 0으로 지정하면 제한이 없다
+            positiveOnly: true, // 양수값만 입력할 수 있다
+            integerOnly: false  // 소수점값 입력할 수 있다.
+        },
+
+        /**
+         * 달력선택 컬럼 editor
+         *
+         * @property editor.datePicker
+         * @type Object
+         */
+        datePicker: {
+            type: &quot;date&quot;,
+            datetimeFormat: &quot;yyyy/MM/dd&quot;,
+            textReadOnly: true,  // 키보드를 이용해서 날짜를 입력할 수 없다.
+            yearNavigation: true // 달력 팝업에 년도 이동버튼이 표시된다
+        }
+    }
+};
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

@@ -1,0 +1,403 @@
+<dom-module id="ep-site-map">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+        .tableHeader{
+        	font-weight : bold;
+        }
+    </style>
+	<template>
+		<sc-request-group init>
+			<sc-code-group>
+				<sc-code code="TZ" value="{{codes.tz}}"></sc-code>
+				<sc-code code="IOT018" value="{{codes.weatherCode}}"></sc-code>
+				<sc-code code="IOT034" value="{{codes.mobileAutoEndCode}}"></sc-code>
+			</sc-code-group>
+		</sc-request-group>
+		
+		<!-- 작업자 동기화 -->
+		<sc-ajax
+			id="syncWorker"
+			url="syncWorker.do"
+			on-response="completeSynkWorker">
+		</sc-ajax>
+		
+		<!-- 현장 목록 저장 -->
+		<sc-ajax
+			id="saveListSite"
+			url="saveListSite.do"
+			on-response="completeSaveListSite">
+		</sc-ajax>
+		
+		<div class="hbox flex">
+			<!-- 지도 영역 -->
+			<div  class="vbox flex-5">
+				<cc-map-container id="mapContainer" view-display-hidden=true show-view-label="true" show-view-marker="true" site-id="{{siteId}}" auto-start="false"></cc-map-container>
+			</div>
+			<!-- 지도 영역 끝 -->
+			<div class="hspace-5"></div>
+			<!-- 테이블 영역 -->
+	        <div class="w-450">
+	        	<span class="tableHeader">기본 설정</span>
+				<div class="vspace-5"></div>
+	        	<table class="tb-form">
+					<colgroup>
+						<col style="width:120px;">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="현장코드"></sc-label></th>
+						<td>
+							<sc-text-field value="{{data.siteCd}}" readonly class="w-120"></sc-text-field>
+							<sc-button text="작업자동기화" on-click="onSyncBtnClick" style="margin-left:4px; padding-left:12px; padding-right:12px"  hidden$="[[!formula('editableYN')]]"></sc-button>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="현장명"></sc-label></th>
+						<td>
+							<sc-text-field value="{{data.name}}" required="true"></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="설명"></sc-label></th>
+						<td>
+							<sc-text-field value="{{data.description}}"></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="위치"></sc-label></th>
+						<td>
+							<sc-text-field id="lat" value="위도 : {{data.pinPoint.lat}} 경도 : {{data.pinPoint.lon}}" required="true" readonly="true" class="w-250"></sc-text-field>
+							<sc-button text="재설정" on-click="onPolygonBtnClick" style="margin-left:4px; padding-left:12px; padding-right:12px"></sc-button>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="해상기상정보"></sc-label></th>
+						<td>
+							<sc-combobox-field 
+								items="{{codes.weatherCode}}" display-field="label" value-field="data" input-clear="false"
+								value="{{data.adjunction.weatherCode}}">
+	                    	</sc-combobox-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="타임존"></sc-label></th>
+						<td>
+							<sc-combobox-field
+								items="{{codes.tz}}" display-field="label" value-field="data" input-clear="false"
+								value="{{data.currentTimezone}}">
+	                    	</sc-combobox-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="관리시작일"></sc-label></th>
+						<td>
+							<sc-date-field value="{{data.startDt}}" display-format="yyyy-MM-dd" style="width : 140px;" max-date="{{data.endDt}}"></sc-date-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="관리종료일"></sc-label></th>
+						<td>
+							<sc-date-field value="{{data.endDt}}" display-format="yyyy-MM-dd" style="width : 140px;" min-date="{{data.startDt}}"></sc-date-field>
+						</td>
+					</tr>
+				</table>
+				<div class="vspace-10"></div>
+				<div class="vspace-10"></div>
+				<span class="tableHeader">모바일앱 설정</span>
+				<div class="vspace-5"></div>
+				<table class="tb-form">
+					<colgroup>
+						<col style="width:180px;">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="위험지역비콘알림간격" ></sc-label></th>
+						<td>
+							<sc-number-field value="{{data.adjunction.dangerBeaconTerm}}" class="w-50" max-value="60" min-value="0"></sc-number-field> 분
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="위치정보수신종료시간"></sc-label></th>
+						<td>
+							<sc-number-field value="{{data.adjunction.mobileLocationLimitedTime}}" class="w-50" max-value="23" min-value="0"></sc-number-field> 시
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="위치정보수집자동종료옵션"></sc-label></th>
+						<td>
+							<sc-combobox-field 
+								items="{{codes.mobileAutoEndCode}}" display-field="label" value-field="data" input-clear="false"
+								value="{{data.adjunction.mobileAutoEndOption}}" on-select="changeMobileAutoEndCode">
+	                    	</sc-combobox-field>
+						</td>
+					</tr>
+					<tr class="afterCheckOption">
+<!-- 							<th><sc-label text="모바일앱 자동 종료 기준"></sc-label></th> -->
+							<td colspan="2" style=" line-height: 2;">
+							매일  <sc-number-field value="{{data.adjunction.mobileLocationLimitedTime}}" class="w-50" max-value="23" min-value="0"
+							readonly="true"></sc-number-field> 시 이후, 모바일앱 위치정보 수집시간을 기준으로  최근   <br> 
+							<sc-number-field value="{{data.adjunction.standardTime}}" class="w-50" max-value="23" min-value="0" readonly="true"></sc-number-field>시간 동안
+							해당 작업자가 <sc-number-field value="{{data.adjunction.minimumWorkTime}}" class="w-50" max-value="12" min-value="0" on-click="onChangeMinTime" on-keyup="onChangeMinTime"></sc-number-field>시간 이상
+							작업하였고  현장이탈   <br>시간이 <sc-number-field value="{{data.adjunction.leaveSiteTime}}" class="w-50" max-value="23" min-value="0"></sc-number-field>분
+							이상일 경우 모바일 앱을 자동 종료 처리합니다.
+							</td>
+					</tr>
+<!-- 					<tr class="afterCheckOption"> -->
+<!-- 						<th><sc-label text="최소작업시간"></sc-label></th> -->
+<!-- 						<td> -->
+<!-- 							<sc-number-field value="{{data.adjunction.minimumWorkTime}}" class="w-50" max-value="23" min-value="0"></sc-number-field> 시간 -->
+<!-- 						</td> -->
+<!-- 					</tr> -->
+<!-- 					<tr class="afterCheckOption"> -->
+<!-- 						<th><sc-label text="기준시간"></sc-label></th> -->
+<!-- 						<td> -->
+<!-- 							<sc-number-field value="{{data.adjunction.standardTime}}" class="w-50" max-value="23" min-value="0"></sc-number-field> 시간 -->
+<!-- 						</td> -->
+<!-- 					</tr> -->
+<!-- 					<tr class="afterCheckOption"> -->
+<!-- 						<th><sc-label text="현장이탈판단시간"></sc-label></th> -->
+<!-- 						<td> -->
+<!-- 							<sc-number-field value="{{data.adjunction.leaveSiteTime}}" class="w-50" max-value="23" min-value="0"></sc-number-field> 분 -->
+<!-- 						</td> -->
+<!-- 					</tr> -->
+				</table>
+				<div class="vspace-10"></div>
+				<cc-sub-title-bar>
+					<sc-button text="저장" on-click="onApplyBtnClick"></sc-button>
+					<sc-button text="닫기" on-click="onCloseClick"></sc-button>
+				</cc-sub-title-bar>
+			</div>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is : 'ep-site-map',
+			properties:{
+			 codes: {		// 코드
+                    type : Object,
+                    reset : false,
+                    value : function() {
+                        return {
+                        	customerList : []
+                        };
+                    }
+                },
+				titleText: {	//팝업 타이틀 지정
+					type: String,
+					value: function () {
+						return "현장위치지정";
+					}
+				},
+				data : {
+					type : Object,
+					value : function(){
+						return {
+							workerInterfaceYn : "N"
+						};
+					}
+				},
+	            map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+                siteId : {
+                    type : Object,
+                    value : function(){
+						return {};
+                    }
+                },
+                vectorLayer:{
+					type : Object,
+					value : function(){
+						return{};
+					}
+                },
+                drawControl:{
+					type : Object,
+					value : function(){
+						return{};
+					}
+                }
+			},
+			formulas : {
+                editableYN: function() {
+                    return (this.get("data.workerInterfaceYn") === "Y");
+                }
+            },
+			load: function(id, data){
+				var me = this;
+
+				setTimeout(function(){
+					me.set('data', data);
+					me.applyFormula();
+					
+		            if(!UT.isEmpty(id)){
+			            me.set('siteId', id);
+			        }
+	
+		            me.$.mapContainer.start();
+		            me.map = me.$.mapContainer.map;
+
+
+		            me.vectorLayer = new OpenLayers.Layer.Vector("vectorLayer", {styleMap:styleMap});
+		            me.map.addLayer(me.vectorLayer);
+
+		         	// 레이어 편집 컨트롤 추가
+	        		var editControl = addEditControl(me.map, me.vectorLayer);
+
+	        		// 좌표 표시 이벤트
+		        	me.vectorLayer.events.register('vertexmodified', me.vectorLayer, function(e){
+			        	if(e.feature.attributes.type=='marker'){
+			        		me.setLonLat(e.feature.geometry);
+				        }
+			        });
+
+	        		// 객체 추가 이벤트
+	        		me.vectorLayer.onFeatureInsert = function(e){
+	        			editControl.selectFeature(this.getFeatureById(e.id));
+	        			me.map.target = me.vectorLayer.getDataExtent();
+		        	};
+		        	
+					// 레이어 그리기 컨트롤 추가
+	        		me.drawControl = new OpenLayers.Control.DrawFeature(me.vectorLayer, OpenLayers.Handler.Polygon);
+	        		me.drawControl.featureAdded = function(e){
+	                	e.attributes = {"type":"polygon"};
+	                	me.drawControl.deactivate();
+
+	                	me.setLonLat(e.geometry.getCentroid());
+		        		
+		               	// 마커 생성
+		            	addAreaMarker(me.vectorLayer, me.data.name, me.data.pinPoint.lon, me.data.pinPoint.lat, "site", true);
+	              	};
+	              	me.map.addControl(me.drawControl);
+
+		        	if(data.geoJson){		// 영역 객체가 있을경우
+			        	// 폴리곤 생성
+			        	var feature =geoJsonToFeature(data.geoJson); 
+				       	me.vectorLayer.addFeatures(feature);
+
+			     		// 마커 생성   	
+			        	addAreaMarker(me.vectorLayer, data.name, me.data.pinPoint.lon, me.data.pinPoint.lat, "site", true);
+
+			        	me.vectorLayer.map.target = me.vectorLayer.getDataExtent();
+			        	moveToTarget(me.vectorLayer.map);
+			        	me.vectorLayer.redraw();
+		        	}
+		       	},100);
+			},
+			onSyncBtnClick : function(){
+				var me = this;
+				UT.confirm("작업자 동기화를 진행 하시겠습니까?", function(){
+					me.$.syncWorker.body = {
+						siteId : me.siteId
+	                };
+					UT.request(me.$.syncWorker,null,false);
+				});
+			},
+			completeSynkWorker : function(e, res){
+				var me = this;
+                
+				if(res.response.result_status === 'S'){
+                    UT.alert("작업자동기화를 완료하였습니다.", function(){});
+                } else {
+                    UT.alert(res.response.result_message);
+                }
+			},
+            onApplyBtnClick: function(){	// 적용버튼 클릭
+            	var me = this;
+            	if(UT.isEmpty(me.data.name)){
+            		UT.alert("현장명을 입력해주세요");
+            		return;
+                }
+            	if(me.vectorLayer.getFeaturesByAttribute("type","polygon").length > 0){
+	            	var polygon = me.vectorLayer.getFeaturesByAttribute("type","polygon")[0].clone();
+	            	polygon.geometry.transform(projection900913, projection4326);
+	
+	            	var geojson_format = new OpenLayers.Format.GeoJSON();
+	            	var geoJson = JSON.parse(geojson_format.write(polygon.geometry));
+		            	
+	                me.data.polygon = featureToPolygonArr(polygon);
+	                me.data.geoJson = geoJson;
+
+	                me.$.saveListSite.body = {
+                        insertList: [],
+                        updateList: []
+                    };
+
+	                if(UT.isEmpty(me.data.id)){
+	                	me.$.saveListSite.body.insertList[0] = me.data;
+		            }else{
+	                	me.$.saveListSite.body.updateList[0] = me.data;
+       		        }
+                    
+                    UT.request(me.$.saveListSite);
+                    
+            	}else{
+					UT.alert("지정된 현장위치가 없습니다.");
+                }
+            },
+            completeSaveListSite: function(e, res){
+                var me = this;
+                var message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                    	me.fire("apply-point");
+                    });
+                } else {
+                    message ="STD.E9600";
+                    UT.alert(message);
+                }
+            },
+            onCloseClick : function(){
+            	var me = this;
+            	me.fire("close");
+           },
+            onPolygonBtnClick: function(){	// 영역 객체 생성
+                var me = this;
+            	if(me.vectorLayer.features.length > 0){
+	           		UT.confirm("이미 생성된 현장이 있습니다.\n현장을 다시 생성 하시겠습니까?", function(){me.createSiteArea()});
+                }else{
+                	me.createSiteArea();
+                }
+            },
+            createSiteArea : function(){
+                var me = this;
+                me.set('data.pinPoint.lat', null);
+        		me.set('data.pinPoint.lon', null);
+        		me.vectorLayer.removeAllFeatures();
+            	me.drawControl.activate();
+            },
+            setLonLat : function(e){
+                var me = this;
+            	var point =e.clone().transform(projection900913, projection4326);
+        		me.set('data.pinPoint.lat', point.y.toFixed(6));
+        		me.set('data.pinPoint.lon', point.x.toFixed(6));
+            },
+            
+            changeMobileAutoEndCode : function(e){
+            	var me = this;
+            	if(e.detail.selectedItem.data == "afterCheck"){
+            		$(".afterCheckOption").show();
+            	}else{
+            		$(".afterCheckOption").hide();
+            	}
+            },
+            
+            onChangeMinTime : function(e){
+            	var me = this;
+            	if(UT.isEmpty(me.data.adjunction.minimumWorkTime) || me.data.adjunction.minimumWorkTime <= 12){
+					me.set("data.adjunction.standardTime",24-me.data.adjunction.minimumWorkTime);
+            	}else{
+            		UT.alert("12시간 이상 입력 할 수 없습니다.")
+            		me.set("data.adjunction.minimumWorkTime",12);
+            		me.set("data.adjunction.standardTime",24-me.data.adjunction.minimumWorkTime);
+            	}
+            }
+		});
+	</script>
+</dom-module>

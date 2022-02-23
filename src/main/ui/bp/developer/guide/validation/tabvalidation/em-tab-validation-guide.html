@@ -1,0 +1,65 @@
+<sc-link rel="import" href="es-tab-validation-description.html"></sc-link>
+<sc-link rel="import" href="em-parent-tab-validation-sample.html"></sc-link>
+<sc-link rel="import" href="../../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-tab-validation-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="hbox flex" title-text="상위 모듈에서 하위 Tab Validation 검증">
+			<es-tab-validation-description class="flex-5"></es-tab-validation-description>
+			<em-parent-tab-validation-sample class="box flex-5"></em-parent-tab-validation-sample>
+		</sc-panel>
+		<es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-tab-validation-guide',
+		properties : {
+			srcList : {
+				type : Array,
+				value : function() {
+					return [{
+                        title        : "cc-tab-validate-behavior.js",
+                        i18nDisabled : true,
+                        extension    : "javascript",
+                        url          : "/ui/lib/custom/html/cc-tab-validate-behavior.js"
+                    },{
+						title        : "em-parent-tab-validation-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/validation/tabvalidation/em-parent-tab-validation-sample.html"
+					},
+					{
+						title        : "es-sub-tab1-validation-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/validation/tabvalidation/es-sub-tab1-validation-sample.html"
+					},
+					{
+                        title        : "es-sub-tab2-validation-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/validation/tabvalidation/es-sub-tab2-validation-sample.html"
+					},
+					{
+                        title        : "es-sub-tab3-validation-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/validation/tabvalidation/es-sub-tab3-validation-sample.html"
+					},
+					{
+                        title        : "es-sub-tab4-validation-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/validation/tabvalidation/es-sub-tab4-validation-sample.html"
+					}]
+				}
+			}
+		}
+	});
+	</script>
+</dom-module>

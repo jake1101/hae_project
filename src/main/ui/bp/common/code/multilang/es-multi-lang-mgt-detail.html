@@ -1,0 +1,150 @@
+<dom-module id="es-multi-lang-mgt-detail">
+
+    <style>
+        :host {
+            @apply(--fit-layout);
+        }
+    </style>
+
+    <template>
+        <!-- 공통 코드 조회-->
+        <sc-code-group>
+            <sc-code id="findListCodeGrp" code="C002" value="{{codes.localeCds}}" ></sc-code> <!-- 언어코드 -->
+        </sc-code-group>
+
+        <!-- 상세정보 조회 -->
+        <sc-ajax id="findMessageList"
+                 url="findMessageList.do"
+                 body="{{searchParam}}"
+                 last-response="{{resultList}}"
+                 on-response="completeFindMessageList">
+        </sc-ajax>
+
+        <!-- 상세정보 저장 -->
+        <sc-ajax id="saveMessageList"
+                 url="saveMessageList.do"
+                 on-response="completeSaveMessageList">
+        </sc-ajax>
+
+        <cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+        <sc-grid id="gridPanel" class="fit" editable="true" use-selection="false" data-provider="{{resultList}}">
+            <cc-grid-toolbar title-text="[[searchParam.message_key]]" i18n-disabled>
+                <sc-button text="저장" on-click="onSaveMessageList" auth-s></sc-button>
+            </cc-grid-toolbar>
+            <sc-grid-columns>
+                <sc-combobox-column data-field="locale" header-text="Locale" width="100" text-align="center" editable="false"
+                                    items="{{codes.localeCds}}" display-field="label" value-field="data"></sc-combobox-column>
+                <sc-data-column data-field="message" header-text="Message" width="500" text-align="left" editable="true" required="true" max-length="500"></sc-data-column>
+            </sc-grid-columns>
+            <sc-grid-fields>
+                <sc-grid-field data-field="message_key"></sc-grid-field>
+            </sc-grid-fields>
+        </sc-grid>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'es-multi-lang-mgt-detail',
+            properties: {
+
+                // 코드 데이터
+                codes: {
+                    type: Object,
+                    reset: false,
+                    value: function() {
+                        return {
+                            localeCds: []
+                        };
+                    }
+                },
+
+                // 조회 조건
+                searchParam: {
+                    type: Object,
+                    value: function() {
+                        return {};
+                    }
+                },
+
+                // 조회 결과
+                resultList: {
+                    type: Array,
+                    value: function(){
+                        return [];
+                    }
+                }
+
+            },
+
+            formulas : {
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+
+            load: function(data) {
+                var me = this;
+                me.set("searchParam", data);
+
+                me.onFindMessageList();
+            },
+
+            // 초기화
+            clear: function() {
+            },
+
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+
+            // 조회
+            onFindMessageList: function() {
+                var me = this;
+                UT.request(me.$.findMessageList);
+            },
+
+            // 조회 완료
+            completeFindMessageList: function() {
+            },
+
+            // 저장
+            onSaveMessageList: function() {
+                var me = this,
+                    provider = me.$.gridPanel.getDataProvider(),
+                    updated = provider.getUpdateItems();
+
+                if(updated.length === 0) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+
+                UT.confirm( "STD.N1200", function() { // 저장 하시겠습니까?
+                    me.$.saveMessageList.body = {
+                        messageList: updated
+                    };
+                    UT.request(me.$.saveMessageList);
+                });
+            },
+
+            // 저장 완료
+            completeSaveMessageList: function(e, res) {
+                var me = this,
+                    message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                    	me.fire("saved");
+//                         me.onFindMessageList();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+            }
+
+        });
+    </script>
+
+</dom-module>

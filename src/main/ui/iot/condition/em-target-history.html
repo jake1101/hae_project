@@ -1,0 +1,30 @@
+<sc-link rel="import" href="es-target-history.html"></sc-link>
+
+<dom-module id="em-target-history">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 현장 이력조회
+        ** @Description		: 현장상황정보 > 현장 이력조회
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.02.25
+        ** @History 		: 2020.02.25 jhkim 최초작성
+        ******************************************************************************************
+    -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<es-target-history class="flex"></es-target-history>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-target-history'
+		});
+	</script>
+
+</dom-module>

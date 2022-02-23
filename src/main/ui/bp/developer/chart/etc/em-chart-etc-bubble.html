@@ -1,0 +1,38 @@
+<sc-link rel="import" href="es-chart-etc-bubble.html"></sc-link>
+<sc-link rel="import" href="../es-chart-source-viewer.html"></sc-link>
+
+<dom-module id="em-chart-etc-bubble">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-panel class="vbox flex" title-text="etc chart bubble">
+			<es-chart-etc-bubble class="fit flex" on-chart-load="onChartLoad"></es-chart-etc-bubble>
+			<es-chart-source-viewer id="viewer" url="/ui/bp/developer/chart/etc/es-chart-etc-bubble.html" class="flex"></es-chart-source-viewer>
+		</sc-panel>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-chart-etc-bubble',
+		properties : {
+			data : {
+				type : Object,
+				value : function() {
+					return {}
+				}
+			}
+		},
+		initialized : function() {
+		},
+		setViewerData : function() {
+			var me = this;
+			me.$.viewer.setData(JSON.stringify(me.get("data"), null, "\t"));
+		},
+		onChartLoad : function(){
+			//this.setViewerData();
+		}
+	});
+	</script>
+</dom-module>

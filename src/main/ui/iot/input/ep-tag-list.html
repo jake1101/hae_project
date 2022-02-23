@@ -1,0 +1,109 @@
+<dom-module id="ep-tag-list">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 이동장비관리(스마트태그 팝업)
+        ** @Description		: (스마트태그 팝업)
+        ** @Author 			: JongHoon Baek
+        ** @Create Date 	: 2019.12.31
+        ** @History 		: 2019.12.31 JongHoon Baek 최초작성
+        ******************************************************************************************
+    -->
+
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+	</style>
+	
+	<template>
+	
+ 		<sc-ajax id="findSensorList"
+			url="findSensorList.do"
+			body={{searchParam}}
+			last-response="{{tagList}}">
+		</sc-ajax>
+	
+		<cc-search-container on-search="onFindList" auth-r>
+			<table>
+			<colgroup>
+				<col style="width:120px"/>
+				<col />
+			</colgroup>
+				<tr>
+					<th><sc-label text="태그명"></sc-label></th>
+					<td><sc-text-field value="{{searchParam.name}}"></sc-text-field></td>
+				</tr>
+			</table>
+		</cc-search-container>
+		<sc-grid  id="gridPanel"  data-provider="{{tagList}}" use-selection="false" on-item-click="onItemClick" editable="true">
+			<cc-grid-toolbar>
+<!-- 				<sc-button text="선택" on-click="onSelect" auth-s></sc-button> -->
+			</cc-grid-toolbar>
+			
+			<sc-grid-columns>
+				<sc-data-column header-text="id" data-field="id" width="0" text-align="center"  ></sc-data-column>
+				<sc-data-column header-text="센서노드아이디" data-field="nodeId" width="150" text-align="center"   required="true" ></sc-data-column>
+				<sc-group-column hide-child-headers="true"	header-text="태그명"	 width="180"	text-align="center"	editable="false">
+				<sc-data-column header-text="태그명" data-field="name" width="150" text-align="center"   required="true" ></sc-data-column>
+					<sc-image-column data-field="button_point" width="30" text-align="center" editable="false" singular-source="ui/assets/img/grid/ico_grd_select.png"></sc-image-column>
+				</sc-group-column>
+				
+				<sc-data-column header-text="배터리" data-field="battery" width="200" text-align="center" ></sc-data-column>						
+			</sc-grid-columns>
+		</sc-grid>	
+		</div>
+			
+	</template>
+	
+	<script>
+		Polymer({
+			is : "ep-tag-list",
+			
+			properties : {
+				
+				searchParam: {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				},
+				
+			
+			},
+			
+			load:function(){
+ 				var me = this;
+				me.set('searchParam.type', "vehicle");
+				me.onFindList();
+			},
+			onFindList : function(){
+				var me = this;
+				//서버요청
+ 				UT.request(me.$.findSensorList);	
+				
+			},
+			
+			onItemClick : function(event) {
+				var me = this,
+					data = event.detail.data,
+					item = event.detail.item,
+                	provider = event.detail.provider,
+                	searchParam = me.get('searchParam');
+				
+				me.currentRowIndex = item.rowIndex;
+				if(item.dataField === "button_point") {					
+					me.fire("show-list",data);
+				}
+            },
+			
+			        
+//  	         onClose: function(){
+//  	        	this.fire('close');
+//  			 } 
+ 			 
+	
+		})
+	
+	</script>
+	
+</dom-module>

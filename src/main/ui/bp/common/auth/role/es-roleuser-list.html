@@ -1,0 +1,200 @@
+<dom-module id="es-roleuser-list">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <!-- 코드 -->
+        <sc-request-group init>
+            <sc-ajax url="getAllCompanyList.do" last-response="{{codes.company}}"></sc-ajax> <!-- 회사 목록 -->
+        </sc-request-group>
+
+        <!-- 목록 조회 -->
+        <sc-ajax id="findList"
+                 url="findListRoleUser.do"
+                 body="{{searchParam}}"
+                 last-response="{{resultList}}">
+        </sc-ajax>
+
+        <!-- 목록 저장 -->
+        <sc-ajax id="saveList"
+                 url="saveListRoleUser.do"
+                 on-response="completeSaveList">
+        </sc-ajax>
+
+        <cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+        <cc-sub-title-bar title-text="권한별사용자연결"></cc-sub-title-bar>
+        <cc-search-container search-button-hidden="[[!formula('isEditable')]]" on-search="onFindList" auth-r>
+            <table class="tb-search">
+                <colgroup>
+                    <col style="width:80px">
+                    <col>
+                    <col style="width:80px">
+                    <col>
+                </colgroup>
+<!--                 <tr> -->
+<!--                     <th><sc-label text="회사"></sc-label></th> -->
+<!--                     <td> -->
+<!--                         <sc-combobox-field -->
+<!--                                 display-field="comp_nm" value-field="comp_cd" placeholder="전체" readonly="[[!formula('isEditable')]]" -->
+<!--                                 items="{{codes.company}}" value="{{searchParam.comp_cd}}" > -->
+<!--                         </sc-combobox-field> -->
+<!--                     </td> -->
+<!--                     <th><sc-label text="부서"></sc-label></th> -->
+<!--                     <td> -->
+<!--                         <sc-text-field value="{{searchParam.dept_nm}}" readonly="[[!formula('isEditable')]]" on-enter="onFindList"></sc-text-field> -->
+<!--                     </td> -->
+<!--                 </tr> -->
+                <tr>
+                    <th><sc-label text="아이디"></sc-label></th>
+                    <td>
+                        <sc-text-field value="{{searchParam.usr_id}}" readonly="[[!formula('isEditable')]]" on-enter="onFindList"></sc-text-field>
+                    </td>
+                    <th><sc-label text="이름"></sc-label></th>
+                    <td>
+                        <sc-text-field value="{{searchParam.usr_nm}}" readonly="[[!formula('isEditable')]]" on-enter="onFindList"></sc-text-field>
+                    </td>
+                </tr>
+            </table>
+        </cc-search-container>
+
+        <sc-grid id="gridPanel" data-provider="{{resultList}}" class="flex" editable="true" use-selection="false">
+            <cc-grid-toolbar title-text="[[roleCdText]]" i18n-disabled>
+                <sc-button text="저장" on-click="onSaveList" auth-s></sc-button>
+            </cc-grid-toolbar>
+            <sc-grid-columns>
+                <sc-data-column data-field="usr_id" header-text="아이디" width="100" text-align="center"></sc-data-column>
+                <sc-data-column data-field="usr_nm" header-text="이름" width="150" text-align="left"></sc-data-column>
+                <sc-data-column data-field="comp_nm" header-text="회사" width="150" text-align="left"></sc-data-column>
+                <sc-data-column data-field="dept_nm" header-text="부서" width="150" text-align="center"></sc-data-column>
+                <sc-checkbox-column data-field="use_yn" header-text="메뉴권한" width="60" text-align="center" editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+            </sc-grid-columns>
+        </sc-grid>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'es-roleuser-list',
+            properties: {
+                // 코드 데이터
+                // TODO : function 으로 변경
+                codes: {
+                    type: Object,
+                    value: {
+                        company: []
+                    },
+                    reset: false
+                },
+
+                // 조회 조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+
+                // 조회 결과
+                resultList: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                },
+
+                roleCdText:{
+                    type:String,
+                    value: ''
+                }
+
+            },
+
+            formulas : {
+                // 수정 가능 상태 : 롤 코드가 선택 되었을 경우
+                isEditable: function() {
+                    return (!UT.isEmpty(this.searchParam.role_cd));
+                }
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            load: function(param) {
+                var me = this;
+                me.set("searchParam.role_cd", param.role_cd);
+                me.set("searchParam.role_nm", param.role_nm);
+                me.set("roleCdText", me.searchParam.role_nm);
+                me.onFindList();
+                me.applyFormula();
+            },
+
+            clear: function() {
+                var me = this;
+                me.reset();
+                me.applyFormula();
+            },
+
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+            // 조회
+            onFindList: function() {
+                var me = this;
+                UT.request(me.$.findList);
+            },
+
+            //저장
+            onSaveList: function() {
+                var me = this,
+                    provider = me.$.gridPanel.getDataProvider(),
+                    message = "STD.N1200"; // 저장 하시겠습니까?
+
+                if(!me.formula('isEditable')){
+                    UT.alert(me.translate("STD.E1012",null,me.translate('롤코드')),null,true); //"'{0}'을(를) 선택하십시오"
+                    return;
+                }
+
+                UT.confirm(message, function() {
+                    var inserts = [],
+                        deletes = [],
+                        updated = provider.getUpdateItems();
+                    for (var i = 0, len = updated.length; i < len; i++) {
+                        updated[i].role_cd = me.get("searchParam.role_cd");
+                        if (updated[i].use_yn === "Y") {
+                            inserts.push(updated[i]);
+                        } else {
+                            deletes.push(updated[i]);
+                        }
+                    }
+                    me.$.saveList.body = {
+                        insertRoleUsers: inserts,
+                        deleteRoleUsers: deletes
+                    };
+                    UT.request(me.$.saveList);
+                });
+            },
+
+            // 저장 완료
+            completeSaveList: function(e, res) {
+                var me = this,
+                    message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                        me.onFindList();
+                        me.fire("saved");
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+            }
+
+        });
+    </script>
+
+</dom-module>

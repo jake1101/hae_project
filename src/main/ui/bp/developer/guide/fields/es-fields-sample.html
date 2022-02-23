@@ -1,0 +1,45 @@
+<sc-link rel="import" href="es-text-field-sample.html"></sc-link>
+<sc-link rel="import" href="es-number-field-sample.html"></sc-link>
+<sc-link rel="import" href="es-date-field-sample.html"></sc-link>
+<sc-link rel="import" href="es-combobox-field-sample.html"></sc-link>
+<sc-link rel="import" href="es-checkbox-field-sample.html"></sc-link>
+<sc-link rel="import" href="es-radio-field-sample.html"></sc-link>
+
+<dom-module id="es-fields-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+    	<sc-tab-navigation class="flex" selected="0">
+    		<es-text-field-sample title-text="텍스트 필드"></es-text-field-sample>
+    		<template>
+	    		<es-number-field-sample title-text="숫자 필드"></es-number-field-sample>
+	    	</template>
+	    	<template>
+    			<es-date-field-sample title-text="날짜 필드"></es-date-field-sample>
+    		</template>
+    		<template>
+    			<es-combobox-field-sample title-text="콤보박스 필드"></es-combobox-field-sample>
+    		</template>
+    		<template>
+    			<es-checkbox-field-sample title-text="체크박스 필드"></es-checkbox-field-sample>
+    		</template>
+    		<template>
+    			<es-radio-field-sample title-text="라디오 필드"></es-radio-field-sample>
+    		</template>
+    	</sc-tab-navigation>
+    </template>
+    <script>
+    Polymer({
+    	is : "es-fields-sample",
+    	properties : {
+    		
+    	},
+    	onTriggerClick: function(e) {
+    		UT.alert("trigger click!", null, true);
+    	}
+    });
+    </script>
+</dom-module>

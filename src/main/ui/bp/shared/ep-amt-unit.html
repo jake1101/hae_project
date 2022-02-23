@@ -1,0 +1,156 @@
+<dom-module id="ep-amt-unit">
+<!--
+	******************************************************************************************
+	** @Program-name 	: 수량단위 공통코드 팝업
+	** @Description		: 
+	** @Author 			: jeKim
+	** @Create Date 	: 2016.05.04
+	** @History 		: 2016.05.04 jeKim 최초작성
+	******************************************************************************************
+-->
+    <style>
+       :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+    <template>
+<!-- 
+	************************************************************************************************************
+	* Service Area
+	************************************************************************************************************
+ -->
+ 		<!-- 조회 -->
+        <sc-ajax id="findListAmtUnit" 
+        	url="findListAmtUnit.do" 
+        	body="{{searchParam}}" 
+        	on-response="completeFindList"></sc-ajax>
+            
+<!--  
+	************************************************************************************************************
+	* UI Area
+	************************************************************************************************************
+-->
+        <div class="vbox flex">
+        	<cc-page-title-bar></cc-page-title-bar>
+        	
+        	<cc-search-container on-search="onFindList">
+	            <table>
+	                <tr>
+	                    <th><sc-label text="단위코드"></sc-label></th>
+	                    <td>
+	                    	<sc-text-field value="{{searchParam.dtl_cd}}" on-enter="onFindList"></sc-text-field>
+	                    </td>
+	                    <th><sc-label text="단위명"></sc-label></th>
+	                    <td>
+	                    	<sc-text-field value="{{searchParam.dtl_cd_nm}}" on-enter="onFindList"></sc-text-field>
+	                    </td>
+	                </tr>
+	            </table>
+        	</cc-search-container>
+        	
+             <sc-grid id="gridPanel" class="flex"	use-state="false"	use-selection="false"	selection-mode="[[formula('selectionMode')]]"
+             						on-item-click="onDataCellClicked">
+         		<cc-grid-toolbar></cc-grid-toolbar>
+             	<sc-grid-columns>
+             		<sc-data-column data-field="dtl_cd"		header-text="단위코드"		width="100"	style-name="link"></sc-data-column>
+             		<sc-data-column	data-field="dtl_cd_nm"	header-text="단위명"		width="250"	text-align="left"></sc-data-column>
+             	</sc-grid-columns>
+             </sc-grid>
+        </div>
+    </template>
+    
+<!--  
+	************************************************************************************************************
+	* Script Area
+	************************************************************************************************************
+-->
+    <script>
+        Polymer({
+            is: "ep-amt-unit",
+            properties: {
+            	titleText:{
+                    type: String,
+    				value: "단위검색"
+    			},
+    			
+            	// 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                
+                singleSelect: {
+                    type: Boolean,
+                    value: false
+                }
+            },
+            formulas: {
+            	selectionMode: function(){
+            		var me = this;
+            		return (me.get("singleSelect") ? "radio" : "check");
+            	}
+            },
+
+            //load
+			load: function(options){
+				var me = this;
+				me.setOptions(options);
+				me.onFindList();
+			},
+         	// 자동완성용(UT.autoCompleteObject) find list url
+            getAjaxUrl: function() {
+                var me = this;
+                
+                return me.$.findListAmtUnit.url;
+            },
+            
+            // 옵션 설정
+            setOptions: function(options) {
+                var me = this;
+                options = options || {};
+                me.set("singleSelect", UT.isBoolean(options.singleSelect) ? options.singleSelect : false);
+                me.set("autoComplete", UT.isBoolean(options.autoComplete) ? options.autoComplete : false);
+                me.applyFormula();
+                if (UT.isObject(options.defaultParam)) {
+                    me.set("searchParam", options.defaultParam);
+                }
+                
+                if (UT.isArray(options.dataRows)) { // 배열 데이터
+                	me.$.gridPanel.setDataProvider(options.dataRows);
+                }
+            },
+            //그리드 데이타 셀 클릭함수
+            onDataCellClicked: function(event){
+            	var me = this, detail = event.detail,
+            	data = detail.data,
+            	item = detail.item,
+            	fieldName = item.dataField,
+            	itemIndex = item.rowIndex;
+            	
+            	if(fieldName === "dtl_cd"){
+                    me.fire("selected-item", data);
+        		}
+            	
+            },
+            // 검색(조회)
+            onFindList: function() {
+                var me = this;
+                UT.request(me.$.findListAmtUnit);
+            },
+
+            // 검색(조회) 완료
+            completeFindList: function(e, res) {
+                var me = this;
+                me.$.gridPanel.setDataProvider(res.response);
+            },
+             behaviors:[
+                        Polymer.CCAutocompleteBehavior
+                    ]
+            
+        });
+    </script>
+
+</dom-module>

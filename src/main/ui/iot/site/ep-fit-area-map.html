@@ -1,0 +1,202 @@
+<dom-module id="ep-fit-area-map">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<!-- 저장 -->
+		<sc-ajax
+			id="saveFitArea"
+			url="saveFitArea.do"
+			on-response="completeSaveFitArea">
+		</sc-ajax>
+		
+		<table class="tb-form">
+			<colgroup>
+				<col style="width:60px;">
+				<col>
+				<col style="width:60px;">
+				<col>
+				<col style="width:115px;">
+				<col style="width:55px;">
+			</colgroup>
+			<tr>
+				<th><sc-label text="위도"></sc-label></th>
+				<td><sc-text-field id="lat" value="{{lat}}" required="true" readonly="true"></sc-text-field></td>
+				<th><sc-label text="경도"></sc-label></th>
+				<td><sc-text-field id="lon" value="{{lon}}" required="true" readonly="true"></sc-text-field></td>
+				<td>
+					<sc-button text="수집 영역 설정" on-click="onPolygonBtnClick"></sc-button>
+				</td>
+				<td>
+					<sc-button text="저장" on-click="onApplyBtnClick"></sc-button>
+				</td>
+			</tr>
+		</table>
+		<cc-map-container id="mapContainer" show-view-label="true" show-view-marker="true" site-id="{{siteId}}" auto-start="false"></cc-map-container>
+	</template>
+	<script>
+		Polymer({
+			is : 'ep-fit-area-map',
+			properties:{
+				titleText: {	//팝업 타이틀 지정
+					type: String,
+					value: function () {
+						return "위치정보 수집영역 지정";
+					}
+				},
+				lon:Number,
+				lat:Number,
+	            map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+                siteId : {
+                    type : Object,
+                    value : function(){
+						return {};
+                    }
+                },
+                vectorLayer:{
+					type : Object,
+					value : function(){
+						return{};
+					}
+                },
+                drawControl:{
+					type : Object,
+					value : function(){
+						return{};
+					}
+                },
+                vStyle :{
+					type : Object,
+					value : function(){
+						return{
+			       		    strokeColor: "#ff0000",
+			       		    fillColor: "#ffffff",
+			       		    strokeOpacity: 1,
+			       		    strokeWidth: 3,
+			       		    pointRadius: 5,
+			       		    graphicName: "circle"
+		       			};
+					}
+                },
+	       		pStyle :{
+					type : Object,
+					value : function(){
+						return{
+		       			    strokeColor:"#ff0000",
+		       			    fillColor: "#ff0000",
+		       			    strokeOpacity:1,
+		       			    strokeWidth: 3,
+		       			    fillOpacity:0.2
+		       			};
+					}
+                }
+			},
+			load: function(id, lat, lon, geoJson){
+				var me = this;
+
+				setTimeout(function(){
+					me.set('lat', lat);
+		            me.set('lon', lon);
+		            me.set('siteId', id);
+
+		            me.$.mapContainer.start();
+		            me.map = me.$.mapContainer.map;
+
+		            moveToTarget(me.map);
+
+		            if(!UT.isEmpty(id)){
+			            me.set('siteId', id);
+			        }
+
+		            var style = new OpenLayers.StyleMap({
+		        	    "default": me.get('pStyle'),
+		        	    "vertex": me.get('vStyle'),
+		        	    "temporary" : me.get('pStyle'),
+		        	    "select": me.get('pStyle')
+		        	}, {extendDefault: false});
+
+		            me.vectorLayer = new OpenLayers.Layer.Vector("vectorLayer", {styleMap:style});
+		            me.map.addLayer(me.vectorLayer);
+
+		         	// 레이어 편집 컨트롤 추가
+	        		var editControl = addEditControl(me.map, me.vectorLayer);
+
+	        		// 객체 추가 이벤트
+	        		me.vectorLayer.onFeatureInsert = function(e){
+	        			editControl.selectFeature(this.getFeatureById(e.id));
+	        			me.map.target = me.vectorLayer.getDataExtent();
+		        	};
+		        	
+					// 레이어 그리기 컨트롤 추가
+	        		me.drawControl = new OpenLayers.Control.DrawFeature(me.vectorLayer, OpenLayers.Handler.Polygon);
+	        		me.drawControl.featureAdded = function(e){
+	                	e.attributes = {"type":"polygon"};
+	                	me.drawControl.deactivate();
+	              	};
+	              	me.map.addControl(me.drawControl);
+
+		        	if(geoJson){		// 영역 객체가 있을경우
+			        	// 폴리곤 생성
+			        	var feature =geoJsonToFeature(geoJson); 
+				       	me.vectorLayer.addFeatures(feature);
+
+			        	me.vectorLayer.map.target = me.vectorLayer.getDataExtent();
+			        	moveToTarget(me.vectorLayer.map);
+			        	me.vectorLayer.redraw();
+		        	}
+		       	},100);
+			},
+            onApplyBtnClick: function(){	// 저장버튼 클릭
+            	var me = this;
+            	if(me.vectorLayer.getFeaturesByAttribute("type","polygon").length > 0){
+	            	var polygon = me.vectorLayer.getFeaturesByAttribute("type","polygon")[0].clone();
+	            	polygon.geometry.transform(projection900913, projection4326);
+	
+	            	var geojson_format = new OpenLayers.Format.GeoJSON();
+	            	var geoJson = JSON.parse(geojson_format.write(polygon.geometry));
+		            	
+					me.$.saveFitArea.body = {
+				    	id: me.siteId,
+				        fitGeoJson: geoJson
+				    };
+				    UT.request(me.$.saveFitArea);	
+            	}else{
+					UT.alert("지정된 영역이 없습니다.");
+                }
+            },
+            onPolygonBtnClick: function(){	// 영역 객체 생성
+                var me = this;
+            	if(me.vectorLayer.features.length > 0){
+	           		UT.confirm("이미 생성된 영역이 있습니다.\n 다시 생성 하시겠습니까?", function(){me.createSiteArea()});
+                }else{
+                	me.createSiteArea();
+                }
+            },
+            createSiteArea : function(){
+                var me = this;
+        		me.vectorLayer.removeAllFeatures();
+            	me.drawControl.activate();
+            },
+            completeSaveFitArea : function(e, res){
+                var me = this;
+                var message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    me.fire("apply-fitarea");
+                }else{
+                    message ="STD.E9600";
+                }
+                
+                UT.alert(message);
+            },
+            
+		});
+	</script>
+</dom-module>

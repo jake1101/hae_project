@@ -1,0 +1,57 @@
+<sc-link rel="import" href="es-java-validation-description.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-java-validation-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="flex" title-text="서버 validation">
+			<es-java-validation-description class="fit flex"></es-java-validation-description>
+		</sc-panel>
+		<es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-java-validation-guide',
+		properties : {
+			srcList : {
+				type : Array,
+				value : function() {
+					return [{
+						title        : "PrService.java",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/validation/source/pr-service-java.txt"
+					}, {
+						title        : "PrValidator.java",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/validation/source/pr-validator-java.txt"
+					}, {
+						title        : "pr.xml",
+						i18nDisabled : true,
+						extension    : "xml",
+						url          : "/ui/bp/developer/guide/validation/source/pr-xml.txt"
+					}, {
+						title        : "Validator.java",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/validation/source/validator-java.txt"
+					}, {
+						title        : "ValidatorUtil.java",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/validation/source/validator-util-java.txt"
+					}]
+				}
+			}
+		},
+		initialized : function() {
+			
+		}
+	});
+	</script>
+</dom-module>

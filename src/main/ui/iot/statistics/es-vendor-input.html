@@ -1,0 +1,413 @@
+<dom-module id="es-vendor-input">
+	<!--
+        ******************************************************************************************
+        ** @Program-name    : 협력사별 투입통계
+        ** @Description     :
+        ** @Author          : jhkim
+        ** @Create Date     : 2020.08.03
+        ** @History         : 2020.08.03 jhkim 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		<sc-ajax id="findWorkerInputStat" url="findWorkerInputStat.do" on-response="completeFindWorkerInputStat" body="{{searchParam}}"></sc-ajax>
+
+		<sc-request-group id="codes" init>
+			<sc-code-group>
+				<sc-code code="IOT031" value="{{codes.dateType}}"></sc-code>
+			</sc-code-group>
+			<!-- 협력사 조회 -->
+			<sc-ajax url="findListVendor.do"  last-response="{{codes.vendorList}}" body="{{searchParam}}"></sc-ajax>
+			<!-- 직종 조회 -->
+			<sc-ajax url="findListJobType.do"  last-response="{{codes.jobTypeList}}" body="{{searchParam}}"></sc-ajax>
+		</sc-request-group>
+		
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+        
+        <cc-search-container on-search="onSearch" auth-r>
+			<table validation-group="search">
+				<colgroup>
+					<col style="width:60px">
+					<col style="width:80px">
+					<col style="width:200px">
+					<col>
+				</colgroup>
+				<tr>
+					<th><sc-label text="검색일"></sc-label></th>
+					<td>
+						<sc-combobox-field class="w-70" selected-index="0" input-clear="false"
+								items="{{codes.dateType}}" display-field="label" value-field="data"
+								value="{{searchParam.dateType}}" on-select="changeDateType" id="dateType"> 
+	                    </sc-combobox-field>
+					</td>
+					<td>
+						<sc-period-date-field id="period" string-date="true" string-format="YYYY-MM-DD" from-value="{{startDt}}" to-value="{{endDt}}" 
+							to-required="true" default-from-value="-6d" default-to-value="0d" max-date="{{today}}" range="30d" mark-range="true" input-clear="false" 
+							from-required="true" on-picker-collapsed="setDate" on-picker-expanded="hideBtn" on-load='hideBtn' ></sc-period-date-field>
+					</td>
+					<td>
+						<sc-radio-group-field name="basis" value="{{searchParam.basis}}" on-change="changeBasis">
+	    					<sc-radio-field label="교부기준"  input-value="mapping"></sc-radio-field>
+	    					<sc-radio-field label="출역기준" input-value="attend"></sc-radio-field>
+	    				</sc-radio-group-field>
+					</td>
+				</tr>
+			</table>
+		</cc-search-container>
+        <div class="vbox flex">
+        	<div class="vspace-5"></div>
+        	<sc-tab-navigation id="tabNavi" class="flex" on-item-select="changeTab">
+        		<sc-container id="worker" class="hbox flex" title-text="작업자"  style="height : 100%; border: 1px solid #bbbbbb; border-radius:0; border-top:0px;">
+	        		<div class="flex-7" id="worker-chart" style="padding : 10px;"></div>
+	        		<div class="flex-3" id="worker-pchart" style="padding : 10px;"></div>
+        		</sc-container>
+        		<sc-container id="vehicle" class="hbox flex" title-text="이동장비"  style="height : 100%; border: 1px solid #bbbbbb; border-radius:0; border-top:0px">
+	        		<div class="flex-7" id="vehicle-chart" style="padding : 10px;"></div>
+	        		<div class="flex-3" id="vehicle-pchart" style="padding : 10px;"></div>
+        		</sc-container>
+        	</sc-tab-navigation>
+        </div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-vendor-input",
+            properties : {
+            	// 공통코드
+				codes : {
+	               	type : Object,
+	               	value : function(){
+		               	return	{
+		               		 dateType : []	
+		               	};
+	               	},
+	               	reset: false
+	            },
+            	searchParam : {
+	            	type : Object,
+	            	value : function(){
+	            		return {
+		            		targetType : 'worker',
+		            		siteId : SCMdiManager.searchParam.site_id,
+		            		startDt : moment(new Date()).add(-6,'days').format('YYYY-MM-DD'),
+		            		endDt : moment(new Date()).format('YYYY-MM-DD'),
+		            		dateType : 'daily'
+		            	};
+	            	}
+		        },
+		        today : {
+					type : Object, 
+					value : function(){
+						return new Date();
+					}
+
+			    },
+			    statisticsData : {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				}	
+            },
+            initialized : function() {		// 초기화 완료 후 호출 함수
+                var me = this;
+                me.targetType="worker";
+                me.targetLabel = "작업자";
+                me.targetUnit = "명";
+                me.dateLabel = "일별"
+                me.onSearch();
+            },
+            onSearch : function(){
+                var me = this;
+                if(me.$.period.fromValue =='Invalid date' || me.$.period.toValue=='Invalid date'){
+					UT.alert("검색기간을 입력해주세요");
+					return;
+                }
+                me.set('dateLabel',me.$.dateType.selectedItem.label);
+            	UT.request(me.$.findWorkerInputStat);
+            },
+            completeFindWorkerInputStat : function(e, res){
+				var me = this;
+                me.setChart(res.response.body);
+            },
+            changeBasis : function(e){
+                if(!this.isInitialized) return;
+				var me = this;
+				me.querySelector('#vehicle').hidden=(me.searchParam.basis == 'attend');
+				if(me.searchParam.basis == 'attend'){
+					me.$.tabNavi.selectItem(me.querySelector('#worker'));
+				}
+				me.onSearch();
+            },
+            changeTab : function(e){
+            	if(!this.isInitialized) return;
+				var me = this;
+				var type = e.target.selectedItem.id;
+				me.searchParam.targetType = type;
+				me.set('targetType', type);
+				me.set('targetLabel', e.target.selectedItem.getAttribute('title-Text'));
+				me.set('targetUnit', (type=='worker')?"명":"대");
+				me.onSearch();
+            },
+            changeDateType : function(e){
+                var me = this;
+                var dateType = e.target.value;
+                var datePicker = me.$.period;
+
+                me.searchParam.startDt ='';
+                me.searchParam.endDt ='';
+                
+                if(dateType == 'daily'){   // 일별 (최근 일주일)
+                	datePicker.range='30d';
+                }else if(dateType == 'weekly'){	// 주별 (최근 한달)
+                	datePicker.range='83d';
+                }else{   //월별 (최근 3개월)
+                	datePicker.range='180d';
+                }
+
+                me.setDate();
+            },
+            setDate : function(){
+                var me = this;
+                if(me.searchParam.startDt == me.$.period.fromValue && me.searchParam.endDt == me.$.period.toValue) return;
+
+               	var startDate = moment(me.$.period.fromValue, "YYYY-MM-DD");
+               	var endDate = moment(me.$.period.toValue, "YYYY-MM-DD");
+
+               	if(me.searchParam.dateType == 'weekly'){
+					startDate = startDate.startOf('isoweek');
+					endDate = endDate.endOf('isoweek');
+                }else if(me.searchParam.dateType == 'monthly'){
+					startDate = startDate.startOf('month');
+					endDate = endDate.endOf('month');
+               	}
+				me.$.period.fromValue = startDate.format('YYYY-MM-DD');
+				me.$.period.toValue = endDate.format('YYYY-MM-DD');
+
+				me.searchParam.startDt = startDate.format('YYYY-MM-DD');
+
+                if(!me.$.period.validate()){
+                	var range = me.$.period.range;
+                	endDate = startDate.add(range.split('d')[0], 'd');
+	               	me.$.period.toValue = endDate.format('YYYY-MM-DD');
+	                me.$.period.validate();
+	                if(me.searchParam.dateType == 'monthly'){
+						endDate = endDate.endOf('month');
+		               	me.$.period.toValue = endDate.format('YYYY-MM-DD');
+		            }
+                }
+               	me.searchParam.endDt = endDate.format('YYYY-MM-DD');
+               	
+                me.onSearch();
+            },
+            setChart : function(chartData){
+				var me = this;
+				var chartDiv = me.querySelector("#"+me.targetType+"-chart");
+				echarts.dispose(chartDiv);
+				chart = echarts.init(chartDiv);
+
+				var startDate = moment(me.searchParam.startDt);
+				var endDate = moment(me.searchParam.endDt);
+
+				var dateArray = chartData.dateArray;
+
+				var chartTitle = startDate.format('YYYY-MM-DD')+"~"+endDate.format('YYYY-MM-DD')+" "+me.dateLabel+" "+me.targetLabel+" 투입 통계";
+				
+				if(UT.isEmpty(chartData.data)){
+					chartDiv.innerHTML ="<div style='position:absolute; top:50%; left:50%;'>조회된 데이터가 없습니다.</div>";
+					me.querySelector("#"+me.targetType+"-pchart").innerHTML ="<div style='position:absolute; top:50%; left:50%;'>조회된 데이터가 없습니다.</div>";
+					return;
+				}
+				
+				var barData = chartData.data.slice(0, chartData.data.length-1);
+
+				chartData.data[0].barMaxWidth='60';
+				chartData.data[chartData.data.length-1].itemStyle={color : '#d91b5c', borderWidth:2};
+				chartData.data[chartData.data.length-1].lineStyle={width : 3};
+
+				var barToolData = [];
+				var lineToolData = [];
+
+				for(var i = 0; i < chartData.data.length; i ++){
+					if(chartData.data[i].type == "bar"){
+						barToolData[chartData.data[i].name] = {};
+						for(var j = 0; j < chartData.data[i].toolData.length; j++){
+							if(chartData.data[i].toolData[j].data!=null){
+									var date = chartData.data[i].toolData[j].date.split("T")[0];
+									barToolData[chartData.data[i].name][date] = chartData.data[i].toolData[j].data;
+									barToolData[chartData.data[i].name][date].totalCount = chartData.data[i].data[j];
+							}
+						}
+					}else{
+						for(var j = 0; j < dateArray.length; j ++){
+							lineToolData[dateArray[j]] = {};
+							lineToolData[dateArray[j]].totalCount = chartData.data[i].data[j];
+							lineToolData[dateArray[j]].data=[];
+							var legend = [];
+							for(var k = 0; k < barData.length; k ++){
+								lineToolData[dateArray[j]].data[k] = {};
+								lineToolData[dateArray[j]].data[k].name = barData[k].name;
+								lineToolData[dateArray[j]].data[k].value = barData[k].data[j];
+								legend.push(barData[k].name);
+							}
+							lineToolData[dateArray[j]].legend = legend;
+						}
+					}
+				}
+
+				me.setPieChart(barData, chartData.legend, '', startDate.format('YYYY-MM-DD')+"~"+endDate.format('YYYY-MM-DD'), chartData.value);
+					
+				var option = {
+					    title: {
+					        text : chartTitle
+					    },
+					    tooltip: {
+					    	formatter: function(params, ticket, callback) {
+					        	var res = params.marker;
+					        	res +=(params.seriesType == "bar")?params.seriesName:params.name;
+					            res +=' '+me.targetLabel+' 총 '+params.data+me.targetUnit+' <br/>';
+
+					            if(params.seriesType == "bar"){
+						            var data = barToolData[params.seriesName][params.name];
+						            for(var i =0; i <data.length; i++){
+							        	if(data[i].count != 0){
+								        	res +='&nbsp;&nbsp;&nbsp;'+data[i].name+' : ';
+								            res +=data[i].value+me.targetUnit+' <br/>';
+							            }
+							       }
+					           }else{
+						            var data = lineToolData[params.name].data;
+						            for(var i =0; i <data.length; i++){
+							        	if(data[i].count != 0 && data[i].value > 0){
+								        	res +='&nbsp;&nbsp;&nbsp;'+data[i].name+' : ';
+								            res +=data[i].value+me.targetUnit+' <br/>';
+							            }
+							       }
+
+						       }
+						             
+				               callback(ticket, res);
+					           return res;
+					    	}
+					    },
+					    legend: {
+						    top : '92%',
+					        data: chartData.legend
+					    },
+					    grid: {
+					        left: '0',
+					        right: '20px',
+					        bottom: '15%',
+					        containLabel: true,
+					    },
+					    toolbox: {
+					        feature: {
+					            saveAsImage: {title:'다운로드'}
+					        }
+					    },
+					    xAxis: {
+					        type: 'category',
+					        boundaryGap: true,
+					        axisTick: {
+				                alignWithLabel: true
+				            },
+					        data: dateArray,
+					        maxInterval: 3600 * 1000 * 24
+					    },
+					    yAxis: {
+					        type: 'value'
+					    },
+					    series: chartData.data
+					};
+
+				chart.setOption(option);
+
+				chart.on('click', function (params) {
+					if(params.seriesType == 'bar'){
+						var legend = barToolData[params.seriesName].legend;
+						var chartData = barToolData[params.seriesName][params.name];
+						var totalCount = barToolData[params.seriesName][params.name].totalCount;
+						me.setPieChart(chartData, legend, params.seriesName, params.name, totalCount, true);
+					}else{
+						var totalCount = lineToolData[params.name].totalCount;
+						if(totalCount == 0){
+							me.querySelector("#"+me.targetType+"-pchart").innerHTML ="<div style='position:absolute; top:50%; left:40%;'>조회된 데이터가 없습니다.</div>";
+						}else{
+							var legend = lineToolData[params.name].legend;
+							var chartData = lineToolData[params.name].data;
+							me.setPieChart(chartData, legend, '', params.name, totalCount, false);
+						}
+					}
+				});
+            },
+            setPieChart : function(chartData, legend, vendor, date, totalCount, theme){
+                var me = this;
+                var pchartDiv = me.querySelector("#"+me.targetType+"-pchart");
+				echarts.dispose(pchartDiv);
+				var pchart = echarts.init(pchartDiv, (theme)?'pieTheme':null);
+
+				var option = {
+						title: {
+					        text : date+' ' +vendor+ ' '+me.targetLabel+' 투입 상세'
+					    },
+					    tooltip: {
+					        trigger: 'item',
+					        formatter: (theme)?'{a} <br/>{b}: {c}'+me.targetUnit+' ({d}%)':'{b}: {c}'+me.targetUnit+' ({d}%)'
+					    },
+					    legend: {
+					        orient: 'vertical',
+					        right: 10,
+					        top : 25,
+					        data: legend,
+					        selectedMode : false
+					    },
+					    series: [
+					        {
+					            name: vendor,
+					            type: 'pie',
+					            radius: ['50%', '70%'],
+					            avoidLabelOverlap: false,
+					            label: {
+					            	formatter: '총 '+totalCount+me.targetUnit,
+					                show: true,
+					                position: 'center',
+						            color :'#747474',
+				                    fontSize: '30',
+				                    fontWeight: 'bold'
+					            },
+					            labelLine: {
+					                show: false
+					            },
+					            data: chartData
+					        }
+					    ]
+					};
+
+				pchart.setOption(option);
+									
+            }
+        });
+	</script>
+</dom-module>

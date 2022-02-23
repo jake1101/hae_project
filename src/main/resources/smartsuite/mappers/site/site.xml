@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="siteVerMgt">
+
+	<!-- 현장 정보 조회  -->
+	<select id="findSiteInfo" resultType="map">
+		SELECT
+			  a.id
+			 ,a.name
+			 ,a.address
+			 ,a.start_dt                                                         AS "startDt"
+			 ,a.end_dt                                                           AS "endDt"
+			 ,a.description
+			 ,a.office_number                                                    AS "officeNumber"
+			 ,a.use_flag                                                         AS "useFlag"
+			 ,v4.fn_get_polygon_to_json(a.geo)                                   AS "polygon"
+			 ,ST_AsGeoJSON(a.geo) ::json                                         AS "geoJson"
+			 ,v4.fn_get_point_to_json_ntype(a.pin_info)                          AS "pinPoint"
+			 ,a.created_dt                                                       AS "createdDt"
+			 ,v4.fn_get_polygon_to_json(a.fit_area)                              AS "siteFitArea"
+			 ,a.air_view                                                         AS "siteAirView"
+			 ,a.company_id                                                       AS "companyId"
+			 ,c.name                                                             AS "companyName"	
+			 ,a.adjunction
+			 ,a.sort_order                                                       AS "sortOrder"
+			 ,v4.fn_astext(coalesce(a.adjunction->>'safeDay',to_char(now() ,'yyyy-mm-dd')) :: timestamptz) AS "safeDay"
+			 ,to_char(now() + interval '1 day' - coalesce(a.adjunction->>'safeDay',to_char(now(),'yyyy-mm-dd')) :: timestamptz, 'DD') AS "safeDayCount"
+			 ,split_part(d.cd_value,'|',2) AS "siteCd"
+		FROM v4.site a
+		LEFT JOIN v4.company c
+			ON a.company_id = c.id
+        LEFT JOIN v4.api_info d
+				ON a.id = d.system_id
+			AND d.system_table = 'site'
+		WHERE a.id = #{p.siteId}
+		AND a.company_id = #{p.companyId}
+	</select>
+
+	
+	<!-- 영역별 작업자 수와 이동장비 수를 구해낸다. -->
+	<select id="getAreaTargetCount" resultType="map">
+		/**getAreaTargetCount**/
+		<![CDATA[
+			with tmp_target_location as(
+		  		SELECT 
+		       CASE
+		        WHEN v.signal_dt IS NULL OR v.signal_dt <= now() - '5 minute' :: interval THEN '신호없음' 
+		        WHEN v.area_id IS NULL AND (v.lock_dt is null or  v.lock_dt <= now() - '5 minute' :: interval ) THEN '위치없음' 
+		        WHEN v.area_id IS NOT NULL THEN area_name
+		        ELSE '영역외'  
+		      END AS "areaName"
+		      , CASE WHEN (s.type = 'tag' or s.type = 'mobile_worker') THEN '작업자'
+		        WHEN (s.type = 'vehicle' or s.type = 'mobile_vehicle') THEN '이동장비' END AS "targetType"
+		      ,CASE
+		        WHEN v.signal_dt IS NULL OR v.signal_dt <= now() - '5 minute' :: interval THEN  9999999 --'신호없음' 
+		        WHEN v.area_id IS NULL AND (v.lock_dt is null or  v.lock_dt <= now() - '5 minute' :: interval ) THEN 9999998 --'위치없음' 
+		        WHEN v.area_id IS NOT NULL THEN area_id 
+		        ELSE  9999997--'영역외'  
+		      END AS "areaId"
+		      ,CASE
+		        WHEN v.signal_dt IS NULL OR v.signal_dt <= now() - '5 minute' :: interval THEN  0 --'신호없음' 
+		        WHEN v.area_id IS NULL AND (v.lock_dt is null or  v.lock_dt <= now() - '5 minute' :: interval ) THEN 0 --'위치없음' 
+		        WHEN v.area_id IS NOT NULL THEN area_id 
+		        ELSE  0--'영역외'  
+		      END AS "type"
+		    FROM (
+		        SELECT signal_dt, lock_dt, p.anchor_id, p.min_area_id, a.id as area_id , a.name as area_name, sensor_id, p.site_id 
+		        FROM   v4.vw_target_location p
+		       LEFT JOIN v4.area a
+		        ON a.id = COALESCE(p.min_area_id , p.anchor_id)
+		        WHERE p.signal_dt > date_trunc('day', now())
+		    )AS v 
+		    INNER JOIN v4.sensor AS s ON v.sensor_id = s.id
+		    WHERE s.site_id = #{p.siteId}
+		      AND s.use_flag = 'Y'
+			), 
+			tmp_virtual_area as (
+			    select '신호없음' as "areaName"
+			          ,0 as "workerCount"
+			          ,0 as "vehicleCount"
+			          ,9999999 as "areaId"
+			          ,0 as "type"
+			    union 
+			    select '위치없음' as "areaName"
+			      ,0 as "workerCount"
+			      ,0 as "vehicleCount"
+			      ,9999998 as "areaId"
+			      ,0 as "type"
+			    union 
+			    select '영역외' as "areaName"
+			      ,0 as "workerCount"
+			      ,0 as "vehicleCount"
+			      ,9999997 as "areaId"
+			      ,0 as "type"
+			)
+			SELECT 
+		    	"areaName"
+			    , sum("workerCount") AS "workerCount"
+			    , sum("vehicleCount") AS "vehicleCount"
+			    , "areaId"
+			    , sum("type") >0 AS "isArea"
+			FROM(
+			      SELECT  
+			        "areaName"
+			        , (select count(*) from tmp_target_location t where "targetType" = '작업자' and "areaName" = v."areaName")  AS "workerCount"
+			        , (select count(*) from tmp_target_location t where "targetType" = '이동장비' and "areaName" = v."areaName")  AS "vehicleCount"
+			        , "areaId"
+			        , type
+			      FROM tmp_target_location v
+			      GROUP BY "areaName", "areaId", "type"
+			      UNION 
+			      SELECT 
+			        *
+			      FROM tmp_virtual_area
+			      ORDER BY "areaId"
+		   ) z
+		   GROUP BY "areaName","areaId"
+		   ORDER BY "areaId"
+	   ]]>
+	</select>
+
+	<!-- 현장 정보 조회  -->
+	<select id="findWidgetGateway" resultType="map">
+		/**findWidgetGateway**/
+		<![CDATA[
+			SELECT
+	           name                                                                        AS "gatewayName"
+	           ,CASE WHEN (state IS NULL OR state !='ready') THEN 'error'
+	                 WHEN last_send_dt < now()-interval '10 minute' THEN 'error'
+	                 ELSE 'ready' END                                                       AS "status"
+	           ,TO_CHAR(last_send_dt,'yyyy/MM/dd') AS "signalDt"
+	           ,TO_CHAR(last_send_dt, 'HH:mm:ss') AS "signalTime"
+	        FROM gateway g
+	        WHERE site_id = {p.siteId}
+	        AND use_flag = 'Y'
+		]]>
+	</select>
+	
+</mapper>

@@ -1,0 +1,66 @@
+package smartsuite.app.bp.pro.pr;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.inject.Inject;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+
+import smartsuite.app.bp.pro.pr.validator.PrValidator;
+import smartsuite.app.common.shared.Const;
+import smartsuite.app.common.shared.SharedService;
+
+@SuppressWarnings ({ "rawtypes", "unchecked" })
+@Service
+@Transactional
+public class PrService {
+	
+	/** The sql session. */
+	@Inject
+	private SqlSession sqlSession;
+	
+	@Inject
+	PrValidator prValidator;
+	
+	@Inject
+	SharedService sharedService;
+	
+	/** The namespace. */
+	private static final String namespace = "pr.";
+	
+	public Map<String, Object> savePr(Map<String, Object> param) {
+		Map<String, Object> prData = (Map<String, Object>)param.get("prData");
+		
+		// validate 수행
+		Map<String, Object> resultMap = prValidator.validate(prData);
+		
+		// validate 결과가 유효한 경우에만 로직 수행
+		if(Const.SUCCESS.equals(resultMap.get(Const.RESULT_STATUS))) {
+			if(prData.get("pr_id") == null || Strings.isNullOrEmpty(prData.get("pr_id").toString())) {
+				// 신규
+				prData.put("pr_id" , UUID.randomUUID().toString());
+				prData.put("pr_no" , sharedService.generateDocNo("PR"));
+				prData.put("pr_rev", 1);
+				
+				sqlSession.insert(namespace + "insertPr", prData);
+			} else {
+				sqlSession.update(namespace + "updatePr", prData);
+			}
+
+			//resultData 셋팅 
+			Map<String, Object> resultDataMap = new HashMap<String, Object>();
+			resultDataMap.put("pr_id", prData.get("pr_id"));
+			
+			resultMap.put(Const.RESULT_DATA, resultDataMap);
+		}
+		return resultMap;
+	}
+}

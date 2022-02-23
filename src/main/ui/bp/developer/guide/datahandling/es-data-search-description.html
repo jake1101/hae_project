@@ -1,0 +1,100 @@
+<dom-module id="es-data-search-description">
+	<style>
+    table, th, td {
+ 		border:1px solid black;
+ 		border-collapse:collapse;
+ 		box-sizing: border-box;
+ 		padding: 3px;
+ 	}
+ 	th {
+ 		background-color:lightgray
+ 	}
+    </style>
+	<template>
+		<p>
+			<b>sc-ajax</b><br/>
+			서버로 Ajax 통신을 요청할 때 사용<br/>
+			<table>
+				<tr>
+					<th>property</th>
+					<th>description</th>
+				</tr>
+				<tr>
+					<td>url</td>
+					<td>서버에 요청할 url 정보</td>
+				</tr>
+				<tr>
+					<td>auto</td>
+					<td>자동조회여부 (default: false)</td>
+				</tr>
+				<tr>
+					<td>body</td>
+					<td>요청에 전달할 내용</td>
+				</tr>
+				<tr>
+					<td>lastResponse</td>
+					<td>마지막에 전달된 response Object</td>
+				</tr>
+			</table>
+			<br/>
+			<table>
+				<tr>
+					<th>event</th>
+					<th>description</th>
+				</tr>
+				<tr>
+					<td>response</td>
+					<td>Ajax 요청의 응답이 완료 시 발생한다.</td>
+				</tr>
+				<tr>
+					<td>error</td>
+					<td>Ajax 요청의 오류 시 발생한다.</td>
+				</tr>
+			</table>
+			<br/>
+		</p>
+		
+		<p>
+			<b>Data Binding - Binding annotations</b><br/>
+			중괄호 {{ }} 또는 대괄호 [[ ]] 로 property 또는 하위 property 명을 포함하여 구성<br/>
+			<table>
+				<tr>
+					<th>[[ ]]</th>
+					<td>one-way binding을 지원. 데이터 흐름은 host -> child (downward)</td>
+				</tr>
+				<tr>
+					<th>{{ }}</th>
+					<td>지정된 property의 설정에 따라 one-way binding 혹은 two-way binding을 지원 (notify option을 사용하여 two-way binding)</td>
+				</tr>
+			</table>
+			<br/>
+		</p>
+		
+		<p>
+			<b>Grid</b><br/>
+			<table>
+				<tr>
+					<th>method</th>
+					<th>parameters</th>
+					<th>return</th>
+				</tr>
+				<tr>
+					<td>getDataProvider</td>
+					<td>none</td>
+					<td>dataProvider (type : Object, 그리드에 연결되어 있는 dataProvider)</td>
+				</tr>
+				<tr>
+					<td>setDataProvider</td>
+					<td>dataProvider (type : Object, 그리드에 연결할 dataProvider)</td>
+					<td>none</td>
+				</tr>
+			</table>
+			<br/>
+		</p>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-data-search-description'
+	});
+	</script>
+</dom-module>

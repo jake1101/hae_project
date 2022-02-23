@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+******************************************************************************************
+** @Program-name        : 구매실적대장
+** @Description            : 구매실적대장
+** @Author                : Kim.Yu.Jeong
+** @Create Date            : 2012.07.27
+** @History                : 1) 2012.07.27-최초 생성
+******************************************************************************************
+-->
+<cc:CCContentBase xmlns:mx="http://www.adobe.com/2006/mxml"     
+                  xmlns:vc="http://www.emro.co.kr/volcano"
+                  xmlns:gr="modules.bp.procurement.gr.*"
+                  xmlns:cm="modules.bp.procurement.comm.*"
+                  xmlns:cc="custom.uxcom.*"
+                  menuCode="PRO90100"
+                  creationComplete="setDate()">
+    
+    <!--
+    ********************************************************************************************************
+    **************       Script Area            ************************************************************
+    ********************************************************************************************************
+    -->
+    <mx:Script>
+        <![CDATA[
+            import custom.uxcom.CCCommUtil;
+            import custom.uxcom.event.SCModulePopupEvent;
+            import custom.uxcom.excel.CCDataGridServerExcelExporter;
+            import custom.uxcom.popup.CCModulePopup;
+            
+            import mx.controls.DateField;
+            import mx.controls.TextInput;
+            import mx.core.Application;
+            import mx.events.ListEvent;
+            import mx.utils.StringUtil;
+            
+            import volcano.uxcom.collections.SCCollection;
+            import volcano.uxcom.collections.SCObject;
+            import volcano.uxcom.controls.SCAlert;
+            import volcano.uxcom.controls.SCPopupSelector;
+            import volcano.uxcom.events.SCPopupSelectorEvent;
+            import volcano.uxcom.managers.SCPopupManager;
+
+            [Bindable] private var _searchSO:SCObject     = new SCObject();     //검색조건 binding Object
+            [Bindable] private var _resultSC:SCCollection = new SCCollection(); //검색결과 binding Collection
+            
+            /********************************************************************************************************
+             ****************                 Override / creationComplete Function            ***********************
+             *******************************************************************************************************/
+            
+            /********************************************************************************************************
+             ****************                 Button Function                                 ***********************
+             *******************************************************************************************************/
+            /**
+             * 조회
+             */
+            private function doList():void
+            {
+                validatorGroup.validate();
+                
+                if (StringUtil.trim(_searchSO.from_date) == "")
+                {
+                    from_date.setFocus();
+                    SCAlert.show(translator.translate("일자는 필수 조회조건 입니다."));
+                    return;
+                }
+                
+                if (StringUtil.trim(_searchSO.to_date) == "")
+                {
+                    to_date.setFocus();
+                    SCAlert.show(translator.translate("일자는 필수 조회조건 입니다."));
+                    return;
+                }
+                
+                // 검색 기간 정합성 체크한다.
+                if (_searchSO['from_date'] > _searchSO['to_date']) 
+                {
+                    SCAlert.show("시작일은 종료일보다 클 수 없습니다.");
+                    return;
+                }
+                
+                getPrResult.service();
+            }
+
+            /**
+             * 엑셀 다운로드
+             */
+            private function exceldown(event:MouseEvent):void 
+            {
+                var excelExporter = new CCDataGridServerExcelExporter();
+                excelExporter.export(datagrid);
+            }
+            
+            /********************************************************************************************************
+             ****************                 Validation Function                             ***********************
+             *******************************************************************************************************/
+            
+            /********************************************************************************************************
+             ****************                 ResultHandler Function                          ***********************
+             *******************************************************************************************************/
+            
+            /********************************************************************************************************
+             ****************                 Grid Function                                   ***********************
+             *******************************************************************************************************/
+            
+            /********************************************************************************************************
+             ****************                 Change Event Function                           ***********************
+             *******************************************************************************************************/
+            /**
+             * Input Box 내용 변경시 해당 명(Label) 내용 삭제
+             */
+            private function changeTextInput(event:Event):void 
+            {
+                var textinput:TextInput = event.target as TextInput;
+                
+                switch( textinput.id ) 
+                {
+                    //구매담당자
+                    case "purc_grp_cd" :
+                        _searchSO.purc_grp_nm = "";
+                        break;
+                    case "item_cd": // 품목코드
+                        _searchSO.item_nm = "";
+                        break;
+                }
+            }
+            
+            /********************************************************************************************************
+             ****************                 PopUp / Code Support Function                    **********************
+             *******************************************************************************************************/
+            /**
+             * @private
+             * 공통 팝업 호출 (Header)
+             */
+            private function callPopup(popcode:String, datafield:String):void
+            {
+                var pu:SCPopupSelector = SCPopupManager.getInstance().popup(popcode);
+                pu.addEventListener(SCPopupSelectorEvent.POPUP_LOADED, function(event:SCPopupSelectorEvent):void
+                {
+                    var popupParam:Object = new Object();
+                    var listlabel:String  = null;
+                    
+                    switch( datafield )
+                    {
+                        case "purc_grp_cd": // 구매담당
+                            popupParam.grp_cd = "C009";
+                            listlabel = translator.translate("구매담당") + " " + translator.translate("검색");
+                            break;
+                    }
+                    pu.parameter = popupParam;
+                    
+                    if( listlabel )
+                    {
+                        pu.titleLabel = listlabel;
+                    }
+                });
+                pu.addEventListener(SCPopupSelectorEvent.POPUP_SELECTED, function(event:SCPopupSelectorEvent):void
+                {
+                    var popupitem:Object = event.selectedItem;
+                    
+                    switch( datafield )
+                    {
+                        case "purc_grp_cd": // 구매담당
+                            _searchSO.purc_grp_cd = popupitem.purc_grp_cd;
+                            _searchSO.purc_grp_nm = popupitem.purc_grp_nm;    
+                            break;
+                    }
+                });
+                pu.popup(Application.application as DisplayObject);
+            }
+            
+            /**
+             * @private
+             * 품목코드 검색 버튼 Click시
+             */
+            private function itemCatalog():void 
+            {
+                var popup:CCModulePopup = new CCModulePopup();
+                popup.popup("modules/bp/procurement/comm/EPPRItemCatalog.swf", "품목마스터", this.width, 500, this, true);
+                
+                var param:Object = new Object();
+                param.multiple   = false; // 다중선택 여부
+                popup.parameter  = param;
+                
+                var pltSelectedFunction:Function = function(event:SCModulePopupEvent):void
+                {
+                    //호출후 반드시 removeEvent 해준다.
+                    popup.removeEventListener(SCModulePopupEvent.SELECTED_ITEM, pltSelectedFunction);
+                    var selectedItems:SCCollection = event.object as SCCollection;
+                    _searchSO.item_cd       = selectedItems.getItemAt(0).item_cd;
+                    _searchSO.item_nm_label = selectedItems.getItemAt(0).item_nm_view;
+                    _searchSO.item_nm       = selectedItems.getItemAt(0).item_nm_view;
+                }
+                
+                popup.addEventListener(SCModulePopupEvent.SELECTED_ITEM, pltSelectedFunction);
+            }
+            
+            /**
+             * @private
+             * Code Supporter
+             * TextInput Enter Event
+             */ 
+            private function enterHandler(event:Event):void
+            {
+                var id:String       = event.currentTarget.id
+                var codeInfos:Array = codeSupporter.codeInfomations;
+                
+                if( codeSupporter.isSearching ) 
+                    return;
+                
+                for each( var codeInfo:CCCodeInformation in codeInfos )
+                {
+                    switch( id )
+                    {
+                        case "purc_grp_cd" ://구매담당 
+                            break;
+                    }
+                    
+                    if( codeInfo.name == id )
+                    { 
+                        codeSupporter.target = _searchSO;
+                        codeSupporter.searchCode(id);
+                        break;
+                    }
+                }
+            }
+            
+            /********************************************************************************************************
+             ****************                 Get/Set Changed Function                         **********************
+             *******************************************************************************************************/
+            /**
+             * 일자 초기화
+             */
+            private function setDate():void
+            {
+                var now:Date = new Date();
+                
+                to_date.selectedDate = now;
+                _searchSO['to_date'] = DateField.dateToString(now, "YYYYMMDD");
+                now.date -= 7; // -7일 ~ 현재
+                from_date.selectedDate  = now;
+                _searchSO['from_date'] = DateField.dateToString(now, "YYYYMMDD");   
+            }
+
+            /********************************************************************************************************
+             ****************                 Util Function                                    **********************
+             *******************************************************************************************************/
+            
+        ]]>
+    </mx:Script>
+    <!--
+    *********************************************************************************************************
+    *************************         ValidatorGroup : 필수값 Check                       ********************   
+    *********************************************************************************************************
+    -->
+    <vc:SCValidatorGroup id="validatorGroup">
+        <vc:validators>
+            <vc:SCDateValidator required="true" source="{_searchSO}" property="from_date" listener="{from_date}"/>
+            <vc:SCDateValidator required="true" source="{_searchSO}" property="to_date" listener="{to_date}"/>
+        </vc:validators>
+    </vc:SCValidatorGroup>
+    
+    <!--
+    *********************************************************************************************************
+    *************************         CodeSupporter : 코드 Like 검색                              *********************   
+    *********************************************************************************************************
+    -->
+    <cc:CCCodeSupporter id="codeSupporter" locks="{[this]}" monitors="{[this]}"
+                        parent="{this}"  noData="SCAlert.show(translator.translate('입력하신 데이터가 존재하지 않습니다.'));">
+        <!-- 구매담당 -->
+        <cc:CCCodeInformation name="purc_grp_cd" minChars="1"/>
+    </cc:CCCodeSupporter>
+    
+    <!--
+    *********************************************************************************************************
+    *************************         ServiceProvider : 호출 할 RemoteObject 서비스 정보       *********************   
+    *********************************************************************************************************
+    -->
+    <vc:SCServiceProvider id="getPrResult" descriptor="procurement/pr" serviceId="get.pr.resultList">
+        <vc:inputs>
+            <vc:SCServiceInput name="searchParam" value="{_searchSO}"/>
+        </vc:inputs>
+        <vc:outputs>
+            <vc:SCServiceOutput name="resultList" target="{_resultSC}"/>
+        </vc:outputs>
+    </vc:SCServiceProvider>
+    
+    <!--
+    *********************************************************************************************************
+    *************************         UI Area                                          **********************   
+    *********************************************************************************************************
+    -->
+    <vc:SCForm width="100%" height="100%" bindingObject="{_searchSO}">
+        <vc:SCFHead>
+            <vc:SCBulletLabel text="구매실적대장(품목단위)" styleName="titleLabel"/>
+            <vc:SCSpacer/>
+            <vc:SCButtonBar group="trList" unit="{menuCode}">
+                <!-- 조회 -->
+                <vc:SCButtonProperty name="search" id="search" click="doList()"/>
+                <!-- 엑셀다운로드 -->
+                <vc:SCButtonProperty name="exceldownload" id="exceldownload" click="exceldown(event)"/>
+            </vc:SCButtonBar>
+        </vc:SCFHead>
+        
+        <vc:SCFVBody>
+            <vc:SCTable styleName="searchTable">
+                <vc:SCTR>
+                    <vc:SCTD label="발주일자" width="10%"/>
+                    <vc:SCTD width="40%">
+                        <vc:SCDateField id="from_date" width="100" required="true"/>
+                        <vc:SCLabel text="~" width="20" textAlign="center"/>
+                        <vc:SCDateField id="to_date" width="100" required="true"/>
+                    </vc:SCTD>
+                    <vc:SCTD label="품목코드" width="10%" styleName="itemLabel"/>
+                    <vc:SCTD width="40%">
+                        <vc:SCTextInput id="item_cd" width="100" editable="true" restrict="A-Z\0-9" maxChars="18" change="changeTextInput(event)" tabIndex="11" upper="true"/>
+                        <vc:SCButton styleName="linkIcon" click="itemCatalog()"/>
+                        <vc:SCLabel id="item_nm" width="50%" textAlign="left"/>
+                    </vc:SCTD>
+                </vc:SCTR>
+                <vc:SCTR>
+                    <vc:SCTD label="발주번호" width="10%"/> 
+                    <vc:SCTD width="40%">
+                        <vc:SCTextInput id="po_no" width="100" upper="true" tabIndex="1" />
+                    </vc:SCTD>
+                    <vc:SCTD label="구매담당" width="10%"/>
+                    <vc:SCTD width="40%">
+                        <vc:SCTextInput id="purc_grp_cd" width="80" restrict="A-Z\0-9" maxChars="18" upper="true" tabIndex="12" change="changeTextInput(event)" enter="enterHandler(event)"/>
+                        <vc:SCButton styleName="linkIcon" click="callPopup('SP009', 'purc_grp_cd')"/>
+                        <vc:SCLabel text="{_searchSO.purc_grp_nm}" width="50%" textAlign="left"/>
+                    </vc:SCTD>
+                </vc:SCTR>
+            </vc:SCTable>
+            
+            <vc:SCDataGridBox>
+                <vc:SCDataGrid id="datagrid" width="100%" height="100%" dataProvider="{_resultSC}"
+                               sortExpertMode="true" editable="true" horizontalScrollPolicy="auto"
+                               useCustomSelector="true" >
+                    <vc:columns>
+                        <vc:SCDataGridColumn    dataField="po_cre_typ_nm"      width="100" editable="false"     textAlign="center"     headerText="계약유형"/>
+                        <vc:SCDataGridColumn    dataField="po_no"                width="100" editable="false"     textAlign="center"     headerText="발주번호"/>
+                        <vc:SCDataGridColumn    dataField="cntr_tit"           width="200" editable="false"     textAlign="left"     headerText="단가계약명"/>
+                        <vc:SCDataGridColumn    dataField="price_cntr_no"        width="100" editable="false"     textAlign="center"     headerText="단가계약번호"/>
+                        <vc:SCDataGridColumn    dataField="po_tit"             width="200"  editable="false"     textAlign="left"     headerText="계약명"/>
+                        <vc:SCDataGridColumn    dataField="cntr_no"            width="100"  editable="false"     textAlign="center"     headerText="계약번호"/>
+                        <vc:SCDataGridColumn    dataField="sap_po_no"          width="100"  editable="false"     textAlign="center"     headerText="ERP발주번호"/>
+                        <vc:SCDataGridColumn    dataField="purc_org_nm"        width="100" editable="false"     textAlign="center"     headerText="구매부서명"/>
+                        <vc:SCDataGridColumn    dataField="purc_grp_nm"        width="80"  editable="false"     textAlign="center"     headerText="구매그룹명"/>
+                        <vc:SCDataGridColumn    dataField="sap_grp_nm"         width="90"  editable="false"     textAlign="center"     headerText="ERP구매그룹명"/>
+                        <vc:SCDataGridColumn    dataField="purc_typ_nm"           width="80"  editable="false"     textAlign="center"     headerText="구매유형"/>
+                        <vc:SCDateFieldColumn   dataField="cntr_date"          width="80"  editable="false"     textAlign="center"     headerText="계약일자"/>
+                        <vc:SCDataGridColumn    dataField="apply_date"         width="160"  editable="false"     textAlign="center"     headerText="계약기간"/>
+                        <vc:SCDateFieldColumn   dataField="rd_date"            width="80"  editable="false"     textAlign="center"     headerText="납기일자"/>
+                        <vc:SCDateFieldColumn   dataField="prd_sd"             width="100"  editable="false"     textAlign="center"     headerText="프로젝트시작일"/>
+                        <vc:SCDateFieldColumn   dataField="prd_ed"             width="100"  editable="false"     textAlign="center"     headerText="프로젝트종료일"/>
+                        <vc:SCDataGridColumn    dataField="sg_nm"              width="120"  editable="false"     textAlign="left"     headerText="SG명"/>
+                        <vc:SCDataGridColumn    dataField="mtg_nm"             width="120"  editable="false"     textAlign="left"     headerText="자재그룹명"/>
+                        <vc:SCDataGridColumn    dataField="cate1_nm"           width="120"  editable="false"     textAlign="left"     headerText="대분류"/>
+                        <vc:SCDataGridColumn    dataField="cate2_nm"           width="120"  editable="false"     textAlign="left"     headerText="중분류"/>
+                        <vc:SCDataGridColumn    dataField="cate3_nm"           width="120"  editable="false"     textAlign="left"     headerText="소분류"/>
+                        <vc:SCDataGridColumn    dataField="cate4_nm"           width="120"  editable="false"     textAlign="left"     headerText="세분류"/>
+                        <vc:SCDataGridColumn    dataField="item_cd"            width="80"  editable="false"     textAlign="center"     headerText="품목코드"/>
+                        <vc:SCDataGridColumn    dataField="sap_item_cd"        width="80"  editable="false"     textAlign="center"     headerText="ERP품목코드"/>
+                        <vc:SCDataGridColumn    dataField="item_nm"            width="120"  editable="false"     textAlign="left"     headerText="품명"/>
+                        <vc:SCDataGridColumn    dataField="spec"               width="200"  editable="false"     textAlign="left"     headerText="규격"/>
+                        <vc:SCDataGridColumn    dataField="item_qty"           width="100"  editable="false"     textAlign="right"     headerText="수량" formatType="qty"/>
+                        <vc:SCDataGridColumn    dataField="unit_cd"            width="60"  editable="false"     textAlign="center"     headerText="단위"/>
+                        <vc:SCDataGridColumn    dataField="price_unit"         width="120"  editable="false"     textAlign="right"     headerText="가격단위" formatType="qty" />
+                        <vc:SCDataGridColumn    dataField="cur"                width="60"  editable="false"     textAlign="center"     headerText="통화"/>
+                        <vc:SCDataGridColumn    dataField="item_price"         width="100"  editable="false"     textAlign="right"     headerText="단가" formatType="amt"/>
+                        <vc:SCDataGridColumn    dataField="cur"                width="60"  editable="false"     textAlign="center"     headerText="통화"/>
+                        <vc:SCDataGridColumn    dataField="item_amt"           width="120"  editable="false"     textAlign="right"     headerText="금액" formatType="amt"/>
+                        <vc:SCDataGridColumn    dataField="item_exch_amt"      width="120"  editable="false"     textAlign="right"     headerText="환산금액(원화)" formatType="amt"/>
+                        <vc:SCDataGridColumn    dataField="shipper_type_nm"    width="80"  editable="false"     textAlign="center"     headerText="내외자구분"/>
+                        <vc:SCDataGridColumn    dataField="cpt_type_cd_nm"     width="80"  editable="false"     textAlign="center"     headerText="경쟁방식"/>
+                        <vc:SCDataGridColumn    dataField="vd_nm"              width="120"  editable="false"     textAlign="left"     headerText="공급업체명"/>
+                        <vc:SCDataGridColumn    dataField="vd_cd"              width="80"  editable="false"     textAlign="center"     headerText="공급업체코드"/>
+                        <vc:SCDataGridColumn    dataField="maker_nm"           width="180"  editable="false"     textAlign="center"     headerText="제조사"/>
+                        <vc:SCDataGridColumn    dataField="delay_rate"         width="120"  editable="false"     textAlign="right"     headerText="지체상금율" formatType="amt"/>
+                        <vc:SCDataGridColumn    dataField="delay_amt"          width="120"  editable="false"     textAlign="right"     headerText="지체상금" formatType="amt"/>
+                        <vc:SCDateFieldColumn   dataField="pr_req_date"        width="120"  editable="false"     textAlign="center"     headerText="구매요청일자"/>
+                        <vc:SCDataGridColumn    dataField="pr_req_dept_nm"     width="80"   editable="false"     textAlign="center"     headerText="구매요청부서"/>
+                        <vc:SCDataGridColumn    dataField="pr_req_nm"          width="100"  editable="false"     textAlign="center"     headerText="구매요청자"/>
+                        <vc:SCDataGridColumn    dataField="pr_no"              width="100"  editable="false"     textAlign="center"     headerText="구매요청번호"/>
+                        <vc:SCDataGridColumn    dataField="pr_item_nm"         width="120"  editable="false"     textAlign="left"     headerText="구매요청(품명)"/>
+                        <vc:SCDataGridColumn    dataField="pr_item_qty"        width="100"  editable="false"     textAlign="right"     headerText="구매요청(수량)" formatType="qty"/>
+                        <vc:SCDataGridColumn    dataField="pr_unit_cd"         width="90"  editable="false"     textAlign="center"     headerText="구매요청(단위)"/>
+                        <vc:SCDataGridColumn    dataField="pr_cur"             width="90"  editable="false"     textAlign="center"     headerText="구매요청(통화)"/>
+                        <vc:SCDataGridColumn    dataField="pr_price"           width="100"  editable="false"     textAlign="right"     headerText="구매요청(단가)" formatType="amt"/>
+                        <vc:SCDataGridColumn    dataField="pr_cur"             width="90"  editable="false"     textAlign="center"     headerText="구매요청(통화)"/>
+                        <vc:SCDataGridColumn    dataField="pr_amt"             width="120"  editable="false"     textAlign="right"     headerText="구매요청금액" formatType="amt"/>
+                        <vc:SCDataGridColumn    dataField="ref_vd_nm"          width="120"  editable="false"     textAlign="left"     headerText="참조업체명"/>
+                        <vc:SCDataGridColumn    dataField="emg_yn"             width="80"   editable="false"     textAlign="center"     headerText="긴급구매여부"/>
+                        <vc:SCDataGridColumn    dataField="auto_po_yn"         width="80"   editable="false"     textAlign="center"     headerText="자동발주여부"/>
+                        <vc:SCDataGridColumn    dataField="gr_qty"             width="100"  editable="false"     textAlign="right"     headerText="입고수량" formatType="qty"/>
+                        <vc:SCDataGridColumn    dataField="gr_cur"             width="90"  editable="false"     textAlign="center"     headerText="통화"/>
+                        <vc:SCDataGridColumn    dataField="gr_amt"             width="120"  editable="false"     textAlign="right"     headerText="입고금액" formatType="amt"/>
+                        <vc:SCDataGridColumn    dataField="gr_exch_amt"        width="120"  editable="false"     textAlign="right"     headerText="환산입고금액(원화)" formatType="amt"/>
+                        <vc:SCDataGridColumn    dataField="gr_chr_nm"          width="80"   editable="false"     textAlign="center"     headerText="검수담당자"/>
+                        <vc:SCDataGridColumn    dataField="ap_no"              width="100"  editable="false"     textAlign="center"     headerText="전표번호"/>
+                        <vc:SCDataGridColumn    dataField="ap_amt"             width="120"  editable="false"     textAlign="right"     headerText="정산금액"/>
+                        <vc:SCDataGridColumn    dataField="plt_nm"             width="180"  editable="false"     textAlign="left"     headerText="Plant명"/>
+                        <vc:SCDataGridColumn    dataField="wh_nm"              width="180"  editable="false"     textAlign="center"     headerText="저장위치"/>
+                        <vc:SCDataGridColumn    dataField="cost_typ_nm"        width="80"   editable="false"     textAlign="center"     headerText="회계지정범주"/>
+                        <vc:SCDataGridColumn    dataField="cost_acc_nm"        width="120"  editable="false"     textAlign="left"     headerText="Cost Ctr명"/>
+                        <vc:SCDataGridColumn    dataField="cost_acc_cd"        width="100"  editable="false"     textAlign="center"     headerText="Cost Ctr코드"/>
+                        <vc:SCDataGridColumn    dataField="fund_center_nm"     width="120"  editable="false"     textAlign="left"     headerText="Fund Ctr명"/>
+                        <vc:SCDataGridColumn    dataField="fund_center_cd"     width="100"  editable="false"     textAlign="center"     headerText="Fund Ctr코드"/>
+                        <vc:SCDataGridColumn    dataField="gl_acc_cd"          width="100"  editable="false"     textAlign="center"     headerText="G/L계정코드"/>
+                        <vc:SCDataGridColumn    dataField="gl_acc_nm"          width="120"  editable="false"     textAlign="left"     headerText="G/L계정명"/>
+                        <vc:SCDataGridColumn    dataField="orgn_rpt_no"        width="120"  editable="false"     textAlign="center"     headerText="사업시행품의(번호)"/>
+                        <vc:SCDataGridColumn    dataField="order_no"           width="100"  editable="false"     textAlign="center"     headerText="투자예산번호"/>
+                        <vc:SCDataGridColumn    dataField="order_no_nm"        width="100"  editable="false"     textAlign="left"     headerText="투자예산번호명"/>
+                        <vc:SCDataGridColumn    dataField="asset_no"           width="100"  editable="false"     textAlign="center"     headerText="자산번호"/>
+                        <vc:SCDataGridColumn    dataField="asset_no_nm"        width="100"  editable="false"     textAlign="left"     headerText="자산번호명"/>
+                        <vc:SCDataGridColumn    dataField="wbs_cd"             width="100"  editable="false"     textAlign="center"     headerText="WBS코드"/>
+                        <vc:SCDataGridColumn    dataField="wbs_nm"             width="120"  editable="false"     textAlign="left"     headerText="WBS명"/>
+                        <vc:SCDataGridColumn    dataField="ord_prd_unit"       width="120"  editable="false"     textAlign="right"     headerText="오더가격단위" />
+                        <vc:SCDataGridColumn    dataField="ord_exch_unit"      width="120"  editable="false"     textAlign="center"     headerText="오더단위" />
+                        <vc:SCDataGridColumn    dataField="pay_terms_cd"       width="100"  editable="false"     textAlign="center"     headerText="지급조건코드"/>
+                        <vc:SCDataGridColumn    dataField="pay_terms_nm"       width="120"  editable="false"     textAlign="left"     headerText="지급조건명"/>
+                        <vc:SCDataGridDumyColumn/>
+                    </vc:columns>
+                </vc:SCDataGrid>
+            </vc:SCDataGridBox>
+        </vc:SCFVBody>
+    </vc:SCForm>
+</cc:CCContentBase>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapper namespace="rfxItem">
+	<!-- 견적요청 품목 정보 map -->
+	<resultMap id="rfxItemMap" type="java.util.HashMap">
+		<id			property="rfx_item_id"	column="RFX_ITEM_ID"/>
+		<result		property="rfx_item_lno"	column="RFX_ITEM_LNO"/>
+		<result		property="item_cd"		column="ITEM_CD"/>
+		<collection	property="itemQtaList"	javaType="java.util.ArrayList" resultMap="itemQtaMap"/>
+	</resultMap>
+	
+	<!-- 협력사 견적품목 정보 map -->
+	<resultMap id="itemQtaMap" type="java.util.HashMap">
+		<id			property="rfx_qta_item_id"	column="RFX_QTA_ITEM_ID"/>
+		<result		property="vd_cd"			column="VD_CD"/>
+		<result		property="vd_nm"			column="VD_NM"/>
+		<result		property="item_price"		column="ITEM_PRICE"/>
+		<result		property="item_amt"			column="ITEM_AMT"/>
+	</resultMap>
+	
+	<select id="findListRfxItemWithQta" resultMap="rfxItemMap">
+	SELECT RQDT.RFX_ITEM_ID         AS RFX_ITEM_ID
+	     , RQDT.RFX_ITEM_LNO        AS RFX_ITEM_LNO
+	     , RQDT.ITEM_CD             AS ITEM_CD
+	     , QTDT.RFX_QTA_ITEM_ID     AS RFX_QTA_ITEM_ID
+	     , QTHD.VD_CD               AS VD_CD
+	     , VDGL.VD_NM               AS VD_NM
+	     , QTDT.ITEM_PRICE          AS ITEM_PRICE
+	     , QTDT.ITEM_AMT            AS ITEM_AMT
+	  FROM ESPRQDT RQDT             /* 견적요청 품목 */
+	 INNER JOIN ESPQTDT QTDT	    /* 협력사 견적품목 */
+	    ON QTDT.SYS_ID      = RQDT.SYS_ID
+	   AND QTDT.RFX_ITEM_ID = RQDT.RFX_ITEM_ID
+	 INNER JOIN ESPQTHD QTHD        /* 협력사 견적헤더 */
+	    ON QTHD.SYS_ID     = QTDT.SYS_ID
+	   AND QTHD.RFX_QTA_ID = QTDT.RFX_QTA_ID
+	   AND QTHD.PROG_STS   = 'S'
+	 INNER JOIN ESMVDGL VDGL        /* 협력사 마스터 */
+	    ON VDGL.SYS_ID = QTHD.SYS_ID
+	   AND VDGL.VD_CD  = QTHD.VD_CD
+	 WHERE RQDT.SYS_ID = #{g.tenant}
+	   AND RQDT.RFX_ID = #{p.rfx_id}
+	   AND RQDT.STS   != 'D'
+	</select>
+</mapper>

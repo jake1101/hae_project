@@ -1,0 +1,44 @@
+<sc-link rel="import" href="es-formatter-sample.html"></sc-link>
+<sc-link rel="import" href="es-formatter-description.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-formatter-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="hbox flex" title-text="formatter">
+            <es-formatter-description class="fit flex"></es-formatter-description>
+            <es-formatter-sample id="sample" class="box flex"></es-formatter-sample>
+        </sc-panel>
+        <es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-formatter-guide',
+		properties : {
+			srcList : {
+                type : Array,
+                value : function() {
+                    return [{
+                        title        : "es-formatter-sample.html",
+                        i18nDisabled : true,
+                        extension    : "html",
+                        url          : "/ui/bp/developer/guide/formatter/es-formatter-sample.html"
+                    }, {
+                    	title        : "formatters.js",
+                        i18nDisabled : true,
+                        extension    : "javascript",
+                        url          : "/ui/lib/custom/js/formatters.js"
+                    }]
+                }
+			}
+		},
+		initialized : function() {
+			
+		}
+	});
+	</script>
+</dom-module>

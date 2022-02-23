@@ -1,0 +1,1486 @@
+<sc-link rel="import" href="ep-vendor-list.html"></sc-link>
+<sc-link rel="import" href="ep-weak-type.html"></sc-link>
+<sc-link rel="import" href="ep-worker-details.html"></sc-link>
+<sc-link rel="import" href="../shared/ep-jobtype-list.html"></sc-link>
+
+<dom-module id="es-worker-list">
+	<!--
+        ******************************************************************************************
+        ** @Program-name    : 작업자관리
+        ** @Description     :
+        ** @Author          : jhbaek
+        ** @Create Date     : 2020.01.21
+        ** @History         : 2020.01.21 jhbaek 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+         -->
+		<!-- 코드 조회-->
+		<sc-request-group init>
+			<sc-code-group>
+				<sc-code code="USEFLAG" value="{{useList}}"></sc-code>
+				<sc-code code="IOT005" value="{{medicalList}}"></sc-code>
+				<sc-code code="IOT029" value="{{blockList}}"></sc-code>
+				<sc-code code="IOT008W" value="{{smsList}}"></sc-code>
+				<sc-code code="MI001" value="{{mapIconList}}"></sc-code>
+				<sc-code code="IOT015" value="{{weakTypeList}}"></sc-code>
+			</sc-code-group>
+				
+			<sc-ajax
+				id="findListVendor"
+				url="findListVendor.do"
+				body="{{searchParam}}"
+				last-response="{{vendorList}}">
+			</sc-ajax>
+			
+			<sc-ajax
+				id="findJobTypeList"
+				url="findJobTypeList.do"
+				body="{{searchParam}}"
+				last-response="{{jobTypeList}}">
+			</sc-ajax>
+				
+		</sc-request-group>
+
+		<!--완료 -->
+		<sc-ajax
+				id="findListWorker"
+				url="findListWorker.do"
+				body="{{searchParam}}"
+				on-response="completeFindListWorker">
+		</sc-ajax>
+		
+		<sc-ajax
+				id="saveListWorker"
+				url="saveListWorker.do"
+				on-response="completeSaveListWorker">
+		</sc-ajax>
+		
+		<sc-ajax
+				id="deleteWorker"
+				url="deleteWorker.do"
+				on-response="completeDeleteWorker">
+		</sc-ajax>
+		
+		<sc-ajax id="findListSensorTarget"
+				 url="findListSensorTarget.do"
+				 body="{{targetParam}}"
+				 on-response="completeFindListSensorTarget">
+		</sc-ajax>
+		<sc-ajax id="findMedicalLog"
+				 url="findMedicalLog.do"
+				 body="{{targetParam}}"
+				 on-response="completeFindMedicalLog">
+		</sc-ajax>
+		<sc-ajax
+				id="saveListMedical"
+				url="saveListMedical.do"
+				on-response="completeSaveListMedical">
+		</sc-ajax>
+		<sc-ajax
+				id="deleteMedical"
+				url="deleteMedical.do"
+				on-response="completeDeleteMedical">
+		</sc-ajax>
+		<sc-ajax id="findBlockLog"
+				 url="findBlockLog.do"
+				 body="{{targetParam}}"
+				 on-response="completeFindBlockLog">
+		</sc-ajax>
+		
+		<sc-ajax id="findSmsInfo"
+			url="findSmsInfo.do"
+			body="{{smsInfo}}"
+			on-response="completeFindSmsInfo">
+		</sc-ajax>
+		<sc-ajax id="findSmsInfoAll"
+			url="findSmsInfo.do"
+			body="{{smsInfoAll}}"
+			on-response="completeFindSmsInfoAll">
+		</sc-ajax>
+		<sc-ajax id="sendSms"
+			url="sendSms.do"
+			body="{{smsInfo}}"
+			on-response="completeSendSms">
+		</sc-ajax>
+		<sc-ajax id="sendSmsAll"
+			url="sendSmsAll.do"
+			body="{{smsInfoAll}}"
+			on-response="completeSendSmsAll">
+		</sc-ajax>
+
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<div class="vbox flex">
+			<cc-search-container on-search="onSearch" auth-r>
+				<table validation-group="search">
+					<colgroup>
+						<col style="width:150px">
+						<col>
+						<col style="width:150px">
+						<col>
+						<col style="width:150px">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="작업자명"></sc-label></th>
+						<td>
+							<sc-text-field value="{{searchParam.workerName}}" on-enter="onSearch" max-length="16"></sc-text-field>
+						</td>
+						<th><sc-label text="협력사"></sc-label></th>
+						<td>
+							<sc-text-field value="{{searchParam.vendorName}}" on-enter="onSearch" max-length="16"></sc-text-field>
+						</td>
+						<th><sc-label text="직종"></sc-label></th>
+						<td>
+							<sc-text-field value="{{searchParam.jobTypeName}}" on-enter="onSearch" max-length="16"></sc-text-field>
+						</td>
+						
+					</tr>
+					<tr>
+						<th><sc-label text="전화번호"></sc-label></th>
+						<td>
+							<sc-text-field value="{{searchParam.phoneNumber}}" on-enter="onSearch" max-length="16"></sc-text-field>
+						</td>
+						<th><sc-label text="사용중지 포함" ></sc-label></th>
+						<td>
+							<sc-checkbox-field input-value="{{searchParam.includeNotUse}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+						</td>
+						<th><sc-label text="취약 근로자만 표시" ></sc-label></th>
+						<td>
+							 <sc-checkbox-field input-value="{{searchParam.onlyWeakWorker}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+						</td>
+					</tr>
+				</table>
+			</cc-search-container>
+			<sc-grid id="gridPanel" data-provider="{{resultList}}" editable="true" class="flex-3" on-item-click="onItemClick" use-selection ="true"
+					 on-item-edit-end="onItemEditEnd" validation-group="save">
+				<cc-grid-toolbar>
+					<sc-button text="직종 추가" on-click="addJobType" auth-s></sc-button>
+					<sc-button text="엑셀 업로드" on-click="onImport" auth-s></sc-button>
+					<sc-button text="작업자 QR코드" on-click="onOpenQr" auth-s></sc-button>
+					<sc-button text="SMS 일괄전송" on-click="onSendAll" auth-s></sc-button>
+					<sc-button text="취약 근로자 초기화" on-click="initWeaktype" auth-s></sc-button>
+					
+					<sc-button text="추가" on-click="onAddWorker" auth-s></sc-button>
+					<sc-button text="저장" on-click="onSaveWorker" auth-s></sc-button>
+					<sc-button text="삭제" on-click="onDeleteWorker" auth-s></sc-button>
+				</cc-grid-toolbar>
+				<sc-grid-columns>
+					<sc-combobox-column data-field="vendorId" display-field="name" items="[[vendorList]]" editable="true"  value-field="id" header-text="협력사" width="150" text-align="center" required="true" ></sc-combobox-column>
+<!-- 					<sc-image-column data-field="button_point" image-cls="search" width="40" text-align="center" editable="false" exclude-export="true"></sc-image-column> -->
+					<sc-combobox-column data-field="jobTypeId"  header-text="직종"  items="[[jobTypeList]]" editable="true" value-field="id" display-field="jobTypeName" width="150" text-align="center"  editable="false" max-length="60" required="true"></sc-combobox-column>
+<!-- 					<sc-image-column data-field="button_point2" image-cls="search" width="40" text-align="center" editable="false" exclude-export="true"></sc-image-column> -->
+					<sc-data-column data-field="name" header-text="작업자" width="150" text-align="left" editable="true" required="true" style-name="link" ></sc-data-column>  <!-- item-editable-function="onGrpCdEditable" -->
+               		<sc-checkbox-column data-field="leaderYn" header-text="관리자" width="80" text-align="center" editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+					<sc-data-column data-field="phoneNumber" header-text="휴대전화" width="150" text-align="center" editable="true" max-length="60" input-mask="900-0000-0000" required="true"></sc-data-column>
+					<sc-data-column data-field="tag"  header-text="고유번호"  required="true"  width="120" text-align="center" editable="true" input-mask="9999"></sc-data-column>
+					<sc-image-column 	width="80"	header-text="SMS" data-field="sms" singular-source="ui/assets/img/grid/icon_sms.png" image-display ="auto" exclude-export="true"></sc-image-column>
+					<sc-data-column data-field="juminNo" header-text="주민번호" width="80" text-align="center" editable="true"   input-mask="000000-0"></sc-data-column>
+					<sc-data-column data-field="birthDt" header-text="생년월일" width="0" text-align="center" editable="true"   input-mask="0000/00/00"></sc-data-column>  
+<!-- 					<sc-data-column data-field="email"          header-text="이메일" width="100" text-align="center" editable="true" max-length="60" ></sc-data-column> -->
+					<sc-data-column data-field="weakType"      header-text="취약근로자"     width="200" text-align="center" editable="false"  max-length="60"   ></sc-data-column>
+					<sc-image-column data-field="button_point3" image-cls="search" width="40" text-align="center" editable="false" exclude-export="true"></sc-image-column>
+					<sc-combobox-column data-field="mapIcon" display-field="label" items="{{mapIconList}}" editable="true"  value-field="data" header-text="지도아이콘" width="100" text-align="center" domain-only="true" domain-only-or-empty="true" required="false" placeholder="선택하지않음"></sc-combobox-column>
+					<sc-data-column data-field="details"    style-name="link"  header-text="상세정보"     width="80" text-align="center" editable="false"  max-length="60" exclude-export="true"></sc-data-column>
+					<sc-checkbox-column data-field="useFlag" header-text="사용여부" width="70" text-align="center" editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+					<sc-data-column data-field="qrCode"    style-name="link"  header-text="QR출력"     width="80" text-align="center" editable="false"  max-length="60"  exclude-export="true" ></sc-data-column>
+<!-- 					<sc-checkbox-column visible ="{{isBusan}}" data-field="bandUserYn" header-text="밴드사용여부" width="100" text-align="center" editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column> -->
+<!-- 					<sc-group-column visible ="{{isBusan}}"	header-text="심박수설정"	column-name="HeartbeatSetting" width="120"> -->
+<!-- 						<sc-data-column data-field="minHeartbeat" data-type="number" header-text="최소" editor-maskre="/[0-9]/" width="60" text-align="center" editable="true" max-length="60"></sc-data-column> -->
+<!-- 						<sc-data-column data-field="maxHeartbeat" data-type="number" header-text="최대" editor-maskre="/[0-9]/" width="60" text-align="center" editable="true" max-length="60"></sc-data-column> -->
+<!-- 					</sc-group-column> -->
+<!-- 					<sc-combobox-column	data-field="useFlag"	header-text="사용여부"	width="100"	required="true " domain-only-or-empty="true"	 -->
+<!-- 									display-field="label"	value-field="data"	items="[[useList]]" editable="true"></sc-combobox-column> -->
+				</sc-grid-columns>
+				<sc-grid-fields>
+					<sc-grid-field data-field="id"></sc-grid-field>
+					<sc-grid-field data-field="age"></sc-grid-field>
+					<sc-grid-field data-field="gender"></sc-grid-field>
+					<sc-grid-field data-field="siteId" data-type="number"></sc-grid-field>
+					<sc-grid-field data-field="vendorId"></sc-grid-field>
+					<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+				</sc-grid-fields>
+			</sc-grid>
+			
+			<!-- <div class="vspace-10"></div> -->
+			<sc-splitter split-type="horizontal"></sc-splitter>
+			
+			<sc-tab-navigation id="tabNavi"  class="flex-3 vbox">
+		            <div title-text="{{workerName}} 스마트태그 교부 이력"  class="vbox flex">
+						<table class="tb-form">
+							<colgroup>
+								<col style="width:150px">
+								<col style="width:350px">
+								<col >
+							</colgroup>
+							<tr>
+								<th><sc-label text="교부일"></sc-label></th>
+								<td style="text-align:center">
+										<sc-date-field value="{{targetParam.startDt}}" display-format="yyyy-MM-dd" required="true" default-value="-1d" style="width : 140px;"></sc-date-field>
+									~
+										<sc-date-field value="{{targetParam.endDt}}" display-format="yyyy-MM-dd" required="true" default-value="0d" style="width : 140px;"></sc-date-field>
+								</td>
+								<th >
+								<sc-button text="조회" on-click="onSearchTag" style="float:right"></sc-button>
+								</th>
+							</tr>
+						</table>
+		            	<sc-grid id="gridPanel1" data-provider="{{resultList1}}" class="fit" on-item-click="onItemClick" editable="true" >
+			                <cc-grid-toolbar>
+			                </cc-grid-toolbar>
+			                <sc-grid-columns>
+			                	<sc-date-column data-field="createdDt" 	  header-text="교부일"   width="200" text-align="center"   display-format="yyyy/MM/dd HH:mm:ss" editable="false"></sc-date-column>
+			                	<sc-date-column data-field="updatedDt" 	  header-text="회수일"   width="200" text-align="center"   display-format="yyyy/MM/dd HH:mm:ss" editable="false"></sc-date-column>
+			                    <sc-data-column data-field="nodeId" header-text="스마트태그ID" width="150" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="description" header-text="특이사항" width="150" text-align="center"></sc-data-column>
+			               </sc-grid-columns>
+		            	</sc-grid>
+		            	<sc-grid-fields>
+							<sc-grid-field data-field="id"></sc-grid-field>
+							<sc-grid-field data-field="siteId" data-type="number"></sc-grid-field>
+							<sc-grid-field data-field="vendorId"></sc-grid-field>
+						</sc-grid-fields>
+		            </div>
+		            
+		            <div title-text="{{workerName}} 보건이력" class="vbox flex">
+		            	<sc-grid id="gridPanel2" data-provider="{{resultList2}}" class="flex" on-item-click="onItemClick" editable="true">
+			                <cc-grid-toolbar>
+				                <sc-button text="추가" on-click="onAddMedical" auth-s></sc-button>
+			                    <sc-button text="저장" on-click="onSaveMedical" auth-s></sc-button>
+			                    <sc-button text="삭제" on-click="onDeleteMedical" auth-s></sc-button>
+			                </cc-grid-toolbar>
+			                <sc-grid-columns>
+			                   <sc-combobox-column	data-field="medicalCode"	header-text="구분"	width="150"		
+									display-field="label"	value-field="data"	items="[[medicalList]]"  editable="true"></sc-combobox-column>
+			                    <sc-data-column data-field="description" header-text="상세내용" width="500" editable="true" text-align="left"></sc-data-column>
+			                	<sc-date-column data-field="createdDt" 	  header-text="등록일"   width="200" text-align="center"   display-format="yyyy/MM/dd HH:mm:ss" editable="false"></sc-date-column>
+			                </sc-grid-columns>
+		            	</sc-grid>
+		            	<sc-grid-fields>
+							<sc-grid-field data-field="id"></sc-grid-field>
+							<sc-grid-field data-field="siteId" data-type="number"></sc-grid-field>
+							<sc-grid-field data-field="workerId"></sc-grid-field>
+							<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+						</sc-grid-fields>
+		            </div>
+		            
+		            <div title-text="{{workerName}} 차단이력" class="vbox flex">
+		            	<sc-grid id="gridPanel3" data-provider="{{resultList3}}" class="flex" on-item-click="onItemClick" editable="false">
+		            		<cc-grid-toolbar></cc-grid-toolbar>
+		            		<div class="vspace-5"></div> 
+			                <sc-grid-columns>
+			                   <sc-combobox-column	data-field="medicalCode"	header-text="구분"	width="150"		
+									display-field="label"	value-field="data"	items="[[blockList]]"  editable="true"></sc-combobox-column>
+			                    <sc-data-column data-field="description" header-text="상세내용" width="500" editable="true" text-align="left"></sc-data-column>
+			                	<sc-date-column data-field="createdDt" 	  header-text="등록일"   width="200" text-align="center"   display-format="yyyy/MM/dd HH:mm:ss" editable="true"></sc-date-column>
+			                </sc-grid-columns>
+		            	</sc-grid>
+		            	<sc-grid-fields>
+							<sc-grid-field data-field="id"></sc-grid-field>
+							<sc-grid-field data-field="siteId" data-type="number"></sc-grid-field>
+							<sc-grid-field data-field="workerId"></sc-grid-field>
+							<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+						</sc-grid-fields>
+		            </div>
+	        </sc-tab-navigation>
+		</div>
+
+		<sc-dialog id="smsDialog" title-text="SMS보내기" style="width:400px; height:300px"
+			modal="true" draggable="true">
+	        <table class="tb-form">
+	        	<colgroup>
+	        		<col style="width:100px;"/>
+	        		<col/>
+	        	</colgroup>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="수신자"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-text-field value="{{smsInfo.phoneNumber}}" readonly ="true"></sc-text-field>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="구분"></sc-label>
+	        		</th>
+	        		<td>
+        				<sc-combobox-field id="combo"  items="[[smsList]]" value="{{smsInfo.smsType}}" placeholder="선택"
+   									display-field="label" value-field="data" on-select="onSelectType" >
+    					</sc-combobox-field>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="SMS 내용"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-textarea-field class="h-100" max-length="70" placeholder="센터에서 연락을 요청하였습니다." value="{{smsInfo.body}}"  readonly ="[[!formula('isInput')]]"></sc-textarea-field>
+	        		</td>
+	        	</tr>
+	        </table>
+	        <div  style= "text-align:center; margin-top: 10%;">
+	        	 <sc-button  text="확인" on-click="onOk" ></sc-button>
+	        	 <sc-button style="margin-left: 10px;" text="취소" on-click="onCancel"></sc-button>
+	        </div>
+		</sc-dialog>
+		
+		<sc-dialog id="smsDialogAll" title-text="일괄 SMS보내기" style="width:400px; height:300px"
+			modal="true" draggable="true">
+	        <table class="tb-form">
+	        	<colgroup>
+	        		<col style="width:100px;"/>
+	        		<col/>
+	        	</colgroup>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="수신자"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-text-field value="{{smsInfoAll.phoneNumber}}" readonly ="true"></sc-text-field>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="구분"></sc-label>
+	        		</th>
+	        		<td>
+        				<sc-combobox-field id="combo"  items="[[smsList]]" value="{{smsInfoAll.smsType}}" placeholder="선택"
+   									display-field="label" value-field="data" on-select="onSelectTypeAll" >
+    					</sc-combobox-field>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="SMS 내용"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-textarea-field class="h-100" max-length="70" placeholder="센터에서 연락을 요청하였습니다." value="{{smsInfoAll.body}}"  readonly ="[[!formula('isAllInput')]]"></sc-textarea-field>
+	        		</td>
+	        	</tr>
+	        </table>
+	        <div  style= "text-align:center; margin-top: 10%;">
+	        	 <sc-button  text="확인" on-click="onAllOk" ></sc-button>
+	        	 <sc-button style="margin-left: 10px;" text="취소" on-click="onAllCancel"></sc-button>
+	        </div>
+		</sc-dialog>
+		
+		
+		<sc-grid id="hiddenGridPanel"  data-provider="{{resultList}}" on-item-click="onItemClick" hidden="true" >
+			<sc-grid-columns>
+				<sc-data-column data-field="name" header-text="작업자" width="150" text-align="left" editable="true" required="true" style-name="link" ></sc-data-column>  <!-- item-editable-function="onGrpCdEditable" -->
+				<sc-data-column data-field="vendorName" header-text="협력사" width="250" text-align="left" editable="false" ></sc-data-column>
+				<sc-data-column data-field="email"          header-text="이메일" width="150" text-align="center" editable="true" max-length="60"></sc-data-column>
+				<sc-data-column data-field="phoneNumber"    header-text="휴대전화" width="150" text-align="center" editable="true" max-length="60" input-mask="900-0000-0000"></sc-data-column>
+				<sc-data-column data-field="jobTypeName"  header-text="직종" width="150" text-align="center"  editable="false" max-length="60"></sc-data-column>
+				<sc-data-column data-field="tag"          header-text="고유번호" width="120" text-align="center" editable="false" max-length="60"></sc-data-column>
+				<sc-data-column data-field="weakType"      header-text="취약근로자"     width="200" text-align="center" editable="false"  max-length="60"   ></sc-data-column>
+				<sc-data-column data-field="details"    style-name="link"  header-text="상세정보"     width="150" text-align="center" editable="false"  max-length="60"   ></sc-data-column>
+			</sc-grid-columns>
+		</sc-grid>	
+		<input type="hidden" id = "f_worker_object" />
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-worker-list",
+            properties : {
+                currentRowIndex:Number,
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {
+                        	siteId : SCMdiManager.searchParam.site_id
+                        };
+                    }
+                },
+                vendorList:{
+					type : Array,
+					value : function(){
+						return [];
+					}
+                },
+                jobTypeList:{
+					type : Array,
+					value : function(){
+						return [];
+					}
+                },
+                // 조회조건
+                targetParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                smsInfo: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                smsInfoAll: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                smsWorkerList: {
+                    type: Array,
+                    value: function(){
+                        return [];
+                    }
+                },
+                smsResult: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                weakTypeArr: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+                isBusan: {
+                    type: Boolean,
+                    value : function() {
+                        return true;
+                    }
+                }
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            // 초기화 완료 후 호출 함수
+            initialized : function() {
+                var me = this;
+                	
+           		if(SCMdiManager.searchParam.site_name != null &&SCMdiManager.searchParam.site_name.indexOf("부산") != -1) {
+           			me.isBusan = true;
+          		}else {
+          			me.isBusan = false;
+          		}
+                me.onSearch();
+            },
+            
+            formulas : {
+				isInput :function(){
+					return  ( this.get("smsInfo.smsType") != undefined && this.get("smsInfo.smsType") == "input"  )
+				},
+				isAllInput :function(){
+					return  ( this.get("smsInfoAll.smsType") != undefined && this.get("smsInfoAll.smsType") == "input"  )
+				},
+                isSystem: function() {
+                    return (SCSessionManager.userDetails.userInfo.access_level == "system");
+                }
+			},
+			// grid item click 이벤트
+			onItemClick : function(event) {
+				var me = this,
+					data = event.detail.data,
+					item = event.detail.item,
+                	provider = event.detail.provider,
+                	searchParam = me.get('searchParam');
+
+				me.currentRowIndex = item.rowIndex;
+				if(item.dataField === "name") {
+					// 신규 컬럼 제외
+	                if(provider.getItemState(item.rowIndex) == "created"){
+	                    return;
+	                }
+
+	                me.set("workerName", data.name);
+					
+	           		me.targetParam.targetId=data.id;
+	           		me.targetParam.workerId=data.id;
+	           		me.onSearchTag();
+	           		UT.request(me.$.findMedicalLog);
+	           		UT.request(me.$.findBlockLog);
+	           		
+				}else if(item.dataField === "button_point") {					
+	           		var vendorListPopup = UT.popup("ep-vendor-list", me, 1150, 550,{
+	           			'apply-vendor' :  function(popup, e){
+	           				var provider = me.$.gridPanel.getDataProvider(),
+	           					result = e.detail;
+	   	   					provider.setItemAt(me.currentRowIndex, {
+	   	   						'vendorId': result.vendorId,
+	   	   						'vendorName': result.vendorName
+	   	   					});
+	                 		popup.close();
+	           			},
+	           			'close' :  function(popup, e){
+	                 		popup.close();
+	           			},
+	           		});
+	           		vendorListPopup.show();
+	           		vendorListPopup.getWindowContent().load(searchParam.siteId);
+	           		
+				}else if(item.dataField == "button_point2"){
+					var jobPopup = UT.popup("ep-jobtype-list", me, 700, 600, {
+		                   "job-save": function(popup, e) {
+			                    UT.request(me.$.findJobTypeList);
+		                   }
+		               },{titleText: "직종 목록"});
+					jobPopup.show();
+					jobPopup.getWindowContent().load();
+				}else if(item.dataField == "button_point3"){				// 취약 코드 팝업
+					var weakPopup = UT.popup("ep-weak-type", me, 400, 600, {
+		                   "show-list": function(popup, e) {
+								var result=e.detail;
+								var weakTypeStr="";
+								var weakTypeArr =[];
+								
+								for(var i = 0 ; i < result.length; i++){
+									weakTypeArr.push(result[i].data);
+									if(i!=result.length-1){
+										weakTypeStr = weakTypeStr + result[i].label  + ",";
+									}else{
+										weakTypeStr += result[i].label;
+									}
+								}
+								
+								if(provider.getItemAt(me.currentRowIndex).property){
+									provider.getItemAt(me.currentRowIndex).property.weakType= weakTypeArr;
+								}else{
+									provider.setItemAt(me.currentRowIndex,{ property: {"weakType": weakTypeArr} });
+								}
+								
+								provider.setItemAt(me.currentRowIndex,{ weakType: weakTypeStr });
+			                   	popup.close();
+			                   	
+			                   	var grid = me.$.gridPanel;
+		   						grid.searchItem("id", data.id, 0,true,false);
+		                   }
+		               },{titleText: "취약근로자 코드"});
+
+		               var weakType = [];
+
+						if(!UT.isEmpty(provider.getItemAt(me.currentRowIndex).property)){
+							weakType = provider.getItemAt(me.currentRowIndex).property.weakType;
+						}
+					   weakPopup.show();
+					   weakPopup.getWindowContent().load(weakType);
+				}else if (item.dataField == "sms") {
+					
+					var smsDialog = me.$.smsDialog;
+// 					me.set("searchParam.workerId", data.id);
+					me.set("smsInfo.workerId", data.id);
+					me.set("smsInfo.phoneNumber", data.phoneNumber);
+					me.set("smsInfo.smsType", "");
+					me.set("smsInfo.body", "");
+					me.applyFormula();
+					smsDialog.show();
+				}else if(item.dataField == "details"){		// 상세정보입력
+					if(provider.getItemState(item.rowIndex) == "created"){
+						return;
+					}
+					var detailPopup = UT.popup("ep-worker-details", me, 900, 800, {
+		                   "show-list": function(popup, e) {
+							var result=e.detail;
+		                   	popup.close();
+		                   	
+		                   },
+		                   "save-property" : function(popup,data){
+		                	   if(provider.getItemAt(me.currentRowIndex).property&& provider.getItemAt(me.currentRowIndex).property.weakType){
+		                		   data.detail.weakType = provider.getItemAt(me.currentRowIndex).property.weakType;
+		                	   }
+	                	   		provider.setItemAt(me.currentRowIndex,{ property: data.detail , name : data.detail.name , phoneNumber : data.detail.phoneNumber , vendorId : data.detail.vendorId ,  jobTypeId : data.detail.jobTypeId});
+		                	   
+		                	   popup.close();
+		                	   me.onSaveWorker();
+		                   }
+		               },{titleText: "상세내용"});
+					detailPopup.show();
+					detailPopup.getWindowContent().load(data);
+				}else if(item.dataField == "qrCode"){
+					var agent = navigator.userAgent.toLowerCase();
+
+					if ( (navigator.appName == 'Netscape' && navigator.userAgent.search('Trident') != -1) || (agent.indexOf("msie") != -1) ) {
+						
+						 $("#f_worker_object").val(JSON.stringify([data]));
+			   			 
+			   			var popupWidth = 700;
+			   			var popupHeight = 600;
+
+			   			var left= (window.screen.width / 2) - (popupWidth / 2);
+			   			var top= (window.screen.height / 2) - (popupHeight / 2);
+			   			
+			   			 var workerReportPopup = UT.popupWindow("/report/jsp/workerQr.jsp",me,"width=700 , height=600 , top="+top+",left="+left+ ",toolbar=no,location=no,menubar=no,status=no");
+					}else {
+						 $("#f_worker_object").val(JSON.stringify([data]));
+			   			 
+			   			var popupWidth = 730;
+			   			var popupHeight = 600;
+
+			   			var left= (window.screen.width / 2) - (popupWidth / 2);
+			   			var top= (window.screen.height / 2) - (popupHeight / 2);
+			   			
+			   			var workerReportPopup = UT.popupWindow("/report/jsp/workerQrChrome.jsp",me,"width=730 , height=600 , top="+top+",left="+left+ ",toolbar=no,location=no,menubar=no,status=no");
+					
+					}
+					
+				}
+            },
+            
+            onSelectType : function(data){
+            	var me= this;
+            	
+            	if(data.detail.selectedItem.data == "worker_regist"){
+            		me.set("smsInfo.smsType", "worker_regist");
+            		me.applyFormula();
+            		//api호출 sms내용 받아오기
+            		UT.request(me.$.findSmsInfo);
+            		
+            	}else if(data.detail.selectedItem.data == "worker"){
+            		me.set("smsInfo.smsType", "worker");
+            		me.applyFormula();
+            		//api호출 sms내용 받아오기
+            		UT.request(me.$.findSmsInfo);
+            		
+            	}else if(data.detail.selectedItem.data == "app_link"){
+            		me.set("smsInfo.smsType", "app_link");
+            		me.applyFormula();
+            		//api호출 sms내용 받아오기
+            		UT.request(me.$.findSmsInfo);
+            		
+            	}else if( data.detail.selectedItem.data == "input"){
+            		me.set("smsInfo.title","");
+            		me.set("smsInfo.body","");
+            		me.smsResult = {};
+            		me.applyFormula();
+            	}
+            	
+            	
+            },
+            onSelectTypeAll : function(data){
+            	var me= this;
+            	
+            	if(data.detail.selectedItem.data == "worker_regist"){
+            		me.set("smsInfoAll.smsType", "worker_regist");
+            		me.applyFormula();
+            		//api호출 sms내용 받아오기
+            		UT.request(me.$.findSmsInfoAll);
+            		
+            	}else if(data.detail.selectedItem.data == "worker"){
+            		me.set("smsInfoAll.smsType", "worker");
+            		me.applyFormula();
+            		//api호출 sms내용 받아오기
+            		UT.request(me.$.findSmsInfoAll);
+            		
+            	}else if(data.detail.selectedItem.data == "app_link"){
+            		me.set("smsInfoAll.smsType", "app_link");
+            		me.applyFormula();
+            		//api호출 sms내용 받아오기
+            		UT.request(me.$.findSmsInfoAll);
+            		
+            	}else if( data.detail.selectedItem.data == "input"){
+            		me.set("smsInfoAll.body","");
+            		me.smsResult = {};
+            		me.applyFormula();
+            	}
+            	
+            	
+            },
+            
+            completeFindSmsInfo : function(e,res){
+            	var me = this;
+            	
+            	me.smsResult = res.response.body;
+            	me.set("smsInfo.title",res.response.body.title1);
+            	me.set("smsInfo.body",res.response.body.body1);
+            },
+            completeFindSmsInfoAll : function(e,res){
+            	var me = this;
+            	
+            	me.smsResult = res.response.body;
+            	me.set("smsInfoAll.title",res.response.body.title1);
+            	me.set("smsInfoAll.body",res.response.body.body1);
+            },
+            
+            onImport :  function() {
+ 				var me = this;
+
+ 				var importerPopup = UT.popup('cc-excel-import', me, 800, 600, null, {closable : true});
+ 				var importer = importerPopup.getContent();
+
+ 				importer.headerRowIndex = 1;
+ 				
+ 				importer.autoColumnMapping = true;
+
+ 				var includeColumns= [];
+
+ 				for(var i = 0; i < me.$.gridPanel.getColumns().length; i++){
+					if(!me.$.gridPanel.getColumns()[i].excludeExport){
+						includeColumns.push(me.$.gridPanel.getColumns()[i].dataField);
+					}
+ 	 			}
+
+ 				importer.includeColumns= includeColumns;
+ 				
+ 				//excelCellText의 양쪽 공백을 제거하고 gridHeaderText와 비교 하도록 변경
+ 				importer.isEqualsHeaderText = function(gridHeaderText, excelCellText){
+ 				    var trimExcelCellText = excelCellText.trim();
+ 				    if(gridHeaderText === trimExcelCellText){
+ 				        return true;
+ 				    }else{
+ 				        return false;
+ 				    }
+ 				};
+			
+ 				var provider = me.$.gridPanel.getDataProvider(),
+                	  currCell = me.$.gridPanel.getCurrentCell();
+
+ 				var vendorComboDatas = UT.getArrayValuesByKey(me.vendorList, "name");
+ 				var jobComboDatas = UT.getArrayValuesByKey(me.jobTypeList, "jobTypeName");
+ 				var mapIconComboDatas = UT.getArrayValuesByKey(me.mapIconList, "label");
+
+ 				importer.doImport(me.$.gridPanel, function(rows){
+ 	 				var idx = 0;
+ 					rows.forEach(function(row) {
+ 						if(vendorComboDatas.indexOf(row.vendorId) === -1) {
+ 							row.vendorId = null;
+ 						}else{
+ 							row.vendorId = me.vendorList[vendorComboDatas.indexOf(row.vendorId)].id;
+ 	 					}
+ 	 					
+ 						if(jobComboDatas.indexOf(row.jobTypeId) === -1) {
+ 							row.jobTypeId = null;
+ 						}else{
+ 							row.jobTypeId = me.jobTypeList[jobComboDatas.indexOf(row.jobTypeId)].id;
+ 	 					}
+ 	 					
+ 						if(mapIconComboDatas.indexOf(row.mapIcon) === -1) {
+ 							row.mapIcon = null;
+ 						}else{
+ 							row.mapIcon = me.mapIconList[mapIconComboDatas.indexOf(row.mapIcon)].data;
+ 	 					}
+
+ 						if(row.leaderYn != "Y"){
+							row.leaderYn = "N";
+		 				}
+		 				
+ 						if(row.useFlag != "N"){
+							row.useFlag = "Y";
+		 				}
+
+ 						var weakArr = [];
+ 						if(UT.isNotEmpty(row.weakType)){
+ 							for(var i = 0 ; i < me.weakTypeList.length ; i ++){
+ 								if(row.weakType.includes(me.weakTypeList[i].label)){
+ 									weakArr.push(me.weakTypeList[i].data);
+ 								};
+ 							}
+ 						}
+
+ 	 					row.property = {};
+ 	 					row.property.weakType = weakArr;
+		 				
+	 					me.$.gridPanel.getDataProvider().addItemAt(idx, row);
+	 					idx++;
+ 					});
+
+
+ 					if(idx >= 0 && rows.length > idx){
+ 						UT.alert("중복행을 제외한 "+idx+"행을 업로드 하였습니다.");
+ 	 				}
+
+ 					
+ 					importerPopup.close();
+ 				}, me);
+		
+ 				importerPopup.show();
+		
+ 			},
+           
+			initWeaktype : function(){
+				var me = this;
+				var provider = me.$.gridPanel.getDataProvider();
+				var indexes = provider.selectionCheckedIndexes();
+            	for(var i = 0 ; i < indexes.length ; i ++){
+            		provider.setItemAt(indexes[i], {'weakType': ""});
+            		var items = provider.getItemAt(indexes[i]);
+            		if(!UT.isEmpty(items.property)){
+                   		items.property.weakType = [];
+	            		provider.setItemAt(indexes[i], {property: items.property});
+                	}
+            	}
+            },
+            onSendAll : function(){
+         	   var me =this;
+ 			   			
+ 			   var provider = me.$.gridPanel.getDataProvider();
+ 			   var selectionItems = provider.selectionCheckedItems();
+ 				
+ 			   if (selectionItems.length === 0) {
+ 	               UT.alert("STD.N1600");
+ 	               return;
+ 	           }
+ 			  me.smsWorkerList=[];
+ 			   var smsDialogAll = me.$.smsDialogAll;
+ 			   for( var i = 0 ; i <selectionItems.length ; i++){
+ 				  me.smsWorkerList.push({"id" : selectionItems[i].id , "phoneNumber" : selectionItems[i].phoneNumber});
+ 			   }
+ 			   
+ 			   me.set("smsInfoAll.workers",me.smsWorkerList);
+ 			   me.set("smsInfoAll.phoneNumber", selectionItems[0].phoneNumber + "(포함" + selectionItems.length + "명)");
+ 			   me.set("smsInfoAll.workerId", selectionItems[0].id);
+ 			   me.set("smsInfoAll.smsType", "");
+ 		       me.set("smsInfoAll.body", "");
+ 			   smsDialogAll.show();
+      				
+             },
+			onOk : function(){
+				var me = this;
+				if(me.smsResult.title2){
+					
+					UT.request(me.$.sendSms);
+					me.set("smsInfo.title",me.smsResult.title2);
+					me.set("smsInfo.body",me.smsResult.body2);
+					UT.request(me.$.sendSms);
+					me.$.smsDialog.hide();
+				}else{
+					UT.request(me.$.sendSms);
+					me.$.smsDialog.hide();
+				}
+				
+			},
+			onCancel : function(){
+				var me = this;
+				me.set("smsInfo.smsType", "");
+				me.set("smsInfo.body", "");
+				me.$.smsDialog.hide();
+			},
+			onAllOk : function(){
+				var me = this;
+				
+				UT.request(me.$.sendSmsAll);
+				me.$.smsDialogAll.hide();
+				
+			},
+			onAllCancel : function(){
+				var me = this;
+				me.set("smsInfo.smsType", "");
+				me.set("smsInfo.body", "");
+				me.$.smsDialogAll.hide();
+			},
+			
+			completeSendSms : function(e,res){
+				var me = this,
+					result = res.response;
+				
+				if(result.result_status === 'S'){
+	                UT.alert("전송에 성공하였습니다", function(){ // 저장하였습니다.
+	                    me.onSearch();
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+				
+			},
+			completeSendSmsAll : function(e,res){
+				var me = this,
+					result = res.response;
+				
+				if(result.result_status === 'S'){
+	                UT.alert("전송에 성공하였습니다", function(){ // 저장하였습니다.
+	                    me.onSearch();
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+				
+			},
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+            // 엔터키 조회
+            onEnterSearch: function(){
+                var me = this;
+
+                me.onSearch();
+            },
+            // 작업자 현황 조회
+            onSearch : function(param) {
+                var me = this;
+                
+                if(param && param.site_id){
+                	me.set("searchParam.siteId", param.site_id);
+                }
+                
+                if(!me.validate('search')){
+                    UT.alert("STD.E0000");
+                    return false;
+                }
+                me.set("targetParam.targetId",null);
+                me.set("resultList", []);
+
+                // 작업자 현황 조회
+                UT.request(me.$.findListWorker);
+            },
+
+            completeFindListWorker: function(e, res){
+            	var me = this;
+            	var resultList = res.response || [];
+            	
+            	
+            	if(UT.isNotEmpty(resultList)){
+					for(var i = 0 ; i < resultList.length; i++){
+						resultList[i].details = "[상세]";
+						resultList[i].qrCode = "[QR출력]";
+						
+						resultList[i].birthDt = resultList[i].property.birthDt ?  (resultList[i].property.birthDt).split("-").join("")  : null;
+						// 주민번호 추가.						
+	            		resultList[i].juminNo = resultList[i].property.juminNo;
+						
+						
+						if(resultList[i].property.bandUserYn && resultList[i].property.bandUserYn=="Y"){
+							resultList[i].bandUserYn = "Y";
+						}else{
+							resultList[i].bandUserYn = "N";
+						}
+						if(UT.isNotEmpty(resultList[i].property.minHeartbeat)){
+							resultList[i].minHeartbeat = resultList[i].property.minHeartbeat;
+						}else{
+							resultList[i].minHeartbeat = 50;
+						}
+						if(UT.isNotEmpty(resultList[i].property.maxHeartbeat)){
+							resultList[i].maxHeartbeat = resultList[i].property.maxHeartbeat;
+						}else{
+							resultList[i].maxHeartbeat = 150;
+						}
+					}
+            	}
+            	me.set("resultList", resultList);
+            },
+            
+            onSearchTag : function(){
+            	var me = this;
+            	
+            	if(UT.isEmpty(me.targetParam.targetId)){
+            		UT.alert("작업자명을 선택해주세요");
+            	}else{
+                	me.targetParam.targetType="worker";
+            	}
+         
+            	
+            	UT.request(me.$.findListSensorTarget);
+            },
+            
+            completeFindListSensorTarget : function(e,res){
+            	var me = this;
+            	var resultList1 = res.response || [];
+            	
+            	me.set("resultList1", resultList1);
+            },
+            completeFindMedicalLog : function(e,res){
+            	var me = this;
+            	var resultList2 = res.response || [];
+            	
+            	me.set("resultList2", resultList2);
+            },
+            completeFindBlockLog : function(e,res){
+            	var me = this;
+            	var resultList3 = res.response || [];
+            	
+            	me.set("resultList3", resultList3);
+            },
+            // 작업자 추가
+            onAddWorker : function(){
+                var me = this,
+                    searchParam = this.get("searchParam"),
+                    provider = me.$.gridPanel.getDataProvider(),
+                    currCell = me.$.gridPanel.getCurrentCell();
+
+                if(!me.validate('search')){
+                    UT.alert("STD.E0000");
+                    return false;
+                }
+
+                // 그리드 신규행 추가
+                var row = {
+                    siteId: searchParam.siteId,   // 회사
+                    useFlag: 'Y'                     // 사용여부
+                };
+                if(currCell == null){
+                 	 provider.addItemAt(0,row);
+                 }else{
+             	    provider.addItemAt(currCell.rowIndex+1, row);
+                 }
+            },
+
+            // 저장 유효성 체크
+            validation: function() {
+                var me = this;
+
+                // 기본 validate
+                if(!me.validate('save')) {
+                    UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return false;
+                }
+
+                // 중복 체크
+                var provider = me.$.gridPanel.getDataProvider(),
+                    rows = provider.getItems();
+                var unique_check = {};
+                for (var i=0, len = rows.length; i<len; i++) {
+                    if(typeof unique_check[rows[i].serialNumber] == "undefined"){
+                        unique_check[rows[i].serialNumber] = 0;
+                    } else {
+                        //UT.alert(me.translate("STD.E1000",null, me.translate('사업자번호')),null,true); // "'{0}'에 동일한 값이 존재합니다"
+                        //return false;
+                    }
+                }
+
+                return true;
+            },
+            
+            // 작업자 저장
+            onSaveWorker : function(){
+                var me = this;
+                var provider = me.$.gridPanel.getDataProvider(),
+                    created = provider.getNewItems(),
+                    updated = provider.getUpdateItems();
+                
+                
+                // 저장 유효성 체크
+                if(!me.$.gridPanel.validateRows(provider.getUpdateIndexes())) {
+                	  UT.alert("STD.E0000");
+                    return;
+                }
+                if(!me.$.gridPanel.validateRows(provider.getNewIndexes())) {
+                	  UT.alert("STD.E0000");
+                    return;
+                }
+                for(var i = 0 ; i <updated.length ; i ++ ){
+					if(!updated[i].property){
+						updated[i].property={};
+					}
+                    
+					if(updated[i].tag.length != 4){
+						UT.alert("고유번호는 4자리만 입력 됩니다.");
+						return;
+					}
+// 					updated[i].property.bandUserYn= updated[i].bandUserYn;
+// 					updated[i].property.minHeartbeat= updated[i].minHeartbeat;
+// 					updated[i].property.maxHeartbeat= updated[i].maxHeartbeat;
+					
+					// 주민번호 추가
+               		updated[i].property.juminNo = updated[i].juminNo;
+               		updated[i].property.gender = updated[i].gender;
+					if(updated[i].birthDt){
+              			updated[i].birthDt = updated[i].birthDt.substring(0,4) + "-"+ updated[i].birthDt.substring(4,6)+"-" + updated[i].birthDt.substring(6,8);
+              		}
+// 					if(updated[i].minHeartbeat >= updated[i].maxHeartbeat){
+// 						UT.alert("최소 심박수는 최대 심박수 보다 작아야 합니다.");
+// 						return;
+// 					}
+                }
+               
+                for(var i = 0 ; i <created.length ; i ++ ){
+                	if(!created[i].property){
+                		created[i].property={};
+                    }
+                	
+					if(created[i].tag.length != 4){
+						UT.alert("고유번호는 4자리만 입력 됩니다.");
+						return;
+					}
+// 					created[i].property.bandUserYn= created[i].bandUserYn;
+// 					created[i].property.minHeartbeat= created[i].minHeartbeat;
+// 					created[i].property.maxHeartbeat= created[i].maxHeartbeat;
+				
+					// 주민번호 추가
+               		created[i].property.juminNo = created[i].juminNo;
+               		created[i].property.gender = created[i].gender;
+					if(created[i].birthDt){
+              			created[i].birthDt = created[i].birthDt.substring(0,4) + "-"+ created[i].birthDt.substring(4,6)+"-" + created[i].birthDt.substring(6,8);
+              		}
+// 					if(created[i].minHeartbeat >= created[i].maxHeartbeat){
+// 						UT.alert("최소 심박수는 최대 심박수 보다 작아야 합니다.");
+// 						return;
+// 					}
+					
+                }
+                
+                if(created.length + updated.length === 0) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+                
+                UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+                    me.$.saveListWorker.body = {
+                        insertList: created,
+                        updateList: updated
+                    };
+                    UT.request(me.$.saveListWorker);
+                });
+            },
+            // 작업자 저장 완료
+            completeSaveListWorker: function(e, res){
+                var me = this,
+                    message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(res.response.result_message, function(){
+                        me.onSearch();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+
+            },
+            onDeleteWorker : function(){		
+  			  var me =this;
+  			
+  			  var provider = me.$.gridPanel.getDataProvider();
+  			  var selectionItems = provider.selectionCheckedItems();
+  				
+  				
+  			  if (selectionItems.length === 0) {
+                    UT.alert("STD.N1600");
+                    return;
+                }
+
+                UT.confirm("STD.N1300", function() {
+                    var deleted = provider.removeItems();
+                    if(deleted.length > 0){
+                        me.$.deleteWorker.body = {
+                      		  deleteList : selectionItems
+                        };
+                       UT.request(me.$.deleteWorker);
+                    }
+                });
+  				
+  			},
+  			
+  			completeDeleteWorker : function(e,res){
+  				var me = this,
+                  result = res.response;
+
+  	            if (result.result_status === 'S') {
+  	                UT.alert("STD.N2500", function () { // 삭제하였습니다.
+  	                    me.onSearch();
+  	                });
+  	            } else {
+  	                UT.alert(result.result_message);
+  	            }
+  			},
+  			
+            
+            
+            onAddMedical : function(){
+                var me = this,
+                    searchParam = this.get("searchParam"),
+                    provider = me.$.gridPanel2.getDataProvider(),
+                    currCell = me.$.gridPanel2.getCurrentCell();
+
+                if(!me.validate('search')){
+                    UT.alert("STD.E0000");
+                    return false;
+                }
+
+                // 그리드 신규행 추가
+                var row = {
+                		workerId : me.targetParam.workerId
+                };
+                if(currCell == null){
+                 	 provider.addItemAt(0,row);
+                 }else{
+             	    provider.addItemAt(currCell.rowIndex+1, row);
+                 }
+            },
+            
+            
+         // 보건이력 저장
+            onSaveMedical : function(){
+                var me = this;
+
+                // 저장 유효성 체크
+                if(!me.validation()) {
+                    return;
+                }
+
+                var provider = me.$.gridPanel2.getDataProvider(),
+                    created = provider.getNewItems(),
+                    updated = provider.getUpdateItems();
+
+                if(created.length + updated.length === 0) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+                
+                for(var i = 0 ; i <created.length ; i++){
+                	created[i].workerId = me.targetParam.workerId;
+                }
+                
+                UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+                    me.$.saveListMedical.body = {
+                        insertList: created,
+                        updateList: updated
+                    };
+                    UT.request(me.$.saveListMedical);
+                });
+            },
+           
+
+            // 보건이력 저장 완료
+            completeSaveListMedical: function(e, res){
+                var me = this,
+                    message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                    	UT.request(me.$.findMedicalLog);
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+
+            },
+            
+            
+            onDeleteMedical : function(){		
+				var me =this;
+				
+				var provider = me.$.gridPanel2.getDataProvider();
+				var selectionItems = provider.selectionCheckedItems();
+				
+				
+			  if (selectionItems.length === 0) {
+                    UT.alert("STD.N1600");
+                    return;
+                }
+
+              UT.confirm("STD.N1300", function() {
+                  var deleted = provider.removeItems();
+                  if(deleted.length > 0){
+                      me.$.deleteMedical.body = {
+                    		  deleteList : selectionItems
+                      };
+                     UT.request(me.$.deleteMedical);
+                  }
+              });
+				
+				
+			},
+			
+			completeDeleteMedical: function(e,res){
+				var me = this,
+                result = res.response;
+
+	            if (result.result_status === 'S') {
+	                UT.alert("STD.N2500", function () { // 삭제하였습니다.
+	                	UT.request(me.$.findMedicalLog);
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+			},
+			
+			itemEditableFunction : function(data,item){
+            	var me = this;
+            	var provider = me.$.gridPanel.getDataProvider();
+            	
+            	if(provider.getItemState(item.rowIndex) != "created"){
+            		return false;
+            	}else{
+            		return true;
+            	} 
+            },
+            
+            onOpenQr : function(){
+            	var me = this;
+            	var provider = me.$.gridPanel.getDataProvider();
+   			    var selectionItems = provider.selectionCheckedItems();
+   			    
+	   			 if (selectionItems.length === 0) {
+	                 UT.alert("STD.N1600");
+	                 return;
+	             }
+	   			 
+	   			
+
+	   			var agent = navigator.userAgent.toLowerCase();
+
+				if ( (navigator.appName == 'Netscape' && navigator.userAgent.search('Trident') != -1) || (agent.indexOf("msie") != -1) ) {
+					$("#f_worker_object").val(JSON.stringify(selectionItems));
+		   			 
+		   			var popupWidth = 700;
+		   			var popupHeight = 600;
+
+		   			var left= (window.screen.width / 2) - (popupWidth / 2);
+		   			var top= (window.screen.height / 2) - (popupHeight / 2);
+		   			
+		   			var workerReportPopup = UT.popupWindow("/report/jsp/workerQr.jsp",me,"width=700 , height=600 , top="+top+",left="+left + ",toolbar=no,location=no,menubar=no,status=no");
+				}else {
+					$("#f_worker_object").val(JSON.stringify(selectionItems));
+		   			 
+		   			var popupWidth = 730;
+		   			var popupHeight = 600;
+
+		   			var left= (window.screen.width / 2) - (popupWidth / 2);
+		   			var top= (window.screen.height / 2) - (popupHeight / 2);
+		   			
+		   			var workerReportPopup = UT.popupWindow("/report/jsp/workerQrChrome.jsp",me,"width=730 , height=600 , top="+top+",left="+left + ",toolbar=no,location=no,menubar=no,status=no");
+					
+				}
+	   			
+            },
+            
+            addJobType : function(){
+            	var me = this;
+        		var jobPopup = UT.popup("ep-jobtype-list", me, 700, 600, {
+	                   "job-save": function(popup, e) {
+		                    UT.request(me.$.findJobTypeList);
+	                   }
+	               },{titleText: "직종 목록"});
+				jobPopup.show();
+				jobPopup.getWindowContent().load();
+            },
+            onItemEditEnd : function(event){
+            	var me = this, e = event.detail,
+ 				data     = e.data,			// 해당 row의 데이터
+ 				item     = e.item,			// item.dataField, item.columnIndex, item.rowIndex (tree인 경우 item.nodeIndex)
+ 				provider = e.provider,		// 해당 sc-grid의 provider
+ 				oldValue = e.oldValue,		// 수정 전 데이터
+ 				newValue = e.newValue,		// 수정 후 데이터
+ 				grid     = e.grid;			// 해당 grid instance
+ 				
+            	if (item.dataField === "juminNo"){
+					me.currentRowIndex = item.rowIndex;
+ 					var juminNo = e.data.juminNo;
+ 					var lastNumber = juminNo.substring(6);
+ 					// 생년월일, 나이
+ 					var birthDt = ""; 
+ 					var age = 0;
+ 					var year = juminNo.substring(0,2); // 년도
+ 					var month = juminNo.substring(2,4);  // 월
+ 					var date = juminNo.substring(4,6);  // 일
+ 					if(month>12 || date>31 || lastNumber == "0" || lastNumber == "9"){
+ 						UT.alert("잘못된 주민번호 형식입니다.")
+ 						return;
+ 					}
+ 					if("1"==(lastNumber) || "2"==(lastNumber) || "5"==(lastNumber) || "6"==(lastNumber)) {
+ 						birthDt = "19" + year+month+date;
+ 					}
+ 					else if("3"==(lastNumber) || "4"==(lastNumber)|| "7"==(lastNumber) || "8"==(lastNumber)) {
+ 						birthDt = "20" + year+month+date;
+ 					}else{
+ 						return;
+ 					}
+ 					age = me.calcAge(birthDt);
+ 					provider.setItemAt(me.currentRowIndex, {
+   						'birthDt': birthDt
+   					});
+ 					provider.setItemAt(me.currentRowIndex, {
+   						'age': age
+   					});
+ 					
+ 					// 성별 
+ 					provider.setItemAt(me.currentRowIndex, {
+   						'gender': (lastNumber%2==1)?"male":"female"
+   					});
+ 					
+ 					// 취약근로자 관련 추가.
+ 					var currentItem = provider.getItemAt(me.currentRowIndex);
+ 					var weakTypeStr = currentItem.weakType?currentItem.weakType:null;
+ 					var property = currentItem.property?currentItem.property:{};
+					if(age>=60){
+						// 없으면 넣어준다.
+						if(weakTypeStr==null || weakTypeStr.indexOf("고령근로자")==-1){
+							var arr1 = (weakTypeStr!=null)?weakTypeStr.split(","):[];
+							arr1.push("고령근로자");
+							weakTypeStr = arr1.join(","); 
+							var arr2 = property.weakType?property.weakType:[];
+							arr2.push("oldaged");
+							property.weakType = arr2;
+						}
+					}else{
+						// 있으면 뺴준다.
+						if(weakTypeStr!=null && weakTypeStr.indexOf("고령근로자")!=-1){
+							var arr1 = weakTypeStr.split(",");
+							arr1.splice(arr1.indexOf("고령근로자"),1);
+							weakTypeStr = arr1.join(",");
+							var arr2 = property.weakType?property.weakType:[];
+							arr2.splice(arr2.indexOf("oldaged"),1);
+							property.weakType = arr2;
+						}
+					}
+					if(lastNumber>=5){
+						// 없으면 넣어준다.
+						if(weakTypeStr==null || weakTypeStr.indexOf("외국인근로자")==-1){
+							var arr1 = (weakTypeStr!=null)?weakTypeStr.split(","):[];
+							arr1.push("외국인근로자");
+							weakTypeStr = arr1.join(","); 
+							var arr2 = property.weakType?property.weakType:[];
+							arr2.push("foreigner");
+							property.weakType = arr2;
+						}
+					}else{
+						// 있으면 뺴준다.
+						if(weakTypeStr!=null && weakTypeStr.indexOf("외국인근로자")!=-1){
+							var arr1 = weakTypeStr.split(",");
+							arr1.splice(arr1.indexOf("외국인근로자"),1);
+							weakTypeStr = arr1.join(",");
+							var arr2 = property.weakType?property.weakType:[];
+							arr2.splice(arr2.indexOf("foreigner"),1);
+							property.weakType = arr2;
+						}
+					}
+ 					
+ 					provider.setItemAt(me.currentRowIndex, {
+   						"weakType" : weakTypeStr,
+   						"property" : property
+   					});
+ 					
+ 				}
+            },
+     		
+     		calcAge :function (birth) {                 
+     		    var date = new Date();
+     		    var year = date.getFullYear();
+     		    var month = (date.getMonth() + 1);
+     		    var day = date.getDate();       
+     		    if (month < 10) month = '0' + month;
+     		    if (day < 10) day = '0' + day;
+     		    var monthDay = month + day;
+
+     		    birth = birth.replace('-', '').replace('-', '');
+     		    var birthdayy = birth.substr(0, 4);
+     		    var birthdaymd = birth.substr(4, 4);
+     		    var age = monthDay < birthdaymd ? year - birthdayy - 1 : year - birthdayy;
+     		    return age;
+     		} 
+            
+        });
+	</script>
+
+</dom-module>

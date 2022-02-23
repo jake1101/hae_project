@@ -1,0 +1,38 @@
+<sc-link rel="import" href="es-chart-column-negative.html"></sc-link>
+<sc-link rel="import" href="../es-chart-source-viewer.html"></sc-link>
+
+<dom-module id="em-chart-column-negative">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-panel class="vbox flex" title-text="column chart negative">
+			<es-chart-column-negative class="fit flex" on-chart-load="onChartLoad"></es-chart-column-negative>
+			<es-chart-source-viewer id="viewer" url="/ui/bp/developer/chart/column/es-chart-column-negative.html" class="flex"></es-chart-source-viewer>
+		</sc-panel>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-chart-column-negative',
+		properties : {
+			data : {
+				type : Object,
+				value : function() {
+					return {}
+				}
+			}
+		},
+		initialized : function() {
+		},
+		setViewerData : function() {
+			var me = this;
+			me.$.viewer.setData(JSON.stringify(me.get("data"), null, "\t"));
+		},
+		onChartLoad : function(){
+			//this.setViewerData();
+		}
+	});
+	</script>
+</dom-module>

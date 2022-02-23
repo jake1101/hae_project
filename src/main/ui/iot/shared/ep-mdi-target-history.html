@@ -1,0 +1,480 @@
+<dom-module id="ep-mdi-target-history">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: [팝업] 당일 이력조회
+        ** @Description		: [팝업] MDI 당일 이력조회 //sc-mdi에서 당일이력조회시 ep-target-history 팝업 객체 중복 방지용 팝업 
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.08.06
+        ** @History 		: 2020.08.06 jhkim 최초작성
+        ******************************************************************************************
+    -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-ajax id ="findTargetHistory" url="findTargetHistory.do" last-response="{{targetHistory}}" on-response="completeFindTargetHistory"></sc-ajax>
+		<cc-auth-checker check-list="auth-r"></cc-auth-checker>
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<div>
+			<table class="tb-form">
+				<tr>
+					<th><sc-label id="nameLabel"></sc-label></th>
+					<td>
+						{{data.targetName}}
+					</td>
+					<th hidden$="[[!formula('hidden')]]"><sc-label text="협력사"></sc-label></th>
+					<td hidden$="[[!formula('hidden')]]">
+						{{data.vendorName}}
+					</td>
+					<th hidden$="[[!formula('hidden')]]"><sc-label id="jobNameLabel"></sc-label></th>
+					<td hidden$="[[!formula('hidden')]]">
+						{{data.targetJobName}}
+					</td>
+					<th style="width: 120px;"><sc-label text="최초 수신 시간" ></sc-label></th>
+					<td style="width: 160px;">
+						{{firstTime}}
+					</td>
+					<th style="width: 120px;"><sc-label text="최종 수신 시간"></sc-label></th>
+					<td style="width: 160px;">
+						{{lastTime}}
+					</td>
+				</tr>
+			</table>
+		</div>
+	
+		<div class="vspace-5"></div>
+		
+		<div class="hbox flex">
+			<cc-ol-map-container id="mapContainer" class="flex"></cc-ol-map-container>
+			<div class="hspace-5"></div>
+			<div class = "w-450">
+				<sc-grid id="gridHistoryPanel" class="w-450" sortable="false" data-provider="{{historyList}}"
+					use-state ="false" use-selection="true" selection-style="singleRow" selection-able-function="isSelection"
+					show-selection-header="true" on-item-click="onItemClick" on-selection-checked="onSelectionChk" on-item-all-checked ="itemAllChecked">
+			        <cc-grid-toolbar>
+		            </cc-grid-toolbar>
+			        <sc-grid-columns>
+			            <sc-image-column  width="70"    header-text="수신상태"   	image-change-function="onImageChange"   image-display ="auto" ></sc-image-column>
+			            <sc-date-column 	width="80"  	header-text="수신시간" 		data-field="signalDt" 	 	text-align="center" 	display-format = "HH:mm:ss" value-format="HH:mm:ss"></sc-date-column>
+			            <sc-data-column 	width="140" 	header-text="위치"   		data-field="areaName"		text-align="center"></sc-data-column>
+			            <sc-data-column 	width="80" 	header-text="배터리(%)" 	data-field="battery"			text-align="center"></sc-data-column>
+			        </sc-grid-columns>
+			        <sc-grid-fields>
+			       	 	<sc-grid-field data-field="iconImage"></sc-grid-field>
+	                    <sc-grid-field data-field="index" 		data-type="number"></sc-grid-field>
+	                    <sc-grid-field data-field="selected" 	data-type="boolean"></sc-grid-field>
+	                    <sc-grid-field data-field="marker" 	data-type="object"></sc-grid-field>
+	                    <sc-grid-field data-field="popup" 		data-type="object"></sc-grid-field>
+	                    <sc-grid-field data-field="geoJson"	data-type="object"></sc-grid-field>
+	                </sc-grid-fields>
+	        	</sc-grid>
+			</div>
+		</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+		Polymer({
+			is : 'ep-mdi-target-history',
+			properties:{
+				data :{ 				
+	            	type : Object,
+	            	value : function(){
+	            		return {}
+	            	}
+	            },
+				historyList :{ 				
+	            	type : Array,
+	            	value : function(){
+	            		return []
+	            	}
+	            },
+	            startRowNum : Number,
+		        endRowNum : Number,
+		        focusRowNum : Number,
+		        isEventPrevent : Boolean,
+				// 지도
+                map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+                type:{type:Object, value : function(){return {};}}
+			},
+			formulas : {
+                hidden: function() {
+                    return (this.get("title") === "작업자") || (this.get("title") === "이동장비");
+                }
+            },
+            /******************************
+             * 초기화 설정
+             ******************************/
+			load: function(title, data){
+				console.log(data);
+				var me = this;
+				setTimeout(function(){
+					me.set("data", data);
+					me.set("title", title);
+
+					me.$.nameLabel.text = title+"명";
+					me.$.jobNameLabel.text = (title=="작업자")?"직종":"유형";
+					me.$.findTargetHistory.body = {targetId:data.targetId, targetType:data.targetType, sensorType:"TAG"};
+
+					me.$.gridHistoryPanel.loadStyles({
+				        body: {
+				              checked: {  //체크될때 로우색상지정
+				                  background: "#96F56E"
+				              }
+				          }
+				    });
+
+					if(data.targetType=='unmapping'){
+						me.$.findTargetHistory.body.sensorId=data.sensorId;
+					}else{
+						me.$.findTargetHistory.body.targetId=data.targetId;
+					}
+					
+					me.set('type', data.targetType);
+					UT.request(me.$.findTargetHistory);
+					me.applyFormula();
+	
+					me.map = me.$.mapContainer.map;
+					createVectorSourceLayer(me.map, 'route');
+					createVectorSourceLayer(me.map, 'marker');
+					createVectorSourceLayer(me.map, 'highlight');
+					createVectorSourceLayer(me.map, 'selected');
+					var color = targetColor[me.data.targetType];
+					var routeStyle = [
+	   					new ol.style.Style({stroke: new ol.style.Stroke({ color: "#ffffff", width: 10})}),
+	   					new ol.style.Style({stroke: new ol.style.Stroke({ color: color, width: 6})}),
+	   					new ol.style.Style({stroke: new ol.style.Stroke({ color: '#ffffff', width: 1, lineDash: [4,4]})})
+	   				];
+	   				me.map.get('route_layer').setStyle(routeStyle);
+	   				me.map.get('marker_layer').declutter_ = true;
+	   				me.map.get('marker_layer').setStyle(me.markerStyleFunction);
+	   				me.map.get('highlight_layer').setStyle(me.highlightStyleFunction);
+	   				me.map.get('highlight_layer').declutter_ = true;
+	   				me.map.get('selected_layer').setStyle(me.highlightStyleFunction);
+	   				me.map.get('selected_layer').declutter_ = true;
+
+	   				me.map.on('pointermove', function(e) {		// 지도 마우스 오버 이벤트
+						me.map.removeOverlay(me.map.getOverlayById('targetPopup'));
+						me.map.get('highlight_source').clear();
+						
+						if(me.map.hasFeatureAtPixel(e.pixel)){
+				    		me.map.getTargetElement().style.cursor = '';
+							var selected = null;
+
+							me.map.forEachFeatureAtPixel(e.pixel, function(f) {
+				  		    	selected = f;
+				  		    	return true;
+				  		  	});
+
+					    	if (selected) {
+						        if(selected.get('icon')){			
+									me.highlightMarker(selected);
+								}
+					    	}
+						}
+					});
+
+	   				me.map.on('click', function(e) {			// 지도 클릭 이벤트
+				    	var selected = null;
+						me.map.get('selected_source').clear();
+
+				    	me.map.forEachFeatureAtPixel(e.pixel, function(f) {
+			  		    	selected = f;
+			  		    	return true;
+			  		  	});
+
+				    	if (selected) {
+				    		if(selected.get('icon')){
+	   			  		  		var object = selected.get('targetInfo');
+		   			  		  	var grid = me.$.gridHistoryPanel;
+
+		   			  			grid.searchItem("index", object.index);
+		   			  			me.map.get('selected_source').addFeature(selected);
+		   			  			
+		   			  		}else if(selected.get('type') == 'marker'){			// 영역 마커 이벤트
+			   			  		me.showAreaPopup(selected);
+						   	}
+				    	}
+				    });
+				},100);
+			},
+			highlightMarker : function(feature){
+				var me = this;
+				me.map.get('highlight_source').clear();
+				var data = feature.get('targetInfo');
+				me.map.getTargetElement().style.cursor = 'pointer';
+
+				var overlays = me.map.getOverlays().getArray();
+				while(overlays.length > 0){
+					me.map.removeOverlay(overlays[0]);
+				}
+
+				me.map.get('highlight_source').addFeature(feature);
+
+				var text =  '<div id="arrow"></div><div id="text">('+feature.getId()+') '+data.signalDt+'</br>'+data.areaName+'</div>';
+				
+    	      	var popup = document.createElement("div");
+				popup.classList.add('targetPopup');
+				popup.innerHTML=text;
+
+				var overlay = new ol.Overlay({
+					id : 'targetPopup',
+					element : popup,
+					positioning : 'bottom-center',
+					offset : [0,-20],
+					position : feature.getGeometry().getCoordinates()
+				});
+				
+				me.map.addOverlay(overlay);
+			}, 
+			completeFindTargetHistory : function(){
+				if(!this.isInitialized) return;
+				var me = this;
+				if(me.targetHistory){
+					var historyList = me.targetHistory;
+					for(var i in historyList){
+						if(UT.isEmpty(me.data.targetName) && i == 0){
+							me.set("data.targetName", historyList[0].targetName);
+							me.set("data.vendorName", historyList[0].vendorName);
+							me.set("data.targetJobName", historyList[0].targetJobName);
+						}
+						historyList[i].index = i; 
+						historyList[i].selected = false; 
+						if(historyList[i].geoJson){
+							if(!historyList[i].areaName){
+								historyList[i].areaName = "영역외";
+							}
+							if(UT.isEmpty(me.map.get('lastGeo'))){			// 마지막 위치 표시
+								var feature = geoJson.readFeature(historyList[i].geoJson);
+								
+								feature.setId(parseInt(i)+1);
+				    	   		feature.set('targetInfo', historyList[i]);
+
+				    	   		var center = ol.proj.fromLonLat(historyList[i].geoJson.coordinates);
+								me.map.getView().setCenter(center);
+
+		   			  			me.map.get('selected_source').addFeature(feature);
+		   			  			
+					       		me.map.set('lastGeo', parseInt(i));
+					       	}
+						}else{
+							historyList[i].areaName = "위치정보 없음";
+						}
+
+						if(!me.lastTime){
+							if(historyList[i].signalDt){
+								me.lastTime = UT.formatDate(historyList[i].signalDt, 'yyyy년 MM월 dd일 HH:mm:ss');
+							}
+						}
+						if(historyList[i].signalDt){
+							me.firstTime = UT.formatDate(historyList[i].signalDt, 'yyyy년 MM월 dd일 HH:mm:ss');
+						}
+					}
+					me.historyList = historyList;
+
+					me.$.gridHistoryPanel.searchItem("index", me.map.get('lastGeo'));
+				}else{
+					me.historyList = [];
+				}
+			},
+			clearMap : function(){
+				if(!this.isInitialized) return;
+				var me = this;
+				me.map.get('route_source').clear();
+				me.map.get('marker_source').clear();
+				me.map.get('selected_source').clear();
+			},
+			isSelection : function(data){
+				return (data.geoJson);
+			},
+			onItemClick : function(e){
+				var me = this,
+				data = e.detail.data;
+				
+				me.map.get('selected_source').clear();
+
+				if(UT.isEmpty(data.geoJson)){return;}
+				
+				var center = ol.proj.fromLonLat(data.geoJson.coordinates);
+				me.map.getView().setCenter(center);
+
+				var feature = geoJson.readFeature(data.geoJson); 
+				feature.setId(data.index+1);
+				feature.set('targetInfo', data);
+				if(me.get('type') == 'unmapping'){
+					feature.get('targetInfo').targetType = 'unmapping';
+				} 
+
+				me.map.get('selected_source').addFeature(feature);
+			},
+			onSelectionChk : function(e){
+				var me = this;
+				if(me.isEventPrevent) return;
+				me.isEventPrevent = true;
+
+				var data = e.detail.data;  
+
+				var idx = data.index * 1;
+				var startNo = me.startRowNum;
+				var endNo = me.endRowNum;
+				
+				if(UT.isEmpty(startNo)){		//start 없을때
+					startNo = idx;
+					endNo = idx;				    
+				}else{
+					if(UT.isEmpty(endNo)){
+						if(startNo <= idx){
+							endNo = idx;
+						}else{
+							endNo = startNo;
+							startNo = idx;
+						}
+					}else{
+						if(idx == startNo || idx == endNo){
+							startNo = null;
+							endNo = null;
+							me.historyList[idx].selected = false;
+						}else if(idx < startNo){
+							startNo = idx;
+						}else{
+							endNo = idx;
+						}
+					}
+				}
+
+				var last = me.$.gridHistoryPanel.getDataProvider().getItemSize()-1;
+				if(startNo==0 && endNo ==last){
+					me.redrawGrid(startNo, endNo, false);
+				}else{
+					me.redrawGrid(startNo, endNo, true);
+				}
+
+				me.$.gridHistoryPanel.refresh();
+				me.isEventPrevent = false;
+			},
+			itemAllChecked : function(e){
+				var me = this;
+				if(me.isEventPrevent) return;
+				me.isEventPrevent = true;
+				var check = e.detail.checked;
+				if(check){
+					me.redrawGrid(0,me.$.gridHistoryPanel.getDataProvider().getItemSize()-1 , false);
+				}else{
+					me.redrawGrid(null, null, false);
+				}
+				me.isEventPrevent = false;
+			},
+			changeIconVisible : function(e){
+				if(!this.isInitialized) return;
+				var me = this;
+				me.map.get('marker_layer').setVisible(me.$.showIcon.value);
+			},
+			redrawGrid : function(startNo, endNo, flag){
+				var me = this;
+
+				if(!UT.isEmpty(me.startRowNum)){
+					for(var i=me.startRowNum; i<=me.endRowNum; i++){
+						me.historyList[i].selected = false;
+						if(flag){
+					    	me.$.gridHistoryPanel.selectionCheck(i, false);
+						}
+					}
+				}
+
+				me.clearMap();
+				
+				me.startRowNum = startNo;
+				me.endRowNum = endNo;
+				
+				if(!UT.isEmpty(me.startRowNum) && !UT.isEmpty(me.endRowNum)){
+					var provider = me.$.gridHistoryPanel.getDataProvider();
+					var routes = [];
+					var markers = [];
+					
+					for(var i = me.startRowNum; i <= me.endRowNum; i++){
+						me.historyList[i].selected = true;
+						if(provider.getItemAt(i).geoJson){
+							me.$.gridHistoryPanel.selectionCheck(i, true);
+							var route = ol.proj.fromLonLat(provider.getItemAt(i).geoJson.coordinates);
+							routes.push(route);
+							var marker = geoJson.readFeature(provider.getItemAt(i).geoJson);
+							marker.setId(provider.getItemAt(i).index+1);
+							marker.set('targetInfo', provider.getItemAt(i));
+							if(me.get('type') == 'unmapping'){
+								marker.get('targetInfo').targetType = 'unmapping';
+							}
+							marker.set('icon', true);
+							markers.push(marker);
+						}
+					}
+
+					if(UT.isNotEmpty(markers)){
+						me.map.get('marker_source').addFeatures(markers);
+					}
+					if(UT.isNotEmpty(routes)){
+						var routeFeature = new ol.Feature({
+						    geometry: new ol.geom.LineString(routes),
+						});
+						me.map.get('route_source').addFeature(routeFeature);
+					}
+				}
+			},
+			markerStyleFunction : function (feature){
+				var me = this;
+				var data = feature.get('targetInfo');
+
+				var markerStyle = new ol.style.Style({
+   	                image: new ol.style.Circle({
+   	                    radius: 10,
+   	                    stroke: new ol.style.Stroke({color: targetColor[data.targetType],width : 2}),
+   	                    fill: new ol.style.Fill({color: '#F5F1E8'})
+   	                }),
+   	                text: new ol.style.Text({
+   	                    text: feature.getId()+'',
+   	                 	font:'500 10px Noto Sans KR',
+   	                    fill: new ol.style.Fill({color: targetColor[data.targetType]})
+   	                })
+   	            });
+   	            
+				return markerStyle;
+			},
+			highlightStyleFunction : function (feature){
+				var me = this;
+				var data = feature.get('targetInfo');
+
+				var markerStyle = new ol.style.Style({
+   	                image: new ol.style.Circle({
+   	                    radius: 10,
+   	                    stroke: new ol.style.Stroke({color: targetColor[data.targetType],width : 2}),
+   	                    fill: new ol.style.Fill({color: targetColor[data.targetType]})
+   	                }),
+   	                text: new ol.style.Text({
+   	                    text: feature.getId()+'',
+   	                 	font:'500 10px Noto Sans KR',
+   	                    fill: new ol.style.Fill({color: '#FFFFFF'})
+   	                })
+   	            });
+   	            
+				return markerStyle;
+			},
+			onImageChange: function(data, item){
+	            return '/ui/assets/img/marker/' +data.iconImage;
+	        }
+		});
+	</script>
+</dom-module>

@@ -1,0 +1,122 @@
+<sc-link href="../../../lib/prettify-element/prettify-element.html"></sc-link>
+
+<dom-module id="es-tab-validation-description">
+    <style>
+        :host {
+            @apply(--vbox-layout)
+        }
+    </style>
+    <template>
+        <div class="flex page">
+            <p>
+                <br>
+                이 가이드는 상위 모듈에서 저장/검증 등의 행위를 할 때 가이드를 작성합니다. <br>
+                자주 사용되는 예제는 아니지만 이러한 상황이 발생할 수 있습니다. </p><br/>
+            <p>
+                <b>기본 컨셉</b><br/>
+                SMARTsuite의 Tab Navigation은 성능상의 이유로 비동기 로딩을 지원합니다. 이 기능은 때로는 개발의 복잡도를 증가시킵니다.
+                상위 모듈에서 하위 Tab들의 데이터를 저장하기 전에 Validation 작업을 진행한다고 가정합니다. <br><br>
+                <br>
+                하위 Tab의 Validation을 하기 전에 3가지 상황을 고려해야 합니다. <br>
+                1) Tab이 initialized 상태인지 (template 태그로 감싸져 있어 비활성화 되어 있는지) <br>
+                2) Tab이 Validation 검증 전 데이터를 로드해야 하는지 <br>
+                3) Validation을 Tab의 순서대로 순차적으로 진행할 수 있는지 <br><br>
+                <br>
+                하위 Tab의 Validation이 끝나면 상위 모듈에서는 다음의 2가지 동작을 할 수 있어야 합니다. <br>
+                1) Validation 결과를 확인 <br>
+                2) 특정 Tab에서 보내는 Validation Result Message(에러 메시지 또는 특정 데이터)가 있으면 메시지를 가공<br>
+                <br>
+                위의 고려사항들을 비즈니스 로직과 같이 넣는 것은 개발 복잡도를 향상시킵니다. <br>
+                비즈니스 로직과 조회/검증 로직을 분리하기 위해 <b>cc-tab-validate-behavior</b>를 사용할 수 있습니다.<br>
+            </p><br/>
+            <p>
+                <b>활용</b><br/>
+
+                다음은 cc-tab-validate-behavior를 사용하기 위한 방법입니다. <br>
+                <br>1) 상위 모듈에서 behavior 추가 <br>
+<prettify-element>
+    Polymer({
+        is: 'em-parent-tab-validation-sample',
+
+        behaviors: [
+            Polymer.CCTabValidateBehavior
+        ],
+
+        ...
+</prettify-element>
+
+                <br>2) 상위 모듈에서 validation 대상이 되는 하위 Tab들을 정의 (비즈니스 로직에 따라 다를 수 있음) <br>
+<prettify-element>
+    getTargetValidateTabs: function () {
+        var me = this;
+        if(me.isNew) {
+            return [me.$.sub1];
+        } else {
+          return [me.$.sub1, me.$.sub2, me.$.sub3, me.$.sub4];
+        }
+    }
+</prettify-element>
+
+                <br>3) 하위 모듈에서 load호출 시 사용될 파라미터 정의 (비즈니스 로직에 따라 다를 수 있음)<br>
+<prettify-element>
+    me.param 이라고 가정
+</prettify-element>
+                <br>4) 2,3 번에서 정의한 데이터로 me.validateTabNavigation 함수 호출 및 콜백 구현<br>
+                <b>validateTabNavigation 함수 인자</b> <br>
+                - tabNavigation: 하위 Tab을 감싸고 있는 sc-tab-navigation <br>
+                - targetTabs: validation 대상인 하위 Tab <br>
+                - loadParam: validation 전 초기화 및 데이터로드가 필요할 때 load 호출 시출 <br>
+                - validParam: isValidFn(하위모듈의 Validation 함수) 호출 시 전달할 인자 <br>
+                - callback: a모든 검증이 끝나고 실행되는 콜백 <br>
+<prettify-element>
+    me.validateTabNavigation(me.$.tabNavi, targetTabs, me.loadParam, me.validParam, function (isValid, resultObjs) {
+        //isValid (전체 Tab 성공 여부)
+        //resultObjs (하위 모듈 isValidFn 에서 반한된 값들의 배열)
+        if(isValid) {
+            //성공
+        } else {
+            //실패 (필요에 따라 가공)
+            var message = "";
+
+            for(var i=0, len=resultObjs.length; i<\len; i++) {
+                var obj = resultObjs[i];
+                if(UT.isString(obj.result)) { //Tab Valid
+                    message += obj.result + "\n";
+                }
+            }
+
+            UT.alert(message, null, true);
+        }
+    });
+</prettify-element>
+
+                <br>5) 하위 모듈에서 validation을 실행할 수 있는 조건이 충족되었을 때 isLoaded 를 true로 설정<br> (비지니스 로직에 따라 다를 수 있음)
+<prettify-element>
+    //load 함수에서 데이터 load 후 isLoaded true로 세팅
+    load: function (param) {
+        this.isLoaded = true;
+    },
+
+    //특별히 데이터를 로드할 경우가 없는 경우에도 loaded를 true로 설정해야 함
+    isLoaded: {
+        type: Boolean,
+        value: true
+    }
+</prettify-element>
+                <br>6) 하위 모듈에서 isValidFn 구현 (비지니스 로직에 따라 다를 수 있음)<br>
+<prettify-element>
+    // 4)에서 전달한 validParam을 인자로 받는다
+    isValidFn: function (validParam) {
+        var me = this;
+        return me.validate();
+    }
+</prettify-element>
+            </p>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: 'es-tab-validation-description'
+        });
+    </script>
+</dom-module>

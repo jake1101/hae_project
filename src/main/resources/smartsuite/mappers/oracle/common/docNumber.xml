@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="docNumber">
+
+<!-- 
+	문서번호 채번(ESACDFM)
+	@author : JuEung Kim
+	@Date 	: 2016. 2. 2
+-->	
+	<!-- 문서번호 채번(ESACDFM) 조회  -->
+	<select id="findListDocNumber" resultType="map">
+	/* docNumber.findListDocNumber */
+       SELECT SYS_ID                /*시스템 아이디 */
+             ,COMP_CD               /*회사 코드 */
+             ,DOC_NO_CD             /*문서 번호 코드 */
+             ,DOC_NO_NM             /*문서 번호 코드 명 */
+             ,START_SEQ             /*시작 시퀀스 */
+             ,END_SEQ               /*종료 시퀀스 */
+             ,EXPRESSION            /*표현 */
+             ,SEQ_REFRESH_UNIT      /*시퀀스 갱신 단위 */
+             ,USE_YN                /*사용 여부 */
+             ,LAST_GENERATED_DATE   /*최종 생성 일자 */
+             ,CURRENT_SEQ           /*현재 시퀀스 */
+             ,STS                   /*상태 */
+             ,REG_ID                /*등록자 아이디 */
+             ,REG_DT                /*등록 일시 */
+             ,MOD_ID                /*수정자 아이디 */
+             ,MOD_DT                /*수정 일시 */
+         FROM ESACDFM
+        WHERE SYS_ID 	= #{g.tenant}
+		<if test='p.comp_cd != null and p.comp_cd != ""'>
+          AND COMP_CD 	= #{p.comp_cd}
+		</if>
+		<if test='p.doc_no_cd != null and p.doc_no_cd != ""'>
+			<bind name="pattern" value="p.doc_no_cd + '%'" />
+          AND UPPER(DOC_NO_CD) LIKE UPPER(#{pattern})
+		</if> 
+		<if test='p.doc_no_nm != null and p.doc_no_nm != ""'>
+			<bind name="pattern" value="'%' + p.doc_no_nm + '%'" />
+          AND UPPER(DOC_NO_NM) LIKE UPPER(#{pattern})
+		</if>
+     ORDER BY COMP_CD
+             ,REG_DT
+	</select>
+	
+	<!-- 문서번호 채번(ESACDFM) INSERT -->
+	<insert id="insertEsacdfm">
+	/* docNumber.insertEsacdfm */
+		INSERT INTO ESACDFM
+		<trim prefix="(" suffix=")" prefixOverrides=",">
+				 STS					/*상태 */
+      			,SYS_ID					/*시스템 아이디 */
+      			,REG_ID					/*등록자 아이디 */
+      			,REG_DT					/*등록 일시 */
+      			,COMP_CD				/*회사 코드 */
+      			,DOC_NO_CD				/*문서 번호 코드 */
+      			,DOC_NO_NM				/*문서 번호 코드 명 */
+      			,START_SEQ				/*시작 시퀀스 */
+      			,END_SEQ				/*종료 시퀀스 */
+      			,EXPRESSION				/*표현 */
+      			,SEQ_REFRESH_UNIT		/*시퀀스 갱신 단위 */
+      			,USE_YN					/*사용 여부 */
+      			,LAST_GENERATED_DATE	/*최종 생성 일자 */
+      			,CURRENT_SEQ			/*현재 시퀀스 */
+      	</trim>
+      	<trim prefix="VALUES (" suffix=")" prefixOverrides=",">
+      			 'C'
+      			,#{g.tenant}
+      			,#{g.username}
+      			,#{g.now}
+      			,#{p.comp_cd}
+      			,#{p.doc_no_cd}
+      			,#{p.doc_no_nm}
+      			,#{p.start_seq}
+      			,#{p.end_seq}
+      			,#{p.expression}
+      			,#{p.seq_refresh_unit}
+      			,#{p.use_yn}
+      			,#{p.last_generated_date}
+      			,#{p.current_seq}
+      	</trim>
+	</insert>
+	
+	<!-- 문서번호 채번(ESACDFM) UPODATE -->
+	<update id="updateEsacdfm">
+	/* docNumber.updateEsacdfm */
+		UPDATE ESACDFM
+		<trim prefix="set" prefixOverrides=",">
+				 MOD_ID 				= #{g.username}				/*수정자 아이디*/ 
+			  	,MOD_DT 				= #{g.now}					/*수정 일시*/
+				,DOC_NO_NM 				= #{p.doc_no_nm}			/*문서 번호 코드 명 */
+				,START_SEQ 				= #{p.start_seq}			/*시작 시퀀스 */
+				,END_SEQ 				= #{p.end_seq}				/*종료 시퀀스 */
+				,EXPRESSION 			= #{p.expression}			/*표현 */
+				,SEQ_REFRESH_UNIT 		= #{p.seq_refresh_unit}		/*시퀀스 갱신 단위 */
+				,USE_YN 				= #{p.use_yn}				/*사용 여부 */
+				,LAST_GENERATED_DATE 	= #{p.last_generated_date}	/*최종 생성 일자 */
+				,CURRENT_SEQ 			= #{p.current_seq}			/*현재 시퀀스 */
+		</trim>
+		 WHERE SYS_ID 		= #{g.tenant}
+		   AND COMP_CD 		= #{p.comp_cd}
+		   AND DOC_NO_CD 	= #{p.doc_no_cd}
+	</update>
+	
+	<!-- 문서번호 채번(ESACDFM) DELETE  -->
+	<delete id="deleteEsacdfm">
+	/* docNumber.deleteEsacdfm */
+		DELETE 
+		  FROM ESACDFM
+		 WHERE SYS_ID 		= #{g.tenant}		/*시스템 아이디 */
+		   AND COMP_CD 		= #{p.comp_cd}		/*회사 코드 */
+		   AND DOC_NO_CD 	= #{p.doc_no_cd} 	/*문서 번호 코드 */
+	</delete>
+	
+</mapper>

@@ -1,0 +1,44 @@
+/**
+ * CASE 3. Custom Exception 처리 방법
+ *  1) 강제 rollback 처리 : TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+ *     - exception 발생 시 rollback-only 설정
+ */
+public Map save(Map param) {
+	try {			
+		sqlSession.insert("sample.insertHeader", param);
+		
+		...
+		
+		// validate 수행
+		if(!isValid()) {
+			throw new CustomException(Const.INVALID_TIME);
+		}
+		
+	} catch(Exception e) {
+		// 트랜잭션 상태를 rollback-only로 설정한다. 트랜잭션이 종료되는 시점에 rollback이 수행된다.
+		TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+		
+		resultMap.put(Const.RESULT_STATUS, Const.FAIL);
+		resultMap.put(Const.RESULT_MSG, e.getMessage());
+	}
+	
+	return resultMap;
+}
+
+/**
+ *  2) @Transactional 어노테이션을 사용하여 rollback 처리할 Exception을 지정
+ */
+@Transactional(rollbackFor=CustomException.class)	// CustomException이 발생하면 rollback 처리
+public Map save(Map param) throws CustomException {
+	
+	sqlSession.insert("sample.insertHeader", param);
+	
+	...
+	
+	// validate 수행
+	if(!isValid()) {
+		throw new CustomException(Const.INVALID_TIME);
+	}
+	
+	...
+}

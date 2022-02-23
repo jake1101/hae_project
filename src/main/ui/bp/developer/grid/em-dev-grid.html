@@ -1,0 +1,347 @@
+<dom-module id="em-dev-grid">
+	<!-- layout Style -->
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+	<!--  화면 구성 시작-->
+    <template>
+		 <!-- 구매 요청 현황 조회 ajax         last-response="{{prList}}"-->
+        <sc-ajax id="findListPr" url="/aa/dev/aa/findListPr.do" body="{{searchParam}}" on-response="onResponse" last-response="{{prList}}"></sc-ajax>
+        
+        
+        <!-- 권한 -->
+        <cc-auth-checker check-list="auth-r,auth-s"></cc-auth-checker>
+        
+        <!-- 공통코드 -->
+       	<sc-code-group>
+        	<!--  공통코드 : 통화-->
+        	<sc-code code="C004" value="{{codes.commCurCd}}"></sc-code>
+        	<!--  구매코드 : 구매유형-->    
+        	<sc-code code="P045" value="{{codes.purcTypCd}}"></sc-code>
+        	<!-- 구매코드 :  구매요청 결재 상태-->
+        	<sc-code code="P011" value="{{codes.prAprvStsCd}}"></sc-code>
+        	<!-- 구매코드 : 구매요청 진행 상태 -->
+        	<sc-code code="P044" value="{{codes.prProgStsCd}}"></sc-code>
+        	<!-- 구매코드 : 구매요청 신규변경구분 -->
+        	<sc-code code="P040" value="{{codes.prModProgStsCd}}"></sc-code>
+        	<!--  구매요청유형-->
+        	<sc-code code="P049" value="{{codes.purcReqTypCd}}"></sc-code>
+        </sc-code-group>
+        
+       	<!-- page title toolbar -->
+       	<sc-toolbar>
+       		<sc-label text="구매요청현황23232323" ></sc-label>
+            <sc-spacer></sc-spacer>
+            <sc-button text="조회" on-click="onFindListPr"></sc-button>
+            <sc-button text="추가" on-click="onAddRow"></sc-button>
+		</sc-toolbar>
+		<sc-panel title-text="테스트" collapsible="true">
+			<!--  조회 조건 테이블-->
+	       <table class="table">
+	        	<colgroup>
+	        		<col style="width:150px"></col>
+	        		<col></col>
+	        		<col style="width:150px"></col>
+	        		<col></col>
+	        	</colgroup>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="운영조직" ></sc-label>
+	        		</th>
+	        		<td>
+	        			<cc-operorg-multi-combobox-field id="operorgcombobox" oper-unit-cd="PO" value="{{searchParam.oper_org_cd}}" placeholder="선택없음" required="true"></cc-operorg-multi-combobox-field>
+	        		</td>
+	        		<th>
+	        			<sc-label text="구매요청일" ></sc-label>
+	        		</th>
+	        		<td colspan="3">
+	        			<sc-period-date-field required="true" from-value="{{searchParam.from_create_date}}" to-value="{{searchParam.to_create_date}}" default-from-value="-1M" string-date="false"></sc-period-date-field>
+	        		</td>
+	        	</tr>	        	
+	        	<tr>
+	       			<th>
+	       				<sc-label text="구매유형" ></sc-label></th>
+	        		<td>
+	        			<sc-combobox-field display-field="label" value-field="data" items="{{codes.purcTypCd}}" value="{{searchParam.purc_typ}}"  placeholder="전체"></sc-combobox-field>
+	        		</td>
+	        		<th>
+	        			<sc-label text="구매요청 번호" ></sc-label>
+	        		</th>
+	        		<td >
+						<cc-multi-text-field value="{{searchParam.pr_no}}" multi-value="{{searchParam.pr_nos}}" on-enter="onFindListPr"></cc-multi-text-field>
+	        		</td>
+	       			<th>
+	       				<sc-label text="구매요청 명" ></sc-label>
+	       			</th>
+	        		<td >
+			        	<sc-text-field  value="{{searchParam.pr_tit}}" on-enter="onFindListPr" maxLength="200"></sc-text-field>
+	        		</td>       		
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="구매요청 진행상태" ></sc-label>
+	        		</th>
+	        		<td>
+			        	<sc-combobox-field display-field="label" value-field="data" items="{{codes.prAprvStsCd}}" value="{{searchParam.pr_aprv_sts}}"  placeholder="전체"></sc-combobox-field>
+	        		</td>
+	        		<th>
+	        			<sc-label text="구매요청 부서" ></sc-label>
+	        		</th>
+	        		<td>
+	        			<cc-dept-search id="deptSearch" value="{{searchParam.pr_req_dept_nm}}" result-field="dept_cd" result-value="{{searchParam.pr_req_dept_cd}}"></cc-dept-search>
+	        		</td>
+	       			<th>
+	       				<sc-label text="구매요청 담당자" ></sc-label>
+	       			</th>
+	        		<td>
+	        			<cc-user-search id="userSearch" value="{{searchParam.pr_req_nm}}" result-field="usr_id" result-value="{{searchParam.pr_req_id}}"></cc-user-search>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="구매요청 유형" ></sc-label>
+	        		</th>
+	        		<td>
+			        	<sc-combobox-field display-field="label" value-field="data" items="{{codes.purcReqTypCd}}" value="{{searchParam.purc_req_typ}}"  placeholder="전체"></sc-combobox-field>
+	        		</td>
+	        		<th>
+	        		</th>
+	        		<td>
+	        		</td>
+	       			<th>
+	        		<td>
+	        		</td>
+	        	</tr>
+	        </table>
+        </sc-panel>
+        
+       	<!-- 그리드   data-provider="{{prList}}" data-provider-target="findListPr" use-status="false" -->
+     	<sc-grid  id="gridPanel"  title-text="구매요청목록" collapsible="true"  data-provider="{{prList}}"  live-scroll="false" selection-mode="check" class="grid-flex"  on-scroll-to-bottom="onScrollBottom" row-height="60" header-height="80"
+     	          on-item-click="onDataCellClicked" on-item-edit-end="onItemEditEnd" use-dummy="false">
+    			<sc-toolbar>
+    				<sc-button text="구매요청작성" on-click="onCreatePr" auth-s></sc-button>
+    			</sc-toolbar>
+    			<sc-grid-columns>
+    		
+      			 <sc-image-column source="ui/assets/img/icon_chat.png" data-field="img_column_test" 	header-text="이미지컬럼 테스트" 	width="120" 		text-align="center" 	editable="true" ></sc-image-column>				
+      				<sc-combobox-column data-field="pr_mod_prog_sts" header-text="요청유형1" 		width="80" 		text-align="center" 	editable="true" display-field="label" value-field="data" items="{{codes.prModProgStsCd}}"></sc-combobox-column>
+      				<sc-data-column data-field="pr_rev" 			header-text="차수" 			width="50" 		text-align="center" 	editable="true" ></sc-data-column>
+      				<sc-data-column data-field="pr_tit" 			header-text="구매요청 명" 		width="300" 	text-align="left" 		editable="true" ></sc-data-column>
+      <!-- 				<sc-combobox-column data-field="purc_typ" 		header-text="구매유형" 		width="80" 		text-align="center" 	editable="true" display-field="label" value-field="data" items="{{codes.purcTypCd}}"></sc-combobox-column> -->
+      				<sc-data-column data-field="cur" 				header-text="통화" 			width="50" 		text-align="center" 	editable="false" ></sc-data-column>
+      				<sc-data-column data-field="pr_tot_amt" header-text="요청금액" width="100" text-align="right" editable="true" data-type="number" format-type="usd" ></sc-data-column>
+      				<sc-date-column data-field="pr_req_date" 		header-text="구매요청 일자" 	    width="120" 	text-align="center" 	editable="true"	 ></sc-date-column>
+      				<sc-date-column data-field="pr_req_date2" 		header-text="구매요청 일자2" 	    width="120" 	text-align="center" 	editable="true"	 ></sc-date-column>
+      				<sc-data-column data-field="pr_req_nm" 			header-text="요청자" 			width="100" 	text-align="center" 	editable="false" ></sc-data-column>
+      				<sc-data-column data-field="pr_req_dept_nm" 	header-text="구매요청 부서" 		width="100" 	text-align="center" 	editable="false" ></sc-data-column>
+      				<sc-data-column data-field="tot_item_cnt" 		header-text="전체 품목 수" 		width="100" 	text-align="center" 	editable="false" ></sc-data-column>
+      				<sc-data-column data-field="reject_item_cnt" 	header-text="반려 건수" 		width="100" 	text-align="center" 	editable="false" ></sc-data-column>
+      <!-- 				<sc-checkbox-column data-field="check_test" 	header-text="체크박스" 		width="80" 	text-align="center" 	editable="true" ></sc-checkbox-column>
+      				<!--	<sc-data-column data-field="oper_org_cd" 		header-text="구매 운영조직" 		width="120" 	text-align="center" 	editable="true" ></sc-data-column> -->
+    			</sc-grid-columns>
+
+     	</sc-grid>
+     	 <table class="table">
+        	<colgroup>
+        		<col style="width:150px"></col>
+        		<col></col>
+        		<col style="width:150px"></col>
+        		<col></col>
+        	</colgroup>
+        	<tr>
+        		<th>
+        			<sc-label text="2323" ></sc-label>
+        		</th>
+        		<td>
+        			<sc-text-field></sc-text-field>
+        		</td>
+        		<th>
+        			<sc-label text="3332323" ></sc-label>
+        		</th>
+        		<td>
+        			<sc-text-field></sc-text-field>
+        		</td>
+        	</tr>	        	
+        </table>
+	</template>
+   	<!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+  	 	
+        Polymer({
+            is: 'em-dev-grid',
+            
+            properties : {
+            	searchParam : {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				},
+                codes : {
+                	type : Object,
+                	value : function(){
+                		return {
+                			operOrgCd : [],                		
+                    		commCurCd : [],
+                    		purcTypCd : [],
+                    		prAprvStsCd : [],
+            				prProgStsCd : [],
+            				prModProgStsCd : [],            				
+            				purcTypCd : [],
+            				purcReqTypCd : []
+                		};
+                	}  		
+                },
+                prList: {
+                	type:Array
+                }
+                
+            },
+            onScrollBottom : function(){
+            	console.log("################### onScrollBottom ");
+            	
+            },
+            
+            onResponse : function(e, res){
+            	var me = this;
+            	var resultList = res.response;
+            	me.$.gridPanel.setDataProvider(resultList);
+            },
+            onAddRow : function(){
+            	var me= this;
+              var a = this.$.gridPanel.getDataProvider();
+              items = a.filterItems({pr_no :"PR20161200003",pr_id:"05f5914e-f9c8-4ef4-a171-a5bdd5155b82"})
+              console.log('items : ' ,items)
+            	
+            },
+			//초기화 욘료시 한번만 호출되는 함수
+			initialized : function() {
+				console.log(this.tagName.toLowerCase() + ' 초기화 완료');
+				
+   				/*공통 코드 결과값을 가져와 grid에 combo Columns 셋팅*/
+   				this.initValidator();
+			},
+			
+			onDataCellClicked : function(event){
+  				var me = this,
+  				data = event.detail.data,
+  				item = event.detail.item;
+  				provider = event.detail.prov
+  				this.$.gridpanel.getDataprovider().set
+                if(item.dataField === 'pr_no') {
+                 	//현재 cell row의 json data 가져오기
+                   	//구매 상세 조회 화면 호출
+                    // me.fire('show-detail', data);
+                   	if(data.purc_typ === 'MT') {
+                 		me.fire('show-product-pr-detail',data);
+                   	} 
+                   	else {
+                 		me.fire('show-service-pr-detail',data);
+                   	}
+                }
+                else if(item.dataField === 'button_appr') {
+                	//결재 상세 버튼 클릭
+					//현재 cell row의 json data 가져오기
+                 	if(["K","T"].indexOf(data.pr_aprv_sts) < 0) {
+                    	//결재 상세 팝업 호출
+                     	me.onShowPopupApprovalDetail(data);
+                	}
+                }
+            },
+            onItemEditEnd : function(event){
+            	 var me = this,
+  				data = event.detail.data,
+  				item = event.detail.item,
+  				grid = event.detail.grid; 
+           		
+            	 console.log('############ onItemEditEnd')
+            },
+
+            initValidator : function() {
+            	var me = this, validator = [];
+  				validator.push({
+  					text : '운영 단위',
+  					fieldName : 'oper_org_cd',
+  					check : [ 'selected' ]
+  				});
+  				me.set('searchParam.$validator', validator);
+  			},
+  			
+  			//*****************************************************************************************************************************************
+  			//결재 상세 팝업
+			onShowPopupApprovalDetail : function(param){
+				var me = this;
+				var aprvTypCd = "PR";
+				if(param.pr_rev > 1) {
+					aprvTypCd = "PC";
+				}
+				//결재 상세화면 호출
+				UT.popupApproval(me, {app_id : param.pr_id , aprv_typcd : aprvTypCd},null,true);
+			},
+			
+			/** 구매현황 리스트 조회 */
+            onFindListPr : function(){
+            	var me = this;
+            	/* if(UT.invalidData(me.get('searchParam'))) {
+            		return;
+                } */
+                
+                UT.request(me.$.findListPr);
+            	//me.$.gridPanel.findList(me.$.findListPr);
+			},
+			
+			/* 조회 완료 후 처리 */
+            completeFindList: function(el,res) {
+            	var me = this;
+            	//조회리스트 결과 처리 ()
+                //me.$.gridPanel.completeFindList(res.response);
+			},
+			
+			//grid toolbar 함수
+            //조회 버튼클릭시 호출
+            onSearch : function(){
+            	this.onFindListPr();
+			},
+			
+			//구매요청작성
+            onCreatePr : function() {
+            	//물품 구매 요청 상세 화면 호출
+            	//this.fire('show-detail',{}); 상세 화면 호출
+            	this.fire('show-pr-create');
+			},
+			
+			//삭제 시 선택된 deleteList validation
+            validateDeleteList : function(){
+            	var me = this , flage = true,messge = '';
+            	var checked = me.gridView.getCheckedRows();
+            	var canDeleteList = ['T', 'D', 'R'];
+            	   
+                if(checked.length > 0) {
+                	var provider = me.gridView.getDataProvider();
+                	for(var i = 0 ; i<checked.length ; i++) {
+                		var item = provider.getJsonRow(checked[i]);
+                		//임시저장이 아닌경우 
+                		if(canDeleteList.indexOf(item.pr_aprv_sts) < 0) {
+                			SCAlert.show("STD.N1000", "STD.PR1000");
+                			flage = false;
+							return false;
+               		  	}
+               	   }
+                }
+                return flage;
+			},
+            
+			destroyed : function() {
+				console.log(this.tagName.toLowerCase() + ' 소멸 완료');
+			}
+			
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

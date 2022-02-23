@@ -1,0 +1,86 @@
+<dom-module id="es-grid-event-description">
+	<style>
+		table, th, td {
+	 		border:1px solid black;
+	 		border-collapse:collapse;
+	 		box-sizing: border-box;
+	 		padding: 3px;
+	 	}
+	 	th {
+	 		background-color:lightgray
+	 	}
+	</style>
+	<template>
+		<p>
+			<b>그리드 event</b><br/>
+			
+			<table>
+				<tr>
+					<th>event</th>
+					<th>argument</th>
+					<th>설명</th>
+				</tr>
+				<tr>
+					<td>itemClick</td>
+					<td>
+					1. data : 해당 row 데이터<br/>
+					2. item : {dataField, rowIndex, columnIndex, nodeIndex(tree인 경우)}<br/>
+					3. provider : sc-grid의 provider
+					</td>
+					<td>사용자가 데이터 셀을 마우스로 클릭했을 때 호출된다.</td>
+				</tr>
+				<tr>
+					<td>itemEditBegin</td>
+					<td>
+					1. data : 해당 row 데이터<br/>
+					2. item : {dataField, rowIndex, columnIndex, nodeIndex(tree인 경우)}<br/>
+					3. editingValue : 입력중인 데이터<br/>
+					4. provider : sc-grid의 provider
+					</td>
+					<td>셀의 데이터가 사용자의 Key입력등으로 값이 변경 될 때마다 호출된다.</td>
+				</tr>
+				<tr>
+					<td>itemEditEnd</td>
+					<td>
+					1. data : 해당 row 데이터<br/>
+					2. item : {dataField, rowIndex, columnIndex, nodeIndex(tree인 경우)}<br/>
+					3. provider : sc-grid의 provider<br/>
+					4. oldValue : 수정 전 데이터<br/>
+					5. newValue : 수정 후 데이터<br/>
+					6. grid : grid instance
+					</td>
+					<td>셀의 편집 완료되었을 때 호출된다.</td>
+				</tr>
+				<tr>
+					<td>itemAllChecked</td>
+					<td>1. checked : 체크 여부</td>
+					<td>사용자가 checkBar의 Header를 클릭하여 전체선택,해제를 하면 호출된다.</td>
+				</tr>
+				<tr>
+					<td>selectionChecked</td>
+					<td>
+					1. checked : 체크 여부<br/>
+					2. data : 해당 row 데이터<br/>
+					3. rowIndex : 셀의 행 번호<br/>
+					4. provider : sg-grid의 provider
+					</td>
+					<td>사용자가 selection을 클릭하여 체크를 변경한 경우 호출된다.</td>
+				</tr>
+				<tr>
+					<td>headerClicked</td>
+					<td>
+					1. dataField : 해당 컬럼의 dataField<br/>
+					2. headerText : 해당 컬럼의 headerText
+					</td>
+					<td>사용자가 column의 header를 클릭한 경우 호출된다.</td>
+				</tr>
+			</table>
+		</p>
+		
+	</template>
+	<script>
+	Polymer({
+		is : 'es-grid-event-description'
+	});
+	</script>
+</dom-module>

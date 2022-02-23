@@ -1,0 +1,361 @@
+<dom-module id="es-driving-statistics">
+	<!--
+        ******************************************************************************************
+        ** @Program-name    : 운행통계
+        ** @Description     :
+        ** @Author          : jh.Park
+        ** @Create Date     : 2021.08.13
+        ** @History         : 2021.08.13 jh.Park 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+         -->
+		<!-- 코드 조회-->
+		<sc-request-group init>
+			<sc-code-group></sc-code-group>
+		</sc-request-group>
+		<!-- 트럭 조회 -->	
+		<sc-ajax id="findListTruck" url="findListTruck.do" body="{{searchParam}}" on-response="completeFindListTruck"></sc-ajax>
+		<!-- 운행통계 조회 -->	
+		<sc-ajax id="findListDrivingSum" url="findListDrivingSum.do" body="{{searchParam}}" last-response="{{sumHistList}}"></sc-ajax>
+		<!-- 개별 운행 통계 조회 -->
+		<sc-ajax id="findListDrivingSingle" url="findListDrivingSingle.do" body="{{searchParam}}" on-response="completefindListDrivingSingle"></sc-ajax>	
+		<!-- 운행 이력 저장 -->	
+		<sc-ajax id="saveDrivingHist" url="saveDrivingHist.do" on-response="completeSaveDrivingHist"></sc-ajax>		
+		<!-- 사토지 조회 -->
+		<sc-ajax id="findLandfill" 	url="findLandfill.do"	body="{{searchParam}}"	on-response="completeFindLandfill"></sc-ajax>
+		
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<div class="vbox flex">
+			<!-- 검색 영역 Start -->
+			<cc-search-container on-search="onSearch" auth-r>
+				<table >
+					<colgroup>
+						<col style="width:60px">
+						<col style="width:350px">
+						<col >
+					</colgroup>
+					<tr>
+						<th><sc-label text="기간"></sc-label></th>
+						<td style="text-align:center">
+								<sc-date-field value="{{searchParam.startDt}}" display-format="yyyy-MM-dd" required="true" default-value="-30d" style="width : 140px;"></sc-date-field>
+							~
+								<sc-date-field value="{{searchParam.endDt}}" display-format="yyyy-MM-dd" required="true" default-value="0d" style="width : 140px;"></sc-date-field>
+						</td>
+					</tr>
+				</table>
+			</cc-search-container>
+			<!-- 검색 영역 End -->
+			
+			<!-- 통합 운행 이력 Grid Start -->
+			<sc-grid id="drivingGrid" data-provider="{{sumHistList}}" class="flex-3" editable="true" use-selection ="true" validation-group="save" on-item-click="onItemClick">
+				<cc-grid-toolbar></cc-grid-toolbar>
+				<sc-grid-columns>
+					<sc-data-column data-field="vehicleName"	header-text="차량번호"			width="200" text-align="center" editable="false" style-name="link"></sc-data-column>
+					<sc-data-column data-field="driverName"		header-text="운전자" 			width="200" text-align="center" editable="false"></sc-data-column>  
+					<sc-data-column data-field="driveDt"		header-text="운행일자"			width="200" text-align="center" editable="false"></sc-data-column>
+<!-- 					<sc-data-column data-field="beforeAccDist"	header-text="운행전 누적 거리"	width="200" text-align="center" editable="false"></sc-data-column> -->
+					<sc-data-column data-field="distance"		header-text="운행거리"			width="200" text-align="center" editable="false"></sc-data-column>
+<!-- 					<sc-data-column data-field="afterAccDist"	header-text="운행후 누적 거리"	width="200" text-align="center" editable="false"></sc-data-column> -->
+					<sc-data-column data-field="weight"      	header-text="무게"			width="200" text-align="center" editable="false"></sc-data-column>
+					<sc-data-column data-field="driveCnt"   	header-text="운행횟수" 		width="200" text-align="center" editable="false"></sc-data-column>
+					<sc-data-column data-field="banAccCnt"  	header-text="위험지역접근"		width="200" text-align="center"	editable="false"></sc-data-column>
+				</sc-grid-columns>
+				<sc-grid-fields>
+					<sc-grid-field data-field="siteId"></sc-grid-field>
+					<sc-grid-field data-field="vehicleId"></sc-grid-field>
+					<sc-grid-field data-field="workerId"></sc-grid-field>
+					<sc-grid-field data-field="areaId"></sc-grid-field>
+				</sc-grid-fields>
+			</sc-grid>
+			<!-- 통합 운행 이력 Grid End -->
+			
+			<sc-splitter split-type="horizontal"></sc-splitter>
+			
+			<!-- 개별 운행 이력 Grid Start -->
+			<sc-tab-navigation id="tabNavi"  class="flex-3 vbox">
+				<div title-text="운행일지 " class="vbox flex">
+	            	<sc-grid id="drivingRecordGrid"	data-provider="{{singleHistList}}" class="fit"	editable="true"	use-selection="false"	on-item-edit-end="onItemEditEnd">
+		                <cc-grid-toolbar title-text="{{vehicleName}}">
+							<sc-button text="신규등록" on-click="onAddNewDrive" auth-r></sc-button>
+							<sc-button text="추가" on-click="onAddDriveHist" auth-r></sc-button>
+							<sc-button text="저장" on-click="onSave" auth-r></sc-button>
+		                </cc-grid-toolbar>
+						<sc-grid-columns>
+							<sc-combobox-column display-field="name" value-field="id" items="{{truckList}}" item-editable-function="itemEditableFunction"
+											data-field="vehicleId"	header-text="차량번호"		width="200" text-align="center" editable="true" required="true" style-name="link"></sc-combobox-column>
+							<sc-data-column data-field="driverName"	header-text="운전자"		width="200" text-align="center" editable="false"></sc-data-column>  
+							<sc-date-column data-field="driveDt"	header-text="운행일자"		width="200" text-align="center"	editable="true" required="true" display-format="yyyy-MM-dd" value-format="yyyy-MM-dd"></sc-date-column>
+							<sc-data-column data-field="distance"	header-text="예상 운행거리 (왕복)"		width="200" text-align="center" editable="true" required="true" editor-maskre="/[0-9]/"></sc-data-column>
+							<sc-data-column data-field="beforeAccDist"	header-text="운행전 누적 거리"	width="200" text-align="center" editable="true" required="true" editor-maskre="/[0-9]/"></sc-data-column>
+							<sc-data-column data-field="afterAccDist"	header-text="운행후 누적 거리"	width="200" text-align="center" editable="true" required="true" editor-maskre="/[0-9]/"></sc-data-column>
+							<sc-data-column data-field="weight"		header-text="무게"		width="200" text-align="center" editable="true" required="true" editor-maskre="/[0-9]/"></sc-data-column>
+							<sc-data-column data-field="banAccCnt"  header-text="위험지역접근"	width="200" text-align="center"	editable="false"></sc-data-column>
+						</sc-grid-columns>
+						<sc-grid-fields>
+							<sc-grid-field data-field="seq"></sc-grid-field>
+							<sc-grid-field data-field="siteId"></sc-grid-field>
+							<sc-grid-field data-field="vehicleId"></sc-grid-field>
+							<sc-grid-field data-field="workerId"></sc-grid-field>
+							<sc-grid-field data-field="areaId"></sc-grid-field>
+						</sc-grid-fields>
+	            	</sc-grid>
+	            </div>
+	        </sc-tab-navigation>
+			<!-- 개별 운행 이력 Grid End -->
+		</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-driving-statistics",
+            properties : {
+                currentRowIndex:Number,
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                // 장비 이름(차량 번호)
+                vehicleName: {
+                    type: String,
+                    value: function(){
+                        return null;
+                    }
+                }
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            // 초기화 완료 후 호출 함수
+            initialized : function() {
+                var me = this;
+            	me.$.findLandfill.body = {
+            			siteId : me.siteId,
+            			onlyLandfill : "Y"
+            	};
+            	UT.request(me.$.findLandfill);
+                me.onSearch();
+            },
+            
+            // 조회
+            onSearch : function(param) {
+            	var me = this;
+            	UT.request(me.$.findListDrivingSum);
+            	UT.request(me.$.findListTruck);
+            	if(me.get("searchParam.vehicleId") != null){
+            		UT.request(me.$.findListDrivingSingle);
+            	}
+            },
+            
+            // 개별 운행 이력 조회 완료
+            completefindListDrivingSingle : function(e, res){
+            	var me = this;
+       	 	 	var result= res.response;
+            	me.set("singleHistList", result);
+            	me.set("vehicleName",result[0].vehicleName );
+            },
+            
+            // 운행 이력 정보 저장 완료
+            completeSaveDrivingHist : function(e, res){
+                var me = this;
+				var message = "STD.N2400"; // 저장하였습니다.
+
+	            if(res.response.result_status === 'S'){
+	                UT.alert("성공적으로 저장하였습니다.", function(){
+	                	me.set("singleHistList", null);
+	                	me.set("vehicleName", null);
+	                	me.$.drivingRecordGrid.getDataProvider().removeAll();
+	                    me.onSearch();
+	                });
+	            } else {
+	                message = res.response.result_message;
+	                UT.alert(message);
+	            }
+            },
+            
+            // 사토지 조회 완료 
+            completeFindLandfill : function(e, res){
+            	var me = this;
+            	var result = res.response[0];
+            	if(result){
+	            	me.set("oriDist", result.adjunction.distance);            		
+            	}
+            	else {
+            		me.set("oriDist", 0);
+            	}
+            },
+            
+            // 운행 트럭 조회
+            completeFindListTruck : function(e, res){
+            	var me = this;
+            	var result = res.response;
+            	console.log(result);
+            	me.set("truckList", result);
+            },
+            
+            /******************************
+             * 그리드 이벤트
+             ******************************/
+ 			// 운행통계 그리드 클릭 이벤트
+			onItemClick : function(event) {
+ 				var me = this;
+ 				var data = event.detail.data;
+ 				var item = event.detail.item;
+                var provider = event.detail.provider;
+                var searchParam = me.get('searchParam');
+ 				
+ 				me.currentRowIndex = item.rowIndex;
+
+ 				if(item.dataField == "vehicleName"){
+ 					me.set("searchParam.vehicleId", data.vehicleId);
+ 					me.set("searchParam.driveDt", data.driveDt);
+ 					me.set("searchParam.data", data);
+	            	UT.request(me.$.findListDrivingSingle);
+ 				}
+			},
+			
+			// 추가된 행에서만 차량번호 변경 가능
+			itemEditableFunction : function(data, item){
+				var me = this
+				if(data.seq == null){
+					return true;
+				}
+				return false;
+			},
+			
+			// 차량 번호 변경시 운전자 컬럼 및 기본 데이터 자동 추가
+			onItemEditEnd : function(event){
+				var me = this;
+				var e = event.detail;
+				var data = e.data;
+				var item = e.item;
+				var provider = me.$.drivingRecordGrid.getDataProvider();
+		        var truckList = me.truckList;
+		        
+		        for(var i in truckList){
+		        	if(truckList[i].id == data.vehicleId){
+		        		me.set("vehicleName", truckList[i].name);
+		        		data.workerId = truckList[i].workerId;
+		        		data.driverName = truckList[i].workerName;
+		        		data.siteId = truckList[i].siteId;
+		        	}
+		        }
+            	provider.setItemAt(item.rowIndex, data);
+			},
+
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+            
+            // 기존 운행 이력 추가
+            onAddDriveHist : function(){
+                var me = this
+                // 아무것도 없는 상태에서 추가 불가
+                if(me.get("vehicleName") == null){
+                	UT.alert("선택된 차량이 없습니다. 신규등록 혹은 차량번호를 클릭해주세요.");
+                	return false;
+                }
+				var searchParam = this.get("searchParam");
+				var provider = me.$.drivingRecordGrid.getDataProvider();
+				var data = provider.getItemAt(0);
+				var arr = provider.getItems();
+//                 var beforeAccDist = 0;
+// 				for(var i in arr){
+// 					if(arr[i].afterAccDist * 1 > beforeAccDist * 1){
+// 						beforeAccDist = arr[i].afterAccDist;
+// 						console.log(beforeAccDist);
+// 					}
+// 				}
+// 				var afterAccDist = beforeAccDist * 1 + me.oriDist * 2;
+
+                if(!me.validate('search')){
+                    UT.alert("STD.E0000");
+                    return false;
+                }
+
+                // 그리드 신규행 추가
+                var row = {
+                    siteId: searchParam.siteId,
+                    workerId: data.workerId,
+                    driverName: data.driverName,
+                    vehicleId: data.vehicleId,
+                    vehicleName: data.vehicleName,
+                    driveDt: data.driveDt,
+                    distance: me.oriDist * 2
+                };
+                
+                provider.addItemAt(0, row);
+            },
+            
+            // 신규 운행 이력 추가
+            onAddNewDrive : function(){
+            	var me = this;
+            	var provider = me.$.drivingRecordGrid.getDataProvider();
+            	
+            	me.set("singleHistList", null);
+            	me.set("vehicleName", null);
+            	provider.removeAll();
+                var row = {
+                    distance: me.oriDist * 2
+                };
+                // 그리드 신규행 추가
+            	provider.addItemAt(0, row);
+            },
+            
+            // 운행 이력 정보 저장
+            onSave : function(){
+                var me = this;
+                var provider = me.$.drivingRecordGrid.getDataProvider();
+				var created = provider.getNewItems();
+				var updated = provider.getUpdateItems();
+                // 저장 유효성 체크
+                if(!me.$.drivingRecordGrid.validateRows(provider.getUpdateIndexes())) {
+                	  UT.alert("STD.E0000");
+                    return;
+                }
+                if(!me.$.drivingRecordGrid.validateRows(provider.getNewIndexes())) {
+                	  UT.alert("STD.E0000");
+                    return;
+                }
+                //변경 유무 체크
+                if(created.length + updated.length === 0) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+                
+                UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+                    me.$.saveDrivingHist.body = {
+                        insertList: created,
+                        updateList: updated
+                    };
+                    UT.request(me.$.saveDrivingHist);
+				});
+			}
+        });
+	</script>
+
+</dom-module>

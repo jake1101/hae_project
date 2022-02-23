@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="Udieresis" format="1">
+  <advance width="1229"/>
+  <unicode hex="00DC"/>
+  <outline>
+    <component base="U" xOffset="-19"/>
+    <component base="dieresis" xOffset="229" yOffset="319"/>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.typemytype.robofont.layerData</key>
+      <dict>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

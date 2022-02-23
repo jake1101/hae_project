@@ -1,0 +1,59 @@
+<link rel="import" href="sc-portal.html"></link>
+<link rel="import" href="sc-portal-manager.html"></link>
+
+<dom-module id="smartsuite-portal">
+    <style>
+        :host {
+        	@apply(--fit-layout)
+            margin: 0;
+            /* position: relative; */
+            display: block;
+            overflow-y: auto;
+            overflow-x: hidden;
+			background-color: #fff; 
+			border:1px solid #f7f7f7;          
+        }
+
+        .editModeOn {
+            background-color: #c00c3f !important;
+        }
+
+        sc-portal {
+            background-color: white;
+        }
+
+        #pagination {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            margin-bottom: 5px;
+        }
+
+        sc-portal-pagination {
+            position: relative;
+            left: -50%;
+        }
+    </style>
+
+    <template>
+        <sc-portal class="fit"></sc-portal>
+    </template>
+    <script>
+        Polymer({
+            is: "smartsuite-portal",
+
+            properties: {
+                _editMode: {
+                    type: Boolean,
+                    value: false
+                }
+            },
+
+            attached: function () {
+                
+            },
+
+            
+        });
+    </script>
+</dom-module>

@@ -1,0 +1,36 @@
+<style is="custom-style">
+	:root {
+		--calendar-flex-layout : {
+			display: -ms-flexbox !important;
+      		display: -webkit-flex !important;
+      		display: flex !important;
+		}
+	
+    	--calendar-fit-layout: {
+    		display : block;
+			width : 100%;
+			height : 100%;
+            overflow:auto;
+		}
+		
+		--calendar-vbox-layout: {
+			@apply(--calendar-flex-layout);
+			-ms-flex-direction: column;
+      		-webkit-flex-direction: column;
+      		flex-direction: column;
+      		width : 100%;
+      		height : 100%;
+      		overflow: auto;
+		}
+		
+		--calendar-hbox-layout: {
+			@apply(--calendar-flex-layout);
+			-ms-flex-direction: row;
+      		-webkit-flex-direction: row;
+      		flex-direction: row;
+      		width : 100%;
+      		height : 100%;
+      		overflow: auto;
+		}
+  	}
+</style>

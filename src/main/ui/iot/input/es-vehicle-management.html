@@ -1,0 +1,298 @@
+<sc-link rel="import" href="ep-worker-details.html"></sc-link>
+
+<sc-link rel="import" href="ep-vehicle-history.html"></sc-link>
+
+<dom-module id="es-vehicle-management">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		<!-- 코드 조회-->
+		<sc-request-group init>
+				<sc-code-group>
+					<sc-code code="USEFLAG" value="{{useList}}"></sc-code>
+					<sc-code code="IOT004" value="{{typList}}"></sc-code>
+				</sc-code-group>
+				
+		</sc-request-group>
+		
+		
+		<sc-ajax
+				id="findListVendor"
+				url="findListVendor.do"
+				body="{{searchParam}}"
+				last-response="{{vendorList}}">
+		</sc-ajax>
+		
+		<sc-ajax id="findListVehicle"
+			url="findListVehicle.do"
+			body="{{searchParam}}"
+			on-response="completeFindVehicle">
+<!-- 			last-response="{{vehicleList}}"> -->
+		</sc-ajax>
+		
+		<sc-ajax id="deleteVehicle"
+			url="deleteVehicle.do"
+			on-response="completeDeleteVehicle">
+		</sc-ajax>
+		
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+
+		<div class="vbox flex">
+			<cc-search-container on-search="onSearch" auth-r>
+				<table>
+					<colgroup>
+						<col style="width:120px">
+						<col>
+						<col style="width:120px">
+						<col>
+						<col style="width:120px">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="협력사" ></sc-label></th>
+						<td>
+							<sc-combobox-field 
+                                              items="{{vendorList}}" display-field="name" value-field="id"
+                                              value="{{searchParam.vendorId}}"
+                                              validation-group="search" placeholder="전체" on-enter="onSearch"> </sc-combobox-field>
+						</td>
+   						<th><sc-label text="장비유형"></sc-label></th>
+						<td>
+							<sc-combobox-field  placeholder="전체"  items="{{typList}}" value="{{searchParam.vehicleType}}" placeholder="선택"
+ 									display-field="label" value-field="data"  on-enter="onSearch">
+							</sc-combobox-field>
+						</td>
+						<th><sc-label text="사용중지 포함"></sc-label></th>
+						<td>
+							<sc-checkbox-field input-value="{{searchParam.includeNotUse}}" checked-value="Y" un-checked-value="N"></sc-text-field>
+						</td>
+					</tr>
+				</table>
+			</cc-search-container>
+            
+			<!-- vendor 관리 -->
+            <div class="hbox flex">
+            	<div class="vbox flex-5">
+            		<sc-grid id="gridPanel1" data-provider="{{vehicleList}}"  class="flex" 
+            			use-selection="true" use-state="false"
+            			on-item-click="onItemClick">
+						<cc-grid-toolbar>
+							<sc-button text="추가" on-click="onAdd" auth-s></sc-button>
+							<sc-button text="삭제" on-click="onDelete" auth-s></sc-button>
+						</cc-grid-toolbar>
+						<sc-grid-columns>
+							<sc-data-column data-field="id" header-text="ID" width="0" text-align="center" data-type="number"></sc-data-column>
+							<sc-combobox-column	data-field="vendorId"	header-text="협력사"	width="100"	
+									display-field="name"	value-field="id"	items="[[vendorList]]" data-type="number"></sc-combobox-column>
+							<sc-combobox-column	data-field="type"	header-text="유형"	width="100"		
+									display-field="label"	value-field="data"	items="[[typList]]" ></sc-combobox-column>
+							<sc-data-column data-field="name" header-text="장비명" width="100" text-align="center"  style-name="link"></sc-data-column>
+			                			 
+							<sc-combobox-column	data-field="useFlag"	header-text="사용여부"	width="100"		
+									display-field="label"	value-field="data"	items="[[useList]]" editable="true"></sc-combobox-column>
+<!-- 							<sc-data-column data-field="sensorName" header-text="스마트태그" width="100" text-align="center" ></sc-data-column> -->
+							<sc-data-column data-field="workerName" header-text="운전자" width="100" text-align="center"  style-name="link"></sc-data-column>
+							 <sc-group-column	header-text="보험기간"		column-name="dateColumns"	width="200">
+				                <sc-date-column		data-field="startDt"	header-text="시작날짜"		width="100" editable="false"></sc-date-column>
+				                <sc-date-column		data-field="endDt"		header-text="종료날짜"		width="100" editable="false"></sc-date-column>
+				            </sc-group-column>
+				            
+							<sc-data-column data-field="history" header-text="운행기록" fill-width="100" text-align="center" style-name="link"></sc-data-column>
+							<sc-data-column data-field="memo" header-text="비고" fill-width="100" text-align="left"></sc-data-column>
+							
+						 </sc-grid-columns>
+						 <sc-grid-fields>
+							<sc-grid-field data-field="siteId"></sc-grid-field>
+							<sc-grid-field data-field="imageGrpCode"></sc-grid-field>
+							<sc-grid-field data-field="workerId"></sc-grid-field>
+							<sc-grid-field data-field="sensorId"></sc-grid-field>
+							<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+							<sc-grid-field data-field="mapIcon"></sc-grid-field>
+						 </sc-grid-fields>
+					</sc-grid>
+				</div>
+            </div>
+		</div>
+
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-vehicle-management",
+            properties : {
+                
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                
+                typList: {
+                    type: Array,
+                    value: function(){
+                        return [];
+                    }
+                },
+                
+                
+
+            },
+            
+            initialized : function() {
+                var me = this;
+                me.onSearch();
+                UT.request(me.$.findListVendor);
+            },
+            
+            onSearch : function() {
+                var me = this;
+                
+                UT.request(me.$.findListVehicle);
+                me.fire('init-vehicle', "N");
+            },
+            
+            onItemClick : function(event){
+            	var me = this
+				,data = event.detail.data
+				,item = event.detail.item
+				,provider = event.detail.provider;
+				
+				me.rowIndex = item.rowIndex;
+				if(item.dataField == "name"){
+					console.log(data);
+					me.fire('find-vehicleinfo', data);
+				}else if(item.dataField == "history"){
+					me.showVehicleHistoryPopup(data);
+				}else if(item.dataField == "workerName"){
+					
+					var dataInfo = {
+                        "id"  : data.workerId
+                     };
+					
+					var detailPopup = UT.popup("ep-worker-details", me, 900, 800, {
+		                   "show-list": function(popup, e) {
+								var result=e.detail;
+			                   	popup.close();
+		                   },
+		               },{titleText: "상세내용"});
+					detailPopup.show();
+					detailPopup.getWindowContent().load(dataInfo,"vehicle");
+				}
+				
+            },
+            
+            showAttPopup :  function(data, item, provider){
+	            var me = this,
+	                grp_cd = item.grp_cd,
+	                itemIndex = item.rowIndex,
+	                fieldName = item.dataField,
+	                provider = me.$.gridPanel1.getDataProvider();
+	            
+	            UT.popupAttach(me, item.grpCd, function(result) {
+	            	var obj = {};
+	            	obj.img_name = result.inserts[0].name;
+	            	
+	                provider.setItemAt(itemIndex, obj);
+	            }, {maxTotalFileCount:1});
+	        },
+            
+            onAdd : function() {
+                var me = this;
+                me.fire('init-vehicle', "N");
+            },
+            
+            
+            onDelete : function(){		
+				var me =this;
+				
+				var provider = me.$.gridPanel1.getDataProvider();
+				var selectionItems = provider.selectionCheckedItems();
+				
+				
+			  if (selectionItems.length === 0) {
+                    UT.alert("STD.N1600");
+                    return;
+                }
+
+              UT.confirm("STD.N1300", function() {
+                  var deleted = provider.removeItems();
+                  if(deleted.length > 0){
+                      me.$.deleteVehicle.body = {
+                    		  deleteList : selectionItems
+                      };
+                     UT.request(me.$.deleteVehicle);
+                  }
+              });
+				
+				
+			},
+			
+			completeDeleteVehicle: function(e,res){
+				var me = this,
+                result = res.response;
+
+	            if (result.result_status === 'S') {
+	                UT.alert("STD.N2500", function () { // 삭제하였습니다.
+	                    me.onSearch();
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+			},
+			
+			/**
+			* 2021-08-02 jh.Park
+			* 운행 이력 컬럼 추가
+			*/
+			completeFindVehicle: function(e,res){
+				var me = this;
+				var result = res.response;
+				for(var i in result){
+					result[i].history = "[보기]";
+				}
+				me.set("vehicleList", result);
+			},
+			
+			/**
+			* 2021-08-03 jh.Park
+			* 이동장비 당일 이력 조회 팝업
+			*/
+			showVehicleHistoryPopup: function(data){
+            	var me = this;
+
+           		var vehicleHistoryPopup = UT.popup("ep-vehicle-history", me, 1300, 600,{
+					'close' : function(popup) {
+						popup.close();
+					}
+    			}, {resizable : false});
+           		vehicleHistoryPopup.show();
+           		vehicleHistoryPopup.getWindowContent().load(data);
+            },
+            
+        });
+	</script>
+
+</dom-module>

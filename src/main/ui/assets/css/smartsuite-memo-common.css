@@ -1,0 +1,517 @@
+.smartsuite-memo-popup {
+	/* border: 2px solid #303030; */
+}
+
+.smartsuite-memo-popup > sc-toolbar.header {
+	/* background-color : #303030; */
+}
+
+/* .smartsuite-memo-popup > sc-toolbar.header > sc-button { */
+/*     background-color: transparent; */
+/*     border-color: transparent; */
+/*     color: #fff; */
+/* } */
+
+/* .smartsuite-memo-popup > sc-toolbar.header > sc-button:hover { */
+/*     background-color: transparent; */
+/* } */
+
+.smartsuite-memo-popup > div.content-wrap > div.content {
+	/* padding : 0; */
+}
+
+.smartsuite-memo-popup-super {
+	min-width: 500px;
+	/* collapsed 시 예외상황 발생할 여지가 있음
+	min-height: 300px; */
+	max-width: 1450px;
+	/*border: 2px solid #303030;*/
+}
+
+.smartsuite-memo-popup-super > sc-toolbar.header {
+	/*background-color : #303030;*/
+}
+        
+.smartsuite-memo-popup-super > sc-toolbar.header > sc-button {
+/*     border-color: transparent; */
+    /* color: #fff; */
+}
+
+.smartsuite-memo-popup-super > sc-toolbar.header > sc-button:hover {
+/*     background-color: transparent; */
+}
+
+.smartsuite-memo-popup-super > div.content-wrap > div.content {
+	padding : 0;
+}
+
+sc-button.smartsuite-memo-sharing-mgt-btn {
+	background-color: #8c8c8c;
+	border-color: #7d7d7d;
+	color: #fff;
+	font-weight: bold;
+}
+       
+sc-button.smartsuite-memo-menuList-btn {
+	padding: 4px 10px 0 10px;
+	background-color: transparent;
+	border-color: transparent;
+	font-size: 14px;
+	color: #333;
+}
+
+sc-button.smartsuite-memo-complete-btn {
+	background-color: transparent;
+	border-color: transparent;
+	color:#929292;
+	font-weight: bold !important;
+}
+
+sc-button.smartsuite-memo-complete-newBtn {
+	background-color: #878787;
+	border-color: transparent;
+	color:#ffffff;
+	font-weight: bold;
+}
+
+sc-button.smartsuite-memo-tag-groupBtn {
+	padding: 2px 5px 2px 5px;
+	width: 100px;
+	text-align: center;
+	background-color: #5d5d5d;
+	color:#FFF;
+	margin: 2px 5px 2px 5px;
+}
+
+sc-button.smartsuite-memo-importance-btn, sc-button.smartsuite-memo-delete-btn, sc-button.smartsuite-memo-tag-btn, sc-button.smartsuite-memo-share-btn, sc-button.smartsuite-memo-restore-btn, sc-button.smartsuite-memo-plus-btn {
+	padding: 4px 10px 0 10px;
+	background-color: transparent;
+	border-color: transparent;
+	font-size: 13px;
+	color: #939393;
+}
+
+sc-button.smartsuite-memo-importance-btn-selected {
+	padding: 4px 10px 0 10px;
+	background-color: transparent;
+	border-color: transparent;
+	font-size: 13px;
+	color: #e20909;	
+}
+
+sc-button.smartsuite-memo-side-btn {
+	width: 12px;
+	padding: 4px 10px 0 0;
+	background-color: transparent;
+	border-color: transparent;
+	color: #000000;
+}
+
+sc-button.smartsuite-memo-side-title-btn{
+	padding: 4px 10px 0 0;
+	background-color: transparent;
+	border-color: transparent;
+	color: #000000;
+	font-weight: bold !important;
+}
+
+sc-button.smartsuite-memo-back-btn {
+	width: 12px;
+	padding: 4px 20px 0 0;
+	background-color: transparent;
+	border-color: transparent;
+	color: #000000;
+}
+/* sc-mdi.html 에 포함되는 부분이기 때문에, lib/mdi/css/layout.css 파일에 추가함
+sc-button.memo-btn {
+	background-color: transparent;
+	border-color: transparent;
+	color: #ffffff;
+	padding-top: 10px;
+}
+
+sc-button.memo-btn:before {
+    font: normal normal normal 16px/1 FontAwesome;
+    content:"\f044";	
+}
+
+sc-button.memo-btn:hover {
+	opacity: 0.5;
+} */
+
+.smartsuite-memo-allmemo {
+	background-image : url(../img/memo/smartsuite-memo-allmemo.png);
+	background-repeat : no-repeat;
+	background-position : center center;
+	width : 18px;
+	height : 17px;
+}
+
+.smartsuite-memo-bookmark {
+	background-image : url(../img/memo/smartsuite-memo-bookmark.png);
+	background-repeat : no-repeat;
+	background-position : center center;
+	width : 18px;
+	height : 17px;
+}
+
+.smartsuite-memo-close {
+	background-image : url(../img/memo/smartsuite-memo-close.png);
+	background-repeat : no-repeat;
+	background-position : center center;
+	width : 18px;
+	height : 17px;
+}
+
+.smartsuite-memo-folder {
+	background-image : url(../img/memo/smartsuite-memo-folder.png);
+	background-repeat : no-repeat;
+	background-position : center center;
+	width : 18px;
+	height : 17px;
+}
+
+.smartsuite-memo-mymemo {
+	background-image : url(../img/memo/smartsuite-memo-mymemo.png);
+	background-repeat : no-repeat;
+	background-position : center center;
+	width : 18px;
+	height : 17px;
+}
+
+.smartsuite-memo-share {
+	background-image : url(../img/memo/smartsuite-memo-share.png);
+	background-repeat : no-repeat;
+	background-position : center center;
+	width : 18px;
+	height : 17px;
+}
+
+.smartsuite-memo-trash {
+	background-image : url(../img/memo/smartsuite-memo-trash.png);
+	background-repeat : no-repeat;
+	background-position : center center;
+	width : 18px;
+	height : 17px;
+}
+
+sc-button.smartsuite-memo-toolbar-buttons {	
+	color: #ffffff;
+	background: #8c8c8c;	
+	border: 1px solid #7d7d7d;
+	border-radius: 2px;
+	margin: 4px 10px 0 0;
+}
+
+sc-button.smartsuite-memo-toolbar-buttons[focused], sc-button.smartsuite-memo-tag-btn[focused], sc-button.smartsuite-memo-side-btn[focused], sc-button.smartsuite-memo-back-btn[focused], sc-button.smartsuite-memo-importance-btn[focused], sc-button.smartsuite-memo-share-btn[focused], sc-button.smartsuite-memo-delete-btn[focused], sc-button.smartsuite-memo-tag-groupBtn[focused], sc-button.smartsuite-memo-complete-btn[focused], sc-button.smartsuite-memo-complete-newBtn[focused], sc-button.smartsuite-memo-restore-btn[focused], sc-button.smartsuite-memo-menuList-btn[focused], sc-button.smartsuite-memo-plus-btn[focused], sc-button.smartsuite-memo-close-btn[focused] {
+	box-shadow : none;
+}
+
+sc-button.smartsuite-memo-tag-btn:hover, sc-button.smartsuite-memo-complete-btn:hover, sc-button.smartsuite-memo-importance-btn:hover, sc-button.smartsuite-memo-share-btn:hover, sc-button.smartsuite-memo-delete-btn:hover, sc-button.smartsuite-memo-restore-btn:hover, sc-button.smartsuite-memo-plus-btn:hover, sc-button.smartsuite-memo-close-btn:hover {
+	box-shadow : none;
+	color:#111111;
+}
+
+sc-button.smartsuite-memo-complete-newBtn:hover {
+	box-shadow : none;
+	color: #dbdbdb;	
+	background-color: #575757;	
+}
+
+sc-button.smartsuite-memo-toolbar-buttons:hover, sc-button.smartsuite-memo-sharing-mgt-btn:hover {
+	color: #dbdbdb;	
+	background-color: #575757;	
+}
+
+sc-button.smartsuite-memo-menuList-btn:hover {
+	color: #6d6d6d;	
+}
+
+smartsuite-memo-list #memoColumns {
+	margin: 10px 10px 10px 10px;
+	-webkit-column-count: 4; /* Chrome, Safari, Opera */
+	-webkit-column-gap: 10px;
+	-webkit-column-fill: auto;
+/* 	-moz-column-count: 1;  /*Firefox
+	-moz-column-gap: 10px;
+	-moz-column-fill: auto; */
+	column-count: 4;
+	column-gap: 15px;
+	column-fill: auto;
+}
+
+smartsuite-memo-list #memoDefaultForm {
+	background-color: #fff;
+	display: none;
+}
+
+smartsuite-memo-list #sideNavCls{
+	background-color: #e1e1e1;
+}
+
+smartsuite-memo-list #sideNavCls:hover{
+	background-color: #818181;
+}
+
+.smartsuite-memo-moddt {
+	text-align: right;
+	font-size: small;
+	font-style: italic;	
+	padding: 2px 10px 2px 0;
+}
+
+smartsuite-memo-list .pin {
+	display: inline-block;
+	border: 1px solid #c5c5c2;
+	box-shadow: 2px 2px 5px #c9c8c8;
+	margin: 0 4px 30px 4px;
+	padding: 0px 7px 5px 7px;
+	opacity: 1;
+	width: 192.6px;
+	-webkit-user-drag: element;
+}
+
+es-memo-display .pin {
+	display: inline-block;
+	border: 1px solid #c5c5c2;
+	box-shadow: 2px 2px 5px #c9c8c8;
+	margin: 10px 20px 20px 20px;
+	padding: 0px 7px 5px 7px;
+	opacity: 1;
+	width: 192.6px;
+	max-width: 200px;
+	
+}
+es-memo-display #memoColumns {
+	margin: 10px 10px 10px 10px;
+/* 	-webkit-column-count: 4; Chrome, Safari, Opera */
+	-webkit-column-gap: 10px;
+	-webkit-column-fill: auto;
+/* 	-moz-column-count: 1;  /*Firefox
+	-moz-column-gap: 10px;
+	-moz-column-fill: auto; */
+/* 	column-count: 4; */
+	column-gap: 15px;
+	column-fill: auto;
+	
+}
+
+
+es-memo-display .memo {
+	background: transparent;
+	height: 100%;
+}
+es-memo-display .pin .fill-div {
+	display: block;
+	height: 100%;
+    width: 100%;
+    text-decoration: none;
+}
+smartsuite-memo-list .pin .fill-div {
+	display: block;
+	height: 100%;
+    width: 100%;
+    text-decoration: none;
+}
+
+smartsuite-memo-list .pin a:hover {
+	font-weight:bold;
+	color:black;
+}
+
+smartsuite-memo-list .memo {
+	background: transparent;
+	height: 100%;
+}
+
+
+smartsuite-memo-list .memo-hr {
+	background: #7d7d7d;
+	width: inherit;
+	height: 1px;
+}
+
+smartsuite-memo-list .memo-ln {
+	width: 100%;
+	height: 1px;
+	background: #a6a6a6;
+	opacity: 0.3;
+}
+
+.smartsuite-memo-share-toolbar {
+	margin: 5px;
+	text-align: right;
+}
+
+.smartsuite-memo-toolbar {
+	background: #c2c2c2;
+}
+
+.smartsuite-memo-toolbar-title {
+	color: #333;
+	font-weight: bold;
+}
+
+.smartsuite-memo-register {
+	text-align: right;
+	font-weight: bold;
+	font-style: italic; 
+}
+
+.smartsuite-memo-bottom-menu {
+	padding-top: 5px;
+	text-align: center;
+}
+
+.smartsuite-memo-title {
+	font-size: medium;
+	font-weight: bold;
+	min-width: 150px;
+	color: #3d3d3d;
+}
+
+.smartsuite-memo-content {
+	font-size: small;
+	min-width: 150px;
+	color: #3d3d3d;
+}
+
+.smartsuite-memo-buttons {
+	text-align: right;
+}
+
+.smartsuite-memo-new-buttons {
+	text-align: right;
+	padding: 3px;
+}
+
+.smartsuite-memo-sidenav, .smartsuite-memo-tag-sidenav {
+	height: 100%;
+	width: 179px;
+	background-color: #fff;
+	position: absolute;
+	z-index: 1;
+	overflow: auto;
+	box-shadow:2px 2px 5px #b0b0b0;
+}
+
+.smartsuite-memo-sidenav a {
+	display: block;
+	text-align: left;
+	height: 35px;
+	padding-left: 10px;
+	padding-top: 10px;
+	font-weight: bold;
+	font-size: 14px;
+	color: #585757;
+	margin-bottom: 3px;
+}
+
+.smartsuite-memo-tag-sidenav a {
+	display: block;
+	text-align: left;
+	height: 30px;
+	padding-left: 15px;
+	padding-top: 5px;
+	font-weight: bold;
+	font-size: small;
+	color: #585757;
+}
+
+.smartsuite-memo-sidenav a:hover, .smartsuite-memo-tag-sidenav a:hover {
+	background-color: #c0c0c0;
+	color: black;
+}
+
+.smartsuite-memo-detail-popup {
+	width : 100%;
+	height : 100%;
+}
+
+.smartsuite-memo-tableTagList {
+	overflow: visible !important;
+}
+
+.smartsuite-memo-tableTagBtn {
+	text-align: right !important;
+}
+
+.smartsuite-memo-blank-area{
+	height: 80px;
+}
+
+.smartsuite-memo-searchField {
+	width: 220px;
+	height: 22px;
+	margin: 2px 20px 0 0;
+}
+
+.smartsuite-memo-searchField .trigger-container .trigger {
+	display: block;
+}
+
+.smartsuite-memo-search {
+	width: 22px;
+	height: 22px;
+	cursor: pointer;
+	background : #ffffff url("../img/memo/smartsuite-memo-search.png") no-repeat center center !important;
+}
+
+.smartsuite-memo-detail-content {
+	height: 60px;
+}
+/**
+* table
+*/
+.smartsuite-memo-table {
+	width: 100%;
+	border: 1px solid #ADBDD5;
+	border-top: 3px solid #ADBDD5;;
+	border-collapse: collapse;
+	border-spacing: 0;
+	box-sizing: border-box;
+	-webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, .05);
+	-moz-box-shadow: 0 2px 2px rgba(0, 0, 0, .05);
+	box-shadow: 0 2px 2px rgba(0, 0, 0, .05);
+	table-layout: fixed;
+}
+
+.smartsuite-memo-table th, .smartsuite-memo-table td {
+	/*border:1px solid #C2C2C2;*/
+	box-sizing: border-box;
+	vertical-align: middle;
+	text-align: left;
+}
+
+.smartsuite-memo-table td>* {
+	vertical-align: middle;
+}
+
+.smartsuite-memo-table th {
+	background: #fafbfc;
+	padding: 0 10px;
+	word-break: break-all;
+}
+
+.smartsuite-memo-table td {
+	padding: 3px;
+	overflow: hidden;
+}
+
+.smartsuite-memo-vspace-5 {
+	min-height: 5px;
+}
+
+.smartsuite-memo-wrap-srch {position:relative; padding:5px 80px 5px 5px; overflow:hidden; border:1px solid #1e5784; background:#f9f9f9;}
+.smartsuite-memo-wrap-srch table {width:100%;}
+.smartsuite-memo-wrap-btn {margin-top:3px; position:absolute; right:10px; top:0; width:60px; height:80%; display: -ms-flexbox; display: -webkit-flex; display: flex; -ms-flex-direction: column; -webkit-flex-direction: column; flex-direction: column;}
+.smartsuite-memo-wrap-btn .smartsuite-memo-wrap-srch-btn {-ms-flex: 1 1 0.000000001px; -webkit-flex: 1; flex: 1; -webkit-flex-basis: 0.000000001px; flex-basis: 0.000000001px; width: auto; height: 100%;}
+.smartsuite-memo-wrap-btn sc-button {width:100%; height:100%; padding:0; color:#fff; text-align:center; display:table; margin-top:3px; min-height:20px; border-radius:3px; box-sizing:border-box;}
+.smartsuite-memo-wrap-btn sc-button .button-container {text-align:center; line-height:100%; height:25px; vertical-align:middle; display:block; font-weight:bold;}
+.smartsuite-memo-wrap-btn sc-button:not([icon-cls])>.button-container {display:table-cell;}/*확인*/
+.smartsuite-memo-wrap-btn .sm_btn_srch {background:#1e5784; margin-top:0;}
+.smartsuite-memo-wrap-btn .sm_btn_srch:hover  {background:#152b3c;}
+#_sm_hideButtonContainer {position:relative; border-top:1px solid #000; width:100%; height:0; top:0; right:0;}
+cc-memo-search-container {position:relative;}
+#_sm_hideButtonContainer sc-button {margin-top:0; min-height:17px;}
+._sm_toggleHide {display: none; height:20px;}

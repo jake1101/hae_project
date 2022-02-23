@@ -1,0 +1,200 @@
+<dom-module id="ep-gateway-comm-map">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+		
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<table class="tb-form" >
+			<colgroup>
+				<col>
+				<col>
+				<col>
+				<col>
+			</colgroup>
+			<tr>
+				<th><sc-label text="위도"></sc-label></th>
+				<td><sc-text-field id="lat" value="{{lat}}" required="true" readonly="true"></sc-text-field></td>
+				<th><sc-label text="경도"></sc-label></th>
+				<td><sc-text-field id="lon" value="{{lon}}" required="true" readonly="true"></sc-text-field></td>
+			</tr>
+		</table>
+		<div class="vspace-5"></div>
+		<!-- 지도 영역 -->
+		<cc-ol-map-container id="mapContainer" show-view-label="true"></cc-ol-map-container>
+	</template>
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "ep-gateway-comm-map",
+            properties : {
+            	titleText:{
+	                type: String,
+					value: "게이트웨이 위치 지정"
+				},
+                // 지도
+                map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+                gatewayId : {
+		            type : Number,
+		            value : null
+		        },
+                lon : Number,
+                lat : Number,
+                latlonVal:{
+					type : Object,
+					value : function(){
+						return{};
+					}
+                },
+                transFlag: {
+                    type: Boolean,
+                    value : function() {
+                    	return  true;
+                    }
+                },
+                vectorLayer:{
+					type : Object,
+					value : function(){
+						return{};
+					}
+                }
+            },
+            load: function(dataInfo, allList){
+            	var me = this;
+
+            	setTimeout(function(){
+					var featureData={};
+	            	var lonlat=[];
+	            	
+	            	me.set('gatewayId', dataInfo.id);
+	            	
+	            	// 지도 객체 추가
+	            	me.set("map", me.$.mapContainer.map);
+	            	
+	            	if(!UT.isEmpty(dataInfo.lat) && !UT.isEmpty(dataInfo.lon)){
+	            		me.set('lon', dataInfo.lon);
+	            		me.set('lat', dataInfo.lat);
+	            		lonlat.push(dataInfo.lon);
+	            		lonlat.push(dataInfo.lat);
+	            		featureData.coordinates=lonlat;
+	                }else{
+	                	var center= me.map.getView().getCenter();
+	                	var rCenter= ol.proj.transform(center, 'EPSG:900913', 'EPSG:4326') ;
+	                	me.set('lon', rCenter[0]);
+	            		me.set('lat', rCenter[1]);
+	                	
+	                	featureData.coordinates = rCenter;
+	                }
+	            	
+					var markerAllSource = new ol.source.Vector({});
+	 				
+	 				var markerAllLayer = new ol.layer.Vector({
+	 					source: markerAllSource
+	 				});
+	            	
+	 				me.map.addLayer(markerAllLayer);
+	 				me.map.set('markerAllSource', markerAllSource);
+	            	
+	 				if(allList){
+	            		var features = me.getFeatureList(allList);
+	            		markerAllSource.addFeatures(features);
+					}
+	            	
+	            	
+	            	featureData.type="Point";
+	            	var markerSource = new ol.source.Vector({});
+	 				
+	 				var markerLayer = new ol.layer.Vector({
+	 					source: markerSource
+	 				});
+	 			
+	 				me.map.addLayer(markerLayer);
+	 				me.map.set('markerSource', markerSource);
+	 				
+	 				var feature = geoJson.readFeature(featureData);
+	 				var currDataInfo={};
+	 				currDataInfo=dataInfo;
+	 				currDataInfo.geoJson = featureData;
+	 				feature.setStyle(new ol.style.Style({
+	    	      		image: new ol.style.Icon({
+	    	      		    crossOrigin: 'anonymous',
+	    	      		    size: [40, 60],
+	    	      		    scale : 0.5,
+	    	      		    anchor : [0.5,1],
+	    	      		    src: './ui/lib/openlayers/img/marker.png',
+	    	      		  }),
+		    	    }));
+	 				feature.set('type', 'currMarker');
+			    	feature.set('targetInfo', currDataInfo);
+	 				markerSource.addFeature(feature);
+	 				
+	 				var center = ol.proj.fromLonLat(featureData.coordinates);
+					me.map.getView().setCenter(center);
+	 				
+            	},100);
+            },
+            onApplyBtnClick: function(){	// 적용버튼 클릭
+            	var me = this;
+	            this.fire("apply-point", {lat : me.lat, lon : me.lon});
+            },
+            
+            getFeatureList : function(list){
+				var me = this;
+				var features = [];
+				var allList= list;
+				for(var i = 0 ; i<allList.length; i++){
+					var lonlat=[];
+					if( (UT.isNotEmpty(allList[i].lon) && UT.isNotEmpty(allList[i].lat)) && (me.gatewayId != allList[i].id)){
+						lonlat.push(allList[i].lon);
+	            		lonlat.push(allList[i].lat);
+	            		allList[i].geoJson = {};
+	            		allList[i].geoJson.coordinates=lonlat;
+					}
+				}
+				
+				allList.forEach(function (object) {
+					if(object.geoJson){
+						object.geoJson.type = "Point";
+				    	var feature = geoJson.readFeature(object.geoJson);
+				    	feature.setStyle(new ol.style.Style({
+		    	      		image: new ol.style.Icon({
+		    	      		    crossOrigin: 'anonymous',
+		    	      		    size: [45, 45],
+		    	      		    scale : 0.5,
+		    	      		    anchor : [0.5,1],
+		    	      		    src: './ui/lib/openlayers/img/gray.png',
+		    	      		  }),
+			    	    }));
+				    	feature.set('type', 'targetMarker');
+				    	feature.set('targetInfo', object);
+		    	      	features.push(feature);
+					}
+				});
+
+				return features;
+			}, 
+        });
+	</script>
+</dom-module>

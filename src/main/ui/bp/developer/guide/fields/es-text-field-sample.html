@@ -1,0 +1,141 @@
+<dom-module id="es-text-field-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+    	<sc-panel title-text="sc-text-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th>
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<sc-text-field value="{{data.value_1}}" placeholder="입력하세요" max-length="10"></sc-text-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="inputClear"></sc-label>
+    				</th>
+    				<td>
+    					<sc-text-field value="{{data.value_2}}" input-clear="true"></sc-text-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="trigger"></sc-label>
+    				</th>
+    				<td>
+    					<sc-text-field value="{{data.value_3}}" trigger-cls="search" on-trigger-click="onTriggerClick"></sc-text-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="inputCover"></sc-label>
+    				</th>
+    				<td>
+    					<sc-text-field value="{{data.value_4}}" input-cover="true" format-type="number"></sc-text-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="inputMask"></sc-label>
+    				</th>
+    				<td>
+    					<sc-text-field value="{{data.value_5}}" input-mask="999-9999-9999" show-mask="true"></sc-text-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="maskRe"></sc-label>
+    				</th>
+    				<td>
+    					<sc-text-field value="{{data.value_6}}" mask-re="/[0-9]/"></sc-text-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="stripCharsRe"></sc-label>
+    				</th>
+    				<td>
+    					<sc-text-field value="{{data.value_7}}" strip-chars-re="/[ㄱ-힣]/"></sc-text-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="regex"></sc-label>
+    				</th>
+    				<td>
+    					<sc-text-field value="{{data.value_8}}" regex="/^01([0|1|6|7|8|9]?)-?([0-9]{3,4})-?([0-9]{4})$/"></sc-text-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="upperCase"></sc-label>
+    				</th>
+    				<td>
+    					<sc-text-field value="{{data.value_9}}" upper-case="true"></sc-text-field>
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    	<sc-panel title-text="sc-textarea-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th>
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<sc-textarea-field value="{{data.textarea_value_1}}" placeholder="입력하세요" max-length="30"></sc-textarea-field>
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    	<sc-panel title-text="cc-multi-text-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th rowspan="2">
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<cc-multi-text-field value="{{data.multitext_value}}" multi-value="{{data.multitext_values}}" placeholder="입력하세요" title="팝업제목"></cc-multi-text-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<td>value : [[data.multitext_value]] , multi-value : [[data.multitext_values]]</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    	
+    </template>
+    <script>
+    Polymer({
+    	is : "es-text-field-sample",
+    	properties : {
+    		data : {
+    			type : Object,
+    			value : function() {
+    				return {}
+    			}
+    		}
+    	},
+    	onTriggerClick: function(e) {
+    		UT.alert("trigger click!", null, true);
+    	}
+    });
+    </script>
+</dom-module>

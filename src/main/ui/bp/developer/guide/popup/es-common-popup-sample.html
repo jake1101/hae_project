@@ -1,0 +1,44 @@
+<sc-link rel="import" href="es-common-form-popup-sample.html"></sc-link>
+<sc-link rel="import" href="es-common-grid-popup-sample.html"></sc-link>
+
+<dom-module id="es-common-popup-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<sc-ajax id="findListOperOrgByUser"
+            url="findListOperOrgByUser.do"
+            body="PO"
+            content-type="text/plain"
+            on-response="onResponse" auto>
+        </sc-ajax>
+        
+		<sc-tab-navigation id="tabnavi" class="flex" selected-index="0">
+			<es-common-form-popup-sample title-text="Form" oper-org-cd="{{operOrgCd}}"></es-common-form-popup-sample>
+			<es-common-grid-popup-sample title-text="Grid" oper-org-cd="{{operOrgCd}}"></es-common-grid-popup-sample>
+		</sc-tab-navigation>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'es-common-popup-sample',
+			properties : {
+				operOrgCd : {
+					type : Object,
+					value : function() {
+						return {}
+					}
+				}
+			},
+			onResponse : function(el, res) {
+				var me = this;
+				var result = res.response;
+				
+				me.set("operOrgCd", (UT.isNotEmpty(result) && UT.isArray(result)) ? result[0]["oper_org_cd"] : "");
+			}
+		});
+	</script>
+</dom-module>

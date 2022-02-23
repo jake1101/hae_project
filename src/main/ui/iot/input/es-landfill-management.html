@@ -1,0 +1,411 @@
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 운행 지역 관리
+    ** @Description     : 사토지 및 회피저역
+    ** @Author          : jhPark
+    ** @Create Date     : 2021-09-17
+    ** @History         : 2021-09-17 jhPark 최초작성
+    ******************************************************************************************
+-->
+<sc-link rel="import" href="ep-drive-map.html"></sc-link>
+
+<dom-module id="es-landfill-management">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		<!-- 코드 조회-->
+		<sc-request-group init></sc-request-group>
+			
+		<!-- 사토지 조회 -->
+		<sc-ajax id="findLandfill" 	url="findLandfill.do"	on-response="completeFindLandfill"></sc-ajax>
+		<!-- 사토지 등록 및 수정 -->
+		<!-- 영역 저장 -->
+		<sc-ajax id="saveLandfill" url="saveLandfill.do"	on-response="completeSaveLandfill" body="{{landfill}}"></sc-ajax>
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+
+
+		<div id="landFillBox" class="hbox flex">
+			<div  class="vbox" style="width:70%; height:100%">
+				<cc-map-container id="mapContainer" show-view-label="true" draw-tool-hidden="false" on-featureadded="featureAdded"></cc-map-container>
+			</div>
+			<div class="hspace-5"></div>
+			<div class="vbox flex">
+				<cc-sub-title-bar title-text="사토지 관리">
+					<sc-button text="수정" on-click="onSaveClick"></sc-button>
+				</cc-sub-title-bar>
+				<div class="vspace-5"></div>
+				<table class="tb-form" validation-group="areaValid">
+		           <colgroup>
+		               <col style="width:100px">
+		               <col>
+		           </colgroup>
+					<tr>
+						<th><sc-label text="이름"></sc-label></th>
+						<td><sc-text-field value="{{landfill.name}}" required="true"></sc-text-field></td>
+					</tr>
+					<tr>
+						<th><sc-label text="설명"></sc-label></th>
+						<td><sc-textarea-field value="{{landfill.description}}" required="true"></sc-textarea-field></td>
+					</tr>
+					<tr>
+						<th><sc-label text="예상 주행 거리"></sc-label></th>
+						<td><sc-text-field value="{{landfill.distance}}km (카카오 내비를 기반으로 하여 실제와 오차가 있을수 있습니다.)" readonly="true"></sc-text-field></td>
+					</tr>
+					<tr>
+						<th><sc-label text="선색"></sc-label></th>
+						<td>
+							<sc-text-field value="{{landfill.lineColor}}" class="w-200" id="line_color" regex="/^#?([a-f0-9]{6}|[a-f0-9]{3})$/" ></sc-text-field>
+		                    <div class="colorpicker-circle-anchor__color" data-color id="line_color_anchor"></div>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="배경색"></sc-label></th>
+						<td>
+							<sc-text-field value="{{landfill.backgroundColor}}" class="w-200" id="bg_color" regex="/^#?([a-f0-9]{6}|[a-f0-9]{3})$/" ></sc-text-field>
+		                    <div class="colorpicker-circle-anchor__color" data-color id="bg_color_anchor"></div>
+						</td>
+					</tr>
+		        </table>
+			</div>
+		</div>
+
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-landfill-management",
+            properties : {
+            	titleText:{
+	                type: String,
+					value: "영역관리"
+				},
+            	// 코드
+                codes: {
+                    type : Object,
+                    reset : false,
+                    value : function() {
+                        return {};
+                    }
+                },
+                siteId : {
+                    type : Object,
+                    value : function(){
+						return SCMdiManager.searchParam.site_id;
+                    }
+                },
+                // 지도
+                map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+                vectorLayer:{
+					type : Object,
+					value : function(){
+						return{};
+					}
+                },
+                vStyle :{
+					type : Object,
+					value : function(){
+						return{
+			       		    strokeColor: "#ff0000",
+			       		    fillColor: "#ffffff",
+			       		    strokeOpacity: 1,
+			       		    strokeWidth: 3,
+			       		    pointRadius: 5,
+			       		    graphicName: "circle"
+		       			};
+					}
+                },
+	       		pStyle :{
+					type : Object,
+					value : function(){
+						return{
+		       			    strokeColor:"#ff0000",
+		       			    fillColor: "#ff0000",
+		       			    strokeOpacity:1,
+		       			    strokeWidth: 3,
+		       			    fillOpacity:0.5
+		       			};
+					}
+                },
+	       		virtualStyle  :{
+					type : Object,
+					value : function(){
+						return{
+		       				strokeColor: "#ff0000",
+			       		    fillColor: "#ff0000",
+		       			    strokeOpacity: 0.6,
+		       			    fillOpacity: 0.5,
+		       			    strokeWidth: 3,
+		       			    pointRadius: 4,
+		       			    graphicName: "circle"
+						};
+					}
+       			},
+       			polygonEdit : {
+					type : Boolean,
+					value : function(){
+						return false;
+					}
+           		}
+            },
+            /** 시작 및 검색 start **/
+            formulas : {
+                isBuilding: function() {
+                    return (this.get('landfill.type') === "building");
+                },
+                isNew : function(){
+                	return (UT.isEmpty(this.get('landfill.id')));
+                }
+            },
+            load: function(){
+            	var me = this;
+            	if(!me.vectorLayer.features){
+	            	me.$.findLandfill.body = {
+	            			siteId : me.siteId,
+	            			onlyLandfill : "Y"
+	            	};
+	            	UT.request(me.$.findLandfill);            		
+            	}
+            },
+            /** 시작 및 검색 end **/
+
+            /** API start **/
+            completeSaveLandfill: function(e, res){
+            	var me = this
+            	,result = res.response;
+
+	            if(result.result_status === 'S'){
+	                UT.alert("STD.N2400"); // 저장하였습니다.
+	                me.reload();
+	            }else {
+                    UT.alert(result.result_message);
+                }
+            },
+            completeFindLandfill : function(e, res){
+            	var me = this;
+            	var data = res.response[0];
+
+            	if(!UT.isEmpty(data)){
+                	var adjunction = data.adjunction;
+                	data.backgroundColor = adjunction.backgroundColor;
+                	data.lineColor = adjunction.lineColor;
+                	data.point = "Lat : "+data.pinCircle.lat+", Lon:"+data.pinCircle.lon+", radius : "+data.pinCircle.radius;
+                	data.polygonCount = (data.polygon.length-1)+" Point";
+                	data.buildingType = adjunction.buildingType;
+                	data.floor = adjunction.floor;
+                	data.passgps = adjunction.gpspass;
+                	data.distance = adjunction.distance;
+                	data.parentIds = [parseInt(data.parentId)];
+                	me.set('lat', data.pinCircle.lat);
+                	me.set('lon', data.pinCircle.lon);
+                	me.set('adjunction', adjunction);
+            	}
+            	else{
+            		data = {};
+	            	data.lineColor = '#ff0000';
+	            	data.backgroundColor = '#ff0000';
+            	}
+            	// 지도 객체 추가
+            	me.map = me.$.mapContainer.map;
+            	
+            	me.set('landfill', data);
+
+				// colorpicker 추가
+            	var lineColorPic = new ColorPic('#line_color', data.lineColor, '#line_color_anchor');
+            	lineColorPic.on('change', function() {
+            		$('#line_color_anchor').css('background-color', this.getColor());
+            		me.changeLineColor( this.getColor());
+                });
+            	var bgColorPic = new ColorPic('#bg_color', data.backgroundColor, '#bg_color_anchor');
+            	bgColorPic.on('change', function() {
+            		$('#bg_color_anchor').css('background-color', this.getColor());
+            		me.changeBgColor( this.getColor());
+                });
+
+		       	var styleMap = new OpenLayers.StyleMap({
+	        	    "default": me.get('pStyle'),
+	        	    "vertex": me.get('vStyle'),
+	        	    "temporary" : me.get('pStyle'),
+	        	    "select": me.get('pStyle')
+	        	}, {extendDefault: false});
+
+		       	// 벡터 레이어 추가
+		       	me.vectorLayer = me.map.drawLayer;
+		       	me.vectorLayer.styleMap = styleMap;
+
+		       	me.vectorLayer.onFeatureInsert = function(e){
+            		this.map.target = this.getDataExtent();
+        			editControl.selectFeature(this.getFeatureById(e.id));
+	        	};
+
+	        	// 좌표 이동 이벤트
+	        	me.vectorLayer.events.register('vertexmodified', me.vectorLayer, function(e){
+		        	if(e.feature.attributes.type=='marker'){
+		        		this.map.target = this.getDataExtent();
+		        		var point =e.feature.geometry.clone();
+		        		point.transform(projection900913, projection4326);
+
+		        		me.set('landfill.pinCircle',{lat:point.y, lon:point.x, radius:0});
+    	            	me.set('landfill.point',"Lat:"+point.y+", Lon:"+point.x+", radius:0");
+			        }else{
+				        me.set('polygonEdit',true);
+				        var polyLength =e.feature.geometry.components[0].components.length-1;
+			        	me.set('landfill.polygonCount', polyLength+" point");
+				    }
+		        });
+
+	        	// 좌표 삭제 이벤트
+	        	me.vectorLayer.events.register('vertexremoved', me.vectorLayer, function(e){
+	        		if(e.feature.attributes.type!='marker'){
+	        			var polyLength =e.feature.geometry.components[0].components.length-1;
+			        	me.set('landfill.polygonCount', polyLength+" point");
+			        	me.polygonEdit = true;
+			        }
+			    });
+
+	        	// 편집 컨트롤 추가
+		       	editControl = addEditControl(me.map, me.vectorLayer);
+		       	editControl.virtualStyle = me.virtualStyle;
+
+        		if(!UT.isEmpty(data.id)){		// 영역 객체가 있을경우
+		        	// 폴리곤 객체 생성
+		        	me.vectorLayer.addFeatures(geoJsonToFeature(data.geoJson));
+
+		     		// 마커 생성
+		        	addAreaMarker(me.vectorLayer, data.name, me.get('lon'), me.get('lat'), data.type, true);
+
+		        	// 지도 위치 이동
+		        	me.map.zoomToExtent(me.vectorLayer.getDataExtent());
+	        	}
+
+	        	me.changeLineColor(data.lineColor);
+	        	me.changeBgColor(data.backgroundColor);
+
+	        	me.map.viewLayer.removeFeatures(me.map.viewLayer.getFeaturesByAttribute("id", data.id));
+
+            	me.applyFormula();
+            },
+            /** API end **/
+
+            /** Btn Event start **/
+			featureAdded : function(event, e){
+                var me = this;
+                var feature = e.feature;
+                feature.attributes = {"type":"polygon"};
+
+            	var point =feature.geometry.getBounds().getCenterLonLat().clone();
+        		point.transform(projection900913, projection4326);
+        		me.set('landfill.pinCircle',{lat:point.lat, lon:point.lon, radius:0});
+        		me.set('landfill.point',"Lat:"+point.lat+", Log:"+point.lon+", radius:0");
+
+        		var polyLength =feature.geometry.components[0].components.length-1;
+        		me.set('landfill.polygonCount', polyLength+" point");
+        		
+               	// 마커 생성
+               	addAreaMarker(me.map.drawLayer, "사토지", point.lon, point.lat, "area", true);
+            	me.map.drawLayer.redraw();
+           },
+           onSaveClick : function(){
+           	var me = this;
+           	if(me.vectorLayer.getFeaturesByAttribute("type","polygon").length > 0){	// 저장전 폴리곤 갯수 확인
+           		if(!me.validate("areaValid")){
+               		UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                       return;
+               	}
+           		var buildingType = UT.isEmpty(me.get('landfill.buildingType')) ? 'none': me.get('landfill.buildingType');
+
+                	var adjunction = {};
+
+                	if(UT.isNotEmpty(me.get('adjunction'))){
+                		adjunction = me.get('adjunction');
+                    }
+                	
+                	adjunction.buildingType = buildingType;
+                	adjunction.lineColor = me.get('landfill.lineColor');
+                	adjunction.backgroundColor = me.get('landfill.backgroundColor');
+                	adjunction.landfill = "Y";
+                	
+                	me.set('landfill.adjunction', adjunction);
+                	
+                	if(me.get('landfill.parentIds')){
+                		me.set('landfill.parentId', me.get('landfill.parentIds')[0]);
+                	}
+                	me.set('landfill.useFlag','Y');
+           		var polygon = me.vectorLayer.getFeaturesByAttribute("type","polygon")[0].clone();
+           		polygon.geometry.transform(projection900913, projection4326);
+                	me.set('landfill.polygon', featureToPolygonArr(polygon));
+	            	var geojson_format = new OpenLayers.Format.GeoJSON();
+	            	var geoJson = JSON.parse(geojson_format.write(polygon.geometry));
+                	me.set('landfill.geoJson', geoJson);
+                	
+                	me.set('landfill.siteId', me.siteId);
+                	me.set('landfill.type', "area");
+
+					UT.confirm("STD.N1200", function(){ // 저장하시겠습니까?
+               		UT.requestNoDefault(me.$.saveLandfill);
+               	});
+                	
+               }else{
+          			UT.alert("영역을 지정해 주세요");//폴리곤을 구성해주세요.
+          			return;
+               }
+           },
+            /** Btn Event end **/
+
+            /** 기타 start **/
+            changeLineColor : function(color){
+                var me = this;
+            	me.vStyle.strokeColor = color;
+            	me.pStyle.strokeColor = color;
+            	me.virtualStyle.strokeColor = color;
+            	me.virtualStyle.fillColor = color;
+            	me.set('landfill.lineColor', color);
+            	me.vectorLayer.redraw();
+            },
+            changeBgColor : function(color){
+                var me = this;
+            	me.pStyle.fillColor = color;
+            	me.set('landfill.backgroundColor', color);
+            	me.vectorLayer.redraw();
+            },
+            /** 기타 end **/
+            
+			/** 미사용 start **/
+            onSelectType : function(e){
+            	var me = this;
+            	if(me.vectorLayer.features.length > 0){
+	            	me.vectorLayer.getFeaturesByAttribute("type", "marker")[0].style.externalGraphic ="./ui/lib/openlayers/img/"+e.target.value+".png";
+	            	me.vectorLayer.redraw();
+            	}
+            	me.applyFormula();
+            },
+            /** 미사용 end **/
+        });
+	</script>
+
+</dom-module>

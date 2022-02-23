@@ -1,0 +1,254 @@
+<dom-module id="es-dev-chart-group-footer">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--fit-layout);
+        }
+    </style>
+
+    <!--  화면 구성 시작-->
+    <template>
+    	<div id="grdMain" class="fit"></div>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-dev-chart-group-footer',
+            
+            	attached: function(){
+                	this.exampleView().init();
+                },
+                
+                exampleView : function (strings) {
+                	var view;
+                    var dsMain;
+                    var grdMain;
+                    
+                    return view = {
+                        init: function () {
+                            var fields = [{
+                                fieldName: "area",
+                                header: "Area"
+                            }, {
+                                fieldName: "subgroup",
+                                header: "Subgroup"
+                            }, {
+                                fieldName: "year",
+                                dataType: "number",
+                                header: "Year"
+                            }, {
+                                fieldName: "source",
+                                header: "Source"
+                            }, {
+                                fieldName: "unit",
+                                header: "Unit"
+                            }, {
+                                fieldName: "value",
+                                dataType: "number",
+                                header: "Value"
+                            }];
+                            dsMain = DataLudi.createGridDataSet();
+                            dsMain.setFields(fields);
+                        	
+                            var columns = [{
+                                fieldName: "area",
+                                width: 150
+                            }, {
+                                fieldName: "subgroup",
+                                width: 60,
+                                header: "Gender",
+                                styles: {
+                                    textAlignment: "center"
+                                }
+                            }, {
+                                fieldName: "year",
+                                width: 50,
+                                styles: {
+                                    textAlignment: "center"
+                                }
+                            }, {
+                                fieldName: "source",
+                                width: 200
+                            }, {
+                                fieldName: "unit",
+                                width: 60,
+                                styles: {
+                                    textAlignment: "center"
+                                }
+                            }, {
+                                fieldName: "value",
+                                width: 100,
+                                styles: {
+                                    textAlignment: "far",
+                                    numberFormat: "#,##0"
+                                },
+                                footer: {
+                                    expression: "sum",
+                                    styles: {
+                                        numberFormat: "#,##0",
+                                        fontBold: true,
+                                        suffix: "$"
+                                    }
+                                },
+                                groupFooter: {
+                                    expression: "sum",
+                                    styles: {
+                                        numberFormat: "#,##0",
+                                        fontBold: true,
+                                        suffix: "$"
+                                    }
+                                }
+                            }];
+                            grdMain = DataLudi.createGridView('grdMain', null);
+                            grdMain.setColumns(columns);
+
+                            grdMain.setDataSource(dsMain);
+                            grdMain.rowGroup().setFooterItems({
+                                type: "chart",
+                                displayCallback: function (group) {
+                                    return group.level() == grdMain.rowGroupLevels();
+                                },
+                                minHeight: 150,
+                                styles: {
+                                    /*background: "#0800ffff",*/
+                                    padding: 4
+                                },
+                                chart: {
+                                    type: "column",
+                                    legend: {
+                                        visible: true,
+                                        position: "right",
+                                        marginLeft: 10,
+                                        styles: {
+                                            /*border: "#800"*/
+                                        }
+                                    },
+                                    plotArea: {
+                                        styles: {
+                                            background: "#0800ffff"
+                                        }
+                                    },
+                                    xAxes: {
+                                        padding: 0.1,
+                                        styles: {
+                                            line: "#333"
+                                        },
+                                        tickStyles: {
+                                            line: "#333"
+                                        }
+                                    },
+                                    yAxes: {
+                                        indicators: [{
+                                            type: "line",
+                                            front: true,
+                                            series: "serFemale",
+                                            value: "avg",
+                                            label: "Average:${value}",
+                                            styles: {
+                                                line: "#600000ff,1px,dotted",
+                                                color: "#e00000ff",
+                                                fontSize: 10,
+                                                fontBold: true,
+                                                textAlignment: "far",
+                                                numberFormat: "#,##0"
+                                            }
+                                        }, {
+                                            type: "line",
+                                            front: true,
+                                            series: "serMale",
+                                            value: "avg",
+                                            label: "Average:${value}",
+                                            styles: {
+                                                line: "#80ff0000,1px,dashed",
+                                                color: "#e0800000",
+                                                fontSize: 10,
+                                                fontBold: true,
+                                                textAlignment: "near",
+                                                numberFormat: "#,##0"
+                                            }
+                                        }]
+                                    },
+                                    series: [{
+                                        name: "serFemale",
+                                        clusterWidth: 2,
+                                        caption: "Female",
+                                        filter: "values['subgroup'] == 'Female'",
+                                        labelField: "year",
+                                        valueField: "value",
+                                        summaryMode: "aggregate",
+                                        labelLocation: "none",
+                                        styles: {
+                                            background: "#AFD8F8"
+                                        }
+                                    }, {
+                                        name: "serMale",
+                                        caption: "Male",
+                                        filter: "values['subgroup'] == 'Male'",
+                                        labelField: "year",
+                                        valueField: "value",
+                                        summaryMode: "aggregate",
+                                        styles: {
+                                            background: "#F6BD0F"
+                                        }
+                                    }]
+                                }
+                            }); 
+                            
+                            
+                                    
+                            grdMain.loadStyles({
+                                selection: {
+                                    background: "#11000000",
+                                    border: "#88000000,1"
+                                }
+                            });
+                            
+                            grdMain.loadPalettes([{
+                                name: "pal01",
+                                fills: ["#ffe17F", "#97CBE7", "#074868", "#B0D67A", "#2C560A", "#DD9D82", "#578Ba7"]
+                            }, {
+                                name: "pal02",
+                                fills: ["#ffcccccc", "#ffaaaaaa", "#ff999999", "#ff777777", "#ff555555", "#ff333333", "#ff111111"]
+                            }, {
+                                name: "pal03",
+                                fills: ["#100000ff", "#200000ff", "#300000ff"]
+                            }]);
+
+                            grdMain.header().head().setPopupMenu({
+                                label: 'DataLudi Grid Version',
+                                callback: function () { alert(DataLudi.getVersion()); }
+                            });
+                            
+                            this.loadData(dsMain);
+                            grdMain.groupBy(['area']);
+
+                        },
+                        loadData: function (ds) {
+                            $.ajax({
+                                url: "http://helpme.emro.co.kr/repo/grid/resource/data/enrollment_tertiary_edu.csv",
+                                dataType: 'text',
+                                success: function (data) {
+                                    new DataLudi.DataLoader(ds).load("csv", data, {
+                                        delimiter: ';',
+                                        start: 1
+                                    });
+                    				$("#rowCount").css("color", "blue").text(ds.rowCount().toLocaleString());
+                                },
+                                error: function(xhr, status, error) {
+                                    alert("jQuery getJSON() Failed: " + err);
+                                }
+                            });
+                        }
+                    };  
+                }
+            
+            
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

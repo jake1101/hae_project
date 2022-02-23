@@ -1,0 +1,135 @@
+<dom-module id="ep-sensor-mapping-log">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 스마트태그 맵핑 기록확인 팝업
+        ** @Description		: 스마트태그 맵핑 기록확인 팝업        
+        ** @Author 			: yshong
+        ** @Create Date 	: 2021.05.31
+        ** @History 		: 2020.05.31 yshong 최초작성
+        ******************************************************************************************
+    -->
+
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+	</style>
+	
+	<template>
+	
+ 		<sc-ajax id="findSensorMappingListBySensorId"
+			url="findSensorMappingListBySensorId.do"
+			body={{searchParam}}
+			last-response="{{logList}}">
+		</sc-ajax>
+ 		<sc-ajax id="findSensorMappingListByTargetId"
+			url="findSensorMappingListByTargetId.do"
+			body={{searchParam}}
+			last-response="{{logList}}">
+		</sc-ajax>
+		<sc-ajax id="saveSensorMappingLog"
+			url="saveSensorMappingLog.do"
+			on-response="completeSaveSensorMappingLog">
+		</sc-ajax>
+		
+		<cc-page-title-bar title-text="[ [[searchParam.startDt]] ~ [[searchParam.endDt]] ]"></cc-page-title-bar>
+		<sc-grid id="gridPanel" data-provider="{{logList}}" editable="true" class="flex">
+			<cc-grid-toolbar title-text=" 교부 회수 이력 ( [[titleName]] ) ">
+				<sc-button text="저장" on-click="onSave" auth-s></sc-button>
+			</cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-data-column header-text="태그 번호" data-field="sensorName"  width="70" text-align="center"></sc-data-column>				
+				<sc-date-column header-text="교부일" data-field="createdDt" width="170" text-align="center" display-format="yyyy/MM/dd HH:mm:ss"></sc-date-column>
+				<sc-date-column header-text="회수일" data-field="updatedDt" width="170" text-align="center" display-format="yyyy/MM/dd HH:mm:ss"></sc-date-column>
+				<sc-data-column header-text="대상명" data-field="targetName"  width="150" text-align="center"></sc-data-column>
+				<sc-data-column header-text="비고" data-field="description"  width="300" text-align="center" editable=true></sc-data-column>
+			</sc-grid-columns>
+			
+			<sc-grid-fields>
+				<sc-grid-field data-field="seq"></sc-grid-field>
+				<sc-grid-field data-field="siteId"></sc-grid-field>
+			</sc-grid-fields>
+		</sc-grid>
+	</template>
+	
+	<script>
+		Polymer({
+			is : "ep-sensor-mapping-log",
+			properties : {
+				searchParam: {
+					type : Object,
+					value : function(){
+						return {
+							siteId : SCMdiManager.searchParam.site_id
+						};
+					}
+				},
+			},
+			load : function(param){
+				
+ 				var me = this;
+				
+ 				var searchType = param.searchType
+ 				, sensorId = param.sensorId
+ 				, targetType = param.targetType
+ 				, targetId = param.targetId;
+ 				me.set("searchParam.searchType", searchType);
+				
+ 				me.set("searchParam.startDt", param.startDt);
+ 				me.set("searchParam.endDt", param.endDt);
+ 				
+				if(searchType == 'sensor'){
+	 				me.set("titleName", param.sensorName);
+					me.set("searchParam.sensorId", sensorId);
+					me.onSearch();
+				}
+				else if(searchType == 'target'){
+					me.set("titleName", param.targetName);
+					me.set("searchParam.targetId", targetId);				
+					me.set("searchParam.targetType", targetType);
+					me.onSearch();
+				}
+			},
+			onSearch : function(){
+				var me = this;
+				if(me.searchParam.searchType == 'sensor'){
+					UT.request(me.$.findSensorMappingListBySensorId);	
+				}
+				else if(me.searchParam.searchType == 'target'){
+					UT.request(me.$.findSensorMappingListByTargetId);	
+				}
+			},
+			
+			onSave : function(event){
+            	var me = this;
+                var provider = me.$.gridPanel.getDataProvider()
+                ,updated = provider.getUpdateItems();
+                
+                if(updated.length === 0) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+                
+                UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+                    me.$.saveSensorMappingLog.body = {
+                        upsertList: updated
+                    };
+                    UT.request(me.$.saveSensorMappingLog);
+                });
+            },
+            completeSaveSensorMappingLog : function(e,res){
+            	var me = this,
+				message = "STD.N2400"; // 저장하였습니다.
+	            if(res.response.result_status === 'S'){
+	                UT.alert(message, function(){
+	                	 me.onSearch();
+	                	 me.fire("after-save");
+	                });
+	            } else {
+	                message = res.response.result_message;
+	                UT.alert(message);
+	            }
+            }
+		});
+	</script>
+</dom-module>

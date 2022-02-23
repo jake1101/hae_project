@@ -1,0 +1,117 @@
+<dom-module id="es-dialog-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-panel title-text="sc-dialog 샘플">
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+	        	</colgroup>
+	            <tr>
+	            	<th rowspan="2">
+	            		<sc-label text="이름"></sc-label>
+	            	</th>
+	            	<td>
+	            		<div class="field-box">
+		            		<sc-text-field class="w-300" value="{{data.name}}" max-length="120" placeholder="이름을 입력하고 확인 버튼을 클릭하세요!"></sc-text-field>
+		            		<sc-button text="확인" on-click="onShowDialog1" style="margin:0 2px"></sc-button>
+		            		<sc-button text="초기화" on-click="onShowDialog2" style="margin:0 2px"></sc-button>
+		            	</div>
+	            	</td>
+	            </tr>
+	            <tr>
+	            	<td>[[data.confirm_msg]]</td>
+	            </tr>
+	        </table>
+		</sc-panel>
+		
+		<sc-dialog id="dialog1" style="width:300px;height:200px">
+			<div style="display:flex; flex-direction:column;">
+			안녕? [[data.name]] 다이얼로그는 처음이지?
+			</div>
+		</sc-dialog>
+		
+		<sc-dialog id="dialog2" title-text="다이얼로그 샘플2" style="width:500px; height:200px"
+				modal="true" draggable="true"
+				buttons="yes,no" handler="onDialog2BtnClick">
+	        <table class="tb-form">
+	        	<colgroup>
+	        		<col style="width:100px;"/>
+	        		<col/>
+	        	</colgroup>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="초기화 사유"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-textarea-field class="h-100" max-length="500" value="{{data.init_cause}}"></sc-textarea-field>
+	        		</td>
+	        	</tr>
+	        </table>
+		</sc-dialog>
+	</template>
+	<script>
+		Polymer({
+			is : 'es-dialog-sample',
+			properties : {
+				data : {
+					type : Object,
+					value : function() {
+						return {}
+					}
+				}
+			},
+			// 확인 버튼 클릭 시
+			onShowDialog1 : function() {
+				var me = this, dialog1 = me.$.dialog1;
+				me.set("data.confirm_msg", "");
+				
+				// show(config) 함수에서 동적으로 프로퍼티를 변경할 수 있다.
+				dialog1.show({
+					titleText          : "다이얼로그 샘플1",
+					modal              : true,
+					draggable          : true,
+					/*
+		            collapsible        : false,
+		            closable           : true,
+					maximizable        : false,
+					interactResizable  : false,
+		            hideOnEscKey       : false,
+		            hideOnOutsideClick : false,
+		            */
+		            buttons            : 'yes,no',	// 'ok', 'yes', 'no', 'cancel', 'ok,cancel', 'yes,no', 'yes,no,cancel'
+		            handler            : me.onDialog1BtnClick
+				});
+			},
+			// dialog1 의 버튼 클릭 시
+			onDialog1BtnClick : function(btn) {
+				var me = this;
+				
+				// 'yes' 버튼일 때
+				if(btn === "yes") {
+					me.set("data.confirm_msg", me.translate("확인되었습니다."));
+				}
+			},
+			// 초기화 버튼 클릭 시
+			onShowDialog2 : function() {
+				var me = this, dialog2 = me.$.dialog2;
+				
+				dialog2.show();
+			},
+			// dialog2 의 버튼 클릭 시
+			onDialog2BtnClick : function(btn) {
+				var me = this;
+				
+				// 'yes' 버튼일 때
+				if(btn === "yes") {
+					UT.alert(me.translate("초기화 사유") + " : " + (me.get("data.init_cause") || me.translate("해당없음")), null, true);
+					me.set("data", {});
+				}
+			}
+		});
+	</script>
+</dom-module>

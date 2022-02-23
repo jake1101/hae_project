@@ -1,0 +1,172 @@
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 공지사한 광리
+    ** @Description     : 
+    ** @Author          : jhPark
+    ** @Create Date     : 2021.08.19
+    ** @History         : 2021.08.19 jhPark 최초작성
+    ******************************************************************************************
+-->
+<dom-module id="es-notice-info">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+   		 <sc-request-group init>
+			<sc-code-group>
+				<sc-code code="IOT038" value="{{typeList}}"></sc-code>
+			</sc-code-group>
+		</sc-request-group>
+		<!-- 공지 리스트 저장 -->
+		<sc-ajax	id="saveInfoNotice"	url="saveInfoNotice.do"	body="{{searchParam}}"	on-response="completeSaveInfoNotice"></sc-ajax>
+		<sc-ajax	id="findOneNotice"	url="findOneNotice.do"	on-response="completeFindOneNoticeInfo"></sc-ajax>
+
+        <cc-auth-checker check-list="auth-s"></cc-auth-checker>
+		<div class="vspace-5"></div>
+
+		<cc-sub-title-bar title-text="공지사항 정보">
+            <sc-button text="저장" on-click="onSave" auth-s></sc-button>
+		</cc-sub-title-bar>
+		
+		<div class="vspace-5"></div>
+
+		<div class="vbox">
+	        <table class="tb-form">
+	            <colgroup>
+	                <col style="width:150px">
+	                <col>
+	                <col style="width:150px">
+	                <col>
+	            </colgroup>
+	            <tr>
+	                <th><sc-label text="id"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{noticeInfo.notiId}}" max-length="30"  readonly="true"  placeholder="자동으로 입력됩니다."></sc-text-field></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="제목"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{noticeInfo.title}}" max-length="30" required="true"></sc-text-field></td>								
+	            </tr>
+	            <tr>
+	                <th><sc-label text="대상자"></sc-label></th>
+	                <td colspan ="3">
+						<sc-multi-combobox-field items="{{typeList}}" display-field="label" value-field="data"
+		                	value="{{noticeInfo.recipientTypes}}" placeholder="선택 대상 없음" required="true"></sc-multi-combobox-field>
+	                </td>								                      
+	            </tr>
+	            <tr>
+	                <th><sc-label text="공지기간"></sc-label></th>
+	                <td>
+	                	<sc-date-field style="width: 100px;" string-date="true" value="{{noticeInfo.startDt}}" default-value="0d" required="true"></sc-date-field>
+	                	~
+		                <sc-date-field style="width: 100px;" string-date="true" value="{{noticeInfo.endDt}}" default-value="0d" required="true"></sc-date-field>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="내용"></sc-label></th>
+	                <td colspan ="3">
+	                	<sc-editor class="h-400" id="noticeContentPanel"  value="{{noticeInfo.content}}" editable="true"></sc-editor>
+	                </sc-text-field></td>
+	            </tr>
+            	<tr>
+	                <th><sc-label text="사용여부"></sc-label></th>
+	                <td colspan = "3"><sc-checkbox-field input-value="{{noticeInfo.useFlag}}" checked-value="Y" un-checked-value="N" ></sc-checkbox-field></td>
+	            </tr>
+	        </table>
+		</div>	        
+    </template>
+
+    <script>
+        Polymer({
+            is: 'es-notice-info',
+            properties : {
+            	
+            },
+			/** 초기화 설정 **/
+			initialized : function() {
+				var me = this;
+            },
+            //공지사항 정보 상세 조회
+            load : function(data) {
+                var me = this;	
+				me.$.findOneNotice.body = data;
+				UT.request(me.$.findOneNotice); 	
+            },
+            // 공지사항 신규 추가
+            initNotice : function() {
+                var me = this;
+                me.noticeInfo = {};
+                me.$.noticeContentPanel.syncValue();
+                me.set("noticeInfo.isNew", true);
+                me.set("noticeInfo.useFlag","Y");
+            },
+            // 초기화
+            clear: function() {
+                var me = this;
+                me.reset();
+            },
+
+			/** 버튼이벤트 함수 **/
+			// 정보 저장
+            onSave : function(){
+            	var me = this;
+             	
+             	me.noticeInfo.siteId = SCMdiManager.searchParam.site_id;
+				me.$.noticeContentPanel.syncValue();
+				
+
+                if(!me.validate()){
+                    UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return;
+                }
+                UT.confirm("STD.N1200", function() { //저장 하시겠습니까?
+					//정규 테그가 아닌 <>에 감싸여 있는 영문의 경우 스크립트로 인식하는 것을 방지 하기위해 저장할때 값 변환
+					var newContent = me.noticeInfo.content;
+					me.noticeInfo.content = newContent
+// 											.replace(/&lt;/gi, "&amp;lt;")
+// 											.replace(/&gt;/gi, "&amp;gt;")
+											.replace(/&/gi, "&amp;");
+					me.$.saveInfoNotice.body = {
+						noticeInfo : me.noticeInfo
+					};
+					UT.request(me.$.saveInfoNotice); 						
+                });
+            },
+            completeFindOneNoticeInfo: function(e,res) {
+            	var me = this;
+            	var result = res.response;
+				var content =me.htmlDecode(result.content);
+				result.content = content;
+				me.set("noticeInfo", result);
+            },
+            //공지사항 정보 저장후 초기화
+            completeSaveInfoNotice : function(e,res){
+            	var me = this,
+                result = res.response;
+            	
+	            if (result.result_status === 'S') {
+	                UT.alert("STD.N2400", function () { // 저장하였습니다.
+						me.clear();
+	                	me.noticeInfo = null;
+						me.$.noticeContentPanel.syncValue();
+						me.fire('find-list');
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+            	
+            },
+            
+			/** 기타 함수 **/
+            //html 변환 함수
+			htmlDecode : function(input){
+				var e = document.createElement('textarea');
+				e.innerHTML = input;
+				return e.childNodes.length === 0 ? "" : e.childNodes[0].wholeText;
+			},
+        });
+    </script>
+</dom-module>

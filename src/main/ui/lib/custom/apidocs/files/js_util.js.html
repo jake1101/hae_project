@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>js\util.js - API</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="icon" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+                <h1><img src="../assets/css/logo.png" title="API" width="117" height="52"></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.0.1</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+                    <h2 class="off-left">APIs</h2>
+                    <div id="api-tabview" class="tabview">
+                        <ul class="tabs">
+                            <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-elements">Elements</a></li>
+                            <li><a href="#api-modules">Modules</a></li>
+                        </ul>
+                
+                        <div id="api-tabview-filter">
+                            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+                        </div>
+                
+                        <div id="api-tabview-panel">
+                            <ul id="api-classes" class="apis classes">
+                                <li><a href="../classes/DEF.html">DEF</a></li>
+                                <li><a href="../classes/EDITOR.html">EDITOR</a></li>
+                                <li><a href="../classes/GRID.html">GRID</a></li>
+                                <li><a href="../classes/I18N.html">I18N</a></li>
+                                <li><a href="../classes/MSG.html">MSG</a></li>
+                                <li><a href="../classes/UPLOAD.html">UPLOAD</a></li>
+                                <li><a href="../classes/UT.html">UT</a></li>
+                                <li><a href="../classes/VALID.html">VALID</a></li>
+                            </ul>
+                
+                                <ul id="api-elements" class="apis elements">
+                                    <li><a href="../elements/cc-approval-summary.html">&lt;cc-approval-summary&gt;</a></li>
+                                    <li><a href="../elements/cc-dept-search.html">&lt;cc-dept-search&gt;</a></li>
+                                    <li><a href="../elements/cc-editor.html">&lt;cc-editor&gt;</a></li>
+                                    <li><a href="../elements/cc-from-to-date.html">&lt;cc-from-to-date&gt;</a></li>
+                                    <li><a href="../elements/cc-linked-vender.html">&lt;cc-linked-vender&gt;</a></li>
+                                    <li><a href="../elements/cc-multi-text-field.html">&lt;cc-multi-text-field&gt;</a></li>
+                                    <li><a href="../elements/cc-operorg-combobox-field.html">&lt;cc-operorg-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-operorg-multi-combobox-field.html">&lt;cc-operorg-multi-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-purc-grp.html">&lt;cc-purc-grp&gt;</a></li>
+                                    <li><a href="../elements/cc-sg-search.html">&lt;cc-sg-search&gt;</a></li>
+                                    <li><a href="../elements/cc-sp-operorg-combobox-field.html">&lt;cc-sp-operorg-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-sp-operorg-multi-combobox-field.html">&lt;cc-sp-operorg-multi-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-upload.html">&lt;cc-upload&gt;</a></li>
+                                    <li><a href="../elements/cc-user-search.html">&lt;cc-user-search&gt;</a></li>
+                                </ul>
+                
+                            <ul id="api-modules" class="apis modules">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+                    Show:
+                    <label for="api-show-inherited">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </div>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<h1 class="file-heading">File: js\util.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * Util
+ *
+ * @class UT
+ */
+var UT = {
+
+    /**
+     * 권한에 따른 element 노드 삭제
+     *
+     * @method checkAuth
+     * @param  {object} element     element
+     * @param  {string} selector     삭제할 css selector
+     * @param  {string} funcCd        기능 코드
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         UT.cehckAuth(me, &quot;auth-r&#x27;, DEF.READ);
+     *     }
+     */
+    checkAuth : function (element, selector, funcCd) {
+        var menuId = UT.getMenuId(element);
+        var authList = [];
+        if (menuId) {
+            authList = SCRoleManager.getUserFuncs(menuId);
+        }
+        if(authList.indexOf(funcCd) == -1) {
+            var nodes = Polymer.dom(element.root).querySelectorAll(&#x27;.&#x27; + selector);
+            var parentNode;
+            if(nodes != null) {
+                for (var i = 0, len = nodes.length; i &lt; len; i++) {
+                    parentNode = Polymer.dom(nodes[i]).parentNode;
+                    Polymer.dom(parentNode).removeChild(nodes[i]);
+                }
+            }
+        }
+    },
+
+    /**
+     * 화면 생성 및 상위노드에 추가
+     *
+     * @method createModule
+     * @param  {object} parentNode    상위 노드
+     * @param  {string} moduleTagName 모듈 태그 명
+     * @param  {string} [cssName]     css class 명
+     * @param  {array}  [authList]    권한
+     * @return {object}
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         var detail = UT.createModule(me.$.pages, &quot;es-module&quot;, &quot;vbox&quot;);
+     *         detail.addEventListener(&quot;attached&quot;, function() {
+     *             ...
+     *         });
+     *     }
+     */
+    createModule: function(parentNode, moduleTagName, cssName, authList) {
+        var module = document.createElement(moduleTagName);
+        // To-Do : authList properties 시점 문제 없는지 확인
+        module.authList = authList;
+
+        Polymer.dom(parentNode).appendChild(module);
+        if (UT.isString(cssName)) {
+            module.classList.add(cssName);
+        }
+
+        //To-DO : 인덱스 방식 수정 필요, 2016.05.16수정 : 현재노드를 선택하도록 수정.
+        //appendChild한 내용을 flush처리한다.
+        Polymer.dom.flush();
+        //해당 module을 선택한다.
+        parentNode.selectItem(module);
+        return module;
+    },
+
+    /**
+     * 상위 노드에서 화면 삭제
+     *
+     * @method removeModule
+     * @param {object} parentNode 삭제할 객체의 상위 객체
+     * @param {object} event      이벤트 객체
+     * @example
+     *     someFunction: function(e) {
+     *         var me = this;
+     *         UT.removeModule(me.$.pages, e);
+     *     }
+     */
+    removeModule: function(parentNode, event) {
+        Polymer.dom(parentNode).removeChild(event.currentTarget);
+    },
+
+    /**
+     * alert dialog
+     *
+     * @method alert
+     * @param {string}   message      출력할 메시지
+     * @param {function} [okCallback] ok 버튼 클릭 후 콜백 함수
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         UT.alert(&quot;Hello World!&quot;);
+     *     }
+     */
+    alert: function(message, okCallback) {
+        SCAlert.show(I18N.translate(MSG[&quot;N1000&quot;]), message, function(btn) {
+            if (UT.isFunction(okCallback)) {
+                okCallback.call(this);
+            }
+        });
+    },
+
+    /**
+     * confirm dialog
+     *
+     * @method confirm
+     * @param {string}   message       출력할 메시지
+     * @param {function} [yesCallback] ok 버튼 클릭 후 콜백 함수
+     * @param {function} [noCallback]  no 버튼 클릭 후 콜백 함수
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         UT.confirm(&quot;Hello World!&quot;, function() {
+     *             // yes
+     *             ...
+     *         }, function() {
+     *             // no
+     *             ...
+     *         });
+     *     }
+     */
+    confirm: function(message, yesCallback, noCallback) {
+        SCAlert.confirm(I18N.translate(MSG[&quot;N1100&quot;]), message, function(btn) {
+            if (btn === &quot;yes&quot;) {
+                if (UT.isFunction(yesCallback)) {
+                    yesCallback.call(this);
+                }
+            } else { // no
+                if (UT.isFunction(noCallback)) {
+                    noCallback.call(this);
+                }
+            }
+        });
+    },
+
+    /**
+     * 일반 데이터의 유효성 검사
+     *
+     * @method invalidData
+     * @param  {object}  data 검사할 변수들이 포함된 객체
+     * @param  {array}   [validator] 유효성 검사 항목
+     * @return {boolean} true - 유효하지 않음
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         if (UT.invalidData(me.get(&quot;findList.param&quot;))) {
+     *             return;
+     *         }
+     *         ...
+     *     }
+     */
+    invalidData: function(data, validator) {
+        if (UT.isArray(validator)) { // 배열
+            return !VALID.isValidData(data, validator);
+        } else if (UT.isArray(data.$validator)) { // 배열
+            return !VALID.isValidData(data, data.$validator);
+        }
+        return false;
+    },
+
+    /*
+     *
+     * TODO : element로 validation체크,
+     * ynkim
+     *
+     * invalidData : function(element){
+        var elements = Polymer.dom(element.root).querySelectorAll(&#x27;sc-date-field, sc-text-field, sc-combobox-field, cc-operorg-multi-combobox-field&#x27;);
+        var checkResult = false;
+        for(var i in elements){
+            var input  = Polymer.dom(elements[i]).node.querySelector(&#x27;input&#x27;);
+            if(input.required &amp;&amp; !input.disabled &amp;&amp; !input.readonly){
+                if(Polymer.dom(elements[i]).node.value!=null){
+                    console.log(&quot;통과&quot;);
+                }else{
+                    UT.alert(&quot;필수값을 확인하세요.&quot;);
+                    checkResult = true;
+                    return true;
+                }
+            }
+        }
+        return checkResult;
+    },*/
+
+
+    /**
+     * ajax 요청
+     *
+     * @method request
+     * @param {object}  ajax                      sc-ajax 객체
+     * @param {function}[responseCallback(res)]   삭제 완료 후 콜백 함수
+     * @param {object}  responseCallback(res).res 처리 결과 정보
+     * &lt;pre&gt;
+     * &amp;lt;sc-ajax url=&quot;url&quot; on-response=&quot;func&quot;&gt;&amp;lt;/sc_ajax&gt;
+     * on-response 에 함수를 지정하지 않은 경우 : responseCallback 을 정의하여 response를 받을 수 있다
+     * &lt;/pre&gt;
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         UT.request(me.$.findInfo);
+     *     }
+     *     someFunction: function() {
+     *         var me = this;
+     *         UT.request(me.$.findInfo, function(e, res) {
+     *             ...
+     *         });
+     *     }
+     */
+    request: function(ajax, responseCallback) {
+        SCLoadMask.show();
+        var listener = function(e) {
+            SCLoadMask.hide();
+            ajax.removeEventListener(&quot;response&quot;, listener);
+            ajax.removeEventListener(&quot;error&quot;, listener);
+            if (UT.isFunction(responseCallback)) {
+                responseCallback.call(this, e, e.detail.xhr);
+            }
+        };
+        ajax.addEventListener(&quot;response&quot;, listener);
+        ajax.addEventListener(&quot;error&quot;, listener);
+        ajax.generateRequest();
+    },
+
+    /**
+     * save 요청 - &quot;저장하시겠습니까?&quot; 메시지 출력
+     *
+     * @method save
+     * @param {object}  ajax                        sc-ajax 객체
+     * @param {object}  [options]
+     * @param {string}  [options.message]           &quot;저장하시겠습니까?&quot; 와 다른 메시지를 출력하는 경우.
+     * @param {function}[options.onResponse(res)]   저장 완료 후 콜백 함수
+     * @param {object}  options.onResponse(res).res 결과 정보
+     * &lt;pre&gt;
+     * &amp;lt;sc-ajax url=&quot;url&quot; on-response=&quot;func&quot;&gt;&amp;lt;/sc_ajax&gt;
+     * on-response 에 함수를 지정한 경우        : 해당 함수에서 UT.completeSave를 호출해줘야 한다.
+     * on-response 에 함수를 지정하지 않은 경우 : options.onResponse 을 정의하여 response를 받을 수 있다
+     * &lt;/pre&gt;
+     * @param {boolean} [options.confirm=true]         UT.confirm 수행 여부
+     * @param {function}[options.cancelCallback]       confrim 에서 취소 했을 때 콜백 함수
+     * @param {string|array}[options.attachGrpCdNames] 첨부파일 처리시. ajax.body 내에 저장될 grp_cd 필드
+     * @param {string|array}[options.attachUploadIds]  첨부파일 처리시. 업로드 Id
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         me.$.saveInfo.body = {
+     *             attachGrpCdNames: attNo,                // 첨부파일
+     *             attachUploadIds: me.$.upload.getId(),   // 첨부파일
+     *             message: message,
+     *             cancelCallback: function() {
+     *                 ...
+     *             }
+     *         };
+     *         UT.save(me.$.saveInfo);
+     *     }
+     */
+    save: function(ajax, options) {
+        options = options || {};
+        var fn = function() {
+            var getIndex = function(uploadId) { // uploadId의 index를 구한다
+                var index = 0;
+                for (var i = 0, len = attachUploadIds.length; i &lt; len; i++) {
+                    if (uploadId === attachUploadIds[i]) {
+                        index = i;
+                        break;
+                    }
+                }
+                return index;
+            };
+            var getGrpCd = function(propertyNames) { // 첨부파일 그룹코드를 구한다
+                var value = &quot;&quot;;
+                var object = ajax.body;
+                var names = propertyNames.split(&quot;.&quot;);
+                for (var i = 0, len = names.length; i &lt; len; i++) {
+                    if (i === len - 1) {
+                        value = object[names[i]];
+                    } else {
+                        object = object[names[i]];
+                    }
+                }
+                return value ? value : UT.generateUUID();
+            };
+            var setGrpCd = function(propertyNames, value) { // 첨부파일 그룹코드를 설정한다
+                var object = ajax.body;
+                var names = propertyNames.split(&quot;.&quot;);
+                for (var i = 0, len = names.length; i &lt; len; i++) {
+                    if (i === len - 1) {
+                        object[names[i]] = value;
+                    } else {
+                        object = object[names[i]];
+                    }
+                }
+            };
+            var uploads = [];
+            var responseCallback = function(e, res) {
+                for (var i = 0, len = uploads.length; i &lt; len; i++) {
+                    UPLOAD.onLoadFiles(uploads[i].uploadId, uploads[i].grpCd);
+                }
+                if (UT.isFunction(options.onResponse)) {
+                    options.onResponse.call(this, e, res);
+                }
+            };
+
+            var attachUploadIds = options.attachUploadIds || &quot;&quot;;
+            var attachGrpCdNames = options.attachGrpCdNames || &quot;&quot;;
+            if (attachUploadIds &amp;&amp; attachGrpCdNames) {
+                attachUploadIds = [].concat(attachUploadIds);
+                attachGrpCdNames = [].concat(attachGrpCdNames);
+
+                UPLOAD.onUpload(attachUploadIds, function(files) {
+                    var param = {
+                        insertAttachs: [],
+                        deleteAttachs: []
+                    };
+
+                    for (var uploadId in files) {
+                        var object = files[uploadId];
+                        var index = getIndex(uploadId);
+                        var grpCd = getGrpCd(attachGrpCdNames[index]);
+                        for (var i = 0, len = object.inserts.length; i &lt; len; i++) {
+                            param.insertAttachs.push({
+                                grp_cd: grpCd,
+                                orgn_file_nm: object.inserts[i].originalName,
+                                att_file_nm: object.inserts[i].uploadName,
+                                att_file_path: object.inserts[i].uploadPath,
+                                att_file_siz: object.inserts[i].size,
+                                sort_ord: object.inserts[i].order
+                            });
+                        }
+                        for (var i = 0, len = object.deletes.length; i &lt; len; i++) {
+                            param.deleteAttachs.push({
+                                att_id: object.deletes[i].uniqKey
+                            });
+                        }
+                        setGrpCd(attachGrpCdNames[index], object.uploadedCount &gt; 0 ? grpCd : &quot;&quot;); // 첨부파일이 없으면 grpCd를 지운다
+                        uploads.push({
+                            uploadId: uploadId,
+                            grpCd: grpCd
+                        });
+                    }
+                    if (param.insertAttachs.length &gt; 0 || param.deleteAttachs.length &gt; 0) {
+                        UT.ajax(&quot;saveListAttach.do&quot;, param, function() { // 첨부파일 정보 저장
+                            UT.request(ajax, responseCallback);
+                        });
+                    } else {
+                        UT.request(ajax, responseCallback);
+                    }
+                });
+            } else {
+                UT.request(ajax, responseCallback);
+            }
+        };
+        if (options.confirm === false) {
+            fn();
+        } else {
+            UT.confirm(options.message || I18N.translate(MSG[&quot;N1200&quot;]), fn, options.cancelCallback); // 저장하시겠습니까?
+        }
+    },
+
+    /**
+     * 삭제 요청 - &quot;삭제하시겠습니까?&quot; 메시지 출력
+     *
+     * @method onDelete
+     * @param {object}  ajax                        sc-ajax 객체
+     * @param {object}  [options]
+     * @param {string}  [options.message]           &quot;삭제하시겠습니까?&quot; 와 다른 메시지를 출력하는 경우.
+     * @param {function}[options.onResponse(res)]   삭제 완료 후 콜백 함수
+     * @param {object}  options.onResponse(res).res 처리 결과 정보
+     * &lt;pre&gt;
+     * &amp;lt;sc-ajax url=&quot;url&quot; on-response=&quot;func&quot;&gt;&amp;lt;/sc_ajax&gt;
+     * on-response 에 함수를 지정한 경우        : 해당 함수에서 UT.completeDelete를 호출해줘야 한다.
+     * on-response 에 함수를 지정하지 않은 경우 : options.onResponse 을 정의하여 response를 받을 수 있다
+     * &lt;/pre&gt;
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         UT.onDelete(me.$.deleteInfo);
+     *     }
+     */
+    onDelete: function(ajax, options) {
+        options = options || {};
+        UT.confirm(options.message || I18N.translate(MSG[&quot;N1300&quot;]), function() { // 삭제하시겠습니까?
+            UT.request(ajax, options.onResponse);
+        });
+    },
+
+    /**
+     * UT.request 에 대한 요청 완료
+     *
+     * @method completeRequest
+     * @param {object}   options                    옵션
+     * @param {object}   options.result             서버에서의 처리 결과 result.result_status 가 S 이면 성공, 나머지는 실패
+     * @param {object}   [options.success]          성공시 처리
+     * @param {string}   [options.success.message]  성공시 메시지
+     * @param {function} [options.success.callback] 성공시 호출될 콜백 함수
+     * @param {object}   [options.failure]          실패시 처리
+     * @param {string}   [options.failure.message]  실패시 메시지
+     * @param {function} [options.failure.callback] 실패시 호출될 콜백 함수
+     * @async
+     * @example
+     *     someFunction: function(result) {
+     *         var me = this;
+     *         UT.completeRequest({
+     *             result: result,
+     *             success: {
+     *                 message: I18N.translate(MSG[&quot;N1500&quot;]),
+     *                 callback: function() {
+     *                     ...
+     *                 }
+     *             },
+     *             failure: {
+     *                 message: UT.failureMessage(result),
+     *                 callback: function() {
+     *                     ...
+     *                 }
+     *             }
+     *         });
+     *     }
+     */
+    completeRequest: function(options) {
+        options = options || {};
+        if (UT.isObject(options.result)) {
+            if (options.result.result_status === DEF.SUCCESS) {
+                var success = options.success || {};
+                var callback = function() {
+                    if (UT.isFunction(success.callback)) {
+                        success.callback.call(this);
+                    }
+                };
+                if (UT.isString(success.message)) {
+                    UT.alert(success.message, callback);
+                } else {
+                    callback();
+                }
+            } else {
+                var failure = options.failure || {};
+                var callback = function() {
+                    if (UT.isFunction(failure.callback)) {
+                        failure.callback.call(this);
+                    }
+                };
+                if (UT.isString(failure.message)) {
+                    UT.alert(failure.message, callback);
+                } else {
+                    callback();
+                }
+            }
+        }
+    },
+
+    /**
+     * UT.save 에 대한 요청 완료
+     *
+     * @method completeSave
+     * @param {object}   result            서버에서의 처리 결과
+     * @param {function} [successCallback] 처리결과가 성공이었을 때 콜백 함수
+     * @param {function} [failureCallback] 처리결과가 실패였을 때 콜백 함수
+     * @async
+     * @example
+     *     someFunction: function(e, res) {
+     *         var me = this;
+     *         UT.completeSave(res.response, function() {
+     *             ...
+     *         });
+     *     }
+     */
+    completeSave: function(result, successCallback, failureCallback) {
+        UT.completeRequest({
+            result: result,
+            success: {
+                message: I18N.translate(MSG[&quot;N1500&quot;]), // 요청을 완료 하였습니다
+                callback: successCallback
+            },
+            failure: {
+                message: UT.failureMessage(result),
+                callback: failureCallback
+            }
+        });
+    },
+
+    /**
+     * UT.onDelete 에 대한 요청 완료
+     *
+     * @method completeDelete
+     * @param {object}   result            서버에서의 처리 결과
+     * @param {function} [successCallback] 처리결과가 성공이었을 때 콜백 함수
+     * @param {function} [failureCallback] 처리결과가 실패였을 때 콜백 함수
+     * @async
+     * @example
+     *     someFunction: function(e, res) {
+     *         var me = this;
+     *         UT.completeDelete(res.response, function() {
+     *             ...
+     *         });
+     *     }
+     */
+    completeDelete: function(result, successCallback, failureCallback) {
+        UT.completeRequest({
+            result: result,
+            success: {
+                message: I18N.translate(MSG[&quot;N1500&quot;]), // 요청을 완료 하였습니다
+                callback: successCallback
+            },
+            failure: {
+                message: UT.failureMessage(result),
+                callback: failureCallback
+            }
+        });
+    },
+
+    /**
+     * 서버로의 요청 결과에 대한 실패 메시지
+     *
+     * @method failureMessage
+     * @param  {object} result 서버에서의 처리 결과
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         UT.completeRequest({
+     *             result: result,
+     *             ...
+     *             failure: {
+     *                 message: UT.failureMessage(result)
+     *             }
+     *         });
+     *     }
+     */
+    failureMessage: function(result) {
+        var message = I18N.translate(MSG[&quot;E9999&quot;]); // 오류가 발생하였습니다.\n관리자에게 문의하세요
+        if (result.result_status === DEF.DUPLICATED) {
+            message += &quot; - &quot; + I18N.translate(MSG[&quot;E9100&quot;]); // 중복 데이터
+        } else if (result.result_status === DEF.USED) {
+            message += &quot; - &quot; + I18N.translate(MSG[&quot;E9200&quot;]); // 사용중 데이터
+        } else if (result.result_status === DEF.RFX_ERR){
+            message = I18N.translate(MSG[&quot;RFX1022&quot;]);        //RFX 마감됨
+        } else if (result.result_status === DEF.RFX_REJECT){
+            message = I18N.translate(MSG[&quot;RFX1023&quot;]);        //RFX 포기건이 존재함
+        }
+        return message;
+    },
+
+    /**
+     * clone object
+     *
+     * @method copy
+     * @param  {object} object 복사할 대상 object
+     * @return {object} new object
+     * @example
+     *     someFunction: function(param) {
+     *         var me = this;
+     *         me.set(&quot;findInfo.param&quot;, UT.copy(param));
+     *     }
+     */
+    copy: function(object) {
+        if (!UT.isObject(object)) {
+            return object;
+        }
+        if (object instanceof Date) {
+            var copy = new Date();
+            copy.setTime(object.getTime());
+            return copy;
+        }
+        if (Array.isArray(object)) {
+            return object.concat();
+        }
+        var copy = {};
+        for (var key in object) {
+            if (object.hasOwnProperty(key)) {
+                copy[key] = UT.copy(object[key]);
+            }
+        }
+        return copy;
+    },
+
+    /**
+     * sc-ajax 실행
+     *
+     * @method ajax
+     * @param {string}   url                       URL
+     * @param {object}   param                     서버로 전송할 파라미터
+     * @param {function} [completeCallback(res)]   실행 완료 후 콜백 함수
+     * @param {object}   completeCallback(res).res 서버로 부터 전송되는 실행 결과 정보
+     * @param {object}   [element]                 ajax 가 포함될 element (메뉴 권한 체크를 해야하는 경우 필수)
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         UT.ajax(&quot;saveList.do&quot;, param, function() {
+     *             ...
+     *         }, me);
+     *     }
+     */
+    ajax: function(url, param, completeCallback, element) {
+        var request = document.createElement(&quot;sc-ajax&quot;);
+        request.url = url;
+        request.body = param;
+        request.addEventListener(&quot;response&quot;, function() {
+            if (UT.isFunction(completeCallback)) {
+                completeCallback.call(this, request.lastResponse);
+            }
+        });
+        if (element) {
+            element.appendChild(request);
+        }
+        request.generateRequest();
+    },
+
+    /**
+     * uuid 만들기
+     *
+     * @method generateUUID
+     * @return {string} uuid
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         var uuid = UT.generateUUID();
+     *         ...
+     *     }
+     */
+    generateUUID: function() {
+        return &quot;xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx&quot;.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0;
+            var v = (c === &quot;x&quot;) ? r : (r &amp; 3 | 8);
+            return v.toString(16);
+        });
+    },
+
+    /**
+     * 팝업
+     * &lt;br&gt;
+     * 팝업의 close 이벤트는 기본적으로 설정된다.
+     *
+     * @method popup
+     * @param {string} popupTagName                팝업으로 사용할 tag name
+     * @param {object} element                     element
+     * @param {number} width                       가로크기
+     * @param {number} height                      세로크기
+     * @param {object} [events]                    팝업에서 발생되는 event의 리스너 목록,
+     * @param {object} [options]                   팝업 설정 옵션
+     * @param {object} [options.modal=true]        모달 여부
+     * @param {object} [options.maximizable=false] 최대화 여부
+     * @param {object} [options.draggable=true]    이동 여부
+     * @param {object} [options.resizable=false]   리사이징 여부
+     * @param {object} [options.collapsible=false] 접기/펴기 여부
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         UT.popup(&quot;ep-approval&quot;, me, 900, 800, {
+     *             &quot;attached&quot;: function(popup, e) {
+     *                 popup.getContent().setParam({
+     *                     app_id: param.app_id || &quot;&quot;,
+     *                     aprv_id: param.aprv_id || &quot;&quot;,
+     *                     aprv_typcd: param.aprv_typcd || &quot;&quot;
+     *                 });
+     *             },
+     *             &quot;saved-approval&quot;: function(popup, e) {
+     *                 if (UT.isFunction(savedCallback)) {
+     *                     savedCallback.call(this, e.detail);
+     *                 }
+     *             }
+     *         }, {maximizable: true});
+     *     }
+     */
+    popup: function(popupTagName, element, width, height, events, options) {
+        options = options || {};
+        var modal = UT.isBoolean(options.modal) ? options.modal : true;
+        var maximizable = UT.isBoolean(options.maximizable) ? options.maximizable : false;
+        var draggable = UT.isBoolean(options.draggable) ? options.draggable : true;
+        var resizable = UT.isBoolean(options.resizable) ? options.resizable : true;
+        var collapsible = UT.isBoolean(options.collapsible) ? options.collapsible : false;
+        var title = UT.isString(options.title) ? options.title : &quot;&quot;;
+
+        var popup = SCPopupManager.create(popupTagName, element, width, height, modal, true, maximizable, draggable, resizable, collapsible);
+        //팝업 타이틀은 translate한 명으로 가져와야함.
+        popup.titleText = title;
+
+        var content = popup.getContent();
+        if (UT.isObject(events)) {
+            for (var eventName in events) {
+                if (UT.isFunction(events[eventName]) &amp;&amp; eventName !== &quot;close&quot;) {
+                    content.addEventListener(eventName, events[eventName].bind(this, popup));
+                }
+            }
+        }
+        content.addEventListener(&quot;set-popup-title&quot;, function(e) {
+            if (UT.isEmpty(popup.titleText)) {
+                popup.titleText = e.detail;
+            }
+        });
+        content.addEventListener(&quot;close&quot;, function(e) {
+            popup.close();
+            if (UT.isFunction(events[&quot;close&quot;])) {
+                events[&quot;close&quot;].call(this, popup, e);
+            }
+        });
+        popup.show();
+        return popup;
+    },
+
+    /**
+     * 팝업
+     * &lt;br&gt;
+     * scpopup에 iframe을 이용하여 jsp, html등 파일을 호출한다.
+     * 호출된 jsp에서 팝업창을 제어할 수 있도록 closePopup 펑션 추가
+     *
+     * @method popupJsp
+     * @param {string} url                           호출할 파일 url
+     * @param {object} element                     element
+     * @param {number} width                       가로크기
+     * @param {number} height                      세로크기
+     * @param {object} [events]                    팝업에서 발생되는 event의 리스너 목록,
+     * @param {object} [options]                   팝업 설정 옵션
+     * @param {object} [options.modal=true]        모달 여부
+     * @param {object} [options.maximizable=false] 최대화 여부
+     * @param {object} [options.draggable=true]    이동 여부
+     * @param {object} [options.resizable=false]   리사이징 여부
+     * @param {object} [options.collapsible=false] 접기/펴기 여부
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         UT.popupJsp(&quot;test.jsp&quot;, me, 900, 800, {maximizable: true});
+     *     }
+     */
+    popupJsp: function(url, element, width, height, events, options) {
+        options = options || {};
+        var modal = UT.isBoolean(options.modal) ? options.modal : true;
+        var maximizable = UT.isBoolean(options.maximizable) ? options.maximizable : false;
+        var draggable = UT.isBoolean(options.draggable) ? options.draggable : true;
+        var resizable = UT.isBoolean(options.resizable) ? options.resizable : true;
+        var collapsible = UT.isBoolean(options.collapsible) ? options.collapsible : false;
+        var title = UT.isString(options.title) ? options.title : &quot;&quot;;
+
+        var popup = SCPopupManager.create(null, element, width, height, modal, true, maximizable, draggable, resizable, collapsible);
+        popup.titleText = title;
+
+        var iframe = document.createElement(&#x27;iframe&#x27;);
+        iframe.src = encodeURI(url);
+        iframe.frameborder = 0;
+        iframe.scrolling = &#x27;yes&#x27;;
+        iframe.width = &#x27;100%&#x27;;
+        iframe.height = &#x27;100%&#x27;;
+
+        popup._contentElement.appendChild(iframe);
+        popup.show();
+
+        content = iframe.contentWindow;
+
+        iframe.onload = function(){
+            iframe.contentWindow.fire = function(event, detail){
+                popup.fire(event, detail);
+            }
+        };
+
+        if (UT.isObject(events)) {
+            for (var eventName in events) {
+                if (UT.isFunction(events[eventName]) &amp;&amp; eventName !== &quot;close&quot;) {
+                    popup.addEventListener(eventName, events[eventName].bind(this, popup));
+                }
+            }
+        }
+
+        popup.addEventListener(&quot;close&quot;, function(e) {
+            popup.close();
+            if (UT.isFunction(events[&quot;close&quot;])) {
+                events[&quot;close&quot;].call(this, iframe.contentWindow, e);
+            }
+        });
+
+        return iframe.contentWindow;
+    },
+
+    /**
+     * 결재 팝업
+     *
+     * @method popupApproval
+     * @param {object}   element                    element
+     * @param {object}   param                      결재 팝업으로 전달할 파라미터
+     * @param {string}   [param.app_id]             해당 모듈의 APP 아이디(신규작성시)
+     * @param {string}   [param.aprv_typcd]         결재 유형코드(신규작성시)
+     * @param {string}   [param.aprv_id]            결재 아이디
+     * @param {function} [savedCallback(stsCd)]     결재 작성시(resultView=false) 결재정보가 저장된 후 콜백 함수
+     * @param {string}   savedCallback(stsCd).stsCd 결재상태코드
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         UT.popupApproval(me, {aprv_id: data.aprv_id}, function() {
+     *             ...
+     *         });
+     *     }
+     */
+    popupApproval: function(element, param, savedCallback) {
+        Polymer.Base.importHref(&quot;../../../../../ui/bp/shared/ep-approval.html&quot;, function(e) {
+            UT.popup(&quot;ep-approval&quot;, element, 900, 800, {
+                &quot;attached&quot;: function(popup, e) {
+                    popup.getContent().setParam({
+                        app_id: param.app_id || &quot;&quot;,
+                        aprv_id: param.aprv_id || &quot;&quot;,
+                        aprv_typcd: param.aprv_typcd || &quot;&quot;
+                    });
+                },
+                &quot;saved-approval&quot;: function(popup, e) {
+                    if (UT.isFunction(savedCallback)) {
+                        savedCallback.call(this, e.detail, popup);
+                    }
+                },
+                &quot;close&quot;: function(popup, e) {
+                    if (UT.isFunction(savedCallback)) {
+                        savedCallback.call(this, e.detail, popup);
+                    }
+                }
+            }, {maximizable: true});
+        });
+    },
+
+    /**
+     * 첨부파일 업로드 팝업
+     * &lt;br&gt;
+     * 콜백함수로부터 첨부파일 그룹코드와 파일 개수가 전달된다.
+     *
+     * @method popupAttach
+     * @param {object}   element                                 element
+     * @param {string}   grpCd                                   첨부파일 그룹코드
+     * @param {function} [savedCallback(result)]                 파일 저장 후 콜백 함수
+     * @param {object}   savedCallback(result).result            콜백함수로부터 전달 되는 파라미터 - (예) {grp_cd: &quot;xxx&quot;, file_count: 2}
+     * @param {string}   savedCallback(result).result.grp_cd     첨부파일 그룹코드
+     * @param {number}   savedCallback(result).result.file_count 업로드된 파일 총 수
+     * @param {object}   [options]                               업로더 설정 옵션
+     * @param {number}   [options.maxTotalFileCount=0]           객최대 파일 개수, 0 : 제한없음.
+     * @param {string}   [options.maxTotalFileSize=0]            업로드 될 파일의 총 용량. 단위 - B(byte), KB(kilobyte), MB(megabyte), GB(gigabyte)
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         me.gridView.onDataCellClicked = function(grid, cell) {
+     *             var fieldName = cell.fieldName;
+     *             if(fieldName == &quot;field1&quot;){
+     *                 UT.popupAttach(me, me.data.field2, function(result) {
+     *                     grid.setValues(cell.itemIndex, {
+     *                         field2: result.grp_cd,
+     *                         field1: result.file_count
+     *                     }, true);
+     *                 });
+     *             }
+     *         };
+     *     }
+     */
+    popupAttach: function(element, grpCd, savedCallback, options) {
+        Polymer.Base.importHref(&quot;../../../../../ui/bp/shared/ep-attach.html&quot;, function(e) {
+            UT.popup(&quot;ep-attach&quot;, element, 800, 400, {
+                &quot;attached&quot;: function(popup, e) {
+                    popup.getContent().setParam({
+                        grp_cd: grpCd || &quot;&quot;
+                    });
+                    popup.getContent().setUploadOptions(options);
+                },
+                &quot;saved-attach&quot;: function(popup, e) {
+                    if (UT.isFunction(savedCallback)) {
+                        savedCallback.call(this, e.detail);
+                    }
+                }
+            });
+        });
+    },
+
+    /**
+     * 객체 선택 팝업
+     *
+     * @method popupSelectObject
+     * @param {string}   popupTagName                        팝업으로 사용할 tag name
+     * @param {object}   element                             element
+     * @param {function} selectedCallback(selected)          선택된 데이터를 리턴하는 콜백 함수
+     * @param {object}   selectedCallback(selected).selected 선택된 데이터
+     * @param {object}   [options]
+     * @param {boolean}  [options.singleSelect=false]        객체의 단일 선택 여부
+     * @param {boolean}  [options.selectAfterClose=true]     검색 결과가 복수 일 경우 팝업에서 선택 후 창 닫기
+     * @param {number}   [options.width=650]                 팝업 가로 크기
+     * @param {boolean}  [options.height=500]                팝업 세로 크기
+     * @param {array}    [options.dataRows=rows]             팝업의 그리드에 전달할 row 데이터
+     * @param {object}   [options.defaultParam=param]        팝업 검색 파라미터
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         UT.popupSelectObject(&quot;ep-module&quot;, me, function(selected) {
+     *             ...
+     *             me.onAdd(selected);
+     *         });
+     *     }
+     */
+    popupSelectObject: function(popupTagName, element, selectedCallback, options) {
+        options = options || {};
+        options.singleSelect = UT.isBoolean(options.singleSelect) ? options.singleSelect : false;
+        options.selectAfterClose = UT.isBoolean(options.selectAfterClose) ? options.selectAfterClose : true;
+        options.width = UT.isNumber(options.width) ? options.width : 650;
+        options.height = UT.isNumber(options.height) ? options.height : 500;
+        options.title = UT.isString(options.title) ? options.title : &quot;&quot;;
+
+        UT.popup(popupTagName, element, options.width, options.height, {
+            &quot;attached&quot;: function(popup, e) {
+                popup.getContent().setOptions(options);
+                if (!options.dataRows) {
+                    popup.getContent().onFindList();
+                }
+            },
+            &quot;selected-items&quot;: function(popup, e) {
+                selectedCallback.call(this, e.detail);
+                if (options.selectAfterClose) {
+                    popup.close();
+                }
+            }
+        },options);
+    },
+
+    /**
+     * 자동완성 객체 검색
+     * **ep-user-list**: 사용자검색, **ep-job-list**:구매그룹검색, **ep-dept-list**: 부서 검색
+     *
+     * @method autoCompleteObject
+     * @param {string}   popupTagName                        팝업으로 사용할 tag name
+     * @param {object}   element                             element
+     * @param {object}   param                               데이터 검색 파라미터
+     * @param {function} selectedCallback(selected)          검색된(선택된) 데이터를 리턴하는 콜백 함수
+     * @param {object}   selectedCallback(selected).selected 검색된(선택된) 데이터
+     * @param {object}   [options]
+     * @param {boolean}  [options.singleSelect=true]         객체의 단일 선택 여부
+     * @param {boolean}  [options.selectAfterClose=true]     검색 결과가 복수 일 경우 팝업에서 선택 후 창 닫기
+     * @param {number}   [options.width=650]                 팝업 가로 크기
+     * @param {boolean}  [options.height=500]                팝업 세로 크기
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         UT.autoCompleteObject(&quot;ep-module&quot;, me, {&quot;usr_nm&quot;: me.value}, function(result) {
+     *             ...
+     *         });
+     *     }
+     */
+    autoCompleteObject: function(popupTagName, element, param, selectedCallback, options) {
+        options = options || {};
+        options.singleSelect = UT.isBoolean(options.singleSelect) ? options.singleSelect : true;
+
+        var createElement = document.createElement(popupTagName);
+        UT.ajax(createElement.getAjaxUrl(), param, function(result) {
+            if (UT.isArray(result)) { // 배열
+                if (result.length === 0) {
+                    //UT.alert(I18N.translate(MSG[&quot;N2200&quot;])); // 검색결과가 없습니다
+                    selectedCallback.call(this, {});
+
+                } else if (result.length === 1) {
+                    selectedCallback.call(this, options.singleSelect ? result[0] : result);
+
+                } else if (result.length &gt; 1) {
+                    options.dataRows = result;
+                    options.defaultParam = param;
+                    UT.popupSelectObject(popupTagName, element, selectedCallback, options);
+                }
+            }
+        }, element);
+    },
+
+    /**
+     * date를 format의 형태로 출력한다.
+     *
+     * @method  formatDate
+     * @param   {date|number} date 날짜 객체 | 날짜의 time값
+     * @param   {string} [format=DEF.styles.formatDate.datetimeFormat] 변환할 format
+     * @return  {string} 변환된 문자열
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         UT.formatDate(new Date(), &quot;yyyy/MM/dd&quot;); // 2016/04/20
+     *     }
+     */
+    formatDate: function(date, format) {
+        if (UT.isNumber(date)) {
+            date = new Date(date);
+        }
+        if (!(date instanceof Date)) {
+            return date;
+        }
+        var me = date;
+        format = format || DEF.styles.formatDate.datetimeFormat;
+        return format.replace(/(yyyy|yy|MM|M|dd|d|HH|H|mm|m|ss|s)/g, function(match) {
+            switch (match) {
+                case &quot;yyyy&quot;:
+                    return me.getFullYear();
+                case &quot;yy&quot;:
+                    var v = me.getFullYear() % 100;
+                    return v &gt; 10 ? v : &quot;0&quot; + v;
+                case &quot;MM&quot;:
+                case &quot;M&quot;:
+                    var v = me.getMonth() + 1;
+                    return match.length === 1 || v &gt;= 10 ? v : &quot;0&quot; + v;
+                case &quot;dd&quot;:
+                case &quot;d&quot;:
+                    var v = me.getDate();
+                    return match.length === 1 || v &gt;= 10 ? v : &quot;0&quot; + v;
+                case &quot;HH&quot;:
+                case &quot;H&quot;:
+                    var v = me.getHours();
+                    return match.length === 1 || v &gt;= 10 ? v : &quot;0&quot; + v;
+                case &quot;mm&quot;:
+                case &quot;m&quot;:
+                    var v = me.getMinutes();
+                    return match.length === 1 || v &gt;= 10 ? v : &quot;0&quot; + v;
+                case &quot;ss&quot;:
+                case &quot;s&quot;:
+                    var v = me.getSeconds();
+                    return match.length === 1 || v &gt;= 10 ? v : &quot;0&quot; + v;
+                default:
+                    return match;
+            }
+        });
+    },
+
+    /**
+     * string에 values를 replace 한다
+     *
+     * @method formatString
+     * @param  {string}       string 대상 문자열
+     * @param  {string|array} values 바꿀 문자열
+     * @return {string}              replace 된 문자열
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         UT.formatString(&quot;{0} / {1}&quot;, &quot;a&quot;, &quot;b&quot;);                       // a / b
+     *         UT.formatString(&quot;{0} / {1}&quot;, [&quot;a&quot;, &quot;b&quot;]);                     // a / b
+     *         UT.formatString(&quot;{name} / {value}&quot;, {name: &quot;a&quot;, value: &quot;b&quot;}); // a / b
+     *     }
+     */
+    formatString: function(string, values) {
+        values = UT.isObject(values) ? values : Array.prototype.slice.call(arguments, 1);
+        return string.replace(/\{([^{}]+)\}/gm, function(matched, key) {
+            return typeof values[key] === &quot;undefined&quot; ? matched : values[key];
+        });
+    },
+
+    /**
+     * 코드 로드
+     * sc-service-group 요청 및 요청완료를 promise로 반환한다.
+     *
+     * @method promiseCodes
+     * @param {object}   codes             sc-service-group
+     * @param {function} [loadedCallback]  sc-service-group이 모두 load 된 후 콜백 함수
+     * @async
+     * @deprecated Use &#x27;UT.promise&#x27; instead.
+     */
+    promiseCodes: function(codes, loadedCallback) {
+        return new Promise(function(resolve, reject) {
+            codes.addEventListener(&quot;result&quot;, function() {
+                resolve(&quot;codes-loaded&quot;);
+                if (UT.isFunction(loadedCallback)) {
+                    loadedCallback.call(this);
+                }
+            });
+            codes.service();
+        });
+    },
+
+    /**
+     * promise 처리
+     *
+     * @method promise
+     * @param  {array}    elements          sc-service-group 과 같이 service() 함수를 가지는 element 이거나, Promise 를 리턴하는 함수
+     * @param  {function} [loadedCallback]  elements 가 모두 load 된 후 콜백 함수
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         UT.promise([me.$.codes, me.$.editor, me.$.upload], function() {
+     *             me.setupGrid();
+     *             ...
+     *         });
+     *     }
+     */
+    promise: function(elements, loadedCallback) {
+        var fn = function(element) {
+            return new Promise(function(resolve, reject) {
+                element.addEventListener(&quot;result&quot;, function(e) {
+                    resolve(&quot;promised-&quot; + e.detail);
+                });
+                element.service();
+            });
+        };
+        var promise = [];
+        for (var i = 0, len = elements.length; i &lt; len; i++) {
+            if (elements[i] instanceof Promise) {
+                promise.push(elements[i]);
+            } else {
+                promise.push(fn(elements[i]));
+            }
+        }
+        Promise.all(promise).then(function(values) {
+            if (UT.isFunction(loadedCallback)) {
+                loadedCallback.call(this);
+            }
+        });
+    },
+
+    /**
+     * 숫자형으로.
+     *
+     * @method toNumber
+     * @param  {string} s
+     * @return {number} n : param 이 숫자형이 아니면 0
+     */
+    toNumber: function(s) {
+        if (UT.isString(s)) {
+            s = s.replace(/[\,]/g, &quot;&quot;);
+        }
+        return isNaN(s) ? 0 : Number(s);
+    },
+
+    /**
+     * format 형태의 string을 date 로 변환한다.
+     *
+     * @method toDate
+     * @param  {string} str 날짜 string
+     * @param  {string} [format=DEF.styles.formatDate.datetimeFormat] str의 format
+     * @return {date} 변환된 date
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         UT.toDate(&quot;20160420&quot;, &quot;yyyyMMdd&quot;); // 2016/04/20
+     *     }
+     */
+    toDate: function(str, format) {
+        format = format || DEF.styles.formatDate.datetimeFormat;
+
+        if (!UT.isString(str) || str.length !== format.length) {
+            return null;
+        }
+        var y = 0, m = 0, d = 0, h = 0, mi = 0, s = 0;
+        format.replace(/(yyyy|yy|MM|M|dd|d|HH|H|mm|m|ss|s)/g, function(match) {
+            var offset = arguments[arguments.length - 2];
+            switch (match) {
+                case &quot;yyyy&quot;:
+                case &quot;yy&quot;:
+                    y = parseInt(str.substring(offset, offset + match.length), 10);
+                    break;
+                case &quot;MM&quot;:
+                case &quot;M&quot;:
+                    m = parseInt(str.substring(offset, offset + match.length), 10) - 1;
+                    break;
+                case &quot;dd&quot;:
+                case &quot;d&quot;:
+                    d = parseInt(str.substring(offset, offset + match.length), 10);
+                    break;
+                case &quot;HH&quot;:
+                case &quot;H&quot;:
+                    h = parseInt(str.substring(offset, offset + match.length), 10);
+                    break;
+                case &quot;mm&quot;:
+                case &quot;m&quot;:
+                    mi = parseInt(str.substring(offset, offset + match.length), 10);
+                    break;
+                case &quot;ss&quot;:
+                case &quot;s&quot;:
+                    s = parseInt(str.substring(offset, offset + match.length), 10);
+                    break;
+                default:
+                    break;
+            }
+        });
+        return new Date(y, m, d, h, mi, s);
+    },
+
+    /**
+     * Array 여부
+     *
+     * @method isArray
+     * @param  {object}  object
+     * @return {boolean} true is array
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         if (UT.isArray(dataRows)) {
+     *             ...
+     *         }
+     *     }
+     */
+    isArray: function(object) {
+        return Array.isArray(object);
+        // return Object.prototype.toString.call(object) === &quot;[object Array]&quot;;
+    },
+
+    /**
+     * String 여부
+     *
+     * @method isString
+     * @param  {object}  object
+     * @return {boolean} true is string
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         if (UT.isString(usrId)) {
+     *             ...
+     *         }
+     *     }
+     */
+    isString: function(object) {
+        return &quot;string&quot; === typeof object;
+    },
+
+    /**
+     * Boolean 여부
+     *
+     * @method isBoolean
+     * @param  {object}  object
+     * @return {boolean} true is boolean
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         me.set(&quot;singleSelect&quot;, UT.isBoolean(options.singleSelect) ? options.singleSelect : false);
+     *     }
+     */
+    isBoolean: function(object) {
+        return &quot;boolean&quot; === typeof object;
+    },
+
+    /**
+     * Number 여부
+     *
+     * @method isNumber
+     * @param  {object}  object
+     * @return {boolean} true is number
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         if (UT.isNumber(count)) {
+     *             ...
+     *         }
+     *     }
+     */
+    isNumber: function(object) {
+        return &quot;number&quot; === typeof object;
+    },
+
+    /**
+     * Function 여부
+     *
+     * @method isFunction
+     * @param  {object}  object
+     * @return {boolean} true is function
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         if (UT.isFunction(callback)) {
+     *             callback.call(this);
+     *         }
+     *     }
+     */
+    isFunction: function(object) {
+        return &quot;function&quot; === typeof object;
+    },
+
+    /**
+     * Object 여부
+     * &lt;br&gt;
+     * (주의: null 도 object이지만, 편의상 null 은 object에서 제외 한다)
+     *
+     * @method isObject
+     * @param  {object}  object
+     * @return {boolean} true is object
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         if (UT.isObject(options.defaultParam)) {
+     *             me.set(&quot;findList.param&quot;, options.defaultParam);
+     *         }
+     *     }
+     */
+    isObject: function(object) {
+        return object !== null &amp;&amp; &quot;object&quot; === typeof object;
+    },
+
+    /**
+     * Date 여부
+     *
+     * @method isDate
+     * @param  {object}  object
+     * @return {boolean} true is date
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         if (UT.isDate(param)) {
+     *             ...
+     *         }
+     *     }
+     */
+    isDate: function(object) {
+        return UT.isObject(object) &amp;&amp; typeof object.getTime === &quot;function&quot;;
+    },
+
+    /**
+     * 데이터의 empty 여부
+     * &lt;br&gt;
+     * string일 경우 trim 후 empty 검사한다
+     *
+     * @method isEmpty
+     * @param  {string|array} object
+     * @return {boolean}      true is empty
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         if (!UT.isEmpty(item)) {
+     *             ...
+     *         }
+     *     }
+     */
+    isEmpty: function(object) {
+        return object === null || &quot;undefined&quot; === typeof object || (UT.isString(object) &amp;&amp; object.trim() === &quot;&quot;) || (UT.isArray(object) &amp;&amp; object.length === 0);
+    },
+
+    /**
+     * input element에서 enter key가 눌렸을 때의 이벤트
+     *
+     * @method enter
+     * @param {object} element
+     * @param {function} callback enter key가 눌린 후 콜백 함수
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *     }
+     */
+    enter: function(element, callback) {
+        $(element).find(&quot;input&quot;).keypress(function(key) {
+            if (key.keyCode === 13) {
+                if (UT.isFunction(callback)) {
+                    callback.call(this);
+                }
+            }
+        });
+    },
+
+    /**
+     * 부모를 탐색하며 selector와 동일한 엘리먼트를 찾아줌
+     *
+     * @method closest
+     * @param {object} element
+     * @param {string} selector
+     * @return {object}
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *     }
+     */
+    closest: function(element, selector) {
+        while(element) {
+            if (Polymer.DomApi.matchesSelector.call(element, selector)) {
+                return element;
+            } else {
+                element = element.parentElement;
+            }
+        }
+    },
+
+    /**
+     * 현재 화면의 MenuId를 return
+     *
+     * @method getMenuId
+     * @param {object} element
+     * @return {string} menuId
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *     }
+     */
+    getMenuId: function(element) {
+        var mdiWindow = UT.closest(element, &quot;sc-mdi-window&quot;);
+        if (!mdiWindow) {
+            var scWindow = UT.closest(element, &quot;sc-window&quot;);
+            if (scWindow &amp;&amp; typeof scWindow.parent !== &quot;undefined&quot;) {
+                mdiWindow = UT.closest(scWindow.parent, &quot;sc-mdi-window&quot;);
+            } else {
+                return null;
+            }
+        }
+
+        if(!mdiWindow &amp;&amp; typeof mdiWindow === &quot;undefined&quot;){
+            return null;
+        }else{
+            return mdiWindow.getMenuId();
+        }
+
+    },
+
+    /**
+     * 현재 화면의 authList를 return
+     *
+     * @method getAuthList
+     * @param {object} element
+     * @return {array} authList
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *     }
+     */
+    getAuthList: function(element) {
+        var menuId = UT.getMenuId(element);
+        if (menuId) {
+            return SCRoleManager.getUserFuncs(menuId);
+        }
+    },
+
+    /**
+     * menuId를 통해 메뉴생성
+     *
+     * @method createWindowByMenuId
+     * @param {string} menuId 메뉴아이디
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *     }
+     */
+    createWindowByMenuId: function(menuId) {
+        var mdiMain = document.querySelector(&quot;sc-mdi&quot;);
+        var menuList = mdiMain.$.mdiTopMenu.menuList;
+
+        var windowIndex = mdiMain.$.mdiContent.createdWindows.indexOf(menuId);
+        if(windowIndex &gt; -1){
+            mdiMain.$.mdiContent.removeWindow(menuId);
+        }
+
+        for (idx in menuList) {
+            if (menuId == menuList[idx].menu_id) {
+                mdiMain.$.mdiContent.createWindow(menuList[idx].menu_id, menuList[idx].menu_nm, menuList[idx].menu_url);
+                return;
+            }
+        }
+    },
+
+    /**
+     * 메뉴 생성
+     *
+     * @method createWindow
+     * @param {string} menuId    메뉴아이디
+     * @param {string} menuName  메뉴명
+     * @param {string} menuUrl   메뉴URL
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *     }
+     */
+    createWindow: function(menuId, menuName, menuUrl) {
+        var mdiMain = document.querySelector(&quot;sc-mdi&quot;);
+
+        var windowIndex = mdiMain.$.mdiContent.createdWindows.indexOf(menuId);
+        if(windowIndex &gt; -1){
+            mdiMain.$.mdiContent.removeWindow(menuId);
+        }
+        mdiMain.$.mdiContent.createWindow(menuId, menuName, menuUrl);
+    },
+
+    /**
+     * Array 에 특정  필드에 특정 값이 필터값과 같으면 Array를 재생성함.
+     */
+    arrayFilterChange : function(array,filter){
+        var newArray = [];
+        if(UT.isArray(array)){
+            for(var i =0;i&lt;array.length;i++){
+                var item = array[i];
+                if(filter.value===item[filter.key]){
+                    newArray.push(item);
+                }
+            }
+        }
+        return newArray;
+    },
+    getHour : function(){
+        var array = [];
+        for(var i = 0 ; i&lt; 24 ; i++){
+            array.push({data : i});
+        }
+        return array;
+    },
+    getMin : function(){
+        var array = [];
+        for(var i = 0 ; i&lt; 60 ; i++){
+            array.push({data : i});
+        }
+        return array;
+    },
+    /**
+     * TODO : 날짜,시간,분이 있는 component의 값을 date로
+     * dt.hour.min이 있는 data의 경우 dt로 date를 만들어서 셋팅
+     *
+     * ynkim
+     */
+    convertDayHourMinToDt : function(obj){
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key) &amp;&amp; /_dt$/.test(key)) {
+                var val = obj[key];
+                if(Date.parse(val)){
+                     var day  = obj[key],
+                         hour = obj[key +&quot;_hour&quot;],
+                         min  = obj[key +&quot;_min&quot;];
+
+                     if(!UT.isEmpty(day) &amp;&amp; !UT.isObject(hour) &amp;&amp; !UT.isObject(min)){
+                         var date = new Date(day);
+                          date.setHours(!!hour?hour:0, !!min?min:0, 0, 0);
+                          obj[key] = date;
+                     }
+                }
+            }
+        }
+        return obj;
+    },
+    /**
+     * TODO: 추가개발필요 )))) date의 값을 날짜,시간,분이 있는 값으로 셋팅
+     * data에 dt가 있는  데이타의 경우 dt,hour,min data를 만들어서 셋팅
+     *
+     * ynkim
+     */
+    convertDtToDayHourMin : function(obj){
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key) &amp;&amp; /_dt$/.test(key)) {
+                var val = obj[key];
+                if(Date.parse(val)){
+                    var newKey = key+&quot;_dt&quot;;
+                     obj[newKey] = val;
+                     newKey = key +&quot;_hour&quot;;
+                     obj[newKey] = val.getHours();
+                     newKey = key +&quot;_min&quot;;
+                     obj[newKey] = val.getMinutes();
+                }
+            }
+        }
+        return obj;
+    },
+};
+
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

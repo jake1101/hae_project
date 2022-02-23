@@ -1,0 +1,50 @@
+<dom-module id="es-scheduler-description">
+	<style>
+		table, th, td {
+	 		border:1px solid black;
+	 		border-collapse:collapse;
+	 		box-sizing: border-box;
+	 		padding: 3px;
+	 	}
+	 	th {
+	 		background-color:lightgray
+	 	}
+	</style>
+	<template>
+		<p>
+			<b>Quartz 스케쥴러</b><br/>
+			Quartz 스케쥴러는 수행 작업을 정의하는 Job과 실행 스케쥴을 정의하는 Trigger를 분리함으로써 유연성을 제공한다.<br/>
+			Job 과 Trigger를 정의한 경우, Job은 그대로 두고 Trigger만을 변경할 수 있다. 또한 하나의 Job에 여러 개의 Trigger를 정의할 수 있다.<br/>
+			<br/>
+			<table>
+				<tr>
+					<th>Scheduler</th>
+					<td>Quartz 실행 환경을 관리하는 핵심 개체</td>
+				</tr>
+				<tr>
+					<th>Job</th>
+					<td>사용자가 수행할 작업을 정의하는 인터페이스로서 Trigger를 이용하여 스케쥴 할 수 있다.</td>
+				</tr>
+				<tr>
+					<th>JobDetail</th>
+					<td>Job name, Job group과 같이 수행할 Job에 대한 상세 정보를 정의</td>
+				</tr>
+				<tr>
+					<th>Trigger</th>
+					<td>JobDetail의 실행 스케쥴을 정의. Scheduler에게 Job 수행시점을 알려준다.</td>
+				</tr>
+			</table>
+		</p><br/>
+		<p>
+			<b>SchedulerService</b>&nbsp;&nbsp;smartsuite.scheduler.core.ScheduleService<br/>
+			스케줄러 등록, 삭제 등의 관리를 위한 클래스<br/>
+			<br/>
+			반복되는 작업을 실행하기 위해서는 <b>[관리자 > 시스템 관리> 스케쥴러 관리]</b>에서 Cron Expression을 사용하여 스케쥴러를 관리할 수 있다.<br/>
+		</p>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-scheduler-description'
+	});
+	</script>
+</dom-module>

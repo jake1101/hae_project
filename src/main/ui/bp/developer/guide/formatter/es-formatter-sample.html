@@ -1,0 +1,171 @@
+<dom-module id="es-formatter-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-code-group>
+			<!-- 통화코드 -->
+			<sc-code code="C004"	value="{{codes.commCurCd}}"></sc-code>
+		</sc-code-group>
+		
+		<div class="flex page">
+			<sc-toolbar>
+				<sc-spacer></sc-spacer>
+				<sc-button text="init data" on-click="onInitData" i18n-disabled></sc-button>
+			</sc-toolbar>
+			
+			<sc-panel title-text="formatType에 따른 formatting" collapsible="true">
+				<table class="tb-form">
+					<colgroup>
+						<col style="width:120px"/>
+						<col/>
+						<col style="width:120px"/>
+						<col/>
+					</colgroup>
+					<tr>
+						<th>
+							<sc-label text="담당자 전화번호"></sc-label>
+						</th>
+						<td>
+							<sc-text-field class="w-100" value="{{data.chr_phone}}" input-cover="true" format-type="phone" readonly></sc-text-field>
+						</td>
+						<th>
+							<sc-label text="배송예정일자"></sc-label>
+						</th>
+						<td>
+							<sc-text-field class="w-100" value="{{data.dely_dt}}" input-cover="true" format-type="date" readonly></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th>
+		        			<sc-label text="통화"></sc-label>
+		        		</th>
+		        		<td>
+		        			<sc-combobox-field class="w-100" value="{{data.cur}}" display-field="data" value-field="data" items="{{codes.commCurCd}}" selected-index="0" placeholder="필수" required="true" on-select="onSelectCur"></sc-combobox-field>
+		        		</td>
+						<th>
+							<sc-label text="총액"></sc-label>
+						</th>
+						<td>
+							<sc-number-field class="w-150" value="{{data.tot_amt}}" format-type="{{data.cur}}" readonly></sc-number-field>
+						</td>
+					</tr>
+				</table>
+				
+				<sc-grid id="gridPanel1" class="h-150" editable="true" use-selection="false"
+						 on-item-edit-end="onItemEditEnd">
+					<sc-grid-columns>
+						<sc-data-column	data-field="item_cd"	header-text="품목코드"	text-align="center"></sc-data-column>
+						<sc-data-column	data-field="item_qty"	header-text="수량"		format-type="qty"				data-type="number"	text-align="right"	editable="true"></sc-data-column>
+						<sc-data-column	data-field="item_price"	header-text="단가"		format-type="amt"				data-type="number"	text-align="right"	editable="true"></sc-data-column>
+						<sc-data-column	data-field="item_amt"	header-text="금액"		format-type="amt"				data-type="number"	text-align="right"></sc-data-column>
+						<sc-data-column	data-field="rate"		header-text="비율"		format-type="percentDecimal"	data-type="number"	text-align="right"	editable="true"></sc-data-column>
+						<sc-data-column	data-field="phone_no"	header-text="전화번호"	format-type="phone"				text-align="center"	editable="true"></sc-data-column>
+					</sc-grid-columns>
+				</sc-grid>
+			</sc-panel>
+			
+			<sc-panel title-text="그리드 row 별 formatting" collapsible="true">
+				<sc-grid id="gridPanel2" class="h-200" editable="true"	use-selection="false"
+						 on-item-edit-end="onItemEditEnd">
+					<sc-grid-columns>
+						<sc-data-column		data-field="item_cd"	header-text="품목코드"	text-align="center"></sc-data-column>
+						<sc-combobox-column	data-field="item_cur"	header-text="통화"		text-align="center"	display-field="data" value-field="data" items="{{codes.commCurCd}}" ></sc-combobox-column>
+						<sc-data-column		data-field="item_qty"	header-text="수량"		text-align="right"	data-type="number"	editable="true"		format-type="qty"></sc-data-column>
+						<sc-data-column		data-field="item_price"	header-text="단가"		text-align="right"	data-type="number"	editable="true"		item-label-function="onItemLabelFn"></sc-data-column>
+						<sc-data-column		data-field="item_amt"	header-text="금액"		text-align="right"	data-type="number"	editable="false"	item-label-function="onItemLabelFn"></sc-data-column>
+					</sc-grid-columns>
+				</sc-grid>
+			</sc-panel>
+		</div>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-formatter-sample',
+		properties : {
+			codes : {
+				type : Object,
+				value : function() {
+					return {commCurCd:[]}
+				},
+				reset : false
+			},
+			data : {
+				type : Object,
+				value : function() {
+					var delyDt = new Date();
+					delyDt.setDate(delyDt.getDate()+7);
+					
+					return {
+						chr_phone : "01123456789",
+						dely_dt   : delyDt,
+						tot_amt   : 27990,
+						cur       : "KRW"
+					}
+				}
+			},
+			list : {
+				type : Array,
+				value : function() {
+					return [
+						{item_cd : "IT_0001", item_cur : "KRW", item_price : 1000, item_qty : 6, item_amt : 6000, rate : 30.5, phone_no : "0113456789"},
+						{item_cd : "IT_0002", item_cur : "USD", item_price : 1300, item_qty : 3, item_amt : 3900, rate : 21.58, phone_no : "01038459678"},
+						{item_cd : "IT_0003", item_cur : "JPY", item_price : 780, item_qty : 13, item_amt : 10140, rate : 99.99, phone_no : "025678900"},
+						{item_cd : "IT_0004", item_cur : "CNY", item_price : 1650, item_qty : 2, item_amt : 3300, rate : 12.87, phone_no : "0223459999"},
+						{item_cd : "IT_0005", item_cur : "AMD", item_price : 930, item_qty : 5, item_amt : 4650, rate : 19.3, phone_no : "0312223333"}
+					]
+				}
+			}
+		},
+		initialized : function() {
+			this.$.gridPanel1.setDataProvider(this.list);
+			this.$.gridPanel2.setDataProvider(this.list);
+		},
+		onInitData : function() {
+			var me = this;
+			me.reset();
+			
+			me.$.gridPanel1.setDataProvider(UT.copy(me.list));
+			me.$.gridPanel2.setDataProvider(UT.copy(me.list));
+		},
+		onItemEditEnd : function(event) {
+			var me = this, e = event.detail,
+				data = e.data,
+				item = e.item,
+				newValue = e.newValue,
+				oldValue = e.oldValue,
+				grid     = e.grid,
+				provider = e.provider;
+			
+			if(item.dataField === "item_qty" || item.dataField === "item_price") {
+				var qty   = new BigNumber(((item.dataField === 'item_qty') ? newValue : data['item_qty']) || 0);
+        		var price = new BigNumber(((item.dataField === 'item_price') ? newValue : data['item_price']) || 0);
+				var amt   = qty.mul(price).toFixed();
+				
+				
+        		provider.setItemAt(item.rowIndex, {item_amt : amt});
+        		
+        		if(grid.id === "gridPanel1") {
+	        		var totAmt = provider.getSummary("item_amt", "sum");
+	        		me.set("data.tot_amt", totAmt);
+        		}
+			}
+		},
+		onItemLabelFn : function(data, item, provider) {
+			var value = data[item.dataField];
+        	
+        	if(UT.isNotEmpty(value)) {
+        		var name = data["item_cur"];
+        		
+        		var result = SCFormatter.format(name, value);
+                if(result) {
+                    return result;
+                }
+        	}
+            return value;
+		}
+	});
+	</script>
+</dom-module>

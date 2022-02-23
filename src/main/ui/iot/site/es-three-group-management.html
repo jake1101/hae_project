@@ -1,0 +1,145 @@
+<dom-module id="es-three-group-management">
+	<!--
+        ******************************************************************************************
+   		** @Program-name 	: 3D구역설정(new)
+        ** @Description		: 현장정보관리 > 3D구역설정(new)
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2021.06.01
+        ** @History 		: 2021.06.01 jhkim 최초작성
+        ******************************************************************************************
+    -->
+
+	<style type="text/css">
+		:host{
+			@apply(--vbox-layout);
+		}
+  	</style>
+	
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		<sc-request-group init>
+			<!-- 영역 목록 조회 -->
+			<sc-ajax id="findListAreaWithoutSite"
+				url="findListAreaWithoutSite.do"
+				body="{{searchAreaParam}}"
+				last-response="{{areaList}}">
+			</sc-ajax>
+		</sc-request-group>
+		
+		<div id="wholeDiv" class="flex hbox">
+			<div id="leftDiv" class="flex vbox" style="min-width : 700px; max-width : 700px">
+				<cc-search-container on-search="onSearch" auth-r>
+					<table>
+						<colgroup>
+							<col style="width:60px">
+							<col>
+						</colgroup>
+						<tr>
+							<th><sc-label text="영역"></sc-label></th>
+							<td>
+								<sc-combobox-field selected-index="0" id="areaCombo" items="{{areaList}}" 
+								input-clear=false display-field="name" value-field="id" on-change="onSelectAreaList" required="true">
+							</td>
+						</tr>
+					</table>
+				</cc-search-container>
+				<div id="gridArea" class="vbox flex">
+	            </div>
+			</div>
+			<div class="hspace-10"></div>
+			<div id="rightDiv" class="flex vbox" >
+				<div id="threeArea" class="flex">
+				</div>
+			</div>
+		</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+		
+	<script>
+		Polymer({
+			is: "es-three-group-management",
+			properties : {
+                searchAreaParam: {
+                	type : Object,
+                	value: function(){
+                		return {
+                			siteId : SCMdiManager.searchParam.site_id,
+                			onlyHavingModelYn : "Y"
+                		};
+                	}
+                }
+            },
+            onSearch : function(){
+                var me = this;
+                UT.request(this.$.findListAreaWithoutSite);
+            },
+			onSelectAreaList : function(e){
+				var me = this;
+				var modelName = me.$.areaCombo.selectedItem.modelName;
+
+// 				if(gloader.loaded[modelName]){
+// 					me.loadThree(gloader.loaded[modelName].scene.clone(), modelName);
+// 				}else{
+// 					gloader.load(modelName+'.glb', function(model){
+// 						gloader.loaded[modelName] = model;
+// 						me.loadThree(gloader.loaded[modelName].scene.clone(), modelName);
+// 					});
+// 				}
+				gloader.load(modelName+'.glb', function(model){
+					gloader.loaded[modelName] = model;
+					me.loadThree(gloader.loaded[modelName].scene.clone(), modelName);
+				});
+			},
+			loadThree : function(models, modelName){
+				var me = this;
+				me.importLink('/ui/iot/shared/cc-'+modelName+'.html', function(e){
+					me.$.gridArea.innerHTML = null;
+					me.$.threeArea.innerHTML = null;
+
+					var threeComponent = document.createElement(e);
+					var grid = threeComponent.$.layerGroupGrid;
+					var container = threeComponent.$.container;
+					
+					me.$.gridArea.append(grid);
+					me.$.threeArea.append(container);
+					
+					this.rayThree = new RayThree(container);
+					threeComponent.searchParam.areaId = me.$.areaCombo.selectedItem.id;
+					threeComponent.rayThree = this.rayThree;
+					threeComponent.models = models;
+					threeComponent.editable = true;
+					threeComponent.noSetWorker = true;
+					threeComponent.treeHidden = true;
+
+					threeComponent.initThree();
+
+					me.start();
+				}); 
+			},
+			start : function(){
+				var me = this;
+				me.rayThree.animate();
+			},
+			refresh : function(){
+				var me = this;
+				if(me.rayThree) {
+					me.rayThree.stopAnimate();
+					me.rayThree.animate();
+				}
+			},
+			destroyed : function(){
+				var me = this;
+				if(me.rayThree) me.rayThree.stopAnimate();
+			}
+		});
+	</script>
+</dom-module>

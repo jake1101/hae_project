@@ -1,0 +1,388 @@
+<sc-link rel="import" href="ep-worker-sensor-mapping.html"></sc-link>
+<dom-module id="es-worker-group">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 작업자그룹관리
+        ** @Description		: 작업자그룹관리
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.06.03
+        ** @History 		: 2020.06.03 jhkim 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+	</style>
+	<template>
+		<!-- 공통코드 조회-->
+		<sc-request-group id="codes" init>
+			<sc-ajax
+				url="getWorkerGroupList.do"
+				body="{{searchParam}}"
+				last-response="{{groupList}}">
+			</sc-ajax>
+		</sc-request-group>
+		
+		<!-- 그룹 목록 저장 -->
+		<sc-ajax
+			id="saveListGroup"
+			url="saveWorkerGroupList.do"
+			on-response="completeSaveListGroup">
+		</sc-ajax>
+
+		<!-- 그룹 목록 삭제 -->
+		<sc-ajax
+			id="deleteListGroup"
+			url="deleteWorkerGroupList.do"
+			on-response="completeDeleteListGroup">
+		</sc-ajax>
+		
+		<sc-ajax 
+			id="findGroupList"
+			url="getWorkerGroupList.do"
+			body="{{searchParam}}"
+			last-response="{{groupList}}">
+		</sc-ajax>
+		
+		<sc-ajax 
+			id="findGroupData"
+			url="getWorkerGroupData.do"
+			body="{{searchParam}}"
+			last-response="{{groupDataList}}">
+		</sc-ajax>
+		
+		<sc-ajax 
+			id="setWorkerGroupMapping"
+			url="setWorkerGroupMapping.do"
+			on-response="completeMapping">
+		 </sc-ajax>
+		 
+		 <!-- 그룹 정보 삭제 -->
+		<sc-ajax
+			id="deleteGroupDetail"
+			url="deleteWorkerGroupDetail.do"
+			on-response="completeDeleteGroupDetail">
+		</sc-ajax>
+		
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+		
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+	
+		<div class="hbox flex">
+			<div class="vbox w-500">
+				<div class="vspace-5"></div>
+				<div class="vspace-10"></div>
+				<cc-sub-title-bar title-text="그룹 목록"></cc-sub-title-bar>
+				<div class="vspace-10"></div>
+				<cc-search-container on-search="onSearch" auth-r>
+					<table>
+						<colgroup>
+							<col style="width:60px">
+							<col>
+						</colgroup>
+						<tr>
+							<td>그룹명</td>
+							<td><sc-text-field value="{{searchParam.groupName}}" style="width:300px;" on-enter="onSearch"></sc-text-field></td>
+						</tr>
+					</table>
+				</cc-search-container>
+				<sc-grid id="groupListGridPanel" data-provider="{{groupList}}" editable="true" class="flex" on-item-click="selectGroup">
+					<cc-grid-toolbar btn-group-hidden="true">
+						<sc-button text="추가" on-click="onAddGroup" auth-s></sc-button>
+						<sc-button text="저장" on-click="onSaveGroup" auth-s></sc-button>
+						<sc-button text="삭제" on-click="onDeleteGroup" auth-s></sc-button>
+					</cc-grid-toolbar>
+					<sc-grid-columns>
+						<sc-data-column data-field="name" header-text="그룹명" width="150" text-align="center" required="true" editable="true"  style-name="link"></sc-data-column>
+						<sc-data-column data-field="description" header-text="설명" fill-width="200" text-align="center" editable="true"></sc-data-column>
+					</sc-grid-columns>
+					<sc-grid-fields>
+						<sc-grid-field data-field="id"></sc-grid-field>
+					</sc-grid-fields>
+				</sc-grid>
+			</div>
+			<div class="hspace-10"></div>
+			<div class="vbox flex">
+				<sc-grid id="groupGridPanel" data-provider="{{groupDataList}}" editable="false" class="flex" header-height="60" >
+					<cc-grid-toolbar title-text="그룹정보 {{selectedGroupName}}" btn-group-hidden="true">
+						<sc-button text="일괄교부" on-click="mappingGroup" value="Y" auth-s hidden="{{buttonHidden}}"></sc-button>
+						<sc-button text="일괄회수" on-click="mappingGroup" value="N" auth-s hidden="{{buttonHidden}}"></sc-button>
+						<sc-button text="추가" on-click="onAddData" auth-s hidden="{{buttonHidden}}"></sc-button>
+						<sc-button text="삭제" on-click="onDeleteGroupDetail" auth-s hidden="{{buttonHidden}}"></sc-button>
+					</cc-grid-toolbar>
+					<sc-grid-columns>
+						<sc-group-column	header-text="작업자 - 스마트태그 연결 정보"	column-name="dataColumns"	width="650">
+							<sc-group-column	header-text="작업자"	column-name="workerInfo">
+								<sc-data-column data-field="vendorName"      	header-text="협력사" width="100" text-align="center" editable="false" max-length="60"></sc-data-column>
+								<sc-data-column data-field="jobTypeName"   	header-text="직종" width="100" text-align="center" editable="false" max-length="60"></sc-data-column>
+								<sc-data-column data-field="workerName" 		header-text="이름" width="150" text-align="center" required="true" editable="true"></sc-data-column>
+							</sc-group-column>
+							<sc-group-column	header-text="스마트태그"	column-name="sensorInfo">
+								<sc-data-column data-field="sensorName" 		header-text="번호" width="100" text-align="center" editable="false"></sc-data-column>
+								<sc-data-column data-field="nodeId" 				header-text="ID" width="200" text-align="center" editable="false"></sc-data-column>
+							</sc-group-column>
+						</sc-group-column>
+						<sc-data-column data-field="state" 					header-text="교부/회수 상태" fill-width="200" text-align="center" editable="false" item-style-function="onStyleFontColor"></sc-data-column>
+						<sc-data-column data-field="mappedSensorName" 	header-text="작업자에게 교부된 스마트태그" width="200" text-align="center" editable="false"  item-style-function="onStyleFontColor"></sc-data-column>
+						<sc-data-column data-field="mappedWorkerName" 	header-text="스마트태그를 교부받은 작업자" width="200" text-align="center" editable="false"  item-style-function="onStyleFontColor"></sc-data-column>
+					</sc-grid-columns>
+					<sc-grid-fields>
+						<sc-grid-field data-field="id" data-type="number"></sc-grid-field>
+						<sc-grid-field data-field="updatable" data-type="boolean"></sc-grid-field>
+					</sc-grid-fields>
+				</sc-grid>
+			</div>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : "es-worker-group",
+			properties : {
+				searchParam: {
+					type : Object,
+					value : function(){
+						return {
+							siteId: SCMdiManager.searchParam.site_id
+						};
+					}
+				},
+				selectedGroupId : {
+					type : Number,
+					value : function(){
+						return 0;
+					}
+				},
+				groupList : {
+					type : Array,
+					value : function(){
+						return [];
+					}
+				},
+				groupDataList : {
+					type : Array,
+					value : function(){
+						return [];
+					}
+				},
+				buttonHidden : {
+					type : Boolean,
+					value : function(){
+						return true;
+					}
+				}
+			},
+			initialized : function() {		// 초기화 완료 후 호출 함수
+                var me = this;
+            },
+            refreshGrid : function(){
+                var me = this;
+                UT.requestNoDefault(me.$.findGroupList);
+
+                if(me.selectedGroupId == 0){
+                	me.groupDataList = [];
+                	me.selectedGroupName="";
+                }else{
+                	UT.request(me.$.findGroupData);
+                }
+
+            },
+            onAddGroup:function(){
+				var me =this;
+				me.$.groupListGridPanel.getDataProvider().addItemAt(0,{});
+            },
+            onSearch : function(){
+				var me = this;
+				me.buttonHidden = true;
+            	me.selectedGroupId = 0;
+				me.refreshGrid();
+            },
+            onSaveGroup : function(){
+                var me = this;
+
+                var provider = me.$.groupListGridPanel.getDataProvider();
+
+                var created = provider.getNewItems();
+                var updated = provider.getUpdateItems();
+
+                if(!me.$.groupListGridPanel.validate(created) || !me.$.groupListGridPanel.validate(updated)){
+                	UT.alert("유효한 값을 입력해주세요");
+					return;
+                }
+
+                if(created.length + updated.length === 0) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+
+                 me.$.saveListGroup.body = {
+                     insertList: created,
+                     updateList: updated
+                 };
+                 UT.request(me.$.saveListGroup);
+            },
+            completeSaveListGroup : function(e, res){
+	            var me = this;
+	            var message = "STD.N2400"; // 저장하였습니다.
+	
+	            if(res.response.result_status === 'S'){
+	                UT.alert(message, function(){
+	                	me.buttonHidden = true;
+	                	me.selectedGroupId = 0;
+	                    me.refreshGrid();
+	                });
+	            } else {
+	                message ="STD.E9999";
+	                UT.alert(message);
+	            }
+            },
+            // 그룹 삭제
+            onDeleteGroup : function(){
+                var me = this;
+
+                var provider = me.$.groupListGridPanel.getDataProvider(),
+					checked = provider.selectionCheckedItems();
+
+		        if(checked.length == 0){
+					UT.alert("삭제할 행을 선택하세요");
+					return;
+                }
+
+                 me.$.deleteListGroup.body = {
+                     deleteList: checked
+                 };
+                 UT.request(me.$.deleteListGroup);
+            },
+            completeDeleteListGroup : function(e, res){
+            	var me = this,
+                message = "STD.N1500"; // 요청을 완료하였습니다.
+
+	            if(res.response.result_status === 'S'){
+	                UT.alert(message, function(){
+	                	me.buttonHidden = true;
+	                	me.selectedGroupId = 0;
+	                	me.refreshGrid();
+	                });
+	            } else {
+	                message = res.response.result_message;
+	                UT.alert(message);
+	            }
+            },
+            selectGroup : function(e){
+				var me = this;
+				item = event.detail.item;
+				if(item.dataField === "name" && !UT.isEmpty(e.detail.data.id)) {
+					var name = e.detail.data.name;
+
+					if(!UT.isEmpty(name)){
+						name = "("+name+")";
+					}
+
+					me.buttonHidden = false;
+					me.selectedGroupName = name;
+					me.selectedGroupId = e.detail.data.id;
+					me.searchParam.groupId = me.selectedGroupId;
+	
+					UT.request(me.$.findGroupData);
+				}else{
+					me.buttonHidden = true;
+					me.groupDataList = [];
+                	me.selectedGroupName="";
+				}
+            },
+            onAddData : function(){
+                var me = this;
+                if(me.searchParam.groupId)
+            	var mappingPopup = UT.popup('ep-worker-sensor-mapping', me, 1300, 600, {
+					'close' : function(popup, event) {
+						me.refreshGrid();
+					}
+				}, {titleText : me.translate("연결정보 추가")});
+
+                mappingPopup.addEventListener('sc-window-hided', function() {
+					me.refreshGrid();
+                });
+
+            	mappingPopup.show();
+            	mappingPopup.getWindowContent().load(me.selectedGroupId);
+            },
+			onStyleFontColor: function(data, item){
+            	 return (data.updatable)?null:{fontColor:"#ff0000"};
+          	 },
+          	mappingGroup : function(){
+              	var me = this;
+                var provider = me.$.groupGridPanel.getDataProvider(),
+                items = provider.getItems(),
+				checked = provider.selectionCheckedItems();
+
+                var array = [];
+
+				if(checked.length > 0){
+					for(var i in checked){
+						if(checked[i].updatable){
+							array.push(checked[i]);
+						}
+					}
+				}else{
+					for(var i in items){
+						if(items[i].updatable){
+							array.push(items[i]);
+						}
+					}
+				}
+
+				me.$.setWorkerGroupMapping.body = {array:array, mappingYN : event.target.value};
+				UT.request(me.$.setWorkerGroupMapping);
+            },
+          	completeMapping : function(e, res){
+            	var me = this,
+                message = "STD.N1500"; // 요청을 완료하였습니다.
+
+	            if(res.response.result_status === 'S'){
+	                UT.alert(message, function(){
+	                	me.refreshGrid();
+	                });
+	            } else {
+	                message = res.response.result_message;
+	                UT.alert(message);
+	            }
+            },
+         	// 그룹 삭제
+            onDeleteGroupDetail : function(){
+                var me = this;
+
+                var provider = me.$.groupGridPanel.getDataProvider(),
+					checked = provider.selectionCheckedItems();
+
+		        if(checked.length == 0){
+					UT.alert("삭제할 행을 선택하세요");
+					return;
+                }
+
+                 me.$.deleteGroupDetail.body = {
+                     deleteList: checked
+                 };
+                 UT.request(me.$.deleteGroupDetail);
+            },
+            completeDeleteGroupDetail : function(e, res){
+            	var me = this,
+                message = "STD.N1500"; // 요청을 완료하였습니다.
+
+	            if(res.response.result_status === 'S'){
+	                UT.alert(message, function(){
+	                	me.refreshGrid();
+	                });
+	            } else {
+	                message = res.response.result_message;
+	                UT.alert(message);
+	            }
+            }
+		})
+	</script>
+</dom-module>

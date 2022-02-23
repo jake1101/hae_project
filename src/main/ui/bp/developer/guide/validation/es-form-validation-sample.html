@@ -1,0 +1,264 @@
+<dom-module id="es-form-validation-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel id="panel1" title-text="property 유효성 체크" collapsible="true" validation-group="group1">
+			<cc-sub-title-bar>
+				<sc-button text="group validate"	on-click="onValidateGroup"	data-args="group1"></sc-button>
+				<sc-button text="clear invalid"		on-click="onClearInvalid"	data-args="group1"></sc-button>
+			</cc-sub-title-bar>
+			<table class="tb-form">
+				<colgroup>
+					<col style="width:150px"/>
+					<col/>
+				</colgroup>
+				<tr>
+					<th>
+						<sc-label text="sc-text-field" i18n-disabled></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-text-field id="text"	class="w-150"	min-length="1"	max-length="10"	required="true"></sc-text-field>
+							<sc-button text="validate"	on-click="onValidateField"	data-args="text"	style="margin-left:2px" i18n-disabled></sc-button>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<sc-label text="sc-number-field" i18n-disabled></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-number-field id="number"	class="w-100"	min-length="1"	max-length="3"	required="true"
+											 min-value="1"	max-value="100"></sc-number-field>
+							<sc-button text="validate"	on-click="onValidateField"	data-args="number"	style="margin-left:2px" i18n-disabled></sc-button>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<sc-label text="sc-date-field" i18n-disabled></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-date-field id="minDate"	value="{{data.min_date}}"	max-date="{{data.max_date}}"	required="true"></sc-date-field>
+							<span style="margin:5px">~</span>
+							<sc-date-field id="maxDate"	value="{{data.max_date}}"	min-date="{{data.min_date}}"	required="true"></sc-date-field>
+							<sc-button text="validate"	on-click="onValidateField"	data-args="minDate,maxDate"	style="margin-left:2px" i18n-disabled></sc-button>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<sc-label text="sc-period-date-field" i18n-disabled></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-period-date-field id="periodDate"	from-value="{{data.from_date}}" to-value="{{data.to_date}}"
+												string-date="true"	from-required="true" to-required="true"
+	   											min-date="{{compareDate.minDate}}" max-date="{{compareDate.maxDate}}">
+	    					</sc-period-date-field>
+    					<sc-button text="validate"	on-click="onValidateField"	data-args="periodDate"	style="margin-left:2px" i18n-disabled></sc-button>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</sc-panel>
+		
+		<sc-panel id="panel2" title-text="validator-type 체크" collapsible="true" validation-group="group2">
+			<cc-sub-title-bar>
+				<sc-button text="group validate"	on-click="onValidateGroup"	data-args="group2"></sc-button>
+				<sc-button text="clear invalid"		on-click="onClearInvalid"	data-args="group2"></sc-button>
+			</cc-sub-title-bar>
+			<table class="tb-form">
+				<colgroup>
+					<col style="width:170px"/>
+					<col/>
+				</colgroup>
+				<tr>
+					<th>
+						<sc-label text='validator-type="score"' i18n-disabled></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-text-field id="score"	class="w-150"	validator-type="score" 	mask-re="/[0-9]/"	placeholder="0~100점을 입력하세요."></sc-text-field>
+							<sc-button text="validate"	on-click="onValidateField"	data-args="score"	style="margin-left:2px" i18n-disabled></sc-button>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<sc-label text='validator-type="phone"' i18n-disabled></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-text-field id="phoneNo"	class="w-150"	validator-type="phone" 	mask-re="/[0-9\-]/"	placeholder="ex) 02-785-9848"></sc-text-field>
+							<sc-button text="validate"	on-click="onValidateField"	data-args="phoneNo"	style="margin-left:2px" i18n-disabled></sc-button>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</sc-panel>
+		
+		<sc-panel id="panel3" title-text="validator 함수" collapsible="true" validation-group="group3">
+			<cc-sub-title-bar>
+				<sc-button text="group validate"	on-click="onValidateGroup"	data-args="group3"></sc-button>
+				<sc-button text="clear invalid"		on-click="onClearInvalid"	data-args="group3"></sc-button>
+			</cc-sub-title-bar>
+			<table class="tb-form">
+				<colgroup>
+					<col style="width:150px"/>
+					<col/>
+				</colgroup>
+				<tr>
+					<th>
+						<sc-label text="성적"></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-combobox-field class="w-80"	value="{{data.grade}}"	items="[[grades]]"	display-field="label"	value-field="data" selected-index="0" input-clear="false"></sc-combobox-field>
+							<sc-number-field id="gradeScore" class="w-100"	validator="scoreValidator" style="margin-left:2px" placeholder="점수를 입력하세요."></sc-number-field>
+							<sc-button text="validate"	on-click="onValidateField"	data-args="gradeScore"	style="margin-left:2px" i18n-disabled></sc-button>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<sc-label text="연락처"></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-combobox-field class="w-80"	value="{{data.contact_type}}"	items="[[contactTypes]]"	display-field="label"	value-field="data" selected-index="0" input-clear="false"></sc-combobox-field>
+							<sc-text-field id="contact"	class="w-200"	validator="contactValidator" 	mask-re="/[0-9\-]/"	style="margin-left:2px" placeholder="ex) 02-785-9848 or 010-1234-5678"></sc-text-field>
+							<sc-button text="validate"	on-click="onValidateField"	data-args="contact"	style="margin-left:2px" i18n-disabled></sc-button>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</sc-panel>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-form-validation-sample',
+		properties : {
+			data : {
+				type : Object,
+				value : function() {
+					return {}
+				}
+			},
+			grades : {
+				type : Array,
+				value : function() {
+					return [
+						{data:"A", label:"81~100점"},
+						{data:"B", label:"61~80점"},
+						{data:"C", label:"41~60점"},
+						{data:"F", label:"0~40점"},
+					]
+				}
+			},
+			contactTypes : {
+				type : Array,
+				value : function() {
+					return [
+						{data:"phone", label:"유선"},
+						{data:"mobile", label:"모바일"}
+					]
+				}
+			},
+			compareDate : {
+    			type : Object,
+    			value : function() {
+    				var now = new Date(), yr = now.getFullYear().toString();
+    				return {
+    					minDate: yr + "0101",
+    					maxDate: yr + "1231"
+    				}
+    			}
+    		},
+		},
+		initialized : function() {
+			
+		},
+		// 개별 validate()
+		onValidateField : function(event) {
+			var me = this, targetEles = event.target.dataset.args.split(/\s*,\s*/);
+			
+			// me.$.text.validate();
+			targetEles.forEach(function(targetEle) {
+				var isValid = me.$[targetEle].validate();
+				
+				console.log("target : " + targetEle + "=> errors", me.$[targetEle].getErrors());
+			});
+		},
+		// 그룹 validate()
+		onValidateGroup : function(event) {
+			var me = this, target = event.target.dataset.args;
+			
+			var isValid = me.validate(target);
+			
+			if(!isValid) {
+				UT.alert("STD.E0000");
+			}
+		},
+		// invalid 초기화
+		onClearInvalid : function(event) {
+			var me = this,
+				target = event.target.dataset.args,
+				group = (target) ? me.querySelector("[validation-group='" + target + "']") : me;
+			
+			var invalids = group.querySelectorAll("[invalid]");
+			invalids.forEach(function(el) {
+				el.clearInvalid();
+			});
+		},
+		// validator function
+		scoreValidator : function(value) {
+			var me = this;
+			
+			if(!value) {
+				return "점수를 입력하세요.";
+			} else {
+				var grade = me.get("data.grade");
+				
+				if(grade === "A" && (value < 81 || value > 100)) {
+					return "81점 이상 100점 이하로 입력하세요.";
+				} else if(grade === "B" && (value < 61 || value > 80)) {
+					return "61점 이상 80점 이하로 입력하세요.";
+				} else if(grade === "C" && (value < 41 || value > 60)) {
+					return "41점 이상 60점 이하로 입력하세요.";
+				} else if(grade === "F" && (value < 0 || value > 40)) {
+					return "0점 이상 40점 이하로 입력하세요.";
+				}
+				return true;
+			}
+		},
+		// validator function
+		contactValidator : function(value) {
+			var me = this;
+			
+			if(!value) {
+				return "연락처를 입력하세요.";
+			} else {
+				var type = me.get("data.contact_type"), regExp;
+				
+				if(type === "phone") {
+					regExp = new RegExp("^\\d{2,3}-?\\d{3,4}-?\\d{4}$");
+				} else if(type === "mobile") {
+					regExp = new RegExp("^01([0|1|6|7|8|9]?)-?([0-9]{3,4})-?([0-9]{4})$");
+				}
+				
+				if(regExp.test(value)) {
+					return true;
+				} else {
+					return "유효한 형식이 아닙니다.";
+				}
+			}
+		}
+	});
+	</script>
+</dom-module>

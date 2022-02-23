@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sample">
+	<select id="findPr" resultType="map">
+	SELECT *
+	  FROM ESPPRHD
+	 WHERE SYS_ID = #{g.tenant}
+	   AND PR_ID  = #{p.pr_id}
+	</select>
+	
+	<select id="findListPrItem" resultType="map">
+	SELECT *
+	  FROM ESPPRDT
+	 WHERE SYS_ID = #{g.tenant}
+	   AND PR_ID  = #{p.pr_id}
+	</select>
+	
+	<insert id="insertPr">
+	INSERT INTO ESPPRHD
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	        SYS_ID,
+            PR_ID,
+            PR_NO,
+            PR_REV,
+            <if test="p.pr_tit != null">
+            PR_TIT,
+            </if>
+            STS,
+            REG_ID,
+            REG_DT,
+            MOD_ID,
+            MOD_DT,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{g.tenant},
+            #{p.pr_id},
+            #{p.pr_no},
+            CAST(#{p.pr_rev} AS INT),
+            <if test="p.pr_tit != null">
+            #{p.pr_tit},
+            </if>
+            'C',
+            #{g.username},
+            #{g.now},
+            #{g.username},
+            #{g.now},
+        </trim>
+	</insert>
+	
+	<update id="updatePr">
+	UPDATE ESPPRHD
+	   <set>
+	       <if test="p.pr_tit != null">
+	       PR_TIT = #{p.pr_tit},
+	       </if>
+	       STS = 'U',
+	       MOD_ID = #{g.username},
+	       MOD_DT = #{g.now},
+	   </set>
+	 WHERE SYS_ID = #{g.tenant}
+	   AND PR_ID  = #{p.pr_id}
+	</update>
+	
+	<insert id="insertPrItem">
+	INSERT INTO ESPPRDT
+	    <trim prefix="(" suffix=")" suffixOverrides=",">
+	    SYS_ID,
+        PR_ITEM_ID,
+        PR_ID,
+        PR_NO,
+        PR_REV,
+        PR_LNO,
+        <if test="p.item_cd != null">
+        ITEM_CD,
+        </if>
+        <if test="p.item_nm != null">
+        ITEM_NM,
+        </if>
+        <if test="p.item_qty != null">
+        ITEM_QTY,
+        </if>
+        STS,
+        REG_ID,
+        REG_DT,
+        MOD_ID,
+        MOD_DT,
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides=",">
+	    #{g.tenant},
+	    #{p.pr_item_id},
+        #{p.pr_id},
+        #{p.pr_no},
+        CAST(#{p.pr_rev} AS INT),
+        CAST(#{p.pr_lno} AS NVARCHAR2(5)),
+        <if test="p.item_cd != null">
+        #{p.item_cd},
+        </if>
+        <if test="p.item_nm != null">
+        #{p.item_nm},
+        </if>
+        <if test="p.item_qty != null">
+        CAST(#{p.item_qty} AS NUMERIC(20, 5)),
+        </if>
+        'C',
+        #{g.username},
+        #{g.now},
+        #{g.username},
+        #{g.now},
+	    </trim>
+	</insert>
+	
+	<update id="updatePrItem">
+	UPDATE ESPPRDT
+	   <set>
+	       ITEM_NM  = #{p.item_nm},
+	       <choose>
+	         <when test="p.item_qty != null">
+	       ITEM_QTY = CAST(#{p.item_qty} AS NUMERIC(20, 5)),
+	         </when>
+	         <otherwise>
+	       ITEM_QTY = NULL,
+	         </otherwise>
+	       </choose>
+	       STS      = 'U',
+           MOD_ID   = #{g.username},
+           MOD_DT   = #{g.now},
+	   </set>
+	</update>
+	
+	<delete id="deletePrItem">
+	DELETE
+	  FROM ESPPRDT
+	 WHERE SYS_ID     = #{g.tenant}
+	   AND PR_ITEM_ID = #{p.pr_item_id}
+	</delete>
+</mapper>

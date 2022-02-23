@@ -1,0 +1,49 @@
+<sc-link rel="import" href="es-excel-upload-sample.html"></sc-link>
+<sc-link rel="import" href="es-excel-upload-description.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-excel-upload-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="hbox flex" title-text="엑셀 업로드">
+            <es-excel-upload-description class="fit flex"></es-excel-upload-description>
+            <es-excel-upload-sample id="sample" class="box flex"></es-excel-upload-sample>
+        </sc-panel>
+        <es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-excel-upload-guide',
+		properties : {
+			srcList : {
+                type : Array,
+                value : function() {
+                    return [{
+                        title        : "es-excel-upload-sample.html",
+                        i18nDisabled : true,
+                        extension    : "html",
+                        url          : "/ui/bp/developer/guide/excel/es-excel-upload-sample.html"
+                    }, {
+                    	title        : "cc-excel-import.html(ludi=스마트그리드용)",
+                        i18nDisabled : true,
+                        extension    : "html",
+                        url          : "/ui/lib/excel/cc-excel-import-ludi.html"
+                    }, {
+                    	title        : "cc-excel-import.html(realgrid=리얼그리드용)",
+                        i18nDisabled : true,
+                        extension    : "html",
+                        url          : "/ui/lib/excel/cc-excel-import-realgrid.html"
+                    }]
+                }
+			}
+		},
+		initialized : function() {
+			
+		}
+	});
+	</script>
+</dom-module>

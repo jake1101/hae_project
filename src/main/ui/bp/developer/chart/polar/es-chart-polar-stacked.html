@@ -1,0 +1,222 @@
+<dom-module id="es-chart-polar-stacked">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-polar-stacked',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "name": "rMateCharts:WindRose Stacked",
+			    "width": 400,
+			    "height": 500,
+			    "type": "polarcolumn",
+			    "title": {
+			        "text": "Rainfall"
+			    },
+			    "plotArea": {
+			        "circular": true
+			    },
+			    "xAxes": {
+			        "startOffset": -0.5,
+			        "tick": {
+			            "offset": 7
+			        },
+			        "styles": {
+			        }
+			    },
+			    "yAxes": {
+			        "tick": {
+			            "intervalWidth": 60,
+			            "styles": {
+			            },
+			            "grid": {
+			                "styles": {
+			                    "fills": "#fff,#eee"
+			                }
+			            }
+			        }
+			    },
+			    "seriesGroups": {
+			        "name": "group1",
+			        "stackMode": "normal",
+			        "itemWidth": 0.8
+			    },
+			    "series": [{
+			        "name": "Seoul",
+			        "group": "group1",
+			        "items": "data_01",
+			        "labelField": "Month",
+			        "valueField": "Seoul",
+			        "label": {
+			            "styles": {
+			                "fontSize": 12
+			            }
+			        },
+			        "styles": {
+			            "fill": "#cc49e1d2",
+			            "shapeName": null,
+			            "hover": {
+			                "fillBrightness": 1.5,
+			                "border": "#333"
+			            }
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }, {
+			        "name": "NewYork",
+			        "group": "group1",
+			        "items": "data_01",
+			        "labelField": "Month",
+			        "valueField": "NewYork",
+			        "label": {
+			            "styles": {
+			                "fontSize": 12
+			            }
+			        },
+			        "styles": {
+			            "fill": "#cc54bbe8",
+			            "shapeName": null,
+			            "hover": {
+			                "fillBrightness": 1.5,
+			                "border": "#333"
+			            }
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }, {
+			        "name": "Paris",
+			        "group": "group1",
+			        "items": "data_01",
+			        "labelField": "Month",
+			        "valueField": "Paris",
+			        "label": {
+			            "styles": {
+			                "fontSize": 12
+			            }
+			        },
+			        "styles": {
+			            "fill": "#cc5560af",
+			            "shapeName": null,
+			            "hover": {
+			                "fillBrightness": 1.5,
+			                "border": "#333"
+			            }
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }],
+			    "legend": {
+			        "visible": true,
+			        "position": "bottom",
+			        "styles": {
+			            "border": "#333",
+			            "shadow": "#333",
+			            "paddingLeft": 11,
+			            "paddingRight": 11,
+			            "paddingTop": 5,
+			            "paddingBottom": 5,
+			            "background": null
+			        },
+			        "itemStyles": {
+			            "fontBold": true
+			        }
+			    },
+			    "data": [{
+			        "id": "data_01",
+			        "values": [
+			            {
+			                "Month" : "Jan",
+			                "Seoul" : 600,
+			                "NewYork" : 600,
+			                "Paris" : 400
+			            },{
+			                "Month" : "Feb",
+			                "Seoul" : 800,
+			                "NewYork" : 400,
+			                "Paris" : 0
+			            },{
+			                "Month" : "Mar",
+			                "Seoul" : 400,
+			                "NewYork" : 200,
+			                "Paris" : 0
+			            },{
+			                "Month" : "Apr",
+			                "Seoul" : 400,
+			                "NewYork" : 420,
+			                "Paris" : 0
+			            },{
+			                "Month" : "May",
+			                "Seoul" : 600,
+			                "NewYork" : 500,
+			                "Paris" : 0
+			            },{
+			                "Month" : "Jun",
+			                "Seoul" : 900,
+			                "NewYork" : 380,
+			                "Paris" : 340
+			            },{
+			                "Month" : "Jul",
+			                "Seoul" : 600,
+			                "NewYork" : 710,
+			                "Paris" : 430
+			            },{
+			                "Month" : "Aug",
+			                "Seoul" : 600,
+			                "NewYork" : 360,
+			                "Paris" : 0
+			            },{
+			                "Month" : "Sep",
+			                "Seoul" : 800,
+			                "NewYork" : 380,
+			                "Paris" : 0
+			            },{
+			                "Month" : "Oct",
+			                "Seoul" : 600,
+			                "NewYork" : 700,
+			                "Paris" : 480
+			            },{
+			                "Month" : "Nov",
+			                "Seoul" : 900,
+			                "NewYork" : 390,
+			                "Paris" : 440
+			            },{
+			                "Month" : "Dec",
+			                "Seoul" : 600,
+			                "NewYork" : 680,
+			                "Paris" : 0
+			            }
+			        ]
+			    }]
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

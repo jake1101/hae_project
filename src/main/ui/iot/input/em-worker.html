@@ -1,0 +1,26 @@
+<sc-link rel="import" href="es-worker-list.html"></sc-link>
+
+<dom-module id="em-worker">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<es-worker-list id="workerList" class="flex"></es-worer-list>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-worker',
+			load: function(param){
+				var me = this;
+				me.$.workerList.onSearch(param);
+			}
+		});
+	</script>
+
+
+</dom-module>

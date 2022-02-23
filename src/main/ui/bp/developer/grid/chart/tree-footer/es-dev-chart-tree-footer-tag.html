@@ -1,0 +1,162 @@
+<dom-module id="es-dev-chart-tree-footer-tag">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    
+    	<sc-ajax id="findListPr"
+            url="../loan_statement_tree.json"
+            last-response="{{resultList}}"
+            on-response="completefindListPr"
+            >
+        </sc-ajax>
+    	
+    	<!-- [Tree Footer 차트 생성]  
+    		1. row-tree-footer-chart-ref : sc-grid-chart의 ID를 지정하여, 참조할 수 있도록 함 
+    	-->
+    	<sc-grid id="gridChartPanel" class="flex" 
+    			 editable="false" 
+				 use-dummy="true"
+    			 use-state="false"
+    			 is-tree="true" 
+    			 use-tree-checkbox="false"
+				 row-tree-footer-chart-ref="gridChart"
+				 >
+
+			<sc-grid-columns>
+				<sc-data-column 	data-field="loan_number"			header-text="LoanNumber"		width="150"	text-align="center"></sc-data-column>
+				<sc-data-column 	data-field="country"				header-text="Country"		width="150"	text-align="center"></sc-data-column>
+				
+				<!-- 차트의  value로 지정된 컬럼은 반드시 data-type이 number 이어야 함(시리즈의 아이템에 value-filed로 지정됨) -->
+				<sc-data-column 	data-field="interest_rate"			header-text="InterestRate"	width="150"	text-align="center" data-type="number"></sc-data-column>
+				<sc-data-column 	data-field="currency"				header-text="Currency"		width="60"	text-align="center"></sc-data-column>
+				<sc-data-column 	data-field="project_id"				header-text="ProjectID"		width="60"	text-align="center"></sc-data-column>
+			</sc-grid-columns>
+		</sc-grid>
+		
+		<!-- 
+			아래의 sc-grid-chart의 역할은 하위의 엘리먼트를 파악하여 구조 그대로 Object 형태로 변경합니다.
+			그래서, 데이터 루디의 그리드 차트 API를 참조하며 바로 적용가능하도록 구현하였습니다.
+			참고로 sc-grid-chart의 result변수에 차트 객체 결과값이 바인딩되기 때문에 'gridChartColumn.result'로 접근하여 차트 객체를 확인하실 수 있습니다.
+		 -->
+		<sc-grid-chart id="gridChart" type="chart" min-height="150">
+			<styles padding="4"></styles>
+			<chart type="column">
+				<!-- Legend : 차트 하단의 시리즈 아이템 구분값
+					1. position : 기본은 하단에 표시되며, right로 지정하면 오른쪽에 표시
+				 -->
+				<legend visible="true" position="right" margin-left="10">
+					<styles></styles>
+				</legend>
+				<!-- 시리즈 아이템이 그려질 영역 -->
+				<plot-area>
+					<styles background="#0800ffff"></styles>
+				</plot-area>
+				<!-- X축 -->
+				<x-axes padding="0.1">
+					<!-- X축의 라인 색상 -->
+					<styles line="#333"></styles>
+					<!-- X축의 시리즈 아이템간의 구분 라인 색상 -->
+					<tick-styles line="#333"></tick-styles>
+				</x-axes>
+				<!-- Y축 -->
+				<y-axes>
+					<!-- Indicators -->
+					<indicators>
+						<!-- 배열형태는 반드시 아래와 같은 구조로 사용 ( <array>, <item> ) -->
+						<array>
+							<!-- 
+                        		1. front : 시리즈 아이템 앞에서 보여질지, 뒤에서(가려져서) 보여질지 여부.
+                        		2. series : 하단 시리즈 아이템 중 해당하는 name 입력.
+                        		3. value : 사용되는 값.
+                        		4. label : value가 표현되는 라벨.
+                        	 -->
+							<item type="line" front="true" series="serCountry" value="avg" label="Average:${value}">
+								<!-- 스타일 속성 링크 : http://helpme.emro.co.kr/projects/grid/api/ko/Classes_GridStyles -->
+								<styles line="#600000ff,1px,dotted"
+										color="#e00000ff"
+										font-size="10"
+										font-bold="true"
+										text-alignment="far"
+										number-format="#,##0"></styles>
+							</item>
+							<item type="line" front="true" series="serMale" value="avg" label="Average:${value}">
+								<styles line="#60ff0000,1px,dashed"
+										color="#e0800000"
+										font-size="10"
+										font-bold="true"
+										text-alignment="near"
+										number-format="#,##0"></styles>
+							</item>
+						</array>
+					</indicators>
+				</y-axes>
+				<!-- Series : 실제 그려질 차트(시리즈의 아이템) 속성값 세팅 -->
+				<series>
+					<array>
+						<!-- 
+                    		1. caption : 시리즈 아이템의 이름. 이 값이 없으면 name이 사용.
+                    		2. label-field : 라벨에 사용될 필드.
+                    		3. value-field : value에 사용될 필드.
+                    		4. summary-mode : 시리즈 항목 값들의 합계를 구하는 방식.
+                    	 -->
+						<item name="serCountry"
+							  caption="Country"
+							  label-field="country"
+							  value-field="interest_rate"
+							  summary-mode="aggregate"
+							  >
+							<styles background="#AFD8F8"></styles>
+						</item>
+					</array>
+				</series>
+			</chart>
+		</sc-grid-chart>
+    	
+    </template>
+    
+    <script>
+        
+        Polymer({
+            is: 'es-dev-chart-tree-footer-tag',
+            
+            properties: {
+            	
+            	resultList: {
+            		type: Array,
+            		value: []
+            	}
+            	
+            },
+            
+            attached: function(){
+            	this.loadData();
+            },
+            
+            loadData: function () {
+                this.$.findListPr.generateRequest();
+            },
+            
+            completefindListPr: function(e, res){
+            	
+            	this.$.gridChartPanel.setHierachyDataProvider(res.response, "children");
+            	
+            	/** Source Viewer의 data값 set */
+            	this.domHost.$.viewer.setData(JSON.stringify(res.response, null, "\t"));
+
+            	/** 트리 펼치기 */
+            	this.$.gridChartPanel._gridView.expandAll();
+            	
+            }
+            
+            
+            
+        });
+    </script>
+<!--  Polymer script �� -->
+
+</dom-module>

@@ -1,0 +1,65 @@
+<sc-link rel="import" href="es-boardadmin-list.html"></sc-link>
+<sc-link rel="import" href="es-boardadmin-info.html"></sc-link>
+<sc-link rel="import" href="es-boardadmin-account.html"></sc-link>
+<sc-link rel="import" href="es-boardadmin-role.html"></sc-link>
+
+<dom-module id="em-boardadmin">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<div class="hbox flex">
+			<es-boardadmin-list id="boardAdminList" class="flex-4" on-find-boardadmin-detail="onFindBoardAdminDetail" on-add-boardadmin="onAddBoardAdmin" on-show-board="onShowBoard"></es-boardadmin-list>
+			<div class="hspace-10"></div>
+			<div class="vbox flex-6">
+				<es-boardadmin-info id="boardAdminInfo" class="flex" on-clear="onClear"></es-boardadmin-info>
+				<sc-tab-navigation id="tabNavi"  class="flex">
+					<es-boardadmin-account id="boardAdminAccount" title-text="관리자계정"></es-boardadmin-account>
+					<es-boardadmin-role id="boardAdminRole" title-text="게시판권한"></es-boardadmin-role>
+				</sc-tab-navigation>
+			</div>
+		</div>
+	</template>
+
+	<script>
+        Polymer({
+            is : 'em-boardadmin',
+
+            onFindBoardAdminDetail: function(e, data) {
+              	var me = this;
+
+              	me.$.boardAdminInfo.load(data);
+                me.$.boardAdminAccount.load(data);
+                me.$.boardAdminRole.load(data);
+
+                me.$.tabNavi.selectItem(me.$.boardAdminAccount);
+			},
+
+            onAddBoardAdmin: function(e, data) {
+              	var me = this;
+              	me.onClear();
+              	me.$.boardAdminInfo.load(data);
+			},
+
+			onClear: function() {
+                var me = this;
+                me.$.boardAdminInfo.onClear();
+                me.$.boardAdminAccount.onClear();
+                me.$.boardAdminRole.onClear();
+
+                me.$.tabNavi.selectItem(me.$.boardAdminAccount);
+                me.searchBoardList();
+			},
+			
+			searchBoardList: function() {
+				var me = this;
+				me.$.boardAdminList.onSearch();
+			}
+
+        });
+	</script>
+</dom-module>

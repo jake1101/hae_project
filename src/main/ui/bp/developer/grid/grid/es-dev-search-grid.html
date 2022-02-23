@@ -1,0 +1,83 @@
+<dom-module id="es-dev-search-grid">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-ajax id="sampleAjax" url="/ui/griddev/gridSearch.do" body="{{searchParam}}" last-response="{{resultList}}"></sc-ajax>
+        <sc-ajax id="sampleAjax2" url="/ui/griddev/gridSearch.do" body="{{searchParam}}" on-response="onResponse"></sc-ajax>
+
+         <sc-grid  id="gridPanel"  class="flex" editable="true" data-provider="{{resultList}}">
+	         <cc-grid-toolbar titleText="그리드 조회 샘플">
+	            <sc-button text="조회(바인딩)" on-click="onSearch"></sc-button>
+	            <sc-button text="조회(callback)" on-click="onSearch2"></sc-button>
+	        </cc-grid-toolbar>
+            <sc-grid-columns>
+                <sc-data-column data-field="col1"  header-text="컬럼1"  width="100"  text-align="center" required="true" ></sc-data-column>
+                <sc-data-column data-field="col2"  header-text="컬럼2" editable="true"  width="200"  text-align="center" ></sc-data-column>
+                <sc-data-column data-field="col3"  header-text="컬럼3" editable="true"  width="200"  text-align="left"></sc-data-column>
+                <sc-data-column data-field="col4"  header-text="컬럼4"  width="200"  text-align="left"   ></sc-data-column>
+                <sc-data-column data-field="col5"  header-text="컬럼5"  width="200"  text-align="left"   ></sc-data-column>
+            </sc-grid-columns>
+        </sc-grid>
+    </template>
+          
+    <script>
+        Polymer({
+            is: 'es-dev-search-grid',
+            
+            properties : {
+                gridEditable:{
+                    type : Object,
+                    value: true
+                },
+                searchParam : {
+                    type : Object,
+                    value : function(){
+                        return {};
+                    }
+                },
+                resultList: {
+                    type:Array
+                }
+                
+            },
+
+            //리스트(바인딩) 조회
+            onSearch : function(){
+               //조회된 데이터를 sc-ajax last-response 속성과 그리드의 dataProvider를 바인딩 하여 데이터를 셋팅할수 있습니다.
+               this.$.sampleAjax.service();
+            },
+            
+
+            //리스트(callback) 조회
+            onSearch2 : function(){
+               //조회된 데이터를 sc-ajax의 콜백함수를 이용하여 그리드의 데이터를 셋팅할수 있습니다. 
+               this.$.sampleAjax2.service();
+            },
+            onResponse : function(e, res){
+                var result = res.response;
+                /*
+                  for(var i = 0,len = result.length; i < len; i++ ){
+                     	 데이터 가공
+                  }
+                */
+                var list = [];
+                for(var i=0; i< result.length; i++){
+                	var data = result[i];
+                	if(i % 2 == 0){
+                		data['col1'] = null;	
+                	}
+                	
+                	list.push(data);
+                }
+                this.$.gridPanel.setDataProvider(list);
+
+            }
+            
+        });
+    </script>
+
+</dom-module>

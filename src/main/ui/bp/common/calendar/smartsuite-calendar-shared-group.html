@@ -1,0 +1,51 @@
+<!--
+	캘린더 타입 부분 
+ -->
+<dom-module id="smartsuite-calendar-shared-group">
+	<style>
+		:host {
+            @apply(--calendar-vbox-layout);
+            width: 100%;
+            height: 100%;
+        }
+	</style>
+
+	<template>	
+		<div class="calendarSubWrapper">
+			<div class="calendarSubHeader">
+				<span class="mainTitle">[[translate("공유된 일정 그룹")]]</span>
+			</div>
+			<div class="calendarSubContent">
+				<div id="listWrapper" class="page-flex"></div>
+			</div>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is: 'smartsuite-calendar-shared-group',
+			
+			/** 
+			 * 공유 그룹 설정
+			 */
+			setGroupList: function(groupInfoList) {
+				var me = this;
+				
+				me.$.listWrapper.innerHTML = '';
+				for(var i = 0; i < groupInfoList.length; i++) {
+					var listItemEl = document.createElement('smartsuite-colored-list-item');
+					listItemEl.grpInfo = groupInfoList[i];
+					listItemEl.readOnly = true;
+					
+					// 체크박스 클릭시
+					listItemEl.addEventListener('click-colored-list-item', function(event) {
+						var groupInfo = event.currentTarget.grpInfo;
+						me.fire('toggle-display-group', groupInfo);
+					});
+					
+					me.$.listWrapper.appendChild(listItemEl);
+				}
+			}
+		});
+	</script>
+</dom-module>

@@ -1,0 +1,66 @@
+<sc-link rel="import" href="es-orgtype-list.html"></sc-link>
+<sc-link rel="import" href="es-org-list.html"></sc-link>
+<sc-link rel="import" href="es-org-detail.html"></sc-link>
+
+<dom-module id="em-org">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <cc-page-title-bar></cc-page-title-bar>
+        <div class="hbox flex">
+            <div class="vbox flex-6">
+                <es-orgtype-list id="orgtypeList" on-selected-orgtype="onSelectedOrgType" on-changed-orgtype="onChangedOrgType" class="flex-4"></es-orgtype-list>
+                <div class="vspace-10"></div>
+                <es-org-list id="orgList" on-selected-org="onSelectedOrg" on-deleted-org="onDeletedOrg" class="flex-6"></es-org-list>
+            </div>
+            <div class="hspace-10"></div>
+            <es-org-detail id="orgInfo" on-saved-org="onSavedOrg" class="flex-4"></es-org-detail>
+        </div>
+    </template>
+
+    <script>
+        Polymer({
+            is: "em-org",
+
+            // 조직유형 : 조직 유형 코드 선택
+            onSelectedOrgType: function(e, data) {
+                var me = this;
+                me.$.orgList.load(data); // 조직 목록 - 조직유형코드 전달
+                me.$.orgInfo.clear(); // 조직 정보 초기화
+            },
+
+            // 조직유형 : 저장 및 삭제 완료
+            onChangedOrgType: function() {
+                var me = this;
+                me.$.orgList.clear(); // 조직목록 초기화
+                me.$.orgInfo.clear(); // 조직 정보 초기화
+            },
+
+            // 조직목록 : 조직코드 선택
+            onSelectedOrg: function(e, data) {
+                var me = this;
+                me.$.orgInfo.load(data); // 조직 상세정보 - 조직코드 전달
+            },
+
+            // 조직목록 : 삭제 완료
+            onDeletedOrg: function() {
+                var me = this;
+                me.$.orgtypeList.onFindList(); // 조직유형 조회
+                me.$.orgInfo.clear(); // 조직 정보 초기화
+            },
+
+            // 조직정보 : 저장 완료
+            onSavedOrg: function() {
+                var me = this;
+                me.$.orgtypeList.onFindList(); // 조직유형 조회
+                me.$.orgList.onFindList(); // 조직목록 조회
+            }
+        });
+    </script>
+
+</dom-module>

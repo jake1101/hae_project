@@ -1,0 +1,368 @@
+<dom-module id="sc-mdi-content">
+	<template>
+		<sc-mdi-tabbar id="mdiTabbar" on-mdi-tab-selected="_onMdiTabSelected" on-mdi-tab-closed="_onMdiTabClosed" on-mdi-tab-close-all="_onMdiTabCloseAll"
+					   on-mdi-tab-help="_onMdiTabHelp"
+					   on-mdi-tab-favorit="_onMdiTabFavorit"
+					   hidden="[[tabbarHidden]]"></sc-mdi-tabbar>
+		<!-- Breadcrumbs -->
+		<sc-bc id="mdiBreadCrumb"></sc-bc>
+		<!-- //Breadcrumbs -->
+		<sc-pages id="mdiPages"></sc-pages>
+		<sc-mdi-progress id="mdiProgress"></sc-mdi-progress>
+	</template>
+	<script>
+		
+		Polymer({
+			
+	    	is: 'sc-mdi-content',
+	    	
+	    	properties: {
+	    	
+	    		createdWindows: {
+					type: Array,
+					value:  [],
+					notify: true
+					
+				},
+				
+				maxTabCount : {
+					type: Number,
+					value: 10
+				},
+				
+				_boundWindowModuleLoad : {
+					type : Function,
+					value : function() {
+						return this._onWindowModuleLoad.bind(this);
+					}
+				},
+				
+				_boundWindowModuleLoaded : {
+					type : Function,
+					value : function() {
+						return this._onWindowModuleLoaded.bind(this);
+					}
+				},
+				
+				_boundWindowModuleFailure : {
+					type : Function,
+					value : function() {
+						return this._onWindowModuleFailure.bind(this);
+					}
+				},
+				
+				menuPaths : {
+                    type : Object,
+                    value : {}
+                },
+                
+                tabbarHidden:{
+                	type : Object,
+                	value : function(){
+                		return false;
+                	}
+                },
+
+                _bindedFunctions:{
+                    type: Object,
+                    value: function() {
+                        return {};
+                    }
+                }
+			},
+			
+			get mdiTabbarHeight() {
+                if(!this._mdiTabbarRect) {
+                    this._mdiTabbarRect = this.$.mdiTabbar.getBoundingClientRect();
+                }
+                
+                // RAYCOM 수정 : 대시보드 최대 화면시, 탭바 숨긴후에 height update 되도록 수정
+               	if(this.$.mdiTabbar.style.display == "none"){
+               		return 0;
+               		
+               	}else{
+               		return this._mdiTabbarRect.height;
+               	}
+                
+            },
+
+            get mdiTabbarWidth() {
+                if(!this._mdiTabbarRect) {
+                    this._mdiTabbarRect = this.$.mdiTabbar.getBoundingClientRect();
+                }
+                return this._mdiTabbarRect.width;
+            },
+            
+            get mdiBreadCrumbHeight(){
+            	if(!this._mdiBreadCrumbHeight) {
+	                var computedStyle = window.getComputedStyle(this.$.mdiBreadCrumb); 
+	                
+	                var height = parseInt(computedStyle.lineHeight, 10);
+	                height += parseInt(computedStyle.marginTop, 10);
+	                height += parseInt(computedStyle.marginBottom, 10);
+	                height += parseInt(computedStyle.borderTopWidth, 10);
+	                height += parseInt(computedStyle.borderBottomWidth, 10);
+	                this._mdiBreadCrumbHeight = height;
+	            }
+            	
+            	// RAYCOM 추가 : 대시보드 최대 화면시, mdiBreadCrumb 숨긴후에 height update 되도록 수정
+            	if(this.$.mdiBreadCrumb.style.display == "none"){
+            		return 0;
+            		
+            	}else{
+            		return this._mdiBreadCrumbHeight;
+            	}
+	            
+            },
+			
+			get mdiContentPadding() {
+				if(!this._mdiContentPadding) {
+					this._mdiContentPadding = Number(this.getComputedStyleValue('padding-left').replace('px', '')) + Number(this.getComputedStyleValue('padding-right').replace('px', ''));	
+				}
+				return this._mdiContentPadding;
+			},
+			
+			get activatedWindow() {
+				return this.$.mdiPages.selectedItem;
+			},
+
+            get startPage() {
+                return SCMdiManager.getStartPage();
+            },
+
+			_onMdiTabSelected : function(event) {
+				this.activateWindow(event.detail.windowId);
+
+				if(SCMdiHistory.useHistory) {
+                    SCMdiHistory.setHistory(event.detail.windowId);
+				}
+
+			},
+			
+			_onMdiTabClosed : function(event) {
+				this.removeWindow(event.detail.windowId);
+			},
+			
+			_onMdiTabCloseAll : function(event) {
+                var me = this;
+				var tabs = this.$.mdiPages.items;
+
+                var alert = UT.alert("메뉴 삭제 및 메모리 초기화 중");
+
+                setTimeout(function() {
+                    for(var i=0,len=tabs.length,tab; i<len; i++) {
+                        tab = tabs[i];
+                        if(tab.windowId === me.startPage.menu_id){
+                            continue;
+                        }
+                        me.removeWindow(tab.windowId);
+                    }
+                    setTimeout(function() {
+                        alert.close();
+                    }, 50);
+                }, 100);
+			},
+
+			_onMdiContentIronResize : function(containerHeight, windowWidth, leftmenuWidth) {
+	        	this.style.height = containerHeight + 'px';
+	        	this.style.width = (windowWidth - leftmenuWidth - this.mdiContentPadding) + 'px';
+				this.$.mdiPages.style.width = this.style.width;
+				this.$.mdiPages.style.height = (containerHeight - this.mdiTabbarHeight - this.mdiBreadCrumbHeight) + 'px';
+				this.$.mdiProgress.targetWidth = windowWidth - leftmenuWidth;
+				this.$.mdiProgress.targetHeight = containerHeight;
+				if(this.activatedWindow) {
+					this.activatedWindow._onMdiWindowIronResize();
+				}
+				var containerWeight = windowWidth - leftmenuWidth - this.mdiContentPadding;
+				this.$.mdiTabbar._onMdiTabbarIronResize(containerWeight);
+
+			},
+			
+			_onWindowModuleLoad : function(event) {
+				event.target.removeEventListener('window-module-load', this._boundWindowModuleLoad);
+			},
+			
+			_onWindowModuleLoaded : function(event) {
+				event.target.removeEventListener('window-module-loaded', this._boundWindowModuleLoaded);
+				event.target.removeEventListener('window-module-load-failure', this._boundWindowModuleFailure);
+			},
+			
+			_onWindowModuleFailure : function(event) {
+				event.target.removeEventListener('window-module-loaded', this._boundWindowModuleLoaded);
+				event.target.removeEventListener('window-module-load-failure', this._boundWindowModuleFailure);
+
+                this._failMessage(event);
+			},
+			
+			_failMessage: function(event) {
+				UT.alert("STD.E9999");
+			},
+			
+			createWindow: function(windowId, windowName, windowUrl, lazy) {
+				var windowIndex, createHandler = function() {
+                    var newWindow = new SCMdiWindow({
+                        id : windowId,
+                        windowId : windowId,
+                        windowName : windowName,
+                        windowUrl : windowUrl,
+                        lazy : lazy
+                    });
+                    newWindow.addEventListener('window-module-load', this._boundWindowModuleLoad);
+                    newWindow.addEventListener('window-module-loaded', this._boundWindowModuleLoaded);
+                    newWindow.addEventListener('window-module-load-failure', this._boundWindowModuleFailure);
+                    this.$.mdiTabbar.addTab(newWindow);
+                    Polymer.dom.flush();
+                    Polymer.dom(this.$.mdiPages).appendChild(newWindow);
+                    Polymer.dom.flush();
+                    this.createdWindows.push(windowId);
+                    this.fire('window-created');
+                    if(!lazy){
+                        return this.activateWindow(windowId);
+                    }
+				}.bind(this);
+
+				if(!windowUrl) {
+					console.error('url is undefined');
+					return;
+				}
+				
+				windowIndex = this.createdWindows.indexOf(windowId);
+				if(windowIndex == -1) {
+                    if(this.createdWindows.length >= this.maxTabCount) {
+						this.selectRemoveWindowPopup(createHandler);
+						return;
+                    }
+                    return createHandler();
+				} else if(!lazy){
+                    return this.activateWindow(windowId);
+                }
+
+			},
+
+            selectRemoveWindowPopup: function(createHandler) {
+                var messageBox = new SCMessageBox(),
+                    mdiTabs = this.$.mdiTabbar.$.mdiTabs.items;
+
+                var tabListHtml = '<div class="alertMessage">'+ this.translate("STD.MDI1012", null, this.maxTabCount) + '</div>';
+
+
+                for (var i=0, len=mdiTabs.length, menuId; i<len; i++) {
+                    menuId = mdiTabs[i].dataset.windowId;
+                    if(menuId === "HOME"){
+                        continue;
+                    }
+                    tabListHtml+= '<li id="'+menuId+'" class="removeMenuMessageBox"><a><span style="width:150px;">' + mdiTabs[i].innerText + '</span><div class="windowCloseIcon"></div> </a></li>' ;
+                    this._bindedFunctions[menuId] = this.selectRemoveWindow.bind(this, menuId, createHandler, messageBox);
+
+                }
+
+                messageBox.autoGrowMessageBox = true;
+                messageBox._messageElement.innerHTML = tabListHtml;
+
+                var tabs = messageBox.querySelectorAll("li");
+                for (var idx in tabs) {
+                    if (tabs.hasOwnProperty(idx)) {
+                        tabs[idx].firstChild.addEventListener('tap', this._bindedFunctions[tabs[idx].id]);
+                    }
+                }
+                messageBox.show({
+                    title: '알림',
+                    modal : true,
+                    buttons : 'cancel',
+                    iconCls : null
+                })
+			},
+
+            selectRemoveWindow: function(menuId, callback, messageBox) {
+                if(menuId){
+                    messageBox.hide();
+                    this.removeWindow(menuId);
+                    callback.call(this);
+
+                    var tabs = messageBox.querySelectorAll("li");
+                    for (var idx in tabs) {
+                        if (tabs.hasOwnProperty(idx)) {
+                            tabs[idx].firstChild.removeEventListener('tap', this._bindedFunctions[tabs[idx].id]);
+                        }
+                    }
+                    this._bindedFunctions = {};
+                }
+            },
+			
+			removeWindow: function(windowId) {
+				var mdiPages = Polymer.dom(this.$.mdiPages),
+					window = mdiPages.querySelector('sc-mdi-window[window-id="'+windowId+'"]');
+
+				if(!window) {
+				    return;
+				}
+
+				this.$.mdiTabbar.removeTab(windowId);
+                this.createdWindows.splice(this.createdWindows.indexOf(windowId), 1);
+				window.hidden = true;
+                window.module = null;
+				window.removeEventListener('window-module-load', this._boundWindowModuleLoad);
+				window.removeEventListener('window-module-loaded', this._boundWindowModuleLoaded);
+				window.removeEventListener('window-module-load-failure', this._boundWindowModuleFailure);
+				window.destroy();
+				Polymer.dom.addDebouncer(this.debounce('_windowDestroyDebouncer', this.windowDestroyDebouncer, 16));
+			},
+			
+			windowDestroyDebouncer : function() {
+				Polymer.dom.flush();
+				if(window.CollectGarbage) {
+					window.CollectGarbage();
+					this.async(function() {
+						window.CollectGarbage();
+					}, 1000);
+		    	}
+				if(!this.$.mdiPages.querySelector('sc-mdi-window')) {
+					this.$.mdiPages.selected = -1;
+					this.$.mdiTabbar.activateTab = null;
+				}
+			},
+			
+			activateWindow: function(windowId) {
+				var window = Polymer.dom(this.$.mdiPages).querySelector('sc-mdi-window[window-id="'+windowId+'"]'), 
+					windowIndex = this.createdWindows.indexOf(windowId);
+				if(window && window.lazy) {
+					window.lazy = false;
+					window.loadModule();
+				}
+				if(windowIndex > -1) {
+					this.$.mdiPages.selectedIndex = windowIndex;
+					this.$.mdiTabbar.activateTab = windowId;
+
+					if(windowId === this.startPage.menu_id) {
+						this.$.mdiBreadCrumb.hidden = true;
+					} else {
+					    this.$.mdiBreadCrumb.hidden = false;
+					}
+					window.checkAuthentication();
+				}
+				else {
+					this.$.mdiPages.selected = -1;
+					this.$.mdiTabbar.activateTab = null;
+				}
+				this.fire('window-activated', window, {bubbles: false});
+				return window;
+			},
+			
+            setMenuPath : function(menuPath) {
+                this.$.mdiBreadCrumb.innerHTML = menuPath ? menuPath : '';
+            },
+            
+            _destroy: function(){
+                this.menuPaths = null;
+				this.createdWindows = null;
+				this.maxTabCount = null;
+				this._boundWindowModuleLoad = null;
+				this._boundWindowModuleLoaded = null;
+				this._boundWindowModuleFailure = null;
+				this.menuPaths = null;
+				this.tabbarHidden = null;
+				this._bindedFunctions = null;
+			}
+	  	});
+	</script>
+</dom-module>

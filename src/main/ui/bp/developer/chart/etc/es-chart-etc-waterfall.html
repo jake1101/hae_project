@@ -1,0 +1,114 @@
+<dom-module id="es-chart-etc-waterfall">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-etc-waterfall',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "name": "Highcharts:Waterfall",
+			    "type": "waterfall",
+			    "title": "Highcharts Waterfall",
+			    "xAxes": {
+			        "title": false,
+			        "tick": {
+			            "styles": {
+			                "textRotation": -45
+			            }
+			        }
+			    },
+			    "yAxes": {
+			        "title": "USD",
+			        "tick": {
+			            "styles": {
+			                "numberScale": 3
+			            }
+			        }
+			    },
+			    "series": [{
+			        "name": "Female",
+			        "labelField": "name",
+			        "valueField": "y",
+			        "items": [
+			            {
+			                "name": 'Start',
+			                "y": 120000
+			            }, {
+			                "name": 'Product Revenue',
+			                "y": 569000
+			            }, {
+			                "name": 'Service Revenue',
+			                "y": 231000
+			            }, {
+			                "name": 'Positive Balance',
+			                "isSum": true
+			            }, {
+			                "name": 'Fixed Costs',
+			                "y": -342000
+			            }, {
+			                "name": 'Variable Costs',
+			                "y": -233000
+			            }, {
+			                "name": 'Balance',
+			                "isSum": true,
+			                "cumulative": true
+			            }
+			        ],
+			        "label": {
+			            "position": "center",
+			            "styles": {
+			                "fontSize": 12,
+			                "numberScale": 3,
+			                "color": "#fff",
+			                "textShadow": "#000,1,1"
+			            }
+			        },
+			        "styles": {
+			            "fill": "#98fb98",
+			            "border": "#555",
+			            "shapeSize": "1000%",
+			            "hovered": {
+			                "fillBrightness": 1.5
+			            }
+			        },
+			        "decreaseStyles": {
+			            "fill": "#ffa500"
+			        },
+			        "sumStyles": {
+			            "fill": "#333"
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "endValue"
+			        }, {
+			            "property": "startValue"
+			        }]
+			    }],
+			    "legend": {
+			        "visible": false
+			    }
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

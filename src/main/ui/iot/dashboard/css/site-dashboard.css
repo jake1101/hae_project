@@ -1,0 +1,144 @@
+@import url("dashboard.css");
+
+@charset "utf-8";
+
+/* BACKGROUND */
+.site-back-ground-color {background: #14203C; color: #FFFFFF;}
+.site-sub-back-ground-color {background: #182747; margin:33px 33px 33px 33px; border-radius: 13px;} /* margin : top right bottom left */
+
+/* TOP */
+.site-top-area {background: #182747; min-height:79px; border-top: 1px solid #2C4670; border-right: 1px solid #2C4670; border-left: 1px solid #2C4670; overflow: hidden !important; border-radius: 13px 13px 0px 0px;}
+.site-middle-area{border: 1px solid #2C4670; border-radius: 0px 0px 13px 13px;}
+.site-top-left-area {align-self: center; padding-left: 30px; padding-right: 29px;}
+.site-top-site-text {font-size: 27px; font-weight: 900;}
+.site-top-time-text {font-size: 18px; font-weight: 500; justify-content: flex-end;}
+.site-top-right-area {align-self: center; padding-left: 29px; padding-right: 30px;}
+
+/* SUB TITLE */
+.site-sub-title-area{min-height: 70px;} 
+.site-sub-title {font-size: 22px; font-weight: 700; display: table-cell; vertical-align: bottom; padding-bottom: 10px;}
+
+/* LEFT, RIGHT */
+.site-left-area {min-height:754px; min-width:845px; padding:0px 30px 0px 33px; border-right: 1px solid #2C4770; border-radius: 0px 0px 0px 13px;}
+.site-right-area {min-height:754px; min-width:562px; padding:0px 33px 0px 30px; border-radius: 0px 0px 13px 0px;}
+
+/* LEFT AREA */
+/* .area-condition-box{background: #1E3155;} */
+.site-condition-box{min-height: 314px; background: #1E3155; border-radius: 15px; border: 1px solid #2C4670;} /* min-width:496px; */
+.site-condition-title{font-size:21px; font-weight:500; text-align:center; padding: 15px 0px 5px 0px;}
+.site-prog-left-text{max-width: 100px; font-size:13px; font-weight:400; text-align: right; padding-right:20px; overflow: hidden;}
+.site-prog-right-text{max-width: 100px; font-size:13px; font-weight:400; text-align: left; padding-left:20px; overflow: hidden;}
+.site-area-input-box {min-height:645px; padding-bottom:39px;}
+.site-landWorker-background{background: url(../icon/site/landworker.png) no-repeat; background-position: center;}
+.site-marineWorker-background{background: url(../icon/site/marineworker.png) no-repeat; background-position: center;}
+.site-landMachine-background{background: url(../icon/site/landmachine.png) no-repeat; background-position: center;}
+.site-marineMachine-background{background: url(../icon/site/marinemachine.png) no-repeat; background-position: center;}
+.site-worker-none-background{background: url(../icon/site/worker_none.png) no-repeat; background-position: center;}
+.site-machine-none-background{background: url(../icon/site/machine_none.png) no-repeat; background-position: center;}
+.site-markertext1{position: absolute; top: 5%; left: 69%; width:125px; height:18px; text-align:left;}
+.site-marker1{position: absolute; top: 7%; left: 64%; width:18px; height:18px; background-color: #4477ED; border-radius: 50%;}
+.site-markertext2{position: absolute; bottom: 8%; left: 69%; width:125px; height:18px; text-align:left;}
+.site-marker2{position: absolute; bottom: 7%; left: 64%; width:18px; height:18px; background-color: #9559EA; border-radius: 50%;}
+.site-markertext3{position: absolute; bottom: 8%; right: 69%; width:125px; height:18px; text-align:right;}
+.site-marker3{position: absolute; bottom: 7%; right: 64%; width:18px; height:18px; background-color: #E7574F; border-radius: 50%;}
+.site-markertext4{position: absolute; top: 5%; right: 69%; width:125px; height:18px; text-align:right;}
+.site-marker4{position: absolute; top: 7%; right: 64%; width:18px; height:18px; background-color: #70C471; border-radius: 50%;}
+.site-none-text{}
+
+/* RIGHT : NOW */
+.site-now-weather-box {min-height:148px; background: #1E3155; border-radius: 10px; border: 1px solid #2C4670;}
+.site-now-div-line{padding-right:15px; border-right: solid 1px #314E7B;}
+.site-now-position-icon {width:21px; height:27px; background: url(../icon/site/position.png) no-repeat;}
+/* .now-position-text {font-size:18px; font-weight:400;} */
+
+.site-now-maxtemp-icon {width:9px; background: url(../icon/site/weather/maxtemp.png) no-repeat; background-position: center;}
+.site-now-mintemp-icon {width:9px; background: url(../icon/site/weather/mintemp.png) no-repeat; background-position: center;}
+.site-now-weather-icon-area {min-width: 118px; padding: 20px 20px 10px 10px;}
+.site-now-weather-text{}
+
+/* RIGHT : TODAY */
+.site-today-weather-box{min-width:562px; min-height:330px; background: #1E3155; border-radius: 15px; text-align: center; font-size: 15px; font-weight:400; border: 1px solid #2C4670;}
+.site-today-weather-title-box{min-width:51px; background: #1E3155;}
+.site-today-weather-title-box div{justify-content: center;}
+.site-today-weather-title-box div>p{color:#7F91C8;}
+.site-today-weather-content-box1{min-width:72px; background: #223860;}
+.site-today-weather-content-box1 div{justify-content: center;}
+.site-today-weather-content-box2{min-width:72px; background: #1E3155;}
+.site-today-weather-content-box2 div{justify-content: center;}
+
+/* RIGHT : WEEK */
+.site-week-weather-box{padding-bottom:39px;}
+.site-week-weather-content-box{min-width:68px; min-height:137px; background: #1E3155; border-radius: 10px; border: 1px solid #2C4670;}
+.site-week-weather-content-box div:not(:nth-child(2)){justify-content: center; align-self: center;}
+.site-week-weather-line {height: 1px; width: 65%; border-bottom: solid 1px;}
+.site-week-selected{background: #386BD4 !important;}
+
+/* ICON */
+.site-window-max {width:30px; height:30px; background: url(../icon/window_max.png) no-repeat; cursor: pointer;}
+.site-window-return {width:30px; height:30px; background: url(../icon/window_return.png) no-repeat; cursor: pointer;}
+.site-now-weather-icon1 {background: url(../icon/site/weather/1.png) no-repeat; background-size: 100% 100%;}
+.site-now-weather-icon3 {background: url(../icon/site/weather/3.png) no-repeat; background-size: 100% 100%;}
+.site-now-weather-icon4 {background: url(../icon/site/weather/4.png) no-repeat; background-size: 100% 100%;}
+.site-now-weather-icon5 {background: url(../icon/site/weather/5.png) no-repeat; background-size: 100% 100%;}
+.site-now-weather-icon7 {background: url(../icon/site/weather/7.png) no-repeat; background-size: 100% 100%;}
+.site-now-weather-icon9 {background: url(../icon/site/weather/9.png) no-repeat; background-size: 100% 100%;}
+.site-now-weather-icon12 {background: url(../icon/site/weather/12.png) no-repeat; background-size: 100% 100%;}
+
+.site-black-select-icon{min-width: 32px; height: 32px; background: url(../icon/black-select.png) no-repeat; background-position: center;}
+.site-white-select-icon{min-width: 32px; height: 32px; background: url(../icon/white-no-select.png) no-repeat; background-position: center;}
+
+/* Weather temperature icon */
+.site-today-weather-icon1 {background: url(../icon/site/weather/1.png) no-repeat; background-position: center; background-size: contain;}
+.site-today-weather-icon3 {background: url(../icon/site/weather/3.png) no-repeat; background-position: center; background-size: contain;}
+.site-today-weather-icon4 {background: url(../icon/site/weather/4.png) no-repeat; background-position: center; background-size: contain;}
+.site-today-weather-icon5 {background: url(../icon/site/weather/5.png) no-repeat; background-position: center; background-size: contain;}
+.site-today-weather-icon7 {background: url(../icon/site/weather/7.png) no-repeat; background-position: center; background-size: contain;}
+.site-today-weather-icon9 {background: url(../icon/site/weather/9.png) no-repeat; background-position: center; background-size: contain;}
+.site-today-weather-icon12 {background: url(../icon/site/weather/12.png) no-repeat; background-position: center; background-size: contain;}
+
+/* Weather wind icon */
+.site-today-weather-small-wind1 {width:18px; height:18px; background: url(../icon/site/wind/1.png) no-repeat;}
+.site-today-weather-small-wind2 {width:18px; height:18px; background: url(../icon/site/wind/2.png) no-repeat;}
+.site-today-weather-small-wind3 {width:18px; height:18px; background: url(../icon/site/wind/3.png) no-repeat;}
+.site-today-weather-small-wind4 {width:18px; height:18px; background: url(../icon/site/wind/4.png) no-repeat;}
+.site-today-weather-small-wind5 {width:18px; height:18px; background: url(../icon/site/wind/5.png) no-repeat;}
+.site-today-weather-small-wind6 {width:18px; height:18px; background: url(../icon/site/wind/6.png) no-repeat;}
+.site-today-weather-small-wind7 {width:18px; height:18px; background: url(../icon/site/wind/7.png) no-repeat;}
+.site-today-weather-small-wind8 {width:18px; height:18px; background: url(../icon/site/wind/8.png) no-repeat;}
+.site-today-weather-small-wind12 {width:63px; height:45px; background: url(../icon/site/wind/12.png) no-repeat;}
+
+/**** CSS progress bar ****/
+.site-progress-background{
+	min-width: 100px;
+	background-color: #111D33;
+	height: 15px;
+    border-radius: 10px;
+}
+
+.site-progressbar1 {
+	border-radius: 10px; 
+	background-color: #4477ED;
+	height: 15px;
+	width: 0%;
+}
+
+.site-progressbar2 {
+	border-radius: 10px; 
+	background-color: #9559EA;
+	height: 15px;
+	width: 0%;
+}
+
+.site-progressbar3 {
+	border-radius: 10px; 
+	background-color: #E7574F;
+	height: 15px;
+	width: 0%;
+}
+
+.site-progressbar4 {
+	border-radius: 10px; 
+	background-color: #70C471;
+	height: 15px;
+	width: 0%;
+}

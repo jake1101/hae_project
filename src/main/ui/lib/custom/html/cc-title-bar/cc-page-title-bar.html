@@ -1,0 +1,95 @@
+<!--
+`<cc-page-title-bar></cc-page-title-bar>` 는 <h3> 크기로 제목을 지정하고자 할 때 사용하며, 즐겨찾기와 메뉴얼 기능이 포함되어 있습니다.
+title-text 속성을 활용하여 제목을 지정 할 수 있으며, `<sc-button>` 컴포넌트를 포함 할 수 있습니다.
+부모 엘리먼트가 `<sc-window>`, `<sc-dialog>` 일 경우(팝업), toolbar (즐겨찾기, 메뉴얼) 기능이 비활성화 됩니다.
+
+### 기본예제
+
+	<cc-page-title-bar></cc-page-title-bar>
+
+### title-text 활용
+화면에 표시할 String 을 지정 할 수 있습니다. 입력 하지 않을 경우 현재 메뉴명이 출력됩니다.
+
+    <cc-page-title-bar title-text="메뉴명"></cc-page-title-bar>
+
+### 다국어 미처리 방법
+만약 동적으로 변하는 변수명을 제목으로 사용하고자 할때는 다국어가 수집되지 않도록 `i18n-disabled` 속성을 추가합니다.
+
+    <cc-page-title-bar title-text="{{title}}" i18n-disabled></cc-page-title-bar>
+
+### 버튼 추가 방법
+`<cc-page-title-bar>` 태그 안에 `<sc-button>` 컴포넌트를 추가하여 우측 정렬되는 버튼을 추가 할수 있습니다.
+
+    <cc-page-title-bar>
+        <sc-button text="저장"></sc-button>
+    </cc-page-title-bar>
+-->
+<dom-module id="cc-page-title-bar">
+    <template>
+        <h3>[[_title]]</h3>
+        <ul id="toolbar" hidden$="[[formula('toolbarHidden')]]">
+<!--             <li><button class$="[[formula('isFavorite')]]" title="[[translate('즐겨찾기저장')]]" on-tap="_onFavorite"></button></li> -->
+<!--             <li><button title="[[translate('메뉴얼보기')]]" on-tap="_onShowHelp"></button></li> -->
+        </ul>
+        <div class="wrap_btn">
+            <content></content>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: 'cc-page-title-bar',
+            
+            formulas:{
+                /**
+                 * 부모 element 가 `<sc-window>`, `<sc-dialog>` 일 경우(팝업) `true` 를 반환 합니다.
+                 * `true` 일 경우 toolbar 기능(즐겨찾기, 메뉴얼)이 빌활성화 됩니다.
+                 *
+                 * @type {Boolean}
+                 */
+                toolbarHidden: function(){
+                    return (this._parentWindow instanceof  SCWindow || this._parentWindow instanceof  SCDialog);
+                },
+
+                /**
+                 * 즐겨찾기로 등록이 된 메뉴 일 경우 지정할 class 명을 지정합니다.
+                 *
+                 * @type {String}
+                 */
+                isFavorite: function(){
+                    var me = this;
+                    if('undefined' !== typeof SCMdiWindow && me._parentWindow instanceof SCMdiWindow){
+                        if(SCMdiManager.hasMenuFavorite(me._parentWindow.windowId)){
+                            return "a_is_favorite";
+                        }
+                    }
+                    return "";
+                }
+            },
+            
+            attached: function(){
+                this.applyFormula();
+            },
+            
+            /**
+             * 메뉴얼을 보여줍니다.
+             *
+             * @private
+             * @return {String}
+             */
+            _onShowHelp : function(){
+                var activatedWindow = SCMdiManager.activatedWindow();
+
+                if(activatedWindow) {
+                    var url = "findInfoHelpManual.do?menuCd=" + activatedWindow.windowId;
+                    UT.popupJsp(url, activatedWindow, '80%', '100%', null, {maximizable: true,titleText: "메뉴얼"});
+                }else {
+                    UT.alert("STD.ADM1026");	// "활성화된 메뉴가 없습니다."
+                }
+            },
+            
+            behaviors:[
+                       Polymer.CCTitleBarBehavior
+                   ]
+        });
+    </script>
+</dom-module>

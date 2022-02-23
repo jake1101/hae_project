@@ -1,0 +1,4 @@
+[
+	{"id": 1, "vendorId": 1,"type": 1,"name": "A-1","useFlag":"Y","tag":"tag1","workerName":"운전자1"}
+	,{"id": 2, "vendorId": 2,"type": 2,"name": "A-2","useFlag":"Y","tag":"tag2","workerName":"운전자2"}
+]

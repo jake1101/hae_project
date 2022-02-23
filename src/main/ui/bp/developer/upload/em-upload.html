@@ -1,0 +1,37 @@
+<dom-module id="em-upload">
+	
+	<style>
+		 :host {
+            @apply(--hbox-layout);
+        }
+	</style>
+
+	<template>
+		<sc-upload id="upload" class="flex" style="height:200px" value="test" 
+			on-upload-completed="uploadCompleted"
+			on-delete-completed="deleteCompleted"></sc-upload>
+			
+		<sc-upload id="upload2" class="flex" style="height:300px" value="test" 
+			on-upload-completed="uploadCompleted"
+			on-delete-completed="deleteCompleted"></sc-upload>
+	</template>
+
+	<script>
+	
+		Polymer({
+			
+			is : 'em-upload',
+			
+			uploadCompleted : function() {
+				SCAlert.show("완료", "업로드 완료");
+			},
+			
+			deleteCompleted : function() {
+				SCAlert.show("완료", "삭제 완료");
+			}
+			
+		});
+	
+	</script>
+
+</dom-module>

@@ -1,0 +1,316 @@
+<dom-module id="ep-worker-sensor-mapping">
+	<!--
+        ******************************************************************************************
+        ** @Program-name    : ep-worker-sensor-mapping
+        ** @Description     :
+        ** @Author          : jhkim
+        ** @Create Date     : 2020.06.04
+        ** @History         : 2020.06.04 jhkim
+        ******************************************************************************************
+    -->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+         -->
+         <!-- 코드 조회-->
+		 <sc-request-group init>
+		 	<sc-ajax url="findListVendor.do"  last-response="{{codes.vendorList}}" body="{{searchParam}}"></sc-ajax>
+		 </sc-request-group>
+		 
+		 <sc-ajax 
+			id="findWorkerList"
+			url="getWorkerGroupWorkerList.do"
+			body="{{searchParam}}"
+			last-response="{{workerList}}">
+		 </sc-ajax>
+		 
+		 <sc-ajax 
+			id="findSensorList"
+			url="getWorkerGroupSensorList.do"
+			body="{{searchParam}}"
+			last-response="{{sensorList}}">
+		 </sc-ajax>
+		 
+		 <!-- 그룹 저장 -->
+		<sc-ajax
+			id="saveGroup"
+			url="saveWorkerGroup.do"
+			on-response="completeSaveGroup">
+		</sc-ajax>
+		 
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+        <div class="vbox flex">
+			<div class="vbox" style="height:80px;">
+				<div style="display:block;">
+					<sc-button text="추가" style="width:80px; float:right" on-click="save"></sc-button>
+				</div>
+				<div class="vspace-5"></div>
+				<table class="tb-form">
+					<colgroup>
+		        		<col style="width:150px"></col>
+		        		<col></col>
+		        		<col style="width:150px"></col>
+		        		<col></col>
+		        	</colgroup>
+		        	<tr>
+		        		<th>
+		        			<sc-label text="작업자"></sc-label>
+		        		</th>
+		        		<td>
+		        			<sc-text-field value="{{selectedWorkerName}}"  readonly="true" placeholder="작업자를 선택해주세요" required="true"></sc-text-field>
+		        		</td>
+		        		<th>
+		        			<sc-label text="스마트태그"></sc-label>
+		        		</th>
+		        		<td>
+		        			<sc-text-field value="{{selectedSensorName}}" readonly="true" placeholder="스마트태그를 선택해주세요" required="true"></sc-text-field>
+		        		</td>
+		        	</tr>
+				</table>	
+			</div>
+			<div class="hbox flex">
+				<div class="vbox flex">
+					<cc-sub-title-bar title-text="작업자 목록"></cc-sub-title-bar>
+					<div class="vspace-10"></div>
+					<cc-search-container on-search="onWorkerSearch" auth-r>
+						<table>
+						<colgroup>
+							<col style="width:60px;">
+							<col style="width:140px">
+							<col style="width:60px;">
+							<col>
+						</colgroup>
+							<tr>
+								<th><sc-label text="협력사"></sc-label></th>
+								<td>
+									<sc-multi-combobox-field class="w-120" placeholder="전체선택" input-clear="false" selected-all="true"
+											items="{{codes.vendorList}}" display-field="name" value-field="id" 
+											value="{{searchParam.vendorIds}}" enable-check-all="true">
+				                    </sc-multi-combobox-field>
+								</td>
+								<th><sc-label text="이름"></sc-label></th>
+								<td>
+									<sc-text-field value="{{searchParam.workerName}}" class="w-200" on-enter="onWorkerSearch"></sc-text-field>
+								</td>
+							</tr>
+						</table>
+					</cc-search-container>
+					<sc-grid id="workerListGridPanel" data-provider="{{workerList}}" on-selection-checked="onSelectionWorkerChecked" editable="false" class="flex" selection-mode="radio" selection-able-function="isSelection" on-item-click="selectWorker">
+						<cc-grid-toolbar btn-group-hidden="true"></cc-grid-toolbar>
+						<sc-grid-columns>
+							<sc-data-column data-field="vendorName"      	header-text="협력사" width="100" text-align="center" editable="false" max-length="60"></sc-data-column>
+							<sc-data-column data-field="jobTypeName"   	header-text="직종" width="100" text-align="center" editable="false" max-length="60"></sc-data-column>
+							<sc-data-column data-field="name" 		header-text="이름" width="150" text-align="center" required="true" editable="true" item-style-function="onStyleFontColor" style-name="link"></sc-data-column>
+							<sc-data-column data-field="groupName" 		header-text="작업그룹" width="150" text-align="center" required="true" editable="true"></sc-data-column>
+						</sc-grid-columns>
+						<sc-grid-fields>
+							<sc-grid-field data-field="id"></sc-grid-field>
+						</sc-grid-fields>
+					</sc-grid>
+				</div>
+				<div class="hspace-10"></div>
+				<div class="vbox flex">
+					<cc-sub-title-bar title-text="스마트태그 목록"></cc-sub-title-bar>
+					<div class="vspace-10"></div>
+					<cc-search-container on-search="onSensorSearch" auth-r>
+						<table>
+						<colgroup>
+							<col style="width:120px">
+							<col>
+							<col style="width:120px">
+							<col>
+						</colgroup>
+							<tr>
+								<th><sc-label text="스마트태그번호"></sc-label></th>
+								<td>
+									<sc-text-field value="{{searchParam.sensorName}}" on-enter="onSensorSearch"></sc-text-field>
+								</td>
+								<th><sc-label text="스마트태그ID"></sc-label></th>
+								<td>
+									<sc-text-field value="{{searchParam.nodeId}}"  on-enter="onSensorSearch"></sc-text-field>
+								</td>
+							</tr>
+						</table>
+					</cc-search-container>
+					<sc-grid id="sensorListGridPanel" data-provider="{{sensorList}}" on-selection-checked="onSelectionSensorChecked" editable="false" class="flex" selection-mode="radio"  selection-able-function="isSelection" on-item-click="selectSensor">
+					<cc-grid-toolbar btn-group-hidden="true"></cc-grid-toolbar>
+						<sc-grid-columns>
+							<sc-data-column data-field="name" header-text="스마트태그번호" width="150" text-align="center" required="true" item-style-function="onStyleFontColor" style-name="link"></sc-data-column>
+							<sc-data-column data-field="nodeId" header-text="스마트태그ID" fill-width="200" text-align="center" ></sc-data-column>
+							<sc-data-column data-field="groupName" 		header-text="작업그룹" width="150" text-align="center" required="true" editable="true"></sc-data-column>
+						</sc-grid-columns>
+						<sc-grid-fields>
+							<sc-grid-field data-field="id"></sc-grid-field>
+						</sc-grid-fields>
+					</sc-grid>
+				</div>
+			</div>
+		</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "ep-worker-sensor-mapping",
+            properties:{
+            	codes : {
+	               	type : Object,
+	               	value : function(){
+		               	return	{
+			               	 vendorList : []				// 협력사 목록
+		               	};
+	               	},
+	               	reset: false
+	            },
+            	searchParam: {
+					type : Object,
+					value : function(){
+						return {
+							siteId: SCMdiManager.searchParam.site_id
+						};
+					}
+				},
+				vendorList :{ 				
+	            	type : Array,
+	            	value : function(){
+	            		return []
+	            	}
+	            },
+	            workerList : {
+					type : Array,
+					value : function(){
+						return [];
+					}
+				},
+				sensorList : {
+					type : Array,
+					value : function(){
+						return [];
+					}
+				},
+            	titleText:{
+	                type: String,
+					value: ""
+				}
+			},
+			initialized : function(){
+				var me = this;
+			},
+			load: function(groupId){
+				var me= this;
+				me.searchParam.groupId = groupId;
+				me.onWorkerSearch();
+				me.onSensorSearch();
+			},
+			isSelection : function(data){
+				return UT.isEmpty(data.groupName);
+			},
+			onWorkerSearch : function(){
+				var me = this;
+				UT.requestNoDefault(me.$.findWorkerList);
+			},
+			onSensorSearch : function(){
+				var me = this;
+				UT.requestNoDefault(me.$.findSensorList);
+			},
+			selectWorker : function(e){
+				var me = this;
+				item = e.detail.item;
+				if(item.dataField === "name") {
+					if(! UT.isEmpty(e.detail.data.groupName)){
+						UT.alert("이미 다른 그룹에 포함된 작업자는 선택 할 수 없습니다.");
+						return;
+					}
+					me.selectedWorkerName = e.detail.data.name;
+					me.selectedWorkerId = e.detail.data.id;
+					me.$.workerListGridPanel.selectionCheck(item.rowIndex, true, true);
+				}
+            },
+			selectSensor : function(e){
+				var me = this;
+				item = e.detail.item;
+				if(item.dataField === "name") {
+					if(! UT.isEmpty(e.detail.data.groupName)){
+						UT.alert("이미 다른 그룹에 포함된 스마트태그는 선택 할 수 없습니다.");
+						return;
+					}
+					me.selectedSensorName = e.detail.data.name;
+					me.selectedSensorId = e.detail.data.id;
+					me.$.sensorListGridPanel.selectionCheck(item.rowIndex, true, true);
+				}
+            },
+	        onStyleFontColor: function(data, item){
+	        	return UT.isEmpty(data.groupName)?null:{fontColor:"#000000", fontWeight:"nomal"};
+           	},
+           	save : function(){
+               	var me = this;
+               	if(UT.isEmpty(me.selectedWorkerName)){
+               		UT.alert("작업자를 선택해주세요");
+                }else if(UT.isEmpty(me.selectedSensorName)){
+               		UT.alert("스마트태그를 선택해주세요");
+                }else{
+                    var saveArray = [];
+                    me.searchParam.workerId = me.selectedWorkerId;
+                    me.searchParam.sensorId = me.selectedSensorId;
+                    saveArray[0] = me.searchParam;
+
+                    me.$.saveGroup.body = {array:saveArray};
+                    
+                	UT.request(me.$.saveGroup);
+                }
+            },
+            completeSaveGroup : function(e, res){
+	            var me = this;
+	            var message = "STD.N2400"; // 저장하였습니다.
+	
+	            if(res.response.result_status === 'S'){
+	                UT.alert(message, function(){
+	                	UT.requestNotUseLoading(me.$.findWorkerList);
+	                	UT.requestNotUseLoading(me.$.findSensorList);
+	                	me.selectedWorkerName = "";
+	                	me.selectedSensorName = "";
+	                });
+	            } else {
+	                message ="STD.E9600";
+	                UT.alert(message);
+	            }
+            },
+            onSelectionWorkerChecked: function(event){
+                var me = this,detail = event.detail,
+                    checked = detail.checked,  //체크하여 변경된값
+                    data = detail.data;        //row data
+                if(checked){
+                	me.selectedWorkerName = data.name;
+                	me.selectedWorkerId = data.id;
+                }
+            },
+            onSelectionSensorChecked: function(event){
+                var me = this,detail = event.detail,
+                    checked = detail.checked,  //체크하여 변경된값
+                    data = detail.data;        //row data
+                if(checked){
+                	me.selectedSensorName = data.name;
+                	me.selectedSensorId = data.id;
+                }
+            }
+        });
+	</script>
+
+</dom-module>

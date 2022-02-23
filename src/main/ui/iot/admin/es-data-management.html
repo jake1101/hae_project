@@ -1,0 +1,250 @@
+<dom-module id="es-data-management">
+
+	<style>
+ 		:host {
+ 			@apply(--vbox-layout);
+ 		}
+	</style>
+
+	<template>
+		
+		
+		<sc-request-group init>
+			<!-- 공통 코드 조회 -->
+			<sc-code-group>
+				<sc-code code="IOT016" value="{{termList}}"></sc-code> <!-- 사용여부(Y/N) -->
+			</sc-code-group>
+		</sc-request-group>
+		
+		
+		<sc-ajax id="findLogTerm"
+			url="findLogTerm.do"
+			on-response="completeFindLogTerm">
+		</sc-ajax>
+		
+		<sc-ajax id="saveInfoTermData"
+			url="saveInfoTermData.do"
+			body="{{dataInfo}}"
+			on-response="completeSaveInfoTermData">
+		</sc-ajax>
+		
+		
+		<div style="color:red;font-weight:bold;">
+			[[translate('데이터 관리 정책에 따라 서버 저장공간을 고려한 기간을 지정합니다.')]]
+			<br>
+			[[translate('지정 기한에 따라 데이터 로그 기록을 제거합니다.')]]
+		</div>
+		
+		<div class='vspace-10'></div>
+		<div class='vspace-10'></div>
+		<div class='vspace-10'></div>
+		<div class='vspace-10'></div>
+		<div class='vspace-10'></div>
+		
+		<cc-sub-title-bar  title-text=" ">
+            <sc-button text="저장" on-click="onSave" auth-s></sc-button>
+		</cc-sub-title-bar>
+		
+		<sc-panel title-text="센서 데이터">
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:500px"></col>
+	        		<col></col>
+	        	</colgroup>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="게이트웨이 로데이터 로그 기록 저장기간"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-combobox-field   items="[[termList]]" value="{{dataInfo.gatewayLogTerm}}" placeholder="선택"
+   									display-field="label" value-field="data"  required="true"
+   									class="w-200">
+   						</sc-combobox-field>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="스마트태그 위치 로그 기록 저장기간"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-combobox-field   items="[[termList]]" value="{{dataInfo.nodeDataLogTerm}}" placeholder="선택"
+   									display-field="label" value-field="data" required="true"
+   									class="w-200">
+   						</sc-combobox-field>
+	        		</td>
+	        	</tr>
+			</table>
+		</sc-panel>
+			
+		<div class='hspace-10'></div>
+			
+		<sc-panel title-text="알림 데이터">
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:500px"></col>
+	        		<col></col>
+	        	</colgroup>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="알림 로그 기록 저장기간"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-combobox-field   items="[[termList]]" value="{{dataInfo.alarmLogTerm}}" placeholder="선택"
+   									display-field="label" value-field="data" required="true"
+   									class="w-200">
+   						</sc-combobox-field>
+	        		</td>
+	        	</tr>
+			</table>
+		</sc-panel>
+		
+		<div class='hspace-10'></div>
+		
+		<sc-panel title-text="작업자 데이터">
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:500px"></col>
+	        		<col></col>
+	        	</colgroup>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="사전등록 작업자 데이터 저장기간"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-combobox-field   items="[[termList]]" value="{{dataInfo.tempWorkerLogTerm}}" placeholder="선택"
+   									display-field="label" value-field="data" required="true"
+   									class="w-200">
+   						</sc-combobox-field>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="휴면 작업자 개인정보(보건기록,서명서 등) 저장기간"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-combobox-field   items="[[termList]]" value="{{dataInfo.workerLogTerm}}" placeholder="선택"
+   									display-field="label" value-field="data" required="true"
+   									class="w-200">
+   						</sc-combobox-field>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="출역 기록 저장기간"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-combobox-field   items="[[termList]]" value="{{dataInfo.attendLogTerm}}" placeholder="선택"
+   									display-field="label" value-field="data" required="true"
+   									class="w-200">
+   						</sc-combobox-field>
+	        		</td>
+	        	</tr>
+			</table>
+		</sc-panel>
+			
+		<div class='hspace-10'></div>
+			
+		<sc-panel title-text="현장내 작업 관련 데이터">
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:500px"></col>
+	        		<col></col>
+	        	</colgroup>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="스마트태그 교부이력 저장기간"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-combobox-field   items="[[termList]]" value="{{dataInfo.mappingLogTerm}}" placeholder="선택"
+   									display-field="label" value-field="data" required="true"
+   									class="w-200">
+   						</sc-combobox-field>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="작업허가제 관련 데이터 저장기간"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-combobox-field   items="[[termList]]" value="{{dataInfo.ptwLogTerm}}" placeholder="선택"
+   									display-field="label" value-field="data" required="true"
+   									class="w-200">
+   						</sc-combobox-field>
+	        		</td>
+	        	</tr>
+			</table>
+		</sc-panel>
+		
+	</template>
+	
+	<script>
+	
+		Polymer({
+			
+			is : 'es-data-management',
+			
+			properties : {
+				dataInfo: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+				termList: {
+                    type: Array,
+                    value: function(){
+                        return [];
+                    }
+                },
+			},
+			
+			initialized : function() {
+				var me = this;
+				
+				for(var i = 0 ; i < me.termList.length ; i ++){
+					me.termList[i].data = Number(me.termList[i].data);
+				}
+				UT.request(me.$.findLogTerm);
+			},
+			
+			completeFindLogTerm : function(e,res){
+				var me = this,
+				result = res.response;
+				
+				me.set("dataInfo" , result);
+			},
+			
+			onSave : function(){
+            	var me = this;
+
+                if(!me.validate()){
+                    UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return;
+                }
+
+                UT.confirm("STD.N1200", function() { //저장 하시겠습니까?
+                    me.$.saveInfoTermData.body = {
+                    	dataInfo : me.dataInfo
+                    };
+                    UT.request(me.$.saveInfoTermData);
+                })
+            },
+            
+            completeSaveInfoTermData : function(e,res){
+            	var me = this,
+                result = res.response;
+
+	            if(result.result_status === 'S'){
+	                UT.alert("STD.N2400", function(){ // 저장하였습니다.
+	                	UT.request(me.$.findLogTerm); 	               
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+            }
+			
+		});
+		
+	</script>
+
+</dom-module>

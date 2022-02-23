@@ -1,0 +1,61 @@
+<!-- 
+	sc-image-column은 cell에 이미지를 지정하여 사용할 수있게 한 컬럼입니다.
+	singular-source, image-cls를 통해 이미지를 지정할 수있으며,
+	image-change-function을 지정하여 동적으로 이미지를 변경 할 수있습니다.	
+-->
+
+<dom-module id="es-sp-image">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" editable="true">
+        <cc-grid-toolbar>
+        		<sc-button text="조회" on-click="onSearch"></sc-button>
+        	</cc-grid-toolbar> 
+                <sc-grid-columns>
+                    <sc-data-column data-field="colunm_1"   header-text="colunm_1"  width="150" text-align="left"   editable="true" ></sc-data-column>
+                    <sc-image-column data-field="image_1"   header-text="image_1"  width="150" text-align="left"   editable="false" image-cls="search"></sc-image-column>
+                    <sc-image-column data-field="image_2"   header-text="image_2"  width="150" text-align="left"   editable="false" singular-source="ui/assets/img/icon_chat.png"></sc-image-column>
+                    <sc-image-column data-field="image_3"   header-text="image_3"  width="150" text-align="left"   editable="false" ></sc-image-column>
+                    <sc-image-column data-field="image_4"   header-text="image_4"  width="150" text-align="left"   editable="false" singular-source="ui/assets/img/icon_chat.png" image-change-function="onImageChange"></sc-image-column>
+                </sc-grid-columns>
+        </sc-grid>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-sp-image',
+            
+            properties : {
+                resultList: {
+                    type:Array
+                },
+            },
+
+            onImageChange: function(data, item){
+                if(data["colunm_1"] == "A"){
+                    return "search";
+                }else if(data["colunm_1"] == "C"){
+                    return "link";
+
+                }else{
+                    return "";
+                }         
+            },
+            onSearch : function(){
+            	this.fire('search');
+            }
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

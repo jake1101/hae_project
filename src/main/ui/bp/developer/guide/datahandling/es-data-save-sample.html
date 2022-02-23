@@ -1,0 +1,224 @@
+<dom-module id="es-data-save-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-ajax id="findTest" url="json/data-search.json" on-response="completeFindTest" auto></sc-ajax>
+	    
+	    <sc-code-group>
+		    <sc-code code="P033" value="{{codes.rfxTyp}}"></sc-code>
+		    <sc-code code="P044" value="{{codes.progSts}}"></sc-code>
+		</sc-code-group>
+	    
+		<cc-page-title-bar title-text="구매요청 저장">
+			<sc-button text="데이터 초기화"	on-click="onReload"></sc-button>
+			<sc-button text="데이터 저장"	on-click="onSave"></sc-button>
+		</cc-page-title-bar>
+		
+		<div class="flex page">
+			<sc-panel title-text="기본정보" collapsible="true">
+				<table class="tb-form">
+					<colgroup>
+		        		<col style="width:120px"/>
+		        		<col/>
+		        	</colgroup>
+		        	<tr>
+						<th>
+							<sc-label text="구매운영조직"></sc-label>
+						</th>
+						<td>
+							<sc-text-field class="w-150" value="{{prData.oper_org_nm}}" readonly></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th>
+							<sc-label text="구매요청번호"></sc-label>
+						</th>
+						<td>
+							<div class="field-box" style="width:100%">
+								<sc-text-field class="w-150" value="{{prData.pr_no}}" readonly></sc-text-field>
+								<span style="margin:0 5px">&#47;</span>
+								<sc-text-field class="w-50 align-right" value="{{prData.pr_rev}}" readonly></sc-text-field>
+								<span style="margin-left:5px">[[translate('차')]]</span>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<th>
+							<sc-label text="구매요청명"></sc-label>
+						</th>
+						<td>
+							<sc-text-field value="{{prData.pr_tit}}" max-length="200"></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th>
+							<sc-label text="테스트"></sc-label>
+						</th>
+						<td>
+							<cc-item-selection-field id="rfxTyp" name="RFx유형" placeholder="RFx유형을 선택하세요." value="{{prData.rfx_types}}" items="{{codes.rfxTyp}}" required-cnt="2" required="true">
+							</cc-item-selection-field>
+						</td>
+					</tr>
+					<tr>
+						<th>
+							<sc-label text="테스트"></sc-label>
+						</th>
+						<td>
+							<cc-item-selection-field id="progSts" name="진행상태" placeholder="진행상태를 선택하세요." value="{{prData.prog_stss}}" items="{{codes.progSts}}" required-cnt="3" required="true">
+							</cc-item-selection-field>
+						</td>
+					</tr>
+		        </table>
+			</sc-panel>
+			<sc-grid id="gridPanel" collapsible="true" aggregate="true" use-dummy="false" editable="true">
+				<cc-grid-toolbar title-text="품목정보">
+					<sc-button text="품목추가" on-click="onAddItem"></sc-button>
+					<sc-button text="품목삭제" on-click="onDeleteItem"></sc-button>
+				</cc-grid-toolbar>
+				<sc-grid-columns>
+					<sc-data-column	data-field="pr_lno"		header-text="항번"		width="50"	text-align="center"	data-type="number"	editable="false"></sc-data-column>
+					<sc-data-column	data-field="item_cd"	header-text="품목코드"	width="100"	text-align="center"	editable="true"></sc-data-column>
+					<sc-data-column	data-field="item_nm"	header-text="품목명"	width="250"	text-align="left"	editable="true"></sc-data-column>
+					<sc-data-column	data-field="item_qty"	header-text="수량"		width="80"	text-align="right"	data-type="number"	format-type="qty"	editable="true"></sc-data-column>
+				</sc-grid-columns>
+				<sc-grid-fields>
+					<sc-grid-field	data-field="pr_id"		data-type="text"></sc-grid-field>
+					<sc-grid-field	data-field="pr_no"		data-type="text"></sc-grid-field>
+					<sc-grid-field	data-field="pr_item_id"	data-type="text"></sc-grid-field>
+				</sc-grid-fields>
+			</sc-grid>
+		</div>
+		<sc-dialog id="dialog_saveParam" title="데이터 저장 파라미터" title-align="left" style="width:800px;height:500px" modal="true">
+			<cc-page-title-bar>
+	            <sc-button text="데이터 초기화"	on-click="onReload"></sc-button>
+	            <sc-button text="닫기"			on-click="onCloseDialog"></sc-button>
+	        </cc-page-title-bar>
+			<sc-textarea-field id="paramViewer" class="fit" readonly></sc-textarea-field>
+		</sc-dialog>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-data-save-sample',
+		properties : {
+			prData : {
+				type : Object,
+				value : function() {
+					return {}
+				}
+			},
+			codes : {
+				type: Object,
+				value: function() {
+					return {
+						rfxTyp: [],
+						progSts: []
+					}
+				},
+				reset:false
+			}
+		},
+		// 조회
+		onFind : function() {
+			var me = this;
+			
+			UT.request(me.$.findTest);
+		},
+		// 조회 완료 시
+		completeFindTest : function(el, res) {
+			var me = this;
+			var result = res.response;
+			
+			me.set("prData", result.prData);
+			me.$.gridPanel.setDataProvider(result.prItemList);
+		},
+		// 품목추가 버튼 클릭
+		onAddItem : function() {
+			var me = this;
+			var provider = me.$.gridPanel.getDataProvider();
+			provider.addItem({"pr_lno" : me.getMaxLno(), "item_qty" : 1});
+		},
+		// 품목 항번 구하기
+		getMaxLno : function() {
+			var me = this;
+			var provider = me.$.gridPanel.getDataProvider();
+			
+			var maxLno = 10;
+			if(provider.getItemSize() > 0) {
+				var allItems = provider.getItems();
+				
+				maxRow = allItems.reduce(function(a,b) {
+					if(!a.pr_lno) a.pr_lno = 0;
+					if(!b.pr_lno) b.pr_lno = 0;
+					return (parseInt(a.pr_lno,10)> parseInt(b.pr_lno,10)) ? a : b ;
+				});
+				maxLno = parseInt(maxRow.pr_lno,10) + 10;
+			}
+			return maxLno;
+		},
+		// 품목삭제 버튼 클릭
+		onDeleteItem : function() {
+			var me = this;
+			var provider = me.$.gridPanel.getDataProvider();
+			
+			// selection 체크된 아이템 리스트
+			var checked = provider.selectionCheckedItems();
+			
+			if(checked.length === 0) {
+				UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+			} else {
+				UT.confirm("STD.N1300", function() {	// "삭제 하시겠습니까?"
+					provider.removeItems(true);	// 그리드에서 체크된 데이터를 지워준다. getRemoveItems에서 지워진 데이터를 가져올 수 있다.
+				});
+	        }
+		},
+		// 저장 버튼 클릭
+		onSave : function() {
+			var me = this;
+			
+			if(!me.validate()) {
+				UT.alert("STD.E0000");
+				return;
+			}
+			// 저장 하시겠습니까?
+			UT.confirm("STD.N1200", function() {
+				// 저장 파라미터 확인
+				me.showSaveParam();
+			});
+		},
+		// Dialog 보기 (저장 파라미터 확인)
+		showSaveParam : function() {
+			var me = this;
+			
+			var prData = me.get("prData");
+			var provider = me.$.gridPanel.getDataProvider();
+			
+			var saveParam = {
+				"prData"        : prData,
+				"insertPrItems" : provider.getNewItems(), 		
+				"updatePrItems" : provider.getUpdateItems(),
+				"deletePrItems" : provider.getRemoveItems()
+			};
+			
+			me.$.dialog_saveParam.show();
+			me.$.paramViewer.value = JSON.stringify(saveParam, null, "\t");
+		},
+		// 데이터 초기화
+		onReload : function() {
+			var me = this;
+			
+			me.onFind();
+			me.onCloseDialog();
+		},
+		// Dialog 닫기
+		onCloseDialog : function() {
+			var me = this;
+			
+			me.$.dialog_saveParam.close();
+			me.$.paramViewer.value = "";
+		}
+	});
+	</script>
+</dom-module>

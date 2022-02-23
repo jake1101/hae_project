@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gateway">
+	<resultMap id="customMap" type="map">
+		<result column="useFlag" property="useFlag"/>
+		<result column="lastSendDt" property="lastSendDt"/>
+		<result column="lockDt" property="lockDt"/>
+	</resultMap>
+	
+	<select id="findListLoraGateway" resultMap="customMap">
+	/* ptw.findListLoraGateway */
+          SELECT
+		      a.id,
+		      a.site_id as "siteId",
+		      a.name as "name",
+		      a.gw_type as "gatewayType",
+		      v4.fn_get_point_to_json(a.setup_geo) as "setupPoint",
+		      v4.fn_get_point_to_json(a.moving_geo) as "movingPoint",
+		      a.use_flag as "useFlag",
+		      v4.fn_astext(a.last_send_dt) as "lastSendDt",
+		      a.state,
+		      a.gw_err_code as "gwErrorCode",
+		      v4.fn_astext(a.lock_dt) as "lockDt",
+		      a.type,
+		      a.description   
+			FROM v4.gateway a
+			WHERE a.site_id = #{p.siteId}
+	</select>
+</mapper>

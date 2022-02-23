@@ -1,0 +1,202 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Set the size of the div element that contains the map */
+        #map {
+            height: 800px; /* The height is 400 pixels */
+            width: 80%; /* The width is the width of the web page */
+            float : left;
+        }
+    </style>
+</head>
+<body>
+    <h3>My Google Maps Demo</h3>
+    <!--The div element for the map -->
+    <div id="map"></div>
+    <div id = "dialog" style="margin-left :2%; float : left;width : 18%; height : 600px;">
+    	<textarea rows="20" cols="45"  id = "textarea">
+    	
+    	</textarea>
+    	<button onclick = "assign();">적용</button>
+    	<div>
+    		배의 이동경로
+    		<div id="buttonDiv">
+    		</div>
+    	</div>
+    </div>
+    <div id = "dialog" style="margin-left :2%; float : left;width : 18%; height : 200px;">
+    	<div>
+    		추가 좌표 입력   </br>
+    		위도,경도  ->  예시 : 37.31235,127.11142
+	    	<input id="additional" type='text' style="width : 300px;"/>
+	    	<button onclick ='showAdditional();'> 나타내기</button>
+	    	<button onclick ='removeAdditional();'> 추가 좌표 지우기</button>
+    	</div>
+    
+    </div>
+    
+    
+    
+    
+    <script src = "https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script>
+        /**
+select tz_created_dt, get_polygon_to_json(fit_area) from v3_site_log
+where site_id = 41
+order by tz_created_dt desc
+limit 100
+;
+          * */
+      	var jsonArray = [];
+		var map;
+		var gmarkers = [];
+		var addArray = [];
+		
+		var GreenIcon 
+		
+		
+        function assign(){
+        	var timeArray = $("#textarea").val().replace(/ /gi,'').replace(/\]/gi,"]@").split('@');
+        	
+        	for(var i =0; i<timeArray.length; i++){
+        		try{
+        			jsonArray[i] = JSON.parse(timeArray[i]);
+        		}catch(e){   }
+        	}
+        	
+        	
+        	$("#buttonDiv").empty();
+        	for(var i = 0; i<jsonArray.length ; i++){
+       			var html = '<button id="time"'+i+' onclick = showMarker("'+i+'")>'+i+'번째</button';
+	        	$("#buttonDiv").append(html);
+        		
+        	}
+        	//jsonArray
+        	
+        	  
+        }
+        function showMarker(index){
+        	
+        	console.log(map);
+        	for(i=0; i<gmarkers.length; i++){
+                gmarkers[i].setMap(null);
+            }
+        	
+        	if(typeof(index)=='string'){
+        		index = Number(index);
+        	}
+        	var positionArray = jsonArray[index];
+        	console.log(positionArray);
+        	for(var i =0; i<positionArray.length ; i++){
+        		var object = {};
+        		object.position = {};
+        		object.map = map;
+        		object.position.lng = positionArray[i].lon;
+        		object.position.lat = positionArray[i].lat;
+	        	var marker = new google.maps.Marker(object);
+	        	gmarkers.push(marker)
+	        	
+	        	if(i==0){
+	        		var center = new google.maps.LatLng(object.position.lat, object.position.lng);
+	        		map.panTo(center);
+	        	}
+	        	
+        	}
+        }
+          
+        function showAdditional(){
+        	var additional = $("#additional").val().split(',');
+        	var object = {};
+        	object.icon = GreenIcon;
+    		object.position = {};
+    		object.map = map;
+    		object.position.lat = Number(additional[0]);
+    		object.position.lng = Number(additional[1]);
+    		var marker = new google.maps.Marker(object);
+    		addArray.push(marker);
+    		
+    		var center = new google.maps.LatLng(object.position.lat, object.position.lng);
+    		map.panTo(center);
+        	
+        }
+        function removeAdditional(){
+        	for(i=0; i<addArray.length; i++){
+                addArray[i].setMap(null);
+            }
+        }
+        
+        
+          
+        // Initialize and add the map
+        function initMap() {
+            // The location of Uluru
+            //var uluru = { lat: 37.5461833258693, lng: 126.909875989437 };
+            //var uluru = { lat: 66.388396, lng: 180.116804  };
+            //var uluru = { lat: 65.348521, lng: -179.928445 };
+            //var uluru = { lat: 5.6287590, lng: 0.0916010 };
+            var uluru = { lat: 37.5200200, lng: 126.9598710 };
+            
+            // 지도 위치 이동.
+            map = new google.maps.Map(
+                document.getElementById('map'), { zoom: 18, center: uluru, heading: 0 });
+            
+            
+            
+            
+            google.maps.event.addListener(map, "rightclick", function(event) {
+                var lat = event.latLng.lat();
+                var lng = event.latLng.lng();
+                // populate yor box/field with lat, lng
+                $("#additional").val(lat +',' + lng);
+            });
+            
+            
+            
+            GreenIcon = new google.maps.MarkerImage(
+ 				   "http://labs.google.com/ridefinder/images/mm_20_green.png",
+ 				   new google.maps.Size(12, 20),
+ 				   new google.maps.Point(0, 0),
+ 				   new google.maps.Point(6, 20)
+ 			);
+            
+            // 마커 추가.
+            //var marker = new google.maps.Marker({ position: uluru, map: map });
+            //var marker = new google.maps.Marker({ position: { lat: -25.344, lng: 131.036 }, map: map });
+            //===>> 34.4300136, 126.0709107 ~ 31.3226898, 122.0533131 
+            /* gmarkers.push(new google.maps.Marker({ position: { lat: 37.520282, lng: 126.953291 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.520296, lng: 126.953166 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.520328, lng: 126.953117 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.520376, lng: 126.953074 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.520441, lng: 126.953046 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.52049, lng: 126.953036 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.520561, lng: 126.953034 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.520622, lng: 126.953053 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.520671, lng: 126.953085 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.520736, lng: 126.953193 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.520797, lng: 126.953379 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.521239, lng: 126.955487 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.521261, lng: 126.955714 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.521237, lng: 126.955838 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.521202, lng: 126.955954 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.520997, lng: 126.955998 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.520917, lng: 126.955908 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.520844, lng: 126.955804 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.520771, lng: 126.955588 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.520303, lng: 126.953486 }, map: map }));
+            gmarkers.push(new google.maps.Marker({ position: { lat: 37.520282, lng: 126.953291 }, map: map }));
+                                                                                                            
+            gmarkers.push(new google.maps.Marker({ position: {  lat:37.5147093, lng:126.9595007}, map: map })); */
+
+        }
+    </script>
+    <!--Load the API from the specified URL
+    * The async attribute allows the browser to render the page while the API loads
+    * The key parameter will contain your own API key (which is not needed for this tutorial)
+    * The callback parameter executes the initMap() function
+    -->
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArLDSEjXH6WXnCYtJn6cHZJirMqNUsoXw&callback=initMap">
+    </script>
+</body>
+</html>

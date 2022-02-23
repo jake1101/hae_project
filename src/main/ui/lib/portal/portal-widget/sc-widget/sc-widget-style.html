@@ -1,0 +1,101 @@
+<!--
+ * @Desc 위젯 스타일
+ * @Author patrick.sung
+ * @Created 2016-03-28
+ -->
+
+<dom-module id="sc-widget-style">
+    <template>
+        <style>
+            :host {
+                --widget-titleBar-height: 26px;
+                background-color: #fff;
+                display: block;
+                cursor: auto;
+                display: inline-block;
+                box-shadow: 0px 1px 1px #999;
+            }
+
+            #titleBar {
+            	display: flex;
+                width: 100%;
+                height: var(--widget-titleBar-height);
+                background-color:#f7f7f7;
+                border-bottom:1px solid #ccc;
+                text-align: right;
+                cursor: move;
+                color: white;
+                font-size:16px;
+                display:table;
+                box-sizing:border-box;
+ 
+            }
+
+            #titleBar span {
+            	flex: 1;
+                font-size: 16px;
+                color: #555555;
+                float: left;
+                text-align: left;
+                margin:2px 5px 0px 10px; /* 2020.09.10 ch.byeon */
+                max-width: calc(100% - 22px);
+                white-space: nowrap;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+                line-height:30px;
+            }
+
+			/* 2020.10.05 ch.byeon */
+             #titleBar span::before{
+             	display:inline-block;
+             	content:"";
+             	margin:9px 7px;
+             	width:3px;
+             	height:12px;
+             	vertical-align:top;
+             	background:#027dfa;
+             }
+
+            #titleBar div {
+                width: 20px;
+                height: 20px;
+                text-align: center;
+                vertical-align:middle;
+                margin:8px 0 0 0;
+                cursor: pointer;
+            }
+
+            #titleBar div:last-child {
+                margin-right: 15px;
+            }
+
+            #handle {
+                position: absolute;
+                width: 7px;
+                height: 7px;
+                right: 0;
+                bottom: 0;
+                background: url('../../img/handle.png') no-repeat;
+                cursor: se-resize;
+            }
+
+            /* Widget Close btn */
+            #closeBtn {
+                background: transparent url('../../img/btn_wgt_close_N.png') no-repeat right top; opacity:.4;
+            }
+
+            #closeBtn:hover {
+                opacity:1;
+            }
+
+            #settingsBtn {
+                background: url('../../img/btn_wgt_edit_N.png') no-repeat right top;
+            }
+
+            #settingsBtn:hover {
+                background: url('../../img/btn_wgt_edit_H.png') no-repeat right top;
+            }
+        </style>
+    </template>
+</dom-module>

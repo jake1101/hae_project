@@ -1,0 +1,215 @@
+@charset "utf-8";
+
+/* ----------------------------
+2019.04.15 pjsuny - 엠로 디자인팀
+2020.01.15 pjsuny - 엠로 디자인팀 - 한라건설 
+---------------------------- */
+
+/*RESET*/
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, 
+sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, 
+footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {margin:0;padding:0;border:0;font-size:100%;font-family: 'Noto sans','Malgun Gothic', "맑은고딕",'dotum',"돋움",sans-serif;color:#333;line-height: 1;}
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {display: block;}
+ol, ul, li {list-style:none;}
+blockquote, q {quotes:none;}
+blockquote:before, blockquote:after, q:before, q:after {content:''; content:none;}
+table {border-collapse:collapse; border-spacing:0;}
+a {text-decoration:none; cursor:pointer}
+em, address {font-style:normal;}
+table {border-spacing:0; border-collapse: collapse;;}
+a, a:link, a:visited {cursor:pointer;text-decoration:none; color:#000;}
+p, a, h2, h3 {word-wrap:break-word;}
+a, em, label, span, strong, button {display:inline-block;}
+li {list-style:none;}
+img, fieldset {border:0 none;}
+img {vertical-align:middle;}
+legend, hr {display:none;}
+legend {position:absolute; top:0; left:0; width:0; height:0; display:block; overflow:hidden; visibility:hidden; font-size:0; line-height:0;}
+caption {padding:0;width:0;height:0;overflow:hidden;visibility:hidden;font-size:0;line-height:0;}
+input:-ms-input-placeholder {color:#666;}
+input::-webkit-input-placeholder {color:#666;}
+input::-moz-placeholder {color:#666;}
+input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {-webkit-box-shadow: 0 0 0 0 #fff inset; -moz-box-shadow: 0 0 0 0 #fff inset; box-shadow: 0 0 0 0 #fff inset;}
+h1, h2, h3, h4, h5, h6{font-size:100%;font-family: 'Malgun Gothic', "맑은고딕",'dotum',"돋움",sans-serif;}
+input, select, textarea {font-size:100%; font-family:'Malgun Gothic', "맑은고딕",'dotum',"돋움",sans-serif;vertical-align:middle }
+button {overflow:visible; border:0 none;background:transparent;vertical-align:top;cursor:pointer;font-family:'Malgun Gothic', "맑은고딕",'dotum',"돋움",sans-serif;}
+button::-moz-focus-inner {border:0;padding:0;}
+
+
+
+/*COMMON*/
+body {overflow: hidden;height: 100%;min-height: 100%;font-size: 13px;letter-spacing: -1px;color: #111;}
+div {box-sizing: border-box;}
+.bg_leftbar {display: none;position: absolute;top: 50%;left: 50%;width: 106px;height: 97px;margin-left: -553px;margin-top: -120px;z-index: 9999;}
+.bg_rightbar {display: none;position: absolute;top: 50%;left: 50%;width: 260px;height: 162px;margin-left: 380px;margin-top: 120px;z-index: 9999;}
+
+/*Login*/
+.loginWrap {position: absolute;top: 50%;left: 50%;width: 1000px;height: 620px;margin-left: -500px;margin-top: -330px;z-index: 999}
+h2 {width: 100%;height: 60px;background: url(../img/typea-logo.png) no-repeat;margin-bottom: 10px;font-size: 0; background-position: left;}
+.content {overflow: hidden;width: 100%;height: 475px;box-shadow: 3px 3px 20px #ddd;}
+.content .visual {float: left;position:relative;width: 658px;height: inherit;}
+.content .visual>p {position: absolute;top: 90px;left: 100px;font-size: 13px;color: #fff;font-family: 'Noto sans','Malgun Gothic', "맑은고딕",'dotum',"돋움",sans-serif;letter-spacing: 0;line-height: 2}
+.content .visual>p>b {display: block;font-size: 50px;color: #fff;text-shadow: 1px 1px 5px #555;}
+.content .loginbox {float: right;width: 342px;height: inherit;border: 1px solid #e3e4e5;background: #fff;padding: 42px 40px}
+.content .loginbox h4 {font-size: 26px;color: #333;font-weight: normal;margin-bottom: 25px;}
+.content .loginbox .loginform {}
+.content .loginbox .loginform input, .content .loginbox .loginform select {width: 100%;height: 36px;border-radius: 3px;border: 1px solid #cbced2;box-sizing: border-box;margin-bottom: 3px;padding-left: 35px;}
+.content .loginbox .loginform input:nth-child(1) {background: url(../img/icon_id.png) no-repeat 15px center;}
+.content .loginbox .loginform input:nth-child(2) {background: url(../img/icon_pw.png) no-repeat 15px center;}
+.content .loginbox .loginform input::placeholder {font-size: 14px;color: #444;}
+.content .loginbox .loginform select:nth-child(3) {background: url(../img/icon_lng.png) no-repeat 15px center,url(../img/toggle_down.png) no-repeat 236px center;}
+.content .loginbox .loginform select:nth-child(4) {background: url(../img/icon_timer.png) no-repeat 15px center,url(../img/toggle_down.png) no-repeat 236px center;;}
+.content .loginbox .loginform select {font-size: 14px;color: #444;-webkit-appearance: none;-moz-appearance: none;appearance: none;cursor: pointer;}
+.content .loginbox .loginform select::-ms-expand { display: none; } * IE 10, 11의 네이티브 화살표 숨기기 */
+.content .loginbox .loginform select::before {background: url(../img/toggle_down.png) no-repeat;}
+.content .loginbox .option {overflow: hidden;margin-top: 12px;}
+.content .loginbox .option>.saveid {float: left;padding: 0;margin: -3px;}
+.content .loginbox .option>a {float: right;height: 14px;background: url(../img/icon_find.png) no-repeat;padding-left: 20px;}
+.content .loginbox .option>a:hover {color: #000;text-decoration: underline;}
+.content .loginbox .option>a, .content .loginbox .option>.saveid>input, .content .loginbox .option>.saveid>label {font-size: 13px;color: #666;vertical-align: middle;line-height: 1}
+.content .loginbox .option>.saveid>input {width: 14px;height: 14px;border-radius: 3px;border: 1px solid #959595;}
+.content .loginbox .loginbtn {width: 100%;height: 43px;border-radius: 3px;background: #007ec8;text-align: center;margin-bottom: 30px;margin-top: 10px;}
+.content .loginbox .loginbtn:hover {background: #12619d;transition: .2s;}
+.content .loginbox .loginbtn>span {font-size: 16px;color: #fff;line-height: 2.8;}
+.content .loginbox .commt {font-size: 12px;color: #999;line-height: 1.5;}
+.copyright {float: right;height: 18px; margin-top: 30px;font-size: 12px;color: #9a9a9a;font-family: 'Noto sans','Malgun Gothic', "맑은고딕",'dotum',"돋움",sans-serif;letter-spacing: 0;padding: 16px 0 0 80px;}
+/* login test  */
+#sliderFrame, #sliderFrame div {
+    box-sizing: content-box;
+}
+#sliderFrame 
+{
+	
+	width: 658px;height: inherit;
+    margin:0 auto; /*center-aligned*/
+}
+
+#slider, #slider .sliderInner {
+   width: 658px;height: inherit;/* Must be the same size as the slider images */
+    border-radius:3px;
+}
+
+#slider {
+    background-color:white;
+    position:relative;
+    margin:0 auto; /*center-aligned*/
+    transform: translate3d(0,0,0);
+    box-shadow: 0px 1px 5px #999999;
+}
+
+/* the link style (if an image is wrapped by a link) */
+#slider a.imgLink, #slider .video {
+    z-index:2;
+    cursor:pointer;
+    position:absolute;
+    top:0px;left:0px;border:0;padding:0;margin:0;
+    width:100%;height:100%;
+}
+#slider .video {
+    background:transparent url(video.png) no-repeat 50% 50%;
+}
+
+/* Caption styles */
+#slider .mc-caption {
+    position:absolute;
+    width:100%;
+    height:auto;
+    padding:10px 0;/* 10px will increase the height.*/
+    left:0px;
+    bottom:0px;top:auto;
+    overflow:hidden;
+    font: bold 14px/20px Arial;
+    color:#EEE;
+    text-align:center;
+    background:rgba(0,0,0,0.3);
+}
+#slider .mc-caption a {
+    color:#FB0;
+}
+#slider .mc-caption a:hover {
+    color:#DA0;
+}
+
+
+/* ------ built-in navigation bullets wrapper ------*/
+#slider .navBulletsWrapper  {
+    top:320px;
+    text-align:center;
+    background:none;
+    position:relative;
+    z-index:3;
+}
+
+/* each bullet */
+#slider .navBulletsWrapper div 
+{
+    width:11px; height:11px;
+    font-size:0;color:White;/*hide the index number in the bullet element*/
+   /*  background:transparent url(bullet.png) no-repeat 0 0; */
+    display:inline-block; *display:inline; zoom:1;
+    overflow:hidden;cursor:pointer;
+    margin:0 6px;/* set distance between each bullet*/
+}
+
+#slider .navBulletsWrapper .active {background-position:0 -11px;}
+
+
+/* --------- Others ------- */
+
+#slider img, #slider>b, #slider a>b {
+    position:absolute; border:none; display:none;
+}
+
+#slider .sliderInner {
+    overflow:hidden;
+    position:absolute; top:0; left:0;
+}
+
+#slider>a, #slider video, #slider audio {display:none;}
+#slider div {-webkit-transform: translate3d(0,0,0);transform: translate3d(0,0,0);}
+/* test end  */
+
+
+/* find password Popup */
+.popLayer {display: none;position: fixed;top:50%;left:50%;width:430px;height:auto;margin-left:-265px;margin-top:-220px;background: #fff;box-shadow: 1px 2px 5px #666;}
+.popContainer {width:100%;height:100%;}
+.popHeader {display:hidden;width:100%;height:80px;background: #007ec8;padding:20px 30px;box-sizing: border-box;}
+.popHeader h3 {height:100%;float:left;font-size: 18px;color: #fff;background: url(../img/ico_findpw.png) no-repeat;padding:10px 60px;}
+.popHeader .popClose {display: inline-block;float:right;width: 18px;height: 18px;background: url(../img/btn_popclose.png) no-repeat;margin-top:10px}
+.popConts {padding-top: 30px;padding-bottom: 10px;text-align: center;}
+.popConts .popForm {width:85%;height: auto;margin: 0 auto;background: #f0f2f5;border: 1px solid #cbced2;padding:20px 40px;box-sizing: border-box;text-align: left;}
+.popConts .popForm li {font-family:arial,sans-serif;}
+.popConts .popForm li label {display: inline-block;width: 60px; font-size: 14px;color: #555;}
+.popConts .popForm li input[type=text] {width:78%;height:34px;background:#fff;border:1px solid #dadada;border-radius:3px;margin-bottom:6px;font-size:13px;padding-left:5px;box-sizing:border-box;}
+.popConts .popBtn {display: inline-block;width: 125px;height: 40px;background: #7d7d7d;border-radius:3px;font-size: 14px;color: #fff;text-align: center;padding-top: 12px;margin: 20px 0;box-sizing: border-box;}
+.popConts .popBtn:hover {background: #003e63;}
+
+
+/* Message */
+.messageWrap {background:#f1f1f1;border-top: 0;}
+.messageWrap .wrap {position:relative;width:100%;height:100%;}
+.messageWrap .container {position:fixed;left:50%;top:50%;width:500px;height:460px;margin-top:-280px;margin-left:-250px;box-shadow:0px 3px 8px #dadada;background:#fff}
+.messageWrap .container2 {position:fixed;left:50%;top:50%;width:540px;height:500px;margin-top:-300px;margin-left:-270px;box-shadow:0px 3px 8px #dadada;background:#fff} 
+.messageWrap .header {overflow: hidden;width:100%;height:52px;border-radius:5px 5px 0 0;background:#007ec8;box-sizing:border-box}
+.messageWrap .header .logo {float: left;display:inline-block;width:183px;height:35px;margin:10px 0 0 25px;text-indent:-10000px;}
+.messageWrap .header .logo2 {float: right;display:inline-block;width:81px;height:24px;background:url(../img/logo_message2.png) no-repeat;margin:15px 25px 0 0;text-indent:-10000px;}
+.messageWrap .section {width:100%;border-radius:0 0 5px 5px;box-sizing:border-box}
+.messageWrap .section .subject {overflow:hidden;margin:60px auto 25px;}
+.messageWrap .section .subject b,
+.messageWrap .section .subject span {display:inline-block;letter-spacing:-1px}
+.messageWrap .section .subject b {font-size:80px;font-weight:normal;vertical-align:top;letter-spacing:-6px}
+.messageWrap .section .subject span {font-size:28px;color:#303030;font-weight:bold;line-height:1.2em;letter-spacing:-1px;padding-top:10px;padding-left:22px}
+.messageWrap .section .explan {width:380px;min-height:32px;margin:0 auto;background:url(../img/ico_caution_y.png) no-repeat;padding-left:55px;font-size:12px;color:#7f7f7f;line-height:1.3em;}
+.messageWrap .section .subject2 {width:340px;margin:60px auto 25px;}
+.messageWrap .section .subject2 b {display:inline-block;min-height:32px;background:url(../img/ico_caution_y.png) no-repeat;padding-left:55px;padding-top:5px;font-size:24px;font-weight:bold;}
+.messageWrap .section .explan2 {width:380px;margin:0 auto;font-size:13px;color:#252424;line-height:1.5em;text-align:center}
+.messageWrap .section .subject3 {width:340px;margin:60px auto 30px;}
+.messageWrap .section .subject3 b {display:inline-block;min-height:71px;background:url(../img/ico_logout_y.png) no-repeat;padding-left:100px;padding-top:5px;font-size:24px;font-weight:bold;line-height:1.3em;}
+.messageWrap .section .hr {width:370px;height:1px;background:#b1b1b1;margin:40px auto}
+.messageWrap .section .hr2 {width:450px;height:1px;background:#b1b1b1;margin:40px auto}
+.messageWrap .section .commt {margin: 0 auto;font-size:15px;color:#252424;line-height:1.6em;text-align: center;}
+.messageWrap .section .commt b {font-weight:normal;}
+.messageWrap .section .btn_bg_msg {width:290px;height:52px;border-radius:5px;border:0;background:#7d7d7d;cursor:pointer;text-align:center;font-size:18px;color:#fff;line-height:1.3em}
+.messageWrap .section .btn_bg_msg:hover {background:#32426e}
+.messageWrap .section .btn_cnt {margin: 25px auto;text-align: center;}
+

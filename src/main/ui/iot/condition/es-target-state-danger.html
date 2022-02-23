@@ -1,0 +1,181 @@
+<dom-module id="es-target-state-danger">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		
+		
+
+        <sc-ajax id="findWorkerStateDanger"
+                 url="findWorkerStateDanger.do"
+                 body="{{searchParam}}"
+                 on-response="completeFindWorkerStateDanger"
+                 >
+        </sc-ajax>
+
+        <cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+        <div class="vbox flex">
+            <sc-grid id="gridPanel" 
+                     data-provider="{{resultList}}" 
+                     class="flex"
+                     on-item-click="onItemClick"
+                     use-selection = "false"
+                     use-state = "false"
+                     use-dummy = "false"
+                     column-fit-style = "evenFill"
+                     >
+                <cc-grid-toolbar title-text="{{gridText}}"> 
+                </cc-grid-toolbar>
+                <sc-grid-columns>
+                    <sc-image-column width="100" text-align="center" header-text="위험지역"  singular-source = "/ui/assets/img/worker/dangerZone.png" image-display ="auto"  ></sc-image-column>
+                    <sc-data-column width="120" text-align="center"   header-text="협력사"     data-field="vendorName"   ></sc-data-column>
+                    <sc-data-column width="100" text-align="center" header-text="직종"       data-field="targetJobName"      ></sc-data-column>
+                    <sc-data-column width="100" text-align="left"   header-text="작업자이름" data-field="targetName"    style-name = "link"></sc-data-column>
+                    <sc-date-column width="100" text-align="center" header-text="수신시간"   data-field="signalDt" format-type = "datetime"></sc-date-column>
+                    <sc-data-column width="100" text-align="center" header-text="위치"     data-field="dangerName"     ></sc-data-column>
+                    <sc-data-column width="100" text-align="center" header-text="배터리"     data-field="battery"            renderer-options="{{rendererOptions}}" item-style-function="onItemStyleFunction"           ></sc-data-column>
+                </sc-grid-columns>
+                <sc-grid-fields>
+                
+                </sc-grid-fields>
+            </sc-grid>
+            
+            <sc-grid id="gridPanelVehicle" 
+                     data-provider="{{resultList}}" 
+                     on-item-click="onItemClick"
+                     use-selection = "false"
+                     use-state = "false"
+                     class = "flex"
+                     >
+                <cc-grid-toolbar title-text="{{gridText}}"></cc-grid-toolbar>
+                <sc-grid-columns>
+                    <sc-image-column width="100" text-align="center" header-text="위험지역"   data-field="image"        singular-source = "/ui/assets/img/worker/dangerZone.png" image-display ="auto"  ></sc-image-column>
+                    <sc-data-column width="150" text-align="left"   header-text="협력사"     data-field="vendorName"    item-style-function="onStyleFontColor"></sc-data-column>
+                    <sc-data-column width="200" text-align="left"   header-text="이동장비명" data-field="targetName"    style-name = "link"  item-style-function="onStyleFontColor"></sc-data-column>
+<!--                     <sc-data-column width="150" text-align="center" header-text="운전자명"       data-field="driverName"     ></sc-data-column> -->
+                    <sc-date-column width="200" text-align="center" header-text="수신시간"   data-field="signalDt" format-type = "datetime"></sc-date-column>
+                    <sc-data-column width="200" text-align="center" header-text="위치"     data-field="dangerName"     ></sc-data-column>
+                    <sc-data-column width="200" text-align="center" header-text="배터리"     data-field="battery"            renderer-options="{{rendererOptions}}" item-style-function="onItemStyleFunction"           ></sc-data-column>
+                </sc-grid-columns>
+            </sc-grid>
+        </div>
+
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'es-target-state-danger',
+			properties : {
+				searchParam : {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				},
+				gridText : {
+					type : Object,
+					value : function(){
+						return "위험지역";
+					}
+				},
+                rendererOptions: {
+                    type:Object,
+                    value: function(){
+                        return {
+                            type: "signal",
+                            maximum: 100,
+                            barCount: 8,
+                            detailed: true,
+                            startRate: 0.5,
+                            endRate: 1
+                        }
+                    }
+                },
+			},
+			initialized : function(){
+			},
+			load : function(param){
+				var me = this;
+				me.onSearch(param);
+			},
+			onSearch : function(param){
+				var me = this;
+				me.set("searchParam.siteId", param.siteId);   // 현장식별번호
+
+				if(UT.isEmpty(param.targetType)){
+					param.targetType="worker";
+				}
+				me.set("searchParam.targetType", param.targetType);
+				
+ 				UT.request(me.$.findWorkerStateDanger);
+				
+				if(param.targetId == "worker"){
+					me.$.gridPanel.hidden= false;
+					me.$.gridPanelVehicle.hidden= true;
+					
+				}else if(param.targetId == "vehicle"){
+					me.$.gridPanel.hidden= true;
+					me.$.gridPanelVehicle.hidden= false;
+				}else{
+					me.$.gridPanel.hidden= false;
+					me.$.gridPanelVehicle.hidden= true;
+				}
+			},
+			completeFindWorkerStateDanger : function(e, res){
+				var me = this;
+				
+				var result = res.response;
+				if(result){
+					for(var i = 0 ; i< res.response.length; i ++){
+						if(result[i].beaconName){
+							result[i].areaName = res.response[i].beaconName;
+						}else if(result[i].location){
+							result[i].areaName = "lat :" +res.response[i].location.lat + ", lon :"+ res.response[i].location.lon;
+						}else{
+							result[i].areaName = null;
+						}
+					}
+				}
+				me.set("resultList", result);
+				
+				if(res.response == null) {
+					me.$.gridPanel.getDataProvider().removeAll();
+				}
+				
+				me.$.gridPanel.getDataProvider().setItemAtBatch(true,function(index, data){
+					if(UT.isEmpty(data.battery))
+						return { battery : 0 };
+				});
+				me.$.gridPanel.refresh();
+			},
+			onItemClick : function(event){
+				var me = this;
+				var data = event.detail.data;
+				var dataField = event.detail.item.dataField;
+				switch(dataField){
+				case "workerName" :
+					me.fire("open-history-pop", data);
+					break;
+				default :
+					break;
+				}
+			},
+			onItemStyleFunction : function(data, item){
+				if(data["battery"] < 31){
+			        return {
+			                 shapeColor : "#ff1111",
+			                };
+			    }else{
+			    	return {
+			             shapeColor : "#00BB00"
+			        };
+			    }
+			},
+		});
+	</script>
+
+</dom-module>

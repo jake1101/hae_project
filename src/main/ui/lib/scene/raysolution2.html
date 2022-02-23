@@ -1,0 +1,340 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Insert title here</title>
+	
+	
+<!--   	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"> -->
+  	<style type="text/css">
+  		 html, body { height:100%; overflow:hidden } .row {height:96% ; margin:1% 1% 1% 1%;} 
+  		 .objectBox{  background-color : pink ; color : black; border-radius:5px; border:1px solid red; margin-bottom :5px; padding:5px;}
+  		 .arrayInput{ width : 40px;} .positionInput{width : 200px;} 
+  		  .balloon {
+		    display: inline-block;
+		    background: #ccc;
+		    margin: 0 auto 10px;
+		}
+		.balloon:after {
+		    content: '';
+		    position: absolute;
+		    border-top: 10px solid #ccc;
+		    border-right: 5px solid transparent;
+		    border-left: 5px solid transparent;
+		    bottom: -9px;
+		    left: 5px;
+		}
+		.transparent-ui {
+                opacity: 0.7;
+                position: absolute;
+                clear: both;
+                padding: 8px;
+                overflow: hidden;
+                background: rgb(165, 49, 49);
+                color: white;
+                margin: 0 auto;
+                border: 1px solid;
+                text-align: left;
+                -webkit-box-shadow: #444 5px 5px 2px;
+                border-bottom-left-radius: 5px 5px;
+                border-bottom-right-radius: 5px 5px;
+                border-top-left-radius: 5px 5px;
+                border-top-right-radius: 5px 5px;
+                z-index: 100000;
+         }
+
+  	</style>
+
+	<script src = "scenejs.js"></script>
+	<script src = "sceneWrapper.js"></script>
+	<script src = "https://code.jquery.com/jquery-3.3.1.js"></script>
+<!--   	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script> -->
+<script type="text/javascript">
+var monitor1 ;
+
+function pushObjects(val){
+	//boundWinObject.showMessage(val);
+	if(val.substring(0,1)=="["){
+		monitor1.addJsonData(JSON.parse(val));	
+	}
+	else{
+		monitor1.addJsonData((JSON.parse(val)).items);	
+	}
+}
+function hideObjects(val) {
+	boundWinObject.showMessage(val);
+	monitor1.removeJsonData(JSON.parse(val));
+}
+
+function hideObjects(val) {
+	boundWinObject.showMessage(val);
+	monitor1.removeJsonData(JSON.parse(val));
+}
+$(document).ready(function(){
+	monitor1 = ray.createScene("mycanvas1","cameras/orbit");
+	
+	
+	monitor1.setCameraOptions(
+		{
+ 			yaw : "default",
+			pitch : "default",
+			zoom : 100,
+			zoomSensitivity : "default",
+			
+		}
+	); 
+	monitor1.createXZBasePlane();
+	monitor1.addJsonData(
+			[
+				//{type:"boxclipQ",layer:"myLayer", yarray: ["0:3","7:10"], xarray:["3:10","15:20"],zarray:["1","3","5"]},
+				//{type:"boxclipO", layer:"myLayer",direction: "WE", yarray:["0","7:10"], xarray:["3:10","15:20"],zarray:["2","4","6"]}, 
+				//{type:"boxclipO",layer:"myLayer", yarray: [0], x:[3^10,15^20],z:[10,12,14]}, 
+			]
+	);
+	
+	
+	
+	
+	
+	
+	
+	var count = 0;
+	
+	var	divPositionHtml = function(i,type){
+		return '<div id="objectBox'+i+'" class="objectBox">'
+				+'<div style="float:right"><button onclick="closeObjectBox('+i+');">지우기</button></div>'	
+				+'<div> 타입 : <span style="font-weight:bold">'+type+'</span> <input id="typeInput'+i+'" type="hidden" value="'+type+'"/>' 
+				+'<br/> positions(x,z) : <input id="positionsInput'+i+'" class="positionInput" type="text"/>'
+				
+				+(type=="floor"?'<br/> y(높이) : <input id="yarrayInput'+i+'" class="arrayInput" type="text"/>':
+					'<br/> min(하단부) : <input id="minHeightInput'+i+'" class="arrayInput" type="text"/>'+
+					'&nbsp;,&nbsp;&nbsp; max(상단부) : <input id="maxHeightInput'+i+'" class="arrayInput" type="text"/>')
+				+'</div>'; 
+	} 
+	var	divBoxHtml = function(i,type){
+		return '<div id="objectBox'+i+'" class="objectBox">'
+				+'<div style="float:right"><button onclick="closeObjectBox('+i+');">지우기</button></div>'	
+				+'<div> 타입 : <span style="font-weight:bold">'+type+'</span> <input id="typeInput'+i+'" type="hidden" value="'+type+'"/>' 
+				+ (type=="rack"?'&nbsp; , &nbsp;&nbsp; 방향 :'
+				+' <select id="pivotInput'+i+'"><option value="z">─</option><option value="x">│</option></select>':'')
+				+'<br/> y(높이) : <input id="yarrayInput'+i+'" class="arrayInput" type="text"/>'
+				+'&nbsp;,&nbsp;&nbsp; x(가로) : <input id="xarrayInput'+i+'" class="arrayInput" type="text"/>'
+				+'&nbsp;,&nbsp;&nbsp; z(세로) : <input id="zarrayInput'+i+'" class="arrayInput" type="text"/></div>'
+				+'</div>'; 
+	} 
+
+	
+	var divRoadHtml = function(i,type){
+		return '<div id="objectBox'+i+'" class="objectBox">'
+				+'<div style="float:right"><button onclick="closeObjectBox('+i+');">지우기</button></div>'	
+				+'<div> 타입 : <span style="font-weight:bold">'+type+'</span> <input id="typeInput'+i+'" type="hidden" value="'+type+'"/>'
+				+'&nbsp; , &nbsp; 방향 : &nbsp; <select id="directionInput'+i+'">'
+				+'<option value="WE">─</option>'
+				+'<option value="NS">│</option>'
+				+'<option value="SE">┌</option>'
+				+'<option value="NE">└</option>'
+				+'<option value="SW">┐</option>'
+				+'<option value="NW">┘</option>'
+				+'<option value="NSE">├</option>'
+				+'<option value="WEN">┴</option>'
+				+'<option value="NSW">┤</option>'
+				+'<option value="WES">┬</option>'
+				+'<option value="NSWE">┼</option>'
+				+'</select>'
+				+'<br/> y(높이) : <input id="yarrayInput'+i+'" class="arrayInput" type="text"/>'
+				+'&nbsp;,&nbsp;&nbsp; x(가로) : <input id="xarrayInput'+i+'" class="arrayInput" type="text"/>'
+				+'&nbsp;,&nbsp;&nbsp; z(세로) : <input id="zarrayInput'+i+'" class="arrayInput" type="text"/></div>'
+				+'</div>'; 
+	}	
+	
+	
+	
+	$("#addListBtn").click(function(){
+		var $div;
+		var typeValue = $("#objectTypeSelect").val();
+		if(typeValue=="floor") $div = $(divPositionHtml(count++,'floor'));
+		if(typeValue=="wall") $div = $(divPositionHtml(count++,'wall'));
+		if(typeValue=="boxclipO") $div = $(divBoxHtml(count++,'boxclipO'));
+		if(typeValue=="boxclipQ") $div = $(divBoxHtml(count++,'boxclipQ'));
+		if(typeValue=="rack") $div = $(divBoxHtml(count++,'rack'));
+		if(typeValue=="road") $div = $(divRoadHtml(count++,'road'));
+		if(typeValue=="sensor") $div = $(divBoxHtml(count++,'sensor'));
+		if(typeValue=="gateway") $div = $(divBoxHtml(count++,'gateway'));
+		
+		$("#controlDiv").append($div);
+		
+	})
+	
+	
+	
+	
+	var jsonDataArray;
+	$("#render").click(function(){
+		jsonDataArray = [];
+		for(var i =0; i<count; i++){
+			var typeInput = $("#typeInput"+i).val();
+			if(typeInput==null || typeInput==undefined) continue;
+			if(typeInput=="boxclipO"||typeInput=="boxclipQ"|| typeInput=="rack" || typeInput=="sensor" || typeInput=="gateway"){
+				var yarrayInput = $("#yarrayInput"+i).val()==""?null:[$("#yarrayInput"+i).val()];
+				var xarrayInput = $("#xarrayInput"+i).val()==""?null:[$("#xarrayInput"+i).val()];
+				var zarrayInput = $("#zarrayInput"+i).val()==""?null:[$("#zarrayInput"+i).val()];
+				if(yarrayInput==null ||xarrayInput==null || zarrayInput==null) continue;
+				var jsonInput = {type : typeInput, yarray : yarrayInput, xarray: xarrayInput, zarray:zarrayInput};
+				jsonDataArray.push(jsonInput);
+			}
+			if(typeInput=="wall"){
+				
+				var positionsInput = JSON.parse("[" + $("#positionsInput"+i).val() + "]");
+				var minHeightInput = parseInt($("#minHeightInput"+i).val());
+				var maxHeightInput = parseInt($("#maxHeightInput"+i).val());
+				var jsonInput = {type : typeInput, positionsArr: positionsInput, minHeight: minHeightInput, maxHeight:maxHeightInput };
+				jsonDataArray.push(jsonInput);
+			}
+			if(typeInput=="floor"){
+				var positionsInput = JSON.parse("[" + $("#positionsInput"+i).val() + "]");
+				var yarrayInput = $("#yarrayInput"+i).val()==""?null:[$("#yarrayInput"+i).val()];
+				var jsonInput = {type : typeInput, positionsArr: positionsInput, yarray : yarrayInput };
+				jsonDataArray.push(jsonInput);
+			}
+			if(typeInput=="rack"){
+				var pivotInput = $("#pivotInput"+i).val();
+				var yarrayInput = $("#yarrayInput"+i).val()==""?null:[$("#yarrayInput"+i).val()];
+				var xarrayInput = $("#xarrayInput"+i).val()==""?null:[$("#xarrayInput"+i).val()];
+				var zarrayInput = $("#zarrayInput"+i).val()==""?null:[$("#zarrayInput"+i).val()];
+				if(yarrayInput==null ||xarrayInput==null || zarrayInput==null) continue;
+				var jsonInput = {type : typeInput , pivot : pivotInput , yarray : yarrayInput, xarray: xarrayInput, zarray:zarrayInput};
+				jsonDataArray.push(jsonInput);
+			}
+			
+			if(typeInput=="road"){
+				var directionInput = $("#directionInput"+i).val();
+				var yarrayInput = $("#yarrayInput"+i).val()==""?null:[$("#yarrayInput"+i).val()];
+				var xarrayInput = $("#xarrayInput"+i).val()==""?null:[$("#xarrayInput"+i).val()];
+				var zarrayInput = $("#zarrayInput"+i).val()==""?null:[$("#zarrayInput"+i).val()];
+				if(yarrayInput==null ||xarrayInput==null || zarrayInput==null) continue;
+				var jsonInput = {type : typeInput , direction : directionInput , yarray : yarrayInput, xarray: xarrayInput, zarray:zarrayInput};
+				jsonDataArray.push(jsonInput);
+			}
+			
+			
+			
+		}// end of for(i : boxObject number);
+		console.log(JSON.stringify(jsonDataArray));
+		monitor1.addJsonData(jsonDataArray);
+	});
+	
+	$("#renderClear").click(function(){
+		monitor1.renderClear();
+	});
+	
+	
+	$("#showPointer").click(function(){
+		
+		var x = $("#pointer_x").val();
+		var y = $("#pointer_y").val();
+		var z = $("#pointer_z").val()
+		monitor1.showPointer(x,y,z);
+	});
+	
+	$("#hidePointer").click(function(){
+		monitor1.hidePointer();
+	})
+	
+	
+	$("#additionalJsonText").click(function(){
+		var jsonData = $("#jsonArea").val();
+		pushObjects(jsonData);
+	})
+	$("#removeJson").click(function(){
+		var jsonData = $("#jsonArea").val();
+		jsonData = JSON.parse(jsonData);
+		monitor1.removeJsonData(jsonData);
+	});
+	
+	$("#showTemp").click(function(){
+		monitor1.showPointMap("temperature");
+	})
+	$("#hideTemp").click(function(){
+		monitor1.showPointMap("temperature");
+	})
+	
+	
+	
+})
+ function closeObjectBox(i){
+	$("#objectBox"+i).remove();
+} 
+
+
+</script>
+
+</head>
+<body>
+<!-- 
+	배모양
+	
+	[{"type":"floor","positionsArr":[-40,0,-25,15,30,15,35,10,35,-10,30,-15,-25,-15,-40,0],"yarray":["0"]},
+	{"type":"wall","positionsArr":[-40,0,-25,15,30,15,37,12,37,-12,30,-15,-25,-15,-40,0],"minHeight":0,"maxHeight":5},
+	{"type":"wall","positionsArr":[-43,0,-25,15,30,15,39,14,39,-14,30,-15,-25,-15,-43,0],"minHeight":5,"maxHeight":10},
+	{"type":"wall","positionsArr":[-46,0,-25,15,30,15,41,16,41,-16,30,-15,-25,-15,-46,0],"minHeight":10,"maxHeight":15},
+	{"type":"wall","positionsArr":[-49,0,-25,15,30,15,43,18,43,-18,30,-15,-25,-15,-49,0],"minHeight":15,"maxHeight":20},
+	{"type":"floor","positionsArr":[-49,0,-25,15,30,15,43,18,43,-18,30,-15,-25,-15,-49,0],"yarray":["18"]}]
+
+
+
+ -->
+	
+	 <div class="row">
+		 <div class="col-sm-3" style="height : 15%; border:2px solid gray; border-radius:5px; ">
+			<span style="font-size:15px; font-weight:bold">리스트</span><br/>
+			<select id="objectTypeSelect" style="width : 150px; height : 30px;">
+				<option value="floor">바닥(floor)</option>
+				<option value="wall">벽(wall)</option>
+				<option value="boxclipO">박스 1(boxclipO)</option>
+				<option value="boxclipQ">박스 2(boxclipO)</option>
+				<option value="road">길(road)</option>
+				<option value="rack">랙(rack)</option>
+				<option value="sensor">센서(sensor)</option>
+				<option value="gateway">게이트웨이(gateway)</option>
+				<option value="textBox">텍스트상자(textBox)</option>
+			</select>
+			&nbsp;&nbsp;&nbsp;
+			<button id="addListBtn">추가</button>
+
+			<br/>	 바닥, 벽 예시 ) : -25,-25,-25,25,25,25,25,-25,-25,-25<br/>
+			-40,0,-25,15,30,15,35,10,35,-10,30,-15,-25,-15,-40,0
+
+			<br/>
+			<button id="render">아래의 목록을 3d로 렌더링하기</button>
+			<button id="renderClear">3d 화면 초기화 </button>
+			
+		</div>
+		<div class="col-sm-3" style="height : 15%; border:2px solid gray; border-radius:5px; ">
+			<span style="font-size:15px; font-weight:bold">포인터</span><br/>
+			<div  style="height : 30px; background-color:#bb99ff; width : 70%; margin :3%; padding:2px; font-weight : bold"> 
+				x좌표 :	<input id = "pointer_x" class="arrayInput" type="text" value="0" />
+				y좌표 :	<input id = "pointer_y" class="arrayInput" type="text" value="0"/>
+				z좌표 :	<input id = "pointer_z" class="arrayInput" type="text" value="0"/>
+			</div>
+			<button id="showPointer">포인터 나타나기</button>
+			<button id="hidePointer">포인터 숨기기</button>
+			
+		</div>
+		<div class="col-sm-6" style="height : 15%;border:2px solid gray; border-radius:5px;">
+			<span style="font-size:15px; font-weight:bold">JSON TEXT</span><br/>
+			<textarea id = "jsonArea" style="height:60%; overflow:scroll; width : 90%;"></textarea>
+			<button id="additionalJsonText" style="height : 20%" >json객체  추가 렌더링하기</button>
+			<button id="removeJson" style="height : 20%" >json객체  삭제하기</button>
+			<button id="showTemp" style="height : 20%" >온도 정보 나타내기</button>
+			<button id="hideTemp" style="height : 20%" >온도 정보 없애기</button>
+		</div> 
+	    <div class="col-sm-3" id="controlDiv" style="height : 80%; overflow :scroll; border:2px solid gray; border-radius:5px;">
+	    </div>
+	    <div class="col-sm-9" style="background-color:pink; height : 80%; border:2px solid gray; border-radius:5px;" >
+			<canvas id="mycanvas1" style=" width: 100%; height: 100%"></canvas>
+			<div id="textBoxDiv"></div>
+	    </div>
+  	</div> 
+</body>
+</html>

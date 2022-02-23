@@ -1,0 +1,145 @@
+<dom-module id="es-chart-pie-donut">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-pie-donut',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+				"name": "rMateChart:Pie Doughnu",
+			    "width": 620,
+			    "height": 500,
+			    "type": "pie",
+			    "palettes":[{
+			        "name": "pal_01",
+			        "fills": ['#40B1E6', '#074D81', '#20CBC2', '#FABB05', '#F97B17']
+
+
+			    }],
+			    "title": {
+			        "text": "Annual Report",
+			        "styles": {
+			            "fontSize": 14
+			        }
+			    },
+			    "plotArea": {
+			        "items": [{
+			            "text": "2017",
+			            "styles": {
+			                "fontSize": 20,
+			                "marginBottom": 24
+			            }
+			        }, {
+			            "text": "Annual Report",
+			            "styles": {
+			                "fontSize": 14,
+			                "marginTop": 18
+			            }
+			        }]
+			    },
+			    "xAxes": {
+			    },
+			    "yAxes": {
+			    },
+			    "series": [{
+			        "name": "Vancouver",
+			        "labelField": "Month",
+			        "valueField": "Profit",
+			        "lineType": "curved",
+			        "startAngle": 110,
+			        "innerRadius": 0.5,
+			        "items": [
+			            {
+			                "Month" : "Jan",
+			                "Profit" : 900
+			            },{
+			                "Month" : "Feb",
+			                "Profit" : 2400
+			            },{
+			                "Month" : "Mar",
+			                "Profit" : 1900
+			            }
+			        ],
+			        "label": {
+			            "visible": true,
+			            "labelField": "displayLabel",
+			            //"position": "inner",
+			            "offset": 30,
+			            "styles": {
+			                "fontSize": "11",
+			                "color": "#333"
+			            }
+			        },
+			        "legend": {
+			            "visible": true,
+			            "position": "bottom",
+			            "layout": "horizontal",
+			            "styles": {
+			                "border": "#20000000"
+			            }
+			        },
+			        "styles": {
+			            "fill": "p(pal_01:index)",
+						"border": null,
+			            "shadow": null,
+			            "hover": {
+			                "fillBrightness": 1.5
+			            }
+			       	},
+			        "separatorStyles": {
+			            "line": null
+			        },
+					"animations": [{
+			            "id": "slicing",
+			            "active": false,
+			            "property": "slicedOffset",
+			            "duration": 500
+					}],
+					"itemAnimations": [{
+			            "property": "value",
+			            "nexts": ["slicing"]
+					//}, {
+			         //   "trigger": "change",
+			         //   "triggerProperty": "sliced",
+			         //   "property": "sliced"
+			        }],
+			        "tooltip": {
+			            "text": "${label}<br>Vancouver: ${value}",
+			            "styles": {
+			                "fill": "#ddffffff",
+			                "color": "#333",
+			                "fontSize": 10,
+			                "shadow": null,
+			                "borderRadius": 0,
+			                "paddingTop": 2,
+			                "paddingBottom": 2,
+			                "paddingLeft": 5,
+			                "paddingRight": 5
+			            }
+			        }
+				}],
+			    "legend": false
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

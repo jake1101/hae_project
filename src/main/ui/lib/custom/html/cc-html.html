@@ -1,0 +1,33 @@
+<dom-module id="cc-html">
+    <style>
+        :host {
+            display: inline-block;
+        }
+    </style>
+    <template>
+    </template>
+    <script>
+        Polymer({
+            is: "cc-html",
+            properties: {
+                html: {
+                    type: String,
+                    observer: "_htmlChanged"
+                }
+            },
+            _htmlChanged: function(html) {
+                var root = Polymer.dom(this.root);
+                
+                var children = root.children;
+                for(var len = children.length, i = len - 1; i >= 0; i--) {
+                    root.removeChild(children[i]);
+                }
+                if (html) {
+                    var div = document.createElement("div");
+                    div.innerHTML = html;
+                    root.appendChild(div);
+                }
+            }
+        });
+    </script>
+</dom-module>

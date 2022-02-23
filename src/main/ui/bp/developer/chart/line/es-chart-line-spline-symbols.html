@@ -1,0 +1,116 @@
+<dom-module id="es-chart-line-spline-symbols">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-line-spline-symbols',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "type": "line",
+			    "palettes":[{
+			        "name": "lines",
+			        "alpha": 1.0,
+			        "width": 2,
+			        "strokes": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }, {
+			        "name": "fills",
+			        "alpha": 1.0,
+			        "fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }],
+			    "title": "Monthly Average Temperature",
+			    "subtitle": "Source: WorldClimate.com",
+			    "plotArea": {
+			        "animations": [{
+			            "property": "seriesMask"
+			        }]
+			    },
+			    "xAxes": {
+			        "categories":[
+			            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+			            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+			        ]
+			    },
+			    "yAxes": {
+			        "title": "Temperature",
+			        "tick": {
+			            "styles": {
+			                "suffix": "°"
+			            }
+			        }
+			    },
+			    "series": [{
+			        "name": "Tokyo",
+			        "lineType": "curved",
+			        "items": [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, {
+			            "value": 26.5,
+			            "styles": {
+			                "shapeName": "url(images/sun.png)"
+			            }
+			        },
+			            23.3, 18.3, 13.9, 9.6],
+			        "label": false,
+			        "styles": {
+			            "line": "p(lines:0)",
+			            "fill": "p(fills:0)",
+			            "border":"",
+			            "shapeName": "rectangle"
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			        }]
+			    }, {
+			        "name": "London",
+			        "lineType": "curved",
+			        "items": [{
+			            "value": 3.9,
+			            "styles": {
+			                "shapeName": "url(images/snow.png)"
+			            }
+			        },
+			        4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8
+			        ],
+			        "label": false,
+			        "styles": {
+			            "line": "p(lines:1)",
+			            "shapeName": "diamond",
+			            "fill": "p(fills:1)",
+			            "label": {
+			                "visible": false
+			            }
+			        },
+			        "animations": [],
+			        "itemAnimations": [{
+			        }]
+			    }],
+			    "legend": {
+			        "itemStyles": {
+			            "fontBold": true
+			        }
+			    }
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

@@ -1,0 +1,100 @@
+<dom-module id="es-chart-etc-treemap">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-etc-treemap',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "width": 700,
+				"name": "Highcharts:Tree map",
+			    "type": "treemap",
+				"palettes":[{
+					"name": "color1",
+			        "alpha": 1.0,
+			        "minFill": "#fff",
+			        "maxFill": "#7cb5ec",
+			        "stops": 8,
+			        "start": 1
+				}],
+				"styles": {
+				},
+			    "title": {
+			        "text": "Treemap",
+			        "styles" : {
+					},
+			    },
+			    "plotArea": {
+			        "styles": {
+			            "border": "#ccc"
+			        }
+			    },
+			    "xAxes": {
+			        "visible": false
+			    },
+			    "yAxes": {
+			        "visible": false
+			    },
+			    "series": [{
+			        "label": {
+			            "styles": {
+			                "fontSize": 13,
+			                "color": "#800"
+			            }
+			        },
+			        "labelField": "name",
+			        "items": [{
+			            "name": "A",
+			            "value": 6
+			        }, {
+			            "name": "B",
+			            "value": 6
+			        }, {
+			            "name": "C",
+			            "value": 4
+			        }, {
+			            "name": "D",
+			            "value": 3
+			        }, {
+			            "name": "E",
+			            "value": 2
+			        }, {
+			            "name": "F",
+			            "value": 2
+			        }, {
+			            "name": "G",
+			            "value": 1
+			        }],
+			        "styles": {
+			            "fill": "p(color1:index)",
+			            "line": "#eee",
+			            "border": null
+			       	}
+
+			    }],
+			    "legend": {
+			    }
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

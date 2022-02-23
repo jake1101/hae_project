@@ -1,0 +1,38 @@
+package smartsuite.app.bp.sample;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+@Controller
+@RequestMapping(value = "**/sample/**")
+public class SampleController {
+
+	@Inject
+	SampleService sampleService;
+	
+	/**
+	 * 구매요청 상세 조회
+	 */
+	@RequestMapping (value = "findTest.do")
+	public @ResponseBody Map<String, Object> findTest(@RequestBody Map<String, Object> param) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("prData"    , sampleService.findPr(param));			// 구매요청 정보
+		result.put("prItemList", sampleService.findListPrItem(param));	// 구매요청 품목 목록
+		return result;
+	}
+	
+	/**
+	 * 구매요청 저장
+	 */
+	@RequestMapping (value = "saveTest.do")
+	public @ResponseBody Map<String, Object> saveTest(@RequestBody Map<String, Object> param) {
+		return sampleService.saveTest(param);
+	}
+}

@@ -1,0 +1,1001 @@
+<sc-link rel="stylesheet" type="text/css" href="./css/place-dashboard.css"></sc-link>
+<sc-link rel="import" href="ep-safedate-setting.html"></sc-link>
+
+<dom-module id="es-place-dashboard">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+			
+			font-family:'Noto Sans KR';
+		}
+	</style>
+
+	<template>
+<!--
+   ************************************************************************************************************
+   * Service Area
+   ************************************************************************************************************
+-->
+		<!-- 조회 -->
+		<sc-ajax id="getPlaceDashboard"
+			url="getPlaceDashboard.do"
+			body="{{searchParam}}"
+			on-response="completeGetPlaceDashboard">
+		</sc-ajax>
+		
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+<!--
+    ************************************************************************************************************
+    * UI Area
+    ************************************************************************************************************
+-->
+		<!-- 바깥 배경 -->
+		<div class="vbox flex place-back-ground-color">
+			<!-- 안쪽 배경 -->
+			<div class="vbox flex place-sub-back-ground-color">
+				<!-- 상단 타이틀 -->
+				<div class="hbox place-top-area">
+					<div class="vbox place-top-left-area">
+						<div class="hbox">
+							<div class="vbox place-top-site-text">현장 대시보드</div>
+							<div class="hspace-50"></div>
+							<div class="vbox place-top-time-text">[[currentDate]] [[dayOfWeek]] [[currentTime]]</div>
+							<div class="hspace-50"></div>
+							<div class="vbox place-top-time-text">현재 날씨</div>
+							<div class="hspace-10"></div>
+							<div class="vbox flex _placeNowWeatherIcon place-now-weather-icon-area"></div>
+							<div class="vbox safeday-text"><sc-label text="무재해 달성 {{safeDate}}일차" on-click="changeSafeDate"></sc-label></div>
+						</div>
+					</div>
+					<div class="vbox flex place-top-right-area">
+						<div class="hbox a-flex-end">
+							<div class="vbox place-top-time-text">새로고침 : [[refreshSecond]]</div>
+							<div class="hspace-30"></div>
+							<div class="hbox">
+								<div class="vbox font-15 a-center">UI컬러</div>
+								<div class="hspace-10"></div>
+								<div class="vbox flex place-black-select-icon" data-args="black" on-click="changeTone"></div>
+								<div class="hspace-10"></div>
+								<div class="vbox flex place-white-select-icon" data-args="white" on-click="changeTone"></div>
+							</div>
+							<div class="hspace-30"></div>
+							<div id="windowmax" class="place-window-max" on-click="onWindowMax"></div>
+						</div>
+					</div>
+				</div>
+				
+				<!-- 하단 내용 -->
+				<div class="hbox flex place-middle-area scroll-none">
+					<!-- 왼쪽 -->
+					<div class="vbox flex-6 place-left-area scroll-none">
+						<div class="vbox place-sub-title-area j-flex-end">
+							<p class="place-sub-title">위험작업 현황</p>
+							
+						</div>
+						
+						<div class="hbox flex place-area-input-box">
+							<!-- 위험작업 현황 -->
+							<div class="vbox flex">
+								<div class="vbox flex">
+									<!-- BOX : 테이블 -->
+									<div class="vbox flex place-condition-box" style="max-height: calc(100% - 200px); text-align: center; overflow : hidden">
+										<div class="hbox place-stat-start-row font-25-700" style="height:60px; overflow:visible;">
+											<div class="vbox place-table-header" style="width:10%">상태</div>
+											<div class="vbox place-left-border place-table-header" style="width:30%">작업명</div>
+											<div class="vbox place-left-border place-table-header" style="width:16%">신청업체</div>
+											<div class="vbox place-left-border place-table-header" style="width:16%">신청일</div>
+											<div class="vbox place-left-border place-table-header" style="width:30%">작업기간</div>
+										</div>
+										<div id="ptw-area-list" class="place-area-list" style="font-size:17px">
+											<template id="ptw-area-template" is="dom-repeat" items="{{ptwReqList}}" as="request"  index-as="requestIndex">
+	                                                <div class$="{{isEven(requestIndex)}}" >
+	                                                	<div class="" style = "width : 10%">{{request.status_nm}}</div>
+	                                                	<div class="place-left-border" style = "width : 30%">{{request.ptw_nm}}</div>
+	                                                	<div class="place-left-border" style = "width : 16%">{{request.vendor_nm}}</div>
+	                                                	<div class="place-left-border" style = "width : 16%">{{request.req_dt}}</div>
+	                                                	<div class="place-left-border" style = "width : 30%">{{request.dur}}</div>
+	                                                </div>
+	                                        </template>
+                               				<template is="dom-if" if="{{isEmpty(ptwReqList)}}">
+                               					<div class='vbox flex a-center font-15-500 place-none-text'>신청한 작업허가제가 없습니다.</div>
+                                        	</template>
+										</div>
+									</div>
+									
+									<div class="vspace-20"></div>
+									
+									<!-- BOX : 차트 -->
+									<div class="vbox flex place-condition-box">
+										<!-- 파이 차트 -->
+										<div id="pieChart1" class="vbox flex j-center ai-center"></div>
+										<div class="_ptw-nonetext vbox flex a-center font-15-500 place-none-text" style="display:none;">신청한 작업허가제가 없습니다.</div>
+									</div>
+									
+								</div>
+							</div>
+							
+						</div>
+					</div>
+					
+					<!-- 오른쪽 -->
+					<div class="vbox flex-4 place-right-area scroll-none">
+						<div class="vbox place-sub-title-area j-flex-end">
+							<p class="place-sub-title">스마트 태그</p>
+						</div>
+						
+						<div class="hbox flex place-area-input-box">
+							<!-- 스마트 태그 현황 -->
+							<div class="vbox flex">
+								<div class="vbox flex">
+									<div class="vbox flex place-condition-box" style="min-height: 264px;">
+										<div class="vbox flex" style="overflow : hidden">
+											<table style="height: 100%; width:100%; text-align:center;" class="tSmartTag font-25-700">
+												<colgroup>
+													<col style="width:40%"></col>
+													<col style="width:20%"></col>
+													<col style="width:20%"></col>
+													<col style="width:20%"></col>
+												</colgroup>
+												<tr>
+													<td></td>
+													<td>교부</td>
+													<td>미교부</td>
+													<td>계</td>
+												</tr>
+												<tr>
+													<td>스마트 태그<br><span style="font-size: 20px;">(작업자,이동장비)</span></td>
+													<td>[[deliverTagInfo.cnt1]]</td>
+													<td>[[deliverTagInfo.cnt2]]</td>
+													<td>[[deliverTagInfo.cnt3]]</td>
+												</tr>
+												<tr style="border-bottom : none;">
+													<td>모바일<br><span style="font-size: 20px;">(작업자,이동장비)</span></td>
+													<td>[[deliverTagInfo.cnt4]]</td>
+													<td>[[deliverTagInfo.cnt5]]</td>
+													<td>[[deliverTagInfo.cnt6]]</td>
+												</tr>
+											</table>
+										</div>
+									</div>
+									
+<!-- 									<div class="vspace-20"></div> -->
+									<div class="vbox place-sub-title-area j-flex-end">
+										<p class="place-sub-title">투입 현황(일일 출역 현황)</p>
+									</div>
+									
+									<div class="hbox flex place-condition-box" style="overflow : hidden;">
+										<div class="vbox flex-5">
+											<!-- 타이틀 -->
+											<p class="place-condition-title">작업자({{workerCount}})</p>
+										
+											<!-- 파이차트 -->
+											<div id="pieChart2" class="vbox flex place-landWorker-background j-center ai-center"></div>
+											<div class="_worker-nonetext vbox flex a-center font-15-500 place-none-text" style="display:none;">투입 작업자가 없습니다.</div>
+										</div>
+										
+										<div class="vbox flex-5">
+											<!-- 타이틀 -->
+											<p class="place-condition-title">이동장비({{vehicleCount}})</p>
+											
+											<!-- 파이 차트 -->
+											<div id="pieChart3" class="vbox flex place-landMachine-background j-center ai-center"></div> <!-- work-none-background -->
+											<div class="_vehicle-nonetext vbox flex a-center font-15-500 place-none-text" style="display:none;">투입 이동장비가 없습니다.</div>
+										</div>
+										
+									</div>
+								</div>
+							</div>
+							
+						</div>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</template>
+
+<!--
+    ************************************************************************************************************
+    * Script Area
+    ************************************************************************************************************
+-->
+	<script>
+        Polymer({
+            is: "es-place-dashboard",
+            
+            // 리사이즈
+            behaviors:[
+    			Polymer.SCResizableBehavior
+    		],
+    		
+    		listeners:{
+    			'sc-resize':'doContentElementResize'
+    		},
+    		
+    		doContentElementResize: function(){
+    			var me = this;
+    			
+    			return;
+    			
+    			// 리사이즈
+				var _todayWeatherBox = $('._todayWeatherBox');
+				var boxHeight = _todayWeatherBox[0].offsetHeight;
+				var boxDivHeight = boxHeight / 6;
+				
+				var calcTop = 0;
+				calcTop = boxDivHeight + (boxDivHeight - (70-(boxDivHeight/2)) ) + 10;
+				
+				var boxDivWidth = _todayWeatherBox[0].offsetWidth / 8;
+				var calcLeft = 0;
+				calcLeft = (boxDivWidth / 14.5);
+				
+				me.$.tempLineChart.style.top = calcTop + "px";
+				me.$.tempLineChart.style.left = calcLeft + "%";
+				
+				me.lineChart.resize();
+    		},
+            
+            properties : {
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                
+                currentDate: {
+                    type: Object,
+                    value: function(){
+                        return "";
+                    }
+                },
+                
+                dayOfWeek: {
+                    type: Object,
+                    value: function(){
+                        return "";
+                    }
+                },
+                
+                currentTime: {
+                    type: Object,
+                    value: function(){
+                        return "";
+                    }
+                },
+
+                safeDay: {
+                    type: Object,
+                    value: function(){
+                        return new Date();
+                    }
+                },
+                
+                safeDate: {
+                    type: Object,
+                    value: function(){
+                        return 1;
+                    }
+                },    
+                
+                refreshSecond: {
+                	type: Object,
+                	value: function(){
+                		return 60;
+                	}
+                },
+                
+                siteInfo: {
+                	type: Object,
+                	value: function(){
+                		return {};
+                	}
+                },
+                
+                colorTone: {
+                	type: Object,
+                	value: function(){
+                		return 'black';
+                	}
+                },
+
+                workerCount : {
+                    type : Number,
+                    value : 0
+                },
+                vehicleCount : {
+                    type : Number,
+                    value : 0
+                },
+            },
+            
+            // 초기화 완료 후 호출 함수
+            initialized : function() {
+                var me = this;
+                
+                /*** 시간설정 ***/
+                var d = new Date();
+                var currentDate = d.getFullYear() + "년 " + ( d.getMonth() + 1 ) + "월 " + d.getDate() + "일";
+                
+                // 현재일자
+                me.set("currentDate", currentDate);
+                
+                // 요일
+                var week = ['일', '월', '화', '수', '목', '금', '토'];
+                var dayOfWeek = week[d.getDay()];
+                
+                me.set("dayOfWeek", dayOfWeek + "요일");
+                
+                // 현재시간
+                me.timeInterval = setInterval(function() {
+               		me.setTimeText();
+				}, 1000); // 1초
+                
+                me.searchDataAll();
+				
+                me.onWindowMax();
+            },
+            
+            isEmpty :  function(param){
+                if(param==null || param.length ==0){
+              		return true; 
+                }
+                else{
+                    return false;
+                }
+            },
+            isNotEmpty : function(param){
+                if(param==null || param.length ==0){
+              		return false; 
+                }
+                else{
+                    return true;
+                }
+            },
+            isEven : function(param) {
+                console.log(param);
+                var result = param%2==0? "flex hbox place-color_row" : "flex hbox";
+                console.log(result);
+				return result;
+            },
+            setTimeText: function(){
+            	var me = this;
+            	
+            	var d = new Date();
+            	var hours = d.getHours();
+            	var minutes = d.getMinutes();
+            	
+            	if(hours < 10){
+            		hours = "0" + hours;
+            	}
+            	
+            	if(minutes < 10){
+            		minutes = "0" + minutes;
+            	}
+            	
+            	var currentTime = hours + ":" + minutes;
+            	me.set("currentTime", currentTime);
+            	
+            	// refresh 초
+				var refreshSecond = me.get("refreshSecond") || 0;
+            	
+            	if(refreshSecond <= 0){
+            		me.set("refreshSecond", 60);
+            		
+           			me.searchDataAll();
+            		
+            	}else{
+            		me.set("refreshSecond", --refreshSecond);
+            	}
+            },
+            
+            // 대시보드 데이터 조회
+            searchDataAll: function(){
+            	var me = this;
+            	
+            	UT.requestNotUseLoading(me.$.getPlaceDashboard);
+            },
+            
+            completeGetPlaceDashboard: function(e, res){
+            	var me = this;
+            	
+            	var result = res.response || {};
+            	
+            	// 현장 정보
+            	var siteInfo = res.response.siteInfo.body || {};
+            	me.set("siteInfo", siteInfo);
+            	me.set("safeDay", siteInfo.safeDay);
+            	me.set("safeDate", siteInfo.safeDayCount);
+            	
+            	// 기상정보
+            	var weatherInfo = (res.response.weatherInfo && res.response.weatherInfo.body) || {};
+            	// 현재기상정보
+            	var weatherInfoNow = weatherInfo.now || {};
+            	// 기상정보 아이콘 정보 획득
+               	var iconInfo = me.getWeatherIconInfo(weatherInfoNow, "place-now");
+            	
+             	// 현재 기상정보 아이콘 등록
+               	var nowWeatherIconDom = $('._placeNowWeatherIcon')[0];
+               	nowWeatherIconDom.classList.add(iconInfo.icon);
+//            		weatherInfoNow.weatherText = iconInfo.text;
+            	
+            	// 1.위험작업 현황
+            	var ptwReqList = result.ptwReqList || [];
+            	
+            	// 2.스마트 태그
+            	var deliverTagInfo = result.deliverTagInfo || {};
+            	
+            	me.set("ptwReqList", ptwReqList);
+            	me.set("deliverTagInfo", deliverTagInfo);
+            	
+            	var chartList1 = result.chartList1 || []; 
+            	var chartList2 = result.chartList2 || [];
+            	var chartList3 = result.chartList3 || [];
+            	
+            	me.set("chartList1", chartList1);
+            	me.set("chartList2", chartList2);
+            	me.set("chartList3", chartList3);
+            	
+            	// 차트 생성
+                me.initChart();
+            	
+            },
+            
+            getWeatherIconInfo: function(param, prefix){
+            	var pty = param.ptyCode; // 강수형태(PTY) 코드 : 없음(0), 비(1), 비/눈(2), 눈(3), 소나기(4) 여기서 비/눈은 비와 눈이 섞여 오는 것을 의미 (진눈개비)
+               	var sky = param.skyCode; // 맑음 0 ～ 5 , 구름많음 6 ～ 8 ,  흐림  9 ～ 10
+               	
+               	/**
+               	 * icon
+               	 * 05_비, 09_눈비, 07_눈, 05_비
+               	 * 01_낮_맑음, 10_밤_맑음, 04_구름많음, 03_흐림 
+               	 * 12_정보없음
+               	 */ 
+               	var icon = prefix + "-weather-icon12";
+               	var text = "정보없음";
+               	
+               	if(pty == 0){ // 없음
+               		if(sky <= 5){ // 맑음
+               			// 낮 or 밤(1or10)
+               			icon = prefix + '-weather-icon1';
+               			text = "맑음";
+               			
+               		}else if(sky >= 9){ // 흐림
+               			icon = prefix + '-weather-icon3';
+               			text = "흐림";
+               			
+               		}else{ // 구름많음
+               			icon = prefix + '-weather-icon4';
+               			text = "구름많음";
+               		}
+               	
+               	}else{
+               		if(pty == 1){ // 비
+               			icon = prefix + '-weather-icon5';
+               			text = "비";
+               			
+               		}else if(pty == 2){ // 비/눈
+               			icon = prefix + '-weather-icon9';
+               			text = "비/눈";
+               			
+               		}else if(pty == 3){ // 눈
+               			icon = prefix + '-weather-icon7';
+               			text = "눈";
+               			
+               		}else if(pty == 4){ // 소나기
+               			icon = prefix + '-weather-icon5';
+               			text = "소나기";
+               			
+               		}
+               	}
+               	
+               	return {
+               		icon: icon
+               		,text: text
+               	};
+            },
+            
+            initChart: function(){
+            	var me = this;
+            	
+            	// 작업허가제
+            	var dataList1 = me.get("chartList1");
+            	
+            	// 작업자
+            	var dataList2 = me.get("chartList2");
+            	
+            	// 이동장비
+            	var dataList3 = me.get("chartList3");
+            	
+            	/* 작업허가제 차트 */
+           		me.createPieChart('ptw', dataList1);
+				
+				/* 작업자 차트 */
+				me.createPieChart('worker', dataList2);
+				me.set("workerCount", 0);
+				for(var i=0; i<dataList2.length; i++){
+					me.set("workerCount" , me.get("workerCount") + dataList2[i].cnt);
+				}
+				/* 이동장비 차트 */
+				me.createPieChart('vehicle', dataList3);
+				me.set("vehicleCount", 0);
+				for(var i=0; i<dataList3.length; i++){
+					me.set("vehicleCount" , me.get("vehicleCount") + dataList3[i].cnt);
+				}
+            },
+            
+            /**
+             * 파이차트 생성
+             * - background 설정, 파이차트생성, 파이차트 범례 생성
+             */
+            createPieChart: function(div, dataList){
+            	var me = this;
+            	
+            	var colorTone = me.get("colorTone");
+            	
+            	/*** Background 설정 ***/
+            	me.setInputBackground(div, dataList);
+            	
+            	/*** 파이 차트 생성 ***/
+            	var legendList = [];
+            	var chartDataList = [];
+            	
+            	for(var idx in dataList){
+            		var item = dataList[idx];
+        			
+        			var itemStyleConfig = {};
+        			if(idx == "0"){
+        				itemStyleConfig = {color:'#4477ED'}; // 파랑
+        				
+        			}else if(idx == "1"){
+        				itemStyleConfig = {color:'#9559EA'}; // 보라
+        				
+        			}else if(idx == "2"){
+        				itemStyleConfig = {color:'#E7574F'}; // 빨강
+        				
+        			}else if(idx == "3"){
+        				if(colorTone == "black"){
+        					itemStyleConfig = {color:'#70C471'}; // 녹색
+        				}else{
+        					itemStyleConfig = {color:'#4CCC4C'}; // 녹색
+        				}
+        				
+        			}
+		            	
+        			// 차트 데이터
+        			chartDataList.push({
+        				itemStyle: itemStyleConfig
+        				,value: item.cnt
+        				,name: item.target_name
+        			});
+        			
+        			// 범례명
+        			legendList.push(item.target_name);
+        		}
+            	
+            	var chartDom = null;
+            	var chart = null;
+            	var option = {};
+            	
+            	// 작업허가제
+            	if(div == "ptw"){
+            		chartDom = me.$.pieChart1;
+	            	
+	            // 작업자
+            	}else if(div == "worker"){
+            		chartDom = me.$.pieChart2;
+	            	
+	            // 이동장비
+            	}else if(div == "vehicle"){
+            		chartDom = me.$.pieChart3;
+            	}
+            	
+            	chart = echarts.init(chartDom);
+            	
+            	// 데이터 존재여부에 따라, 배경 변경
+            	var isEmpty = true;
+        		
+        		for(var i=0; i<dataList.length; i++){
+        			if(dataList[i].target_name){
+        				isEmpty = false;
+        				break;
+        			}
+            	}
+        		
+        		var option = {};
+        		
+        		if(!isEmpty){
+        			// 작업허가제
+                	if(div == "ptw"){
+	        			// 차트 옵션
+	                	option = {
+	                		tooltip: {
+	               		        trigger: 'item',
+	               		        formatter: '{b}: {c} ({d}%)'
+	               		    },
+	               		    legend: {
+	               		    	show: false,
+	               		    	orient: 'vertical',
+	               		        left: 10,
+	               		     	textStyle: {
+	               		    		color: (colorTone == "white" ? "#000" : "#fff")
+	               		     	},
+	               		        data: legendList
+	               		    },
+	               		    series: [
+	               		        {
+	               		            type: 'pie',
+// 	               		            radius: ['40%', '70%'],
+	               		            label: {
+	               		            	color: (colorTone == "white" ? "#000" : "#fff")
+	               		            	,fontFamily: "Noto Sans KR"
+	               		            	,fontSize: 15
+	               		            	,position: 'outer'
+	               		            	,alignTo: 'labelLine'
+	               		            	,formatter: '{b} {c}건 ({d}%)'
+	//                		                normal: {
+	//                		                    show: false
+	//                		                },
+	//                		                emphasis: {
+	//                		                    show: false
+	//                		                }
+	               		            },
+	//                		            labelLine: {
+	//                		                normal: {
+	//                		                    show: false
+	//                		                }
+	//                		            },
+	               		            data: chartDataList
+	               		        }
+	               		    ]
+	    				};
+	        			
+	        		// 작업자, 이동장비
+                	}else{
+                		// 차트 옵션
+	                	option = {
+	                		tooltip: {
+	               		        trigger: 'item',
+	               		        formatter: '{b}: {c} ({d}%)'
+	               		    },
+	               		    legend: {
+	               		    	show: false,
+	               		    	orient: 'vertical',
+	               		        left: 10,
+	               		     	textStyle: {
+	               		    		color: (colorTone == "white" ? "#000" : "#fff")
+	               		     	},
+	               		        data: legendList
+	               		    },
+	               		    series: [
+	               		        {
+	               		            type: 'pie',
+	               		         	radius: ['30%', '50%'],
+	               		            label: {
+	               		            	color: (colorTone == "white" ? "#000" : "#fff")
+	               		            	,fontFamily: "Noto Sans KR"
+	               		            	,fontSize: 15
+	               		            	,position: 'outer'
+	               		            	,alignTo: 'labelLine'
+// 	               		            	,bleedMargin: 10
+	               		            	,formatter: function(params){
+	               		            		var name = params.data.name;
+// 	               		            		if(name.length >= 5){
+// 	               		            			name = name.substr(0,4) + "..";
+// 	               		            		}
+	               		            		
+	               		            		return name + "\n" + params.data.value + "명";
+	               		            	} // '{b}\n{c}명'
+	               		            },
+	               		            data: chartDataList
+	               		        }
+	               		    ]
+	    				};
+                	}
+        			
+        		}else{
+        			option = {
+        				series: [
+        					{
+        						type: 'pie',
+        						data: []
+        					}
+        				]
+        			};
+        		}
+        		
+            	chart.setOption(option);
+            	
+            	me.set(div, chart);
+            },
+            
+            onWindowMax: function(){
+            	var me = this;
+            	
+            	// 확대 축소 버튼
+            	var windowMax = me.$.windowmax;
+            	
+            	// 탑메뉴
+            	var topmenu = $('#headWrap');
+            	// 탭바
+            	var mdiTabbar = $('#mdiTabbar');
+            	// 메뉴경로
+            	var mdiBreadCrumb = $('#mdiBreadCrumb');
+            	// 왼쪽 메뉴
+            	var mdiLeftMenu = $('#mdiLeftMenu');
+            	
+                // 원래 사이즈 상태
+            	if( windowMax.classList.contains('place-window-max') ){
+            		windowMax.classList.remove('place-window-max');
+            		windowMax.classList.add('place-window-return');
+            		
+            		// 탑메뉴 숨김
+                	topmenu.css("display", "none");
+                	// 탭바 숨김
+                	mdiTabbar.css("display", "none");
+                	// 메뉴경로 숨김
+                	mdiBreadCrumb.css("display", "none");
+                	// 왼쪽 사이드 바 숨김
+                	mdiLeftMenu.css("display", "none");
+                	
+                	$('.mdiTabsDiv')[0].style.display='none';
+                	
+                	// sc-mdi-window (padding 제거)
+                	var domList = document.querySelectorAll('sc-mdi-window');
+                	
+                	for(var i=0; i<domList.length; i++){
+                		var domElem = domList[i];
+                		domElem.classList.add("padding-none");
+                	}
+                	
+                	// 전체화면 실행
+                	me.openFullscreen();
+                	
+                	setTimeout(function(){
+                		var domList = document.querySelectorAll('sc-mdi-window');
+                    	
+                    	for(var i=0; i<domList.length; i++){
+                    		var domElem = domList[i];
+                    		domElem.style.width = "100%";
+                    		domElem.style.height = "100%";
+                    	}
+                	}, 700);
+                	
+                // 확대 사이즈 상태
+            	}else{
+            		windowMax.classList.remove('place-window-return');
+            		windowMax.classList.add('place-window-max');
+            		
+            		// 탑메뉴 보임
+					topmenu.css("display", "");
+					// 탭바 보임
+                	mdiTabbar.css("display", "");
+                	// 메뉴경로 보임
+                	mdiBreadCrumb.css("display", "");
+                	// 왼쪽 사이드 바 보임
+                	mdiLeftMenu.css("display", "");
+                	
+                	$('.mdiTabsDiv')[0].style.display='block';
+                	
+                	// 전체화면 취소
+                	me.closeFullscreen();
+                	
+                	// sc-mdi-window (padding 제거)
+					var domList = document.querySelectorAll('sc-mdi-window');
+                	
+                	for(var i=0; i<domList.length; i++){
+                		var domElem = domList[i];
+                		domElem.classList.remove("padding-none");
+                	}
+            	}
+                
+                // SC-MDI : RESIZE FUNCTION
+               	$('sc-mdi')[0]._onUtilAreaResize();
+            },
+            
+            /* View in fullscreen */
+            openFullscreen: function() {
+            	var elem = document.documentElement;
+            	
+            	if (elem.mozRequestFullScreen) { /* Firefox */
+            		elem.mozRequestFullScreen();
+            	} else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+            		elem.webkitRequestFullscreen();
+            	} else if (elem.msRequestFullscreen) { /* IE/Edge */
+            		elem.msRequestFullscreen();
+            	}
+            },
+            
+            closeFullscreen: function() {
+            	if (document.mozCancelFullScreen) { /* Firefox */
+            		document.mozCancelFullScreen();
+            	} else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+            		document.webkitExitFullscreen();
+            	} else if (document.msExitFullscreen) { /* IE/Edge */
+            		document.msExitFullscreen();
+            	}
+            },
+            
+            changeTone: function(e){
+            	var me = this;
+            	
+            	var args = e.target.dataset.args;
+            	me.set("colorTone", args);
+            	
+            	var elements = this.getElementsByTagName('link');
+            	
+            	// black
+            	if(args == 'black'){
+            		if(elements.length > 0 ){
+            			var ele = elements.item(0);
+            			ele.parentNode.removeChild(ele);
+            		}
+                	
+            		me.setChartColor();
+                	
+            	// white
+            	}else{
+            		if(elements.length == 0 ){
+                		var link = document.createElement('link');
+                    	link.rel = 'stylesheet';
+                        link.type = 'text/css';
+                        link.href = './ui/iot/dashboard/css/place-dashboard-white.css';
+                        this.appendChild(link);
+                	}
+            		
+            		me.setChartColor();
+            	}
+            	
+            },
+            
+            /**
+             * 선택된 톤(블랙/화이트)에 따라, 차트 색 변경
+             */
+            setChartColor: function(){
+            	var me = this;
+            	
+            	var lineChart = me.get("lineChart");
+            	
+            	var colorTone = me.get("colorTone");
+            	
+            	if(colorTone == "black"){
+            		// 차트 옵션
+                	var option = {
+               		    series: [{
+               		    	label: {
+               		        	normal: {
+               		        		show: true,
+               		        		position: 'top',
+               		                color: '#fff',
+               		             	fontFamily: 'Noto Sans KR',
+                		        	fontWeight: '400',
+                		        	fontSize: 15
+               		        	}
+               		    	},
+               		    	lineStyle: {
+               		            color: "#44884F",
+               		            width: 3
+               		        },
+               		        symbol: 'circle',
+               		        symbolSize : 10,
+               		        itemStyle: {
+               		        	color: "#44884F"
+               		        }
+               		    }]
+               		};
+                	
+//                 	lineChart.setOption(option);
+                	
+                	me.initChart();
+            	}else{
+            		// 차트 옵션
+                	var option = {
+               		    series: [{
+               		        label: {
+               		        	normal: {
+               		        		show: true,
+               		        		position: 'top',
+               		                color: '#000',
+               		             	fontFamily: 'Noto Sans KR',
+                		        	fontWeight: '400',
+                		        	fontSize: 15
+               		        	}
+               		    	},
+               		    	lineStyle: {
+               		            color: "#4477ED",
+               		            width: 3
+               		        },
+               		        symbol: 'circle',
+               		        symbolSize : 10,
+               		        itemStyle: {
+               		        	color: "#4477ED"
+               		        }
+               		    }]
+               		};
+                	
+                	me.initChart();
+            	}
+            	
+            },
+            
+            /**
+             * Background 설정
+             * - 데이터 유무에 따라 아이콘 변경 및 텍스트 처리
+             */
+            setInputBackground: function(div, dataList){
+            	var me = this;
+            	
+            	var chartDom = null;
+            	
+            	if(div == "ptw"){
+            		chartDom = me.$.pieChart1;
+            		
+            	}else if(div == "worker"){
+            		chartDom = me.$.pieChart2;
+            		
+            	}else if(div == "vehicle"){
+            		chartDom = me.$.pieChart3;
+            		
+            	}
+            	
+            	// 데이터 존재여부에 따라, 배경 변경
+            	var isEmpty = true;
+        		
+        		for(var i=0; i<dataList.length; i++){
+        			if(dataList[i].target_name){
+        				isEmpty = false;
+        				break;
+        			}
+            	}
+        		
+            	if(isEmpty){
+            		chartDom.classList.remove('place-' + div + '-background');
+            		
+            		if(div == "worker"){
+            			chartDom.classList.add('place-worker-none-background');
+                		
+                	}else if(div == "vehicle"){
+                		chartDom.classList.add('place-vehicle-none-background');
+                		
+                	}
+            		            		
+            		$('.' + '_' + div + '-nonetext')[0].style.display = "flex";
+            		
+            	}else{
+            		if(div == "worker"){
+            			chartDom.classList.remove('place-worker-none-background');
+                		
+                	}else if(div == "vehicle"){
+                		chartDom.classList.remove('place-vehicle-none-background');
+                		
+                	}
+            		
+            		chartDom.classList.add('place-' + div + '-background');
+            		
+            		$('.' + '_' + div + '-nonetext')[0].style.display = "none";
+            	}
+            	
+            },
+            
+            destroyed : function(popup, e) {
+                var me = this;
+            	clearInterval(me.timeInterval);
+            	clearInterval(me.searchInterval);
+            	window.onresize = null;
+            },
+            
+            changeSafeDate : function(){
+		        var me = this;
+	        	var safePopup = UT.popup('ep-safedate-setting', me, 300, 200, {
+				}, {titleText : "", resizable:false});
+	        	safePopup.show();
+	        	safePopup.getWindowContent().load(me.safeDay, me.safeDate);
+		    },
+		    
+            
+        });
+	</script>
+
+</dom-module>

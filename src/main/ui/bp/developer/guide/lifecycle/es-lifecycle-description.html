@@ -1,0 +1,35 @@
+<dom-module id="es-lifecycle-description">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<p>
+			<br><b>Polymer 초기화 과정</b><br>
+			<img src="img/polymer_.jpg" style="height:50px;"/><br>
+		</p>
+		<p>
+			<br><b>SMARTsuite 9.1 초기화 과정</b><br>
+			<img src="img/9.1_.jpg" style="height:50px;"/><br>
+		</p>
+		<p>
+			1. attached 이후에 수동으로 호출해야 하는 초기화 관련 데이터 서비스 호출 자동화한다.<br>
+			2. 화면 전환 시 불필요한 이벤트 처리 없이 공통 메소드 호출(load())로 소스 간결화<br>
+			3. initialized 메소드를 업무 모듈에서 구현 하여 사용한다<br>
+		</p>
+		<p>
+			<br><br><b>제거 과정</b><br>
+			<img src="img/9.1_destroy.jpg" style="height:200px;"/><br>
+			1. 메뉴 삭제, 팝업 제거, 브라우저 리프레쉬가 이루어질 때 내부적으로 Element Destroy 작업<br>
+			- Element (메뉴 삭제, 팝업 제거, 브라우저 refresh)<br>
+			- Element 사용하는 properties (메뉴 삭제, 팝업 제거, 브라우저 refresh)<br>
+			- Polymer Element, Behavior 등 코어 라이브러리 (브라우저 refresh)<br>
+		</p>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-lifecycle-description'
+	});
+	</script>
+</dom-module>

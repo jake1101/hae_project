@@ -1,0 +1,41 @@
+<sc-link rel="stylesheet" type="text/css" href="/ui/lib/dashboard/resources/css/dashboard.css"></sc-link>
+<sc-link rel="import" href="es-dashboard-list.html"></sc-link>
+<sc-link rel="import" href="es-dashboard-detail.html"></sc-link>
+<dom-module id="em-dashboard-manager">
+    <style>
+	    :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+   		<sc-pages id="pages" selected="0" class="fit">
+			<es-dashboard-list id="dashboardList" on-show-dashboard-detail="onShowDashboardDetail"></es-dashboard-list>
+			<template>
+				<es-dashboard-detail id="dashboardDetail" on-dashboard-detail-close="onDetailClose"></es-dashboard-detail>
+			</template>
+		</sc-pages>
+	</template>	
+    <script>
+        Polymer({
+            is: "em-dashboard-manager",
+
+            properties: {
+               
+            },  
+            listeners : {
+            	
+    		},
+    		onShowDashboardDetail : function(e,data){
+    			var me = this, dashboardDetail = me.$.dashboardDetail;
+    			me.$.pages.selectItem(dashboardDetail);
+    			me.$.dashboardDetail.load(data);
+    		},
+    		onDetailClose : function(){
+    			var me = this;
+    			me.$.pages.selectItem(me.$.dashboardList);
+    			me.$.dashboardList.load();
+    		}
+        });
+    </script>
+</dom-module>

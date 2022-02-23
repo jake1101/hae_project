@@ -1,0 +1,164 @@
+<link rel="import" href="sc-behavior-coordinates.html"/>
+
+<script>
+    BehaviorDraggableImpl = {
+        properties: {
+            width: {
+                type: Number,
+                value: 300,
+                reflectToAttribute: true,
+                observer: '_widthChanged'
+            },
+            height: {
+                type: Number,
+                value: 200,
+                reflectToAttribute: true,
+                observer: '_heightChanged'
+            },
+            x: {
+                type: Number,
+                value: 0,
+                reflectToAttribute: true,
+                observer: '_xCoordinateChanged'
+            },
+            y: {
+                type: Number,
+                value: 0,
+                reflectToAttribute: true,
+                observer: '_yCoordinateChanged'
+            },
+            dragAreaID: {
+                type: String
+            },
+            lockMouseCoordinate: {
+                type: Boolean
+            },
+            _differenceBetweenClickAndOrigin: {
+                type: Object,
+                value: {x: 0, y: 0}
+            },
+            noLeftTopBound: Boolean,
+            noRightBottomBound: Boolean,
+            boundRect: {
+                type: Object,
+                value: {left: 0, top: 0, right: 0, bottom: 0}
+            },
+            preventSelection: {
+                type: Boolean,
+                value: false
+            },
+        },
+
+        listeners: {
+            down: '_onDragStart',
+            track: '_onDragMove',
+            up: '_onDragEnd' 
+        },
+
+        attached: function () {
+            if (this.preventSelection)
+                this.listen(this, 'selectstart', '_onSelectStart');
+
+            this.listen(this, 'dragstart', '_onSelectStart');
+            this.listen(document, 'scroll', '_onScroll');
+        },
+
+        _onSelectStart: function (e) {
+            e.preventDefault();
+        },
+
+        _onScroll: function (e) {
+            this.updateLocalBound();
+        },
+
+        _onDragStart: function (e) {
+            this.fire('selected');
+            if (this.dragAllowed(e.currentTarget.id) && !this.isResizing(e.target.id)) {
+                this.fire('drag', {state: 'started', info: e});
+
+                var localCoordinate = this.globalToLocal(e.detail);
+                this._differenceBetweenClickAndOrigin.x = this.lockMouseCoordinate ? localCoordinate.x - this.x : 0;
+                this._differenceBetweenClickAndOrigin.y = this.lockMouseCoordinate ? localCoordinate.y - this.y : 0;
+
+                this.positionNewCoordinate(localCoordinate);
+            }
+        },
+
+        _onDragMove: function (e) {
+            if (this.dragAllowed(e.currentTarget.id) && e.detail.state == 'track' && !this.isResizing(e.target.id)) {
+                this.fire('drag', {state: 'dragging', info: e});
+                var localCoordinate = this.globalToLocal(e.detail);
+                this.positionNewCoordinate(localCoordinate);
+                this.afterCoordinateAssign();
+
+                if (this.x + this.width >= this.parentNode.scrollWidth){
+                    this.parentNode.scrollLeft = this.x;
+                    console.log('_onDragMove')
+                }
+
+                if (this.y + this.height >= this.parentNode.scrollHeight)
+                    this.parentNode.scrollTop = this.y;
+            }
+        },
+
+        _onDragEnd: function (e) {
+             if (this.dragAllowed(e.currentTarget.id) && !this.isResizing(e.target.id)) {
+                this.fire('drag', {state: 'ended', info: e});
+                this.updateLocalBound();
+            } 
+        },
+
+        positionNewCoordinate: function (localCoordinate) {
+            var newCoordinate = this.checkBoundRect(localCoordinate.x - this._differenceBetweenClickAndOrigin.x, localCoordinate.y - this._differenceBetweenClickAndOrigin.y);
+            this.x = newCoordinate.x;
+            this.y = newCoordinate.y;
+        },
+
+        checkBoundRect: function (x, y) {
+            if (!this.noLeftTopBound && x < this.boundRect.left)
+                x = this.boundRect.left;
+            else if (!this.noRightBottomBound && x + this.width > this.boundRect.right)
+                x = this.boundRect.right - this.width;
+
+            if (!this.noLeftTopBound && y < this.boundRect.top)
+                y = this.boundRect.top;
+            else if (!this.noRightBottomBound && y + this.height > this.boundRect.bottom)
+                y = this.boundRect.bottom - this.height;
+
+            return {x: x, y: y};
+        },
+
+        dragAllowed: function (id) {
+            if (this.dragAreaID){
+                return id == this.dragAreaID;
+            }
+            else{
+                return true;
+            }
+        },
+		isResizing: function(id){
+			return id === 'handle';
+		},
+        _xCoordinateChanged: function (value) {
+            this.style.left = value + 'px';
+        },
+
+        _yCoordinateChanged: function (value) {
+            this.style.top = value + 'px';
+        },
+
+        _widthChanged: function (value) {
+            this.style.width = value + 'px';
+        },
+
+        _heightChanged: function (value) {
+            this.style.height = (value) + 'px';
+        },
+
+        afterCoordinateAssign: function () {
+            //abstract
+        }
+    }
+
+    BehaviorDraggable = [BehaviorCoordinates, BehaviorDraggableImpl];
+</script>

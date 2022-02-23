@@ -1,0 +1,986 @@
+<sc-link rel="stylesheet" type="text/css" href="./css/operate-dashboard.css"></sc-link>
+<sc-link rel="import" href="ep-safedate-setting.html"></sc-link>
+<sc-link rel="import" href="ep-vehicle-list.html"></sc-link>
+<sc-link rel="import" href="ep-worker-list.html"></sc-link>
+
+<dom-module id="es-operate-dashboard">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+			
+			font-family:'Noto Sans KR';
+		}
+	</style>
+
+	<template>
+<!--
+   ************************************************************************************************************
+   * Service Area
+   ************************************************************************************************************
+-->
+		<!-- 조회 -->
+		<sc-ajax id="getOperateDashboard"
+			url="getOperateDashboard.do"
+			body="{{searchParam}}"
+			on-response="completeGetOperateDashboard">
+		</sc-ajax>
+		
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+<!--
+    ************************************************************************************************************
+    * UI Area
+    ************************************************************************************************************
+-->
+		<!-- 바깥 배경 -->
+		<div class="vbox flex operate-back-ground-color" id="backsub">
+			<!-- 안쪽 배경 -->
+			<div class="vbox flex operate-sub-back-ground-color">
+			<!-- 상단 타이틀 -->
+				<div class="hbox operate-top-area">
+					<div class="vbox operate-top-left-area">
+						<div class="hbox">
+							<div class="vbox operate-top-site-text">운영 대시보드</div>
+							<div class="hspace-50"></div>
+							<div class="vbox operate-top-time-text">[[currentDate]] [[dayOfWeek]] [[currentTime]]</div>
+							<div class="vbox safeday-text"><sc-label text="무재해 달성 {{safeDate}}일차" on-click="changeSafeDate"></sc-label></div>
+						</div>
+					</div>
+					
+					<div class="vbox flex operate-top-right-area">
+						<div class="hbox a-flex-end">
+							<div class="vbox operate-top-time-text">새로고침 : [[refreshSecond]]</div>
+							<div class="hspace-30"></div>
+							<div class="hbox">
+								<div class="vbox font-15 a-center">UI컬러</div>
+								<div class="hspace-10"></div>
+								<div class="vbox flex operate-black-select-icon" data-args="black" on-click="changeTone"></div>
+								<div class="hspace-10"></div>
+								<div class="vbox flex operate-white-select-icon" data-args="white" on-click="changeTone"></div>
+							</div>
+							<div class="hspace-30"></div>
+							<div id="windowmax" class="window-max" on-click="onWindowMax"></div>
+						</div>
+					</div>
+				</div>
+				
+				<!-- 내용 구역 -->
+				
+				<div class="hbox flex operate-middle-area scroll-none">
+					<div class="vbox flex operate-middle-left-area">
+						<div class="vbox operate-sub-title-area j-flex-end">
+							<p class="operate-sub-title">스마트 태그</p>
+						</div>
+						<div class="flex">
+							<sc-tab-navigation id="tabNavi" style="height:100%">
+								<!-- 중단 왼쪽 : 작업자 스마트태그 -->
+								<div class="nav-back-ground-color " style="height:100%">
+									<div class="hbox flex-3 operate-sensor-boxes">
+										<div class="hbox flex operate-sensor-box2">
+											<div class="hbox flex">
+												<div class="flex"></div>
+												<div class="operate-allcount-icon" style="width:80px;"></div>
+												<div class="vbox j-center "  style="width:100px;">
+													<div class="font-22-700 j-center" style="cursor: pointer;" on-click="openListPopup" value="worker">전체수량</div>
+													<div class="font-32-500" style="cursor: pointer;" on-click="openListPopup" value="worker">{{allWorkerCount}}</a></div>
+												</div>
+												<div class="flex"></div>
+											</div>
+											<div class="vbox" style="width:130px">
+												<div class="flex"></div>
+												<div class="hbox font-23 j-center">
+													<span class="text-h flex-5" style="cursor: pointer;" on-click="openListPopup" value="worker" mappingFilter="교부">교부</span> 
+													<span class="flex-5" style="cursor: pointer;" on-click="openListPopup" value="worker" mappingFilter="교부">{{mWorkerCount}}</span>
+												</div>
+												<div class="flex underline"></div>
+												<div class="flex"></div>
+												<div class="hbox font-23 j-center">
+													<span class="text-h flex-5" style="cursor: pointer;" on-click="openListPopup" value="worker" mappingFilter="미교부">미교부</span> 
+													<span class="flex-5" style="cursor: pointer;" on-click="openListPopup" value="worker" mappingFilter="미교부">{{nmWorkerCount}}</span>
+												</div>
+												<div class="flex"></div>
+											</div>
+										</div>
+										
+										<div class="hspace-16"></div>
+										
+										<div class="hbox flex operate-sensor-box2">
+											<div class="hbox flex">
+												<div class="flex"></div>
+												<div class="operate-battery2-icon" style="width:80px"></div>
+												<div class="vbox j-center "  style="width:100px">
+													<div class="font-22-700 j-center" style="cursor: pointer;" on-click="openListPopup" value="worker" batteryFilter="충전필요">충전필요</div>
+													<div class="font-32-500" style="cursor: pointer;" on-click="openListPopup" value="worker" batteryFilter="충전필요">{{allLessWorkerCount}}</div>
+												</div>
+												<div class="flex"></div>
+											</div>
+											<div class="vbox" style="width:130px">
+												<div class="flex"></div>
+												<div class="hbox font-23 j-center">
+													<span class="text-h flex-5" style="cursor: pointer;" on-click="openListPopup" value="worker" mappingFilter="교부" batteryFilter="충전필요">교부</span> 
+													<span class="flex-5" style="cursor: pointer;" on-click="openListPopup" value="worker" mappingFilter="교부" batteryFilter="충전필요">{{mLessWorkerCount}}</span>
+												</div>
+												<div class="flex underline"></div>
+												<div class="flex"></div>
+												<div class="hbox font-23 j-center">
+													<span class="text-h flex-5" style="cursor: pointer;" on-click="openListPopup" value="worker" mappingFilter="미교부" batteryFilter="충전필요">미교부</span> 
+													<span class="flex-5" style="cursor: pointer;" on-click="openListPopup" value="worker" mappingFilter="미교부" batteryFilter="충전필요">{{nmLessWorkerCount}}</span>
+												</div>
+												<div class="flex"></div>
+											</div>
+										</div>
+										
+										<div class="hspace-16"></div>
+										
+										<div class="hbox flex operate-sensor-box2">
+											<div class="hbox flex">
+												<div class="flex"></div>
+												<div class="operate-nosignal-icon" style="width:80px"></div>
+												<div class="vbox j-center "  style="width:100px">
+													<div class="font-22-700 j-center" style="cursor: pointer;" on-click="openListPopup" value="worker" areaFilter="신호없음">신호없음</div>
+													<div class="font-32-500" style="cursor: pointer;" on-click="openListPopup" value="worker" areaFilter="신호없음">{{allUnknownWorkerCount}}</div>
+												</div>
+												<div class="flex"></div>
+											</div>
+											<div class="vbox" style="width:130px">
+												<div class="flex"></div>
+												<div class="hbox font-23 j-center">
+													<span class="text-h flex-5" style="cursor: pointer;" on-click="openListPopup" value="worker" mappingFilter="교부" areaFilter="신호없음">교부</span> 
+													<span class="flex-5" style="cursor: pointer;" on-click="openListPopup" value="worker" mappingFilter="교부" areaFilter="신호없음">{{mUnknownWorkerCount}}</span>
+												</div>
+												<div class="flex underline"></div>
+												<div class="flex"></div>
+												<div class="hbox font-23 j-center">
+													<span class="text-h flex-5" style="cursor: pointer;" on-click="openListPopup" value="worker" mappingFilter="미교부" areaFilter="신호없음">미교부</span> 
+													<span class="flex-5" style="cursor: pointer;" on-click="openListPopup" value="worker" mappingFilter="미교부" areaFilter="신호없음">{{nmUnknownWorkerCount}}</span>
+												</div>
+												<div class="flex"></div>
+											</div>
+										</div>
+									</div>
+								
+									<div class="vspace-17"></div>
+									
+									<div class="vbox flex operate-stats-box" style="max-height: calc(100% - 200px); overflow : hidden">
+										<div class="hbox operate-stat-start-row font-25-700" style="height:110px; overflow:visible;">
+											<div class="vbox flex operate-worker-icon" style="width:20px"></div>
+											<div class="vbox flex left-border table-header">교부</div>
+											<div class="vbox flex left-border table-header">미교부</div>
+											<div class="vbox flex left-border table-header">계</div>
+										</div>
+										<div id="worker-area-list" class="area-list"></div>
+									</div>
+								</div>
+								<!-- 중단 왼쪽 : 이동장비 스마트태그 -->
+								<div class="nav-back-ground-color " style="height:100%">
+									<div class="hbox flex-3 operate-sensor-boxes">
+										<div class="hbox flex operate-sensor-box2">
+											<div class="hbox flex">
+												<div class="flex"></div>
+												<div class="operate-allcount-icon" style="width:80px;"></div>
+												<div class="vbox j-center "  style="width:100px;">
+													<div class="font-22-700 j-center" style="cursor: pointer;" on-click="openListPopup" value="vehicle">전체수량</div>
+													<div class="font-32-500" style="cursor: pointer;" on-click="openListPopup" value="vehicle">{{allVehicleCount}}</div>
+												</div>
+												<div class="flex"></div>
+											</div>
+											<div class="vbox" style="width:130px">
+												<div class="flex"></div>
+												<div class="hbox font-23 j-center">
+													<span class="text-h flex-5" style="cursor: pointer;" on-click="openListPopup" value="vehicle" mappingFilter="교부">교부</span> 
+													<span class="flex-5" style="cursor: pointer;" on-click="openListPopup" value="vehicle" mappingFilter="교부">{{mVehicleCount}}</span>
+												</div>
+												<div class="flex underline"></div>
+												<div class="flex"></div>
+												<div class="hbox font-23 j-center">
+													<span class="text-h flex-5" style="cursor: pointer;" on-click="openListPopup" value="vehicle" mappingFilter="미교부">미교부</span> 
+													<span class="flex-5" style="cursor: pointer;" on-click="openListPopup" value="vehicle" mappingFilter="미교부">{{nmVehicleCount}}</span>
+												</div>
+												<div class="flex"></div>
+											</div>
+										</div>
+										
+										<div class="hspace-16"></div>
+										
+										<div class="hbox flex operate-sensor-box2">
+											<div class="hbox flex">
+												<div class="flex"></div>
+												<div class="operate-battery2-icon" style="width:80px"></div>
+												<div class="vbox j-center "  style="width:100px">
+													<div class="font-22-700 j-center" style="cursor: pointer;" on-click="openListPopup" value="vehicle" batteryFilter="충전필요">충전필요</div>
+													<div class="font-32-500" style="cursor: pointer;" on-click="openListPopup" value="vehicle" batteryFilter="충전필요">{{allLessVehicleCount}}</div>
+												</div>
+												<div class="flex"></div>
+											</div>
+											<div class="vbox" style="width:130px">
+												<div class="flex"></div>
+												<div class="hbox font-23 j-center">
+													<span class="text-h flex-5" style="cursor: pointer;" on-click="openListPopup" value="vehicle" mappingFilter="교부" batteryFilter="충전필요">교부</span> 
+													<span class="flex-5" style="cursor: pointer;" on-click="openListPopup" value="vehicle" mappingFilter="교부" batteryFilter="충전필요">{{mLessVehicleCount}}</span>
+												</div>
+												<div class="flex underline"></div>
+												<div class="flex"></div>
+												<div class="hbox font-23 j-center">
+													<span class="text-h flex-5" style="cursor: pointer;" on-click="openListPopup" value="vehicle" mappingFilter="미교부" batteryFilter="충전필요">미교부</span> 
+													<span class="flex-5" style="cursor: pointer;" on-click="openListPopup" value="vehicle" mappingFilter="미교부" batteryFilter="충전필요">{{nmLessVehicleCount}}</span>
+												</div>
+												<div class="flex"></div>
+											</div>
+										</div>
+										
+										<div class="hspace-16"></div>
+										
+										<div class="hbox flex operate-sensor-box2">
+											<div class="hbox flex">
+												<div class="flex"></div>
+												<div class="operate-nosignal-icon" style="width:80px"></div>
+												<div class="vbox j-center "  style="width:100px">
+													<div class="font-22-700 j-center" style="cursor: pointer;" on-click="openListPopup" value="vehicle" areaFilter="신호없음">신호없음</div>
+													<div class="font-32-500" style="cursor: pointer;" on-click="openListPopup" value="vehicle" areaFilter="신호없음">{{allUnknownVehicleCount}}</div>
+												</div>
+												<div class="flex"></div>
+											</div>
+											<div class="vbox" style="width:130px">
+												<div class="flex"></div>
+												<div class="hbox font-23 j-center">
+													<span class="text-h flex-5" style="cursor: pointer;" on-click="openListPopup" value="vehicle" mappingFilter="교부" areaFilter="신호없음">교부</span> 
+													<span class="flex-5" style="cursor: pointer;" on-click="openListPopup" value="vehicle" mappingFilter="교부" areaFilter="신호없음">{{mUnknownVehicleCount}}</span>
+												</div>
+												<div class="flex underline"></div>
+												<div class="flex"></div>
+												<div class="hbox font-23 j-center">
+													<span class="text-h flex-5" style="cursor: pointer;" on-click="openListPopup" value="vehicle" mappingFilter="미교부" areaFilter="신호없음">미교부</span> 
+													<span class="flex-5" style="cursor: pointer;" on-click="openListPopup" value="vehicle" mappingFilter="미교부" areaFilter="신호없음">{{nmUnknownVehicleCount}}</span>
+												</div>
+												<div class="flex"></div>
+											</div>
+										</div>
+									</div>
+								
+									<div class="vspace-17"></div>
+									
+									<div class="vbox flex operate-stats-box" style="max-height: calc(100% - 200px); overflow : hidden">
+										<div class="hbox operate-stat-start-row font-25-700" style="height:110px; overflow:visible;">
+											<div class="vbox flex operate-vehicle-icon" style="width:20px"></div>
+											<div class="vbox flex left-border table-header">교부</div>
+											<div class="vbox flex left-border table-header">미교부</div>
+											<div class="vbox flex left-border table-header">계</div>
+										</div>
+										<div id="vehicle-area-list" class="area-list"></div>
+									</div>
+								</div>
+							</sc-tab-navigation>
+						 </div>
+					</div>
+					
+					<!-- 중단 오른쪽 : 비콘 / 게이트웨이 -->
+					<div class="vbox operate-middle-right-area">
+						<!-- 오른쪽 상단 : 비콘 -->
+						<div class="vbox flex-4 operate-middle-right-top-area">
+							<div class="vbox operate-sub-title-area j-flex-end">
+								<p class="operate-sub-title">비콘</p>
+							</div>
+							
+							<div class="hbox flex operate-sensor-boxes">
+								<div class="hbox flex operate-sensor-box">
+									<div class="hbox flex j-center">
+										<div class="flex"></div>
+										<div class="vbox operate-battery1-icon" style="min-width:80px;"></div>
+										<div class="vbox j-center a-center flex"  style="min-width:120px;">
+											<div class="font-25">정상</div>
+											<div class="font-32-500">[[beaconStat.normalCount]]</div>
+										</div>
+										<div class="flex"></div>
+									</div>
+								</div>
+								
+								<div class="hspace-19"></div>
+								
+								<div class="hbox flex operate-sensor-box">
+									<div class="hbox flex j-center">
+										<div class="flex"></div>
+										<div class="vbox operate-battery2-icon" style="min-width:80px;"></div>
+										<div class="vbox j-center a-center flex"  style="min-width:120px;">
+											<div class="font-25">전원교체</div>
+											<div class="font-32-500">[[beaconStat.normalCount]]</div>
+										</div>
+										<div class="flex"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+						
+						<!-- 오른쪽 하단 : 게이트웨이 -->
+						<div class="vbox flex-6 operate-middle-right-bottom-area">
+							<div class="vbox operate-sub-title-area2 j-flex-end">
+								<p class="operate-sub-title">게이트 웨이</p>
+							</div>
+							
+							<div class="hbox flex operate-gateway-boxes">
+								<div class="vbox flex operate-gateway-box"></div>
+								<div class="hspace-14"></div>
+								<div class="vbox flex operate-gateway-box"></div>
+								<div class="hspace-14"></div>
+								<div class="vbox flex operate-gateway-box"></div>
+							</div>
+						</div>
+						
+					</div>
+					
+				</div>
+				
+			</div>
+		</div>
+
+	</template>
+
+<!--
+    ************************************************************************************************************
+    * Script Area
+    ************************************************************************************************************
+-->
+	<script>
+        Polymer({
+            is: "es-operate-dashboard",
+            
+            properties : {
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                
+                currentDate: {
+                    type: Object,
+                    value: function(){
+                        return "";
+                    }
+                },
+                
+                dayOfWeek: {
+                    type: Object,
+                    value: function(){
+                        return "";
+                    }
+                },
+                
+                currentTime: {
+                    type: Object,
+                    value: function(){
+                        return "";
+                    }
+                },
+
+                safeDay: {
+                    type: Object,
+                    value: function(){
+                        return new Date();
+                    }
+                },
+                
+                safeDate: {
+                    type: Object,
+                    value: function(){
+                        return 1;
+                    }
+                },    
+                
+                refreshSecond: {
+                	type: Object,
+                	value: function(){
+                		return 60;
+                	}
+                },
+                
+                siteInfo: {
+                	type: Object,
+                	value: function(){
+                		return {};
+                	}
+                },
+                
+                // 스마트 태그 현황
+                sensorStat: {
+                	type: Object,
+                	value: function(){
+                		return {};
+                	}
+                },
+                
+                // 스마트 태그 구역별 목록
+                sensorAreaStatList: {
+                	type: Object,
+                	value: function(){
+                		return [];
+                	}
+                },
+                
+                // 비콘 현황
+                beaconStat: {
+                	type: Object,
+                	value: function(){
+                		return {};
+                	}
+                },
+                
+                // 게이트 웨이 현황 목록
+                gatewayStatList: {
+                	type: Object,
+                	value: function(){
+                		return [];
+                	}
+                },
+                
+                colorTone: {
+                	type: Object,
+                	value: function(){
+                		return 'black';
+                	}
+                }
+            },
+            
+            // 초기화 완료 후 호출 함수
+            initialized : function() {
+                var me = this;
+                
+                var d = new Date();
+                var currentDate = d.getFullYear() + "년 " + ( d.getMonth() + 1 ) + "월 " + d.getDate() + "일";
+                
+                // 현재일자
+                me.set("currentDate", currentDate);
+                
+                // 요일
+                var week = ['일', '월', '화', '수', '목', '금', '토'];
+                var dayOfWeek = week[d.getDay()];
+                
+                me.set("dayOfWeek", dayOfWeek + "요일");
+                
+                // 현재시간
+                me.timeInterval = setInterval(function() {
+               		me.setTimeText();
+				}, 1000); // 1초
+                
+				// 데이터 조회
+                me.searchData();
+				
+                me.onWindowMax();
+            },
+            
+            /**
+             * 현재 시간 표시
+             */
+            setTimeText: function(){
+            	var me = this;
+            	
+            	var d = new Date();
+            	var hours = d.getHours();
+            	var minutes = d.getMinutes();
+            	
+            	if(hours < 10){
+            		hours = "0" + hours;
+            	}
+            	if(minutes < 10){
+            		minutes = "0" + minutes;
+            	}
+            	
+            	var currentTime = hours + ":" + minutes;
+            	me.set("currentTime", currentTime);
+            	
+            	// refresh 초
+				var refreshSecond = me.get("refreshSecond") || 0;
+            	
+            	if(refreshSecond <= 0){
+            		me.set("refreshSecond", 60);
+            		me.searchData();
+            	}else{
+            		me.set("refreshSecond", --refreshSecond);
+            	}
+            },
+            
+            // 대시보드 데이터 조회
+            searchData: function(){
+            	var me = this;
+            	
+            	UT.requestNotUseLoading(me.$.getOperateDashboard);
+            },
+            
+            // 조회 완료
+            completeGetOperateDashboard: function(e, res){
+            	var me = this;
+            	
+            	// 현장 정보
+            	var siteInfo = res.response.siteInfo.body || {};
+            	me.set("siteInfo", siteInfo);
+
+            	me.set("safeDay", siteInfo.safeDay);
+            	me.set("safeDate", siteInfo.safeDayCount);
+            	
+            	// 대시보드 데이터 세팅
+            	var result = res.response.data.body || {};
+            	
+            	// 스마트 태그 현황
+            	me.set("sensorStat", result.sensorStat || {});
+            	
+            	// 스마트 태그 현황
+            	me.mWorkerCount  = result.sensorStat2[1].전체;
+            	me.nmWorkerCount  = result.sensorStat2[3].전체;
+            	me.allWorkerCount = result.sensorStat2[1].전체+result.sensorStat2[3].전체;
+            	me.mVehicleCount  = result.sensorStat2[0].전체;
+            	me.nmVehicleCount  = result.sensorStat2[2].전체;
+            	me.allVehicleCount = result.sensorStat2[0].전체+result.sensorStat2[2].전체;
+
+            	me.mLessWorkerCount  = result.sensorStat2[1].충전필요;
+            	me.nmLessWorkerCount  = result.sensorStat2[3].충전필요;
+            	me.allLessWorkerCount = result.sensorStat2[1].충전필요+result.sensorStat2[3].충전필요;
+            	me.mLessVehicleCount  = result.sensorStat2[0].충전필요;
+            	me.nmLessVehicleCount  = result.sensorStat2[2].충전필요;
+            	me.allLessVehicleCount = result.sensorStat2[0].충전필요+result.sensorStat2[2].충전필요;
+
+            	me.mUnknownWorkerCount= result.sensorStat2[1].신호없음;
+            	me.nmUnknownWorkerCount= result.sensorStat2[3].신호없음;
+            	me.allUnknownWorkerCount = result.sensorStat2[1].신호없음 + result.sensorStat2[3].신호없음;
+            	
+            	me.mUnknownVehicleCount = result.sensorStat2[0].신호없음;
+            	me.nmUnknownVehicleCount = result.sensorStat2[2].신호없음;
+            	me.allUnknownVehicleCount = result.sensorStat2[0].신호없음 + result.sensorStat2[2].신호없음;
+            	
+            	// 스마트 태그 구역별 현황
+            	me.set("sensorAreaStatList", result.sensorAreaStatList || []);
+            	
+            	// 비콘 현황
+            	me.set("beaconStat", result.beaconStat || {});
+            	
+            	// 게이트 웨이 현황
+            	me.set("gatewayStatList", result.gatewayStatList || []);
+            	
+            	// 스마트 태그 : 영역별 센서 목록 세팅
+            	me.setAreaList('worker', result.workerMappingStat.statistics, result.workerMappingStat.data);
+            	me.setAreaList('vehicle', result.vehicleMappingStat.statistics, result.vehicleMappingStat.data);
+
+            	me.worker = result.workerMappingStat.data;
+            	me.vehicle = result.vehicleMappingStat.data;
+            	
+            	// 게이트 웨이 : 세팅
+            	me.setGatewayList();
+            },
+
+            setAreaList : function(id, list, data){
+				var areaDiv = $('#'+id+'-area-list')[0];
+				areaDiv.innerHTML = "";
+
+				for(var i in list){
+					var item = list[i];
+					var row = document.createElement("div");
+					row.classList.add("flex");
+					row.classList.add("hbox");
+					if(i%2 == 0){
+						row.classList.add("color_row");
+					}
+
+            		var col1 = document.createElement("div");
+            		col1.classList.add("flex");
+            		col1.innerHTML = "<a href='javascript:void(0);' onclick='openPopup("+JSON.stringify(data)+",\""+id+"\",\"\",\""+item.area_name+"\")'>"+item.area_name+"</a>";
+            		var col2 = document.createElement("div");
+            		col2.classList.add("flex");
+            		col2.classList.add("left-border");
+            		col2.innerHTML = "<a href='javascript:void(0);' onclick='openPopup("+JSON.stringify(data)+",\""+id+"\",\"교부\",\""+item.area_name+"\")'>"+item.교부+"</a>";
+            		var col3 = document.createElement("div");
+            		col3.classList.add("flex");
+            		col3.classList.add("left-border");
+            		col3.innerHTML = "<a href='javascript:void(0);' onclick='openPopup("+JSON.stringify(data)+",\""+id+"\",\"미교부\",\""+item.area_name+"\")'>"+item.미교부+"</a>";
+            		var col4 = document.createElement("div");
+            		col4.classList.add("flex");
+            		col4.classList.add("left-border");
+            		col4.innerHTML = "<a href='javascript:void(0);' onclick='openPopup("+JSON.stringify(data)+",\""+id+"\",\"\",\""+item.area_name+"\")'>" +item.전체+" ("+item.충전필요+")"+"</a>";
+            		
+            		Polymer.dom(row).appendChild(col1);
+            		Polymer.dom(row).appendChild(col2);
+            		Polymer.dom(row).appendChild(col3);
+            		Polymer.dom(row).appendChild(col4);
+					Polymer.dom(areaDiv).appendChild(row);
+				}				
+            },
+
+            openListPopup : function(e){
+                var me = this;
+				var type = e.currentTarget.getAttribute("value");
+				var data = me.get(type);
+				var mappingFilter = e.currentTarget.getAttribute("mappingFilter");
+				var areaFilter = e.currentTarget.getAttribute("areaFilter");
+				var batteryFilter = e.currentTarget.getAttribute("batteryFilter");
+
+				var title = (type=="worker")?"작업자":"이동장비";
+	       		if(!UT.isEmpty(batteryFilter)){
+					title = batteryFilter+" "+title;
+	       		}else{
+	       			batteryFilter="";
+		       	}
+		       	
+	       		if(!UT.isEmpty(mappingFilter)){
+					title = mappingFilter+" "+title;
+	           	}
+	       		if(!UT.isEmpty(areaFilter)){
+					title = areaFilter+" "+title;
+	       		}
+
+	           	title = title+" 목록";
+
+				var popup = UT.popup('ep-'+type+'-list', this, 1000, 600, {"close": function(popup, e) {popup.close();}}, {titleText : title, resizable:false});
+	       		popup.show();
+	       		popup.getWindowContent().load(data, true, mappingFilter, areaFilter, batteryFilter);
+            },
+            
+            // 스마트 태그 : 영역별 센서 목록 세팅
+            setSensorAreaList: function(){
+            	var me = this;
+            	
+            	var statsBox = $('.operate-stats-box')[0];
+            	var statsChilds = statsBox.childNodes;
+            	
+            	// 첫행은 제외하고 클리어
+            	for(var i=1; i<statsChilds.length; i++){
+            		var child = statsChilds[i];
+            		
+            		while ( child.hasChildNodes() ){
+            			child.removeChild( child.firstChild );
+            		}
+            	}
+            	
+            	// 영역별 센서 목록 세팅
+            	var sensorAreaStatList = me.get("sensorAreaStatList") || [];
+            	
+            	for(var idx in sensorAreaStatList){
+            		var item = sensorAreaStatList[idx];
+            		
+            		var index = Number(idx) + 1;
+            		// 5건까지 표시
+            		if(index > 5){
+            			break;
+            		}
+            		var rowDom = statsChilds[index];
+            		
+            		var col1 = document.createElement("div");
+            		col1.classList.add("flex");
+            		col1.innerHTML = item.areaName;
+            		var col2 = document.createElement("div");
+            		col2.classList.add("flex");
+            		col2.innerHTML = item.normalCount;
+            		var col3 = document.createElement("div");
+            		col3.classList.add("flex");
+            		// 충전필요 건수(0이 아니면 붉은색으로 글씨 표시)
+//             		if(item.chargeNeedCount >= 1){
+//             			col3.style.color = "#E7574F";
+//             		}
+            		col3.innerHTML = item.chargeNeedCount;
+            		var col4 = document.createElement("div");
+            		col4.classList.add("flex");
+            		col4.innerHTML = item.noGiveCount;
+            		
+            		// dom append
+            		Polymer.dom(rowDom).appendChild(col1);
+            		Polymer.dom(rowDom).appendChild(col2);
+            		Polymer.dom(rowDom).appendChild(col3);
+            		Polymer.dom(rowDom).appendChild(col4);
+            	}
+            },
+            
+         	// 게이트 웨이 : 세팅
+        	setGatewayList: function(){
+        		var me = this;
+        		
+        		// 게이트 웨이 목록 초기화
+        		$('.operate-gateway-boxes').empty();
+        		
+        		// 게이트웨이 박스 영역
+        		var gatewayBoxes = $('.operate-gateway-boxes')[0];
+        		
+        		// 박스 dom 목록
+        		var boxDomList = [];
+        		
+        		// 게이트웨이 데이터 목록
+        		var gatewayStatList = me.get("gatewayStatList") || [];
+        		
+        		// 게이트 웨이 box 세팅(데이터 개수 만큼)
+        		for(var idx in gatewayStatList){
+        			var item = gatewayStatList[idx];
+        			
+        			var box = document.createElement("div");
+        			box.classList.add("vbox");
+        			box.classList.add("flex");
+        			box.classList.add("operate-gateway-box");
+        			
+        			var sub = document.createElement("div");
+        			sub.classList.add("vbox");
+        			sub.classList.add("flex");
+        			sub.style.padding = "10%";
+
+        			var row0 = document.createElement("div"); 
+        			row0.classList.add("flex");
+        			var row6 = document.createElement("div"); 
+        			row6.classList.add("flex");
+        			
+        			var row1 = document.createElement("div");
+        			row1.classList.add("vbox");
+        			row1.classList.add("font-16");
+        			row1.setAttribute("title", item.gatewayName);
+        			row1.innerHTML = "<p style=\"overflow:hidden; text-overflow: ellipsis; display: block;\">"+item.gatewayName+"</p>";
+        			
+        			var row2 = document.createElement("div");
+        			row2.classList.add("vbox");
+        			row2.style.minHeight = "120px";
+        			row2.classList.add("flex-6");
+        			// 정상
+        			if(item.status == "ready"){
+        				row2.classList.add("operate-gateway1-icon");
+        			}else{
+        				row2.classList.add("operate-gateway2-icon");
+        			}
+        			
+        			var row3 = document.createElement("div"); 
+        			row3.classList.add("vbox");
+        			row3.classList.add("font-23");
+        			
+        			var row4 = document.createElement("div"); 
+        			row4.classList.add("vbox");
+        			row4.innerHTML = item.signalDt || "";
+        			
+        			var row5 = document.createElement("div"); 
+        			row5.classList.add("vbox");
+        			row5.innerHTML = item.signalTime || "";
+        			
+        			if(item.status == "ready"){
+        				row3.classList.add("operate-gateway-text1");
+        				row4.classList.add("operate-gateway-text1");
+        				row5.classList.add("operate-gateway-text1");
+        				row3.innerHTML = "정상";
+        			}else{
+        				row3.classList.add("operate-gateway-text2");
+        				row4.classList.add("operate-gateway-text2");
+        				row5.classList.add("operate-gateway-text2");
+        				row3.innerHTML = "확인필요";
+        			}
+        			
+        			
+        			// dom append
+            		Polymer.dom(sub).appendChild(row0);
+            		Polymer.dom(sub).appendChild(row1);
+            		Polymer.dom(sub).appendChild(row2);
+            		Polymer.dom(sub).appendChild(row3);
+            		Polymer.dom(sub).appendChild(row4);
+            		Polymer.dom(sub).appendChild(row5);
+            		Polymer.dom(sub).appendChild(row6);
+            		Polymer.dom(box).appendChild(sub);
+            		
+            		boxDomList.push(box);
+        		}
+        		
+        		// 게이트 웨이 박스 추가(없으면 빈박스로 생성 - 3개까지 채움)
+        		for(var i=0; i<=2; i++){
+        			var box = boxDomList[i];
+        			
+        			if(!box){
+        				box = document.createElement("div");
+            			box.classList.add("vbox");
+            			box.classList.add("flex");
+            			box.classList.add("operate-gateway-box");
+        			}
+        			
+        			Polymer.dom(gatewayBoxes).appendChild(box);
+        			
+        			if(i<2){
+        				var hspace = document.createElement("div");
+        				hspace.classList.add("hspace-14");
+        				Polymer.dom(gatewayBoxes).appendChild(hspace);
+        			}
+        		}
+        		
+        	},
+            
+            onWindowMax: function(){
+            	var me = this;
+            	
+            	// 확대 축소 버튼
+            	var windowMax = me.$.windowmax;
+            	
+            	// 탑메뉴
+            	var topmenu = $('#headWrap');
+            	// 탭바
+            	var mdiTabbar = $('#mdiTabbar');
+            	// 메뉴경로
+            	var mdiBreadCrumb = $('#mdiBreadCrumb');
+            	// 왼쪽 메뉴
+            	var mdiLeftMenu = $('#mdiLeftMenu');
+            	
+                // 원래 사이즈 상태
+            	if( windowMax.classList.contains('window-max') ){
+            		windowMax.classList.remove('window-max');
+            		windowMax.classList.add('window-return');
+            		
+            		// 탑메뉴 숨김
+                	topmenu.css("display", "none");
+                	// 탭바 숨김
+                	mdiTabbar.css("display", "none");
+                	// 메뉴경로 숨김
+                	mdiBreadCrumb.css("display", "none");
+                	// 왼쪽 사이드 바 숨김
+                	mdiLeftMenu.css("display", "none");
+                	
+                	$('.mdiTabsDiv')[0].style.display='none';
+
+                	$('#backsub').addClass('fullback');
+                	
+                	// sc-mdi-window (padding 제거)
+                	var domList = document.querySelectorAll('sc-mdi-window');
+                	
+                	for(var i=0; i<domList.length; i++){
+                		var domElem = domList[i];
+                		domElem.classList.add("padding-none");
+                	}
+                	
+                	// 전체화면 실행
+                	me.openFullscreen();
+                	
+                	setTimeout(function(){
+                		var domList = document.querySelectorAll('sc-mdi-window');
+                    	
+                    	for(var i=0; i<domList.length; i++){
+                    		var domElem = domList[i];
+                    		domElem.style.width = "100%";
+                    		domElem.style.height = "100%";
+                    	}
+                	}, 700);
+                	
+                // 확대 사이즈 상태
+            	}else{
+            		windowMax.classList.remove('window-return');
+            		windowMax.classList.add('window-max');
+            		
+            		// 탑메뉴 보임
+					topmenu.css("display", "");
+					// 탭바 보임
+                	mdiTabbar.css("display", "");
+                	// 메뉴경로 보임
+                	mdiBreadCrumb.css("display", "");
+                	// 왼쪽 사이드 바 보임
+                	mdiLeftMenu.css("display", "");
+                	
+                	$('.mdiTabsDiv')[0].style.display='block';
+
+                	$('#backsub').removeClass('fullback');
+                	
+                	// 전체화면 취소
+                	me.closeFullscreen();
+                	
+                	// sc-mdi-window (padding 제거)
+					var domList = document.querySelectorAll('sc-mdi-window');
+                	
+                	for(var i=0; i<domList.length; i++){
+                		var domElem = domList[i];
+                		domElem.classList.remove("padding-none");
+                	}
+            	}
+                
+                // SC-MDI : RESIZE FUNCTION
+               	$('sc-mdi')[0]._onUtilAreaResize();
+            },
+            
+            /* View in fullscreen */
+            openFullscreen: function() {
+            	var elem = document.documentElement;
+            	
+            	if (elem.mozRequestFullScreen) { /* Firefox */
+            		elem.mozRequestFullScreen();
+            	} else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+            		elem.webkitRequestFullscreen();
+            	} else if (elem.msRequestFullscreen) { /* IE/Edge */
+            		elem.msRequestFullscreen();
+            	}
+            },
+            
+            closeFullscreen: function() {
+            	if (document.mozCancelFullScreen) { /* Firefox */
+            		document.mozCancelFullScreen();
+            	} else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+            		document.webkitExitFullscreen();
+            	} else if (document.msExitFullscreen) { /* IE/Edge */
+            		document.msExitFullscreen();
+            	}
+            },
+            
+            changeTone: function(e){
+            	var me = this;
+            	
+            	var args = e.target.dataset.args;
+            	me.set("colorTone", args);
+            	
+            	var elements = this.getElementsByTagName('link');
+            	
+            	// black
+            	if(args == 'black'){
+            		if(elements.length > 0 ){
+            			var ele = elements.item(0);
+            			ele.parentNode.removeChild(ele);
+            		}
+                	
+            	// white
+            	}else{
+            		if(elements.length == 0 ){
+                		var link = document.createElement('link');
+                    	link.rel = 'stylesheet';
+                        link.type = 'text/css';
+                        link.href = './ui/iot/dashboard/css/operate-dashboard-white.css';
+                        this.appendChild(link);
+                	}
+            		
+            	}
+            	
+            },
+            
+            destroyed : function(popup, e) {
+                var me = this;
+            	clearInterval(me.timeInterval);
+            	clearInterval(me.searchInterval);
+            },
+            changeSafeDate : function(){
+		        var me = this;
+	        	var safePopup = UT.popup('ep-safedate-setting', me, 300, 200, {
+				}, {titleText : "", resizable:false});
+	        	safePopup.show();
+	        	safePopup.getWindowContent().load(me.safeDay, me.safeDate);
+		    }
+            
+        });
+       	function openPopup(data, type, mappingFilter, areaFilter){
+
+       		var mappingFilter = mappingFilter||"";
+			var batteryFilter = batteryFilter||"";
+
+           	if(areaFilter == "합계"){
+           		areaFilter="";
+            }
+
+           	var title = (type=="worker")?"작업자":"이동장비";
+       		if(mappingFilter != ""){
+				title = mappingFilter+" "+title;
+           	}
+
+           	title = areaFilter+" "+ title+" 목록";
+
+			for(var i in data){
+				if(!UT.isEmpty(data[i].updatedDt)){
+					data[i].updatedDt = new Date(data[i].updatedDt);
+				}
+			}				
+			
+       		var popup = UT.popup('ep-'+type+'-list', this, 1000, 550, {
+	    		"close": function(popup, e) {
+                 	popup.close();
+                 }
+			}, {titleText : title, resizable:false});
+       		popup.show();
+       		popup.getWindowContent().load(data, true, mappingFilter, areaFilter);
+        }
+	</script>
+
+</dom-module>

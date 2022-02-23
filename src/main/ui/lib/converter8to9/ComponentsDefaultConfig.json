@@ -1,0 +1,2168 @@
+{
+	"Ext.Component": {
+		"defaultConfig": {
+			"data": null,
+			"maxHeight": null,
+			"maxWidth": null,
+			"minHeight": null,
+			"minWidth": null,
+			"bind": null,
+			"controller": null,
+			"defaultListenerScope": false,
+			"publishes": null,
+			"reference": null,
+			"session": null,
+			"twoWayBindable": null,
+			"viewModel": null,
+			"childEls": {
+				"frameTable": {
+					"frame": true,
+					"itemId": "frameTable",
+					"name": "frameTable"
+				},
+				"frameTL": {
+					"frame": "tl",
+					"itemId": "frameTL",
+					"name": "frameTL"
+				},
+				"frameTC": {
+					"frame": "tc",
+					"itemId": "frameTC",
+					"name": "frameTC"
+				},
+				"frameTR": {
+					"frame": "tr",
+					"itemId": "frameTR",
+					"name": "frameTR"
+				},
+				"frameML": {
+					"frame": "ml",
+					"itemId": "frameML",
+					"name": "frameML"
+				},
+				"frameBody": {
+					"frame": "mc",
+					"itemId": "frameBody",
+					"name": "frameBody"
+				},
+				"frameMR": {
+					"frame": "mr",
+					"itemId": "frameMR",
+					"name": "frameMR"
+				},
+				"frameBL": {
+					"frame": "bl",
+					"itemId": "frameBL",
+					"name": "frameBL"
+				},
+				"frameBC": {
+					"frame": "bc",
+					"itemId": "frameBC",
+					"name": "frameBC"
+				},
+				"frameBR": {
+					"frame": "br",
+					"itemId": "frameBR",
+					"name": "frameBR"
+				}
+			},
+			"activeCounter": 0,
+			"alwaysOnTop": false
+		},
+		"config": {
+			"data": null,
+			"maxHeight": null,
+			"maxWidth": null,
+			"minHeight": null,
+			"minWidth": null,
+			"bind": null,
+			"controller": null,
+			"defaultListenerScope": false,
+			"publishes": null,
+			"reference": null,
+			"session": null,
+			"twoWayBindable": null,
+			"viewModel": null,
+			"childEls": {
+				"frameTable": {
+					"frame": true,
+					"itemId": "frameTable",
+					"name": "frameTable"
+				},
+				"frameTL": {
+					"frame": "tl",
+					"itemId": "frameTL",
+					"name": "frameTL"
+				},
+				"frameTC": {
+					"frame": "tc",
+					"itemId": "frameTC",
+					"name": "frameTC"
+				},
+				"frameTR": {
+					"frame": "tr",
+					"itemId": "frameTR",
+					"name": "frameTR"
+				},
+				"frameML": {
+					"frame": "ml",
+					"itemId": "frameML",
+					"name": "frameML"
+				},
+				"frameBody": {
+					"frame": "mc",
+					"itemId": "frameBody",
+					"name": "frameBody"
+				},
+				"frameMR": {
+					"frame": "mr",
+					"itemId": "frameMR",
+					"name": "frameMR"
+				},
+				"frameBL": {
+					"frame": "bl",
+					"itemId": "frameBL",
+					"name": "frameBL"
+				},
+				"frameBC": {
+					"frame": "bc",
+					"itemId": "frameBC",
+					"name": "frameBC"
+				},
+				"frameBR": {
+					"frame": "br",
+					"itemId": "frameBR",
+					"name": "frameBR"
+				}
+			},
+			"activeCounter": 0,
+			"alwaysOnTop": false
+		},
+		"extends": "Ext.Component"
+	},
+	"Ext.container.Container": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container"
+	},
+	"Ext.view.AbstractView": {
+		"defaultConfig": {
+			"selection": null,
+			"navigationModel": "default",
+			"publishes": {
+				"selection": true
+			},
+			"twoWayBindable": {
+				"selection": true
+			}
+		},
+		"config": {
+			"selection": null,
+			"navigationModel": "default",
+			"publishes": {
+				"selection": true
+			},
+			"twoWayBindable": {
+				"selection": true
+			}
+		},
+		"extends": "Ext.Component||Ext.view.AbstractView"
+	},
+	"Ext.Evented": {
+		"defaultConfig": {
+			"listeners": null,
+			"bubbleEvents": null
+		},
+		"config": {
+			"listeners": null,
+			"bubbleEvents": null
+		},
+		"extends": "Ext.Evented"
+	},
+	"Ext.Widget": {
+		"defaultConfig": {
+			"width": null,
+			"height": null,
+			"bind": null,
+			"controller": null,
+			"defaultListenerScope": false,
+			"publishes": null,
+			"reference": null,
+			"session": null,
+			"twoWayBindable": null,
+			"viewModel": null,
+			"baseCls": "x-widget"
+		},
+		"config": {
+			"width": null,
+			"height": null,
+			"bind": null,
+			"controller": null,
+			"defaultListenerScope": false,
+			"publishes": null,
+			"reference": null,
+			"session": null,
+			"twoWayBindable": null,
+			"viewModel": null,
+			"baseCls": "x-widget"
+		},
+		"extends": "Ext.Evented||Ext.Widget"
+	},
+	"Ext.sparkline.Base": {
+		"defaultConfig": {
+			"values": null,
+			"baseCls": "x-sparkline",
+			"lineColor": "#157fcc",
+			"fillColor": "#def",
+			"defaultPixelsPerValue": 3,
+			"tagValuesAttribute": "values",
+			"enableTagOptions": false,
+			"enableHighlight": true,
+			"highlightColor": null,
+			"highlightLighten": 1.4,
+			"tooltipSkipNull": true,
+			"tooltipPrefix": "",
+			"tooltipSuffix": "",
+			"disableTooltips": false,
+			"disableInteraction": false,
+			"tipTpl": null
+		},
+		"config": {
+			"values": null,
+			"baseCls": "x-sparkline",
+			"lineColor": "#157fcc",
+			"fillColor": "#def",
+			"defaultPixelsPerValue": 3,
+			"tagValuesAttribute": "values",
+			"enableTagOptions": false,
+			"enableHighlight": true,
+			"highlightColor": null,
+			"highlightLighten": 1.4,
+			"tooltipSkipNull": true,
+			"tooltipPrefix": "",
+			"tooltipSuffix": "",
+			"disableTooltips": false,
+			"disableInteraction": false,
+			"tipTpl": null
+		},
+		"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base"
+	},
+	"Ext.form.field.Base": {
+		"defaultConfig": {
+			"childEls": {
+				"errorWrapEl": {
+					"name": "errorWrapEl",
+					"itemId": "errorWrapEl"
+				},
+				"errorEl": {
+					"name": "errorEl",
+					"itemId": "errorEl"
+				},
+				"bodyEl": {
+					"name": "bodyEl",
+					"itemId": "bodyEl"
+				},
+				"labelEl": {
+					"name": "labelEl",
+					"itemId": "labelEl"
+				}
+			},
+			"validation": null,
+			"validationField": null,
+			"required": false
+		},
+		"config": {
+			"childEls": {
+				"errorWrapEl": {
+					"name": "errorWrapEl",
+					"itemId": "errorWrapEl"
+				},
+				"errorEl": {
+					"name": "errorEl",
+					"itemId": "errorEl"
+				},
+				"bodyEl": {
+					"name": "bodyEl",
+					"itemId": "bodyEl"
+				},
+				"labelEl": {
+					"name": "labelEl",
+					"itemId": "labelEl"
+				}
+			},
+			"validation": null,
+			"validationField": null,
+			"required": false
+		},
+		"extends": "Ext.Component||Ext.form.field.Base"
+	},
+	"Ext.resizer.Splitter": {
+		"defaultConfig": {
+			"childEls": {
+				"collapseEl": {
+					"name": "collapseEl",
+					"itemId": "collapseEl"
+				}
+			}
+		},
+		"config": {
+			"childEls": {
+				"collapseEl": {
+					"name": "collapseEl",
+					"itemId": "collapseEl"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.resizer.Splitter"
+	},
+	"Ext.sparkline.BarBase": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.BarBase"
+	},
+	"Ext.grid.column.Column": {
+		"defaultConfig": {
+			"triggerVisible": false,
+			"childEls": {
+				"textEl": {
+					"name": "textEl",
+					"itemId": "textEl"
+				},
+				"triggerEl": {
+					"name": "triggerEl",
+					"itemId": "triggerEl"
+				},
+				"titleEl": {
+					"name": "titleEl",
+					"itemId": "titleEl"
+				}
+			}
+		},
+		"config": {
+			"triggerVisible": false,
+			"childEls": {
+				"textEl": {
+					"name": "textEl",
+					"itemId": "textEl"
+				},
+				"triggerEl": {
+					"name": "triggerEl",
+					"itemId": "triggerEl"
+				},
+				"titleEl": {
+					"name": "titleEl",
+					"itemId": "titleEl"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column"
+	},
+	"Ext.grid.header.Container": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container"
+	},
+	"Ext.Img": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.Img"
+	},
+	"Ext.LoadMask": {
+		"defaultConfig": {
+			"childEls": {
+				"msgTextEl": {
+					"name": "msgTextEl",
+					"itemId": "msgTextEl"
+				},
+				"msgEl": {
+					"name": "msgEl",
+					"itemId": "msgEl"
+				}
+			}
+		},
+		"config": {
+			"childEls": {
+				"msgTextEl": {
+					"name": "msgTextEl",
+					"itemId": "msgTextEl"
+				},
+				"msgEl": {
+					"name": "msgEl",
+					"itemId": "msgEl"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.LoadMask"
+	},
+	"Ext.ProgressBar": {
+		"defaultConfig": {
+			"value": 0,
+			"textTpl": null,
+			"childEls": {
+				"bar": {
+					"name": "bar",
+					"itemId": "bar"
+				}
+			}
+		},
+		"config": {
+			"value": 0,
+			"textTpl": null,
+			"childEls": {
+				"bar": {
+					"name": "bar",
+					"itemId": "bar"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.ProgressBar"
+	},
+	"Ext.ProgressBarWidget": {
+		"defaultConfig": {
+			"text": null,
+			"value": 0,
+			"animate": false,
+			"textTpl": null,
+			"baseCls": "x-progress",
+			"textCls": "x-progress-text",
+			"ui": "default"
+		},
+		"config": {
+			"text": null,
+			"value": 0,
+			"animate": false,
+			"textTpl": null,
+			"baseCls": "x-progress",
+			"textCls": "x-progress-text",
+			"ui": "default"
+		},
+		"extends": "Ext.Evented||Ext.Widget||Ext.ProgressBarWidget"
+	},
+	"Ext.toolbar.Fill": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.toolbar.Fill"
+	},
+	"Ext.toolbar.Item": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.toolbar.Item"
+	},
+	"Ext.toolbar.Separator": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.toolbar.Item||Ext.toolbar.Separator"
+	},
+	"Ext.button.Button": {
+		"defaultConfig": {
+			"iconAlign": "left",
+			"text": null,
+			"textAlign": "center",
+			"arrowVisible": true,
+			"childEls": {
+				"btnIconEl": {
+					"name": "btnIconEl",
+					"itemId": "btnIconEl"
+				},
+				"btnInnerEl": {
+					"name": "btnInnerEl",
+					"itemId": "btnInnerEl"
+				},
+				"btnWrap": {
+					"name": "btnWrap",
+					"itemId": "btnWrap"
+				},
+				"btnEl": {
+					"name": "btnEl",
+					"itemId": "btnEl"
+				}
+			},
+			"publishes": {
+				"pressed": 1
+			}
+		},
+		"config": {
+			"iconAlign": "left",
+			"text": null,
+			"textAlign": "center",
+			"arrowVisible": true,
+			"childEls": {
+				"btnIconEl": {
+					"name": "btnIconEl",
+					"itemId": "btnIconEl"
+				},
+				"btnInnerEl": {
+					"name": "btnInnerEl",
+					"itemId": "btnInnerEl"
+				},
+				"btnWrap": {
+					"name": "btnWrap",
+					"itemId": "btnWrap"
+				},
+				"btnEl": {
+					"name": "btnEl",
+					"itemId": "btnEl"
+				}
+			},
+			"publishes": {
+				"pressed": 1
+			}
+		},
+		"extends": "Ext.Component||Ext.button.Button"
+	},
+	"Ext.toolbar.Toolbar": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.toolbar.Toolbar"
+	},
+	"Ext.panel.Panel": {
+		"defaultConfig": {
+			"glyph": null,
+			"headerPosition": null,
+			"icon": null,
+			"iconAlign": null,
+			"iconCls": null,
+			"title": null,
+			"titleAlign": null,
+			"titleRotation": null,
+			"childEls": {
+				"body": {
+					"name": "body",
+					"itemId": "body"
+				}
+			}
+		},
+		"config": {
+			"glyph": null,
+			"headerPosition": null,
+			"icon": null,
+			"iconAlign": null,
+			"iconCls": null,
+			"title": null,
+			"titleAlign": null,
+			"titleRotation": null,
+			"childEls": {
+				"body": {
+					"name": "body",
+					"itemId": "body"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel"
+	},
+	"Ext.tip.Tip": {
+		"defaultConfig": {
+			"minWidth": 40,
+			"maxWidth": 500
+		},
+		"config": {
+			"minWidth": 40,
+			"maxWidth": 500
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.tip.Tip"
+	},
+	"Ext.tip.ToolTip": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.tip.Tip||Ext.tip.ToolTip"
+	},
+	"Ext.tip.QuickTip": {
+		"defaultConfig": {
+			"title": "&#160;"
+		},
+		"config": {
+			"title": "&#160;"
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.tip.Tip||Ext.tip.ToolTip||Ext.tip.QuickTip"
+	},
+	"Ext.form.field.Display": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Display"
+	},
+	"Ext.panel.Table": {
+		"defaultConfig": {
+			"selection": null,
+			"publishes": {
+				"selection": true
+			},
+			"twoWayBindable": {
+				"selection": true
+			}
+		},
+		"config": {
+			"selection": null,
+			"publishes": {
+				"selection": true
+			},
+			"twoWayBindable": {
+				"selection": true
+			}
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.panel.Table"
+	},
+	"Ext.view.View": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View"
+	},
+	"Ext.view.Table": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View||Ext.view.Table"
+	},
+	"Ext.grid.View": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View||Ext.view.Table||Ext.grid.View"
+	},
+	"Ext.grid.Panel": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.panel.Table||Ext.grid.Panel"
+	},
+	"Ext.form.field.Checkbox": {
+		"defaultConfig": {
+			"childEls": {
+				"boxLabelEl": {
+					"name": "boxLabelEl",
+					"itemId": "boxLabelEl"
+				}
+			},
+			"publishes": {
+				"checked": 1
+			}
+		},
+		"config": {
+			"childEls": {
+				"boxLabelEl": {
+					"name": "boxLabelEl",
+					"itemId": "boxLabelEl"
+				}
+			},
+			"publishes": {
+				"checked": 1
+			}
+		},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Checkbox"
+	},
+	"Ext.app.bindinspector.ComponentDetail": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.app.bindinspector.ComponentDetail"
+	},
+	"Ext.tree.View": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View||Ext.view.Table||Ext.tree.View"
+	},
+	"Ext.tree.Column": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.tree.Column"
+	},
+	"Ext.tree.Panel": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.panel.Table||Ext.tree.Panel"
+	},
+	"Ext.form.field.Text": {
+		"defaultConfig": {
+			"hideTrigger": false,
+			"childEls": {
+				"inputWrap": {
+					"name": "inputWrap",
+					"itemId": "inputWrap"
+				},
+				"triggerWrap": {
+					"name": "triggerWrap",
+					"itemId": "triggerWrap"
+				}
+			}
+		},
+		"config": {
+			"hideTrigger": false,
+			"childEls": {
+				"inputWrap": {
+					"name": "inputWrap",
+					"itemId": "inputWrap"
+				},
+				"triggerWrap": {
+					"name": "triggerWrap",
+					"itemId": "triggerWrap"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text"
+	},
+	"Ext.app.bindinspector.ComponentList": {
+		"defaultConfig": {
+			"title": "Component Tree"
+		},
+		"config": {
+			"title": "Component Tree"
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.panel.Table||Ext.tree.Panel||Ext.app.bindinspector.ComponentList"
+	},
+	"Ext.resizer.BorderSplitter": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.resizer.Splitter||Ext.resizer.BorderSplitter"
+	},
+	"Ext.tab.Tab": {
+		"defaultConfig": {
+			"rotation": "default",
+			"tabPosition": "top",
+			"childEls": {
+				"closeEl": {
+					"name": "closeEl",
+					"itemId": "closeEl"
+				}
+			}
+		},
+		"config": {
+			"rotation": "default",
+			"tabPosition": "top",
+			"childEls": {
+				"closeEl": {
+					"name": "closeEl",
+					"itemId": "closeEl"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.button.Button||Ext.tab.Tab"
+	},
+	"Ext.tab.Panel": {
+		"defaultConfig": {
+			"tabPosition": "top",
+			"tabRotation": "default",
+			"tabStretchMax": true
+		},
+		"config": {
+			"tabPosition": "top",
+			"tabRotation": "default",
+			"tabStretchMax": true
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.tab.Panel"
+	},
+	"Ext.app.bindinspector.ViewModelDetail": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.panel.Table||Ext.tree.Panel||Ext.app.bindinspector.ViewModelDetail"
+	},
+	"Ext.app.bindinspector.Container": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.app.bindinspector.Container"
+	},
+	"Ext.window.Window": {
+		"defaultConfig": {
+			"minHeight": 50,
+			"minWidth": 50
+		},
+		"config": {
+			"minHeight": 50,
+			"minWidth": 50
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.window.Window"
+	},
+	"Ext.button.Split": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.button.Button||Ext.button.Split"
+	},
+	"Ext.button.Cycle": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.button.Button||Ext.button.Split||Ext.button.Cycle"
+	},
+	"Ext.container.ButtonGroup": {
+		"defaultConfig": {
+			"titleAlign": "center"
+		},
+		"config": {
+			"titleAlign": "center"
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.container.ButtonGroup"
+	},
+	"Ext.container.Viewport": {
+		"defaultConfig": {
+			"responsiveFormulas": 0
+		},
+		"config": {
+			"responsiveFormulas": 0
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.container.Viewport"
+	},
+	"Ext.flash.Component": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.flash.Component"
+	},
+	"Ext.form.field.TextArea": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.TextArea"
+	},
+	"Ext.window.MessageBox": {
+		"defaultConfig": {
+			"title": "&#160;",
+			"minWidth": null,
+			"maxWidth": null,
+			"minHeight": null,
+			"maxHeight": null
+		},
+		"config": {
+			"title": "&#160;",
+			"minWidth": null,
+			"maxWidth": null,
+			"minHeight": null,
+			"maxHeight": null
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.window.Window||Ext.window.MessageBox"
+	},
+	"Ext.form.FieldContainer": {
+		"defaultConfig": {
+			"childEls": {
+				"errorWrapEl": {
+					"name": "errorWrapEl",
+					"itemId": "errorWrapEl"
+				},
+				"errorEl": {
+					"name": "errorEl",
+					"itemId": "errorEl"
+				},
+				"bodyEl": {
+					"name": "bodyEl",
+					"itemId": "bodyEl"
+				},
+				"labelEl": {
+					"name": "labelEl",
+					"itemId": "labelEl"
+				}
+			}
+		},
+		"config": {
+			"childEls": {
+				"errorWrapEl": {
+					"name": "errorWrapEl",
+					"itemId": "errorWrapEl"
+				},
+				"errorEl": {
+					"name": "errorEl",
+					"itemId": "errorEl"
+				},
+				"bodyEl": {
+					"name": "bodyEl",
+					"itemId": "bodyEl"
+				},
+				"labelEl": {
+					"name": "labelEl",
+					"itemId": "labelEl"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.form.FieldContainer"
+	},
+	"Ext.form.CheckboxGroup": {
+		"defaultConfig": {
+			"validation": null,
+			"validationField": null
+		},
+		"config": {
+			"validation": null,
+			"validationField": null
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.form.FieldContainer||Ext.form.CheckboxGroup"
+	},
+	"Ext.form.FieldSet": {
+		"defaultConfig": {
+			"childEls": {
+				"body": {
+					"name": "body",
+					"itemId": "body"
+				}
+			}
+		},
+		"config": {
+			"childEls": {
+				"body": {
+					"name": "body",
+					"itemId": "body"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.form.FieldSet"
+	},
+	"Ext.form.Label": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.form.Label"
+	},
+	"Ext.form.Panel": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.form.Panel"
+	},
+	"Ext.form.field.Radio": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Checkbox||Ext.form.field.Radio"
+	},
+	"Ext.form.RadioGroup": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.form.FieldContainer||Ext.form.CheckboxGroup||Ext.form.RadioGroup"
+	},
+	"Ext.form.field.Picker": {
+		"defaultConfig": {
+			"triggers": {
+				"picker": {
+					"handler": "onTriggerClick",
+					"scope": "this"
+				}
+			}
+		},
+		"config": {
+			"triggers": {
+				"picker": {
+					"handler": "onTriggerClick",
+					"scope": "this"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Picker"
+	},
+	"Ext.toolbar.TextItem": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.toolbar.Item||Ext.toolbar.TextItem"
+	},
+	"Ext.form.field.Spinner": {
+		"defaultConfig": {
+			"triggers": {
+				"spinner": {
+					"type": "spinner",
+					"upHandler": "onSpinnerUpClick",
+					"downHandler": "onSpinnerDownClick",
+					"scope": "this"
+				}
+			}
+		},
+		"config": {
+			"triggers": {
+				"spinner": {
+					"type": "spinner",
+					"upHandler": "onSpinnerUpClick",
+					"downHandler": "onSpinnerDownClick",
+					"scope": "this"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Spinner"
+	},
+	"Ext.form.field.Number": {
+		"defaultConfig": {
+			"coverFormat": null,
+			"kind": null
+		},
+		"config": {
+			"coverFormat": null,
+			"kind": null
+		},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Spinner||Ext.form.field.Number"
+	},
+	"Ext.view.BoundList": {
+		"defaultConfig": {
+			"navigationModel": "boundlist",
+			"childEls": {
+				"selectAllEl": {
+					"name": "selectAllEl",
+					"itemId": "selectAllEl"
+				}
+			}
+		},
+		"config": {
+			"navigationModel": "boundlist",
+			"childEls": {
+				"selectAllEl": {
+					"name": "selectAllEl",
+					"itemId": "selectAllEl"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View||Ext.view.BoundList"
+	},
+	"Ext.form.field.ComboBox": {
+		"defaultConfig": {
+			"filters": null,
+			"selection": null,
+			"publishes": {
+				"selection": true
+			},
+			"twoWayBindable": {
+				"selection": true
+			},
+			"childEls": {
+				"hiddenDataEl": {
+					"itemId": "hiddenDataEl",
+					"name": "hiddenDataEl"
+				}
+			}
+		},
+		"config": {
+			"filters": null,
+			"selection": null,
+			"publishes": {
+				"selection": true
+			},
+			"twoWayBindable": {
+				"selection": true
+			},
+			"childEls": {
+				"hiddenDataEl": {
+					"itemId": "hiddenDataEl",
+					"name": "hiddenDataEl"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Picker||Ext.form.field.ComboBox"
+	},
+	"Ext.picker.Month": {
+		"defaultConfig": {
+			"childEls": {
+				"yearEl": {
+					"name": "yearEl",
+					"itemId": "yearEl"
+				},
+				"monthEl": {
+					"name": "monthEl",
+					"itemId": "monthEl"
+				},
+				"nextEl": {
+					"name": "nextEl",
+					"itemId": "nextEl"
+				},
+				"prevEl": {
+					"name": "prevEl",
+					"itemId": "prevEl"
+				},
+				"bodyEl": {
+					"name": "bodyEl",
+					"itemId": "bodyEl"
+				}
+			}
+		},
+		"config": {
+			"childEls": {
+				"yearEl": {
+					"name": "yearEl",
+					"itemId": "yearEl"
+				},
+				"monthEl": {
+					"name": "monthEl",
+					"itemId": "monthEl"
+				},
+				"nextEl": {
+					"name": "nextEl",
+					"itemId": "nextEl"
+				},
+				"prevEl": {
+					"name": "prevEl",
+					"itemId": "prevEl"
+				},
+				"bodyEl": {
+					"name": "bodyEl",
+					"itemId": "bodyEl"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.picker.Month"
+	},
+	"Ext.picker.Date": {
+		"defaultConfig": {
+			"childEls": {
+				"footerEl": {
+					"name": "footerEl",
+					"itemId": "footerEl"
+				},
+				"middleBtnEl": {
+					"name": "middleBtnEl",
+					"itemId": "middleBtnEl"
+				},
+				"nextEl": {
+					"name": "nextEl",
+					"itemId": "nextEl"
+				},
+				"prevEl": {
+					"name": "prevEl",
+					"itemId": "prevEl"
+				},
+				"eventEl": {
+					"name": "eventEl",
+					"itemId": "eventEl"
+				},
+				"innerEl": {
+					"name": "innerEl",
+					"itemId": "innerEl"
+				}
+			}
+		},
+		"config": {
+			"childEls": {
+				"footerEl": {
+					"name": "footerEl",
+					"itemId": "footerEl"
+				},
+				"middleBtnEl": {
+					"name": "middleBtnEl",
+					"itemId": "middleBtnEl"
+				},
+				"nextEl": {
+					"name": "nextEl",
+					"itemId": "nextEl"
+				},
+				"prevEl": {
+					"name": "prevEl",
+					"itemId": "prevEl"
+				},
+				"eventEl": {
+					"name": "eventEl",
+					"itemId": "eventEl"
+				},
+				"innerEl": {
+					"name": "innerEl",
+					"itemId": "innerEl"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.picker.Date"
+	},
+	"Ext.form.field.Date": {
+		"defaultConfig": {
+			"displayMonths": 3,
+			"columnCount": 3
+		},
+		"config": {
+			"displayMonths": 3,
+			"columnCount": 3
+		},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Picker||Ext.form.field.Date"
+	},
+	"Ext.form.field.FileButton": {
+		"defaultConfig": {
+			"childEls": {
+				"fileInputEl": {
+					"name": "fileInputEl",
+					"itemId": "fileInputEl"
+				}
+			}
+		},
+		"config": {
+			"childEls": {
+				"fileInputEl": {
+					"name": "fileInputEl",
+					"itemId": "fileInputEl"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.button.Button||Ext.form.field.FileButton"
+	},
+	"Ext.form.field.File": {
+		"defaultConfig": {
+			"triggers": {
+				"filebutton": {
+					"type": "component",
+					"hideOnReadOnly": false
+				}
+			},
+			"childEls": {
+				"browseButtonWrap": {
+					"name": "browseButtonWrap",
+					"itemId": "browseButtonWrap"
+				}
+			}
+		},
+		"config": {
+			"triggers": {
+				"filebutton": {
+					"type": "component",
+					"hideOnReadOnly": false
+				}
+			},
+			"childEls": {
+				"browseButtonWrap": {
+					"name": "browseButtonWrap",
+					"itemId": "browseButtonWrap"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.File"
+	},
+	"Ext.form.field.Hidden": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Hidden"
+	},
+	"Ext.picker.Color": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.picker.Color"
+	},
+	"Ext.form.field.HtmlEditor": {
+		"defaultConfig": {
+			"validation": null,
+			"validationField": null
+		},
+		"config": {
+			"validation": null,
+			"validationField": null
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.form.FieldContainer||Ext.form.field.HtmlEditor"
+	},
+	"Ext.picker.Time": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View||Ext.view.BoundList||Ext.picker.Time"
+	},
+	"Ext.form.field.Time": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Picker||Ext.form.field.ComboBox||Ext.form.field.Time"
+	},
+	"Ext.form.field.Trigger": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Trigger"
+	},
+	"Ext.grid.RowEditorButtons": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.RowEditorButtons"
+	},
+	"Ext.grid.RowEditor": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.form.Panel||Ext.grid.RowEditor"
+	},
+	"Ext.grid.column.Action": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Action"
+	},
+	"Ext.grid.column.Boolean": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Boolean"
+	},
+	"Ext.grid.column.Check": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Check"
+	},
+	"Ext.grid.column.Date": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Date"
+	},
+	"Ext.grid.column.Number": {
+		"defaultConfig": {
+			"kind": null,
+			"kindDataIndex": null
+		},
+		"config": {
+			"kind": null,
+			"kindDataIndex": null
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Number"
+	},
+	"Ext.grid.column.RowNumberer": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.RowNumberer"
+	},
+	"Ext.grid.column.Template": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Template"
+	},
+	"Ext.grid.column.Widget": {
+		"defaultConfig": {
+			"defaultWidgetUI": {}
+		},
+		"config": {
+			"defaultWidgetUI": {}
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Widget"
+	},
+	"Ext.menu.Item": {
+		"defaultConfig": {
+			"childEls": {
+				"arrowEl": {
+					"name": "arrowEl",
+					"itemId": "arrowEl"
+				},
+				"textEl": {
+					"name": "textEl",
+					"itemId": "textEl"
+				},
+				"iconEl": {
+					"name": "iconEl",
+					"itemId": "iconEl"
+				},
+				"itemEl": {
+					"name": "itemEl",
+					"itemId": "itemEl"
+				}
+			}
+		},
+		"config": {
+			"childEls": {
+				"arrowEl": {
+					"name": "arrowEl",
+					"itemId": "arrowEl"
+				},
+				"textEl": {
+					"name": "textEl",
+					"itemId": "textEl"
+				},
+				"iconEl": {
+					"name": "iconEl",
+					"itemId": "iconEl"
+				},
+				"itemEl": {
+					"name": "itemEl",
+					"itemId": "itemEl"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.menu.Item"
+	},
+	"Ext.menu.CheckItem": {
+		"defaultConfig": {
+			"childEls": {
+				"checkEl": {
+					"name": "checkEl",
+					"itemId": "checkEl"
+				}
+			}
+		},
+		"config": {
+			"childEls": {
+				"checkEl": {
+					"name": "checkEl",
+					"itemId": "checkEl"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.menu.Item||Ext.menu.CheckItem"
+	},
+	"Ext.menu.Separator": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.menu.Item||Ext.menu.Separator"
+	},
+	"Ext.menu.Menu": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.menu.Menu"
+	},
+	"Ext.grid.property.Grid": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.panel.Table||Ext.grid.Panel||Ext.grid.property.Grid"
+	},
+	"Ext.menu.ColorPicker": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.menu.Menu||Ext.menu.ColorPicker"
+	},
+	"Ext.menu.DatePicker": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.menu.Menu||Ext.menu.DatePicker"
+	},
+	"Ext.slider.Tip": {
+		"defaultConfig": {
+			"minWidth": 10
+		},
+		"config": {
+			"minWidth": 10
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.tip.Tip||Ext.slider.Tip"
+	},
+	"Ext.slider.Multi": {
+		"defaultConfig": {
+			"childEls": {
+				"innerEl": {
+					"name": "innerEl",
+					"itemId": "innerEl"
+				},
+				"endEl": {
+					"name": "endEl",
+					"itemId": "endEl"
+				}
+			}
+		},
+		"config": {
+			"childEls": {
+				"innerEl": {
+					"name": "innerEl",
+					"itemId": "innerEl"
+				},
+				"endEl": {
+					"name": "endEl",
+					"itemId": "endEl"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.slider.Multi"
+	},
+	"Ext.slider.Single": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.slider.Multi||Ext.slider.Single"
+	},
+	"Ext.slider.Widget": {
+		"defaultConfig": {
+			"clickToChange": true,
+			"ui": "widget",
+			"value": 0,
+			"minValue": 0,
+			"maxValue": 100,
+			"publishOnComplete": true,
+			"twoWayBindable": {
+				"value": 1
+			},
+			"vertical": false
+		},
+		"config": {
+			"clickToChange": true,
+			"ui": "widget",
+			"value": 0,
+			"minValue": 0,
+			"maxValue": 100,
+			"publishOnComplete": true,
+			"twoWayBindable": {
+				"value": 1
+			},
+			"vertical": false
+		},
+		"extends": "Ext.Evented||Ext.Widget||Ext.slider.Widget"
+	},
+	"Ext.sparkline.Bar": {
+		"defaultConfig": {
+			"barColor": "#3366cc",
+			"negBarColor": "#f44",
+			"stackedBarColor": [
+				"#3366cc",
+				"#dc3912",
+				"#ff9900",
+				"#109618",
+				"#66aa00",
+				"#dd4477",
+				"#0099c6",
+				"#990099"
+			],
+			"zeroColor": null,
+			"nullColor": null,
+			"zeroAxis": true,
+			"barWidth": 4,
+			"barSpacing": 1,
+			"chartRangeMin": null,
+			"chartRangeMax": null,
+			"chartRangeClip": false,
+			"colorMap": null,
+			"tipTpl": {
+				"initialConfig": {},
+				"html": "&#9679; {prefix}{value}{suffix}"
+			}
+		},
+		"config": {
+			"barColor": "#3366cc",
+			"negBarColor": "#f44",
+			"stackedBarColor": [
+				"#3366cc",
+				"#dc3912",
+				"#ff9900",
+				"#109618",
+				"#66aa00",
+				"#dd4477",
+				"#0099c6",
+				"#990099"
+			],
+			"zeroColor": null,
+			"nullColor": null,
+			"zeroAxis": true,
+			"barWidth": 4,
+			"barSpacing": 1,
+			"chartRangeMin": null,
+			"chartRangeMax": null,
+			"chartRangeClip": false,
+			"colorMap": null,
+			"tipTpl": {
+				"initialConfig": {},
+				"html": "&#9679; {prefix}{value}{suffix}"
+			}
+		},
+		"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.BarBase||Ext.sparkline.Bar"
+	},
+	"Ext.sparkline.Box": {
+		"defaultConfig": {
+			"raw": false,
+			"boxLineColor": "#000",
+			"boxFillColor": "#cdf",
+			"whiskerColor": "#000",
+			"outlierLineColor": "#333",
+			"outlierFillColor": "#fff",
+			"medianColor": "#f00",
+			"showOutliers": true,
+			"outlierIQR": 1.5,
+			"spotRadius": 1.5,
+			"target": null,
+			"targetColor": "#4a2",
+			"chartRangeMin": null,
+			"chartRangeMax": null,
+			"tipTpl": {
+				"initialConfig": {},
+				"html": "{field:this.fields}: {value}"
+			},
+			"tooltipFormatFieldlistKey": "field"
+		},
+		"config": {
+			"raw": false,
+			"boxLineColor": "#000",
+			"boxFillColor": "#cdf",
+			"whiskerColor": "#000",
+			"outlierLineColor": "#333",
+			"outlierFillColor": "#fff",
+			"medianColor": "#f00",
+			"showOutliers": true,
+			"outlierIQR": 1.5,
+			"spotRadius": 1.5,
+			"target": null,
+			"targetColor": "#4a2",
+			"chartRangeMin": null,
+			"chartRangeMax": null,
+			"tipTpl": {
+				"initialConfig": {},
+				"html": "{field:this.fields}: {value}"
+			},
+			"tooltipFormatFieldlistKey": "field"
+		},
+		"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.Box"
+	},
+	"Ext.sparkline.Bullet": {
+		"defaultConfig": {
+			"targetColor": "#f33",
+			"targetWidth": 3,
+			"performanceColor": "#33f",
+			"rangeColors": [
+				"#d3dafe",
+				"#a8b6ff",
+				"#7f94ff"
+			],
+			"base": null,
+			"tipTpl": {
+				"initialConfig": {},
+				"html": "{fieldkey:this.fields} - {value}"
+			}
+		},
+		"config": {
+			"targetColor": "#f33",
+			"targetWidth": 3,
+			"performanceColor": "#33f",
+			"rangeColors": [
+				"#d3dafe",
+				"#a8b6ff",
+				"#7f94ff"
+			],
+			"base": null,
+			"tipTpl": {
+				"initialConfig": {},
+				"html": "{fieldkey:this.fields} - {value}"
+			}
+		},
+		"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.Bullet"
+	},
+	"Ext.sparkline.Discrete": {
+		"defaultConfig": {
+			"lineHeight": "auto",
+			"thresholdColor": null,
+			"thresholdValue": 0,
+			"chartRangeMax": null,
+			"chartRangeMin": null,
+			"chartRangeClip": false,
+			"tipTpl": {
+				"initialConfig": {},
+				"html": "{prefix}{value}{suffix}"
+			}
+		},
+		"config": {
+			"lineHeight": "auto",
+			"thresholdColor": null,
+			"thresholdValue": 0,
+			"chartRangeMax": null,
+			"chartRangeMin": null,
+			"chartRangeClip": false,
+			"tipTpl": {
+				"initialConfig": {},
+				"html": "{prefix}{value}{suffix}"
+			}
+		},
+		"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.BarBase||Ext.sparkline.Discrete"
+	},
+	"Ext.sparkline.Line": {
+		"defaultConfig": {
+			"spotColor": "#f80",
+			"highlightSpotColor": "#5f5",
+			"highlightLineColor": "#f22",
+			"spotRadius": 1.5,
+			"minSpotColor": "#f80",
+			"maxSpotColor": "#f80",
+			"lineWidth": 1,
+			"normalRangeMin": null,
+			"normalRangeMax": null,
+			"normalRangeColor": "#ccc",
+			"drawNormalOnTop": false,
+			"chartRangeMin": null,
+			"chartRangeMax": null,
+			"chartRangeMinX": null,
+			"chartRangeMaxX": null,
+			"tipTpl": {
+				"initialConfig": {},
+				"html": "&#9679; {prefix}{y}{suffix}"
+			},
+			"valueSpots": null
+		},
+		"config": {
+			"spotColor": "#f80",
+			"highlightSpotColor": "#5f5",
+			"highlightLineColor": "#f22",
+			"spotRadius": 1.5,
+			"minSpotColor": "#f80",
+			"maxSpotColor": "#f80",
+			"lineWidth": 1,
+			"normalRangeMin": null,
+			"normalRangeMax": null,
+			"normalRangeColor": "#ccc",
+			"drawNormalOnTop": false,
+			"chartRangeMin": null,
+			"chartRangeMax": null,
+			"chartRangeMinX": null,
+			"chartRangeMaxX": null,
+			"tipTpl": {
+				"initialConfig": {},
+				"html": "&#9679; {prefix}{y}{suffix}"
+			},
+			"valueSpots": null
+		},
+		"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.Line"
+	},
+	"Ext.sparkline.Pie": {
+		"defaultConfig": {
+			"offset": 0,
+			"sliceColors": [
+				"#3366cc",
+				"#dc3912",
+				"#ff9900",
+				"#109618",
+				"#66aa00",
+				"#dd4477",
+				"#0099c6",
+				"#990099"
+			],
+			"borderWidth": 0,
+			"borderColor": "#000",
+			"tipTpl": {
+				"initialConfig": {},
+				"html": "&#9679; {value} ({percent:number(\"0.0\")}%)"
+			}
+		},
+		"config": {
+			"offset": 0,
+			"sliceColors": [
+				"#3366cc",
+				"#dc3912",
+				"#ff9900",
+				"#109618",
+				"#66aa00",
+				"#dd4477",
+				"#0099c6",
+				"#990099"
+			],
+			"borderWidth": 0,
+			"borderColor": "#000",
+			"tipTpl": {
+				"initialConfig": {},
+				"html": "&#9679; {value} ({percent:number(\"0.0\")}%)"
+			}
+		},
+		"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.Pie"
+	},
+	"Ext.sparkline.TriState": {
+		"defaultConfig": {
+			"barWidth": 4,
+			"barSpacing": 1,
+			"posBarColor": "#6f6",
+			"negBarColor": "#f44",
+			"zeroBarColor": "#999",
+			"colorMap": {},
+			"tipTpl": {
+				"initialConfig": {},
+				"html": "&#9679; {value:this.states}"
+			}
+		},
+		"config": {
+			"barWidth": 4,
+			"barSpacing": 1,
+			"posBarColor": "#6f6",
+			"negBarColor": "#f44",
+			"zeroBarColor": "#999",
+			"colorMap": {},
+			"tipTpl": {
+				"initialConfig": {},
+				"html": "&#9679; {value:this.states}"
+			}
+		},
+		"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.BarBase||Ext.sparkline.TriState"
+	},
+	"Ext.toolbar.Spacer": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.toolbar.Spacer"
+	},
+	"Etna.form.field.Attachment": {
+		"defaultConfig": {
+			"uploader": null
+		},
+		"config": {
+			"uploader": null
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.form.FieldContainer||Etna.form.field.Attachment"
+	},
+	"Etna.form.field.Currency": {
+		"defaultConfig": {
+			"currency": null
+		},
+		"config": {
+			"currency": null
+		},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Spinner||Ext.form.field.Number||Etna.form.field.Currency"
+	},
+	"Etna.form.field.Month": {
+		"defaultConfig": {
+			"valueAlign": "start"
+		},
+		"config": {
+			"valueAlign": "start"
+		},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Picker||Etna.form.field.Month"
+	},
+	"Etna.form.field.MultiLine": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Picker||Etna.form.field.MultiLine"
+	},
+	"Etna.form.field.Toggle": {
+		"defaultConfig": {
+			"onText": "#{Yes}",
+			"offText": "#{No}",
+			"scale": "small",
+			"validation": null,
+			"validationField": null,
+			"childEls": {}
+		},
+		"config": {
+			"onText": "#{Yes}",
+			"offText": "#{No}",
+			"scale": "small",
+			"validation": null,
+			"validationField": null,
+			"childEls": {}
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.form.FieldContainer||Etna.form.field.Toggle"
+	},
+	"Etna.grid.column.Attachment": {
+		"defaultConfig": {
+			"uploader": null,
+			"uploaderConfig": {},
+			"windowWidth": 300,
+			"windowHeight": 250
+		},
+		"config": {
+			"uploader": null,
+			"uploaderConfig": {},
+			"windowWidth": 300,
+			"windowHeight": 250
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Action||Etna.grid.column.Attachment"
+	},
+	"Etna.grid.column.Currency": {
+		"defaultConfig": {
+			"currency": null,
+			"currencyDataIndex": null
+		},
+		"config": {
+			"currency": null,
+			"currencyDataIndex": null
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Number||Etna.grid.column.Currency"
+	},
+	"Etna.grid.column.DataActionColumn": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Action||Etna.grid.column.DataActionColumn"
+	},
+	"Etna.grid.column.Eliminate": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Check||Etna.grid.column.Eliminate"
+	},
+	"Etna.grid.column.Status": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Template||Etna.grid.column.Status"
+	},
+	"Etna.grid.column.Store": {
+		"defaultConfig": {
+			"store": null,
+			"valueField": null,
+			"displayField": null
+		},
+		"config": {
+			"store": null,
+			"valueField": null,
+			"displayField": null
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Etna.grid.column.Store"
+	},
+	"Etna.grid.plugin.ui.Filter": {
+		"defaultConfig": {
+			"grid": null,
+			"filter": null,
+			"column": null
+		},
+		"config": {
+			"grid": null,
+			"filter": null,
+			"column": null
+		},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Picker||Ext.form.field.ComboBox||Etna.grid.plugin.ui.Filter"
+	},
+	"Etna.grid.plugin.ui.Stateful": {
+		"defaultConfig": {
+			"title": "개인화"
+		},
+		"config": {
+			"title": "개인화"
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Etna.grid.plugin.ui.Stateful"
+	},
+	"Etna.upload.Uploader": {
+		"defaultConfig": {
+			"uploader": null,
+			"multipartParams": {},
+			"multipartHeaders": {},
+			"browseButton": null,
+			"moxieElement": null,
+			"container": null,
+			"dropElement": null,
+			"preventDuplicates": false,
+			"multiSelection": true,
+			"maxFileSize": "10m",
+			"minFileSize": 0,
+			"totalFileSize": 0
+		},
+		"config": {
+			"uploader": null,
+			"multipartParams": {},
+			"multipartHeaders": {},
+			"browseButton": null,
+			"moxieElement": null,
+			"container": null,
+			"dropElement": null,
+			"preventDuplicates": false,
+			"multiSelection": true,
+			"maxFileSize": "10m",
+			"minFileSize": 0,
+			"totalFileSize": 0
+		},
+		"extends": "Ext.Component||Etna.upload.Uploader"
+	},
+	"Etna.grid.plugin.ui.Import": {
+		"defaultConfig": {
+			"uploader": null,
+			"importer": null,
+			"grid": null,
+			"maxFileSize": "10m",
+			"multipartParams": {},
+			"multipartHeaders": {},
+			"browseButton": null,
+			"moxieElement": null,
+			"container": null,
+			"dropElement": null,
+			"preventDuplicates": false,
+			"multiSelection": true,
+			"minFileSize": 0,
+			"totalFileSize": 0,
+			"publishes": {},
+			"twoWayBindable": {},
+			"childEls": {
+				"frameTable": {
+					"name": "frameTable"
+				},
+				"frameTL": {
+					"name": "frameTL"
+				},
+				"frameTC": {
+					"name": "frameTC"
+				},
+				"frameTR": {
+					"name": "frameTR"
+				},
+				"frameML": {
+					"name": "frameML"
+				},
+				"frameBody": {
+					"name": "frameBody"
+				},
+				"frameMR": {
+					"name": "frameMR"
+				},
+				"frameBL": {
+					"name": "frameBL"
+				},
+				"frameBC": {
+					"name": "frameBC"
+				},
+				"frameBR": {
+					"name": "frameBR"
+				}
+			}
+		},
+		"config": {
+			"uploader": null,
+			"importer": null,
+			"grid": null,
+			"maxFileSize": "10m",
+			"multipartParams": {},
+			"multipartHeaders": {},
+			"browseButton": null,
+			"moxieElement": null,
+			"container": null,
+			"dropElement": null,
+			"preventDuplicates": false,
+			"multiSelection": true,
+			"minFileSize": 0,
+			"totalFileSize": 0,
+			"publishes": {},
+			"twoWayBindable": {},
+			"childEls": {
+				"frameTable": {
+					"name": "frameTable"
+				},
+				"frameTL": {
+					"name": "frameTL"
+				},
+				"frameTC": {
+					"name": "frameTC"
+				},
+				"frameTR": {
+					"name": "frameTR"
+				},
+				"frameML": {
+					"name": "frameML"
+				},
+				"frameBody": {
+					"name": "frameBody"
+				},
+				"frameMR": {
+					"name": "frameMR"
+				},
+				"frameBL": {
+					"name": "frameBL"
+				},
+				"frameBC": {
+					"name": "frameBC"
+				},
+				"frameBR": {
+					"name": "frameBR"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Etna.grid.plugin.ui.Import"
+	},
+	"Etna.picker.BroadDate": {
+		"defaultConfig": {
+			"displayMonths": 3,
+			"columnCount": 3
+		},
+		"config": {
+			"displayMonths": 3,
+			"columnCount": 3
+		},
+		"extends": "Ext.Component||Ext.container.Container||Etna.picker.BroadDate"
+	},
+	"Etna.toolbar.TreeFinder": {
+		"defaultConfig": {
+			"publishes": {},
+			"twoWayBindable": {}
+		},
+		"config": {
+			"publishes": {},
+			"twoWayBindable": {}
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.toolbar.Toolbar||Etna.toolbar.TreeFinder"
+	},
+	"Etna.tree.TreeActionColumn": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.tree.Column||Etna.tree.TreeActionColumn"
+	},
+	"Etna.upload.ui.DataView": {
+		"defaultConfig": {
+			"uploader": null
+		},
+		"config": {
+			"uploader": null
+		},
+		"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View||Etna.upload.ui.DataView"
+	},
+	"Etna.upload.ui.Grid": {
+		"defaultConfig": {
+			"uploader": null
+		},
+		"config": {
+			"uploader": null
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.panel.Table||Ext.grid.Panel||Etna.upload.ui.Grid"
+	},
+	"Etna.upload.StoreBasedUploader": {
+		"defaultConfig": {
+			"maxFileCount": 0,
+			"minFileCount": 0,
+			"validation": null,
+			"validationField": null,
+			"uploader": null,
+			"multipartParams": {},
+			"multipartHeaders": {},
+			"browseButton": null,
+			"moxieElement": null,
+			"container": null,
+			"dropElement": null,
+			"preventDuplicates": false,
+			"multiSelection": true,
+			"maxFileSize": "10m",
+			"minFileSize": 0,
+			"totalFileSize": 0,
+			"publishes": {},
+			"twoWayBindable": {},
+			"childEls": {
+				"frameTable": {
+					"name": "frameTable"
+				},
+				"frameTL": {
+					"name": "frameTL"
+				},
+				"frameTC": {
+					"name": "frameTC"
+				},
+				"frameTR": {
+					"name": "frameTR"
+				},
+				"frameML": {
+					"name": "frameML"
+				},
+				"frameBody": {
+					"name": "frameBody"
+				},
+				"frameMR": {
+					"name": "frameMR"
+				},
+				"frameBL": {
+					"name": "frameBL"
+				},
+				"frameBC": {
+					"name": "frameBC"
+				},
+				"frameBR": {
+					"name": "frameBR"
+				}
+			}
+		},
+		"config": {
+			"maxFileCount": 0,
+			"minFileCount": 0,
+			"validation": null,
+			"validationField": null,
+			"uploader": null,
+			"multipartParams": {},
+			"multipartHeaders": {},
+			"browseButton": null,
+			"moxieElement": null,
+			"container": null,
+			"dropElement": null,
+			"preventDuplicates": false,
+			"multiSelection": true,
+			"maxFileSize": "10m",
+			"minFileSize": 0,
+			"totalFileSize": 0,
+			"publishes": {},
+			"twoWayBindable": {},
+			"childEls": {
+				"frameTable": {
+					"name": "frameTable"
+				},
+				"frameTL": {
+					"name": "frameTL"
+				},
+				"frameTC": {
+					"name": "frameTC"
+				},
+				"frameTR": {
+					"name": "frameTR"
+				},
+				"frameML": {
+					"name": "frameML"
+				},
+				"frameBody": {
+					"name": "frameBody"
+				},
+				"frameMR": {
+					"name": "frameMR"
+				},
+				"frameBL": {
+					"name": "frameBL"
+				},
+				"frameBC": {
+					"name": "frameBC"
+				},
+				"frameBR": {
+					"name": "frameBR"
+				}
+			}
+		},
+		"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Etna.upload.StoreBasedUploader"
+	},
+	"Etna.ux.form.SearchField": {
+		"defaultConfig": {},
+		"config": {},
+		"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Trigger||Etna.ux.form.SearchField"
+	},
+	"Etna.view.Thumbnail": {
+		"defaultConfig": {
+			"thumbnailConfig": {},
+			"parameterName": "param",
+			"validation": null,
+			"validationField": null
+		},
+		"config": {
+			"thumbnailConfig": {},
+			"parameterName": "param",
+			"validation": null,
+			"validationField": null
+		},
+		"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View||Etna.view.Thumbnail"
+	}
+}

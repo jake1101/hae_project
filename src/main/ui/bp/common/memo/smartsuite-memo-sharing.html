@@ -1,0 +1,336 @@
+<link rel="import" href="smartsuite-memo-search-tab.html">
+
+<dom-module id="smartsuite-memo-sharing">
+	<style>
+		:host {
+            @apply(--vbox-layout);
+        }
+	</style>
+
+	<template>
+<!-- 
+	************************************************************************************************************
+	* Service Area
+	************************************************************************************************************
+-->		
+		<!-- 메모 공유 정보 조회-->
+		<sc-ajax id="findListSharedUsers"
+    		 url="findListSharedUsers.do"
+             body="{{memoInfo}}"
+             last-response="{{resultList}}"
+             on-response="completeFindListSharedUsers">
+		</sc-ajax>
+		
+		<!-- 메모 공유 설정 -->
+		<sc-ajax id="manageSharedInfo"
+    		 url="manageSharedInfo.do"
+             body="{{shareParam}}"
+             on-response="completeManageSharedInfo">
+		</sc-ajax>
+		
+		<!-- 메모 공유 삭제 -->
+        <sc-ajax id="deleteSharedInfo"
+                 url="deleteSharedInfo.do"
+                 body="{{deleteParam}}"
+                 on-response="completeDeletingList">
+        </sc-ajax>
+<!--  
+	************************************************************************************************************
+	* UI Area
+	************************************************************************************************************
+-->
+		<div class="smartsuite-memo-share-toolbar">
+			<sc-button text="사용자추가"   class="smartsuite-memo-sharing-mgt-btn" on-click="onClickAddUser"></sc-button>
+			<sc-button text="선택삭제" class="smartsuite-memo-sharing-mgt-btn" on-click="onClickRemoveUser"></sc-button>
+		</div>
+		<sc-grid id="userGridPanel" class="flex" data-provider="{{resultList}}" use-state="false" editable="false">
+            <sc-grid-columns>
+                <sc-data-column data-field="usr_id" header-text="아이디" width="90" text-align="center"></sc-data-column>
+                <sc-data-column data-field="usr_nm" header-text="이름" width="120" text-align="center"></sc-data-column>
+                <sc-data-column data-field="dept_nm" header-text="부서명" width="90" text-align="center"></sc-data-column>
+            </sc-grid-columns>
+        </sc-grid>
+		<div class="smartsuite-memo-share-toolbar">
+			<sc-button text="완료" class="smartsuite-memo-complete-btn" on-click="onClickComplete"></sc-button>
+			<sc-button text="취소" class="smartsuite-memo-complete-btn" on-click="onClickCancel"></sc-button>
+		</div>
+	</template>
+<!--  
+	************************************************************************************************************
+	* Script Area
+	************************************************************************************************************
+-->		
+	<script>
+		Polymer({
+			is : 'smartsuite-memo-sharing',
+			
+			properties : {
+				
+	            /**
+				 * 변경 전 메모 공유 데이터
+				 * @type {Object}
+				 */
+				originData: {
+					type: Object,
+					value: function() {
+						return {
+							usr_id: []
+						};
+					}
+				},
+				
+				/**
+				 * findListSharedUsers.do 의 파라미터로 공유할 메모의 memo_id 를 담고 있음
+				 * @type {Object}
+				 */
+				memoInfo: {
+					type: Object,
+					value: function() {
+						return {
+							memo_id: null
+						};
+					}
+	            },
+	            
+	            /**
+				 * manageSharedInfo.do 의 파라미터로 공유할 메모의 memo_id 와 usr_id 를 담고 있음
+				 * @type {Object}
+				 */
+	            shareParam: {
+					type: Object,
+					value: function() {
+						return {
+							usr_id: [],
+							memo_id: null
+						};
+					}
+	            },
+	            
+	           	deleteParam : {
+	            	type: Object,
+					value: function() {
+						return {
+							memo_id: null,							
+							usr_id: []
+						};
+					}
+	            },
+                
+                resultList : {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                },
+                
+                isNewMemo : {
+                	type : Object,
+                	value : false
+                }
+			},
+			
+			attached : function() {
+				this.fire('load-completed');
+			},		
+
+			loadData : function() {
+				memoUtil.request(this.$.findListSharedUsers);
+			},
+			
+			/**
+			 * 전달 받은 파라미터 memo_id 세팅
+ 			 * @param {String} 공유 메모 아이디
+			 */
+			setParam : function(id, isNew) {
+				this.isNewMemo = isNew;
+				this.memoInfo.memo_id = id;
+				this.shareParam.memo_id = id;
+				this.loadData();
+			},
+			
+			/**
+			 * 팝업으로 그리드에 데이터를 넣을시, 그리드에 만약 값이 존재한다면 넣지 않도록 하는 로직
+ 			 * @param {Array} 사용자 정보 팝업에서 체크된 사용자 리스트
+ 			 * @param {Element} 공유 사용자 데이터 관련 그리드
+ 			 * @param {String} 공유 사용자 아이디
+			 */
+			addList2Grid : function(selected) {
+				var me = this,
+					provider = me.$.userGridPanel.getDataProvider(),
+	     			currentRow = provider.getItems();
+				
+				if (selected.length > 0) {
+					for (var i = 0; i < selected.length; i++) {
+						var exist = false;
+						for(var j = 0; j < currentRow.length; j++){
+							if(currentRow[j].usr_id === selected[i].usr_id) {
+								exist = true;
+								break;
+							}
+						}
+						if(!exist) {
+							provider.addItem({'usr_id':selected[i].usr_id, 'usr_nm':selected[i].usr_nm, 'dept_nm':selected[i].dept_nm});
+						}
+						else {
+							memoUtil.alert(me.translate('이미 등록된 사용자입니다.'));
+						}
+					}
+				}
+			},
+            
+            /**
+             * 공유 데이터 변경 여부 체크
+             */
+			compareSharedData : function() {
+				var me = this,
+					idx = 0,
+					provider = me.$.userGridPanel.getDataProvider(),
+         			currentRow = provider.getItems();
+					orgLen = me.originData.usr_id.length,
+					modLen = currentRow.length;
+
+				if(orgLen !== modLen){
+					return true;
+				}
+				
+				for(var i = 0; i < orgLen; i++){
+					for(var j = 0; j < modLen; j++){
+						if(this.originData.usr_id[i] === currentRow[j].usr_id && ++idx === modLen){
+							break;
+						}
+					}
+				}
+				
+				if(idx !== modLen){
+					return true;
+				}
+				else {
+					return false;
+				}
+			},
+			
+            /**
+             * 공유 대상자 추가
+             */
+         	addSharedUser : function(){
+         		var me = this,
+         			provider = me.$.userGridPanel.getDataProvider(),
+         			addedRow = provider.getNewItems(),
+         			length = addedRow.length;
+         		
+         		for(var i = 0; i < length; i++) {
+         			me.shareParam.usr_id[i] = addedRow[i].usr_id;
+				}
+         		
+         		if(me.isNewMemo) {
+         			me.fire('share-setting-completed', me.shareParam);
+         			me.fire('close');
+         		}
+         		else {
+	            	memoUtil.request(me.$.manageSharedInfo);
+         		}
+         	},
+  
+			/**
+			 * 유저 추가 버튼
+			 */
+			onClickAddUser : function() {
+				var me = this,
+					provider = me.$.userGridPanel.getDataProvider();
+				
+				//사용자 검색 팝업을 호출한다.
+				var memoPopup = memoUtil.popup('smartsuite-memo-search-tab', me, 420, 420, {
+					'selected-items' : function(popup, e){
+						var selected = e.detail;
+						
+						me.addList2Grid(selected);
+						memoPopup.hide();
+					}
+                },{title : me.translate("사용자 추가")});
+				
+				memoPopup.classList.add('smartsuite-memo-popup');
+				memoPopup.show();
+			},
+			
+            /**
+             * 선택 유저 삭제
+             */
+            onClickRemoveUser : function() {
+            	var me = this,
+                	provider = me.$.userGridPanel.getDataProvider(),
+                	checked = provider.selectionCheckedItems();
+            	
+            	if (checked.length === 0) {
+                    memoUtil.alert('선택된 항목이 없습니다');
+                    return;
+                }
+
+                memoUtil.confirm('삭제 하시겠습니까?', function() {
+                    var deletedList = provider.removeItems(),
+                    	userList = [];
+                	
+                    for(var i = 0; i < deletedList.length; i++){
+                    	userList.push(deletedList[i].usr_id);
+                	}
+                	
+                	me.set('deleteParam.memo_id', me.memoInfo.memo_id);
+                	me.set('deleteParam.usr_id', userList);
+
+                	memoUtil.request(me.$.deleteSharedInfo);
+                });
+            },
+            
+            /**
+             * 공유 대상자 추가 완료
+             */
+            onClickComplete : function() {
+            	var isChanged;
+            	
+            	isChanged = this.compareSharedData();
+            	
+            	if(isChanged){
+            		this.addSharedUser();
+            	}
+            	else {
+            		memoUtil.alert(this.translate("수정된 내용이 없습니다."));
+            		return;
+            	}
+            	
+            },
+         	
+            /**
+             * 공유 대상자 추가 취소
+             */
+			onClickCancel : function(){
+				this.fire("close");
+			},
+            
+            /**
+			* 메모 공유 데이터 조회 성공 시 호출
+			*/
+            completeFindListSharedUsers : function(e, res){
+            	var result = res.response;
+            	
+            	for(var i = 0; i < result.length; i++){
+                	this.originData.usr_id[i] = result[i].usr_id;
+            	}
+            },
+            
+            /**
+			* 메모 공유 데이터 수정 성공 시 호출
+			*/
+            completeManageSharedInfo : function(e, res){
+            	memoUtil.alert(this.translate("메모 공유 설정이 완료되었습니다."));
+
+            	this.fire("close");
+            },
+            
+            completeDeletingList : function(e, res) {
+ 				var me = this;
+ 				
+ 				memoUtil.alert(this.translate("삭제하였습니다."));
+ 				me.loadData();
+            }
+		});
+	</script>
+</dom-module>

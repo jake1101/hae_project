@@ -1,0 +1,152 @@
+<dom-module id="es-sc-upload-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-ajax id="savePr" url="savePr.do" body="{{prData}}">
+		</sc-ajax>
+	
+		<sc-panel title-text="기본정보" collapsible="true">
+			<sc-toolbar>
+				<sc-spacer></sc-spacer>
+				<sc-button text="저장" on-click="onSave"></sc-button>
+			</sc-toolbar>
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:150px"/>
+	        		<col/>
+	        	</colgroup>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="구매운영단위"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-text-field class="w-150" value="{{prData.oper_org_nm}}"></sc-text-field>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="구매자 첨부"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-upload id="intn_upload" class="h-200" value="{{prData.intn_att_no}}" editable="{{editable}}"></sc-upload>
+	        		</td>
+	        	</tr>
+	        </table>
+		</sc-panel>
+		
+		<sc-upload id="extn_upload" class="h-200" title-text="기타 첨부" collapsible="true"
+				value="{{prData.extn_att_no}}" editable="{{editable}}"
+				uploadable="true"
+				extension="txt,doc,xls"
+				restrict-extension="jpg,gif,png,bmp"
+				max-total-file-count="3"
+				max-total-file-size="2.5MB"
+				max-file-size="1MB"
+				min-file-size="2bytes"
+				reorderable="true"
+				prevent-duplicate="true"
+				view-type="thumbnail"
+				hide-view-control="false"
+				on-load-complete="onLoadComplete"
+				on-upload-completed="onUploadCompleted"
+				on-delete-complete="onDeleteComplete"
+				on-filter-error="onFilterError"
+				on-item-select="onItemSelect"
+				>
+		</sc-upload>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-sc-upload-sample',
+		properties : {
+			prData : {
+				type : Object,
+				value : function() {
+					return {
+						oper_org_nm : "엠로구매",
+						intn_att_no : "test_in",
+						extn_att_no : "test_ex",
+					}
+				}
+			},
+			editable : {
+				type : Boolean,
+				value : function() {
+					return true
+				}
+			}
+		},
+		initialized : function() {
+			
+		},
+		// 저장 버튼 클릭 시
+		onSave : function() {
+			var me = this;
+			
+			// 첨부파일 upload
+			me.$.intn_upload.upload().then(function() {
+				var prData = me.get("prData");
+				
+				// 업무 저장
+				// UT.request(me.$.savePr);
+			});
+		},
+		/**
+		 * [load-complete]
+		 * 
+		 * 첨부파일 목록 조회 완료
+		 */
+		onLoadComplete: function(event) {
+			var me = this, files = event.detail;
+			
+			console.log("[load-complete] files", files);
+		},
+		/**
+		 * [upload-completed]
+		 * 
+		 * 첨부파일 업로드 완료
+		 */
+		onUploadCompleted : function(event) {
+			var me = this, files = event.detail;
+			
+			console.log("[upload-completed] files", files);
+		},
+		/**
+		 * [delete-complete]
+		 *
+		 * 첨부파일 삭제 완료
+		 */
+		onDeleteComplete : function(event) {
+			var me = this;
+			
+			console.log("[delete-complete]");
+		},
+		/**
+		 * [filter-error]
+		 *
+		 * 첨부파일 필터(확장자, 사이즈)의 설정된 조건에 벗어나는 파일을 첨부할 때
+		 */
+		onFilterError : function(event) {
+			var me = this, error = event.detail;
+			
+			console.log("[filter-error] error", error);
+		},
+		/**
+		 * [item-select]
+		 *
+		 * 첨부파일 아이템 선택 시
+		 */
+		onItemSelect : function(event) {
+			var me = this,
+				e = event.detail,
+				index    = e.index,
+				selected = e.item;
+			
+			console.log("[item-select] index : " + index + ", selected : " , selected);
+		},
+	});
+	</script>
+</dom-module>

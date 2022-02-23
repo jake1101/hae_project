@@ -1,0 +1,164 @@
+<dom-module id="ep-sms-send">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: SMS 전송 팝업
+        ** @Description		: SMS 전송 팝업
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.07.10
+        ** @History 		: 2020.07.10 jhkim 최초작성
+        					: 2021.05.13 yshong 전체 전송 기능 사용여부 확인하여 일괄전송 기능 추가.
+        ******************************************************************************************
+    -->
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+		sc-checkbox-field {
+			margin-left : -8px;
+		}
+		
+	</style>
+	<template>
+		<sc-ajax id="sendSms"
+			url="sendSms.do"
+			body="{{smsInfo}}"
+			on-response="completeSendSms">
+		</sc-ajax>
+		<sc-ajax id="sendSmsAll"
+			url="sendSmsAll.do"
+			body="{{smsInfo}}"
+			on-response="completeSendSms">
+		</sc-ajax>
+		
+        <table class="tb-form">
+        	<colgroup>
+        		<col style="width:100px;"/>
+        		<col/>
+        	</colgroup>
+<!--         	<tr> -->
+<!--         		<th> -->
+<!--         			<sc-label text="전체 전송"></sc-label> -->
+<!--         		</th> -->
+<!--         		<td> -->
+<!--         			<sc-checkbox-field on-checkchange="changeAllSend" id="isSendAll" value="{{isSendAllChecked}}"></sc-checkbox-field> -->
+<!--         			<sc-label hidden="{{!isSendAllChecked}}" style="font-weight:300; font-size:12px; color:#666; " text = " ※ 화면에 표시된 모든 작업자에게 SMS전송"></sc-label> -->
+<!--         		</td> -->
+<!--         	</tr> -->
+        	<tr>
+        		<th>
+        			<sc-label text="수신자"></sc-label>
+        		</th>
+        		<td>
+        			<sc-text-field value={{smsInfo.name}}{{smsInfo.sendAllName}} readonly ="true"></sc-text-field>
+        		</td>
+        	</tr>
+        	<tr>
+        		<th>
+        			<sc-label text="수신번호"></sc-label>
+        		</th>
+        		<td>
+        			<sc-text-field value={{smsInfo.phoneNumber}}{{smsInfo.sendAllName}} readonly ="true"></sc-text-field>
+        		</td>
+        	</tr>
+        	<tr>
+        		<th>
+        			<sc-label text="SMS 내용"></sc-label>
+        		</th>
+        		<td>
+        			<sc-textarea-field class="h-100" max-length="70" placeholder="센터에서 연락을 요청하였습니다." value="{{smsInfo.body}}"  ></sc-textarea-field>
+        		</td>
+        	</tr>
+        </table>
+         <div  style= "text-align:center; margin-top: 1%;">
+        	 <sc-button  text="전송" on-click="onOk" ></sc-button>
+        	 <sc-button style="margin-left: 10px;" text="취소" on-click="onCancle"></sc-button>
+        </div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : "ep-sms-send",
+			properties : {
+				titleText:{
+	                type: String,
+					value: "SMS 전송"
+				},
+				searchParam: {
+					type : Object,
+					value : function(){
+						return {
+							siteId : SCMdiManager.searchParam.site_id
+						};
+					}
+				},
+				smsInfo: {
+	            	type: Object,
+	                value : function() {
+	                	return{};
+	                }
+	            },
+	            provider : {
+	            	type : Object,
+	            	value : function() {
+	            		return {};
+	            	}
+	            }
+			},
+			load:function(data, provider){
+ 				var me = this;
+ 				me.set("smsInfo.name", data.vendorName+" ["+data.targetJobName+"] "+data.targetName);
+ 				me.set("smsInfo.phoneNumber", data.phoneNumber);
+				me.set("provider", provider);
+ 				
+			},
+			onOk : function(){
+				var me = this;
+				if(UT.isEmpty(me.smsInfo.body)){
+					me.set("smsInfo.body", "센터에서 연락을 요청하였습니다.");
+				}
+				
+				if(me.isSendAllChecked && me.provider && me.provider.getItems().length > 1 ){
+					// 작업자 전체에게 보내는 상황이다.
+					var workers = [];
+					var targets = me.provider.getItems();
+					for(var i=0; i<targets.length; i++){
+						workers.push({"phoneNumber" : targets[i].phoneNumber});
+					}
+					me.smsInfo.workers = workers;
+					me.smsInfo.smsType = "input";
+					console.log(me.smsInfo);
+					UT.request(me.$.sendSmsAll);
+				}else{
+					// 한명에게 보낸다.
+					UT.request(me.$.sendSms);
+				}
+				
+			},
+			onCancle : function(){
+				var me = this;
+				me.fire("close");
+			},
+			completeSendSms : function(e,res){
+				var me = this,
+					result = res.response;
+				
+				if(result.result_status === 'S'){
+	                UT.alert("전송에 성공하였습니다", function(){ // 저장하였습니다.
+	                	me.fire("close");
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+			},
+			changeAllSend : function(e){
+				var me = this;
+				
+				if(me.isSendAllChecked && me.provider && me.provider.getItems().length > 1 ){
+					me.set("smsInfo.sendAllName", " 외 "+(me.provider.getItems().length -1 ) + "명");
+				}else{
+					me.set("smsInfo.sendAllName", "");
+				}
+			}
+		})
+	</script>
+</dom-module>

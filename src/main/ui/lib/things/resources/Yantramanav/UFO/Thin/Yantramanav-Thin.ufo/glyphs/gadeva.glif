@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="gadeva" format="1">
+  <advance width="1144"/>
+  <unicode hex="0917"/>
+  <outline>
+    <contour>
+      <point x="840" y="1236" type="line"/>
+      <point x="889" y="1236" type="line"/>
+      <point x="889" y="0" type="line"/>
+      <point x="840" y="0" type="line"/>
+    </contour>
+    <contour>
+      <point x="1174" y="1225" type="line"/>
+      <point x="-30" y="1225" type="line"/>
+      <point x="-30" y="1274" type="line"/>
+      <point x="1174" y="1274" type="line"/>
+    </contour>
+    <contour>
+      <point x="346" y="1258" type="line"/>
+      <point x="346" y="562" type="line" smooth="yes"/>
+      <point x="346" y="511"/>
+      <point x="317" y="472"/>
+      <point x="297" y="472" type="qcurve" smooth="yes"/>
+      <point x="259" y="472"/>
+      <point x="204" y="567"/>
+      <point x="204" y="622" type="qcurve" smooth="yes"/>
+      <point x="204" y="654"/>
+      <point x="237" y="687"/>
+      <point x="274" y="687" type="qcurve" smooth="yes"/>
+      <point x="309" y="687" type="line"/>
+      <point x="297" y="665" type="line"/>
+      <point x="297" y="1258" type="line"/>
+    </contour>
+    <contour>
+      <point x="809.0" y="1256.0" type="move" name="top"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.typemytype.robofont.guides</key>
+      <array>
+      </array>
+      <key>com.typemytype.robofont.layerData</key>
+      <dict>
+      </dict>
+      <key>org.robofab.fontlab.mark</key>
+      <integer>210</integer>
+    </dict>
+  </lib>
+</glyph>

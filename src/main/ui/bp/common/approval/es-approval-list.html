@@ -1,0 +1,87 @@
+
+<dom-module id="es-approval-list">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<!-- 결재 템플릿 목록 그리드 조회 -->
+		<sc-ajax id="findList"
+				 url="findListApprovalTmp.do"
+				 body="{{searchParam}}"
+				 last-response="{{resultList}}">
+		</sc-ajax>
+
+		<sc-grid id="gridPanel" data-provider="{{resultList}}" class="flex" use-state="false"
+				 on-item-click="onItemClick">
+			<cc-grid-toolbar  title-text="결재유형목록" ></cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-data-column data-field="aprv_typ_cd" header-text="결재유형" width="150" text-align="center" style-name="link"></sc-data-column>
+				<sc-data-column data-field="aprv_typ_nm" header-text="결재유형명" width="200" text-align="left"></sc-data-column>
+				<sc-data-column data-field="use_yn" header-text="작성여부" width="100" text-align="center"></sc-data-column>
+			</sc-grid-columns>
+		</sc-grid>
+
+	</template>
+
+	<script>
+        Polymer({
+            is: 'es-approval-list',
+
+            properties:{
+                // 조회 조건
+                searchParam:{
+                    type: Object,
+                    value: function() {
+                        return {
+                            grp_cd : "G003" // 결재 유형 코드
+						};
+                    }
+                },
+
+                // 조회 결과
+				resultList: {
+                    type: Array,
+					value: function() {
+                        return [];
+					}
+				}
+            },
+            /******************************
+             * 초기화 설정
+             ******************************/
+			// 초기화 완료 후 호출 함수
+            initialized: function(){
+                var me = this;
+                me.onFindList();
+            },
+
+            /******************************
+             * 그리드 이벤트
+             ******************************/
+            // 그리드 cell click 이벤트
+            onItemClick: function(event) {
+                var me = this,
+                    data = event.detail.data,
+                    item = event.detail.item;
+
+                if(item.dataField === "aprv_typ_cd"){
+                    me.fire("selected-approval", data);
+                }
+            },
+
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+			// 조회
+            onFindList: function(){
+                var me = this;
+                UT.request(me.$.findList);
+            }
+
+        });
+	</script>
+
+</dom-module>

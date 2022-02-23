@@ -1,0 +1,65 @@
+<sc-link rel="import" href="es-role-list.html"></sc-link>
+<sc-link rel="import" href="es-rolemenu-list.html"></sc-link>
+<sc-link rel="import" href="es-rolemenufunc-list.html"></sc-link>
+<sc-link rel="import" href="es-roleuser-list.html"></sc-link>
+<!-- <sc-link rel="import" href="es-roledept-list.html"></sc-link> -->
+
+<dom-module id="em-role">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    	<cc-page-title-bar></cc-page-title-bar>
+    	
+    	<div class="hbox flex">
+	        <es-role-list id="roleList" on-selected-role="onSelectedRole" on-reset-role-detail="onResetRoleDetail" class="flex-4"></es-role-list>
+	
+	        <div class="hspace-10"></div>
+
+	        <sc-tab-navigation id="tabNavi"  class="flex-6">
+	            <es-rolemenu-list id="rolemenuList" title-text="롤/메뉴" on-saved="onSaved"></es-rolemenu-list>
+	            <es-rolemenufunc-list id="rolemenufuncList" title-text="롤/메뉴기능" on-saved="onSaved"></es-rolemenufunc-list>
+	            <es-roleuser-list id="roleuserList" title-text="롤/사용자" on-saved="onSaved"></es-roleuser-list>
+	            <!--
+	            2019.05.15 부서 미사용으로 삭제 
+	             <es-roledept-list id="roledeptList" title-text="롤/부서" ></es-roledept-list> -->
+	        </sc-tab-navigation>
+    	</div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'em-role',
+
+            // 롤 현황 : 롤코드 선택
+            onSelectedRole: function(e, data) {
+                var me = this;
+                me.$.rolemenuList.load(data);
+                me.$.rolemenufuncList.load(data);
+                me.$.roleuserList.load(data);
+//                 me.$.roledeptList.load(data);
+            },
+            // 롤 현황 조회 시 상세 내용 초기화
+            onResetRoleDetail: function() {
+                var me = this;
+                me.$.rolemenuList.clear();
+                me.$.rolemenufuncList.clear();
+                me.$.roleuserList.clear();
+//                 me.$.roledeptList.clear();
+
+                me.$.tabNavi.selectItem(me.$.rolemenuList);
+            },
+            onSaved: function(){
+            	var me = this;
+                
+            	me.$.roleList.onFindList();
+            }
+
+        });
+    </script>
+
+</dom-module>

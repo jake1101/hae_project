@@ -1,0 +1,39 @@
+<sc-link rel="import" href="es-menu-control-sample.html"></sc-link>
+<sc-link rel="import" href="es-menu-control-description.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-menu-control-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="hbox flex" title-text="동적 메뉴 제어">
+            <es-menu-control-description class="fit flex"></es-menu-control-description>
+            <es-menu-control-sample id="sample" class="box flex"></es-menu-control-sample>
+        </sc-panel>
+        <es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-menu-control-guide',
+		properties : {
+			srcList : {
+                type : Array,
+                value : function() {
+                    return [{
+                        title        : "es-menu-control-sample.html",
+                        i18nDisabled : true,
+                        extension    : "html",
+                        url          : "/ui/bp/developer/guide/menucontrol/es-menu-control-sample.html"
+                    }];
+                }
+			}
+		},
+		initialized : function() {
+			
+		}
+	});
+	</script>
+</dom-module>

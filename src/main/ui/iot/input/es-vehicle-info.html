@@ -1,0 +1,346 @@
+<!-- <sc-link rel="import" href="ep-tag-list.html"></sc-link> -->
+<sc-link rel="import" href="ep-driver-list.html"></sc-link>
+<sc-link rel="import" href="ep-image-view.html"></sc-link>
+
+<dom-module id="es-vehicle-info">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    
+   		 <sc-request-group init>
+				<sc-code-group>
+					<sc-code code="USEFLAG" value="{{useList}}"></sc-code>
+					<sc-code code="IOT004" value="{{typList}}"></sc-code>
+					<sc-code code="MI001" value="{{mapIcon}}"></sc-code>
+				</sc-code-group>
+				
+		</sc-request-group>
+    	<sc-ajax
+				id="findListVendor"
+				url="findListVendor.do"
+				body="{{searchParam}}"
+				last-response="{{vendorList}}">
+		</sc-ajax>
+		
+		<sc-ajax id="saveInfoVehicle"
+			url="saveInfoVehicle.do"
+			on-response="completeSaveInfoVehicle">
+		</sc-ajax>
+
+        <cc-auth-checker check-list="auth-s"></cc-auth-checker>
+		<div class="vspace-5"></div>
+
+		<cc-sub-title-bar >
+            <sc-button text="저장" on-click="onSave" auth-s></sc-button>
+		</cc-sub-title-bar>
+		
+		<div class="vspace-5"></div>
+
+		<div class="vbox page">
+	        <table class="tb-form">
+	            <colgroup>
+	                <col style="width:150px">
+	                <col>
+	                <col style="width:150px">
+	                <col>
+	            </colgroup>
+	            <tr>
+	                <th><sc-label text="id"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{vehicleInfo.id}}" max-length="30"  readonly="true"  placeholder="자동으로 입력됩니다."></sc-text-field></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="협력사"></sc-label></th>
+	                <td colspan ="3">
+		            <sc-combobox-field id="vendor" items="{{vendorList}}" required="true" display-field="name" value-field="id" value="{{vehicleInfo.vendorId}}" placeholder="전체"></sc-combobox-field>
+	                </td>								
+	            </tr>
+	            <tr>
+	                <th><sc-label text="유형"></sc-label></th>
+					<td id="colspanTd">
+	                	<sc-combobox-field id="type" items="{{typList}}" required="true" display-field="label" value-field="data" value="{{vehicleInfo.type}}" placeholder="전체"></sc-combobox-field>
+	                </td>	           
+	                <th hidden="[[!formula('isSystem')]]" ><sc-label text="지도아이콘"></sc-label></th>
+					<td hidden="[[!formula('isSystem')]]">
+	                	<sc-combobox-field id="mapIcon" items="{{mapIcon}}" required="false" display-field="label" value-field="data" value="{{vehicleInfo.mapIcon}}" placeholder="선택안함"></sc-combobox-field>
+	                </td>	           
+	            </tr>
+	            <tr>
+	                <th><sc-label text="장비명"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{vehicleInfo.name}}" required="true" max-length="100" ></sc-text-field></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="운전자"></sc-label></th>
+	                <td colspan ="2"><sc-text-field value="{{vehicleInfo.workerName}}" max-length="100" readonly="true"></sc-text-field></td>
+	                <td><sc-trigger-field id="popupTrigger" on-trigger-click="driverPopup" trigger-cls="search" ></sc-trigger-field><sc-button style="margin-left: 10px;" text="초기화" on-click="initDriver" auth-s></sc-button></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="제원"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{vehicleInfo.specification}}"  max-length="100" ></sc-text-field></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="등록번호"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{vehicleInfo.enrollNum}}" max-length="100" ></sc-text-field></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="입고일"></sc-label></th>
+	                <td><sc-date-field style="width: 100px;" string-date="true" value="{{vehicleInfo.receiptDt}}" default-value="0d"></sc-date-field> </td>
+	                <th><sc-label text="반출일"></sc-label></th>
+	                <td><sc-date-field style="width: 100px;" string-date="true" value="{{vehicleInfo.takeOutDt}}" default-value="0d"></sc-date-field> </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="면허번호"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{vehicleInfo.licenseNum}}" max-length="100" ></sc-text-field></td>
+	            </tr>
+ 				<tr>
+	                <th><sc-label text="보험기간"></sc-label></th>
+	                <td>
+		                <sc-period-date-field from-value="{{vehicleInfo.startDt}}" to-value="{{vehicleInfo.endDt}}"
+	   										default-from-value="-1M" default-to-value="0d"	
+	  											string-date="true">
+	   					</sc-period-date-field>
+	  					</td>
+	                <th><sc-label text="보험비고"></sc-label></th>
+	                <td><sc-text-field value="{{vehicleInfo.insureMemo}}" max-length="100" ></sc-text-field></td>
+		        </tr>
+	            <tr>
+	                <th><sc-label text="장비등록증/보험증권/면허"></sc-label></th>
+	                <td colspan = "3">
+						<sc-upload id="uploadPanel2" style="height:200px" 
+							value="{{vehicleInfo.equipRegistGrpCode}}"
+							on-upload-completed="uploadCompleted"
+							on-delete-completed="deleteCompleted"
+							on-item-select="onItemSelect"
+							view-type="thumbnail"
+							downloadable="true"
+							>
+						</sc-upload>
+					</td>
+	            </tr>
+<!-- 	            <tr> -->
+<!-- 	                <th><sc-label text="보험증권"></sc-label></th> -->
+<!-- 	                <td colspan = "3"> -->
+<!-- 	                	<sc-upload id="uploadPanel3" style="height:200px"  -->
+<!-- 							value="{{vehicleInfo.insurancePolicyGrpCode}}" -->
+<!-- 							on-upload-completed="uploadCompleted" -->
+<!-- 							on-delete-completed="deleteCompleted" -->
+<!-- 							on-item-select="onItemSelect" -->
+<!-- 							view-type="thumbnail" -->
+<!-- 							downloadable="true" -->
+<!-- 							> -->
+<!-- 						</sc-upload> -->
+<!-- 	                </td> -->
+<!-- 	            </tr> -->
+<!-- 	            <tr> -->
+<!-- 	                <th><sc-label text="스마트태그"></sc-label></th> -->
+<!-- 	                <td colspan ="2"><sc-text-field value="{{vehicleInfo.sensorName}}" max-length="100" readonly="true" ></sc-text-field></td> -->
+<!-- 	          		<td><sc-trigger-field id="popupTrigger" on-trigger-click="tagPopup" trigger-cls="search" ></sc-trigger-field></td> -->
+<!-- 	            </tr> -->
+	            <tr>
+	                <th ><sc-label text="비고"></sc-label></th>
+	                <td colspan ="3"><sc-textarea-field value="{{vehicleInfo.memo}}" max-length="500" style="height:100px;"></sc-textarea-field></td>
+	            </tr>
+            	<tr>
+	                <th><sc-label text="사용여부"></sc-label></th>
+	                <td colspan = "3"><sc-checkbox-field input-value="{{vehicleInfo.useFlag}}" checked-value="Y" un-checked-value="N" ></sc-checkbox-field></td>
+	            </tr>
+	        </table>
+	        
+		</div>	        
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'es-vehicle-info',
+            formulas : {
+                // 신규 상태
+                isSystem: function() {
+                    return (SCSessionManager.userDetails.userInfo.access_level == "system");
+                },
+        		isSystemColspan : function(){
+                    return (SCSessionManager.userDetails.userInfo.access_level == "system")?"1":"3";
+            	}
+            },
+            properties : {
+                // 코드 데이터
+                codes: {
+                    type: Object,
+                    reset: false,
+                    value: function() {
+                        return {
+                            company: {}
+                        };
+                    }
+                },
+
+                // 이동장비 정보
+                vehicleInfo : {
+                    type : Object,
+                    value : function(){
+                        return {};
+                    }
+                },
+                searchParam : {
+                    type : Object,
+                    value : function(){
+                        return {};
+                    }
+                }
+            },
+
+
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+
+             initialized : function() {
+                 var me = this;
+                 UT.request(me.$.findListVendor);
+                 var colspan = (SCSessionManager.userDetails.userInfo.access_level == "system")?1:3;
+                 $("#colspanTd").attr("colspan", colspan);
+             },
+            load : function(data) {
+                var me = this;
+                me.$.uploadPanel2.reset();
+                me.set('vehicleInfo', data);
+            },
+
+            // 이동장비 신규 추가
+            initVehicle : function() {
+                var me = this;
+                me.vehicleInfo = {};
+
+                me.set("vehicleInfo.isNew", true);
+                me.set("vehicleInfo.useFlag","Y");// 사용여부
+                me.set("vehicleInfo.property",{});
+
+            },
+
+            // 초기화
+            clear: function() {
+                var me = this;
+                me.reset();
+            },
+
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+
+            
+            driverPopup : function(){
+            	 var me = this;
+            	var nodePopup1 = UT.popup("ep-driver-list", me, 700, 600, {
+	                   "show-list": function(popup, e) {
+	                	me.set("vehicleInfo.workerName", e.detail.name)
+	                	me.set("vehicleInfo.workerId", e.detail.id)
+	                   	popup.close();
+	                   	
+	                   }
+	               },{titleText: "운전자목록"});
+				nodePopup1.show();
+				nodePopup1.getWindowContent().load();
+            },
+            
+            initDriver : function(){
+            	var me = this;
+            
+            	me.set("vehicleInfo.workerName", "");
+            	me.set("vehicleInfo.workerId", "");
+            },
+            
+//             tagPopup : function(){
+//             	 var me = this;
+//             	var nodePopup2 = UT.popup("ep-tag-list", me, 700, 600, {
+// 	                   "show-list": function(popup, e) {
+//                 	    me.set("vehicleInfo.sensorName", e.detail.name)
+//                 	    me.set("vehicleInfo.sensorId", e.detail.id)
+// 	                   	popup.close();
+	                   	
+// 	                   }
+// 	               },{titleText: "태그목록"});
+// 				nodePopup2.show();
+// 				nodePopup2.getWindowContent().load();
+//             },
+            
+            
+            onSave : function(){
+            	var me = this;
+
+                if(!me.validate()){
+                    UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return;
+                }
+                UT.confirm("STD.N1200", function() { //저장 하시겠습니까?
+//                     me.$.uploadPanel.upload().then(function(){
+//                     Promise.all([me.$.uploadPanel.upload(), me.$.uploadPanel2.upload(),me.$.uploadPanel3.upload()]).then(function() {
+//                     	me.vehicleInfo.property= {"imageGrpCode" : me.vehicleInfo.imageGrpCode} ;
+//                     	me.vehicleInfo.property.insurancePolicyGrpCode= me.vehicleInfo.insurancePolicyGrpCode;
+ 					me.$.uploadPanel2.upload().then(function(){
+                    	me.vehicleInfo.property.equipRegistGrpCode= me.vehicleInfo.equipRegistGrpCode;
+                    	me.vehicleInfo.property.startDt= me.vehicleInfo.startDt;
+                    	me.vehicleInfo.property.endDt= me.vehicleInfo.endDt;
+                    	
+                    	me.vehicleInfo.property.specification= me.vehicleInfo.specification;
+                    	me.vehicleInfo.property.enrollNum= me.vehicleInfo.enrollNum;
+                    	me.vehicleInfo.property.receiptDt= me.vehicleInfo.receiptDt;
+                    	me.vehicleInfo.property.takeOutDt= me.vehicleInfo.takeOutDt;
+                    	me.vehicleInfo.property.licenseNum= me.vehicleInfo.licenseNum;
+                    	me.vehicleInfo.property.insureMemo= me.vehicleInfo.insureMemo;
+                    	me.vehicleInfo.property.memo= me.vehicleInfo.memo;
+                    	me.vehicleInfo.property.mapIcon= me.vehicleInfo.mapIcon;
+                    	
+                        me.$.saveInfoVehicle.body = {
+                            vehicleInfo : me.vehicleInfo
+                        };
+                        UT.request(me.$.saveInfoVehicle);
+                    })
+                });
+            },
+            
+            completeSaveInfoVehicle : function(e,res){
+            	var me = this,
+                result = res.response;
+
+	            if(result.result_status === 'S'){
+	                UT.alert("STD.N2400", function(){ // 저장하였습니다.
+	                	 me.fire('find-list');
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+            },
+            
+            onItemSelect: function(event, detail) {
+				var me = this;
+				if(detail.item) {
+					if(detail.item.id.indexOf('-file') !== -1) {
+						var imageReader = new FileReader();
+						imageReader.onload = (function(aFile) {
+							return function(e) {
+								var popup = UT.popup('ep-image-view', me, 600, 500, {}, {});
+								popup.show();
+								var popupContent = popup.getWindowContent();
+								popupContent.load(e.target.result, true);
+							};
+						})(detail.item.orgFile);
+						imageReader.readAsDataURL(detail.item.orgFile);
+					} else {
+						var popup = UT.popup('ep-image-view', me, 600, 500, {}, {});
+						popup.show();
+						var popupContent = popup.getWindowContent();
+						popupContent.load(detail.item.id);		
+					}
+				}
+			},
+            
+
+            
+        });
+    </script>
+</dom-module>

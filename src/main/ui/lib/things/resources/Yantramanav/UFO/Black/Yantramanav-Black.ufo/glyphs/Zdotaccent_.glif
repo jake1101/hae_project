@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="Zdotaccent" format="1">
+  <advance width="1124"/>
+  <unicode hex="017B"/>
+  <outline>
+    <component base="Z" xOffset="-6"/>
+    <component base="dotaccent" xOffset="356" yOffset="333"/>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.typemytype.robofont.layerData</key>
+      <dict>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

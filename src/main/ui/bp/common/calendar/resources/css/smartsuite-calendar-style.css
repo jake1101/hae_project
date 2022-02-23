@@ -1,0 +1,559 @@
+smartsuite-calendar-mgt {
+	min-width: 660px !important;
+	min-height: 430px !important;
+}
+
+smartsuite-calendar-mgt sc-selectbox-field > select {
+	height : 100% !important;
+	width : 100% !important;
+	border-color : #ccc !important;
+}
+
+smartsuite-calendar-mgt .calendarShortcut {
+	width:100% !important; height:100% !important;
+	padding:0px !important; margin:0 auto !important;
+	border:0px !important;
+	background-color: #f5f5f5 !important;
+}
+
+smartsuite-calendar-mgt .calendarShortcut .calendar-header {
+	background-color : #f5f5f5 !important;
+}
+
+smartsuite-calendar-mgt .calendarGroupWrapper {
+	height: 30% !important;
+    margin: 4px !important;
+    border: 1px solid silver;
+}
+
+smartsuite-calendar-mgt .dateChooserWrapper {
+	min-height : 202px !important;
+	max-height : 212px !important;
+	overflow : hidden !important;
+}
+
+smartsuite-calendar-mgt .dateChooserWrapper > .dateChooser {
+	border : none !important;
+	background-color : #f5f5f5 !important;
+}
+        
+
+smartsuite-calendar-mgt .dateChooserWrapper > .weekday {
+	background-color : #e8e8e8 !important;
+}
+
+smartsuite-calendar-shared-group .calendarSubWrapper {
+	border-bottom : 1px solid #c3cbd1 !important;
+}
+
+sc-button.calendarNaviIcon {
+	background: gray !important;
+    padding-right: 5px !important;
+}
+
+smartsuite-calendar-mgt .calendarRefresh {
+	background: gray !important;
+	background-image : url(../img/icon_c_refresh.png) !important;
+	background-repeat : no-repeat !important;
+	background-position : center center !important;
+	width : 18px !important;
+	height : 17px !important; 
+	border-radius: 10px !important;
+}
+
+smartsuite-calendar-add-schedule-popup {
+	overflow: hidden !important;
+}
+
+smartsuite-calendar-add-group-popup {
+	overflow: hidden !important;
+}
+
+smartsuite-calendar-mgt .calendarSearch {
+	background: gray !important;
+	background-image : url(../img/icon_c_search.png) !important;
+	background-repeat : no-repeat !important;
+	background-position : center center !important;
+	width : 18px !important;
+	height : 17px !important; 
+	border-radius: 10px !important;
+}
+
+smartsuite-calendar-mgt .calendarSubWrapper {
+	width : 100% !important;
+	height : 100% !important;
+}
+
+smartsuite-calendar-mgt .calendarSubHeader {
+	padding : 4px !important;
+	height : 19px !important;
+	line-height: 1.4 !important;
+	border-bottom : 1px solid silver !important;
+	background-color : #f5f5f5 !important;
+}
+
+
+smartsuite-calendar-mgt .calendarSubHeader > .mainTitle {
+	font-weight: bold !important;
+	font-size : 12px !important;
+	color: black !important;
+	width : 40% !important;
+	text-overflow: ellipsis !important;
+	font-family: Malgun Gothic,Verdana,Arial !important;
+}
+
+smartsuite-calendar-mgt .calendarSubHeader > .subTitle {
+	font-size : 8px !important;
+}
+
+smartsuite-calendar-mgt i {
+	margin-right: 3px;
+}
+
+smartsuite-calendar-mgt .calendarSubContent {
+	width : 100% !important;
+	height : calc(100% - 28px) !important;
+	padding: 0px !important;
+	margin : 0 auto !important;
+	overflow : auto !important;
+	background-color : #ffffff !important;
+}
+
+smartsuite-calendar-mgt .calendarTable {
+	border: 1px solid silver !important;
+}
+
+smartsuite-calendar-mgt .calendarTable tr th {
+	border: 1px solid silver !important;
+}
+
+smartsuite-calendar-mgt .calendarTable tr td {
+	border: 1px solid silver !important;
+    background-color: #fff !important;
+}
+
+smartsuite-calendar-mgt .calendarTable tbody tr td {
+	border: 1px solid silver !important;
+    background-color: #fff !important;
+}
+
+smartsuite-calendar-mgt .calendarNavLeft {
+	background-image : url(../img/btn_c_leftarrow.png) !important;
+	background-repeat : no-repeat !important;
+	background-position : center center !important;
+	width : 18px !important;
+	height : 17px !important;
+}
+
+smartsuite-calendar-mgt .calendarNavRight {
+	background-image : url(../img/btn_c_rightarrow.png) !important;
+	background-repeat : no-repeat !important;
+	background-position : center center !important;
+	width : 18px !important;
+	height : 17px !important;
+}
+
+/**
+ * smartsuite-calendar-add-group-popup
+ */
+ 
+smartsuite-calendar-add-group-popup .sharedPanel > .content-wrap {
+	width : 100% !important;
+	height : calc(100% - 32px) !important;
+}
+
+smartsuite-calendar-add-group-popup .sharedPanel > .content-wrap > .content {
+	width : 100% !important;
+	height : 100% !important;
+}
+
+smartsuite-calendar-add-group-popup sc-button {
+	color : black !important;
+}
+
+smartsuite-calendar-mgt .dateChooserWrapper sc-date-chooser a {
+	border : 1px solid #f5f5f5 !important;
+}
+
+/**
+ * 캘린더 뷰
+ */
+smartsuite-calendar-view .calendarview-header > .main {
+	font-size : 25px !important; font-weight : bold !important; 
+	line-height : 1.5 !important;
+	margin-right: 4px;
+}
+
+smartsuite-calendar-view .calendarControlIcon:hover {
+	opacity: 0.5 !important;
+}
+smartsuite-calendar-view sc-button.selectedNav {
+	background-color: #202020 !important;	
+}
+
+smartsuite-calendar-view .center {
+	margin : auto !important;
+	width: 250px !important;
+}
+
+smartsuite-calendar-view .calendarview-header {
+	height : 35px !important;
+	padding : 5px !important;
+}
+
+smartsuite-calendar-view .calendarview-content {
+	height : calc(100% - 45px) !important;
+}
+		
+smartsuite-calendar-view .selectedButton {
+	font-weight : bold !important;
+	background-color : black !important;
+}
+		
+smartsuite-calendar-view .calendarNaviIcon {
+	background-color : gray !important;
+	color : white !important;
+}
+
+smartsuite-calendar-view sc-button {
+	margin-right: 3px !important;
+}
+		
+smartsuite-calendar-view .calendarNaviIcon:hover {
+	opacity : 0.5 !important;
+}
+		
+smartsuite-calendar-view .calendarNaviIcon {
+	padding: 1px 10px 4px 6px !important;
+}
+		
+smartsuite-calendar-view .calendarNaviIcon > .button-container {
+	height : auto !important;
+}
+		
+smartsuite-calendar-view .calendarNaviIcon div{
+	display: inline-block !important;
+	width: auto !important;
+}
+
+smartsuite-calendar-view .side-btn {
+	background: none !important;
+    padding: 0px !important;
+}
+
+/**
+ * smartsuite-calendar-search-popup
+ */
+smartsuite-calendar-search-popup .calendar-search-box {
+	position: relative !important;
+	padding: 5px 80px 5px 5px !important;
+	border: 1px solid #1e5784 !important;
+	background: #f9f9f9 !important;
+}
+        
+smartsuite-calendar-search-popup .calendar-search-button-group {
+	position: absolute !important;
+	right: 10px !important;
+	top: 0 !important;
+	width: 60px !important;
+	height: calc(100% - 6px) !important;
+	display: -ms-flexbox !important;
+	display: -webkit-flex !important;
+	display: flex !important;
+	-ms-flex-direction: column !important;
+	-webkit-flex-direction: column !important;
+	flex-direction: column !important;
+}
+        
+smartsuite-calendar-search-popup .calendar-search-button-group button {
+	color: #fff !important; 
+	font-weight: bold !important;
+	border-radius: 3px !important;
+}
+        
+smartsuite-calendar-search-popup .calendar-search-button-group .calendar-search-button {
+	margin-top: 5px !important;
+	background: #1e5784 !important;
+}
+        
+smartsuite-calendar-search-popup  .calendar-reset-button {
+	margin-top: 3px !important;
+}
+
+/**
+ * smartsuite-calendar-shared-group
+ */
+
+smartsuite-calendar-shared-group .listItem {
+	border-radius: 3px !important;
+	width: calc(100% - 16px) !important;
+	height : 24px !important;
+}
+		
+smartsuite-calendar-shared-group .listItem:hover {
+	opacity : 1 !important;
+}
+        
+smartsuite-calendar-shared-group .groupIcon:hover {
+	opacity:0.5 !important;
+}
+
+smartsuite-calendar-shared-group .checkboxClass {
+	line-height: 2 !important;
+	padding: 1px !important;
+}
+
+smartsuite-calendar-shared-group #mainText {
+	width: calc(100% - 10px) !important;
+}
+
+/**
+ * colored list item
+ */
+smartsuite-colored-list-item .coloredItemWrapper {
+	display : flex !important;
+	margin : 1px 2px 1px 2px !important;
+	border-bottom : 1px dotted silver !important;
+}
+	
+smartsuite-colored-list-item .coloredCheckBox {
+	margin-top : 4px !important;
+	display : inline-block !important;
+	width : 16px !important;
+	height : 16px !important;
+	border-radius: 2px !important;
+	cursor : pointer !important;
+}
+	
+smartsuite-colored-list-item .listItem {
+	flex : 1 !important;
+	border-radius: 3px !important;
+	height : 24px !important;
+}
+	
+smartsuite-colored-list-item .listItem:hover {
+	opacity : 1 !important;
+}
+		
+smartsuite-colored-list-item .groupIconWrapper {
+	background-color : #9fa6ad !important;
+	-moz-border-radius: 70px !important; 
+	-webkit-border-radius: 70px !important; 
+	border-radius: 70px !important;
+}
+		
+smartsuite-colored-list-item .groupIcon {
+	font-size : 20px !important;
+	line-height : 1.3 !important;
+}
+
+smartsuite-colored-list-item .groupIcon:hover {
+	opacity:0.5 !important;
+}
+        
+smartsuite-colored-list-item .checkboxClass {
+	line-height: 2 !important;
+	padding: 1px !important;
+}
+        
+smartsuite-colored-list-item #mainText {
+	line-height: 18px !important;
+	/*min-width: 111px !important;
+    max-width: 200px !important;*/
+    width: calc(100% - 50px);
+	padding : 4px !important;
+	float: left !important;
+	font-weight : bold !important;
+}
+
+
+smartsuite-colored-list-item #checkIcon {
+	padding-left : 1px !important;
+	color: #fff !important;
+}
+        
+smartsuite-colored-list-item .checkboxClass, .groupIcon {
+	color : #B7B7B7 !important;
+}
+
+smartsuite-colored-list-item .controlIcon {
+	float:right !important;
+	cursor : pointer !important;
+}
+
+smartsuite-colored-list-item .checkboxClass:hover {
+	opacity : 0.5 !important;
+}
+        
+smartsuite-colored-list-item .mainText {
+	overflow:hidden !important;
+	white-space:nowrap !important;
+	text-overflow:ellipsis !important;
+}
+
+smartsuite-colored-list-item .disabledIcon {
+	visibility : hidden !important;
+}
+
+/**
+ * 스케줄 추가 팝업
+ */
+smartsuite-calendar-add-schedule-popup .groupParent > sc-button {
+	margin-left : 4px !important;
+}
+
+smartsuite-calendar-add-schedule-popup .setDate {
+	display : flex !important;
+	padding-top : 4px !important;
+}
+
+smartsuite-calendar-add-schedule-popup .addDesc {
+	padding : 1px !important;
+	width: calc(100% - 2px) !important;
+}
+        
+smartsuite-calendar-add-schedule-popup .timeSelector {
+	padding-left : 4px !important;
+	flex:1 !important;
+}
+        
+smartsuite-calendar-add-schedule-popup .timeSelector > sc-selectbox-field {
+	height:24px !important;
+}
+        
+smartsuite-calendar-add-schedule-popup .readonlytext input {
+	pointer-events : none !important;
+}
+        
+smartsuite-calendar-add-schedule-popup .setConfigButton {
+	padding: 1px 10px 4px 10px !important;
+	background-color: #fcfcfc !important;
+	border: 1px solid #b8b8b8 !important;
+	border-radius: 0 !important;
+	color: #333 !important;
+	height: 24px !important;
+	font-size: 11px !important;
+}
+
+smartsuite-calendar-add-schedule-popup sc-button {
+	color : black !important;
+}
+        
+smartsuite-calendar-add-schedule-popup .borderPlus {
+	background-color: #fcfcfc !important;
+	border: 1px solid #b8b8b8 !important;
+	color:black !important;
+}
+
+smartsuite-user-list .borderPlus {
+	background-color: #fcfcfc !important;
+	border: 1px solid #b8b8b8 !important;
+	color:black !important;
+}
+
+smartsuite-dept-list .borderPlus {
+	background-color: #fcfcfc !important;
+	border: 1px solid #b8b8b8 !important;
+	color:black !important;
+}
+
+.calendar-page-title {
+	height: 30px;
+    padding: 2px !important;
+}
+
+.calendar-flex {
+	-ms-flex: 1 1 0.000000001px !important;
+    -webkit-flex: 1 !important;
+    flex: 1 !important;
+    -webkit-flex-basis: 0.000000001px !important;
+    flex-basis: 0.000000001px !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+.calendar-tb-form {
+	width: 100% !important;
+	border-collapse: collapse !important;
+	border-spacing: 0 !important;
+    box-shadow: none !important;
+    table-layout: fixed !important;
+}
+
+.calendar-tb-form tr:first-child th, .tb-form tr:first-child td {
+    border-top: 1px solid #1e5784;
+}
+
+.calendar-tb-form th {
+    background: #effafd;
+    padding: 3px 5px 3px 10px;
+    word-break: keep-all;
+    text-align: left;
+    font-weight: bold;
+}
+
+.calendar-tb-form td {
+    padding: 3px 5px;
+    overflow: hidden;
+}
+
+.calendar-tb-form th, .calendar-tb-form td {
+    border: 1px solid #d2d2d2;
+    vertical-align: middle;
+    text-align: left;
+    height: 18px;
+}
+
+.calendar-tb-form th[Attributes Style] {
+    width: 100px;
+}
+
+.calendar-tb-form th {
+    font-weight: bold;
+    text-align: -internal-center;
+}
+
+.calendar-tb-form td, th {
+    display: table-cell;
+    vertical-align: inherit;
+}
+
+.calendar-vbox {
+	display: -ms-flexbox !important;
+    display: -webkit-flex !important;
+    display: flex !important;
+    -ms-flex-direction: column !important;
+    -webkit-flex-direction: column !important;
+    flex-direction: column !important;
+    overflow: auto !important;
+}
+
+.calendar-hbox {
+	display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -ms-flex-direction: row;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+    overflow: auto;
+}
+
+.calendar-tb-search {
+	width : 100%;
+	border-spacing:0;
+	border: 5px solid #f2f2f2;	 /* 2016.09.05 CMK */ 
+	border-collapse: collapse; 
+    table-layout:fixed;
+}
+.calendar-tb-search th, .calendar-tb-search td {height:28px; border:0px solid #C2C2C2; vertical-align:middle; text-align:left;}
+.calendar-tb-search th {
+	background:#f2f2f2;  /* 2016.09.05 CMK */ 
+	padding:0 10px; 
+	word-break: break-all;
+	text-align: right;
+}
+.calendar-tb-search td {padding:0 5px;overflow:hidden; background:#f2f2f2;  /* 2016.09.05 CMK*/ }
+.calendar-tb-search td > * {vertical-align : middle}
+.calendar-tb-search td .calendar-td-hbox {display : table;}
+.calendar-tb-search td .calendar-td-hbox > * {display : table-cell;vertical-align : middle;}
+.calendar-tb-search-open {float:right}

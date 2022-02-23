@@ -1,0 +1,39 @@
+<link rel="import" href="charts/widget-chart-column.html"/>
+<link rel="import" href="charts/widget-chart-column-stack.html"/>
+<link rel="import" href="charts/widget-chart-bar.html"/>
+<link rel="import" href="charts/widget-chart-bar-stack.html"/>
+<link rel="import" href="charts/widget-chart-pie.html"/>
+<link rel="import" href="charts/widget-chart-area.html"/>
+<link rel="import" href="charts/widget-chart-line.html"/>
+<link rel="import" href="charts/widget-chart-polar.html"/>
+<link rel="import" href="charts/widget-chart-bubble.html"/>
+<script>
+	WidgetChartFactory = Polymer({
+		is : 'widget-chart-factory',	
+		properties : {
+			
+			
+		},
+		ready : function(){
+			var me = this;
+			me.chartMap = {
+					column         : new WidgetChartColumn(),
+					columnStack    : new WidgetChartColumnStack(),
+					bar            : new WidgetChartBar(),
+					barStack       : new WidgetChartBarStack(),
+					pie            : new WidgetChartPie(),
+					area           : new WidgetChartArea(),
+					line           : new WidgetChartLine(),
+					polar          : new WidgetChartPolar(),
+					bubble         : new WidgetChartBubble()
+			};
+		},
+		factoryImpl : function(chartType){
+			this.chartTemplate = this.chartMap[chartType];
+		},
+		
+		getTemplate : function(temp,datas){
+			return this.chartTemplate.getTemplate(temp,datas);
+		}
+	});
+</script>

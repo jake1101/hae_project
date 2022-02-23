@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="viramadeva" format="1">
+  <advance width="0"/>
+  <unicode hex="094D"/>
+  <outline>
+    <contour>
+      <point x="-394" y="-91" type="line"/>
+      <point x="78" y="-342" type="line"/>
+      <point x="6" y="-469" type="line"/>
+      <point x="-467" y="-221" type="line"/>
+    </contour>
+    <contour>
+      <point x="-370" y="12" type="move" name="_btm"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.typemytype.robofont.layerData</key>
+      <dict>
+      </dict>
+      <key>org.robofab.fontlab.mark</key>
+      <integer>210</integer>
+    </dict>
+  </lib>
+</glyph>

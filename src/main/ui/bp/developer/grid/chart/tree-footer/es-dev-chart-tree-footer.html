@@ -1,0 +1,341 @@
+<dom-module id="es-dev-chart-tree-footer">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--fit-layout);
+        }
+    </style>
+
+    <!--  화면 구성 시작-->
+    <template>
+    	<div id="treeMain" class="fit"></div>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-dev-chart-tree-footer',
+            
+            	attached: function(){
+                	this.exampleView().init();
+                },
+                
+                exampleView : function (strings) {
+                	var view;
+                    var dsMain;
+                    var treeMain;
+                    
+                    return view = {
+                    		init: function () {
+                                var fields = [{
+                                    fieldName: "icon"
+                                }, {
+                                	fieldName: "loan_number"
+                                }, {
+                                	fieldName: "country"
+                                }, {
+                                	fieldName: "interest_rate",
+                                	dataType: "number"
+                                }, {
+                                	fieldName: "currency"
+                                }, {
+                                	fieldName: "project_id"
+                                }, {
+                                	fieldName: "original_amount",
+                                	dataType: "number"
+                                }, {
+                                	fieldName: "cancelled_amount",
+                                	dataType: "number"
+                                }, {
+                                	fieldName: "disbursed_amount",
+                                	dataType: "number"
+                                }, {
+                                    fieldName: "repaid_amount",
+                                    dataType: "number"
+                                }, {
+                                    fieldName: "sold_amount",
+                                    dataType: "number"
+                                }, {
+                                	fieldName: "first_date",
+                                	dataType: "datetime",
+                                	datetimeFormat: "MM/dd/yyyy"
+                                }, {
+                                	fieldName: "last_date",
+                                	dataType: "datetime",
+                                	datetimeFormat: "MM/dd/yyyy"
+                                }];
+                                dsMain = DataLudi.createTreeDataSet();
+                                dsMain.setFields(fields);
+                                dsMain.onRowCountChanged = function (ds) {
+                    				$("#rowCount").css("color", "blue").text(ds.rowCount().toLocaleString());
+                                };
+                            	
+                                var columns = [{
+                            		"name": "LoanNumber",
+                            		"fieldName": "loan_number",
+                            		"width": "110",
+                            		"styles": {
+                            		    textAlignment: "near"
+                            		},
+                            		"header": {
+                            			"text": "LoanNumber"
+                            		}
+                            	}, {
+                            		"name": "Country",
+                            		"fieldName": "country",
+                            		"width": "70",
+                            		"styles": {
+                            		},
+                            		"header": {
+                            			"text": "Country"
+                            		}
+                                }, {
+                            		"name": "InterestRate",
+                            		"fieldName": "interest_rate",
+                            		"width": "55",
+                            		"styles": {
+                            		    "textAlignment": "far"
+                            		},
+                            		"header": {
+                            			"text": "InterestRate"
+                            		}/**,
+                            		"footer": {
+                            		    "expression": "avg",
+                            		    "styles": {
+                            		        "prefix": "Average" + ": ",
+                            		        "numberFormat": "#,##0.00"
+                            		    }
+                            		}*/
+                            	}, {
+                            		"name": "Currency",
+                            		"fieldName": "currency",
+                            		"width": "40",
+                            		"styles": {
+                            		    "textAlignment": "center"
+                            		},
+                            		"header": {
+                            			"text": "Currency"
+                            		}
+                                }, {
+                            		"name": "ProjectID",
+                            		"fieldName": "project_id",
+                            		"width": "70",
+                            		"styles": {
+                            		    "textAlignment": "center"
+                            		},
+                            		"header": {
+                            			"text": "ProjectID"
+                            		},
+                            		"footer": {
+                            		    "text": "Sum",
+                            		    "styles": {
+                            		        "textAlignment": "far"
+                            		    }
+                            		}
+                            	}, {
+                            		"name": "OriginalAmount",
+                            		"fieldName": "original_amount",
+                            		"width": 80,
+                            		"styles": {
+                            		    "textAlignment": "far"
+                            		},
+                            		"header": {
+                            			"text": "OriginalAmount"
+                            		},
+                            		"footer": {
+                            		    "expression": "sum",
+                            		    "styles": {
+                            		        "prefix": "$",
+                                		    "numberFormat": "#,##0",
+                                		    "background": "#777",
+                                		    "color": "#fff",
+                                		    "borderTop": "#ddd"
+                            		    }
+                            		}
+                            	}, {
+                            		"name": "DisbursedAmount",
+                            		"fieldName": "disbursed_amount",
+                            		"width": 80,
+                            		"styles": {
+                            		    "textAlignment": "far"
+                            		},
+                            		"header": {
+                            			"text": "DisbursedAmount"
+                            		},
+                            		"footer": {
+                            		    "expression": "varp",
+                            		    "text": "Var",
+                            		    "styles": {
+                            		        "prefix": "Var=>$",
+                                		    "numberFormat": "#,##0"
+                            		    }
+                            		}
+                            	},  {
+                            		"name": "FirstDate",
+                            		"fieldName": "first_date",
+                            		"width": "90",
+                            		"styles": {
+                            		    datetimeFormat: "yyyy-MM-dd",
+                            		    textAlignment: "center"
+                            		},
+                            		"header": {
+                            			"text": "FirstDate"
+                            		}
+                            	},  {
+                            		"name": "LastDate",
+                            		"fieldName": "last_date",
+                            		"width": "90",
+                            		"styles": {
+                            		    datetimeFormat: "yyyy-MM-dd",
+                            		    textAlignment: "center"
+                            		},
+                            		"header": {
+                            			"text": "LastDate"
+                            		}
+                            	}];
+                                treeMain = DataLudi.createTreeView('treeMain', null);
+                                treeMain.setColumns(columns);
+                                treeMain.setDataSource(dsMain);
+
+                                treeMain.checkBar().setVisible(false);
+                                treeMain.header().setHeight(30);
+                                treeMain.header().head().setPopupMenu({
+                                    label: 'DataLudi Version',
+                                    callback: function () { alert(DataLudi.getVersion()); }
+                                });
+                                
+                                /*treeMain.registerImageList({
+                                    name: "images01",
+                                    rootUrl: "http://helpme.emro.co.kr/repo/grid/resource/images/",
+                                    items: [
+                                        "ar.png", "at.png", "be.png", "br.png", "ca.png",
+                                        "de.png", "dk.png", "et.png", "fi.png", "fr.png",
+                                        "it.png", "jp.png", "kg.png"
+                                    ]
+                                });*/
+                                
+                                $.ajax({
+                        			url: "http://helpme.emro.co.kr/repo/grid/resource/data/loan_statement_tree.json",
+                        			dataType: 'text',
+                        			success: function (data) {
+                                        DataLudi.loadJsonData(dsMain, data, {
+                                            currency: true,
+                                            rows: "",
+                                            childRows: "rows"
+                                        });
+                                        //treeMain.expand(treeMain.getRow(0), true);
+                        			},
+                        			error: function (xhr, status, error) {
+                        				var err = status + ', ' + error;
+                        				alert("jQuery ajax() Failed: " + err);
+                        			}
+                            	});
+                                
+                                treeMain.setOptions({
+                                    tree: {
+                                        
+                                        footerItems: [{
+                                            type: "chart",
+//                                             displayCallback: function (row) {
+//                                                 return row.level() == 1;
+//                                             },
+                                            minHeight: 150,
+                                            styles: {
+                                                /*background: "#0800ffff",*/
+                                                padding: 4
+                                            },
+                                            chart: {
+                                                type: "column",
+                                                legend: {
+                                                    visible: true,
+                                                    position: "right",
+                                                    marginLeft: 10,
+                                                    styles: {
+                                                        /*border: "#800"*/
+                                                    }
+                                                },
+                                                plotArea: {
+                                                    styles: {
+                                                        background: "#0800ffff"
+                                                    }
+                                                },
+                                                xAxes: {
+                                                    padding: 0.1,
+                                                    styles: {
+                                                        line: "#333"
+                                                    },
+                                                    tickStyles: {
+                                                        line: "#333"
+                                                    }
+                                                },
+                                                yAxes: {
+                                                    indicators: [{
+                                                        type: "line",
+                                                        front: true,
+                                                        //series: "serCountry",
+                                                        value: "avg",
+                                                        //label: "Average:${value}",
+                                                        styles: {
+                                                            line: "#600000ff,1px,dotted",
+                                                            color: "#e00000ff",
+                                                            fontSize: 10,
+                                                            fontBold: true,
+                                                            textAlignment: "far",
+                                                            numberFormat: "#,##0"
+                                                        }
+                                                    }/**, {
+                                                        type: "line",
+                                                        front: true,
+                                                        series: "serMale",
+                                                        value: "avg",
+                                                        label: "Average:${value}",
+                                                        styles: {
+                                                            line: "#80ff0000,1px,dashed",
+                                                            color: "#e0800000",
+                                                            fontSize: 10,
+                                                            fontBold: true,
+                                                            textAlignment: "near",
+                                                            numberFormat: "#,##0"
+                                                        }
+                                                    }*/]
+                                                },
+                                                series: [{
+                                                    name: "serCountry",
+                                                    caption: "Country",
+                                                    /*filter: "values['subgroup'] == 'Female'",*/
+                                                    labelField: "country",
+                                                    valueField: "interest_rate",
+                                                    summaryMode: "aggregate",
+                                                    labelLocation: "none",
+                                                    styles: {
+                                                        background: "#AFD8F8"
+                                                    }
+                                                }/*, {
+                                                    name: "serMale",
+                                                    caption: "Male",
+                                                    filter: "values['subgroup'] == 'Male'",
+                                                    labelField: "year",
+                                                    valueField: "value",
+                                                    summaryMode: "aggregate",
+                                                    styles: {
+                                                        background: "#F6BD0F"
+                                                    }
+                                                }*/]
+                                            }
+                                        }]
+                                    }
+                                });
+
+                    		}
+                    };  
+                }
+            
+            
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

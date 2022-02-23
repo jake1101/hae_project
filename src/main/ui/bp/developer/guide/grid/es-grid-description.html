@@ -1,0 +1,87 @@
+<dom-module id="es-grid-description">
+	<style>
+		table, th, td {
+	 		border:1px solid black;
+	 		border-collapse:collapse;
+	 		box-sizing: border-box;
+	 		padding: 3px;
+	 	}
+	 	th {
+	 		background-color:lightgray
+	 	}
+	</style>
+	<template>
+		<p>
+			<b>그리드 속성</b><br/>
+			
+			<table>
+				<tr>
+					<th>property</th>
+					<th>type</th>
+					<th>설명</th>
+				</tr>
+				<tr>
+					<td>editable</td>
+					<td>Boolean<br/>default : false</td>
+					<td>그리드 수정 가능 여부</td>
+				</tr>
+				<tr>
+					<td>useState</td>
+					<td>Boolean<br/>default : true</td>
+					<td>행들의 상태컬럼 표현 여부</td>
+				</tr>
+				<tr>
+					<td>useSelection</td>
+					<td>Boolean<br/>default : true</td>
+					<td>checkBar 사용여부</td>
+				</tr>
+				<tr>
+					<td>selectionMode</td>
+					<td>String<br/>default : 'check'</td>
+					<td>selection을 check 또는 radio로 지정한다.</td>
+				</tr>
+				<tr>
+					<td>showSelectionHeader</td>
+					<td>Boolean<br/>default : true</td>
+					<td>selectionMode가 check일 경우, 클릭하여 check-all(전체 선택)을 할 수 있는 헤더 표시여부</td>
+				</tr>
+				<tr>
+					<td>showNumberLine</td>
+					<td>Boolean<br/>default : true</td>
+					<td>그리드 행번호의 표시여부</td>
+				</tr>
+				<tr>
+					<td>focusVisible</td>
+					<td>Boolean<br/>default : true</td>
+					<td>포커스의 보임 여부</td>
+				</tr>
+				<tr>
+					<td>useContextMenu</td>
+					<td>Boolean<br/>default : true</td>
+					<td>그리드에서 오른쪽 마우스를 클릭했을때 표시되는 컨텍스트 메뉴 사용 여부</td>
+				</tr>
+				<tr>
+					<td>autoFill</td>
+					<td>Boolean<br/>default : false</td>
+					<td>selector의 포인트를 드래그하여 같은 값으로 채워지는 기능 사용 여부</td>
+				</tr>
+				<tr>
+					<td>selectionAbleFunction</td>
+					<td>Function<br/>default : none</td>
+					<td>selection의 체크가능 여부를 함수를 통해 제어한다.</td>
+				</tr>
+				<tr>
+					<td>rowStyleFunction</td>
+					<td>Function<br/>default : none</td>
+					<td>row별로 style을 변경할때 사용한다.</td>
+				</tr>
+			</table>
+		</p>
+		
+	</template>
+	<script>
+	Polymer({
+		is : 'es-grid-description'
+	});
+	</script>
+</dom-module>

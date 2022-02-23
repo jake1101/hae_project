@@ -1,0 +1,590 @@
+<link rel="import" href="ep-image-view.html"></link>
+
+<dom-module id="es-ptw-detail">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+
+	</style>
+
+	<template>
+<!--
+    ************************************************************************************************************
+    * Service Area
+    ************************************************************************************************************
+-->
+		<!-- 코드 조회-->
+		<sc-request-group init>
+			<!-- 공통 코드 조회 -->
+			<sc-code-group>
+				<sc-code code="IOT006" value="{{codes.status}}" ></sc-code>
+			</sc-code-group>
+		</sc-request-group>
+		
+		<!-- 작업허가 조회 -->
+		<sc-ajax id="findPtwReqDetail"
+				 url="findPtwReqDetail.do"
+				 body="{{searchParam}}"
+				 on-response="completeFindPtwReqDetail">
+		</sc-ajax>
+		
+		<!-- 안전작업 요청 저장 -->
+		<sc-ajax id="upsertPtwReq"
+				 url="upsertPtwReq.do"
+				 on-response="completeUpsertPtwReq">
+		</sc-ajax>
+
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+<!-- 		<cc-page-title-bar title-text="고소작업허가서"> -->
+<!-- 		</cc-page-title-bar> -->
+
+		<cc-sub-title-bar title-text="[[ptwName]]">
+<!-- 			<sc-button text="저장" on-click="onSavePtw" hidden="[[formula('isFinish')]]" auth-s></sc-button> -->
+<!-- 			<sc-button text="삭제" on-click="onDeleteBoard" auth-s></sc-button> -->
+			
+			<sc-button  text="레포트 출력" on-click="onOpenReport" ></sc-button>
+			<sc-button text="승인" data-args="approval" on-click="onApprPtw" hidden="[[formula('isFinish')]]" auth-s></sc-button>
+			<sc-button text="반려" data-args="return" on-click="onApprPtw" hidden="[[formula('isFinish')]]" auth-s></sc-button>
+			
+			<sc-button text="목록" on-click="onShowPtwList"></sc-button>
+		</cc-sub-title-bar>
+		
+		<div class="vspace-5"></div>
+
+		<div class="flex page">
+			<!-- 게시물 작성 폼 -->
+			<table class="tb-form">
+				<colgroup>
+					<col style="width:150px"></col>
+					<col></col>
+					<col style="width:150px"></col>
+					<col></col>
+				</colgroup>
+				
+				<tr>
+					<th><sc-label text="제목"></sc-label></th>
+					<td colspan="3">
+						<sc-text-field value="{{ptwReqInfo.title}}" maxlength="100" readonly="true"></sc-text-field>
+					</td>
+				</tr>
+				
+				<tr>
+					<th><sc-label text="신청인"></sc-label></th>
+					<td>
+						<sc-label text="{{ptwReqInfo.reqUserName}}" i18n-disabled></sc-label>
+					</td>
+					<th><sc-label text="신청일자"></sc-label></th>
+					<td>
+						<sc-date-field value="{{ptwReqInfo.reqDt}}" string-date="true" string-format="YYYY-MM-DD" default-value="0d" class="w-100" readonly="true"></sc-date-field>
+					</td>
+				</tr>
+				
+				<tr>
+					<th><sc-label text="작업허가기간"></sc-label></th>
+					<td colspan="3">
+						<div class="field-box">
+	   						<sc-date-field value="{{ptwReqInfo.startDt}}" string-date="true" string-format="YYYY-MM-DD" default-value="0d" class="w-100" readonly="true"></sc-date-field>
+	   						<div class="hspace-5"></div>:<div class="hspace-5"></div>
+	   						<sc-number-field class="w-50" value="{{ptwReqInfo.startHr}}" min-value="0" max-value="23" default-value="00" max-length="2" readonly="true"></sc-number-field> 
+	    					<div class="hspace-5"></div>~<div class="hspace-5"></div>
+	    					<sc-date-field value="{{ptwReqInfo.endDt}}" string-date="true" string-format="YYYY-MM-DD" default-value="0d" class="w-100" readonly="true"></sc-date-field>
+	    					<div class="hspace-5"></div>:<div class="hspace-5"></div>
+	    					<sc-number-field class="w-50" value="{{ptwReqInfo.endHr}}" min-value="0" max-value="23" default-value="23" max-length="2" readonly="true"></sc-number-field>
+	    				</div>
+					</td>
+				</tr>
+				
+				<tr>
+					<th><sc-label text="승인자"></sc-label></th>
+					<td>
+						<sc-label text="{{ptwReqInfo.apprUserName}}" i18n-disabled></sc-label>
+					</td>
+					<th><sc-label text="승인일자"></sc-label></th>
+					<td>
+						<sc-date-field value="{{ptwReqInfo.apprDt}}"  string-date="true" string-format="YYYY-MM-DD" default-value="0d" class="w-100" readonly="true"></sc-date-field>
+					</td>
+				</tr>
+				
+				<tr>
+					<th><sc-label text="상태"></sc-label></th>
+					<td colspan="3">
+						<sc-combobox-field id="ptwStatus" items="[[codes.status]]" value="{{ptwReqInfo.status}}" placeholder="선택" class="w-150" 
+							display-field="label" value-field="data" readonly="true">
+	    				</sc-combobox-field>
+					</td>
+				</tr>
+			</table>
+			
+			<div class="vspace-10"></div>
+		
+			<cc-sub-title-bar title-text="안전조치 요구사항"></cc-sub-title-bar>
+			
+			<sc-upload class="h-100" view-type="thumbnail" hidden="true"></sc-upload>
+			
+			<table id="ptwForm" class="tb-form">
+				<colgroup>
+					<col style="width:150px"></col>
+					<col></col>
+				</colgroup>
+			</table>
+			
+			<div class="vspace-10"></div>
+			
+			<cc-sub-title-bar title-text="의견"></cc-sub-title-bar>
+			
+			<table class="tb-form">
+				<colgroup>
+					<col></col>
+				</colgroup>
+				
+				<tr>
+					<td>
+						<sc-textarea-field class="h-200" value="{{ptwReqInfo.opinion}}"></sc-textarea-field>
+					</td>
+				</tr>
+			</table>
+			
+		</div>
+		
+		  <input type="hidden" id = "f_ptw_detail_object" />
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-ptw-detail",
+            properties : {
+            	codes: {
+            		type: Object,
+            		value: function(){
+            			return {};
+            		}
+            	},
+            	
+                // 정보 조회 결과
+                ptwReqInfo : {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                
+                // 조회 조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                
+                resultList: {
+                	type: Array,
+                    value: function(){
+                        return [];
+                    }
+                },
+                
+                ptwDataList: {
+                	type: Object,
+                    value: function(){
+                        return [];
+                    }
+                },
+                
+                reportInfo: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                ptwName :{
+                	type: String
+                }
+
+            },
+            
+            formulas:{
+                isEditable: function(){
+                    return (this.ptwReqInfo.status == 'temp' || this.ptwReqInfo.status == 'request');
+				},
+				
+				// 결재완료 : 승인 또는 반려 상태인 경우
+				isFinish: function(){
+					return (this.ptwReqInfo.status == 'approval' || this.ptwReqInfo.status == 'return');
+				}
+			},
+			
+            /******************************
+             * 초기화 설정
+             ******************************/
+            load: function(data) {
+                var me = this;
+                
+                if(data){
+                	me.set("searchParam", data);
+                	me.set("ptwName", data.ptwName);
+                }
+                
+               	me.onSearch();
+            },
+            
+         	// 조회
+            onSearch: function(){
+                var me = this;
+                
+                UT.request(me.$.findPtwReqDetail);
+            },
+
+            // 조회 완료
+            completeFindPtwReqDetail: function(e, res){
+                var me = this;
+                
+                var result = res.response || {};
+                
+                var ptwReqInfo = result;
+                var ptwDataList = result.dataArray || [];
+                
+                me.set("ptwReqInfo", ptwReqInfo);
+                me.set("ptwDataList", ptwDataList);
+                
+                // 초기화
+                me.initPtwForm();
+                
+                me.applyFormula();
+            },
+            
+            /**
+             * 안전조치 요구사항 
+             * - 목록 개수 만큼 1세트 생성(체크,기록,사진)
+             */
+            initPtwForm: function(){
+            	var me = this;
+            	var target = me.$.ptwForm;
+            	
+            	/**
+            	 * 안전조치 요구사항 table 자식노드 모두 삭제
+            	 */
+            	while(Polymer.dom(target).childNodes.length > 1){
+            		Polymer.dom(target).removeChild(Polymer.dom(target).lastChild);
+            	}
+            	
+            	/**
+            	 * 요구사항 목록 동적 생성 (항목당 체크, 기록, 사진)
+            	 */
+            	var ptwDataList = me.get("ptwDataList");
+            	
+            	for(var idx in ptwDataList){
+            		var item = ptwDataList[idx];
+            		var index = Number(idx);
+            		
+            		var tr = document.createElement('tr');
+            		var th = document.createElement('td');
+            		var label = document.createElement('sc-label');
+            		var td = document.createElement('td');
+            		var textField = document.createElement('sc-text-field');
+            		var checkboxField = document.createElement('sc-checkbox-field');
+            		checkboxField.setAttribute("id", "apprConfirm"+index);
+            		checkboxField.classList.add("apprConfirm"+index);
+//             		checkboxField.label = "확인";
+            		checkboxField.checkedValue = "Y";
+            		checkboxField.unCheckedValue = "N";
+            		// 승인자 확인여부
+            		checkboxField.inputValue = item.apprConfirmFlag;
+            		
+            		// line1 (항목명)
+           			th.colSpan = 2;
+           			
+           			var formName = document.createElement('sc-label');
+           			formName.text = item.ptwFormName;
+//            			formName.text = (Number(idx)+1) + ". " + item.ptwFormName + " ( 승인자 확인 : ";
+//            			var closeLabel = document.createElement('sc-label');
+//            			closeLabel.text = " )";
+           			
+           			Polymer.dom(th).appendChild(formName);
+//            			Polymer.dom(th).appendChild(checkboxField);
+//            			Polymer.dom(th).appendChild(closeLabel);
+           			Polymer.dom(tr).appendChild(th);
+           			
+           			Polymer.dom(target).appendChild(tr);
+           			
+           			// line2(체크)
+           			if(item.checkYn == "Y"){
+           				var tr2 = document.createElement('tr');
+                		var th2 = document.createElement('th');
+                		var label2 = document.createElement('sc-label');
+                		label2.text = "확인";
+                		var td2 = document.createElement('td');
+                		var checkboxField2 = document.createElement('sc-checkbox-field');
+                		checkboxField2.setAttribute("id", "check"+index);
+                		checkboxField2.setAttribute("readonly", "true");
+                		checkboxField2.classList.add("ptwCheck"+index);
+                		checkboxField2.checkedValue = "Y";
+                		checkboxField2.unCheckedValue = "N";
+//                 		checkboxField2.setAttribute("value", "Y");
+						// 체크값
+                		checkboxField2.inputValue = item.check;
+                		
+           				Polymer.dom(th2).appendChild(label2);
+                   		Polymer.dom(td2).appendChild(checkboxField2);
+                   		Polymer.dom(tr2).appendChild(th2);
+                   		Polymer.dom(tr2).appendChild(td2);
+                   		
+                   		Polymer.dom(target).appendChild(tr2);
+           			}
+           			
+           			// line3(기록)
+           			if(item.textYn == "Y"){
+           				var tr3 = document.createElement('tr');
+                		var th3 = document.createElement('th');
+                		var label3 = document.createElement('sc-label');
+                		label3.text = "기록";
+                		var td3 = document.createElement('td');
+                		var textAreaField3 = document.createElement('sc-textarea-field');
+                		textAreaField3.setAttribute("id", "text_"+index);
+                		textAreaField3.setAttribute("readonly", "true");
+                		textAreaField3.classList.add("ptwDesc"+index);
+                		// 기록값
+                		textAreaField3.setAttribute("value", item.text || "");
+//                 		textField2.value = item.desc;
+                		
+           				Polymer.dom(th3).appendChild(label3);
+                   		Polymer.dom(td3).appendChild(textAreaField3);
+                   		Polymer.dom(tr3).appendChild(th3);
+                   		Polymer.dom(tr3).appendChild(td3);
+                   		
+                   		Polymer.dom(target).appendChild(tr3);
+           			}
+           			
+           			// line4 (사진)
+           			if(item.pictureYn == "Y"){
+           				var tr4 = document.createElement('tr');
+                		var th4 = document.createElement('th');
+                		var label4 = document.createElement('sc-label');
+                		label4.text = "사진";
+                		var td4 = document.createElement('td');
+                		var scUpload = document.createElement('sc-upload');
+                		scUpload.setAttribute("id", "upload"+index);
+               			scUpload.setAttribute("class", "h-200");
+               			scUpload.setAttribute("editable", "false");
+               			scUpload.classList.add("ptwPhoto"+index);
+               			scUpload.setAttribute("view-type", "thumbnail");
+               			scUpload.setAttribute("extension", "png,jpg,jpeg,gif");
+               			scUpload.querySelector('.content').style.height = "198px";
+               			scUpload.querySelector('.content').style.width = "100%";
+               			
+						// 사진값
+						scUpload.value = item.picture;
+						
+						scUpload.addEventListener("item-select", function(event) {
+							var me = this;
+							
+							var item = event.detail.item;
+							
+							if(item) {
+								if(item.id.indexOf('-file') !== -1) {
+									var imageReader = new FileReader();
+									imageReader.onload = (function(aFile) {
+										return function(e) {
+											var popup = UT.popup('ep-image-view', me, 600, 500, {}, {});
+											popup.show();
+											var popupContent = popup.getWindowContent();
+											popupContent.load(e.target.result, true);
+										};
+									})(item.orgFile);
+									imageReader.readAsDataURL(detail.item.orgFile);
+								} else {
+									var popup = UT.popup('ep-image-view', me, 600, 500, {}, {});
+									popup.show();
+									var popupContent = popup.getWindowContent();
+									popupContent.load(item.id);		
+								}
+							}
+						});
+						
+           				Polymer.dom(th4).appendChild(label4);
+                   		Polymer.dom(td4).appendChild(scUpload);
+                   		Polymer.dom(tr4).appendChild(th4);
+                   		Polymer.dom(tr4).appendChild(td4);
+                   		
+                   		Polymer.dom(target).appendChild(tr4);
+           			}
+           			
+            	}
+            	
+            },
+            
+            onApprPtw: function(e) {
+            	var me = this;
+            	
+            	var status = e.target.dataset.args;
+            	
+            	var msg = "STD.N1200"; // 저장 하시겠습니까?
+            	
+            	if(status == "approval"){
+            		msg = "승인 하시겠습니까?";
+            	}else{
+            		msg = "반려 하시겠습니까?";
+            	}
+            	
+            	UT.confirm(msg, function() {
+	            	var ptwDataList = me.get("ptwDataList");
+	            	
+	            	/**
+	            	 * upload promise
+	            	 */
+	            	var promiseArray = [];
+	            	
+	            	for(var idx in ptwDataList){
+	            		var item = ptwDataList[idx];
+	            		
+	            		var upload = document.getElementById('upload' + idx );
+	            		
+// 	            		var promise = new Promise(function(resolve, reject){
+// // 							resolve("test");
+// 	            		});
+	            		
+	            		if(upload){
+	            			promiseArray.push( upload.upload() );
+	            		}
+	            	}
+	            	
+	            	/**
+	            	 * upload 실행 후, 저장
+	            	 */
+	            	Promise.all(promiseArray).then(function(values) {
+	            		var ptwReqInfo = me.get("ptwReqInfo");
+	            		ptwReqInfo.status = status;
+	            		var ptwDataList = me.get("ptwDataList");
+	            		
+	            		for(var idx in ptwDataList){
+	            			var item = ptwDataList[idx];
+	                		
+	            			// 승인자 확인여부
+// 	            			var apprConfirm = document.getElementById('apprConfirm' + idx );
+// 	            			item.apprConfirmFlag = apprConfirm.inputValue;
+	            			
+	            			// 확인, 설명, 사진
+	            			var check = document.getElementById('check' + idx );
+	                		var text = document.getElementById('text_' + idx );
+	                		var upload = document.getElementById('upload' + idx );
+	                		
+	                		// property 값 update
+	                		var property = item.property || {};
+	                		if(check){
+	                			property.check = check.inputValue;
+	                		}
+	                		if(text){
+	                			property.text = text.value;
+	                		}
+	                		if(upload){
+	                			property.picture = upload.value;
+	                		}
+	                		
+	                		item.property = property;
+	            		}
+	            		
+// 	            		console.log("upload complete", values);
+						me.$.upsertPtwReq.body = {
+							ptwReqInfo: ptwReqInfo
+							,ptwDataList: ptwDataList
+						};
+						
+						UT.request(me.$.upsertPtwReq);
+	            	});
+	            	
+            	});
+            	
+            },
+            
+            completeUpsertPtwReq: function(e, res){
+            	var me = this;
+
+	            if(res.response.result_status === 'S'){
+	                UT.alert("STD.N2400", function(){ // 저장하였습니다.
+	                    me.onSearch();
+	                });
+	                
+	            }else{
+	                message = res.response.result_message;
+	                UT.alert(message);
+	            }
+            },
+            
+            onShowPtwList: function(){
+            	var me = this;
+            	
+            	me.fire("close");
+            },
+            
+         	// 초기화
+            onClear: function(){
+                var me = this;
+                me.reset();
+                me.applyFormula();
+            },
+            
+            onOpenReport : function(){
+            	var me = this;
+            	
+                  me.reportInfo.ptwName = me.ptwReqInfo.ptwName;
+                  me.reportInfo.title = me.ptwReqInfo.title;
+                  me.reportInfo.reqUserName = me.ptwReqInfo.reqUserName;
+                  me.reportInfo.reqDt = me.ptwReqInfo.reqDt;
+                  me.reportInfo.startDt = me.ptwReqInfo.startDt + ":" + (me.ptwReqInfo.startHr + ":00:00");
+                  me.reportInfo.endDt = me.ptwReqInfo.endDt + ":" + (me.ptwReqInfo.endHr + ":00:00");
+                  me.reportInfo.apprUserName = me.ptwReqInfo.apprUserName;
+                  me.reportInfo.apprDt = me.ptwReqInfo.apprDt;
+                  for(var i = 0 ; i< me.codes.status.length; i++){
+                	  if(me.codes.status[i].data == me.$.ptwStatus.value){
+		                  me.reportInfo.status = me.codes.status[i].label;
+                	  }
+                  }
+                  
+                  
+                  me.reportInfo.id = me.ptwReqInfo.id;
+                  me.reportInfo.opinion = me.ptwReqInfo.opinion;
+                  
+                  me.reportInfo.ptwDataList = me.ptwDataList;
+                  me.reportInfo.Imgpath = window.location.protocol+"//"+window.location.hostname+":"+window.location.port+ "/repository/";
+                  
+//             		console.log(me.reportInfo);
+	   			var agent = navigator.userAgent.toLowerCase();
+
+				if ( (navigator.appName == 'Netscape' && navigator.userAgent.search('Trident') != -1) || (agent.indexOf("msie") != -1) ) {
+		   		 	$("#f_ptw_detail_object").val(JSON.stringify(me.reportInfo));
+		   			var popupWidth = 850;
+		   			var popupHeight = 1000;
+
+		   			var left= (window.screen.width / 2) - (popupWidth / 2);
+		   			var top= (window.screen.height / 2) - (popupHeight / 2);
+		   			
+		   			var workerReportPopup = UT.popupWindow("/report/jsp/ptwReport.jsp",me,"width=850 , height=1000 , top="+top+",left="+left + ",toolbar=no,location=no,menubar=no,status=no");
+			
+				}else {
+					$("#f_ptw_detail_object").val(JSON.stringify(me.reportInfo));
+		   			var popupWidth = 850;
+		   			var popupHeight = 1000;
+
+		   			var left= (window.screen.width / 2) - (popupWidth / 2);
+		   			var top= (window.screen.height / 2) - (popupHeight / 2);
+		   			
+		   			var workerReportPopup = UT.popupWindow("/report/jsp/ptwReportChrome.jsp",me,"width=850 , height=1000 , top="+top+",left="+left + ",toolbar=no,location=no,menubar=no,status=no");
+				}
+	   			
+            }
+            
+        });
+	</script>
+
+</dom-module>

@@ -1,0 +1,47 @@
+<sc-link rel="import" href="es-auth-check-client-sample.html"></sc-link>
+<sc-link rel="import" href="es-auth-check-server-sample.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+<sc-link rel="import" href="es-auth-check-description.html"></sc-link>
+
+<dom-module id="em-auth-check-guide">
+	<style>
+		:host {
+			@apply(--hbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="hbox flex" title-text="권한 체크">
+			<es-auth-check-description class="fit flex"></es-auth-check-description>
+			<sc-tab-navigation class="box flex" selected="0">
+				<div class="vbox fit" title-text="클라이언트 권한 체크">
+					<es-auth-check-client-sample class="flex"></es-auth-check-client-sample>
+					<es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+				</div>
+				<template>
+					<es-auth-check-server-sample title-text="서버 권한 체크"></es-auth-check-server-sample>
+				</template>
+			</sc-tab-navigation>
+		</sc-panel>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-auth-check-guide',
+		properties : {
+			srcList : {
+                type : Array,
+                value : function() {
+                    return [{
+                        title        : "es-auth-check-client-sample.html",
+                        i18nDisabled : true,
+                        extension    : "html",
+                        url          : "/ui/bp/developer/guide/authcheck/es-auth-check-client-sample.html"
+                    }]
+                }
+			}
+		},
+		initialized : function() {
+			
+		}
+	});
+	</script>
+</dom-module>

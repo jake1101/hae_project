@@ -1,0 +1,32 @@
+<!-- 
+
+## Layout 
+
+참고 [http://alm.emro.co.kr/browse/NFCH-843](http://alm.emro.co.kr/browse/NFCH-843)
+
+ -->
+
+<dom-module id="layout-ex-4">
+
+    <style>
+		:host {
+			@apply(--hbox-layout);
+		}
+	</style>
+    
+    <template>
+		<sc-panel title-text="조직정보" class="flex-4"></sc-panel>
+		<div class="hspace-5"></div>
+		<div class="vbox flex-6">
+			<sc-panel title-text="조직유형" class="flex-5"></sc-panel>
+			<sc-panel title-text="조직목록" class="flex-5"></sc-panel>
+		</div>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'layout-ex-4'
+		});
+	</script>
+
+</dom-module>

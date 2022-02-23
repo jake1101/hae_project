@@ -1,0 +1,39 @@
+<link rel="import" href="em-memoryleak-field.html">
+<link rel="import" href="em-memoryleak-tab.html">
+
+<dom-module id="em-memoryleak-pop">
+
+	<style>
+        :host {
+            @apply(--layout-vertical);
+            @apply(--layout-flex);
+        }
+    </style>
+    
+	<template>
+		<div class="page-flex">
+			<div>
+				<sc-button text="#{팝업 호출(필드들)}" on-click="onShowFieldsPopup"></sc-button>
+				<sc-button text="#{팝업 호출(탭)}" on-click="onShowTabsPopup"></sc-button>
+			</div>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-memoryleak-pop',
+			onShowFieldsPopup : function(e, data) {
+				var window = SCPopupManager.create('em-memoryleak-field', this, 800, 600, true);
+				var content = window.getContent();
+				window.show();
+			},
+			onShowTabsPopup : function(e, data) {
+				var window = SCPopupManager.create('em-memoryleak-tab', this, 800, 600, true);
+				var content = window.getContent();
+				window.show();
+			}
+		});
+	</script>
+
+
+</dom-module>

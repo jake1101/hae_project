@@ -1,0 +1,165 @@
+<dom-module id="ep-beacon-map">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+        <!-- 코드 조회-->
+		<sc-request-group init>
+			<!-- 현장조회 -->
+			<sc-ajax url="findSiteInfoForBeacon.do" body="{{searchParam}}" last-response="{{siteInfo}}" on-response="findSiteInfo"></sc-ajax>
+		</sc-request-group>
+		
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+		
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<table class="tb-form" >
+			<colgroup>
+				<col>
+				<col>
+				<col>
+				<col>
+				<col style="width:150px; height:30px;">
+				<col>
+				<col style="width:60px;">
+			</colgroup>
+			<tr>
+				<th><sc-label text="위도"></sc-label></th>
+				<td><sc-text-field id="lat" value="{{lat}}" required="true" readonly="true"></sc-text-field></td>
+				<th><sc-label text="경도"></sc-label></th>
+				<td><sc-text-field id="lon" value="{{lon}}" required="true" readonly="true"></sc-text-field></td>
+				<th><sc-label text="설치영역"></sc-label></th>
+				<td>
+					<sc-combobox-field id="areaIdCombo" items="[[items]]" value ={{areaId}}  display-field="name" value-field="id" placeholder="선택 안함" >
+ 					</sc-combobox-field>
+				</td>
+				<td>
+					<sc-button text="적용" on-click="onApplyBtnClick"></sc-button>
+				</td>
+			</tr>
+		</table>
+		<div class="vspace-5"></div>
+		<!-- 지도 영역 -->
+		<cc-map-container id="mapContainer" show-view-label="true"></cc-map-container>
+	</template>
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "ep-beacon-map",
+            properties : {
+            	titleText:{
+	                type: String,
+					value: "비콘 위치 등록"
+				},
+				items: {
+					type : Array,
+		            value : function() {
+		            	return [];
+		            }
+				},
+				areaId : {
+		            type : Number,
+		            value : null
+		          },
+				siteInfo: {
+                    type: Object,
+                    value: function(e){
+                        return {};
+                    }
+                },
+                searchParam : {
+                    type : Object,
+                    value : function() {
+                    	return{
+                    		siteId: SCMdiManager.searchParam.site_id,
+                    		includeAreaListFlag : 'Y'
+                        };
+                    }
+                },
+                // 지도
+                map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+                lat : Number,
+                lon : Number,
+                vectorLayer:{
+					type : Object,
+					value : function(){
+						return{};
+					}
+                }
+            },
+            load: function(lat, lon, areaId){
+            	var me = this;
+
+            	if(!UT.isEmpty(lat) && !UT.isEmpty(lon)){
+            		me.set('lon', lon);
+            		me.set('lat', lat);
+                }
+            	me.set('areaId', areaId);
+            	
+            	// 지도 객체 추가
+            	me.map = me.$.mapContainer.map;
+
+		       	// 벡터 레이어 추가
+		       	vectorLayer = new OpenLayers.Layer.Vector("vectorLayer");
+		       	me.map.addLayer(vectorLayer);
+
+		       	var editControl = addEditControl(me.map, vectorLayer);
+
+		     	// 객체 추가 이벤트
+        		vectorLayer.onFeatureInsert = function(e){
+            		var feature = this.getFeatureById(e.id);
+        			editControl.selectFeature(feature);
+	        	};
+
+	        	// 좌표 이동 이벤트
+	        	vectorLayer.events.register('vertexmodified', vectorLayer, function(e){
+	        		this.map.target = this.getDataExtent();
+	        		var point =e.feature.geometry.clone();
+	        		point.transform(projection900913, projection4326);
+
+   	            	me.set('lat',point.y);
+   	            	me.set('lon',point.x);
+		        });
+
+		     	if(UT.isEmpty(me.lat) || UT.isEmpty(me.lon)){
+		       		var lonlat = me.map.target.getCenterLonLat().transform(projection900913, projection4326);
+            		me.set('lon', lonlat.lon);
+            		me.set('lat', lonlat.lat);
+                }
+
+		     	addPositionMarker(vectorLayer, me.get('lon'), me.get('lat'));
+            },
+            findSiteInfo : function(){
+                var me = this;
+                var buildingArea = me.siteInfo.filter(function(e){    
+                	  return e.type === "building" || e.type === "area";
+                });  
+                me.set("items", buildingArea);
+            },
+            onApplyBtnClick: function(){	// 적용버튼 클릭
+            	var me = this;
+	            this.fire("apply-point", {lat : me.lat, lon : me.lon, areaId : me.areaId});
+            }
+        });
+	</script>
+</dom-module>

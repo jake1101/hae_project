@@ -1,0 +1,785 @@
+<dom-module id="ep-sensor-state">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+        
+        <!-- 센서상태 조회 -->
+		<sc-ajax id="findSenserState" 
+			url="findSenserState.do" 
+			body="{{searchParam}}"
+			last-response="{{resultInfo}}"
+			on-response = "completeFindSenserState"
+			>
+		</sc-ajax>
+		
+		<cc-sub-title-bar id="subTitle" title-text = "센서현황" ></cc-sub-title-bar>
+		<div class="vspace-10"></div>
+		<div class = "hbox flex-5">
+			<div class = "flex-5 vbox">
+				<cc-search-container on-search = "drawChart1">
+					<table style="width:100%">
+					<colgroup>
+						<col style="width:120px">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="통신상태"></sc-label></th>
+						<td class = "field-box">
+							<div class = "hspace-5"></div>
+							<sc-combobox-field 
+							                   value="{{searchParam.fromHr1}}" 
+							                   required="true" 
+							                   items="{{codes.hr_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-label text = ":"></sc-label>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-combobox-field 
+							                   value="{{searchParam.fromMin1}}" 
+							                   required="true" 
+							                   items="{{codes.min_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+		                   	<div class = "hspace-10"></div>
+		                   	<sc-label text = "~"></sc-label>
+		                   	<div class = "hspace-10"></div>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-combobox-field 
+							                   value="{{searchParam.toHr1}}" 
+							                   required="true" 
+							                   items="{{codes.hr_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-label text = ":"></sc-label>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-combobox-field 
+							                   value="{{searchParam.toMin1}}" 
+							                   required="true" 
+							                   items="{{codes.min_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+						</td> 
+					</tr>
+<!-- 					<tr> -->
+<!-- 						<td> -->
+<!-- 							<sc-label text = "줌"></sc-label> -->
+<!-- 						</td> -->
+<!-- 						<th> -->
+<!-- 							<sc-button text= "zoomIn" on-click = "zommInDrawChart1"> -->
+<!-- 						</th> -->
+<!-- 					</tr> -->
+				</table>
+			</cc-search-container>
+			<div id = "communication_state" class ="flex"></div>
+			</div>
+			
+			<div class = "vbox flex-5">
+				<cc-search-container on-search = "drawChart2">
+					<table style="width:100%">
+					<colgroup>
+						<col style="width:120px">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="GPS수신"></sc-label></th>
+						<td class = "field-box">
+							<div class = "hspace-5"></div>
+							<sc-combobox-field 
+							                   value="{{searchParam.fromHr2}}" 
+							                   required="true" 
+							                   items="{{codes.hr_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-label text = ":"></sc-label>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-combobox-field 
+							                   value="{{searchParam.fromMin2}}" 
+							                   required="true" 
+							                   items="{{codes.min_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+		                   	<div class = "hspace-10"></div>
+		                   	<sc-label text = "~"></sc-label>
+		                   	<div class = "hspace-10"></div>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-combobox-field 
+							                   value="{{searchParam.toHr2}}" 
+							                   required="true" 
+							                   items="{{codes.hr_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-label text = ":"></sc-label>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-combobox-field 
+							                   value="{{searchParam.toMin2}}" 
+							                   required="true" 
+							                   items="{{codes.min_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+						</td> 
+					</tr>
+				</table>
+			</cc-search-container>
+			<div id = "gps_state" class ="flex"></div>
+			</div>
+		</div>
+		<div class = "hbox flex-5">
+			<div class=  "vbox flex-5">
+				
+				<cc-search-container on-search = "drawChart3">
+					<table style="width:100%">
+					<colgroup>
+						<col style="width:120px">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="비콘수신"></sc-label></th>
+						<td class = "field-box">
+							<div class = "hspace-5"></div>
+							<sc-combobox-field 
+							                   value="{{searchParam.fromHr3}}" 
+							                   required="true" 
+							                   items="{{codes.hr_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-label text = ":"></sc-label>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-combobox-field 
+							                   value="{{searchParam.fromMin3}}" 
+							                   required="true" 
+							                   items="{{codes.min_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+		                   	<div class = "hspace-10"></div>
+		                   	<sc-label text = "~"></sc-label>
+		                   	<div class = "hspace-10"></div>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-combobox-field 
+							                   value="{{searchParam.toHr3}}" 
+							                   required="true" 
+							                   items="{{codes.hr_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-label text = ":"></sc-label>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-combobox-field 
+							                   value="{{searchParam.toMin3}}" 
+							                   required="true" 
+							                   items="{{codes.min_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+						</td> 
+					</tr>
+				</table>
+			</cc-search-container>
+			<div id = "recive_state" class ="flex"></div>
+			</div>
+			<div class=  "vbox flex-5">
+				<cc-search-container on-search = "drawChart4">
+					<table style="width:100%">
+					<colgroup>
+						<col style="width:120px">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="배터리상태"></sc-label></th>
+						<td class = "field-box">
+							<div class = "hspace-5"></div>
+							<sc-combobox-field 
+							                   value="{{searchParam.fromHr4}}" 
+							                   required="true" 
+							                   items="{{codes.hr_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-label text = ":"></sc-label>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-combobox-field 
+							                   value="{{searchParam.fromMin4}}" 
+							                   required="true" 
+							                   items="{{codes.min_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+		                   	<div class = "hspace-10"></div>
+		                   	<sc-label text = "~"></sc-label>
+		                   	<div class = "hspace-10"></div>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-combobox-field 
+							                   value="{{searchParam.toHr4}}" 
+							                   required="true" 
+							                   items="{{codes.hr_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-label text = ":"></sc-label>
+		                   	<div class = "hspace-5"></div>
+		                   	<sc-combobox-field 
+							                   value="{{searchParam.toMin4}}" 
+							                   required="true" 
+							                   items="{{codes.min_list}}" 
+							                   display-field="label" value-field="data" 
+								               placeholder="선택" 
+								               input-clear = "false"
+								               class = "w-60"
+								               >
+		                   	</sc-combobox-field>
+						</td> 
+					</tr>
+				</table>
+			</cc-search-container>
+			<div id = "battery_state" class ="flex"></div>
+			</div>
+		</div>
+		
+	</template>
+
+
+	
+	<script>
+		Polymer({
+			is : 'ep-sensor-state',
+			
+			properties:{
+				codes : {
+	               	type : Object,
+	               	value : function(){
+		               	return	{
+		               		  hr_list : []
+		               		, min_list : []
+		               	};
+	               	},
+	               	reset: false
+	            },
+	            searchParam : {
+	            	type : Object,
+	            	value : function(){
+	            		return {};
+	            	}
+	            },
+	            resultInfo :{
+	            	type : String,
+	            	value : function(){
+	            		return {};
+	            	}
+	            },
+	           
+			},
+			initialized : function(){
+				var hr_list = [];
+				var min_list = [];
+				for(var hr = 0; hr < 24 ; hr ++)
+					hr_list.push({label : ((hr > 9) ? hr: "0" +hr), data : hr});
+				for(var mi = 0; mi < 60 ; mi ++)
+					min_list.push({label : ((mi > 9) ? mi: "0" +mi) , data : mi});
+				this.set("codes.hr_list",hr_list);
+				this.set("codes.min_list",min_list);
+			},
+			load: function(param){
+				var me= this;
+				var date= new Date();
+				me.set("searchParam.sensorId", param.sensorId); 
+				me.set("searchParam.dt", new Date(Date.parse(date.toString()))); // tzBasicDate null 일경우 현재날짜기준 조회
+ 				if(param.targetName){
+					me.$.subTitle.titleText = "["+param.vendorName +"]"+ param.targetJobName + " - " + param.targetName;
+ 				}
+				
+				UT.request(me.$.findSenserState);
+				
+			},
+			completeFindSenserState : function(e, res){
+				var me = this;
+				me.set("searchParam.fromHr1", 0);  me.set("searchParam.fromHr2", 0);  me.set("searchParam.fromHr3", 0);  me.set("searchParam.fromHr4", 0);
+				me.set("searchParam.fromMin1", 0); me.set("searchParam.fromMin2", 0); me.set("searchParam.fromMin3", 0); me.set("searchParam.fromMin4", 0);
+				me.set("searchParam.toHr1", 23);   me.set("searchParam.toHr2", 23);   me.set("searchParam.toHr3", 23);   me.set("searchParam.toHr4", 23);
+				me.set("searchParam.toMin1", 59);  me.set("searchParam.toMin2", 59);  me.set("searchParam.toMin3", 59);  me.set("searchParam.toMin4", 59);
+				me.drawChart1();
+				me.drawChart2();
+				me.drawChart3();
+				me.drawChart4();
+			},
+// 			zommInDrawChart1: function(){
+// 				var me = this;
+// 				var chartContainer = me.communication_state;
+// 				var chartMain = chartContainer.chartView();
+// 				var chart = chartMain.model();
+// 		        var axis = chart.getXAxis(0);
+// 		        axis.zoomIn(5, 15);
+// 			},
+			drawChart1 : function()
+		    {
+		    	var me = this;
+				if(me.$.communication_state.firstElementChild) {
+					me.$.communication_state.removeChild(me.$.communication_state.firstElementChild);
+				}
+		    	var color = ['#7cb5ec', '#91e8e1', '#90ed7d', '#f7a35c', '#8085e9',
+								'#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#434348'];
+		    	var acdData = [];
+        		var cur = new Date();
+        		var datas = me.get("resultInfo.packets"); 
+        		var start = Number(StringUtil.setDateFormat(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(),me.searchParam.fromHr1, me.searchParam.fromMin1,0,0),"d"));
+        		var end = Number(StringUtil.setDateFormat(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(),me.searchParam.toHr1, me.searchParam.toMin1,59,999),"d"))
+        		if(UT.isEmpty(datas)){
+        			acdData.push([start , 0]);
+        			acdData.push([end , 0]);
+        		}
+        		else {
+            		for(var idx = 0 ; idx < datas.length; idx++){
+         				var currentTime = Number(StringUtil.setDateFormat(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(),cur.getHours(), cur.getMinutes(), cur.getSeconds()),"d"));
+        				if(currentTime < datas[idx].createdDt)
+        					continue;
+            			acdData.push([Number(datas[idx].createdDt), datas[idx].val] );
+            		}
+        		}
+        		
+		    	var chartObj =
+		    		{
+		    			"type": "line",
+						"palettes":[{
+							"name": "color1",
+					        "alpha": 1.0,
+							"fills": color,
+							"tick" : true
+						}],
+					    "title": me.translate("통신상태"),
+					    
+		    		    "xAxes": {
+		    				"visible" : true,
+// 		    				"scrollable": true,
+// 		    				"zoomable": true,
+		    				"name": "axis2",
+ 		    				"minValue"  : start,
+ 			    		    "maxValue"  : end,
+		    				"type" : "datetime",
+		    				"styles" :{
+		    					"line" : "#ccc"
+		    				},
+		    				"tick": {
+		    					styles : {
+		    						"datetimeFormat" : "HH:mm:ss",
+		    						"fontSize" : 10,
+		    					}
+		    				},
+		    		    },
+		    		    "yAxes": {
+		    		    	"visible": true,
+		    		    	"name": "axis1",
+		    		        "minValue" : 0,
+		    		        "maxValue" : 1,
+/* 		    		        "maxValue" : 2.5, */
+		    		        "tickCount" : 1,
+/* 		    		        "tickCount" : 5, */
+		    		    	"grid": {"visible": false},
+		    		        "tick": {
+		    					styles : {
+		    						numberFormat : "#,##0.0",
+		    						"fontSize" : 10,
+		    		                "fontBold": true,
+		    		                "marginLeft" : 30
+		    					}
+		    				},
+		    		    },
+					    "series": [{
+					        "name": me.translate("통신상태"),
+					        "label" :false,
+					        "type": "area",
+							"itemWidth": 0.7,
+							"dataField": "value",
+					        "items": acdData,
+					        tooltip : {
+					        	text : "[ ${label: HH:mm:ss} ] ${value}"
+							},
+					        "styles": {
+					            "line": "p(lines:0)",
+					            "fill": "linear,#c07cb5ec,#c0ffffff,90",
+					            "shapeName": null
+					        },
+					        "animations": [{
+					            "property": "mask"
+					        }],
+						}],
+						"legend": {
+							"visible" : false,
+						}
+		    		};
+		    		me.communication_state = new DLChart.ChartComponent(false, me.$.communication_state, chartObj);
+		    		me.chartMain = me.communication_state.chartView();	
+		    },
+			drawChart2 : function()
+		    {
+		    	var me = this;
+				if(me.$.gps_state.firstElementChild) {
+					me.$.gps_state.removeChild(me.$.gps_state.firstElementChild);
+				}
+		    	var color = ['#7cb5ec', '#91e8e1', '#90ed7d', '#f7a35c', '#8085e9',
+								'#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#434348'];
+		    	var gpsData = [];
+        		var cur = new Date();
+        		var datas = me.get("resultInfo.signals"); 
+        		var start = Number(StringUtil.setDateFormat(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(),me.searchParam.fromHr2, me.searchParam.fromMin2,0,0),"d"));
+        		var end = Number(StringUtil.setDateFormat(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(),me.searchParam.toHr2, me.searchParam.toMin2,59,999),"d"))
+        		if(UT.isEmpty(datas)){
+        			gpsData.push([start , 0]);
+        			gpsData.push([end , 0]);
+        		}
+        		else {
+            		for(var idx = 0 ; idx < datas.length; idx++){
+         				var currentTime = Number(StringUtil.setDateFormat(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(),cur.getHours(), cur.getMinutes(), cur.getSeconds()),"d"));
+        				if(currentTime < datas[idx].createdDt)
+        					continue;
+            			gpsData.push([Number(datas[idx].createdDt), datas[idx].val.locked] );
+            		}
+        		}
+		    	
+		    	var chartObj =
+		    		{
+		    			"type": "line",
+						"palettes":[{
+							"name": "color1",
+					        "alpha": 1.0,
+							"fills": color,
+							"tick" : true
+						}],
+					    "title": me.translate("GPS수신"),
+					    
+		    		    "xAxes": {
+		    				"type" : "datetime",
+ 		    				"minValue"  : start,
+ 			    		    "maxValue"  : end,
+		    				"styles" :{
+		    					"line" : "#ccc"
+		    				},
+		    				"tick": {
+		    					styles : {
+		    						"datetimeFormat" : "HH:mm:ss",
+		    						"fontSize" : 10,
+		    					}
+		    				},
+		    		    },
+		    		    "yAxes": {
+		    		    	"visible": true,
+		    		    	"name": "axis1",
+		    		        "minValue" : 0,
+		    		        "maxValue" : 1,
+/* 		    		        "maxValue" : 2.5, */
+		    		        "tickCount" : 1,
+/* 		    		        "tickCount" : 5, */
+		    		    	"grid": {"visible": false},
+		    		        "tick": {
+		    					styles : {
+		    						numberFormat : "#,##0.0",
+		    						"fontSize" : 10,
+		    		                "fontBold": true,
+		    		                "marginLeft" : 30
+		    					}
+		    				},
+		    		    },
+					    "series":  [{
+					        "name": me.translate("GPS수신"),
+					        "label" :false,
+					        "type": "area",
+							"itemWidth": 0.7,
+							"dataField": "value",
+					        "items": gpsData,
+					        tooltip : {
+					        	text : "[ ${label: HH:mm:ss} ] ${value}"
+							},
+					        "styles": {
+					            "line": "p(lines:0)",
+					            "fill": "linear,#c07cb5ec,#c0ffffff,90",
+					            "shapeName": null
+					        },
+					        "animations": [{
+					            "property": "mask"
+					        }],
+						}],
+						"legend": {
+							"visible" : false,
+						}
+		    		};
+		    		me.gps_state = new DLChart.ChartComponent(false, me.$.gps_state, chartObj);
+		    		me.chartMain = me.gps_state.chartView();	
+		    },
+			drawChart3 : function()
+		    {
+		    	var me = this;
+				if(me.$.recive_state.firstElementChild) {
+					me.$.recive_state.removeChild(me.$.recive_state.firstElementChild);
+				}
+				
+		    	var color = ['#7cb5ec', '#91e8e1', '#90ed7d', '#f7a35c', '#8085e9',
+								'#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#434348'];
+		    	var bcnData = [];
+        		var cur = new Date();
+        		var datas = me.get("resultInfo.signals"); 
+        		var start = Number(StringUtil.setDateFormat(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(),me.searchParam.fromHr3, me.searchParam.fromMin3,0,0),"d"));
+        		var end = Number(StringUtil.setDateFormat(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(),me.searchParam.toHr3, me.searchParam.toMin3,59,999),"d"))
+        		if(UT.isEmpty(datas)){
+        			bcnData.push([start , 0]);
+        			bcnData.push([end , 0]);
+        		}
+        		else {
+            		for(var idx = 0 ; idx < datas.length; idx++){
+         				var currentTime = Number(StringUtil.setDateFormat(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(),cur.getHours(), cur.getMinutes(), cur.getSeconds()),"d"));
+        				if(currentTime < datas[idx].createdDt)
+        					continue;
+            			bcnData.push([Number(datas[idx].createdDt), datas[idx].val.beacon] );
+            		}
+        		}
+
+		    	var chartObj = 
+		    		{
+		    			"type": "line",
+						"palettes":[{
+							"name": "color1",
+					        "alpha": 1.0,
+							"fills": color,
+							"tick" : true
+						}],
+					    "title": me.translate("비콘 수신"),
+					    
+		    		    "xAxes": {
+		    				"type" : "datetime",
+ 		    				"minValue"  : start,
+ 			    		    "maxValue"  : end,
+		    				"styles" :{
+		    					"line" : "#ccc"
+		    				},
+		    				"styles" :{
+		    					"line" : "#ccc"
+		    				},
+		    				"tick": {
+		    					styles : {
+		    						"datetimeFormat" : "HH:mm:ss",
+		    						"fontSize" : 10,
+		    					}
+		    				},
+		    		    },
+		    		    "yAxes": {
+		    		    	"visible": true,
+		    		    	"name": "axis1",
+		    		        "minValue" : 0,
+		    		        "maxValue" : 4.0,
+/* 		    		        "maxValue" : 2.5, */
+		    		        "tickCount" : 4,
+/* 		    		        "tickCount" : 5, */
+		    		    	"grid": {"visible": false},
+		    		        "tick": {
+		    					styles : {
+		    						numberFormat : "#,##0.0",
+		    						"fontSize" : 10,
+		    		                "fontBold": true,
+		    		                "marginLeft" : 30
+		    					}
+		    				},
+		    		    },
+					    "series": [{
+					        "name": me.translate("비콘 수신"),
+					        "label" :false,
+					        "type": "area",
+							"itemWidth": 0.7,
+							"dataField": "value",
+					        "items": bcnData,
+					        tooltip : {
+					        	text : "[ ${label: HH:mm:ss} ] ${value}"
+							},
+					        "styles": {
+					            "line": "p(lines:0)",
+					            "fill": "linear,#c07cb5ec,#c0ffffff,90",
+					            "shapeName": null
+					        },
+					        "animations": [{
+					            "property": "mask"
+					        }],
+						}],
+						"legend": {
+							"visible" : false,
+						}
+		    		};
+		    		me.recive_state = new DLChart.ChartComponent(false, me.$.recive_state, chartObj);
+		    		me.chartMain = me.recive_state.chartView();	
+		    },
+			drawChart4 : function()
+		    {
+		    	var me = this;
+		    	if(me.$.battery_state.firstElementChild) {
+					me.$.battery_state.removeChild(me.$.battery_state.firstElementChild);
+				}
+		    	var color = ['#7cb5ec'];
+		    	var btyData = [];
+        		var cur = new Date();
+        		var datas = me.get("resultInfo.signals"); 
+        		var start = Number(StringUtil.setDateFormat(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(),me.searchParam.fromHr4, me.searchParam.fromMin4, 0, 0),"d"));
+        		var end = Number(StringUtil.setDateFormat(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(),me.searchParam.toHr4, me.searchParam.toMin4, 59, 999),"d"))
+        		if(UT.isEmpty(datas)){
+        			btyData.push([start , 0]);
+        			btyData.push([end , 0]);
+        		}
+        		else {
+            		for(var idx = 0 ; idx < datas.length; idx++){
+         				var currentTime = Number(StringUtil.setDateFormat(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(),cur.getHours(), cur.getMinutes(), cur.getSeconds()),"d"));
+        				if(currentTime < datas[idx].createdDt)
+        					continue;
+    					btyData.push([Number(datas[idx].createdDt), datas[idx].val.battery] );
+            		}
+        		}
+
+		    	var chartObj =
+		    		{
+		    			"type": "line",
+						"palettes":[{
+							"name": "color1",
+					        "alpha": 1.0,
+							"fills": color,
+							"tick" : true
+						}],
+					    "title": me.translate("배터리상태"),
+					    
+		    		    "xAxes": {
+		    				"type" : "datetime",
+		    				"visible" : true, 
+		    				"name": "axis2",
+ 		    				"minValue"  : start,
+ 			    		    "maxValue"  : end,
+// 			    		    "tickCount" : 6, 
+		    				"styles" :{
+		    					"line" : "#ccc"
+		    				},
+		    				"tick": {
+		    					styles : {
+		    						"datetimeFormat" : "HH:mm:ss",
+		    						"fontSize" : 10,
+		    					}
+		    				},
+		    		    },
+		    		    "yAxes": {
+		    		    	"visible": true,
+		    		    	"name": "axis1",
+		    		        "minValue" : 0,
+		    		        "maxValue" : 100,
+		    		        "tickCount" : 5,
+		    		    	"grid": {"visible": false},
+		    		        "tick": {
+		    					styles : {
+		    						numberFormat : "#,##0",
+		    						"fontSize" : 10,
+		    		                "fontBold": true,
+		    		                "marginLeft" : 30
+		    					}
+		    				},
+		    				"indicators": [{
+					            "type": "line",
+					            "label": {
+					                
+					                "text": "",
+					                "styles" : {
+					                },
+					                
+					                "offsetX" : -40
+					            },
+					            "front" :true,
+					            "value": 30,
+					            "styles": {
+					                "line": "#ff0000,1px,dotted",
+					                "color": "#ff0000",
+					            }
+					        }]
+		    		    },
+					    "series": [{
+					        "name": me.translate("배터리량"),
+					        "label" :false,
+					        "type": "area",
+							"itemWidth": 0.7,
+							"dataField": "value",
+					        "items": btyData,
+							tooltip : {
+								text : "[ ${label: HH:mm:ss} ] ${value}"
+							},
+					        "styles": {
+					            "line": "p(lines:0)",
+					            "fill": "linear,#c07cb5ec,#c0ffffff,90",
+					            "shapeName": null
+					        },
+					        "animations": [{
+					            "property": "mask"
+					        }],
+						}],
+						"legend": {
+							"visible" : false,
+						}
+		    		};
+		    		me.battery_state = new DLChart.ChartComponent(false, me.$.battery_state, chartObj);
+		    		me.chartMain = me.battery_state.chartView();	
+		    },
+		});
+	</script>
+
+</dom-module>

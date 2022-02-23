@@ -1,0 +1,40 @@
+<!--
+gp system rotate animation
+-->
+<script>
+
+  Polymer({
+
+    is: 'gp-rotate-left-right-animation',   
+    
+
+    behaviors: [
+		Polymer.NeonAnimationBehavior
+    ],
+
+    configure: function(config) {
+    	var node  = config.node
+         
+         this.setPrefixedProperty(node, 'transformOrigin', '50% 50%');
+         
+         this._effect = new KeyframeEffect(node, [
+					{
+						'transform' : 'rotateY(0deg)',
+						'opacity' : '0' 
+					},
+                  {
+						'opacity' : '1', 
+						'transform' : 'rotateY(180deg)'
+				  }                  
+                 
+          ], this.timingFromConfig(config));
+         
+         return this._effect;
+     
+    },
+    
+    
+
+  });
+
+</script>

@@ -1,0 +1,45 @@
+<dom-module id="es-sub-tab2-validation-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<sc-request-group init>
+			<sc-code-group>
+				<!-- 지급조건/지급조건상세 -->
+				<sc-code code="P009" value="{{codes.payTermsCdD}}"></sc-code>
+			</sc-code-group>
+		</sc-request-group>
+
+		<sc-label text="서브탭2" i18n-disabled></sc-label>
+		<sc-text-field></sc-text-field>
+	</template>
+
+	<script>
+        Polymer({
+            is: 'es-sub-tab2-validation-sample',
+            properties: {
+                codes: {
+                    type: Object,
+                    value: function () {
+                        return {
+                            payTermsCdD: []
+                        };
+                    },
+                    reset: false
+                }
+            },
+
+            load: function (param) {
+                this.isLoaded = true;
+            },
+
+            isValidFn: function (validParam) {
+                return true;
+            }
+
+        });
+	</script>
+</dom-module>

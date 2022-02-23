@@ -1,0 +1,317 @@
+<link rel="stylesheet" href="resources/css/smartsuite-calendar-style.css">
+<link rel="import" href="resources/css/smartsuite-calendar-style.html">
+<link rel="import" href="resources/lib/fullcalendar-3.0.1/fullcalendar.html">
+
+<link rel="import" href="resources/lib/smartsuite-color-picker/smartsuite-color-picker.html">
+<link rel="import" href="resources/lib/smartsuite-timepicker/smartsuite-timepicker.html">
+<link rel="import" href="resources/lib/smartsuite-user-list/smartsuite-user-list.html">
+<link rel="import" href="resources/lib/smartsuite-dept-list/smartsuite-dept-list.html">
+<link rel="import" href="resources/lib/smartsuite-colored-list-item/smartsuite-colored-list-item.html">
+
+<link rel="import" href="smartsuite-calendar-config.html">
+
+<link rel="import" href="smartsuite-calendar-group.html">
+<link rel="import" href="smartsuite-calendar-shared-group.html">
+<link rel="import" href="smartsuite-calendar-view.html">
+
+<link rel="import" href="smartsuite-calendar-add-schedule-popup.html">
+<link rel="import" href="smartsuite-calendar-add-group-popup.html">
+<link rel="import" href="smartsuite-calendar-search-popup.html">
+
+<link rel="import" href="smartsuite-calendar-popup-behavior.html">
+
+<!-- 
+	캘린더 관리 - 메인 화면
+ -->
+<dom-module id="smartsuite-calendar-mgt">
+	<style>
+		:host {
+            @apply(--calendar-vbox-layout);
+        }
+	</style>
+
+	<template>
+		<!--
+			AJAX 요청
+		 -->
+		<!-- 캘린더 기본 데이터 정보 가져오기 -->
+		<sc-ajax id="getCommonCalendarData" url="getCommonCalendarData.do" on-response="onResponseCommonCalendarData"></sc-ajax>
+		<!-- 전체 일정 정보 가져오기 -->
+		<sc-ajax id="getScheduleInfo" url="getScheduleInfo.do" on-response="onResponseScheduleInfo"></sc-ajax>
+
+		<!--
+			화면 
+		 -->			
+		<div class="calendar-hbox calendar-flex">
+			<!-- 좌측: 캘린더를 보여주는 부분 -->
+			<div class="flex-8" style="overflow-x:auto;overflow-y:hidden;">
+				<smartsuite-calendar-view id="calendarView" style="min-width:500px;"></smartsuite-calendar-view>
+			</div>
+			
+			<!-- 우측: 제어 패널 부분 -->
+			<div class="calendar-vbox flex-2" style="background-color: #f5f5f5;border-left: 1px solid silver;">
+				<!-- 미니 캘린더를 보여주는 부분 -->
+				<div class="dateChooserWrapper calendar-flex">
+					<sc-date-chooser id="miniCalendar" class="calendarShortcut" today-hidden="true"></sc-date-chooser>
+				</div>
+					
+				<!-- 캘린더 그룹을 보여주는 부분 -->
+				<div class="calendar-flex calendarGroupWrapper">
+					<smartsuite-calendar-group id="calendarGroup"></smartsuite-calendar-group>
+				</div>
+				
+				<!-- 공유 캘린더를 보여주는 부분 -->
+				<div class="calendar-flex calendarGroupWrapper">
+					<smartsuite-calendar-shared-group id="sharedCalendarGroup"></smartsuite-calendar-shared-group>
+				</div>
+			</div>
+		</div>
+	</template>
+
+	<script>
+		Polymer({
+			is: 'smartsuite-calendar-mgt',
+			
+			properties: {
+				
+				// 현재 볼 수 있는 스케줄 정보 - key: 그룹 키, value: 스케줄 정보
+				calendarData: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				},
+				
+				
+				// 현재 보여질 기준 날짜
+				targetDate: {
+					type: Object,
+					value: function() {
+						return {
+							start_limit: undefined,
+							end_limit: undefined
+						};
+					}
+				},
+				
+				
+				// 보여지지 않는 그룹 리스트
+				nonDisplayedGroup: {
+					type: Array,
+					value: function() {
+						return [];
+					}
+				},
+				
+				// 그룹 전체 정보
+				groupInfo: {
+					type: Object,
+					value: function() {
+						return { own: [], shared: [], total: {} };
+					}
+				}
+			},
+			
+			listeners: {
+				'refresh': 'onRefresh', // 리프레시
+				
+				// 날짜 이동
+				'calendar-tap': 'tapCalendar',
+				
+				// 표시 관련
+				'change-date': 'onChangeTargetDate', // 보여지는 구간 변경
+				'toggle-display-group': 'onChangeDisplayGroup', // 보여지는 그룹 설정
+				
+				// 팝업 관련
+				'open-calendar-group-popup': 'onOpenCalendarGroupPopup', // 그룹 팝업
+				'open-calendar-schedule-popup': 'onOpenCalendarSchedulePopup', // 스케줄 팝업
+				'open-search-popup': 'onOpenCalendarSearchPopup'
+			},
+			
+			// 기본 정보 가져오기
+			attached: function() {
+				var me = this;
+				
+				// 기본정보 요청
+				me.$.getCommonCalendarData.generateRequest();
+			},
+			
+			// 화면 전체를 리프레시한다.
+			onRefresh: function() {
+				var me = this;
+				me.$.getScheduleInfo.body = {
+					start_limit: me.targetDate.start_limit,
+					end_limit: me.targetDate.end_limit
+				};
+				
+				// 보정
+				me.$.getScheduleInfo.body.start_limit	= me.$.getScheduleInfo.body.start_limit.toDate();
+				me.$.getScheduleInfo.body.end_limit		= me.$.getScheduleInfo.body.end_limit.toDate();
+				
+				me.$.getScheduleInfo.body.dept_cd		= SCSessionManager.currentUser.dept_cd;
+				
+				SCLoadMask.show();
+				me.$.getScheduleInfo.generateRequest();
+			},
+			
+			// 캘린더의 공용 데이터를 가져옴
+			onResponseCommonCalendarData: function(response) {
+				var commonData = response.detail.response;
+				for(var index in commonData) {
+					CalendarData[index] = commonData[index];
+				}
+			},
+			
+			formatDate: function(date) {
+			    var d = new Date(date),
+			        month = '' + (d.getMonth() + 1),
+			        day = '' + d.getDate(),
+			        year = d.getFullYear();
+
+			    if (month.length < 2) month = '0' + month;
+			    if (day.length < 2) day = '0' + day;
+
+			    return [year, month, day].join('-');
+			},
+			
+			// 미니 캘린더를 클릭했을때
+			tapCalendar: function(event) {
+				var me = this;
+				me.$.calendarView.setDate(me.$.miniCalendar.selectedDate);
+			},
+			
+			// 보여지는 구간이 달라질 때
+			onChangeTargetDate: function(event, detail) {
+				var me = this;
+				
+				me.targetDate = {
+					start_limit:  detail.start,
+					end_limit: detail.end
+				};
+				
+				me.onRefresh();
+			},
+			
+			// 캘린더의 일정 데이터를 가져옴
+			onResponseScheduleInfo: function(response) {
+				var me = this;
+				var groupData = response.detail.response;				
+				
+				me.set('calendarData', groupData);
+				me.setGroupData();
+				me.setScheduleData();
+				SCLoadMask.hide();
+			},
+			
+			// 선택 그룹 여부를 toggle함
+			onChangeDisplayGroup: function(event, groupInfo) {
+				var me = this;
+				var grpIdx = me.nonDisplayedGroup.indexOf(groupInfo.grp_id);
+				if(grpIdx === -1) {
+					me.nonDisplayedGroup.push(groupInfo.grp_id);
+				} else {
+					me.nonDisplayedGroup.splice(grpIdx, 1);
+				}
+				
+				// 보여지는 스케줄을 재 설정
+				me.setScheduleData();
+			},
+			
+			// 그룹 정보를 설정함
+			setGroupData: function() {
+				var me = this;
+				me.groupInfo = { own: [], shared: [], total: {} };
+				
+				for(var i = 0; i < me.calendarData.length; i++) {
+					var groupInfo = me.calendarData[i];
+					if(groupInfo.usr_id === SCSessionManager.currentUser.usr_id) {
+						me.groupInfo.own.push(groupInfo);
+					} else {
+						me.groupInfo.shared.push(groupInfo);
+					}
+					me.groupInfo.total[groupInfo.grp_id] = groupInfo;
+				}
+				
+				me.$.calendarGroup.setGroupList(me.groupInfo.own);
+				me.$.sharedCalendarGroup.setGroupList(me.groupInfo.shared);
+			},
+			
+			// 스케줄 데이터를 설정함
+			setScheduleData: function() {
+				var me = this;
+				
+				var scheduleList = [];
+				for(var i = 0; i < me.calendarData.length; i++) {
+					var groupInfo = me.calendarData[i]; 
+					if(me.nonDisplayedGroup.indexOf(groupInfo.grp_id) === -1) {
+						scheduleList.push(groupInfo);
+					}
+				}
+				
+				me.$.calendarView.setSchedule(scheduleList);
+			},
+			
+			// 그룹 팝업을 띄움
+			onOpenCalendarGroupPopup: function(event, groupInfo) {
+				var me = this;
+				
+				if(!SCLinkManager.isLoaded('sc-grid')) {
+					SCLinkManager.load('sc-grid').then(function() {
+						me.openGroupInfoPopup(groupInfo);
+					});
+				} else {
+					me.openGroupInfoPopup(groupInfo);
+				}
+			},
+			
+			// 스케줄 팝업을 띄움
+			onOpenCalendarSchedulePopup: function(event, scheduleInfo) {
+				var me = this;
+				
+				// 그룹 호출
+				me.openScheduleInfoPopup(scheduleInfo, me.getAvailableGroupList());
+			},
+			
+			// 사용가능한 그룹 목록 가져오기
+			getAvailableGroupList: function() {
+				var me = this;
+				var groupList = {ownGroup:[], sharedGroup: []};
+				for(var i = 0; i < me.calendarData.length; i++) {
+					var groupInfo = me.calendarData[i];
+					if(groupInfo.usr_id === SCSessionManager.currentUser.usr_id) {
+						groupList.ownGroup.push({ label: groupInfo.grp_nm, data: groupInfo.grp_id });
+					} else {
+						groupList.sharedGroup.push({ label: groupInfo.grp_nm, data: groupInfo.grp_id });
+					}
+				}
+				
+				return groupList;
+			},
+			
+			// 검색 팝업 띄움
+			onOpenCalendarSearchPopup: function(event) {
+				var me = this;
+				
+				if(!SCLinkManager.isLoaded('sc-grid')) {
+					SCLinkManager.load('sc-grid').then(function() {
+						me.openSearchPopup();
+					});
+				} else {
+					me.openSearchPopup();
+				}
+			},
+			
+			// 검색 팝업 띄움
+			openSearchPopup: function() {
+				var me = this;
+				var tmpGroupList = me.getAvailableGroupList();
+				var groupList = [];
+				groupList = groupList.concat(tmpGroupList.ownGroup).concat(tmpGroupList.sharedGroup);
+				me.openSearchPopupInBehavior(groupList);
+			},
+			
+			behaviors: [Polymer.SmartsuiteCalendarPopupBehavior]
+		});
+	</script>
+
+</dom-module>

@@ -1,0 +1,250 @@
+<dom-module id="gp-progress-state">
+    <template>
+        <style>
+            :host {
+                display: flex;
+                align-items: stretch;
+                width: 100%;
+                height: 55px;
+                min-height: 55px;
+                border: 1px solid #d6d6d6;
+                -webkit-border-radius: 4px;
+                -moz-border-radius: 4px;
+                border-radius: 4px;
+                background-color: #f8f8f8;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+
+                --line-style: {
+                    content: "";
+                    position: absolute;
+                    left: calc(50% + 3px);
+                    top: 23px;
+                    width: 100%;
+                };
+
+                --dot-style: {
+                    padding-top: 33px;
+                    flex: 1;
+                    text-align: center;
+                    position: relative;
+                };
+            }
+
+            .state {
+                @apply(--dot-style);
+                background: url('./img/dot.png') no-repeat center 20px;
+            }
+
+            .stateDone {
+                @apply(--dot-style);
+                background: url('./img/dot_gray.png') no-repeat center 20px;
+            }
+
+            .stateCurrent {
+                @apply(--dot-style);
+                background: url('./img/dot_red.png') no-repeat center 20px;
+            }
+
+            .stateAval {
+                @apply(--dot-style);
+                background: url('./img/dot_green.png') no-repeat center 20px;
+            }
+
+            .backgroundLine:before {
+                @apply(--line-style);
+                background: url('./img/line_default.png') repeat-x;
+                height: 1px;
+            }
+
+            .checkMark:after {
+                @apply(--line-style);
+                background: url('./img/icon_check.png') no-repeat;
+                width: 9px;
+                height: 9px;
+                left: calc(50% - 3px);
+                top: 9px;
+            }
+
+            #sub {
+                position: absolute;
+                top: -21px;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+                margin: 0 5px;
+            }
+
+            .subAlignRight {
+                right: -50%;
+            }
+
+            #subArea {
+                background-color: white;
+                border: 1px solid #d6d6d6;
+                height: 27px;
+                display: flex;
+                -webkit-box-shadow: 0px 1px 1px #999;
+                -moz-box-shadow: 0px 1px 1px #999;
+                box-shadow: 0px 1px 1px #999
+            }
+
+            #arrow {
+                background: url('./img/sub_box_arrow.png') no-repeat center top;
+                width: 10px;
+                height: 9px;
+                position: absolute;
+                top: 7px;
+                left: calc(50% - 5px);
+            }
+
+            .subName {
+                margin: 0 10px;
+                white-space: nowrap;
+                padding-top: 7px;
+            }
+
+            .subCurrent {
+                font-weight: 700;
+            }
+
+            .subNormal {
+                color: #c7c7c7;
+            }
+
+            .pathArrow {
+                background: url('./img/icon_arrow.png') no-repeat right center;
+                width: 3px;
+                height: 5px;
+                padding-top: 18px;
+            }
+
+            .linkCurrent {
+                /*cursor: default;*/
+            }
+
+            .linkAval {
+
+            }
+
+            .linkNormal {
+                cursor: not-allowed;
+            }
+
+            .linkDone {
+                color: #c7c7c7;
+            }
+
+            .linkDone:hover,
+            .linkNormal:hover {
+                text-decoration: none;
+            }
+        </style>
+
+        <template is="dom-repeat" items="{{data}}" as="state" index="index">
+            <div class$="{{_computeMainState(index)}}">
+                <a href="javascript:void(0);" on-tap="_onStateTap" value="{{index}}" class$="{{_computeLinkAval(index)}}">{{state.main_work_nm}}</a>
+                <template is="dom-if" if="{{_hasSub(state.stateList, index)}}">
+                    <div id="sub" class$="{{_determineSubAlign(index)}}">
+                        <div id="subArea">
+                            <template is="dom-repeat" items="{{state.stateList}}" as="subState" index="index">
+                                <span class$="subName {{_computeSubState(subState)}}">{{subState.sub_work_nm}}</span>
+                                <div class$="{{_computeSubOrder(index)}}"></div>
+                            </template>
+                        </div>
+                    </div>
+                    <div id="arrow"></div>
+                </template>
+            </div>
+        </template>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'gp-progress-state',
+
+            properties: {
+                data: {
+                    type: Array
+                },
+                width: {
+                    type: String,
+                    observer: '_onWidthSet'
+                }
+            },
+
+            _computeMainState: function (index) {
+                var order = this.data[index].main_sort_ord;
+                var currentOrder = this.data[index].crnt_main_sort_ord;
+
+                if (index == this.data.length - 1)
+                    return order == currentOrder ? "checkMark stateCurrent" : "state";
+                else if (order < currentOrder)
+                    return "backgroundLine stateDone";
+                else if (order == currentOrder)
+                    return "backgroundLine checkMark stateCurrent";
+                else if (this._checkAvals(order))
+                    return "backgroundLine stateAval";
+                else
+                    return "backgroundLine state";
+            },
+
+            _computeLinkAval: function (index) {
+                var order = this.data[index].main_sort_ord;
+
+                if (this.data[0].crnt_main_sort_ord == order)
+                    return 'linkCurrent';
+                else if (this._checkAvals(order))
+                    return 'linkAval';
+                else if (this.data[0].crnt_main_sort_ord > order)
+                    return "linkDone"
+                else
+                    return 'linkNormal';
+            },
+
+            _checkAvals: function (index) {
+                var avals = this.data[this.data[0].crnt_main_sort_ord - 1].aftr_sort_ord;
+                if (avals != '') {
+
+                    if (avals.indexOf('@') != -1) {
+                        return avals.split('@').indexOf(String(index)) != -1;
+                    } else
+                        return avals == String(index) ? true : false;
+
+                } else
+                    return false;
+            },
+
+            _determineSubAlign: function (index) {
+                return index + 1 > Math.floor(this.data.length / 2) ? 'subAlignRight' : '';
+            },
+
+            _onStateTap: function (e) {
+                var state = e.target;
+
+                //if (state.classList.contains('linkAval') || state.classList.contains('linkDone')) {
+                //현재 상태 화면으로 돌아올 수 있도록 수정 (임시방안)
+				if (state.classList.contains('linkAval') || state.classList.contains('linkDone') || state.classList.contains('linkCurrent')) {                	
+                    this.fire('state-tap', {menu_cd: this.data[state.value].menu_cd, main_work_cd: this.data[state.value].main_work_cd});
+                }
+            },
+
+            _hasSub: function (subState, index) {
+                return this.data[index].main_sort_ord == this.data[index].crnt_main_sort_ord && subState.length > 0 ? true : false;
+            },
+
+            _computeSubState: function (subState) {
+                return subState.sub_sort_ord == subState.crnt_sub_sort_ord ? "subCurrent" : 'subNormal';
+            },
+
+            _computeSubOrder: function (subIndex) {
+                return this.data[this.data[0].crnt_main_sort_ord - 1].stateList.length - 1 == subIndex ? '' : "pathArrow";
+            },
+
+            _onWidthSet: function (newvalue) {
+                this.style.width = newvalue + 'px';
+            }
+        })
+    </script>
+</dom-module>

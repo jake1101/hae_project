@@ -1,0 +1,169 @@
+<dom-module id="es-dev-chart-area-tag">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <!--  화면 구성 시작-->
+    <template>
+    
+    	<sc-ajax id="findListPr"
+            url="../enrollment_tertiary_edu.json"
+            last-response="{{resultList}}"
+            on-response="onFindListPrHandler">
+        </sc-ajax>
+    	
+    	<sc-grid id="gridChartPanel" class="flex" 
+    			 editable="false"
+    			 use-selection="false"
+    			 use-state="false"
+    			 row-height="40"
+				 data-provider="{{resultList}}">
+
+			<sc-grid-columns>
+				<sc-data-column 	data-field="area"		header-text="Area"		width="160"	text-align="center"></sc-data-column>
+				<sc-data-column 	data-field="subgroup"	header-text="Subgroup"	width="50"	text-align="center"></sc-data-column>
+				<sc-data-column 	data-field="value"		header-text="Value"		width="60"	text-align="center" data-type="number"></sc-data-column>
+				<sc-data-column 	data-field="year"		header-text="Year"		width="40"	text-align="center"></sc-data-column>
+				
+				<!-- 차트 컬럼 : grid-chart-ref : sc-grid-chart의 ID값을 지정하여, 참조할 수 있도록 함 -->
+				<sc-chart-column	grid-chart-ref="gridChartColumn"	header-text="Chart"		width="600"></sc-chart-column>
+			</sc-grid-columns>
+		</sc-grid>
+		
+		<!-- 
+			아래의 sc-grid-chart의 역할은 하위의 엘리먼트를 파악하여 구조 그대로 Object 형태로 변경합니다.
+			그래서, 데이터 루디의 그리드 차트 API를 참조하며 바로 적용가능하도록 구현하였습니다.
+			참고로 sc-grid-chart의 result변수에 차트 객체 결과값이 바인딩되기 때문에 'gridChartColumn.result'로 접근하여 차트 객체를 확인하실 수 있습니다.
+		 -->
+		<!-- [차트 속성] 
+			1. field-names : 하단의 <series>태그 내의 <item>에서 사용될 필드를 명시. 이는 각 각 filter, label-field, value-field에서 사용.
+			2. merge-expression : 해당 차트의 표현될 대상이 되는 그룹을 의미.
+			  					    예를 들어, 해당 예제에서는 area를 지정했으므로 Afghanistan, Albania, Algeria.. 등등으로 그룹핑이 됨. 
+		-->
+        <sc-grid-chart id="gridChartColumn" type="chart" field-names="year, subgroup, value" merge-expression="values['area']">
+        	<!-- 차트 객체(type : 차트 속성) 
+        		type : column, area, bar, line, pie가 존재함
+        	-->
+            <chart type="area">
+            	<!-- Legend : 시리즈 아이템 구분값 -->
+                <legend visible="true" position="right" direction="vertical" margin-left="10">
+                    <styles></styles>
+                </legend>
+                <!-- 시리즈 아이템이 그려질 영역 -->
+                <plot-area>
+            		<styles background="#0800ffff"></styles>
+            	</plot-area>
+                <!-- X축 -->
+                <x-axes padding="0.1">
+                	<!-- X축의 라인 색상 -->
+                    <styles line="#999"></styles>
+                    <!-- X축의 시리즈 아이템간의 구분 라인 색상 -->
+                    <tick-styles line="#999"></tick-styles>
+                </x-axes>
+                <!-- Y축 -->
+                <y-axes padding="0.1">
+                	<styles line="null"></styles>
+                	<!-- Indicators -->
+                    <indicators>
+                    	<!-- 배열형태는 반드시 아래와 같이 사용 ( <array>, <item> ) -->
+                        <array>
+                        	<!-- 
+                        		1. front : 시리즈 아이템 앞에서 보여질지, 뒤에서(가려져서) 보여질지 여부.
+                        		2. series : 하단 시리즈 아이템 중 해당하는 name 입력.
+                        		3. value : 사용되는 값.
+                        		4. label : value가 표현되는 라벨.
+                        	 -->
+                            <item type="line" front="true" series="serFemale" value="avg" label="Average:${value}">
+                            	<!-- 스타일 속성 링크 : http://helpme.emro.co.kr/projects/grid/api/ko/Classes_GridStyles -->
+                                <styles line="#600000ff,1px,dotted"
+                                        color="#e00000ff"
+                                        font-size="10"
+                                        font-bold="true"
+                                        text-alignment="far"
+                                        number-format="#,##0"></styles>
+                            </item>
+                            <item type="line" front="false" series="serMale" value="avg" label="Average:${value}">
+                                <styles line="#60ff0000,1px,dashed"
+                                        color="#e0800000"
+                                        font-size="10"
+                                        font-bold="true"
+                                        text-alignment="near"
+                                        number-format="#,##0"></styles>
+                            </item>
+                        </array>
+                    </indicators>
+                </y-axes>
+                <!-- Series : 실제 그려질 차트 속성값 세팅 -->
+                <series>
+                    <array>
+                    	<!-- 
+                    		1. cluster-width : 둘 이상의 시리즈가 표시될 때, 시리즈의 각 항목이 차지하는 상대 너비.
+                    		2. item-width : 컬럼 bar의 상대적 너비.
+                    		3. caption : 시리즈 아이템의 이름. 이 값이 없으면 name이 사용.
+                    		4. filter : 차트에 표현될 시리즈 필터.
+                    		5. label-field : 라벨에 사용될 필드.
+                    		6. value-field : value에 사용될 필드.
+                    		7. summary-mode : 시리즈 항목 값들의 합계를 구하는 방식.
+                    		8. styles : 시리즈 아이템들의 기본 스타일.
+                    		9. dynamic-styles : 시리즈 아이템들에 적용되는 동적 스타일.
+                    		   - expression : 표현식.
+                    	 -->
+                        <item name="serFemale"
+                        	  cluster-width="1"
+                        	  item-width="1"
+                              caption="Female"
+                              label-field="year"
+                              value-field="value"
+                              summary-mode="aggregate"
+                              >
+                            <styles background="#30AFA8AF" shape-name="diamond" shape-color="#7F787F"></styles>
+                            <!-- 값이 평균보다 큰 경우, 어두운 붉은색 적용 -->
+                            <dynamic-styles expression="value > avg">
+                            	<styles background="#F00"></styles>
+                            </dynamic-styles>
+                        </item>
+                    </array>
+                </series>
+            </chart>
+        </sc-grid-chart>
+		
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-dev-chart-area-tag',
+            
+            properties: {
+            	resultList: {
+            		type: Array,
+            		value: []
+            	}
+            },
+            
+            attached: function(){
+            	this.loadData();
+            },
+            
+            loadData: function () {
+                this.$.findListPr.generateRequest();
+            },
+            
+            onFindListPrHandler: function(e, res){
+            	/** Group By */
+            	this.$.gridChartPanel.groupBy(['area']);
+            	
+            	/** Source Viewer의 data값 set */
+            	this.domHost.$.viewer.setData(JSON.stringify(res.response, null, "\t"));
+            }
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

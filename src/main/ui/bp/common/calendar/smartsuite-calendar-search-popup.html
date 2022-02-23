@@ -1,0 +1,154 @@
+<!--
+	일정 검색 팝업 
+ -->
+<dom-module id="smartsuite-calendar-search-popup">
+	<style>
+		:host {
+            @apply(--calendar-vbox-layout);
+            width: 100%;
+            height: 100%;
+        }
+	</style>
+
+	<template>
+		<sc-ajax id="searchSchedule" 
+			last-response="{{resultList}}" 
+			url="findSchedule.do">
+		</sc-ajax>
+	
+		<div class="calendar-vbox flex">
+			<sc-toolbar>
+				<sc-spacer></sc-spacer>
+				<sc-button text="닫기" on-click="onClose"></sc-button>
+			</sc-toolbar>
+			<div class="calendar-search-box">
+	            <table>
+	                <tr>
+	                    <th width="100px"><sc-label text="일정 명"></sc-label></th>
+	                    <td>
+	                        <sc-text-field value="{{searchParam.sched_nm}}" on-enter="search"></sc-text-field>
+	                    </td>
+	                    <th width="100px"><sc-label text="그룹 명"></sc-label></th>
+	                    <td>
+	                    	<sc-multi-combobox-field selected-all="true" placeholder="선택"	required="true"
+	                            display-field="label" value-field="data" items="{{groupList}}"
+	                            value="{{searchParam.target_group}}">
+	                        </sc-multi-combobox-field>
+	                    </td>
+	                </tr>
+	                <tr>
+	                    <th><sc-label text="일정 설명"></sc-label></th>
+	                    <td>
+	                    	<sc-text-field value="{{searchParam.sched_desc}}" max-length="200" on-enter="search"></sc-text-field>
+	                    </td>
+	                </tr>
+	            </table>
+	            <div class="calendar-search-button-group">
+	            	<button class="calendar-search-button" on-click="search">Search</button>
+	            	<button class="calendar-reset-button" on-click="onClickReset">Reset</button>
+	            </div>
+        	</div>
+        	
+        	<div class="calendar-flex">
+        		<sc-grid id="gridPanel" editable="false" use-state="false"
+        			 data-provider="{{resultList}}" on-item-click="onDataCellClicked">
+	            <sc-grid-columns>
+                    <sc-data-column data-field="sched_nm"		header-text="일정 명"		width="110"	text-align="center"></sc-data-column>
+                    <sc-combobox-column	data-field="grp_id"	header-text="구분"	width="150"		editable="true"
+									display-field="label"		value-field="data"	items="{{groupList}}"></sc-combobox-column>
+						<sc-data-column data-field="sched_desc"		header-text="일정 설명"		width="150"	text-align="center"></sc-data-column>
+    	                <sc-date-column data-field="start_date" header-text="일정 시작일" width="115" display-format="yyyy/MM/dd HH:mm:ss"></sc-date-column>
+	                    <sc-date-column data-field="end_date" header-text="일정 종료일" width="115" display-format="yyyy/MM/dd HH:mm:ss"></sc-date-column>
+	            	</sc-grid-columns>
+	            	<sc-grid-fields>
+	            		<sc-grid-field data-field="sched_id"></sc-grid-field>
+	            		<sc-grid-field data-field="sched_nm"></sc-grid-field>
+	            		<sc-grid-field data-field="grp_id"></sc-grid-field>
+	            		<sc-grid-field data-field="sched_desc"></sc-grid-field>
+	            	</sc-grid-fields>
+        		</sc-grid>
+        	</div>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is: 'smartsuite-calendar-search-popup',
+			
+			properties: {
+				// 그룹 목록
+				groupList: {
+					type: Object
+				},
+				
+				// 검색 조건
+				searchParam: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				},
+				
+				// 결과 리스트
+				resultList: {
+					type: Array
+				}
+			},
+			
+			/**
+			 * 팝업 초기화
+			 */
+			initPopup: function(groupList) {
+				var me = this;
+				me.set('groupList', groupList);
+			},
+			
+			/**
+			 * 검색
+			 */
+			search: function() {
+				var me = this;
+				if(me.validate()) {
+					me.$.searchSchedule.body = me.searchParam;
+					me.$.searchSchedule.generateRequest();	
+				} else {
+					UT.alert('그룹명이 누락되었습니다.');
+				}
+			},
+			
+			/**
+			 * 셀 클릭시 해당 일자로 이동
+			 */
+			onDataCellClicked: function(event) {
+				var me = this;
+				var data = event.detail.data;
+				for(var i = 0; i < me.resultList.length; i++) {
+					if(me.resultList[i].sched_id === data.sched_id) {
+						me.fire('result', me.resultList[i]);
+						break;
+					}
+				}
+				me.onClose();
+			},
+			
+			/**
+			 * 검색조건 리셋
+			 */
+			onClickReset: function() {
+				var newValue = {};
+				for(var index in this.searchParam) {
+					newValue[index] = undefined;
+				}
+				this.set('searchParam', newValue);
+			},
+			
+			/**
+			 * 팝업 종료
+			 */
+			onClose: function(){
+				var me = this;
+				me.fire("close");
+			},
+		});
+	</script>
+</dom-module>

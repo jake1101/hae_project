@@ -1,0 +1,567 @@
+<dom-module id="es-user-info">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	
+    <template>
+        <!-- 코드 데이터 조회 -->
+        <sc-request-group id="codes" init>
+<!--             <sc-ajax url="getAllCompanyList.do" last-response="{{codes.company}}"></sc-ajax> 회사목록 -->
+			<sc-code-group>
+				<!-- 타임존 -->
+				<sc-code code="C025" value="{{codes.C025}}" ></sc-code>
+				<sc-code code="IOT024" value="{{codes.IOT024}}" ></sc-code>
+				<sc-code code="LOCKYN" value="{{codes.lockYn}}" ></sc-code>
+			</sc-code-group>
+			<sc-ajax id="comboAllCustomerList" url="getCompanyList.do" last-response="{{codes.company}}"></sc-ajax>
+        </sc-request-group>
+
+        <!-- 사용자 기본정보 조회 -->
+        <sc-ajax id="findUserInfo"
+                 url="findUserByUserId.do"
+                 last-response="{{userInfo}}"
+                 on-response="completeFindInfo">
+        </sc-ajax>
+
+        <!-- 사용자 기본정보 저장 -->
+        <sc-ajax id="saveUser"
+                 url="saveUser.do"
+                 body="{{userInfo}}"
+                 on-response="completeSaveInfo">
+        </sc-ajax>
+        
+        <!-- 사용자 정보 log 저장 -->
+        <sc-ajax id="saveUserLog"
+                 url="saveUserLog.do"
+                 on-response="completeSaveUserLog">
+        </sc-ajax>
+        
+        <!-- 비밀번호 재설정 기간 초기화 -->
+        <sc-ajax id="initPwTerm"
+                 url="initPwTerm.do"
+                 body="{{userInfo}}"
+                 on-response="completeInitPwTerm">
+        </sc-ajax>
+
+		<!-- 사용자 롤 저장 -->
+        <sc-ajax id="saveUserRole"
+                 url="saveUserRole.do"
+                 on-response="completeSaveUserRole">
+        </sc-ajax>
+
+
+        <cc-auth-checker check-list="auth-s"></cc-auth-checker>
+
+		<cc-sub-title-bar >
+            <sc-button text="저장" on-click="onSaveUser" auth-s></sc-button>
+		</cc-sub-title-bar>
+
+		<div class="page">
+	        <table class="tb-form">
+	            <colgroup>
+	                <col style="width:150px">
+	                <col>
+	                <col style="width:150px">
+	                <col>
+	            </colgroup>
+	            <tr>
+					<th><sc-label text="접근권한"></sc-label></th>
+					<td colspan = "3">
+						<sc-combobox-field value="{{userInfo.access_level}}" items="{{codes.IOT024}}" display-field="label" value-field="data"
+							required="true" readonly="[[!formula('isEditable')]]" placeholder="선택"></sc-combobox-field>
+					</td>
+				</tr>
+	            <tr>
+	                <th><sc-label text="운영사"></sc-label></th>
+	                <td colspan ="3">
+	                    <sc-combobox-field value="{{userInfo.company_id}}" items="{{codes.company}}" display-field="name" value-field="id"
+	                    	required="[[formula('isRequired')]]" placeholder="선택" readonly="[[!formula('isEditable')]]">
+	                    </sc-combobox-field>
+	                </td>
+	            </tr>
+<!-- 	            <tr> -->
+<!-- 	                <th><sc-label text="현장"></sc-label></th> -->
+<!-- 	                <td colspan ="3"> -->
+<!-- 	                    <sc-combobox-field id = "site_id_combo" value="{{userInfo.site_id}}" items="{{codes.siteList}}" display-field="name" value-field="id" -->
+<!-- 	                                       required="true" placeholder="선택"> -->
+<!-- 	                    </sc-combobox-field> -->
+<!-- 	                </td> -->
+<!-- 	            </tr> -->
+	            <tr>
+	                <th><sc-label text="아이디"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{userInfo.usr_id}}" max-length="30" required="[[formula('isNew')]]" readonly="[[!formula('isNew')]]"></sc-text-field></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="이름"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{userInfo.usr_nm}}" max-length="100" required="[[formula('isNew')]]" readonly="[[!formula('isEditable')]]"></sc-text-field></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="이름(영문)"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{userInfo.usr_en_nm}}" max-length="100" readonly="[[!formula('isEditable')]]"></sc-text-field></td>
+	            </tr>
+<!-- 	            <tr> -->
+<!-- 	                <th><sc-label text="부서"></sc-label></th> -->
+<!-- 	                <td colspan ="3"> -->
+<!-- 	                    <cc-dept-search value="{{userInfo.dept_nm}}" result-value="{{userInfo.dept_cd}}" result-field="dept_cd" -->
+<!-- 	                                    id="deptSearch" disabled="[[!formula('isEditable')]]"> -->
+<!-- 	                    </cc-dept-search> -->
+<!-- 	                </td> -->
+<!-- 	            </tr> -->
+	            <tr>
+	                <th><sc-label text="이메일"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{userInfo.email}}" max-length="60" readonly="[[!formula('isEditable')]]" validator-type="email" required="true"></sc-text-field></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="전화번호"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{userInfo.phone_no}}" max-length="60" mask-re="/[0-9\-+]/" readonly="[[!formula('isEditable')]]" validator-type="phone"></sc-text-field></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="HP번호"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{userInfo.mobile_no}}" max-length="60" mask-re="/[0-9\-+]/" readonly="[[!formula('isEditable')]]"	validator-type="mobile"></sc-text-field></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="Fax번호"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{userInfo.fax_no}}" max-length="60" mask-re="/[0-9\-+]/" readonly="[[!formula('isEditable')]]"	validator-type="phone"></sc-text-field></td>
+	            </tr>
+<!-- 	            <tr>
+	                <th><sc-label text="이메일수신" ></sc-label></th>
+	                <td><sc-checkbox-field input-value="{{userInfo.mail_received_yn}}" checked-value="Y" un-checked-value="N" readonly="[[!formula('isModify')]]"></sc-checkbox-field></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="SMS수신"></sc-label></th>
+	                <td><sc-checkbox-field input-value="{{userInfo.sms_received_yn}}" checked-value="Y" un-checked-value="N" readonly="[[!formula('isEditable')]]"></sc-checkbox-field></td>
+	            </tr>
+-->
+	            <tr>
+	                <th><sc-label text="이메일 수신 여부" ></sc-label></th>
+	                <td>
+	                	<sc-checkbox-field input-value="{{userInfo.mail_use}}" readonly="[[!formula('isEditable')]]" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+	                </td>
+	                <th>
+	                	<sc-label text="이메일 수신 시간" ></sc-label>
+	                </th>
+	                <td>
+		                <div class = "field-box">
+		                	<sc-text-field strip-chars-re="/[^(0-9)]/" max-length="2" value="{{userInfo.mail_from_hr}}" readonly="[[!formula('isEditableMail')]]" style="width:30px"></sc-text-field>
+		                	<div class = "hspace-10"></div>
+		                    <sc-label text="시"></sc-label>
+		                    <sc-label text="~" style="padding-left: 5px; padding-right: 5px;"></sc-label>
+		                    <sc-text-field strip-chars-re="/[^(0-9)]/" max-length="2" value="{{userInfo.mail_to_hr}}" readonly="[[!formula('isEditableMail')]]" style="width:30px"></sc-text-field>
+		                    <div class = "hspace-10"></div>
+		                    <sc-label text="시"></sc-label>
+	                    </div>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="SMS수신 여부"></sc-label></th>
+	                <td>
+	                	<sc-checkbox-field input-value="{{userInfo.sms_use}}" readonly="[[!formula('isEditable')]]" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+	                </td>
+	                <th><sc-label text="SMS수신 시간"></sc-label></th>
+	                <td>
+	                	<div class = "field-box">
+	                	    <sc-text-field strip-chars-re="/[^(0-9)]/" max-length="2" value="{{userInfo.sms_from_hr}}" readonly="[[!formula('isEditableSms')]]" style="width:30px"></sc-text-field>
+	                	    <div class = "hspace-10"></div>
+	                        <sc-label text="시"></sc-label>
+	                        <sc-label text="~" style="padding-left: 5px; padding-right: 5px;"></sc-label>
+	                        <sc-text-field strip-chars-re="/[^(0-9)]/" max-length="2" value="{{userInfo.sms_to_hr}}" readonly="[[!formula('isEditableSms')]]" style="width:30px"></sc-text-field>
+	                        <div class = "hspace-10"></div>
+	                        <sc-label text="시"></sc-label>
+	                    </div>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="Socket수신 여부"></sc-label></th>
+	                <td>
+	                	<sc-checkbox-field input-value="{{userInfo.ws_use}}" readonly="[[!formula('isEditable')]]" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+	                </td>
+	                <th><sc-label text="Socket수신 시간"></sc-label></th>
+	                <td>
+	                	<div class = "field-box">
+	                		<sc-text-field strip-chars-re="/[^(0-9)]/" max-length="2" value="{{userInfo.ws_from_hr}}" readonly="[[!formula('isEditableSocket')]]" style="width:30px"></sc-text-field>
+	                		<div class = "hspace-10"></div>
+	                		<sc-label text="시"></sc-label>
+	                		<sc-label text="~" style="padding-left: 5px; padding-right: 5px;"></sc-label>
+	                        <sc-text-field strip-chars-re="/[^(0-9)]/" max-length="2" value="{{userInfo.ws_to_hr}}" readonly="[[!formula('isEditableSocket')]]" style="width:30px"></sc-text-field>
+	                        <div class = "hspace-10"></div>
+	                        <sc-label text="시"></sc-label>
+	                	</div>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="사용여부"></sc-label></th>
+	                <td colspan = "3"><sc-checkbox-field input-value="{{userInfo.use_yn}}" checked-value="Y" un-checked-value="N" readonly="[[!formula('isEditable')]]"></sc-checkbox-field>
+	            </tr>
+	            <tr  hidden="[[formula('isNew')]]">
+	                <th><sc-label text="계정 잠김 여부"></sc-label></th>
+					<td >
+						<sc-combobox-field value="{{userInfo.lock_yn}}" items="{{codes.lockYn}}" display-field="label" value-field="data" 
+										  placeholder="선택" ></sc-combobox-field>
+					</td>	           
+	                <th><sc-label text="비밀번호 재설정 주기"></sc-label></th>
+					<td >
+						<sc-button text="초기화" on-click="onInitPw" auth-s></sc-button>
+					</td>	           
+				</tr>
+				<tr>
+					<th><sc-label text="타임존"></sc-label></th>
+					<td colspan = "3">
+						<sc-combobox-field value="{{userInfo.timezone_cd}}" items="{{codes.C025}}" display-field="label" value-field="data" default
+										   required="true" readonly="[[!formula('isEditable')]]" placeholder="선택"></sc-combobox-field>
+					</td>
+				</tr>
+	        </table>
+	        
+		</div>	        
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'es-user-info',
+            properties : {
+                // 코드 데이터
+                codes: {
+                    type: Object,
+                    reset: false,
+                    value: function() {
+                        return {
+                            company: {}
+                        };
+                    }
+                },
+
+                // 사용자 정보
+                userInfo : {
+                    type : Object,
+                    value : function(){
+                        return {};
+                    }
+                }
+            },
+            observers : [
+                         "changeEditTime(userInfo.*)"
+                         , "changeCompanyId(userInfo.company_id)"
+            ],
+
+
+            formulas : {
+                // 신규 상태
+                isNew: function() {
+                    return this.userInfo.isNew === true;
+                },
+                
+                // 수정 상태
+                isModify: function() {
+                	return UT.isNotEmpty(this.userInfo.usr_id);
+                },
+
+                // 수정 가능 상태 (신규 & 수정)
+                isEditable: function() {
+                    return (this.formula('isNew') || this.formula('isModify'));
+                },
+                isEditableMail: function(){
+                	if((this.formula('isEditable') && this.userInfo.mail_use == "Y")) return true;
+                	else{
+                		this.set("userInfo.mail_from_hr","");
+                		this.set("userInfo.mail_to_hr","");
+                		return false;
+                	}
+                },
+                isEditableSms: function(){
+                	if (this.formula('isEditable') && this.userInfo.sms_use == "Y") return true;
+                	else {
+                		this.set("userInfo.sms_from_hr","");
+                		this.set("userInfo.sms_to_hr","");
+                		return false;
+                	}
+                },
+                isEditableSocket: function(){
+                	if(this.formula('isEditable') && this.userInfo.ws_use == "Y") return true;
+                	else {
+                		this.set("userInfo.ws_from_hr","");
+                		this.set("userInfo.ws_to_hr","");
+                		return false;
+                	}
+                },
+                
+                isRequired: function(){
+                	return (this.userInfo.access_level != "system");
+                }
+
+            },
+            changeEditTime : function(){
+            	var me = this;
+            	me.applyFormula();
+            },
+            changeCompanyId :function(){
+            	var me = this;
+            	if(UT.isEmpty(me.get("userInfo.company_id")))
+            		return;
+				me.set("resultList",[]);
+            },
+            
+            initialized: function(){
+            	var me = this;
+            	
+            	// 접근권한 코드 filter 설정
+            	var accessCodes = me.get("codes.IOT024") || [];
+            	var filterCodes = [];
+            	var accessLevel = SCSessionManager.userDetails.userInfo.access_level;
+            	var condFlag = false;
+            	
+            	for(var idx in accessCodes){
+            		var item = accessCodes[idx];
+            		
+            		if(item.data == accessLevel){
+            			condFlag = true;
+            		}
+            		
+            		if(condFlag){
+            			filterCodes.push(item);
+            		}
+            	}
+            	
+            	me.set("codes.IOT024", filterCodes);
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            load : function(data) {
+                var me = this;
+
+                me.$.findUserInfo.body = {
+                    usr_id : data.usr_id
+                };
+
+                me.onFindInfo();
+
+            },
+
+            // 사용자 신규 추가
+            initUser : function() {
+                var me = this;
+                me.userInfo = {};
+
+                me.set("userInfo.isNew", true);
+                me.set("userInfo.usr_cls", "B"); // 사용자 구분 B:구매사, S:협력사
+                me.set("userInfo.use_yn","Y");// 사용여부
+//                 me.set("userInfo.mail_received_yn","Y"); //메일 수신 여부
+//                 me.set("userInfo.sms_received_yn", "Y");//SMS 수신 여부
+                me.set("userInfo.timezone_cd", "9"); // Korea (GMT+9:00);
+                me.set("userInfo.lock_yn", "N"); // 계정 열림
+                
+                me.set("userInfo.mail_use", "N");
+                me.set("userInfo.sms_use", "N");
+                me.set("userInfo.ws_use", "N");
+
+                var siteIds =[SCMdiManager.searchParam.site_id];
+//                me.set("userInfo.site_ids",  JSON.stringify(siteIds));
+                
+                me.applyFormula();
+            },
+
+            // 초기화
+            clear: function() {
+                var me = this;
+                me.reset();
+                me.applyFormula();
+            },
+
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+            // 조회
+            onFindInfo: function() {
+                var me = this;
+                UT.request(me.$.findUserInfo);
+            },
+
+            // 조회 완료
+            completeFindInfo: function(e,res) {
+                var me = this;
+                me.applyFormula();
+            },
+
+            // 비밀 번호 변경 여부
+            onPwChangeYn : function() {
+                var me = this;
+                me.applyFormula('isPwChangeable');
+            },
+
+            // 사용자 정보 저장 (신규저장/수정)
+            onSaveUser : function() {
+                var me = this;
+
+                if(!me.formula('isEditable')){
+                    UT.alert(me.translate("STD.E1012",null,me.translate('아이디')),null,true); //"'{0}'을(를) 선택하십시오"
+                    return;
+                }
+                
+                if(!me.validateTime()){
+                	return;
+                }
+
+                if(!me.validate()){
+                    UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return;
+                }
+
+                // 신규 : 지정된 이메일주소로 임시비밀번호가 발송됩니다. 저장 하시겠습니까?
+                // 수정 : 저장 하시겠습니까?
+                me.setUserProperty();
+                
+                UT.confirm("STD.N1200", function() { 
+                    UT.request(me.$.saveUser);
+                });
+            },
+            
+            // 수신 시간 체크 및 property 칼럼 셋팅
+            validateTime : function(){
+            	var me = this;
+            	if(me.formula("isEditableMail")){
+            		var fromHr = userInfo.mail_from_hr ? Number(userInfo.mail_from_hr) : 0;
+            		var toHr = userInfo.mail_to_hr ? Number(userInfo.mail_to_hr) : 24;
+            		
+            		if(fromHr > 24 || toHr > 24){
+            			UT.alert("STD.E1051"); //유효하지 않은 시간이 존재합니다.
+            			return false;
+            		}
+            		
+            		if(fromHr >= toHr){
+            			UT.alert("STD.E1052"); //시작시간은 종료시간을 초과할 수 없습니다.
+            			return false;
+            		}
+            	}
+            	if(me.formula("isEditableSms")){
+            		var fromHr = userInfo.sms_from_hr ? Number(userInfo.sms_from_hr) : 0;
+            		var toHr = userInfo.sms_to_hr ? Number(userInfo.sms_to_hr) : 24;
+            		
+            		if(fromHr > 24 || toHr > 24){
+            			UT.alert("STD.E1051"); //유효하지 않은 시간이 존재합니다.
+            			return false;
+            		}
+            		
+					if(fromHr >= toHr){
+						UT.alert("STD.E1052"); //시작시간은 종료시간을 초과할 수 없습니다.
+            			return false;
+            		}
+            	}
+            	if(me.formula("isEditableSocket")){
+            		var fromHr = userInfo.ws_from_hr ? Number(userInfo.ws_from_hr) : 0;
+            		var toHr = userInfo.ws_to_hr ? Number(userInfo.ws_to_hr) : 24;
+            		
+            		if(fromHr > 24 || toHr > 24){
+            			UT.alert("STD.E1051"); //유효하지 않은 시간이 존재합니다.
+            			return false;
+            		}
+            		
+            		if(fromHr >= toHr){
+            			UT.alert("STD.E1052"); //시작시간은 종료시간을 초과할 수 없습니다.
+            			return false;
+            		}
+            	}
+            	return true;
+            },
+            setUserProperty: function(){
+            	var me = this;
+            	var userInfo = me.get("userInfo");
+            	
+           		var property = {};
+           		
+           		var mail = {receiveHour:{}};
+           		var sms = {receiveHour:{}};
+           		var websocket = {receiveHour:{}};
+           		
+           		mail.use = userInfo.mail_use;
+           		mail.receiveHour.from = userInfo.mail_from_hr ? Number(userInfo.mail_from_hr) : null;
+           		mail.receiveHour.to = userInfo.mail_to_hr ? Number(userInfo.mail_to_hr) : null;
+           		
+           		sms.use = userInfo.sms_use;
+           		sms.receiveHour.from = userInfo.sms_from_hr ? Number(userInfo.sms_from_hr) : null;
+          		sms.receiveHour.to = userInfo.sms_to_hr ? Number(userInfo.sms_to_hr) : null;
+           		
+           		websocket.use = userInfo.ws_use;
+           		websocket.receiveHour.from = userInfo.ws_from_hr ? Number(userInfo.ws_from_hr) : null;
+           		websocket.receiveHour.to = userInfo.ws_to_hr ? Number(userInfo.ws_to_hr) : null;
+           		
+           		property.mail = mail;
+           		property.sms = sms;
+           		property.websocket = websocket;
+           		
+           		me.set("userInfo.property", JSON.stringify(property) );
+            },
+            
+            // 저장 완료
+            completeSaveInfo : function(e, res) {
+                var me = this,
+                    result = res.response;
+
+                if(result.result_status === 'S'){ // 저장하였습니다.
+
+
+                	if("create" == result.result_data.operation){
+						// YSHONG 2021-02-05
+						// 만약 계정의 신규 생성이라면 계정의 access_level 에 따라 기본권한을 넣어준다..
+						var usr_id = result.result_data.usr_id;
+						var role_cd =null;
+						if(result.result_data.access_level=="system") role_cd = 'A100';
+						else if(result.result_data.access_level=="company") role_cd = 'A200';
+						else if(result.result_data.access_level=="site") role_cd = 'A300';
+						else if(result.result_data.access_level=="none") role_cd = 'A400';
+						me.$.saveUserRole.body = {
+							"usr_id" : usr_id,
+							"role_cd" : role_cd
+						};
+						if(role_cd !=null){
+							UT.request(me.$.saveUserRole);
+						}
+                    }
+
+                	
+                	// RAYCOM 수정 : log insert 로직 추가
+                	me.$.saveUserLog.body = result.result_data || {};
+                	UT.request(me.$.saveUserLog);
+                	
+                } else if(result.result_status === 'D'){ // 중복되는 사용자 아이디가 존재합니다.
+                	UT.alert("STD.ADM1040");
+                }
+            },
+            
+            completeSaveUserLog: function(e, res){
+            	var me = this
+            	,result = res.response;
+            	
+            	UT.alert("STD.N2400", function(){
+            		me.fire("find-user-list");
+//                  	me.fire('find-userinfo', result.result_data);
+             	});
+            },
+
+            completeSaveUserRole : function(e,res){
+                
+            },
+            
+            onInitPw : function(){
+            	var me =this;
+            	var message = "마지막 비밀번호 변경 일자를 오늘 날짜로 강제로 변경합니다. 진행하시겠습니까?";
+            	
+            	 UT.confirm(message, function() { 
+                     UT.request(me.$.initPwTerm);
+                 });
+            },
+            
+            completeInitPwTerm : function(e,res){
+            	var me = this,
+                result = res.response;
+				
+            	console.log(result);
+            }
+        
+        });
+    </script>
+</dom-module>

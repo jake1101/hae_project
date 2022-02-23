@@ -1,0 +1,119 @@
+package smartsuite.app.bp.pro.rfx.scheduler;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import smartsuite.scheduler.core.ScheduleService;
+
+@SuppressWarnings ({ "rawtypes"})
+@Service
+@Transactional
+public class RfxSchedulerService{
+	
+	/** The sql session. */
+	@Inject
+	SqlSession sqlSession;
+
+	/** The schedule service. */
+	@Inject
+	ScheduleService scheduleService;
+	
+	/** The namespace. */
+	private static final String namespace = "rfx.";
+	
+	/**
+	 * 견적요청 시 처리
+	 */
+	public void noticeRfx(Map param) throws Exception {
+		String rfxId = (String)param.get("rfx_id");
+		
+		Map<String, Object> rfx = sqlSession.selectOne(namespace + "findRfx", param);
+		if(rfx != null) {
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("rfx_typ", rfx.get("rfx_typ"));
+			data.put("rfx_id" , rfx.get("rfx_id"));
+			
+			Object[] args = new Object[]{data};
+			
+			// 시작일시 (즉시시작일 경우 현재시간)
+			Date startDt = ("Y".equals((String)rfx.get("imdt_start_yn"))) ? new Date() : (Date)rfx.get("rfx_start_dt");
+			
+			// 마감일시
+			Date closeDt = (Date)rfx.get("rfx_close_dt");
+			
+			registStartRfxJob(rfxId, startDt, args);	// 1. 시작 스케쥴러 등록
+			registCloseRfxJob(rfxId, closeDt, args);	// 2. 마감 스케쥴러 등록
+		}
+	}
+	
+	/**
+	 * 견적요청 취소 시 처리
+	 */
+	public void cancelRfx(Map param) throws Exception {
+		String rfxId = (String)param.get("rfx_id");
+		
+		deleteStartRfxJob(rfxId);						// 1. 기존 등록된 시작 스케쥴러 삭제
+		deleteCloseRfxJob(rfxId);						// 2. 기존 등록된 마감 스케쥴러 삭제
+	}
+	
+	/**
+	 * 견적 시작 일시 스케줄러 등록.
+	 */
+	private void registStartRfxJob(String rfxId, Date rfxStartDt, Object[] args) throws Exception {
+		scheduleService.registSchedule(
+				Class.forName("smartsuite.app.bp.pro.rfx.RfxService"),	// bean
+				"startRfx",												// method
+				args,													// arguments
+				rfxStartDt,												// excute date
+				"RFX",													// group name
+				rfxId,													// unique id
+				"RFX_START"												// job name
+				);
+	}
+	
+	/**
+	 * 마감 스케줄러 등록
+	 */
+	private void registCloseRfxJob(String rfxId, Date rfxCloseDt, Object[] args) throws Exception {
+		scheduleService.registSchedule(
+				Class.forName("smartsuite.app.bp.pro.rfx.RfxService"),	// bean
+				"closeRfx",												// method
+				args,													// arguments
+				rfxCloseDt,												// excute date
+				"RFX",													// group name
+				rfxId,													// unique id
+				"RFX_CLOSE"												// job name
+				);
+	}
+	
+	/**
+	 * 견적일시 시작 스케줄러를 삭제한다.
+	 */
+	private void deleteStartRfxJob(String rfxId) throws Exception {
+		scheduleService.removeScheduleTrigger(
+				Class.forName("smartsuite.app.bp.pro.rfx.RfxService"),	// bean
+				"startRfx",												// method
+				"RFX",													// group name
+				rfxId													// unique id
+				);
+	}
+	
+	/**
+	 * 마감 스케줄러를 삭제한다.
+	 */
+	private void deleteCloseRfxJob(String rfxId) throws Exception {
+		scheduleService.removeScheduleTrigger(
+				Class.forName("smartsuite.app.bp.pro.rfx.RfxService"),	// bean
+				"closeRfx",												// method
+				"RFX",													// group name
+				rfxId													// unique id
+				);
+	}
+}

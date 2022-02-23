@@ -1,0 +1,220 @@
+<link rel="import" href="resources/lib/custom/cc-memo-search-container.html">
+
+<dom-module id="smartsuite-memo-search-all">
+
+    <style>
+       :host {
+            @apply(--vbox-layout);           
+        }
+    </style>
+    
+    <template>
+    
+        <sc-ajax id="findList"
+	        url="findListUserInMemo.do" 
+	        body="{{findList.param}}"
+	        last-response="{{resultList}}">
+        </sc-ajax>
+        
+       <sc-ajax id="findListFavorites" 
+	        url="findListFavorites.do" 
+	        body="{{findFavoritesList.param}}" 
+	        last-response="{{favoritesList}}">
+        </sc-ajax>
+        
+        <sc-ajax id="insertFavorites" 
+	        url="insertFavorites.do" 
+	        body="{{insertParam}}"
+	        on-response="completeInsertFavorites">
+        </sc-ajax>
+
+        <div class="vbox flex">
+            
+            <cc-memo-search-container on-search="onFindList">
+	            <table>
+	                <tr>
+	                    <th width="60px"><sc-label text="아이디"></sc-label></th>
+	                    <td><sc-text-field value="{{findList.param.usr_id}}" class="w-80" maxLength="50" on-enter="onFindList"></sc-text-field></td>
+	                    
+	                    <th width="60px"><sc-label text="이름"></sc-label></th>
+	                    <td><sc-text-field value="{{findList.param.usr_nm}}" class="w-80" maxLength="50" on-enter="onFindList"></sc-text-field></td>
+	                </tr>
+	                <tr>
+		                <th width="60px"><sc-label text="부서명"></sc-label></th>
+		                <td><sc-text-field value="{{findList.param.dept_nm}}" class="w-80" maxLength="50" on-enter="onFindList"></sc-text-field></td>
+		            </tr>
+	            </table>
+        	</cc-memo-search-container>
+    
+            <div class="smartsuite-memo-vspace-5"></div>
+           
+			<sc-grid id="gridPanel" class="flex" data-provider="{{resultList}}" use-state="false" editable="false">
+	            <sc-toolbar>
+	                <sc-button text="선택" on-click="onSelectedList"></sc-button>
+	                <sc-button text="즐겨찾기추가" on-click="onAddFavorites"></sc-button>
+	            </sc-toolbar>
+	            <sc-grid-columns>
+	                <sc-data-column data-field="usr_id" header-text="아이디" width="90" text-align="center"></sc-data-column>
+	                <sc-data-column data-field="usr_nm" header-text="이름" width="120" text-align="center"></sc-data-column>
+	                <sc-data-column data-field="dept_nm" header-text="부서명" width="90" text-align="center"></sc-data-column>
+	            </sc-grid-columns>
+	        </sc-grid>        
+        </div>
+
+    </template>
+    
+    <script>
+        Polymer({
+            is: "smartsuite-memo-search-all",
+            
+            properties: {
+            	
+                findList: {
+                    type: Object,
+                    value: function(){
+                        return {
+                            param: {}
+                        };
+                    }
+                },
+
+                findFavoritesList: {
+                    type: Object,
+                    value: function(){
+                        return {
+                        	param: {}
+                        };
+                    }
+                },
+                
+                insertParam: {
+                	type: Object,
+                	value: function(){
+                		return {
+                			fvr_id: [],
+                			usr_id: []
+                		};
+                	}
+                },
+ 
+                favoritesList: {
+	                type: Object,
+	                value: function(){
+	                    return {
+	                    };
+	                }
+                },
+                
+                resultList: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                }
+            },
+            
+            // 화면 생성 완료
+            attached : function() {
+                this.onFindList();
+            	this.setData();
+            },
+            
+            // 선택 항목과 즐겨찾기 목록 중복 데이터 체크
+            checkDuplication : function(selectedList) {
+            	var usrIdList = [];
+        		
+        		for(var i = 0; i < selectedList.length; i++){
+        			usrIdList.push(selectedList[i].usr_id);
+        		}
+        	
+        		for(var i = 0; i < this.favoritesList.length && usrIdList.length != 0; i++){
+        			var idx = usrIdList.indexOf(this.favoritesList[i].usr_id);
+        			if(idx > -1){
+        				usrIdList.splice(idx, 1);
+        			}
+        		}
+        		
+        		if(usrIdList.length){      
+            		for(var i = 0; i < usrIdList.length; i++){	            		
+	        			this.insertParam.fvr_id[i] = memoUtil.generateUUID();
+		            	this.insertParam.usr_id[i] = usrIdList[i];
+	            	}
+            		return false;
+        		}
+        		else {
+        			return true;
+        		}
+            },
+            
+            // insertParam 초기화 및 수정된 즐겨찾기 목록 재조회
+            setData : function() {
+            	this.insertParam.usr_id = [];
+            	memoUtil.request(this.$.findListFavorites);
+            },
+            
+            // 검색(조회)
+            onFindList : function() {
+                memoUtil.request(this.$.findList);
+            },
+            
+            // 선택 목록 반환
+            onSelectedList : function() {
+                var me = this,
+            		provider = me.$.gridPanel.getDataProvider(),
+            		checked = provider.selectionCheckedItems();
+                
+                me.fire("selected-items", checked);
+            },
+            
+            // 즐겨찾기 목록 추가
+            insertFavorites : function(selectedList) {
+            	var me = this,
+            	 	isDup = false;
+            	
+            	memoUtil.confirm(me.translate("즐겨찾기 목록에 추가하시겠습니까?"), function(btn) {	
+            		isDup = me.checkDuplication(selectedList);
+	            	if(isDup){
+	            		memoUtil.alert(me.translate("이미 등록된 사용자입니다."));
+	            	}
+	            	else {	            		
+            			memoUtil.request(me.$.insertFavorites);
+	            	}
+               	});
+            },
+            
+            uncheckSelection : function(checkedIndexes) {
+            	var me = this,
+            		grid = me.$.gridPanel,
+            		length = checkedIndexes.length;
+            	
+            	for(var i = 0; i < length; i++){
+            		grid.selectionCheck(checkedIndexes[i], false, true);
+            	}
+            },
+            
+            // 즐겨찾기 추가 버튼
+            onAddFavorites : function() {
+            	var me = this,
+	            	provider = me.$.gridPanel.getDataProvider(),
+	            	checked = provider.selectionCheckedItems(),
+	            	checkedIndexes = provider.selectionCheckedIndexes();
+            	
+	            me.insertFavorites(checked);
+	            me.uncheckSelection(checkedIndexes);
+            },
+
+            // 즐겨찾기 목록 추가 완료
+            completeInsertFavorites : function(e, res){
+            	memoUtil.alert(this.translate("즐겨찾기 목록에 추가되었습니다."));
+            	this.setData();
+            	this.fire('data-added');
+            },
+            
+          	//닫기
+            onClose : function(e) {
+            	this.fire('close');
+            }
+        });
+    </script>
+
+</dom-module>

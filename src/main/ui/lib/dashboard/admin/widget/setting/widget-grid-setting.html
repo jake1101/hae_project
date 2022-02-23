@@ -1,0 +1,183 @@
+<link rel="import" href="../../../data/widget-data-provider.html">
+<link rel="import" href="popup/widget-grid-setting-popup.html">
+<dom-module id="widget-grid-setting">
+    <style>
+    </style>
+
+    <template>
+     	<sc-ajax id="widgetDataProvider"  on-response="onDataChanged" on-error="onDataError" last-response="{{widgetData}}"></sc-ajax>
+            	<section class="option">
+                	<h5>Grid</h5>
+                	<div class="p_innerbox">
+	                    <table>
+	                    <colgroup>
+	                        <col style="width:25%" />
+	                        <col style="width:75%" />
+	                    </colgroup>
+	                    <tr>
+	                    <th><sc-label text="데이터제공자" style="width:36px;"></sc-label></th>
+	                    <td>
+	                    	<sc-textarea-field value="{{dataUrl}}" style="height:80px;" required></sc-textarea-field>
+		                    <div class="inner_button">
+			                    <sc-button text="검색조건" on-click="onShowCondition"></sc-button>
+			                	<sc-button text="데이터확인" on-click="onDataConfirm"></sc-button>
+			                	<sc-button text="적용" on-click="onDataApply"></sc-button>
+		                    </div>
+	                    </td>
+	                    </tr>
+	                    </table>
+                    </div>
+                    <div class="bt_button">
+	                    <sc-button text="그리드 설정" on-click="onGridSettingPopup"></sc-button>
+	                </div>
+                </section>
+    </template>
+    <script>
+        Polymer({
+            is: "widget-grid-setting",
+            behaviors : [ WidgetDataProvider ],
+            properties: {
+            	contents:{
+            		type: Object,
+            		value: function(){
+            			return {}
+            		}
+            	},
+            	dataUrl:{
+            		type: String,
+            		value: 'ui/lib/dashboard/resources/defaultData/grid.json'
+            	},
+            	widgetData:{
+            		type: Array,
+            		value: []
+            	},
+            	gridFields:{
+            		type: Array,
+            		value:[]
+            	},
+            	defaultRowData:{
+            		type: Object,
+            		value: function(){
+            			return {
+            				field: '',
+            				header_text: '',
+            				align: 'center',
+            				type: 'text',
+            				width: 100
+            			}
+            		}
+            	}
+            }, 
+            listeners: {
+            	
+    		},
+    		initSetting: function(){
+    			this.onDataApply();
+    		},
+    		widgetDraw: function(){
+    			this.fire('re-draw', this.getTemplateData());
+    		},
+    		onDataConfirm: function(){
+    			var me = this;
+    			me.dataMode = 'confirm';
+    			me.dataLoad();
+    		},
+    		onDataApply: function(){
+    			var me = this;
+    			me.initSetting();
+    		},
+    		onShowCondition: function(){
+    			this.showConditions();
+    		},
+    		initSetting: function(){
+    			var me = this;
+    			me.dataMode = 'apply';
+    			me.settingMode = 'init';
+    			me.state = 'open';
+    			me.dataLoad();
+    		},
+    		setting: function(contents){
+    			var me = this, contents = contents.contents;
+    			me.state = 'open';
+    			me.settingMode = 'edit';
+    			me.contents = contents;
+    			me.dataUrl = contents.dataUrl;
+    			me.conditions = contents.conditions;
+    			me.dataLoad();
+    		},
+    		setWidgetData: function(){
+    			var me = this;
+    			if(me.settingMode == 'init'){
+    				me.autoFieldSetting();
+    			}
+       			me.widgetDraw();	
+    		},
+    		onGridSettingPopup: function(){
+    			var me =  this;
+	   			var settingPopup = SCPopupManager.create('widget-grid-setting-popup', this, 700, 300, true,true,false,true);
+	   			var view = settingPopup.getWindowContent();
+	   			settingPopup.titleText = me.translate("그리드설정");  
+	   			settingPopup.show();
+	   			view.load(me.contents.properties);
+	   			view.addEventListener('apply',function(event){
+	   				me.contents.properties = event.detail.data;
+	   				settingPopup.close();
+	   				me.widgetDraw();
+	   			});
+    		},
+    		autoFieldSetting: function(){
+    			var me = this;
+    			var arr = me.widgetData;
+   				var settingDatas = [];
+   				var fields = arr[0];
+   				for(var key in fields){
+   					var rowData = {};
+   					Polymer.$Util.Object.assign(rowData,me.defaultRowData);
+   					rowData.field = key;
+   					rowData.header_text = key;
+   					settingDatas.push(rowData);
+   				}
+   				me.contents.properties = settingDatas;
+    		},
+    		getDatas: function(){
+    			var me = this;
+    			return me.widgetData;
+    		},
+    		getTemplateData: function(){
+    			var me = this;
+    			var properties = me.contents.properties;
+    			return { 
+    						 widget_type:'grid',
+	    				     contents: {
+	    				    	 dataUrl: me.dataUrl,
+	    				    	 conditions:me.conditions,
+	    				    	 properties: properties
+	    				     } 
+    			        };
+    		},
+    		
+    		resetData: function(){
+    			var me = this;
+    			me.dataUrl = 'ui/lib/dashboard/resources/defaultData/grid.json';
+    			
+    			me.alignCodes = [
+            			        	{label:'center',data:'center'},
+            			        	{label:'left'  ,data:'left'},
+            			        	{label:'right' ,data:'right'}
+            			 		];
+            		
+            	me.dataTypeCodes = [
+	            			        {label:'text'   ,data:'text'},
+	            			        {label:'number' ,data:'number'}
+            					 ];
+            	me.defaultRowData = { field: '',
+	            				   header_text: '',
+	            				   align: 'center',
+	            				   type: 'text',
+	            				   width: 100 };
+            	me.conditions = {};
+            	me.contents = {};
+    		}
+    	});
+    </script>
+</dom-module>

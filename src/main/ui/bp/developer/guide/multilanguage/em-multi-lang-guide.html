@@ -1,0 +1,47 @@
+<sc-link rel="import" href="es-multi-lang-client-sample.html"></sc-link>
+<sc-link rel="import" href="es-multi-lang-server-sample.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+<sc-link rel="import" href="es-multi-lang-description.html"></sc-link>
+
+<dom-module id="em-multi-lang-guide">
+	<style>
+		:host {
+			@apply(--hbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="hbox flex" title-text="다국어 처리">
+	        <es-multi-lang-description class="fit flex"></es-multi-lang-description>
+			<sc-tab-navigation class="box flex" selected="0">
+				<div class="vbox fit" title-text="클라이언트 다국어 설정">
+					<es-multi-lang-client-sample class="flex"></es-multi-lang-client-sample>
+					<es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+				</div>
+				<template>
+					<es-multi-lang-server-sample title-text="서버 다국어 설정"></es-multi-lang-server-sample>
+				</template>
+			</sc-tab-navigation>
+		</sc-panel>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-multi-lang-guide',
+		properties : {
+			srcList : {
+                type : Array,
+                value : function() {
+                    return [{
+                        title        : "es-multi-lang-client-sample.html",
+                        i18nDisabled : true,
+                        extension    : "html",
+                        url          : "/ui/bp/developer/guide/multilanguage/es-multi-lang-client-sample.html"
+                    }]
+                }
+			}
+		},
+		initialized : function() {
+			
+		}
+	});
+	</script>
+</dom-module>

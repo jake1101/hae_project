@@ -1,0 +1,269 @@
+<script src="/ui/lib/converter/ejs/ejs.js"></script>
+<script src="/ui/lib/converter/js-beautify/js/lib/beautify-html.js"></script>
+<script src="/ui/lib/converter/js-beautify/js/lib/beautify.js"></script>
+<script src="/ui/lib/converter/as3js/lib/as3.js"></script>
+<script src="/ui/lib/converter/as3js/runtime.js"></script>
+<script src="/ui/lib/converter/source-convert-config.js"></script>
+<script src="/ui/lib/converter/source-convert.js"></script>
+<script src="/ui/lib/converter/source-convert-override.js"></script>
+<script src="/ui/lib/ace/ace.js"></script>
+
+<dom-module id="es-converter-html">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }        
+        #oldEditor { 
+	        border:1px solid #dedede;
+	    }
+        #newEditor { 
+	        border:1px solid #dedede;
+	    }       
+	    
+    </style>
+    
+    <template>
+    
+	    <sc-ajax id="editorToHtml"
+	            url="editorToHtml.do"
+	            body="{{param}}"
+	            on-response="completeEditorToHtml">
+	        </sc-ajax>
+	    <div class="vbox fit">
+	    	
+			<div class="hbox flex">
+				<sc-panel title-text="SMARTsuite7 (mxml)" class="vbox flex-5">
+					<sc-toolbar>
+						<sc-spacer></sc-spacer>
+						<sc-combobox-field items="[[sampleList]]" value="{{selectedSample}}" placeholder="삽입할 샘플을 선택하세요" style="width:200px;"></sc-combobox-field>
+						<sc-button text="Insert Sample" on-click="doInputSample"></sc-button>
+					</sc-toolbar>
+					<sc-container id="oldEditor" flexible="true" class="flex"></sc-container>
+				</sc-panel>
+				<sc-splitter split-type="vertical"></sc-splitter>
+				<sc-panel title-text="SMARTsuite9 (html)" class="vbox flex-5">
+					<sc-toolbar>
+						<sc-spacer></sc-spacer>
+			    		<sc-button text="Convert" on-click="doConvert"></sc-button>
+			    		<sc-button text="Preview" on-click="doPreview"></sc-button>
+					</sc-toolbar>
+					<table class="tb-form" >
+                        <colgroup>
+                            <col style="width:150px"/>
+                            <col></col>
+                            <col style="width:150px"/>
+                            <col></col>
+                        </colgroup>
+                        <tr>
+                            <th>
+                                <sc-label text="dom-module id" ></sc-label>
+                            </th>
+                            <td>
+                                <sc-text-field class="w-200" value="{{domName}}"></sc-text-field>
+                            </td>
+                            <th>
+                                <sc-label text="Type" ></sc-label>
+                            </th>
+                            <td>
+                                <!-- <sc-combo-field class="w-200" value="{{domName}}"></sc-text-field> -->
+                                <sc-combobox-field display-field="label" value-field="data" items="{{typeList}}" value="{{type}}" ></sc-combobox-field>
+                            </td>
+                        </tr>               
+                    </table>
+					<sc-container id="newEditor" flexible="true" class="flex"></sc-container>
+				</sc-panel>
+			</div>
+		</div>
+		
+		<div id="test"></div>
+		
+		
+    </template>
+    
+    <script>
+        Polymer({
+            is: "es-converter-html",
+            
+            properties: {
+            	oldEditor : {
+                    type : Object,
+                    value : null
+                },
+                newEditor : {
+                    type : Object,
+                    value : null
+                },
+                domName : {
+                	type: Object,
+                	value: function() {
+                		return "es-sample";
+                	}
+                },
+                typeList :{
+                	type: Array,
+                	value: function() {
+                		return [
+                		        {data:'all', label:'전체'},
+                		        {data:'component', label:'Component'}
+                		        ];
+                	}
+                },
+                type : {
+                	type : Object,
+                	value : 'all'
+                },
+                param : {
+                    type  : Object,
+                    value : function() {
+                        return {
+                            fileName:'',
+                           	value : ''
+                        };
+                    }
+                },
+                selectedSample : {
+                	type : Object,
+                },
+                sampleList : {
+                	type : Object,
+                	value : function(){
+                		return [{
+                			text : 'PR List',
+                			value : '/ui/lib/converter/samples/mxml/ESPRResultList.mxml'
+               			},{
+                   			text : 'PR Detail',
+                   			value : '/ui/lib/converter/samples/mxml/ESPRInfo.mxml'
+                  		}];
+                	}
+                }
+            },
+            
+            attached: function() {                
+                var me = this;
+                /* this.$.test.style.display ="none"; */
+                
+            	var oldEditor = ace.edit(this.$.oldEditor._contentEl);
+            	me.oldEditor = oldEditor; 
+            	oldEditor.setTheme("ace/theme/crimson_editor");
+            	oldEditor.getSession().setMode("ace/mode/xml");
+            	oldEditor.setValue("");
+            	
+            	var newEditor = ace.edit(this.$.newEditor._contentEl);
+            	me.newEditor = newEditor; 
+            	newEditor.setTheme("ace/theme/crimson_editor");
+            	newEditor.getSession().setMode("ace/mode/html");
+            	newEditor.setValue("");
+                
+            },
+            
+            onClose: function(){
+            	this.fire("close-remove");
+            },
+            
+            doConvert: function() {
+            	var me = this;
+            	var content = me.oldEditor.getValue();
+            	var domName = me.domName;
+            	var result;
+            	
+            	//try {
+	            	result = convert(content, domName, me.type);            		
+            	//} catch (e) {
+            		//result = e.message;
+            	//}
+           		me.newEditor.setValue(result);
+            },
+            
+            doInputSample: function(){
+            	if(!this.selectedSample){
+            		UT.alert("샘플을 선택해주세요!",null,true);
+            		return;
+            	}
+            	
+            	var me = this;
+            	var request = new XMLHttpRequest();
+            	request.onreadystatechange = function(){
+            		if(request.readyState == 4){
+            			if(request.status == 200){
+            				me.oldEditor.setValue(request.responseText);	
+            			}else{
+            				UT.alert("샘플 소스를 찾을 수 없습니다.",null,true);
+            			}
+            				
+            			
+            		}
+            	};
+            	
+            	request.open("GET", this.selectedSample, true);
+            	request.send(null);
+
+            },
+            
+            doPreview: function(){
+            	var me = this;
+            	var content = me.oldEditor.getValue();
+            	var domName = me.domName;
+            	
+            	
+            	var id = "test-"+this.generateId(true);
+            	var result = convert(content, id, "all"); //me.newEditor.getValue();
+            	
+            	var editResult = convert(content, domName, "all"); //me.newEditor.getValue();
+            	me.newEditor.setValue(editResult);
+            	
+            	this.$.test.innerHTML = result;
+            	var originParse = Polymer.Annotations._parseElementAnnotations;
+            	Polymer.Annotations._parseElementAnnotations = function(element, list, stripWhiteSpace) {
+            		var tagName;
+            		if(element.nodeType === 1) {
+            			tagName = element.tagName.toLowerCase();
+            			if(SCLinkManager.isRegistered(tagName) && !SCLinkManager.isLoaded(tagName)) {
+            				SCLinkManager.load(tagName);
+            			}
+            		}
+            		
+            		return originParse.call(this, element, list, stripWhiteSpace);
+            	};
+            	
+                Polymer({is: id});
+                Polymer.Annotations._parseElementAnnotations = originParse;
+                
+                var popup =  UT.popup(id, me, 900, 500, null, {
+                    titleText: 'Preview'
+                });
+               popup.show();
+               
+               /* while(this.$.test.hasChildNodes()){
+               		this.$.test.removeChild(this.$.test.firstChild);
+               } */
+            },
+    		generateId : function(unique, prefix) {
+    			if(unique) {
+    				return (function() {
+    					 var pattern = 'xxxxxxxx-xxxx-4xxx-Rxxx-xMxxxxxxxxxx'.split(''),
+    				 	 hex = '0123456789abcdef'.split(''),
+    		         	 length = pattern.length,
+    		          	 parts = [];
+    				 
+    				 return function () {
+    					 for(var r, c, i = 0; i < length; ++i) {
+    						 c = pattern[i];
+    						 if(c !== '-' && c !== '4') {
+    							 r = Math.random() * 16;
+    							 r = (c === 'R') ? (r & 3 | 8) : (r | ((c === 'M') ? 1 : 0));
+    							 c = hex[r]; // above floors r so always 0-15
+    						 }
+    						 parts[i] = c;
+    					 }
+    					 return parts.join('');
+    				 }()
+    			 }());
+    			}
+    			return (prefix || this._idPrefix);	
+    		},
+                        
+        });
+    </script>
+
+</dom-module>

@@ -1,0 +1,49 @@
+<sc-link rel="import" href="es-dynamic-columns-sample.html"></sc-link>
+<sc-link rel="import" href="es-dynamic-columns-description.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-dynamic-columns-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="hbox flex" title-text="그리드 동적컬럼">
+            <es-dynamic-columns-description class="fit flex"></es-dynamic-columns-description>
+            <es-dynamic-columns-sample id="sample" class="box flex"></es-dynamic-columns-sample>
+        </sc-panel>
+        <es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-dynamic-columns-guide',
+		properties : {
+			srcList : {
+                type : Array,
+                value : function() {
+                    return [{
+                        title        : "es-dynamic-columns-sample.html",
+                        i18nDisabled : true,
+                        extension    : "html",
+                        url          : "/ui/bp/developer/guide/grid/es-dynamic-columns-sample.html"
+                    }, {
+                    	title        : "item-qta-list.json",
+                    	i18nDisabled : true,
+                    	extension    : "json",
+                    	url          : "/ui/bp/developer/guide/grid/json/item-qta-list.json"
+                    }, {
+                    	title        : "sql-sample.xml",
+                    	i18nDisabled : true,
+                    	extension    : "xml",
+                    	url          : "/ui/bp/developer/guide/grid/source/sql-item-qta-list.xml"
+                    }]
+                }
+            }
+		},
+		initialized : function() {
+			
+		}
+	});
+	</script>
+</dom-module>

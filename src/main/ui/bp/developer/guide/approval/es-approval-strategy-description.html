@@ -1,0 +1,18 @@
+<dom-module id="es-approval-strategy-description">
+	<template>
+		<p>
+			결재 승인, 반려, 취소, 상신, 임시저장 등의 프로세스가 진행되면<br/>
+			ApprovalService의 updateApprovalMasterStatus에서 결재 헤더 테이블의 진행상태를 업데이트하고,<br/>
+			결재유형 별 결재 후 처리를 수행한다.<br/>
+		</p><br/>
+		<p>
+			결재유형 별 ApprovalStrategy 인터페이스의 구현체를 작성하고 (ex. 결재유형: PR, 구현체: PrApprovalStrategy.java)<br/>
+			ApprovalFactory의 getApprovalStrategy에서 현재 수행되는 결재유형에 해당하는 Strategy 구현체 서비스 클래스를 리턴하도록 한다.<br/>
+		</p><br/>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-approval-strategy-description'
+	});
+	</script>
+</dom-module>

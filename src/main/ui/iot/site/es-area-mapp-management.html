@@ -1,0 +1,983 @@
+<dom-module id="es-area-mapp-management">
+
+	
+	<style type="text/css">
+		:host{
+			@apply(--vbox-layout);
+		}
+  		 html, body { height:100%; overflow:hidden } .row {height:96% ; margin:1% 1% 1% 1%;} 
+  		 .objectBox{  background-color : pink ; color : black; border-radius:5px; border:1px solid red; margin-bottom :5px; padding:5px;}
+  		 .arrayInput{ width : 40px;} .positionInput{width : 200px;} 
+  		  .balloon {
+		    display: inline-block;
+		    background: #ccc;
+		    margin: 0 auto 10px;
+		}
+		.balloon:after {
+		    content: '';
+		    position: absolute;
+		    border-top: 10px solid #ccc;
+		    border-right: 5px solid transparent;
+		    border-left: 5px solid transparent;
+		    bottom: -9px;
+		    left: 5px;
+		}
+		.transparent-ui {
+                opacity: 0.7;
+                position: absolute;
+                clear: both;
+                padding: 8px;
+                overflow: hidden;
+                background: rgb(165, 49, 49);
+                color: white;
+                margin: 0 auto;
+                border: 1px solid;
+                text-align: left;
+                -webkit-box-shadow: #444 5px 5px 2px;
+                border-bottom-left-radius: 5px 5px;
+                border-bottom-right-radius: 5px 5px;
+                border-top-left-radius: 5px 5px;
+                border-top-right-radius: 5px 5px;
+                z-index: 100000;
+         }
+
+  	</style>
+	
+	
+	<template>
+	
+	<sc-request-group init>
+			<!-- -- 조회조건 Site 콤보 데이터 조회 -->
+			<sc-ajax url="findListSiteCombo.do" last-response="{{siteList}}"></sc-ajax>
+			
+	</sc-request-group>
+	
+	
+	
+	<sc-ajax id="findAreaInfo" 
+		url="findAreaInfo.do" 
+		body="{{searchParam}}"
+		on-response= "completeFindListAreaCombo"> 
+	</sc-ajax>
+	
+	<sc-ajax id="findGroupInfo" 
+		url="findGroupInfo.do" 
+		body="{{searchParam}}"
+		on-response="completeFind"> 
+	</sc-ajax>
+	
+	
+	<sc-ajax id="findListSensor" 
+		url="findListSensor.do" 
+		body="{{searchParam}}"
+		on-response="completeFindGrid"> 
+	</sc-ajax>
+	
+	<sc-ajax id="saveGatewayInfo" 
+		url="saveGatewayInfo.do" 
+		on-response="completeSave"> 
+	</sc-ajax>
+	
+	<sc-ajax id="saveBeaconInfo" 
+		url="saveBeaconInfo.do" 
+		on-response="completeSave"> 
+	</sc-ajax>
+	
+
+	<sc-ajax id="onResetGateway"
+			 url="onResetGateway.do"
+			 on-response="completeReset">		
+	</sc-ajax>
+	
+	<sc-ajax id="resetMpSpPosition"
+			 url="resetMpSpPosition.do"
+			 on-response="completeReset">		
+	</sc-ajax>
+	
+	<sc-ajax id="getProjectTagObject" 
+		url="getProjectTagObject.do" 
+		body={{selectedComboInfo}}
+		on-response="CompletegetProjectTagObject"> 
+	</sc-ajax>	
+	<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+	
+	<cc-page-title-bar></cc-page-title-bar>
+	
+	<cc-search-container on-search="onFindList" auth-r search-button-hidden="true">
+				<table validation-group="search">
+					<colgroup>
+						<col style="width:120px">
+						<col>
+						<col style="width:120px">
+						<col>
+						<col style="width:120px">
+						<col>
+					</colgroup>
+						<tr>
+    						<th><sc-label text="영역"></sc-label></th>
+							<td>
+								<sc-combobox-field id="areaCombo" selected-index="0" id="combo" items="{{areaInfoList}}" value="{{searchParam.area_id}}" placeholder="선택"
+   									display-field="name" value-field="data"  on-change="onSelectArea" required="true">
+						
+									
+							</td>
+						</tr>
+				</table>
+			</cc-search-container>
+			<div class="vspace-10"></div>
+			<div class="vspace-10"></div>
+			<div class="vspace-10"></div>
+			<table class="tb-form">
+				<colgroup>
+				<col style="width:120px"/>
+				<col style="width:200px"/>
+				<col style="width:50px"/>
+				<col style="width:70px"/>
+				<col style="width:50px"/>
+				<col style="width:70px"/>
+				<col style="width:50px"/>
+				<col style="width:70px"/>
+				<col>
+				</colgroup>
+				<tr>
+					<th><sc-label text="그룹"></sc-label></th>
+					<td>
+						<sc-combobox-field id="groupCombo" items="{{groupInfoList}}" value="{{searchParam.group_id}}" placeholder="선택"
+							display-field="group_name" value-field="group_id" readonly="[[!formula('isEditable3')]]" on-change="onSelectGroup">
+ 						</sc-combobox-field>
+					</td>
+	    			<th><sc-label text="X"></sc-label></th>
+					<td><sc-number-field id="value_x"  value="{{searchParam.value_x}}"  on-click="xNumberChange"></sc-number-field></td>
+					<th><sc-label text="Y"></sc-label></th>
+					<td><sc-number-field id="value_y"  value="{{searchParam.value_y}}" on-click="yNumberChange"></sc-number-field></td>
+					<th><sc-label text="Z"></sc-label></th>
+					<td><sc-number-field id="value_z"  value="{{searchParam.value_z}}"  on-click="zNumberChange"></sc-number-field></td>
+					<td style="text-align : right; width : 100%;"><sc-button text="화면 가로세로 전환" on-click = "changeView"></sc-button></td>
+				</tr>
+			</table>
+			
+			<div id="canvasDiv" class="flex hbox canvasDiv">
+				<div id="canvasDiv1" class="flex-6 vbox" style="position: relative; overflow: hidden;">
+				<canvas id="mycanvas1" style="width: 100%; height: 100%; position: absolute;"></canvas>
+		
+				<div id="textBoxDivforMapping" style="position: absolute;"></div>		
+				</div>
+				
+				<div id="canvasDiv2" class="flex-4 vbox">
+				<sc-tab-navigation id="tabNavi" class="vbox flex-5">
+					
+		            
+					<!-- Gateway-->
+		            <div title-text="Gateway" class="vbox flex">
+		            	<sc-grid id="gridPanel1" data-provider="{{resultList1}}" class="flex" on-item-click="onItemClick"
+		            				selection-mode="radio" editable="true" >
+			                <cc-grid-toolbar>
+			                    <sc-button text="위치설정" on-click="onSettingGateway" auth-s></sc-button>
+				                <sc-button text="초기화" on-click="onResetGateway" auth-s></sc-button>
+			                    <sc-button text="저장" on-click="onSaveGateway" auth-s></sc-button>
+			                </cc-grid-toolbar>
+			                <sc-grid-columns>
+			                     <sc-data-column data-field="id" header-text="Id" width="50" text-align="center"></sc-data-column>
+			                    <!-- <sc-data-column data-field="구분" header-text="구분" width="100" text-align="center"></sc-data-column> -->
+			                    <sc-data-column data-field="name" header-text="Gateway" width="150" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="group_name" header-text="그룹" width="150" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="group_id" header-text="그룹아이디" width="0" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="x" header-text="X" width="50" text-align="center" data-type="number"></sc-data-column>
+			                    <sc-data-column data-field="y" header-text="Y" width="50" text-align="center" data-type="number"></sc-data-column>
+			                    <sc-data-column data-field="z" header-text="Z" width="50" text-align="center" data-type="number"></sc-data-column>
+			                    <sc-data-column data-field="category1" header-text="위치명(대)" width="150" text-align="center" editable="true"></sc-data-column>
+			                    <sc-data-column data-field="category2" header-text="위치명(중)" width="150" text-align="center" editable="true"></sc-data-column>
+			                    <sc-data-column data-field="category3" header-text="위치명(소)" width="150" text-align="center" editable="true"></sc-data-column>
+			                    <sc-data-column data-field="mod_dt" header-text="수정일" width="250" text-align="center"></sc-data-column>
+			              		<sc-data-column data-field="layer_group_id" header-text="레이어그룹아이디" width="0" text-align="center" editable="false"></sc-data-column>
+			              		<sc-data-column data-field="position_id" header-text="position_id" width="0" text-align="center" editable="false"></sc-data-column>
+			               </sc-grid-columns>
+		            	</sc-grid>
+		            </div>
+		            
+		            <!-- 비콘 센서-->
+		            <div title-text="Beacon" class="vbox flex">
+		            	<sc-grid id="gridPanel3" data-provider="{{resultList3}}" class="flex" on-item-click="onItemClick"
+		            			selection-mode="radio" editable="true">
+			                <cc-grid-toolbar>
+				                <sc-button text="위치설정" on-click="onSettingBeacon" data-args="bc" auth-s></sc-button>
+				                <sc-button text="초기화" on-click="onResetBeacon" data-args="bc" auth-s></sc-button>
+			                    <sc-button text="저장" on-click="onSaveBeacon" data-args="bc" auth-s></sc-button>
+			                </cc-grid-toolbar>
+			                <sc-grid-columns>
+			                    <sc-data-column data-field="id" header-text="Id" width="50" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="major" header-text="Major" width="50" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="minor" header-text="Minor" width="50" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="group_name" header-text="그룹" width="150" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="group_id" header-text="그룹아이디" width="0" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="x" header-text="X" width="50" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="y" header-text="Y" width="50" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="z" header-text="Z" width="50" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="category1" header-text="위치명(대)" width="150" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="category2" header-text="위치명(중)" width="150" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="category3" header-text="위치명(소)" width="150" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="mod_dt" header-text="수정일" width="250" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="layer_group_id" header-text="레이어그룹아이디" width="0" text-align="center" editable="true"></sc-data-column>
+			               		<sc-data-column data-field="position_id" header-text="position_id" width="0" text-align="center" editable="false"></sc-data-column>
+			                </sc-grid-columns>
+		            	</sc-grid>
+		            </div>
+		        </sc-tab-navigation>
+				
+				</div>
+			</div>
+			
+		
+	</template>
+	
+	
+	<script>
+		Polymer({
+			is: "es-area-mapp-management" ,
+			
+			 properties : {
+// 	                codes: {
+// 	                    type : Object,
+// 	                    reset : false,
+// 	                    value : function() {
+// 	                        return {
+// 	                            companyList: [],
+// 	                            seqRefreshUnitList: []
+// 	                        }
+// 	                    }
+// 	                },
+	                projectTagObject : {
+	                	type : Object,
+	                	value : function(){
+	                		return {}
+	                	}
+	                },
+	                existCamera : {
+	                	type : Object,
+	                	value : function(){
+	                		return {"value":false}
+	                	}
+	                },
+	                
+	                monitor1: {
+	                	type : Object
+	                },
+	                
+	                siteList: {
+						 type : Array,
+						 value : function(){
+							 return [];
+						 }
+					 },
+					 selectedComboInfo : {
+						 type : Object,
+						 value : function(){
+							 return {};
+						 }
+					 },
+					 searchParam: {
+		                	type : Object,
+		                	value: function(){
+		                		return {
+		                			version_sts:['ready', 'publish'] // version 조회 조건값
+		                			,value_x: 0
+		                			,value_y: 0
+		                			,value_z: 0
+		                		};
+		                	}
+		                },
+		             
+		             
+		             areaInfoList:  {
+		                    type: Array,
+		                    value : function() {
+		                        return [];
+		                    }
+		             },
+		             
+		             groupInfoList:  {
+		                    type: Array,
+		                    value : function() {
+		                        return [];
+		                    }
+		             },
+		             
+		             
+		             resultList1:  {
+		                    type: Array,
+		                    value : function() {
+		                        return [];
+		                    }
+		             },
+		             
+		             
+		             
+		             group_name :{
+		            	 type : Object,
+						 value : function(){
+							 return {};
+						 }
+		             },
+		             
+		             group_id:{
+		            	 type : Object,
+						 value : function(){
+							 return {};
+						 }
+		             },
+		             
+		             firstAreaInfo :{
+		            	 type:Object,
+		            	 value : function(){
+		            		 return {};
+		            	 }
+		             },
+		             
+		             layer_group_id:{
+		            	 type : Object,
+						 value : function(){
+							 return {};
+						 }
+		             }
+	                
+	            },
+	            
+			
+	            initialized : function() {
+	                var me = this;
+	                
+	                me.getSceneScript();
+	            },
+	            
+	            getSceneScript: function(){
+	            	var me = this;
+	            	
+	            	$.getScript('./ui/lib/scene/scenejs.js', function(){
+	            		try{
+		                	var ray = new Ray();
+		                	
+		                	me.monitor1 = ray.createScene("mycanvas1");
+		                
+			               /*  me.monitor1.setCameraOptions(
+			            		{
+			             			yaw : "default",
+			            			pitch : "default",
+			            			zoom : 100,
+			            			zoomSensitivity : "default"
+			            		}
+			            	); 
+			                me.monitor1.createXZBasePlane();
+			                me.monitor1.addJsonData([]); */
+		                
+		             		// 버튼 이벤트 등록
+   		                	me.initButtonEvt();
+			                me.initPickEvt();
+	            		}catch(e){
+	            			console.log(e);
+	            			me.getSceneScript();
+	            		}
+	            		
+	                }); 
+	            },
+	            
+	            /**
+	             * 3D-MODEL : 좌표 이동 Canvas 키보드 이벤트리스너 추가
+	             */
+	            initButtonEvt: function(){
+	            	var me = this;
+	            	var myCanvas = me.$.mycanvas1;
+	                myCanvas.setAttribute('tabindex','0');
+//		                myCanvas.focus();
+	                myCanvas.addEventListener('keydown', function(e){
+	                	var x = me.get("searchParam.value_x");
+	                	var y = me.get("searchParam.value_y");
+			    		var z = me.get("searchParam.value_z");
+			    		
+	                	if(e.ctrlKey){
+	                		if(e.keyCode == 38){ // up
+		                		me.set("searchParam.value_z", Number(z)-10);
+		                		me.showPointer();
+		                	
+		                	}else if(e.keyCode == 40){ // down
+		                		me.set("searchParam.value_z", Number(z)+10);
+		                		me.showPointer();
+		                	
+		                	}else if(e.keyCode == 37){ // left
+		                		me.set("searchParam.value_x", Number(x)-10);
+		                		me.showPointer();
+		                	
+		                	}else if(e.keyCode == 39){ // right
+		                		me.set("searchParam.value_x", Number(x)+10);
+		                		me.showPointer();
+		                	}
+	                		
+	                	}else{
+	                		if(e.keyCode == 38){ // up
+		                		me.set("searchParam.value_z", Number(z)-1);
+		                		me.showPointer();
+		                	
+		                	}else if(e.keyCode == 40){ // down
+		                		me.set("searchParam.value_z", Number(z)+1);
+		                		me.showPointer();
+		                	
+		                	}else if(e.keyCode == 37){ // left
+		                		me.set("searchParam.value_x", Number(x)-1);
+		                		me.showPointer();
+		                	
+		                	}else if(e.keyCode == 39){ // right
+		                		me.set("searchParam.value_x", Number(x)+1);
+		                		me.showPointer();		
+		                		
+		                	}else if(e.keyCode == 33){ // pgup
+		                		me.set("searchParam.value_y", Number(y)+1);
+		                		me.showPointer();
+		                		
+		                	}else if(e.keyCode == 34){ // pgdn
+		                		me.set("searchParam.value_y", Number(y)-1);
+		                		me.showPointer();
+		                	}
+	                	}
+	                	
+// 		                alert(e.keyCode);
+	                }, false);
+	                
+	            },
+	            
+	            initPickEvt: function(){
+	            	var me = this;
+	            	//console.log("initPickEvt start!!!!!");
+	            	
+	            	me.monitor1.myScene().off("pick");
+	            	me.monitor1.myScene().on("pick",function(hit){
+	        			var rowData = {};
+	        			rowData.x = Math.round(me.monitor1.currentXYZ().x);
+	        			rowData.y = Math.round(me.monitor1.currentXYZ().y);
+	        			rowData.z = Math.round(me.monitor1.currentXYZ().z);
+	        			//console.log(me.monitor1.currentXYZ());
+	        			me.searchParam.value_x = rowData.x;
+						me.searchParam.value_y = rowData.y;
+						me.searchParam.value_z = rowData.z;
+						me.searchParam.group_id = rowData.group_id;
+						$("#value_x").val(Number(rowData.x));
+						$("#value_y").val(Number(rowData.y));
+						$("#value_z").val(Number(rowData.z));
+						me.showPointer(rowData.x, rowData.y, rowData.z);
+						var group_id = null;
+						try{
+							group_id = hit.path.split(".")[0];
+						}catch(e){	}
+						$("#groupCombo").val(group_id);
+						
+	        		})
+	            	
+	            },
+	            
+	            
+	            showPointer: function(){
+	            	var me = this;
+	            	var x = me.get("searchParam.value_x");
+                	var y = me.get("searchParam.value_y");
+		    		var z = me.get("searchParam.value_z");
+		    		me.monitor1.showPointer(x,y,z);
+	            },
+	            getProjectTagObject : function(bool){
+	            	var me = this;
+	            	//console.log(me.selectedComboInfo);
+	            	//console.log(me.searchParam);
+	            	if(bool== true){
+	            		UT.request(me.$.getProjectTagObject);
+	            	}else{
+	            		if(me.selectedComboInfo.area_id!=null &&
+	            				me.selectedComboInfo.site_id!=null && 
+	            				me.selectedComboInfo.version_id!=null ){
+	            			UT.request(me.$.getProjectTagObject);
+	            		}
+	            	}
+	            },
+	            
+	            
+	            pushObjects: function(val){
+	            	var me = this;
+	            	
+	            	if(val.substring(0,1)=="["){
+	            		me.monitor1.addJsonData(JSON.parse(val));	
+	            	}
+	            	else{
+	            		me.monitor1.addJsonData((JSON.parse(val)).items);	
+	            	}
+	            },
+	            
+	           formulas: {
+	                // 수정 가능 상태
+	                isEditable1: function() {
+	                	if(!this.searchParam.site_id){
+	                    	return false;
+	                	}else{
+	                		return true;
+	                	}
+	                },
+	                isAreaTypSite : function(){
+	                	
+						var areaInfoList = this.areaInfoList;	       
+						var selected_area_id = this.selectedComboInfo.area_id;
+						//console.log(areaInfoList);
+						//console.log(selected_area_id);
+						for(var i = 0; i<areaInfoList.length; i++){
+		                	//if(selected_area_id==areaInfoList[i].data){
+		                		if(areaInfoList[i].type=='site'){
+									//console.log("isAreaTypSite : true!!");		                			
+		                			return true; 
+		                		}
+		                	//}
+						}
+						//console.log("isAreaTypSite : false!!");
+						return false;	                	
+	                }
+	                
+	                
+	            }, 
+	            
+				
+				completeFindGrid :function(e, res){
+	            	var me = this;
+	        		
+					var result = res.response;
+					//console.log("그리드정보"+JSON.stringify(result.gatewayInfo));
+	        		
+	            	me.set("resultList1", result.gatewayInfo);
+	            	me.set("resultList3", result.beaconList);
+	            	
+				},
+				
+				 completeFindListAreaCombo: function(e, res){
+		            	var me = this;
+		            	
+		            	var areaInfoList = res.response;
+		            	
+		                me.set("areaInfoList", areaInfoList);
+		                if(areaInfoList.length > 0){
+		                	me.firstAreaInfo = areaInfoList[0];
+		                	me.set("searchParam.area_id", areaInfoList[0].data);
+		                	me.selectedComboInfo.area_id = areaInfoList[0].data;
+		                	if(areaInfoList[0].toggle_info!=null){
+			                	me.selectedComboInfo.toggle_info = JSON.parse(areaInfoList[0].toggle_info.value);
+		                	}
+		                }
+
+						
+		            	
+		           },
+				
+	        	 onSelectArea : function(event) {
+	        		var me = this;
+	        		var values = event.detail.value; 
+	        		if(values){
+	        		 	me.set("selectedComboInfo.area_id",values);
+		        		me.applyFormula();
+ 	        			
+		        		if(me.areaInfoList){
+							for(var i =0; i<me.areaInfoList.length; i++){
+								if(me.areaInfoList[i].data==values){
+									if(me.areaInfoList[i].toggle_info!=null){
+										me.set("selectedComboInfo.toggle_info", JSON.parse(me.areaInfoList[i].toggle_info.value));
+									}
+								}
+							
+							}
+		                	if(me.searchParam.area_id == me.areaInfoList[0].data ){
+								me.searchParam.tag = me.areaInfoList[0].tag;
+		                	}
+			                me.findSearch();
+			        		me.getProjectTagObject(true);
+		        		}
+	        		}
+	        	},
+	        	
+	        	onSelectGroup: function(event) {
+	        		var me = this;
+	        		if(UT.isEmpty(event.detail.selectedItem)){
+	        			me.monitor1.selectedGroupHighlight()
+	        			return ;
+	        		} 
+	        		var group_name = event.detail.selectedItem.group_name;
+	        		var group_id = event.detail.selectedItem.group_id;
+	        		var layer_group_id = event.detail.selectedItem.layer_group_id;
+	        		
+	        		
+	        		me.group_name.value =  group_name;
+	        		me.group_id.value =  group_id;
+	        		me.layer_group_id.value =  layer_group_id;
+	        		
+	        		var id= me.searchParam.group_id;
+	        		me.applyFormula();
+	        		if(me.formula("isAreaTypSite")){
+			        	var toggle_info = me.selectedComboInfo.toggle_info;
+			        	//console.log(toggle_info);
+			        	for(var i =0; i<toggle_info.length; i++){
+			        		var group_id = toggle_info[i].group_id.substring(1,toggle_info[i].group_id.length-1);
+			        		me.monitor1.selectToggle(group_id, id==group_id);
+			        	}
+	        		}else{
+			        	me.monitor1.selectedGroupHighlight(id);
+	        		}
+	        	},
+	        	
+        	   xNumberChange : function(e) {
+	        		var me = this;
+	        		var x = me.get("searchParam.value_x");
+		    		var y = me.get("searchParam.value_y");
+		    		var z = me.get("searchParam.value_z");
+		    		me.monitor1.showPointer(x,y,z);
+	        	},
+	        	
+	        	yNumberChange : function(e) {
+	        		var me = this;
+	        		var x = me.get("searchParam.value_x");
+		    		var y = me.get("searchParam.value_y");
+		    		var z = me.get("searchParam.value_z");
+		    		me.monitor1.showPointer(x,y,z);
+	        	},
+	        	
+	        	zNumberChange : function(e) {
+	        		var me = this;
+	        		var x = me.get("searchParam.value_x");
+		    		var y = me.get("searchParam.value_y");
+		    		var z = me.get("searchParam.value_z");
+		    		me.monitor1.showPointer(x,y,z);
+	        	},
+	        	changeView : function(){
+					var me = this;
+					$("#canvasDiv").toggleClass("hbox");
+					$("#canvasDiv").toggleClass("vbox");
+					$("#canvasDiv2").removeClass("flex-4 vbox").addClass("flex-4 vbox");
+					$("#canvasDiv1").removeClass("flex-6 vbox").addClass("flex-6 vbox");
+					me.$.tabNavi.doContentElementResize();
+					
+					me.$.gridPanel1.reSize();
+					me.$.gridPanel2.reSize();
+				},
+	        	
+	        	onSettingGateway : function(){
+					var me = this;
+					var provider = me.$.gridPanel1.getDataProvider();
+					var indexes = provider.selectionCheckedIndexes();
+					
+					
+					var x = me.get("searchParam.value_x");
+		    		var y = me.get("searchParam.value_y");
+		    		var z = me.get("searchParam.value_z");
+		    		
+		    		var group_name = me.group_name.value;
+		    		var group_id = me.group_id.value;
+		    		var layer_group_id = me.layer_group_id.value;
+					provider.setItemAt(indexes[0],{x:x,y:y,z:z,group_name:group_name, group_id:group_id,layer_group_id:layer_group_id});
+				},
+				
+				onSettingSensor : function(){
+					var me = this;
+					var provider = me.$.gridPanel2.getDataProvider();
+					var indexes = provider.selectionCheckedIndexes();
+					
+					var x = me.get("searchParam.value_x");
+		    		var y = me.get("searchParam.value_y");
+		    		var z = me.get("searchParam.value_z");
+		    		
+		    		var group_name = me.group_name.value;
+		    		var group_id = me.group_id.value;
+		    		var layer_group_id = me.layer_group_id.value;
+					provider.setItemAt(indexes[0],{x:x,y:y,z:z,group_name:group_name, group_id:group_id, layer_group_id:layer_group_id});					
+					
+					
+				},
+				
+				onSaveGateway : function(){
+					var me = this;
+					var provider = me.$.gridPanel1.getDataProvider();
+					var arr = provider.getUpdateItems();
+					/* var arr = provider.getItems(); */
+					
+					for(var i =0; i<arr.length; i++){
+						arr[i].site_id =me.searchParam.site_id;
+						arr[i].area_id =me.searchParam.area_id;
+						arr[i].tag = me.resultList1[0].tag;
+						arr[i].property='{"type":"gateway"}';
+					}
+					//1.유효성 검사
+					if(!this.validate()){
+						//실패
+						UT.alert("STD.E0000");	// 입력하신 필드를 다시 확인 해 주세요.
+						return;
+					}//성공
+					
+					this.$.saveGatewayInfo.body = {
+							arr: arr
+							
+					};
+					
+					UT.confirm("STD.N1200",function(){	//저장하시겠습니까?
+						UT.request(me.$.saveGatewayInfo);
+					});
+					
+				},
+				
+				
+				
+				completeSave: function(e, res){
+		                var me = this,
+		                    message = "STD.N2400"; // 저장하였습니다.
+
+		                if(res.response.result_status === 'S'){
+		                    UT.alert(message, function(){
+		                    	 me.findSearch();
+		                    });
+		                } else {
+		                    message = res.response.result_message;
+		                    UT.alert(message);
+		                }
+		        },
+		          
+		        onResetGateway : function(){		
+						var me =this;
+						
+						var provider = me.$.gridPanel1.getDataProvider();
+						var selectionItems = provider.selectionCheckedItems();
+						
+						this.$.onResetGateway.body = {
+								selectionItems: selectionItems
+						};
+						
+						if(selectionItems.length>0){
+							UT.confirm("STD.N1300",function(){	//삭제하시겠습니까?
+								UT.request(me.$.onResetGateway);
+							});
+						}else{
+							 UT.alert("STD.N1600");
+						}
+				},
+				
+	        	 
+				completeReset: function(e, res){
+	                var me = this,
+	                    message = "STD.N2500"; // 삭제하였습니다.
+
+	                if(res.response.result_status === 'S'){
+	                    UT.alert(message, function(){
+	                    	me.findSearch();
+	                    });
+	                } else {
+	                    message = res.response.result_message;
+	                    UT.alert(message);
+	                }
+	            },
+	            
+	            findSearch : function(){
+	            	 var me = this;
+	            	 UT.request(me.$.findListSensor);
+	            },
+	            
+	            CompletegetProjectTagObject : function(e,res){
+	            	var me = this;
+	            	var resultList = res.response;
+	            	var tag = null;
+	            	if(resultList == null){
+	            		//UT.request(me.$.getProjectTagObject)
+	            	}
+	            	if(resultList !=null) {
+	            		tag = resultList.tag; 
+		            	UT.request(me.$.findGroupInfo);
+	            	}
+	            	me.projectTagObject = tag;
+	            	
+	            },
+	            completeFind : function(e, res){
+	            	var me = this;
+					var data = res.response;
+					if(data== null){
+						UT.request(me.$.findGroupInfo);
+					}
+					me.groupInfoList = null;
+					
+					this.set("groupInfoList", data);
+					if(data.length ==0){
+						//UT.request(me.$.findAreaInfo);
+						//return;
+					}
+					// 3D-MODEL : 텍스트 말품성 초기화
+	            	while(this.$.textBoxDivforMapping.hasChildNodes()){
+	            		this.$.textBoxDivforMapping.removeChild(this.$.textBoxDivforMapping.firstChild);
+	               	}
+// 					$('.transparent-ui').remove();
+					
+//					if(me.groupInfoList && me.groupInfoList.length>0 && me.monitor1 != undefined){
+					if( me.monitor1 != undefined){
+						me.monitor1.removeCamera(me.existCamera.value);
+						me.existCamera.value = me.monitor1.createCamera(me.projectTagObject);
+		        		me.pushObjects(me.groupInfoList[0].property);
+		        		
+    	        		//progressing show
+    	            	me.loadingInterval = setInterval(function(){
+			        		SCLoadMask.show();
+	   	               		$("#mycanvas1").css("visibility","hidden");
+	   	               		$("#mycanvas1").parent().css("background-color","black");
+							//console.log(me.monitor1.myScene().getStatus().numTasks);
+    	            		if(me.monitor1.myScene().getStatus().numTasks==0){ // 로딩 완료
+		   	               		$("#mycanvas1").css("visibility","visible");
+		   	               		$("#mycanvas1").parent().css("background-color","white");
+    	            			SCLoadMask.hide();
+    	            			//progressing hide
+    	               			clearInterval(me.loadingInterval);
+    	               			
+    	            		 	me.monitor1.currentXYZ().x = 0;
+    	            			me.monitor1.currentXYZ().y = 0;
+    	            			me.monitor1.currentXYZ().z = 0;
+    	            			var rowData = {};
+    		        			rowData.x = 0;
+    		        			rowData.y = 0;
+    		        			rowData.z = 0;
+    		        			me.searchParam.value_x = rowData.x;
+    							me.searchParam.value_y = rowData.y;
+    							me.searchParam.value_z = rowData.z;
+    							$("#value_x").val(Number(rowData.x));
+    							$("#value_y").val(Number(rowData.y));
+    							$("#value_z").val(Number(rowData.z));
+    							me.showPointer(rowData.x, rowData.y, rowData.z); 
+    	            			
+    	               		}
+    	            	},50);
+		        		
+		        		//hys
+		        		//console.log(me.monitor1);
+		        		me.monitor1.renderToggle("additional_object",false);
+		        		
+					}else{
+						//me.getSceneScript();
+						UT.request(me.$.findGroupInfo);
+					}
+					
+				},
+				
+				onItemClick : function(e,res){
+					var me = this;
+					var rowData = res.data;
+					if(!rowData.x){
+						rowData.x = 0;
+						rowData.y = 0;
+						rowData.z = 0;
+					};
+					
+					me.set("searchParam.value_x", rowData.x);
+					me.set("searchParam.value_y", rowData.y);
+					me.set("searchParam.value_z", rowData.z);
+					me.set("searchParam.group_id", rowData.group_id);
+					
+					$("#value_x").val(Number(rowData.x));
+					$("#value_y").val(Number(rowData.y));
+					$("#value_z").val(Number(rowData.z));
+					$("#groupCombo").val(rowData.group_id);
+					
+					me.showPointer();
+				},
+				
+				onSettingBeacon: function(e){
+					var me = this
+					,args = e.target.dataset.args;
+					
+					var provider;
+					
+					// 비콘
+					if(args == "bc"){
+						provider = me.$.gridPanel3.getDataProvider();
+						
+					}
+					
+					var indexes = provider.selectionCheckedIndexes();
+					
+					if (indexes.length === 0) {
+	                    UT.alert("STD.N1600");
+	                    return;
+	                }
+					
+					var x = me.get("searchParam.value_x");
+		    		var y = me.get("searchParam.value_y");
+		    		var z = me.get("searchParam.value_z");
+		    		
+		    		var group_name = me.group_name.value;
+		    		var group_id = me.group_id.value;
+		    		var layer_group_id = me.layer_group_id.value;
+					provider.setItemAt(indexes[0], {x:x, y:y, z:z, group_name:group_name, group_id:group_id, layer_group_id:layer_group_id});
+				},
+				
+				onResetBeacon : function(e){		
+					var me =this
+					,args = e.target.dataset.args;
+					
+					var provider;
+					
+					// 비콘
+					if(args == "bc"){
+						provider = me.$.gridPanel3.getDataProvider();
+						
+					}
+					
+					var selectionItems = provider.selectionCheckedItems();
+					
+					if (selectionItems.length === 0) {
+	                    UT.alert("STD.N1600");
+	                    return;
+	                }
+					
+					this.$.resetMpSpPosition.body = {
+						selectionItems: selectionItems
+					};
+					
+					UT.confirm("STD.N1300",function(){	//삭제하시겠습니까?
+						// 비콘
+						if(args == "bc"){
+							UT.request(me.$.resetMpSpPosition);
+						}
+					
+					});
+				},
+				
+				onSaveBeacon : function(e){
+					var me = this
+					,args = e.target.dataset.args;
+					
+					var provider;
+					
+					// 비콘
+					if(args == "bc"){
+						provider = me.$.gridPanel3.getDataProvider();
+						
+					}
+					
+					var updateItems = provider.getUpdateItems();
+					
+					for(var i =0; i<updateItems.length; i++){
+						updateItems[i].site_id = me.searchParam.site_id;
+						updateItems[i].area_id = me.searchParam.area_id;
+						updateItems[i].tag = me.resultList3[0].tag;
+						updateItems[i].property='{"type":"beacon"}';
+					}
+					
+					//1.유효성 검사
+					if(!this.validate()){
+						//실패
+						UT.alert("STD.E0000");	// 입력하신 필드를 다시 확인 해 주세요.
+						return;
+					}//성공
+					
+					this.$.saveBeaconInfo.body = {
+						updateItems: updateItems
+					};
+					
+					UT.confirm("STD.N1200",function(){	//저장하시겠습니까?
+						UT.request(me.$.saveBeaconInfo);
+					});
+					
+				}
+		})
+	</script>
+
+
+</dom-module>

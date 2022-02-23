@@ -1,0 +1,53 @@
+<sc-link rel="import" href="es-validation-description.html"></sc-link>
+<sc-link rel="import" href="es-form-validation-sample.html"></sc-link>
+<sc-link rel="import" href="es-grid-validation-sample.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-validation-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="hbox flex" title-text="validator">
+			<es-validation-description class="fit flex"></es-validation-description>
+			<sc-tab-navigation class="box flex" selected="0">
+				<es-form-validation-sample class="flex" title-text="Form Validation"></es-form-validation-sample>
+				<es-grid-validation-sample class="flex" title-text="Grid Validation"></es-grid-validation-sample>
+			</sc-tab-navigation>
+		</sc-panel>
+		<es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-validation-guide',
+		properties : {
+			srcList : {
+				type : Array,
+				value : function() {
+					return [{
+						title        : "es-form-validation-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/validation/es-form-validation-sample.html"
+					}, {
+						title        : "es-grid-validation-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/validation/es-grid-validation-sample.html"
+					}, {
+						title        : "validators.js",
+						i18nDisabled : true,
+						extension    : "javascript",
+						url          : "/ui/lib/custom/js/validators.js"
+					}]
+				}
+			}
+		},
+		initialized : function() {
+			
+		}
+	});
+	</script>
+</dom-module>

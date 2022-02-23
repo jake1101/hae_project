@@ -1,0 +1,350 @@
+<sc-link rel="import" href="ep-image-view.html"></sc-link>
+
+<dom-module id="es-vendor-attr-list">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    
+     <sc-request-group init>
+		<sc-code-group>
+			<sc-code code="IOT003" value="{{typeList}}"></sc-code>
+			<sc-code code="IOT004" value="{{nameList1}}"></sc-code>
+		</sc-code-group>
+		
+	</sc-request-group>
+		
+		<sc-ajax id="findJobName"
+			url="findJobName.do"
+			body="{{searchParam}}"			
+			last-response="{{nameList2}}">
+		</sc-ajax>
+		
+		<!--완료 -->
+		<sc-ajax id="saveInfoVendorAttr"
+			url="saveInfoVendorAttr.do"
+			on-response="completeSaveInfoVendorAttr">
+		</sc-ajax>
+
+        <cc-auth-checker check-list="auth-s"></cc-auth-checker>
+
+		<cc-sub-title-bar  title-text="관리 속성">
+            <sc-button text="저장" on-click="onSave" auth-s></sc-button>
+		</cc-sub-title-bar>
+		<div class="vspace-10"></div>
+		<div class="vbox page">
+	        <table class="tb-form">
+	            <colgroup>
+	                <col style="width:150px">
+	                <col>
+	                <col style="width:150px">
+	                <col>
+	            </colgroup>
+	            <tr>
+	                <th><sc-label text="유형"></sc-label></th>
+	                 <td colspan ="3">
+	                <sc-combobox-field required="true" id="type" items="{{typeList}}" display-field="label" value-field="data" value="{{vendorAttrInfo.attrType}}" placeholder="선택" on-change="onChangeType"
+	                		disabled ="[[!isSelected]]"></sc-combobox-field>
+	           		</td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="명칭"></sc-label></th>
+	                <td colspan ="3">
+	                <sc-combobox-field required="true" id="name" items="{{nameList}}" display-field="label" value-field="data" value="{{vendorAttrInfo.attrCode}}" placeholder="선택"
+	                		disabled ="[[!isSelected]]"></sc-combobox-field>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="아이콘"></sc-label></th>
+	                <td colspan = "3">
+	                <sc-upload id="uploadPanel" style="height:200px" 
+						value="{{vendorAttrInfo.attGrpCode}}"
+						on-upload-completed="uploadCompleted"
+						on-delete-completed="deleteCompleted"
+						on-item-select="onItemSelect"
+						view-type="thumbnail"
+						downloadable="true"
+						max-total-file-count="1"
+						on-file-added="onLoadFile"
+						thumbnail-height="45" 
+						thumbnail-width="45" 
+						>
+					</sc-upload>
+	                
+	                </sc-checkbox-field>
+                </tr>
+	            <tr>
+	                <th><sc-label text="텍스트 색상"></sc-label></th>
+					<td colspan ="3">
+						<sc-text-field style="width:90%" value="{{vendorAttrInfo.labelColor}}" max-length="100"  id="text_color"
+								 regex="/^#?([a-f0-9]{6}|[a-f0-9]{3})$/"></sc-text-field>
+	                    <div style="float:right" class="colorpicker-circle-anchor__color" data-color id="text_color_anchor"></div>
+					</td>
+	            </tr>
+	        </table>
+	        
+		</div>	        
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'es-vendor-attr-list',
+            properties : {
+                // 코드 데이터
+                codes: {
+                    type: Object,
+                    reset: false,
+                    value: function() {
+                        return {
+                            company: {}
+                        };
+                    }
+                },
+                
+                vendorAttrInfo : {
+                	type : Object,
+                	value : function(){
+                		return {};
+                	}
+                },
+                searchParam : {
+                	type : Object,
+                	value : function(){
+                		return {};
+                	}
+                },
+                nameList : {
+                	type : Array,
+                	value : function(){
+                		return [];
+                	}
+                },
+                textColorPic: {
+                	type : Object
+                },
+                
+                isSelected:{
+                	type:Boolean,
+                	value: function(){
+                		return false;
+                	}
+                }
+
+            },
+
+
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+             initialized : function() {
+                var me = this;
+                UT.request(me.$.findJobName);
+                me.set("vendorAttrInfo.labelColor","#ff0000");
+                me.textColorPic= new ColorPic('#text_color', "#ff0000", '#text_color_anchor', 'top');
+            	
+             },
+             onLoadFile : function(e, file){
+                 var me = this;
+				 me.resizeOriFile(file[0]);
+             },
+             resizeOriFile : function(files){
+                 var file = files.orgFile;
+            	 var resizeImage = function (settings) {
+            		    var file = settings.file;
+            		    var maxSize = settings.maxSize;
+            		    var reader = new FileReader();
+            		    var image = new Image();
+            		    var canvas = document.createElement('canvas');
+            		    var dataURItoBlob = function (dataURI) {
+            		        var bytes = dataURI.split(',')[0].indexOf('base64') >= 0 ?
+            		            atob(dataURI.split(',')[1]) :
+            		            unescape(dataURI.split(',')[1]);
+            		        var mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            		        var max = bytes.length;
+            		        var ia = new Uint8Array(max);
+            		        for (var i = 0; i < max; i++)
+            		            ia[i] = bytes.charCodeAt(i);
+            		        return new Blob([ia], {type:"image/png"});
+            		    };
+            		    var resize = function () {
+            		        var width = image.width;
+            		        var height = image.height;
+            		        if (width > height) {
+            		            if (width > maxSize) {
+            		                height *= maxSize / width;
+            		                width = maxSize;
+            		            }
+            		        } else {
+            		            if (height > maxSize) {
+            		                width *= maxSize / height;
+            		                height = maxSize;
+            		            }
+            		        }
+            		        canvas.width = width;
+            		         canvas.height = height;
+            		        canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+            		        var dataUrl = canvas.toDataURL("image/png");
+            		        return dataURItoBlob(dataUrl);
+            		    };
+            		    return new Promise(function (ok, no) {
+            		        if (!file.type.match(/image.*/)) {
+            		            no(new Error("Not an image"));
+            		            return;
+            		        }
+            		        reader.onload = function (readerEvent) {
+            		            image.onload = function () { return ok(resize()); };
+            		            image.src = readerEvent.target.result;
+            		        };
+            		        reader.readAsDataURL(file,'');
+            		    });
+            		};
+
+            		resizeImage({
+                        file: file,
+                        maxSize: 45
+                    }).then(function (resizedImage) {
+							files.orgFile =  new File([resizedImage], files.name, {type:'image/png'});
+							files.orgFile.type="image/png";
+                    });
+             },
+            load : function(data) {
+                var me = this;
+
+                me.set('searchParam', data);
+                me.set('vendorAttrInfo',data);
+
+				// colorpicker 추가
+            	me.textColorPic = new ColorPic('#text_color', data.labelColor, '#text_color_anchor', 'top');
+            	
+				me.textColorPic.on('change', function() {
+            		$('#text_color_anchor').css('background-color', this.getColor());
+            		me.set("vendorAttrInfo.labelColor",this.getColor());
+                });
+                me.isSelected = true;
+            },
+
+            // 협력사 관리 속성 신규 추가
+            initVendor : function(data) {
+                var me = this;
+                	me.$.uploadPanel.reset();
+	                me.vendorAttrInfo = {};
+					me.set("vendorAttrInfo.labelColor","#ff0000");
+	                me.textColorPic= new ColorPic('#text_color', "#ff0000", '#text_color_anchor', 'top');
+	                me.textColorPic.on('change', function() {
+	            		$('#text_color_anchor').css('background-color', this.getColor());
+	            		me.set("vendorAttrInfo.labelColor",this.getColor());
+	                });
+	                me.set("vendorAttrInfo.isNew", true);
+                if(data.detail == "N"){
+                     me.isSelected=true;
+                }else{
+               		 me.isSelected=false;
+               		 me.set("searchParam.vendorId",data.detail.id);
+               		 me.set("searchParam.siteId",data.detail.siteId);
+                }
+            },
+
+            // 초기화
+            clear: function() {
+                var me = this;
+                me.reset();
+            },
+
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+            onChangeType : function(e){
+            	var me = this;
+            	if(e.detail.value == "worker"){
+	            	var tempArr =[];
+	            	if(me.nameList2){
+		            	for(var i = 0; i < me.nameList2.length ; i++){
+		            		
+		            		tempArr.push({data:me.nameList2[i].id,label:me.nameList2[i].jobTypeName} );
+		            	}
+	            	}
+	            	me.set("nameList",tempArr);
+	            	
+            	}else if(e.detail.value == "vehicle"){
+            		me.set("nameList",me.nameList1);
+            	}
+            	
+            },
+            
+            onSave : function(){
+            	var me = this;
+
+                if(!me.validate()){
+                    UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return;
+                }
+                
+				
+				me.vendorAttrInfo.vendorId = me.searchParam.vendorId;
+				me.vendorAttrInfo.siteId = me.searchParam.siteId;
+
+                UT.confirm("STD.N1200", function() { //저장 하시겠습니까?
+                    me.$.uploadPanel.upload().then(function(){
+                        me.$.saveInfoVendorAttr.body = {
+                        	vendorAttrInfo : me.vendorAttrInfo
+                        };
+                        UT.request(me.$.saveInfoVendorAttr);
+                    })
+                });
+            },
+            
+            completeSaveInfoVendorAttr : function(e,res){
+            	var me = this,
+                result = res.response;
+
+	            if(result.result_status === 'S'){
+	                UT.alert("STD.N2400", function(){ // 저장하였습니다.
+	                	me.fire('find-vendormgnt');
+	                	me.vendorAttrInfo = {};
+// 	 	                me.searchParam = {};
+	 					me.set("vendorAttrInfo.labelColor","#ff0000");
+		                me.textColorPic= new ColorPic('#text_color', "#ff0000", '#text_color_anchor', 'top');
+	 	                me.set("vendorAttrInfo.isNew", true);
+	 	                me.isSelected=false;
+	 	               
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+            },
+            
+            onItemSelect: function(event, detail) {
+				var me = this;
+				if(detail.item) {
+					if(detail.item.id.indexOf('-file') !== -1) {
+						var imageReader = new FileReader();
+						imageReader.onload = (function(aFile) {
+							return function(e) {
+								var popup = UT.popup('ep-image-view', me, 600, 500, {}, {});
+								popup.show();
+								var popupContent = popup.getWindowContent();
+								popupContent.load(e.target.result, true);
+							};
+						})(detail.item.orgFile);
+						imageReader.readAsDataURL(detail.item.orgFile);
+					} else {
+						var popup = UT.popup('ep-image-view', me, 600, 500, {}, {});
+						popup.show();
+						var popupContent = popup.getWindowContent();
+						popupContent.load(detail.item.id);		
+					}
+				}
+			},
+            
+
+        });
+        
+        
+    </script>
+</dom-module>

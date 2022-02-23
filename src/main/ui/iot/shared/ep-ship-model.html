@@ -1,0 +1,614 @@
+<dom-module id="ep-ship-model">
+	<!--
+        ******************************************************************************************
+   		** @Program-name 	: 3d팝업
+        ** @Description		: 현잔현황 > 3d팝업
+        ** @Author 			: JongHoon Baek
+        ** @Create Date 	: 2020.07.07
+        ** @History 		: 2020.06.07  JongHoon Baek 최초작성
+        ******************************************************************************************
+    -->
+
+	<style type="text/css">
+		:host{
+			@apply(--vbox-layout);
+		}
+  		 html, body { height:100%; overflow:hidden } .row {height:96% ; margin:1% 1% 1% 1%;} 
+  		 
+  		 
+  		.ftrt {float: left;display: inline-block;}
+  		.casen {
+  			top : 30px;
+			position: absolute;
+			border-radius : 3px;
+			transition: none;
+			z-index: 999;
+			right: 30px;
+			background: white;
+		}
+  		.gridBtn {
+  			top : 15px;
+			left: 30px;
+			width: 24px;
+			height: 35px;
+			position: absolute;
+			display: inline-block;
+			background: url(../../lib/openlayers/img/grid_inactive.png) no-repeat;
+			transition: none;
+			z-index: 999;
+			
+		}
+		
+		.gridBtn:hover {
+			background: url(../../lib/openlayers/img/grid_hover.png) no-repeat;
+		}
+		
+		.gridBtn.ItemActive, .map .gridBtn.ItemActive:hover {
+			background: url(../../lib/openlayers/img/grid_active.png) no-repeat;
+		}
+		
+		
+		.filterBtn {
+			top: 15px;
+			left: 80px;
+			width: 24px;
+			height: 35px;
+			position: absolute;
+			display: block;
+			background: url(../../lib/openlayers/img/filter_inactive.png) no-repeat;
+			transition: none;
+			z-index: 999;
+		}
+		
+		.filterBtn:hover {
+			background: url(../../lib/openlayers/img/filter_hover.png) no-repeat;
+		}
+		
+		.filterBtn.ItemActive, .map .filterBtn.ItemActive:hover {
+			background: url(../../lib/openlayers/img/filter_active.png) no-repeat;
+		}
+		
+		.changeBtn {
+			top : 30px;
+			position: absolute;
+			display: inline-block;
+			transition: none;
+			z-index: 999;
+			right: 30px;
+/* 			background : #385a8c; */
+		}
+		
+  	</style>
+	
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+	
+		<sc-request-group init>
+		
+			<sc-code-group>
+				<sc-code code="IOT003" value="{{codes.targetType}}"></sc-code>
+				<sc-code code="IOT004" value="{{codes.vehicleJobList}}"></sc-code>
+			</sc-code-group>
+			<!-- 협력사 조회 -->
+			<sc-ajax 
+				url="findListVendor.do"  
+				last-response="{{codes.vendorList}}" 
+				body="{{searchParam}}">
+			</sc-ajax>
+			<sc-ajax 
+				url="findListJobType.do"  
+				last-response="{{codes.jobTypeList}}" 
+				body="{{searchParam}}">
+			</sc-ajax>
+		</sc-request-group>
+		
+		<!-- 그룹 콤보 조회 -->
+		<sc-ajax id="findGroupInfo"
+			url="findShipGroupList.do"
+			body="{{searchParam}}"
+			on-response="completeFind">
+		</sc-ajax>
+		
+		<sc-ajax id="findListBeacon"
+			url="findListBeacon.do"
+			body="{{searchParam}}"
+			on-response="completeFindListBeacon">
+		</sc-ajax>
+		
+		<sc-ajax
+				id="findGridPositionList"
+				url="findGridPositionList.do"
+				body="{{searchCondition}}"
+				on-response="completefindGridPositionList">
+		</sc-ajax>
+		
+		<sc-ajax id="saveCasenInfo"
+			url="saveCasenInfo.do"
+			on-response="completeSaveCasen">
+		</sc-ajax>
+		
+		
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<cc-page-title-bar></cc-page-title-bar>
+		
+		<div class="vbox" id="filterDiv" >
+			<cc-search-container on-search="onSearch" auth-r>
+				<table validation-group="search">
+					<colgroup>
+						<col style="width:70px">
+						<col style="width:200px">
+						<col style="width:110px">
+						<col style="width:200px">
+						<col style="width:130px">
+						<col style="width:200px">
+						<col style="width:90px">
+						<col style="width:200px">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="구역"></sc-label></th>
+						<td>
+<!-- 							<sc-combobox-field id="groupCombo" items="{{groupInfoList}}" value="{{searchCondition.layerGroupId}}" placeholder="전체" -->
+<!-- 								display-field="name" value-field="id"  on-change="onSelectGroup"> -->
+<!-- 							</sc-combobox-field> -->
+							<sc-tree-combobox-field id="groupCombo" items="{{hierachGroupInfoList}}" 
+								enable-check-box-only-childs="false" value="{{searchCondition.layerGroupIds}}" 
+								display-field="name" value-field="id"  on-change="onSelectGroup">
+							</sc-tree-combobox-field>
+						</td>
+						<th><sc-label text="협력사"></sc-label></th>
+						<td>
+							<sc-multi-combobox-field class="w-170" placeholder="전체선택" input-clear="false" selected-all="true"
+									items="{{codes.vendorList}}" display-field="name" value-field="id"
+									value="{{searchCondition.vendorIds}}" enable-check-all="true">
+		                    </sc-multi-combobox-field>
+						</td>
+						<th><sc-label text="작업자 유형"></sc-label></th>
+						<td>
+							<sc-multi-combobox-field class="w-170" placeholder="전체선택" input-clear="false" selected-all="true"
+									items="{{codes.jobTypeList}}" display-field="jobTypeName" value-field="id" enable-check-all="true"
+									value="{{searchCondition.jobTypeIds}}">
+		                    </sc-multi-combobox-field>
+						</td>
+						
+						<th><sc-label text="조회 시간"></sc-label></th>
+						<td>
+		          			<sc-combobox-field id="limitTimeMinute" items="{{timeList}}" display-field="label" value-field="data"  selected-index="0"
+		          			value="{{searchCondition.limitTimeMinute}}" ></sc-combobox-field>
+						</td>
+						
+						<th hidden><sc-label text="이동장비 유형"></sc-label></th>
+						<td hidden>
+							<sc-multi-combobox-field class="w-170" placeholder="전체선택" input-clear="false" selected-all="true"
+									items="{{codes.vehicleJobList}}" display-field="label" value-field="data"
+									value="{{searchCondition.vehicleTypes}}" enable-check-all="true">
+		                    </sc-multi-combobox-field>
+						</td>
+						<th hidden><sc-label text="표시대상"></sc-label></th>
+						<td hidden>
+							<sc-multi-combobox-field class="w-170" placeholder="전체선택" input-clear="false" selected-all="true"
+									items="{{codes.targetType}}" display-field="label" value-field="data"
+									value="{{searchCondition.targetType}}" enable-check-all="true" >
+		                    </sc-multi-combobox-field>
+						</td>
+						<td hidden>
+							<sc-checkbox-field label="함께 보기(작업자/이동장비)"  ></sc-checkbox-field>
+<!-- 							<sc-checkbox-field label="함께 보기(작업자/이동장비)"  on-checkchange="changeAllShow"></sc-checkbox-field> -->
+						</td>
+					</tr>
+				</table>
+			</cc-search-container>
+		</div>
+		<div id="fullDiv" class="flex hbox">
+			<div id="canvasPopDiv" class="flex-7 vbox" style="position: relative; overflow: hidden;">
+				<div class="ftrt" >
+			        <sc-button id="gridBtn" class="gridBtn ItemActive" on-click="gridBtnClick" hidden="[[gridHidden]]" toggles="true" tooltip="목록 보이기" active=true ></sc-button>
+					<sc-button id="filterBtn" class="filterBtn ItemActive" on-click="filterBtnClick" hidden="[[filterHidden]]" toggles="true" tooltip="검색조건 보이기" active=true ></sc-button>
+					<sc-button style="display:none" id="changeBtn" class="changeBtn" text="{{changeBtnName}}" on-click = "changeInOut"></sc-button>
+				</div>
+				<table id="casenTable" class="casenTable casen" style="display:none">
+					<colgroup>
+						<col style="width:50%"/>
+<!-- 						<col style="width:50%"/> -->
+					</colgroup>
+					<thead>
+						<tr>
+							<th colspan='2'><sc-button style="padding:8px; width:130px;" text="케이슨 진척도 설정" on-click="casenBtn"></sc-button></th>
+						</tr>
+					</thead>
+					<tbody id="casenTbody" style='font-size:15px; text-align:right; padding:3px;'>
+						<tr class="casenTd" hidden>
+							<td style="text-align:center">1번:</td>
+							<td style="padding-right:3px">    					
+								<sc-number-field style="margin-top:2px; width:80px;" value="{{casenInfo.casen1}}"  min-value="0"  max-value="9"  default-value="0"></sc-number-field>
+							</td>
+						</tr>
+						<tr class="casenTd" hidden>
+							<td style="text-align:center">2번:</td>
+							<td style="padding-right:3px">
+								<sc-number-field style="width:80px;" value="{{casenInfo.casen2}}" min-value="0"  max-value="9" default-value="0"></sc-number-field>
+							</td>
+						</tr>
+						<tr class="casenTd" hidden>
+							<td style="text-align:center">3번:</td>
+							<td style="padding-right:3px">
+								<sc-number-field style="width:80px;" value="{{casenInfo.casen3}}" min-value="0"  max-value="9" default-value="0" ></sc-number-field>
+							</td>
+						</tr>
+						<tr class="casenTd" hidden>
+							<td style="text-align:center">4번:</td>
+							<td style="padding-right:3px">
+								<sc-number-field style="width:80px;" value="{{casenInfo.casen4}}" min-value="0"  max-value="9" default-value="0" ></sc-number-field>
+							</td>
+						</tr>
+						<tr class="casenTd" hidden>
+							<td colspan='2' style="text-align:center ;">
+		                    <sc-button style="margin-bottom:3px;" text="확인" on-click="onCheck" auth-s></sc-button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<div id="listTooltip" class="listTooltip" hidden>
+					<div id="tooltipClose" class="close" on-click="tooltipClose">x</div>
+					<ul id="tooltip"></ul>
+				</div>
+				<div id="ship_canvas" class="canvasDiv" style="width: 100%; height: 100%;">
+				</div>
+				<div id="textBoxDivforMapping" style="position: absolute;"></div>		
+			</div>
+			<div class="hspace-5"></div>
+			<sc-tab-navigation id="tabNavi" class="vbox flex-3" on-item-select="selectTab">
+					<sc-grid title="작업자" id="gridWorkerPanel" data-provider="{{gridWorkerList}}" use-state ="false" use-selection="false" selection-style="singleRow" show-selection-header="false" on-item-click="onItemClick" 
+					  focus-visible="false" column-fillstyle="fill" row-style-function="onRowStyle">
+				        <cc-grid-toolbar>
+				        	<sc-button id="beaconBtn" text="비콘위치 보기" on-click="onShowBeacon" auth-s></sc-button>
+			            </cc-grid-toolbar>
+				        <sc-grid-columns>
+<!-- 				            <sc-image-column   width="70"   header-text="수신상태"      data-field = "image"   image-change-function="onImageChange"   image-display ="auto" ></sc-image-column> -->
+				            <sc-data-column 	width="70" 	text-align="center" 	header-text="협력사"   data-field="vendorName" ></sc-data-column>
+				            <sc-data-column 	width="90" 	text-align="center" 	header-text="직종"   data-field="targetJobName" ></sc-data-column>
+				            <sc-data-column 	fill-width="100" 	text-align="center" 	header-text="작업자명"   data-field="targetName" ></sc-data-column>
+				            <sc-data-column 	width="180" 	text-align="center" 	header-text="위치"   data-field="areaName"></sc-data-column>
+				            <sc-date-column 	width="80" 	text-align="center" 	header-text="수신시간" data-field="updatedDt" display-format = "HH:mm:ss"></sc-date-column>
+				            <sc-data-column 	width="80" 	text-align="left" 		header-text="특이사항"   data-field="weakType" ></sc-data-column>
+<!-- 				            <sc-image-column 	width="50" 	header-text="SMS" data-field="sms" singular-source="ui/assets/img/grid/icon_sms_new.png" image-display ="auto"></sc-image-column> -->
+				        </sc-grid-columns>
+				        <sc-grid-fields>
+		                    <sc-grid-field data-field="emergency" ></sc-grid-field>
+		                    <sc-grid-field data-field="sensorId" data-type="number"></sc-grid-field>
+		                    <sc-grid-field data-field="iconImage"></sc-grid-field>
+		                    <sc-grid-field data-field="labelColor"></sc-grid-field>
+		                    <sc-grid-field data-field="popup" data-type="object"></sc-grid-field>
+		                    <sc-grid-field data-field="marker" data-type="object"></sc-grid-field>
+		                    <sc-grid-field data-field="geoJson" data-type="object"></sc-grid-field>
+		                </sc-grid-fields>
+			        </sc-grid>
+			        <sc-grid  hidden title="이동장비" id="gridVehiclePanel" data-provider="{{gridVehicleList}}"  use-state ="false" use-selection="false" selection-style="singleRow" show-selection-header="false" 
+			        	on-item-click="onItemClick"    sortable="false" focus-visible="false" column-fillstyle="fill">
+				        <cc-grid-toolbar>
+			            </cc-grid-toolbar>
+				        <sc-grid-columns>
+				            <sc-image-column   width="70"   header-text="수신상태"  data-field = "image"   image-change-function="onImageChange"   image-display ="auto" ></sc-image-column>
+				            <sc-data-column 	width="80" 	text-align="center" 	header-text="협력사"   data-field="vendorName" ></sc-data-column>
+				            <sc-data-column 	width="120" 	text-align="center" 	header-text="유형"   data-field="targetJobName" ></sc-data-column>
+				            <sc-data-column 	fill-width="120" 	text-align="center" 	header-text="이동장비명"   data-field="targetName" style-name="link" ></sc-data-column>
+				            <sc-data-column 	width="80" 	text-align="center" 	header-text="운전자"   data-field="driverName" ></sc-data-column>
+				            <sc-data-column 	width="125" 	text-align="center" 	header-text="위치"   data-field="areaName"></sc-data-column>
+				            <sc-date-column 	width="130" 	text-align="center" 	header-text="수신시간" data-field="updatedDt" display-format = "yyyy/MM/dd HH:mm:ss"></sc-date-column>
+				        </sc-grid-columns>
+				        <sc-grid-fields>
+		                    <sc-grid-field data-field="sensorId" data-type="number"></sc-grid-field>
+		                    <sc-grid-field data-field="labelColor"></sc-grid-field>
+		                    <sc-grid-field data-field="iconImage"></sc-grid-field>
+		                    <sc-grid-field data-field="popup" data-type="object"></sc-grid-field>
+		                    <sc-grid-field data-field="marker" data-type="object"></sc-grid-field>
+		                    <sc-grid-field data-field="geoJson" data-type="object"></sc-grid-field>
+		                </sc-grid-fields>
+			        </sc-grid>
+				</sc-tab-navigation>
+		</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+		
+	<script>
+		Polymer({
+			is: "ep-ship-model",
+			
+			properties : {
+				codes : {
+	               	type : Object,
+	               	value : function(){
+		               	return	{
+			               	 vendorList : []				// 협력사 목록
+		               	    ,targetType : []				// 표시 유형
+		               		,workerJobList : []			// 작업자 유형
+	               			,vehicleJobList : [] 			// 이동장비 유형
+		               	};
+	               	},
+	               	reset: false
+	            },
+	            searchCondition : {
+                	type : Object,
+                	value : function(){
+                		return {}
+                	}
+                },
+	            timeList : {
+                	type : Array,
+                	value : function(){
+                		return [
+                			{data : 30, label : "30분 이내"},
+               				{data : 60, label : "60분 이내"},
+               				{data : 1440, label : "당일"}
+                		]
+                	}
+                },
+				 positionInfoList : {
+					 type : Array,
+					 value : function(){
+						 return [];
+					 }
+				 },
+				 areaInfo : {
+					 type : Object,
+					 value : function(){
+						 return {};
+					 }
+				 },
+				 casenInfo : {
+					 type : Object,
+					 value : function(){
+						 return {};
+					 }
+				 },
+				 searchParam: {
+                	type : Object,
+                	value: function(){
+                		return {
+                			siteId : SCMdiManager.searchParam.site_id
+                		};
+                	}
+                },
+	             groupInfoList:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+	             },
+	             beaconList:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+	             },
+	             groupName :{
+	            	 type : Object,
+					 value : function(){
+						 return {};
+					 }
+	             },
+	             layerGroupId:{
+	            	 type : Object,
+					 value : function(){
+						 return {};
+					 }
+	             },
+	             mouse: {
+	            	 type:Object,
+	            	 value : function(){
+	            		 return {
+	            			 "clientClickX" : 0,
+	            			 "clientClickY" : 0
+	            		 };
+	            	 }
+	             },
+	             voxelInterval: {
+	            	 type: Object,
+	            	 value: function(){
+	            		 return null;
+	            	 }
+	             },
+	             setTimeInfo: {
+	            	 type: Object,
+	            	 value: function(){
+	            		 return {};
+	            	 }
+	             },
+	             setTimeInfo1: {
+	            	 type: Object,
+	            	 value: function(){
+	            		 return {};
+	            	 }
+	             },
+	             emergencyInfo: {
+	            	 type: Object,
+	            	 value: function(){
+	            		 return {};
+	            	 }
+	             },
+	             isdangerAlarm: {
+	            	type : Boolean,
+					value : function(){
+						return false;
+					}
+	             },
+	             shaderCvalue: {
+	            	type : Number,
+					value : function(){
+						return 0.1;
+					}
+	             },
+	             beaconFlag :{
+	            	 type: Boolean,
+	            	 value : false
+	             },
+	             pageName : {
+	            	 type:String,
+	            	 value : "ep-ship-model"
+	             },
+	             changeBtnName :{
+	            	 type: String,
+	            	 value : "내부 보기"
+	             },
+	             isInside : {
+	            	 type : Boolean,
+	            	 value : false
+	             }
+            },
+			
+            /******************************
+             * 초기화 설정
+             ******************************/
+            initialized : function() {
+                 var me = this;
+                 
+                 me.connectSocketServer();
+            },
+            
+            load : function(areaInfo) {
+                var me = this;
+                
+                me.set("areaInfo",areaInfo);
+            	me.set("searchParam.areaId", areaInfo.id);
+            	if(areaInfo.adjunction.casen){
+            		me.set("casenInfo",areaInfo.adjunction.casen);
+            	}            	
+            	
+            	if(areaInfo.modelName == "fd"){
+            		$("#casenTable").css("display","block");
+            	}else if(areaInfo.modelName == "sejong"){
+            		me.$.changeBtn.style.display = "block";
+            	}
+            	 UT.request(me.$.findGroupInfo);
+            	 UT.request(me.$.findListBeacon);
+//                 me.onSearch();
+                
+                SCLoadMask.show();
+                
+                var animate = function () {
+					// 프레임 처리
+					 me.requestAnimate = requestAnimationFrame(animate);
+					
+					if(me.isdangerAlarm) {
+						if(me.player && me.player.getScene() && me.player.getScene().getObjectByName("workerGroup")&& me.player.getScene().getObjectByName("workerGroup").children){
+							for(var i=0; i<me.player.getScene().getObjectByName("workerGroup").children.length; i++) {
+								danger = me.player.getScene().getObjectByName("workerGroup").children[i];
+								if(danger.material){
+									if(danger.material.uniforms['c'].value >= 1) {
+										me.shaderCvalue = -0.06;
+									} else if(danger.material.uniforms['c'].value <= 0.5) {
+										me.shaderCvalue = 0.06;
+									}
+									danger.material.uniforms['c'].value = danger.material.uniforms['c'].value + me.shaderCvalue;
+								}
+							}
+						}
+					}
+				};
+				animate();
+            },
+            
+            onSearch : threeJsCommonFunc.onSearch,
+            
+            completefindGridPositionList :  threeJsCommonFunc.completefindGridPositionList,
+            
+         	// 마우스 이벤트 설정
+            initMouseEvent: threeJsCommonFunc.initMouseEvent,
+            
+            spanClick: threeJsCommonFunc.spanClick,
+
+            tooltipClose : function(e){
+				$('#'+e.target.data).removeClass('active');
+				$('#'+e.target.data+' .countLabel').removeClass('active');
+				e.target.parentElement.remove();
+				e.stopPropagation();
+            },
+            
+            /**
+             * 3D-MODEL : 좌표 이동 Canvas 키보드 이벤트리스너 추가
+             */
+             initKeyEvent: threeJsCommonFunc.initKeyEvent,
+            
+            // 그룹 콤보 조회 완료
+            completeFind : threeJsCommonFunc.completeFind,
+			
+			// json에 대한 threeJs 생성
+			loadThreeJs: threeJsCommonFunc.loadThreeJs,
+			
+            // grid 클릭 이벤트 리스너
+			onItemClick :threeJsCommonFunc.onItemClick,
+			
+			// 위험표시
+			dangerAlarm: threeJsCommonFunc.dangerAlarm, 
+			
+			vertexShader: threeJsCommonFunc.vertexShader, 
+			
+			fragmentShader: threeJsCommonFunc.fragmentShader, 
+			
+			onImageChange: threeJsCommonFunc.onImageChange, 
+            
+            /**
+			 * SENSOR 3D MODEL 생성
+			 */
+			createSensorModel: threeJsCommonFunc.createSensorModel, 
+			
+			selectTab : threeJsCommonFunc.selectTab, 
+            
+			gridBtnClick : threeJsCommonFunc.gridBtnClick, 
+            
+			filterBtnClick : threeJsCommonFunc.filterBtnClick, 
+            
+			casenBtn : threeJsCommonFunc.casenBtn, 
+			
+			onSetting  : threeJsCommonFunc.onSetting, 
+			
+			onCheck : threeJsCommonFunc.onCheck, 
+			
+			completeSaveCasen: threeJsCommonFunc.completeSaveCasen, 
+			
+			 /**
+			 * casen 3D MODEL 생성
+			 */
+			createCasenModel: threeJsCommonFunc.createCasenModel, 
+			
+			destroyed : threeJsCommonFunc.destroyed, 
+            
+            connectSocketServer: threeJsCommonFunc.connectSocketServer, 
+            
+            /**
+			 * 알람을 위한 주기적 요청을 시작한다.
+			 */
+			startInterval: threeJsCommonFunc.startInterval, 
+			
+			completeFindListBeacon : threeJsCommonFunc.completeFindListBeacon, 
+			
+			onShowBeacon : threeJsCommonFunc.onShowBeacon, 
+            
+            createBeaconModel: threeJsCommonFunc.createBeaconModel, 
+            
+			onRowStyle : threeJsCommonFunc.onRowStyle, 
+			
+			onSelectGroup : threeJsCommonFunc.onSelectGroup,
+			
+			changeInOut : threeJsCommonFunc.changeInOut,
+			
+// 			changeAllShow :threeJsCommonFunc.changeAllShow
+            
+            
+		});
+	</script>
+
+</dom-module>

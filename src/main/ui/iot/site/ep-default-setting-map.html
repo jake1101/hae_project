@@ -1,0 +1,181 @@
+<dom-module id="ep-default-setting-map">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<!-- 저장 -->
+		<sc-ajax id="saveFitArea" url="saveFitArea.do" on-response="completeSaveFitArea"> </sc-ajax>
+		
+		<table class="tb-form">
+			<colgroup>
+				<col>
+				<col style="width:200px;">
+				<col style="width:60px;">
+			</colgroup>
+			<tr>
+				<td>▣지도 기본 값을 저장하세요. 다른 대부분의 지도화면에서 이 값을 기준으로 보여줍니다.(회전, 확대, 중심)
+					<br/> &nbsp;&nbsp;&nbsp;1. shitf + 드래그 하여 회전을 조절할 수 있습니다.
+					<br/> &nbsp;&nbsp;&nbsp;2. 마우스 휠을 조작하여 확대값을 조절할 수 있습니다.
+					<br/> &nbsp;&nbsp;&nbsp;3. 드래그하여, 지도의 중심을 이동할 수 있습니다.
+				</td>
+				<td>
+					<p>
+						<sc-label text="회전"></sc-label>
+						<sc-text-field id="lon" value="{{rotation}}" required="true" readonly="true"></sc-text-field>
+					</p>
+					<p>
+						<sc-label text="확대"></sc-label>
+						<sc-text-field id="lon" value="{{zoomLevel}}" required="true" readonly="true"></sc-text-field>
+					</p>
+					<p>
+						<sc-label text="중심"></sc-label>
+						<sc-text-field id="lon" value="{{center}}" required="true" readonly="true"></sc-text-field>
+					</p>
+				</td>
+				<td>
+					<sc-button text="저장" on-click="settingSave"></sc-button>
+				</td>
+			</tr>
+		</table>
+		<cc-ol-map-container id="popupMapContainer" site-id="{{mapId}}" auto-start="false"></cc-ol-map-container>
+	</template>
+	<script>
+		Polymer({
+			is : 'ep-default-setting-map',
+			properties:{
+				titleText: {	//팝업 타이틀 지정
+					type: String,
+					value: function () {
+						return "지도 기본 위치 설정";
+					}
+				},
+				lon:Number,
+				lat:Number,
+	            map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+                siteId : {
+                    type : Object,
+                    value : function(){
+						return {};
+                    }
+                },
+                vectorLayer:{
+					type : Object,
+					value : function(){
+						return{};
+					}
+                },
+                drawControl:{
+					type : Object,
+					value : function(){
+						return{};
+					}
+                },
+                vStyle :{
+					type : Object,
+					value : function(){
+						return{
+			       		    strokeColor: "#ff0000",
+			       		    fillColor: "#ffffff",
+			       		    strokeOpacity: 1,
+			       		    strokeWidth: 3,
+			       		    pointRadius: 5,
+			       		    graphicName: "circle"
+		       			};
+					}
+                },
+	       		pStyle :{
+					type : Object,
+					value : function(){
+						return{
+		       			    strokeColor:"#ff0000",
+		       			    fillColor: "#ff0000",
+		       			    strokeOpacity:1,
+		       			    strokeWidth: 3,
+		       			    fillOpacity:0.2
+		       			};
+					}
+                }
+			},
+			load: function(dataId, adjunction){
+				var me = this;
+				
+				setTimeout(function(){
+					me.set("mapId", dataId);
+					//맵 초기 설정
+					me.initMap();
+				}, 100);
+			},
+			initMap: function(){
+				var me = this;
+				
+				me.$.popupMapContainer.start();
+				me.set("map", me.$.popupMapContainer.map);
+				
+				// 눈 모양 아이콘 default 설정.
+				me.$.popupMapContainer.querySelector("#anchorLabel").fire('click', event); // anchor 영역 선택 처리
+				me.$.popupMapContainer.querySelector("#siteLabel").fire('click', event); // site 현장 선택 처리
+				me.$.popupMapContainer.querySelector("#areaLabel").fire('click', event); // area 영역 선택 처리
+				me.$.popupMapContainer.querySelector("#buildingLabel").fire('click', event); // building 영역 선택 처리
+				
+				var view = me.map.getView();
+				
+				var zoomLevel = Math.round(view.getZoom() * 100) / 100;
+				me.set("zoomLevel", zoomLevel);
+				var angle = Math.round(view.getRotation() * 180 / Math.PI) % 360;
+            	var rotation = angle > 0 ? angle : angle + 360;
+				me.set("rotation", rotation);
+				var center = me.changeCoordinates(view.getCenter());
+				me.set("center", [(Math.round(center[0] * 1000) / 1000), (Math.round(center[1] * 1000) / 1000)]);
+				
+				me.map.getView().on('change:resolution', function(e) {
+					var zoomLevel = Math.round(view.getZoom() * 100) / 100;
+					me.set("zoomLevel", zoomLevel);
+				});
+				
+				me.map.getView().on('change:rotation', function(e) {
+					var angle = Math.round(view.getRotation() * 180 / Math.PI) % 360;
+	            	var rotation = angle > 0 ? angle : angle + 360;
+					me.set("rotation", rotation);
+				});
+				
+				me.map.getView().on('change:center', function(e) {
+					var center = me.changeCoordinates(view.getCenter());
+					me.set("center", [(Math.round(center[0] * 1000) / 1000), (Math.round(center[1] * 1000) / 1000)]);
+				});
+			},
+			settingSave: function(){	// 저장버튼 클릭
+            	var me = this;
+				
+            	var view = me.get("map").getView();
+            	var zoomLevel = Math.round(view.getZoom() * 100) / 100;
+            	var center = me.changeCoordinates(view.getCenter());
+            	var angle = Math.round(view.getRotation() * 180 / Math.PI) % 360;
+            	var rotation = angle > 0 ? angle : angle + 360;
+            	
+            	data = {
+           			'rotation' : rotation, 'zoomLevel' : zoomLevel, 'center' : center, 'siteId' : me.get("mapId")
+            	}
+            	
+//             	console.log(zoomLevel);
+//             	console.log(center);
+//             	console.log(rotation);
+
+				// site { id: ~~,name : ~~ , ~~~~  , adjunction : {rotaion : , zoomLevel : , center : }   }
+				
+            	me.fire("defaultSettingSave", data);
+            },
+    		//좌표계 변환
+    		changeCoordinates : function(coordinate){
+    			return ol.proj.transform(coordinate, "EPSG:900913", 'EPSG:4326');
+    		},
+            
+		});
+	</script>
+</dom-module>

@@ -1,0 +1,289 @@
+<link rel="import" href="resources/lib/custom/cc-memo-search-container.html">
+
+<dom-module id="smartsuite-memo-tag-mgt">
+<!--
+	******************************************************************************************
+	** @Program-name 	: 메모 태그 관리 팝업
+	** @Description		: 
+	** @Author 			: jHuh
+	** @Create Date 	: 2017.02.10
+	** @History 		: 2017.02.10 jHuh 최초작성
+	******************************************************************************************
+-->
+	<style>
+		:host {     
+			@apply(--vbox-layout);     
+		}
+	</style>
+	    
+	<template>	
+<!-- 
+	************************************************************************************************************
+	* Service Area
+	************************************************************************************************************
+-->
+		<!-- 전체 태그 조회 -->
+    	<sc-ajax id="findListTag"
+    		 url="findListTag.do"
+    		 last-response="{{orgTagData}}"
+    		 on-response="completeLoading">
+		</sc-ajax>
+		
+    	<!-- 전체 태그 조회 -->
+    	<sc-ajax id="findListTagByKeyword"
+    		 url="findListTagByKeyword.do"
+    		 body="{{findList.param}}" 
+    		 last-response="{{tagData}}">
+		</sc-ajax>
+		
+		<!-- 태그 추가 -->
+    	<sc-ajax id="insertTag"
+    		 url="insertTag.do"
+             body="{{insertParam}}"
+             on-response="completeInsertTag">
+		</sc-ajax>
+		
+		<!-- 태그 삭제 -->
+		<sc-ajax id="deleteTag"
+    		 url="deleteTag.do"
+             body="{{deleteParam}}"
+             on-response="completeDeleteTag">
+		</sc-ajax>
+<!--  
+	************************************************************************************************************
+	* UI Area
+	************************************************************************************************************
+-->
+	    <div class="vbox flex">
+    		<cc-memo-search-container on-search="searchData">
+	            <table>
+	                <tr>
+	                    <th width="80px"><sc-label text="태그명 검색"></sc-label></th>
+	                    <td><sc-text-field value="{{findList.param.tag_nm}}" class="w-120" maxLength="50" on-enter="searchData"></sc-text-field></td>  
+	            	</tr>
+	            </table>
+        	</cc-memo-search-container>
+            <div class="smartsuite-memo-vspace-5"></div>
+                    
+			<sc-grid id="gridPanel" class="flex" data-provider="{{tagData}}" use-state="false" editable="true">
+	            <sc-toolbar>
+	                <sc-button text="태그추가" on-click="onAddList"></sc-button>
+	                <sc-button text="선택항목삭제" on-click="onDeleteList"></sc-button>
+	           		<sc-button text="저장" on-click="onSaveList"></sc-button>
+           		</sc-toolbar>
+	            <sc-grid-columns>
+	                <sc-data-column data-field="tag_nm" header-text="태그명" width="200" text-align="center" editable="true"></sc-data-column>
+	            </sc-grid-columns>
+	        </sc-grid>   
+        </div>
+	</template>
+	
+<!--  
+	************************************************************************************************************
+	* Script Area
+	************************************************************************************************************
+-->	
+	<script>
+		Polymer({
+			is : 'smartsuite-memo-tag-mgt',
+			
+			properties : {
+				
+				findList: {
+                    type: Object,
+                    value: function(){
+                        return {
+                            param: {}
+                        };
+                    }
+                },
+                
+                orgTagData : {
+					type: Object,
+					value: function() {
+						return{};
+					}
+				},
+				
+				tagData : {
+					type: Object,
+					value: function() {
+						return{};
+					}
+				},
+				
+	            /**
+				 * insertTag.do 의 파라미터로 추가될 태그 정보를 담고 있음
+				 * @type {Object}
+				 */
+	            insertParam : {
+					type: Object,
+					value: function() {
+						return {
+							tag_id: [],
+							tag_nm: []
+						};
+					}
+	            },
+	            
+	            /**
+				 * deleteTag.do 의 파라미터로 삭제될 태그의 tag_nm 를 담고 있음
+				 * @type {Object}
+				 */
+	            deleteParam : {
+					type: Object,
+					value: function() {
+						return {
+							tag_nm: []
+						};
+					}
+	            }
+			},
+			
+			attached : function() {
+				this.loadData();
+			},
+
+            
+            /**
+			* 모든 태그 데이터 로드
+			*/
+            loadData : function() {
+            	memoUtil.request(this.$.findListTag);
+            },
+            
+            searchData : function() {
+            	memoUtil.request(this.$.findListTagByKeyword);
+            },
+
+            // 태그 추가 버튼
+            onAddList : function() {
+            	var me = this,
+            		row = {},
+            		provider = me.$.gridPanel.getDataProvider();
+            	
+            	provider.addItemAt(0, row);
+            },
+            
+         	// 태그 삭제 버튼
+            onDeleteList : function() {
+                var me = this,
+	                provider = me.$.gridPanel.getDataProvider(),
+	                checked = provider.selectionCheckedIndexes();
+
+	            if (checked.length === 0) {
+	                memoUtil.alert('선택된 항목이 없습니다');
+	                return;
+	            }
+	
+	            memoUtil.confirm('삭제 하시겠습니까?', function() {
+	                var deletedList = provider.removeItems(),
+	                	length = deletedList.length;
+	            	
+	                for(var i = 0; i < length; i++){
+		            	me.deleteParam.tag_nm[i] = deletedList[i].tag_nm;
+	            	}
+                    memoUtil.request(me.$.deleteTag);
+	            });
+            },
+            
+          
+			//리스트 저장
+			onSaveList : function() {
+				var me = this, 
+					provider = me.$.gridPanel.getDataProvider(),
+					newItems = provider.getNewItems(),
+					itemTotalCount = newItems.length,
+					result = [];
+
+				for	(var i = 0; i < itemTotalCount; i++){
+					if(newItems[i].tag_nm) {
+						result.push({
+							tag_nm : newItems[i].tag_nm
+						});
+					}
+				}
+				
+				if (result.length) {
+					me.saveTag(result);
+				} else {
+					memoUtil.alert(me.translate("태그명을 입력하세요."));
+					return;
+				}
+
+			},
+
+			/**
+			 * 태그 저장
+			 */
+			saveTag : function(addedList) {
+				var len, dupCount;
+
+				dupCount = this.checkDuplication(addedList);
+				len = this.insertParam.tag_nm.length;
+
+				// 추가된 태그 모두 중복된 태그인 경우
+				if (dupCount == addedList.length) {
+					memoUtil.alert(this.translate("이미 등록된 태그입니다."));
+					this.reset();
+				} 
+				else {
+					for (var i = 0; i < len; i++) {
+						this.insertParam.tag_id[i] = memoUtil.generateUUID();
+					}
+					memoUtil.request(this.$.insertTag);
+				}
+			},
+
+			/**
+			 * 닫기 버튼
+			 */
+			onClose : function() {
+				this.fire("close");
+			},
+
+			checkDuplication : function(addedList) {
+				var tagNameList = [];
+
+				for (var i = 0; i < addedList.length; i++) {
+					tagNameList.push(addedList[i].tag_nm);
+				}
+
+				for (var i = 0; i < this.orgTagData.length && tagNameList.length != 0; i++) {
+					var idx = tagNameList.indexOf(this.orgTagData[i].tag_nm);
+					if (idx > -1) {
+						tagNameList.splice(idx, 1);
+					}
+				}
+
+				if (tagNameList.length) {
+					for (var i = 0; i < tagNameList.length; i++) {
+						this.insertParam.tag_nm[i] = tagNameList[i];
+					}
+				}
+
+				return (addedList.length - tagNameList.length);
+			},
+
+			reset : function() {
+				this.searchData();
+				this.insertParam.tag_id = [];
+				this.insertParam.tag_nm = [];
+			},
+			
+			completeLoading : function(e, res) {
+				this.tagData = res.response;	
+			},
+			
+			completeInsertTag : function(e, res) {
+				memoUtil.alert(this.translate("태그가 추가되었습니다."));
+				this.reset();
+			},
+
+			completeDeleteTag : function(e, res) {
+				memoUtil.alert(this.translate("태그가 삭제되었습니다."));
+				this.reset();
+			}
+		});
+	</script>
+</dom-module>

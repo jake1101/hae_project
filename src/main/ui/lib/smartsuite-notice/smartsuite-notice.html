@@ -1,0 +1,371 @@
+<sc-link rel="import" href="smartsuite-notice-content.html"></sc-link>
+
+<dom-module id="smartsuite-notice">
+	<template>
+		<style>
+			.scNoticeAlert {
+				color : white;
+				font-weight : bold;
+				font-size : 14px;
+			}
+		
+			.scNoticeAlert:hover {
+				opacity : 0.5;
+			}
+			.notification-icon {
+				visibility:hidden;
+				position:absolute;
+				top:8px;
+				right:39px;
+				background:red;
+				color:white;
+				text-align:center;
+				width:20px;
+				height:20px;
+				border-radius:50%;
+				box-shadow:0 0 1px #333;
+			}
+		</style>
+		
+		<sc-ajax id="findAlarmList" 
+		         url="findAlarmList.do"
+		         body = "{{searchParam}}"
+		         on-response = "onResponseAlertSchedule"
+		></sc-ajax>
+		
+		<!-- 알람내용 출력 div -->
+		<div id="notiIcon" class="notification-icon"></div>
+		<sc-button id="alertIcon" class="alertIcon" tabindex="0"></sc-button>
+		<!--  알람내용 출력 grid? -->
+		<sc-grid hidden></sc-grid>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'smartsuite-notice',
+			
+			properties : {
+				/**
+				 * 알람 스케줄 리스트
+				 */
+				alertScheduleList: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				},
+				newAlramList: {
+					type: Object,
+					value: function() {
+						return [];
+					}
+				},
+
+				/**
+				 * 현재 반복 일정의 아이디
+				 */
+				intervalId: {
+					type: Object
+				},
+				
+				/**
+				 * 타이머 아이디
+				 */
+				timerId: {
+					type: Object
+				},
+				
+				/**
+				 * 알람 사용 여부
+				 */
+				doAlert: {
+					type: Boolean,
+					value: function() {
+						return true;
+					}
+				},
+				ws: {
+					type: Object,
+					value: function() {
+						return null;
+					}
+				},
+				standardDate: {
+					type: Object,
+					value: function() {
+						return new Date;
+					}
+				},
+				searchParam: {
+					type: Object,
+					value: function() {
+						return {userId : SCSessionManager.currentUser.usr_id
+							   ,date   : null};
+					}
+				}
+			},
+
+            listeners: {
+                'tap': 'onClickAlertList'
+            },
+            attached: function(){
+            	var me = this;
+            	me.requestAlertSchedule();
+            },
+            initialized: function() {
+                var me = this;
+                
+            },
+            	
+//             connectSocketServer: function(){
+//             	var me = this;
+            	
+//                 if(me.ws){
+//                 	me.ws.close();
+//                 }
+            	
+//             	var userInfo = SCSessionManager.currentUser;
+//             	if(userInfo.ws_use == "Y"){
+//                     var support = "MozWebSocket" in window ? 'MozWebSocket' : ("WebSocket" in window ? 'WebSocket' : null);
+
+//                     if (support == null) {
+//                         alert(noSupportMessage);
+//                         return;
+//                     }
+
+//                     console.log("* ws Connecting to server...");
+                    
+// //                 	ws = new window[support](conf.ws);
+//                     me.ws = new WebSocket(conf.ws + "0");
+//                 	// when data is comming from the server, this metod is called
+//                     me.ws.onmessage = function (evt) {
+//                     	console.log("# " + evt.data); //con.raycloud.co.kr
+                    	
+//                 		if(evt && evt.data){
+//                 			try{
+// //                 				UT.alert(JSON.parse(evt.data).body.content.message);
+                				
+//                 				// 현재시간
+//                 				var nowDt = new Date();
+//                 				var hour = nowDt.getHours();
+                				
+//                 				// 수신시간
+//                 				var startHr = Number(userInfo.ws_from_hr || 0);
+//                 				var endHr = Number(userInfo.ws_to_hr || 23);
+                				
+//                 				// 사용자 정보에 설정된 수신시간에만 수행 
+//                 				if(hour >= startHr && hour <= endHr){
+//                 					var notiIconEl = $('#notiIcon')[0];
+//                                    	notiIconEl.style.visibility = 'visible';
+                                   	
+//                                    	// 알람 타입 추가
+//                 					var alarmType = JSON.parse(evt.data).body.type;
+                					
+//                                    	// 알람 타입이 작업 시작 or 작업 종료 : 메시지(warn)만 표시, 경고음 없음
+//                 					if(alarmType == "ScaffoldBeginning" || alarmType == "ScaffoldFinished"){
+//                 						$.notify(JSON.parse(evt.data).body.body
+//                         						,{ 
+//                         							className: 'warn', 
+//                         							clickToHide: true,
+//                         							autoHide: false,
+//                         							autoHideDelay: 1800000, // 30분(millisecond)
+//                         							showAnimation: 'slideDown',
+//                         							showDuration: 400
+//                         						}
+//                                    		);
+                						
+//                 					// 그 외 : 메시지(error) 표시 및 경고음
+//                 					}else{
+//                 						$.notify(JSON.parse(evt.data).body.body
+//                         						,{ 
+//                         							className: 'error', 
+//                         							clickToHide: true,
+//                         							autoHide: false,
+//                         							autoHideDelay: 1800000, // 30분(millisecond)
+//                         							showAnimation: 'slideDown',
+//                         							showDuration: 400
+//                         						}
+//                                    		);
+                						
+//                                        	// 경고음
+//                                        	var audio = new Audio('/resources/mp4/fire_truck_air_horn_daniel_simion.mp3');
+//                                        	audio.play();
+//                 					}
+                					
+//                 				}
+                				
+//                 			}catch(e){
+                				
+//                 			}
+//                 		}
+// //                         messageBoard.append("# " + evt.data + "<br />");
+// //                         console.log(evt);
+//                     };
+                    
+//                     // when the connection is established, this method is called
+//                     me.ws.onopen = function () {
+//                     	console.log('* ws Connection open...');
+                        
+//                         var param = {
+//                         	"eventType":"UserCommand"
+//                         	,"body":{
+//                         		"command":"login", 
+//                         		"parameter": SCSessionManager.currentUser.usr_id
+//                         	}
+//                         }
+                        
+//                         me.ws.send(JSON.stringify(param) );
+//                         console.log('open');
+// //                         {"eventType":"UserCommand", "body":{"command":"login", "parameter":"ADMIN"} }
+//                     };
+
+//                     me.ws.onerror = function (error) {
+// 	            		console.log('* ws Connection err '+error +'<br/>');  
+// 	               	};
+
+//                     // when the connection is closed, this method is called
+//                     me.ws.onclose = function () {
+//                     	console.log('* ws Connection closed...');
+//                     }
+//             	}
+//             	//me.set("ws", ws);
+//             	me.startInterval();
+//             },
+            
+// 			/**
+// 			 * 알람을 위한 주기적 요청을 시작한다.
+// 			 */
+// 			startInterval: function() {
+// 				var me = this;
+// 				var date = new Date();
+// 				me.timerId = setTimeout(function() {
+// 					me.requestAlertSchedule();
+// 					me.intervalId = setInterval(function() {
+// 						// 네트워크 끊겼을 때, WebSocket 연결 해제
+// 						if (!navigator.onLine) {
+// 							//console.log("You are Offline");
+// 							me.ws.close();
+// 						}
+						
+// 						// Ready State Constants
+// 						// 0: 연결이 수립되지 않은 상태
+// 						// 1: 연결이 수립되어 데이터가 오고갈 수 있는 상태
+// 						// 2: 연결이 닫히는 중
+// 						// 3: 연결이 종료되었거나, 연결에 실패한 경우
+						
+// 						if(navigator.onLine && me.ws.readyState >= 2 ) {
+// 							me.stopInterval();
+// 							me.connectSocketServer();
+// 						}
+// 						me.requestAlertSchedule();
+// 					}, 60 * 1000);
+// 				}, 0);
+// 			},
+			
+			/**
+			 * 알람 스케줄 요청
+			 */
+			requestAlertSchedule: function() {
+				var me = this;
+				// jhkim 임시 처리
+ 				UT.requestNotUseLoading(me.$.findAlarmList);
+			},
+			
+			/**
+			 * 알람을 위한 주기적 요청을 정지한다.
+			 */
+			stopInterval: function() {
+				var me = this;
+				clearInterval(me.intervalId);
+			},
+			
+			/**
+			 * 타이머를 멈춘다
+			 */
+			stopTimer: function() {
+				var me = this;
+				clearTimeout(me.timerId);
+			},
+			
+			/**
+			 * 알람을 받았을 경우
+			 */
+			onResponseAlertSchedule: function(e,res) {
+				var me = this;
+				me.checkDate();
+				var newAlramList = me.get("newAlramList"); 
+				var scheduleList  = res.response.body || [];
+				if(UT.isNotEmpty(scheduleList) && scheduleList.length !== 0) {
+					for(var i = 0; i < scheduleList.length; i++) {
+						if(UT.isEmpty(me.alertScheduleList[scheduleList[i].seq])) {
+							me.alertScheduleList[scheduleList[i].seq] = scheduleList[i];
+							newAlramList.push(scheduleList[i]);
+						}
+					}
+					var newAlertNum = newAlramList.length//Object.keys(me.alertScheduleList).length;
+					
+					// 신규 알람이 있을 경우
+					if(newAlertNum !== 0) {
+						// 팝업이 떠 있는 경우
+						if(me.popupEl && me.popupEl.isShowing()) {
+							me.setPopupData(me.popupEl);
+						} else {
+// 							var noticeNumEl = me.parentElement.getElementsByClassName('num')[0];
+// 							noticeNumEl.innerHTML = (newAlertNum <= 99) ? String(newAlertNum) : '99+';
+// 							noticeNumEl.style.visibility = 'visible';
+// 							noticeNumEl.style.position = 'absolute';
+                			var notiIconEl = $('#notiIcon')[0];
+                			notiIconEl.style.visibility = 'visible';
+                			$('#notiIcon').html(scheduleList.length);
+						}
+					}else{
+						var notiIconEl = $('#notiIcon')[0];
+            			notiIconEl.style.visibility = 'hidden';
+					}
+				}
+// 				me.connectSocketServer();
+			},
+			
+			/**
+			 * 알람 아이콘을 클릭했을 경우
+			 */
+			onClickAlertList: function() {
+				var me = this;
+				me.$.alertIcon.style.color = '';
+
+				if(!me.popupEl) {
+                    me.popupEl = UT.popup('smartsuite-notice-content', me, 1000, 600, {
+                        'result' : function(event, data) {
+                        },
+                    }, {titleText: "알림 목록", destroyOnHided: false});
+				}
+                me.popupEl.show();
+                me.setPopupData(me.popupEl);
+                var notiIconEl = $('#notiIcon')[0];
+                notiIconEl.style.visibility = 'hidden';
+// 				var noticeNumEl = me.parentElement.getElementsByClassName('num')[0];
+// 				noticeNumEl.style.visibility = 'hidden';
+			},
+			
+			/**
+			 * 팝업에 정보를 설정한다.
+			 */
+			setPopupData: function(popup) {
+				var me = this;
+				popup.getWindowContent().load(me.newAlramList);
+				me.set("newAlramList",[]);
+			},
+			checkDate : function(){
+				var me = this;
+				var standardDate = me.standardDate;
+				var curDate = new Date();
+				if(standardDate.getFullYear()  !=  curDate.getFullYear()
+					|| standardDate.getMonth() !=  curDate.getMonth()
+					|| standardDate.getDate()  !=  curDate.getDate() ){
+					me.set("alertScheduleList", {});
+					me.set("standardDate",curDate);
+				}
+			}
+		});
+	</script>
+</dom-module>
