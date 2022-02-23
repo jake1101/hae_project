@@ -1,0 +1,47 @@
+<dom-module id="es-service-list">
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+	</style>
+	<template>
+		<cc-sub-title-bar title-text="서비스 목록"></cc-sub-title-bar>
+		<cc-search-container>
+			<table>
+				<colgroup>
+					<col style="width: 100px">
+					<col>
+					<col style="width: 100px">
+					<col>
+				</colgroup>
+				<tr>
+					<th>
+						<sc-label text="서비스 그룹"></sc-label>
+					</th>
+                	<td>
+                		<sc-combobox-field value="" items="" display-field="name" value-field="id" placeholder="전체">
+                    	</sc-combobox-field>
+                	</td>
+					<th>
+						<sc-label text="서비스 이름"></sc-label>
+					</th>
+					<td>
+						<sc-text-field></sc-text-field>
+					</td>
+				</tr>
+			</table>
+		</cc-search-container>
+		<sc-grid>
+			<sc-grid-columns >
+				<sc-data-column data-field="svc_gr" header-text="서비스 그룹" width="500" text-align="center"></sc-data-column>
+				<sc-data-column data-field="svc_nm" header-text="서비스 명" width="800" text-align="center"></sc-data-column>
+				<sc-checkbox-column	data-field="use_yn" header-text="사용상태" width="70" text-align="center"></sc-checkbox-column>
+			</sc-grid-columns>
+		</sc-grid>
+	</template>
+    <script>
+    	Polymer({
+    		is: "es-service-list"
+    	})
+    </script>
+</dom-module>
