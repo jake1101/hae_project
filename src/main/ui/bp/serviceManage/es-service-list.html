@@ -5,8 +5,29 @@
 		}
 	</style>
 	<template>
+	
+		<sc-request-group init>
+			<sc-code-group>
+				<sc-code code="C100" value="{{codes.stt_cd}}"></sc-code>
+			</sc-code-group>
+		</sc-request-group>
+		
+		<sc-ajax 
+			id="regSafetyServiceGroupList" 
+			url="regSafetyServiceGroupList.do" 
+			last-response="{{svcGrpList}}"
+		></sc-ajax>
+		
+		<sc-ajax 
+			id="findRegSafetyServiceList"
+			url="findRegSafetyServiceList.do"
+			body="{{searchParam}}"
+			last-response="{{resultList}}"
+		></sc-ajax>
+		
+		
 		<cc-sub-title-bar title-text="서비스 목록"></cc-sub-title-bar>
-		<cc-search-container>
+		<cc-search-container on-search="onFindRegSafetyServiceList">
 			<table>
 				<colgroup>
 					<col style="width: 100px">
@@ -19,29 +40,57 @@
 						<sc-label text="서비스 그룹"></sc-label>
 					</th>
                 	<td>
-                		<sc-combobox-field value="" items="" display-field="name" value-field="id" placeholder="전체">
+                		<sc-combobox-field 
+                			value="{{searchParam.svc_grp_nm}}" 
+                			items="{{svcGrpList}}"
+                			display-field="svc_grp_nm"
+                			value-field="svc_grp_id"
+                			placeholder="그룹명">
                     	</sc-combobox-field>
                 	</td>
 					<th>
 						<sc-label text="서비스 이름"></sc-label>
 					</th>
 					<td>
-						<sc-text-field></sc-text-field>
+						<sc-text-field value="{{searchParam.svc_ctl_nm}}"></sc-text-field>
 					</td>
 				</tr>
 			</table>
 		</cc-search-container>
-		<sc-grid>
+		<sc-grid data-provider="{{resultList}}">
 			<sc-grid-columns >
-				<sc-data-column data-field="svc_gr" header-text="서비스 그룹" width="500" text-align="center"></sc-data-column>
-				<sc-data-column data-field="svc_nm" header-text="서비스 명" width="800" text-align="center"></sc-data-column>
-				<sc-checkbox-column	data-field="use_yn" header-text="사용상태" width="70" text-align="center"></sc-checkbox-column>
+				<sc-data-column data-field="svc_grp_nm" header-text="서비스 그룹" width="500" text-align="center"></sc-data-column>
+				<sc-data-column data-field="svc_ctl_nm" header-text="서비스 명" width="800" text-align="center"></sc-data-column>
+				<sc-checkbox-column	data-field="stt_cd" header-text="사용상태" width="70" text-align="center"></sc-checkbox-column>
 			</sc-grid-columns>
 		</sc-grid>
 	</template>
     <script>
     	Polymer({
-    		is: "es-service-list"
+    		is: "es-service-list",
+    		properties: {
+    			searchParam: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			},
+    			resultList:  {
+    				type: Array,
+    				value: function() {
+    					return [];
+    				}
+    			},
+    			svcGrpList: {
+    				type: Array,
+    				value: function() {
+    					return [];
+    				}
+    			}
+    		},
+    		onFindRegSafetyServiceList: function() {
+    			UT.request(this.$.findRegSafetyServiceList)
+    		}
     	})
     </script>
 </dom-module>
