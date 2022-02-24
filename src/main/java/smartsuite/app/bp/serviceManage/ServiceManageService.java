@@ -104,7 +104,7 @@ public class ServiceManageService {
 		
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		
-		sqlSession.update("serviceManageApi.regSafetyServiceGroupList", param);
+		sqlSession.selectList("serviceManageApi.regSafetyServiceGroupList", param);
 		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
 		
 		return resultMap;
@@ -119,16 +119,11 @@ public class ServiceManageService {
 	 * @Method Name : findRegSafetyServiceList
 	 */
 	public List<Map<String,Object>> findRegSafetyServiceList(Map searchParam) {
-		// RAYCOM 추가 : 세션 정보
-		Map userInfo = Auth.getCurrentUserInfo();
 		
-		if("system".equals(userInfo.get("access_level")) ){
-			return sqlSession.selectList("serviceManageApi.findRegSafetyServiceList", searchParam);
-		}else {
-			searchParam.put("access_level", userInfo.get("access_level") );
-			searchParam.put("user_company_id", userInfo.get("user_company_id") );
-			return sqlSession.selectList("user.findListUserByLevel", searchParam);
-		}
+		//Map userInfo = Auth.getCurrentUserInfo();
+				
+		return sqlSession.selectList("serviceManageApi.findRegSafetyServiceList", searchParam);
+		
 	}
 
 	/**

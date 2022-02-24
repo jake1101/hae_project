@@ -24,7 +24,7 @@
 		where 1 = 1
 		and tb1.svc_ctl_id = tb2.svc_ctl_id 
 		and tb2.svc_grp_id = tb3.svc_grp_id 
-		and tb1.wpc_cd  = #{p.company_id}
+		and tb1.wpc_cd  = #{g.comp_cd}
     </select>
     
     <select id="findListUserByLevel" resultType="map">
