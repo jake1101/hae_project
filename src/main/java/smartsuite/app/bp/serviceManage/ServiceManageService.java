@@ -111,13 +111,12 @@ public class ServiceManageService {
 	}
 	
 	/**
-	 * user list의 값을 반환한다.
+	 * 등록 서비스 리스트
 	 *
-	 * @author : Yeon-u Kim
-	 * @param searchParam the search param
-	 * @return user list
-	 * @Date : 2016. 2. 4
-	 * @Method Name : findListUser
+	 * @author : 
+	 * @param param the param
+	 * @Date : 2022. 2. 24
+	 * @Method Name : findRegSafetyServiceList
 	 */
 	public List<Map<String,Object>> findRegSafetyServiceList(Map searchParam) {
 		// RAYCOM 추가 : 세션 정보
