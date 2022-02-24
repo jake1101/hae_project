@@ -10,21 +10,21 @@
 		FROM CORNERS.SVC_GRP
     </select>
     
-	<select id="findListUser" parameterType="map" resultType="map">
-	/* user.findListUser: 내부 사용자 목록 조회 */	
-    select
-		(ROW_NUMBER() OVER()) AS ROWNUM,
-		tb3.svc_grp_nm,
-		tb2.svc_ctl_nm,
-		tb1.stt_cd 
-	from 
-	corners.svc_req tb1
-	, corners.svc_ctl tb2
-	, corners.svc_grp tb3 
-	where 1 = 1
-	and tb1.svc_ctl_id = tb2.svc_ctl_id 
-	and tb2.svc_grp_id = tb3.svc_grp_id 
-	and tb1.wpc_cd  = #{p.company_id}
+	<select id="findRegSafetyServiceList" parameterType="map" resultType="map">
+		/* user.findListUser: 내부 사용자 목록 조회 */	
+	    select
+			(ROW_NUMBER() OVER()) AS ROWNUM,
+			tb3.svc_grp_nm,
+			tb2.svc_ctl_nm,
+			tb1.stt_cd 
+		from 
+		corners.svc_req tb1
+		, corners.svc_ctl tb2
+		, corners.svc_grp tb3 
+		where 1 = 1
+		and tb1.svc_ctl_id = tb2.svc_ctl_id 
+		and tb2.svc_grp_id = tb3.svc_grp_id 
+		and tb1.wpc_cd  = #{p.company_id}
     </select>
     
     <select id="findListUserByLevel" resultType="map">
