@@ -61,6 +61,7 @@
 				<value>classpath:smartsuite/mappers/law/*.xml</value>
 				<value>classpath:smartsuite/mappers/ptw/*.xml</value>
 				<value>classpath:smartsuite/mappers/site/*.xml</value>
+				<value>classpath:smartsuite/mappers/servicemanage/api/*.xml</value>
 			</array> 
 		</property> 
 	</bean>
