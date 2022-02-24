@@ -89,7 +89,7 @@
 				<property name="password" value="password1!" />
 				<property name="maximumPoolSize" value="6" />
 				<property name="maxLifetime" value="30000" />
-    			<property name="idleTimeout" value="30000" />						
+    			<property name="idleTimeout" value="30000" />
 			</bean>
 		</constructor-arg>
 	</bean>
