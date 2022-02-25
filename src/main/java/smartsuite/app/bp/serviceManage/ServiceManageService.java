@@ -104,8 +104,9 @@ public class ServiceManageService {
 		
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		
-		sqlSession.selectList("serviceManageApi.regSafetyServiceGroupList", param);
+		List list =  sqlSession.selectList("serviceManageApi.regSafetyServiceGroupList", param);
 		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
+		resultMap.put(Const.RESULT_DATA, list);
 		
 		return resultMap;
 	}

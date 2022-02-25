@@ -11,21 +11,31 @@
     </select>
     
 	<select id="findRegSafetyServiceList" parameterType="map" resultType="map">
-		/* serviceManageApi.findRegSafetyServiceList: 등록 서비스 리스트 조회 */	
-	    select
-			(ROW_NUMBER() OVER()) AS ROWNUM,
-			tb3.svc_grp_nm,
-			tb2.svc_ctl_nm,
-			tb1.stt_cd 
-		from 
+		/* serviceManageApi.findRegSafetyServiceList: 등록 서비스 리스트 조회 */
+		select
+		(ROW_NUMBER() OVER()) AS ROWNUM,
+		tb3.svc_grp_nm,
+		tb2.svc_ctl_nm,
+		tb1.stt_cd
+		from
 		corners.svc_req tb1
 		, corners.svc_ctl tb2
-		, corners.svc_grp tb3 
-		where 1 = 1
-		and tb1.svc_ctl_id = tb2.svc_ctl_id 
-		and tb2.svc_grp_id = tb3.svc_grp_id 
-		and tb1.wpc_cd  = #{g.comp_cd}
+		, corners.svc_grp tb3
+		<where>
+			and tb1.svc_ctl_id = tb2.svc_ctl_id
+			and tb2.svc_grp_id = tb3.svc_grp_id
+	
+			<if test="p.svc_grp_id != null and p.svc_grp_id != ''">
+				and tb3.svc_grp_id = #{p.svc_grp_id}
+			</if>
+	
+			<if test="p.svc_ctl_nm != null">
+				<!-- bind name="svcCtlNmPattern" value="'%' + p.svc_ctl_nm + '%'" /-->
+				and tb2.svc_ctl_nm like '%' || #{p.svc_ctl_nm} || '%'
+			</if>
+		</where>
     </select>
+    
     
     <select id="findListUserByLevel" resultType="map">
     /* user.findListUserByLevel: 내부 사용자 목록 조회 */	

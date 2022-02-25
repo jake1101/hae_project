@@ -1,4 +1,4 @@
-<dom-module id="es-service-list">
+<dom-module id="es-search-service-list">
 	<style>
 		:host{
 			@apply(--vbox-layout);
@@ -7,24 +7,18 @@
 	<template>
 	
 		<sc-request-group init>
-			<sc-code-group>
-				<sc-code code="C100" value="{{codes.stt_cd}}"></sc-code>
-			</sc-code-group>
+			<sc-ajax 
+				id="regSafetyServiceGroupList" 
+				url="regSafetyServiceGroupList.do" 
+				last-response="{{svcGrpObj}}"
+			></sc-ajax>
+			<sc-ajax 
+				id="findRegSafetyServiceList"
+				url="findRegSafetyServiceList.do"
+				body="{{searchParam}}"
+				last-response="{{resultList}}"
+			></sc-ajax>
 		</sc-request-group>
-		
-		<sc-ajax 
-			id="regSafetyServiceGroupList" 
-			url="regSafetyServiceGroupList.do" 
-			last-response="{{svcGrpList}}"
-		></sc-ajax>
-		
-		<sc-ajax 
-			id="findRegSafetyServiceList"
-			url="findRegSafetyServiceList.do"
-			body="{{searchParam}}"
-			last-response="{{resultList}}"
-		></sc-ajax>
-		
 		
 		<cc-sub-title-bar title-text="서비스 목록"></cc-sub-title-bar>
 		<cc-search-container on-search="onFindRegSafetyServiceList">
@@ -41,12 +35,12 @@
 					</th>
                 	<td>
                 		<sc-combobox-field 
-                			value="{{searchParam.svc_grp_nm}}" 
-                			items="{{svcGrpList}}"
+                			value="{{searchParam.svc_grp_id}}" 
+                			items="{{groupList}}"
                 			display-field="svc_grp_nm"
                 			value-field="svc_grp_id"
-                			placeholder="그룹명">
-                    	</sc-combobox-field>
+                			placeholder="그룹명"
+                		></sc-combobox-field>
                 	</td>
 					<th>
 						<sc-label text="서비스 이름"></sc-label>
@@ -57,17 +51,17 @@
 				</tr>
 			</table>
 		</cc-search-container>
-		<sc-grid data-provider="{{resultList}}">
+		<sc-grid data-provider="{{resultList}}" on-item-click="onItemClick" editable="true">
 			<sc-grid-columns >
 				<sc-data-column data-field="svc_grp_nm" header-text="서비스 그룹" width="500" text-align="center"></sc-data-column>
 				<sc-data-column data-field="svc_ctl_nm" header-text="서비스 명" width="800" text-align="center"></sc-data-column>
-				<sc-checkbox-column	data-field="stt_cd" header-text="사용상태" width="70" text-align="center"></sc-checkbox-column>
+				<sc-checkbox-column	data-field="stt_cd" header-text="사용상태" width="70" text-align="center" editable="true"></sc-checkbox-column>
 			</sc-grid-columns>
 		</sc-grid>
 	</template>
     <script>
     	Polymer({
-    		is: "es-service-list",
+    		is: "es-search-service-list",
     		properties: {
     			searchParam: {
     				type: Object,
@@ -81,15 +75,37 @@
     					return [];
     				}
     			},
-    			svcGrpList: {
+    			groupList: {
     				type: Array,
     				value: function() {
-    					return [];
+    					return []
+    				}
+    			},
+    			svcGrpObj: {
+    				type: Object,
+    				value: function() {
+    					return {};
     				}
     			}
     		},
+    		initialized: function() {
+    			UT.request(this.$.regSafetyServiceGroupList)
+    			
+                var me = this;               
+                var groupObj = me.get("svcGrpObj") || {};
+                me.set("groupList", groupObj.result_data);
+                
+                var list = me.get("groupList") || [];
+                list.unshift({svc_grp_id: "", svc_grp_nm: "전체"})
+                me.onFindRegSafetyServiceList();
+            },
     		onFindRegSafetyServiceList: function() {
     			UT.request(this.$.findRegSafetyServiceList)
+    		},
+    		onItemClick : function() {
+    			var me = this,
+                data = event.detail.data,
+                item = event.detail.item;
     		}
     	})
     </script>
