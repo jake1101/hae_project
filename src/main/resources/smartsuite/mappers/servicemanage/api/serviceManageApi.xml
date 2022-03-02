@@ -28,7 +28,7 @@
 	
 			<if test="p.svc_ctl_nm != null">
 				<!-- bind name="svcCtlNmPattern" value="'%' + p.svc_ctl_nm + '%'" /-->
-				and tb2.svc_ctl_nm like '%' || #{p.svc_ctl_nm} || '%'
+				and tb1.svc_ctl_nm like '%' || #{p.svc_ctl_nm} || '%'
 			</if>
 		</where>
     </select>
