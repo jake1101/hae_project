@@ -14,7 +14,9 @@
 		/* serviceManageApi.findRegSafetyServiceList: 등록 서비스 리스트 조회 */
 		select
 			(ROW_NUMBER() OVER()) AS ROWNUM,
+			tb2.svc_grp_id,
 			tb2.svc_grp_nm,
+			tb1.svc_ctl_id,
 			tb1.svc_ctl_nm,
 			tb1.svc_use_yn
 		from corners.svc_ctl tb1
