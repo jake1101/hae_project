@@ -1,0 +1,490 @@
+<sc-link rel="import" href="ep-attribute-detail.html"></sc-link>
+
+<dom-module id="es-attribute-changer">
+    <template>
+	    <style>
+	        :host {
+	        	display: block;
+	        	margin-top: 10px;
+	        	max-height: 500px;
+	        	max-height: 500px; 
+	        }
+	        
+	        :host([hidden]) {
+	        	display: none;
+	        }
+	        
+	        .tb {
+	        	display:table;
+	        	width: 100%; 
+	        	height: 100%;
+	        	border-collapse:collapse;
+	        	overflow-y: auto;
+	        }
+	        
+	        .thead {
+	        	margin-top: 30px;
+	        	display:table-header-group;
+	        }
+	        
+	        .thead .th, .thead .td {
+	        	text-align: center;
+	        }
+	        
+	        .tbody .th {
+	        	text-align: left;
+	        }
+	        
+	        .th, .td {
+	        	line-height: 26px;
+	        	height: 26px;
+	        	width: 140px;
+	        	padding: 1px 3px;
+	        	border:1px solid #afafaf;
+	        	vertical-align: middle;
+				font-weight: 500;
+	        }
+	        
+	        .thead .th, .thead .td {
+	        	background-color: #dcdcdc;
+	        }
+	        
+	        .tbody .td {
+	        	text-align: right;
+	        }
+	        
+	        .tbody {
+	        	display: table-row-group;;
+	        }
+	        
+	        .tr {
+	        	display: table-row;
+	        }
+	        
+	        .th {
+	        	display: table-cell;
+	        }
+	        
+	        .td {
+	        	display: table-cell;
+	        }
+	        
+	        .td sc-text-field {
+	        	display: inline;
+	        }
+	        
+     		.th {
+				cursor: pointer;
+			}
+			
+			.th:hover {
+				color: #ea6363;
+			}
+	        
+	    </style>
+    
+    	<div style="text-align:center; margin-bottom: 10px;"><span>Attribute Changer</span><br><span id="currentElement"></span></div>
+   		<!-- <sc-text-field id="search" value="{{search}}" placeholder="Search Attribute.." disabled$="[[!eleSelected]]"></sc-text-field> -->
+    	
+		<div id="table" class="tb" hidden$="[[!eleSelected]]">
+			<div class="thead">
+				<div class="tr">
+					<div class="th">Attribute</div>
+					<div class="td">Value</div>
+				</div>
+			</div>
+			<div class="tbody">
+				<template is="dom-repeat" items="{{syncObjs}}">
+					<div class="tr">
+						<div class="th" on-click="_viewDetail">{{item.name}}</div>
+						<div class="td"><sc-text-field class="inputBox" value="{{item.value}}" readonly="{{item.readonly}}"></sc-text-field></div>
+					</div>
+				</template>
+			</div>
+		</div>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-attribute-changer',
+            properties:{
+            	type: {
+            		type: String
+            	},
+            	devPreview: {
+            		type: Object,
+            		value: function() {
+            			return {};
+            		}
+            	},
+            	devSource: {
+            		type: Object,
+            		value: function() {
+            			return {};
+            		}
+            	},
+            	
+            	devVirtual: {
+            		type: Object,
+            		value: function() {
+            			return {};
+            		}
+            	},
+            	
+            	syncObjs: {
+            		type: Array,
+            		value: function() {
+            			return [];
+            		} 
+            	},
+            	
+            	targetIdxs: {
+            		type: Array,
+            		value: function() {
+            			return [];
+            		} 
+            	},
+            	
+            	eleSelected: {
+            		type: Boolean,
+            		value: false
+            	},
+            	
+            	elementType: String
+            },
+            
+            observers: ['_syncObjsChanged(syncObjs.*)'],
+            
+            /**
+    		 * Sync 대상을 체크합니다. 
+    		 */
+            _syncObjsChanged: function(syncObjsInfo) {
+            	var match = syncObjsInfo.path.match(/#([0-9]+)./);
+            	var idx = match ? parseInt(match[1]) : -1; 
+            	
+            	if(idx >= 0) {
+	             	this.syncObjs[idx].isSyncReq = true;
+	             	this._sync();
+            	}
+            },
+            
+            /**
+    		 * 동기화  
+    		 */
+            _sync: function() {
+            	var me = this;
+            	syncObjs = this.syncObjs;
+            	
+            	syncObjs.forEach(function(syncObj){
+            		if(syncObj.isSyncReq) {
+            			me._syncDevPreview(syncObj);
+            			me._syncDevSource(syncObj);
+            			
+            			syncObj.isSyncReq = false;
+            		}
+            	});
+            },
+            
+            /**
+    		 * devPreview에 대해 동기화를 진행합니다. 
+    		 */
+            _syncDevPreview: function(syncObj) {
+				var kind = syncObj.kind;
+				var me = this;
+
+				//기존의 값이 object, array 일 경우 JSON to Object
+				var value = syncObj.value;
+				if(syncObj.valueType === "object" || syncObj.valueType === "array") {
+					value = JSON.parse(value); 
+				}
+				
+				//Kind별 분기
+            	if(kind === "attribute") {
+            		//Single Tag(값의 존재가 아닌 태그의 유무)이면 Toggle 아니면 값 변경
+            		syncObj.isSingleTag ? this._setAttrBool(syncObj.name, (value === "true"))  
+            								: this.devPreview.setAttribute(syncObj.name, value);
+            	} else if(kind === "property") {
+            		this.devPreview[syncObj.name] = value;
+            	} else if(kind === "class") {
+            		//Polymer 기본 Style 백업 
+            		var polymerCls = me.devPreview.classList.toString().match(/(style-scope[\s|\S]+$)/);
+            		
+            		//class 초기화
+            		me.devPreview.classList = "";
+            		
+            		//사용자 입력 Class
+            		var clazzList = syncObj.value.split(" ");
+            		for(var i=0, c; c = clazzList[i]; i++) {
+            			me.devPreview.classList.add(c);
+            		}
+            		
+            		//Polymer Style 재적용
+            		if(polymerCls) {
+           				clazzList = polymerCls[1].split(" ");
+                   		for(var i=0, c; c = clazzList[i]; i++) {
+                   			me.devPreview.classList.add(c);
+                   		}	
+            		}
+            	} else if(kind === "event") {
+            		
+            	} else if(kind === "id") {
+            		//ID는 Element상에서 변경하지 않음
+            		//Copy용 Source에서는 변경
+            	}
+            },
+            
+            /**
+    		 * devSource에 대해 동기화를 진행합니다. 
+    		 */
+			_syncDevSource: function(syncObj) {
+				var me = this;
+				var kind = syncObj.kind;
+				var value = syncObj.value;
+				
+				//바인딩이면 값이 변경되지 않음
+				if(syncObj.isBinding) {
+					return; 
+				}
+				
+            	if(kind === "attribute") {
+            		//싱글 태그(값이 아닌 Attr의 유무)인 경우 
+            		if (syncObj.isSingleTag) {
+               			(syncObj.value === "true") ? syncObj.atn.innerText = syncObj.name : syncObj.atn.innerText = "";
+            		}
+            		//값이 존재하는 경우
+            		else {
+            			syncObj.atv.innerText = addQuot(value);
+            		}  
+            	} else if(kind === "property") {
+            		syncObj.atv.innerText = addQuot(value);
+            	} else if(kind === "class") {
+            		syncObj.atv.innerText = addQuot(value);
+            	} else if(kind === "event") {
+            		syncObj.atv.innerText = addQuot(value);
+            	} else if(kind === "id") {
+            		syncObj.atv.innerText = addQuot(value);
+            	}
+            	
+				function addQuot(value) {
+					return '"' + value + '"'; 
+				}
+				
+            },
+            
+            /**
+    		 * 외부에서 엘리먼트 주입 
+    		 */
+            setElement: function(devPreview, devSource, devVirtual, elementType) {
+            	this.$.currentElement.innerText = "<" + devPreview.nodeName.toLowerCase() + ">";
+            	this.devPreview = devPreview;
+            	this.devSource = devSource;
+            	this.eleSelected = true;
+            	this.devVirtual = devVirtual;
+            	this.elementType = elementType;
+            	
+            	//Sync
+            	this._syncAttributeChanger();
+            },
+            
+            /**
+    		 * devSource로 동기화용 객체(syncObjs)를 생성 
+    		 */
+    		 _syncAttributeChanger : function() {
+    			 // 현재 인덱스를 가져온다. 
+    			 var currIdx = this._getCurrentIndex();
+    			 
+    			 var atnList = this.devSource.querySelectorAll('.dev-source-' + currIdx + ' > span.atn'); //현재 선택된 엘리먼트 바로 하위의 span.atn 
+    			 var me = this;
+    			 var syncObjs = [];
+    			 
+    			 for (var i=0, atn; atn = atnList[i]; i++) {
+    				 var name = atn.innerText.toLowerCase().trim();
+    				 var kind = ''
+    				 	, value = undefined
+    				 	, valueType = ''
+    				 	, isBinding = false
+    				 	, isSingleTag = false
+    				 	, bindInfo = null
+    				 	, readonly = true;
+    				 
+    				 
+    				 //Kind별 Setting
+    				 if(name === 'id') {
+    					 kind = 'id';
+    					 value = this.devPreview[name];
+    				 } 
+    				 else if(name === 'class'){
+    					 kind = 'class';
+    					 value = this._getAtv(atn).innerText.replace(/[\'|\"]?/g,"");
+    					 if(me.elementType === "layout") {
+    						 readonly = false;
+    					 }
+    				 } 
+    				 else if(name.slice(0,3) === 'on-') {
+    					 kind = 'event';
+    					 value = this._getAtv(atn).innerText.replace(/[\'|\"]?/g,"");
+    				 } 
+    				 else if(atn.nextSibling && atn.nextSibling.innerText === '=') {
+    					 kind = 'property';
+    					 
+    					 // Dash방식을 Camel 방식으로 변경
+    					 name = Polymer.CaseMap.dashToCamelCase(name);
+    					 value = this.devPreview[name];
+    				 } 
+    				 else {
+    					 kind = 'attribute';
+    					 
+    					 //Attribute && Boolean Type 
+    					 if(!atn.nextSibling || atn.nextSibling.innerText !== '$') {
+    						 value = true;
+    						 isSingleTag = true;
+    					 } else {
+    						 value = this.devPreview.getAttribute(name + '$');
+    					 }
+    				 }
+    				
+					 //Binding 정보 분석
+   					 var atv = null;
+    				 if(!isSingleTag) {
+    					 atv = this._getAtv(atn);
+    					 
+    					 bindInfo = this._getBindingInfoByAtv(atv.innerText.replace(/[\'|\"]?/g,"")); //바인딩 분석 : return value는 Object 또는 undefined 
+    					
+    					 if(bindInfo) {
+    						 isBinding = true;
+    						 value = Polymer.Base.get(bindInfo.value, this.devVirtual);
+    					 } else {
+    						 isBinding = false;
+    						 //바인딩 객체만 보이게 하기
+    						 if(kind !== 'class' || me.elementType !== "layout") {
+    						 	continue;
+    						 } 
+    					 }
+    				 }
+    				 
+    				 //value, valueType 지정
+    				 if(value || value === "") {
+    				 	 if(UT.isDate(value)) {
+							 value = value.toString();
+							 valueType = "date";
+    				 	 } else if(value === "true") {
+    						 value = true;
+    						 valueType = "boolean";
+    					 } else if(value === "false") {
+    						 value = false;
+    						 valueType = "boolean";
+    					 } else if(typeof value == "array") {
+    						 value = JSON.stringify(value).replace(/^[\"]?/,"").replace(/[\"]?$/,"");
+    						 valueType = "array";
+    					 } else if(typeof value == "object") {
+    						 value = JSON.stringify(value).replace(/^[\"]?/,"").replace(/[\"]?$/,"");
+    						 valueType = "object";
+    					 } else {
+		   					 valueType = typeof value;
+    					 }
+    				 }
+ 				
+    				 syncObjs.push({
+    					 atn: atn,	//해당 devPreview
+    					 atv: atv,	//해당 devSource 
+    					 kind: kind, //attribute & preoperty & id & class & event
+    					 name: name,
+    					 value: value,
+    					 valueType: valueType, // String, Object, Boolean, Array, function 등
+    					 bindInfo: bindInfo,  // 바인딩 true일 경우 binding 정보
+    					 isBinding: isBinding, // 바인딩 변수 여부
+    					 isSingleTag: isSingleTag, //Tag 유무로 판단
+    					 isSyncReq: false, //devSource, devPreview 동기화 필요 여부
+    					 readonly: readonly //value에 표시되는 Text-field를 Readonly로 한다. 
+    				 });
+    				 
+    			 }
+    			 
+    			 this.syncObjs = syncObjs;
+            },
+            
+            /**
+    		 * Attribute Value를 넘겨 바인딩 정보를 수집한다. 
+    		 */
+            _getBindingInfoByAtv: function(atv) {
+            	 var valueParse = Polymer.Annotations._parseBindings(atv); //바인딩 분석 : return value는 Object 또는 undefined 
+            	 var bindInfo = null;
+				
+            	 if(!valueParse) {
+            		 return null;
+            	 } 
+            	 
+				 for(var j=0, m; m = valueParse[j]; j++) {
+					 if(m.literal) continue;
+					 
+					 return bindInfo = m;
+				 }
+            },
+            
+            /**
+    		 * 해당 Attribute Name 태그의 값을 가져온다.
+    		 */
+            _getPropertyValue: function(propName) {
+            	
+            	var value;
+            	
+            	//Polymer Instance
+     			if(Polymer.isInstance(this.devPreview)) {
+     				
+	     			var propertyInfo = this.devPreview.getPropertyInfo(propName);
+	     			//property 정보 있음
+	     			if(propertyInfo.defined) {
+	     				return value = propertyInfo.value;
+	     			//property 정보 없음
+	     			} else {
+	     				return null;
+	     			}
+
+	     		//Native Instance
+     			} else {
+     				return value = this.devPreview[propName];
+     			}
+            },
+            
+            /**
+    		 * 해당 Attribute Name 태그의 값을 가져온다.
+    		 */
+            _getAtv: function(atn) {
+            	return atn.nextSibling.nextSibling;
+            },
+            
+            /**
+    		 * 현재 선택된 엘리먼트의 인덱스를 가져온다.
+    		 */
+            _getCurrentIndex: function() {
+            	 var currIdx, matched;
+            	
+            	for (var i=0, cls; cls = this.devSource.classList[i]; i++) {
+					if(matched = cls.match(/dev-source-([0-9]+)/,'i')) {
+					 currIdx = matched[1];
+					}
+  			 	}
+            	
+            	return currIdx;
+            },
+            
+            /**
+    		 * Boolean Attribute를 설정한다.   
+    		 */
+            _setAttrBool: function(name, bool) {
+            	node = this.devPreview;
+            	
+           		bool ? Polymer.dom(node).setAttribute(name, '') : Polymer.dom(node).removeAttribute(name);
+            },
+            
+            _viewDetail: function(e, res) {
+            	var me = this;
+ 
+            	var popup = SCPopupManager.popup("ep-attribute-detail", me, 500, 500, {}, {maximizable: true, title: e.model.get('item.name')});
+            	
+            	popup.show();
+            	popup.getWindowContent().load(e.model.get('item.value'));
+            }
+		});
+	</script>
+</dom-module>

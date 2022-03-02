@@ -1,0 +1,3018 @@
+[
+	{
+		"class": "Ext.Component",
+		"superclass": "Ext.Base",
+		"extends": "Ext.Component",
+		"children": [
+			{
+				"class": "Ext.container.Container",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.container.Container",
+				"children": [
+					{
+						"class": "Ext.grid.header.Container",
+						"superclass": "Ext.container.Container",
+						"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container",
+						"children": [
+							{
+								"class": "Ext.grid.column.Column",
+								"superclass": "Ext.grid.header.Container",
+								"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column",
+								"children": [
+									{
+										"class": "Ext.tree.Column",
+										"superclass": "Ext.grid.column.Column",
+										"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.tree.Column",
+										"children": [
+											{
+												"class": "Etna.tree.TreeActionColumn",
+												"superclass": "Ext.tree.Column",
+												"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.tree.Column||Etna.tree.TreeActionColumn",
+												"xtype": "etnatreeactioncolumn",
+												"xtypes": [
+													"etnatreeactioncolumn"
+												],
+												"config": {},
+												"defaultConfig": {}
+											}
+										],
+										"xtype": "treecolumn",
+										"xtypes": [
+											"treecolumn"
+										],
+										"config": {},
+										"defaultConfig": {}
+									},
+									{
+										"class": "Ext.grid.column.Action",
+										"superclass": "Ext.grid.column.Column",
+										"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Action",
+										"children": [
+											{
+												"class": "Etna.grid.column.Attachment",
+												"superclass": "Ext.grid.column.Action",
+												"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Action||Etna.grid.column.Attachment",
+												"xtype": "etnaattachmentcolumn",
+												"xtypes": [
+													"etnaattachmentcolumn"
+												],
+												"config": {
+													"uploader": null,
+													"uploaderConfig": {},
+													"windowWidth": 300,
+													"windowHeight": 250
+												},
+												"defaultConfig": {
+													"uploader": null,
+													"uploaderConfig": {},
+													"windowWidth": 300,
+													"windowHeight": 250
+												}
+											},
+											{
+												"class": "Etna.grid.column.DataActionColumn",
+												"superclass": "Ext.grid.column.Action",
+												"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Action||Etna.grid.column.DataActionColumn",
+												"xtype": "etnadataactioncolumn",
+												"xtypes": [
+													"etnadataactioncolumn"
+												],
+												"config": {},
+												"defaultConfig": {}
+											}
+										],
+										"xtype": "actioncolumn",
+										"xtypes": [
+											"actioncolumn"
+										],
+										"config": {},
+										"defaultConfig": {}
+									},
+									{
+										"class": "Ext.grid.column.Boolean",
+										"superclass": "Ext.grid.column.Column",
+										"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Boolean",
+										"xtype": "booleancolumn",
+										"xtypes": [
+											"booleancolumn"
+										],
+										"config": {},
+										"defaultConfig": {}
+									},
+									{
+										"class": "Ext.grid.column.Check",
+										"superclass": "Ext.grid.column.Column",
+										"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Check",
+										"children": [
+											{
+												"class": "Etna.grid.column.Eliminate",
+												"superclass": "Ext.grid.column.Check",
+												"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Check||Etna.grid.column.Eliminate",
+												"xtype": "etnaeliminatecolumn",
+												"xtypes": [
+													"etnaeliminatecolumn"
+												],
+												"config": {},
+												"defaultConfig": {}
+											}
+										],
+										"xtype": "checkcolumn",
+										"xtypes": [
+											"checkcolumn"
+										],
+										"config": {},
+										"defaultConfig": {}
+									},
+									{
+										"class": "Ext.grid.column.Date",
+										"superclass": "Ext.grid.column.Column",
+										"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Date",
+										"xtype": "datecolumn",
+										"xtypes": [
+											"datecolumn"
+										],
+										"config": {},
+										"defaultConfig": {}
+									},
+									{
+										"class": "Ext.grid.column.Number",
+										"superclass": "Ext.grid.column.Column",
+										"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Number",
+										"children": [
+											{
+												"class": "Etna.grid.column.Currency",
+												"superclass": "Ext.grid.column.Number",
+												"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Number||Etna.grid.column.Currency",
+												"xtype": "etnacurrencycolumn",
+												"xtypes": [
+													"etnacurrencycolumn"
+												],
+												"config": {
+													"currency": null,
+													"currencyDataIndex": null
+												},
+												"defaultConfig": {
+													"currency": null,
+													"currencyDataIndex": null
+												}
+											}
+										],
+										"xtype": "numbercolumn",
+										"xtypes": [
+											"numbercolumn"
+										],
+										"config": {
+											"kind": null,
+											"kindDataIndex": null
+										},
+										"defaultConfig": {
+											"kind": null,
+											"kindDataIndex": null
+										}
+									},
+									{
+										"class": "Ext.grid.column.RowNumberer",
+										"superclass": "Ext.grid.column.Column",
+										"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.RowNumberer",
+										"xtype": "rownumberer",
+										"xtypes": [
+											"rownumberer"
+										],
+										"config": {},
+										"defaultConfig": {}
+									},
+									{
+										"class": "Ext.grid.column.Template",
+										"superclass": "Ext.grid.column.Column",
+										"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Template",
+										"children": [
+											{
+												"class": "Etna.grid.column.Status",
+												"superclass": "Ext.grid.column.Template",
+												"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Template||Etna.grid.column.Status",
+												"xtype": "etnastatuscolumn",
+												"xtypes": [
+													"etnastatuscolumn"
+												],
+												"config": {},
+												"defaultConfig": {}
+											}
+										],
+										"xtype": "templatecolumn",
+										"xtypes": [
+											"templatecolumn"
+										],
+										"config": {},
+										"defaultConfig": {}
+									},
+									{
+										"class": "Ext.grid.column.Widget",
+										"superclass": "Ext.grid.column.Column",
+										"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Ext.grid.column.Widget",
+										"xtype": "widgetcolumn",
+										"xtypes": [
+											"widgetcolumn"
+										],
+										"config": {
+											"defaultWidgetUI": {}
+										},
+										"defaultConfig": {
+											"defaultWidgetUI": {}
+										}
+									},
+									{
+										"class": "Etna.grid.column.Store",
+										"superclass": "Ext.grid.column.Column",
+										"extends": "Ext.Component||Ext.container.Container||Ext.grid.header.Container||Ext.grid.column.Column||Etna.grid.column.Store",
+										"xtype": "etnastorecolumn",
+										"xtypes": [
+											"etnastorecolumn"
+										],
+										"config": {
+											"store": null,
+											"valueField": null,
+											"displayField": null
+										},
+										"defaultConfig": {
+											"store": null,
+											"valueField": null,
+											"displayField": null
+										}
+									}
+								],
+								"xtype": "gridcolumn",
+								"xtypes": [
+									"gridcolumn"
+								],
+								"config": {
+									"triggerVisible": false,
+									"childEls": {
+										"textEl": {
+											"name": "textEl",
+											"itemId": "textEl"
+										},
+										"triggerEl": {
+											"name": "triggerEl",
+											"itemId": "triggerEl"
+										},
+										"titleEl": {
+											"name": "titleEl",
+											"itemId": "titleEl"
+										}
+									}
+								},
+								"defaultConfig": {
+									"triggerVisible": false,
+									"childEls": {
+										"textEl": {
+											"name": "textEl",
+											"itemId": "textEl"
+										},
+										"triggerEl": {
+											"name": "triggerEl",
+											"itemId": "triggerEl"
+										},
+										"titleEl": {
+											"name": "titleEl",
+											"itemId": "titleEl"
+										}
+									}
+								}
+							}
+						],
+						"xtype": "headercontainer",
+						"xtypes": [
+							"headercontainer"
+						],
+						"config": {},
+						"defaultConfig": {}
+					},
+					{
+						"class": "Ext.toolbar.Toolbar",
+						"superclass": "Ext.container.Container",
+						"extends": "Ext.Component||Ext.container.Container||Ext.toolbar.Toolbar",
+						"children": [
+							{
+								"class": "Etna.toolbar.TreeFinder",
+								"superclass": "Ext.toolbar.Toolbar",
+								"extends": "Ext.Component||Ext.container.Container||Ext.toolbar.Toolbar||Etna.toolbar.TreeFinder",
+								"xtype": "etnatreefindertoolbar",
+								"xtypes": [
+									"etnatreefindertoolbar"
+								],
+								"config": {
+									"publishes": {},
+									"twoWayBindable": {}
+								},
+								"defaultConfig": {
+									"publishes": {},
+									"twoWayBindable": {}
+								}
+							}
+						],
+						"xtype": "toolbar",
+						"xtypes": [
+							"toolbar"
+						],
+						"config": {},
+						"defaultConfig": {}
+					},
+					{
+						"class": "Ext.panel.Panel",
+						"superclass": "Ext.container.Container",
+						"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel",
+						"children": [
+							{
+								"class": "Ext.tip.Tip",
+								"superclass": "Ext.panel.Panel",
+								"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.tip.Tip",
+								"children": [
+									{
+										"class": "Ext.tip.ToolTip",
+										"superclass": "Ext.tip.Tip",
+										"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.tip.Tip||Ext.tip.ToolTip",
+										"children": [
+											{
+												"class": "Ext.tip.QuickTip",
+												"superclass": "Ext.tip.ToolTip",
+												"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.tip.Tip||Ext.tip.ToolTip||Ext.tip.QuickTip",
+												"xtype": "quicktip",
+												"xtypes": [
+													"quicktip"
+												],
+												"config": {
+													"title": "&#160;"
+												},
+												"defaultConfig": {
+													"title": "&#160;"
+												}
+											}
+										],
+										"xtype": "tooltip",
+										"xtypes": [
+											"tooltip"
+										],
+										"config": {},
+										"defaultConfig": {}
+									},
+									{
+										"class": "Ext.slider.Tip",
+										"superclass": "Ext.tip.Tip",
+										"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.tip.Tip||Ext.slider.Tip",
+										"xtype": "slidertip",
+										"xtypes": [
+											"slidertip"
+										],
+										"config": {
+											"minWidth": 10
+										},
+										"defaultConfig": {
+											"minWidth": 10
+										}
+									}
+								],
+								"xtype": "tip",
+								"xtypes": [
+									"tip"
+								],
+								"config": {
+									"minWidth": 40,
+									"maxWidth": 500
+								},
+								"defaultConfig": {
+									"minWidth": 40,
+									"maxWidth": 500
+								}
+							},
+							{
+								"class": "Ext.panel.Table",
+								"superclass": "Ext.panel.Panel",
+								"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.panel.Table",
+								"children": [
+									{
+										"class": "Ext.grid.Panel",
+										"superclass": "Ext.panel.Table",
+										"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.panel.Table||Ext.grid.Panel",
+										"children": [
+											{
+												"class": "Ext.grid.property.Grid",
+												"superclass": "Ext.grid.Panel",
+												"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.panel.Table||Ext.grid.Panel||Ext.grid.property.Grid",
+												"xtype": "propertygrid",
+												"xtypes": [
+													"propertygrid"
+												],
+												"config": {},
+												"defaultConfig": {}
+											},
+											{
+												"class": "Etna.upload.ui.Grid",
+												"superclass": "Ext.grid.Panel",
+												"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.panel.Table||Ext.grid.Panel||Etna.upload.ui.Grid",
+												"xtype": "etnagriduploader",
+												"xtypes": [
+													"etnagriduploader"
+												],
+												"config": {
+													"uploader": null
+												},
+												"defaultConfig": {
+													"uploader": null
+												}
+											}
+										],
+										"xtype": "gridpanel",
+										"xtypes": [
+											"gridpanel",
+											"grid"
+										],
+										"config": {},
+										"defaultConfig": {}
+									},
+									{
+										"class": "Ext.tree.Panel",
+										"superclass": "Ext.panel.Table",
+										"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.panel.Table||Ext.tree.Panel",
+										"children": [
+											{
+												"class": "Ext.app.bindinspector.ComponentList",
+												"superclass": "Ext.tree.Panel",
+												"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.panel.Table||Ext.tree.Panel||Ext.app.bindinspector.ComponentList",
+												"xtype": "bindinspector-componentlist",
+												"xtypes": [
+													"bindinspector-componentlist"
+												],
+												"config": {
+													"title": "Component Tree"
+												},
+												"defaultConfig": {
+													"title": "Component Tree"
+												}
+											},
+											{
+												"class": "Ext.app.bindinspector.ViewModelDetail",
+												"superclass": "Ext.tree.Panel",
+												"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.panel.Table||Ext.tree.Panel||Ext.app.bindinspector.ViewModelDetail",
+												"xtype": "bindinspector-viewmodeldetail",
+												"xtypes": [
+													"bindinspector-viewmodeldetail"
+												],
+												"config": {},
+												"defaultConfig": {}
+											}
+										],
+										"xtype": "treepanel",
+										"xtypes": [
+											"treepanel"
+										],
+										"config": {},
+										"defaultConfig": {}
+									}
+								],
+								"xtype": "tablepanel",
+								"xtypes": [
+									"tablepanel"
+								],
+								"config": {
+									"selection": null,
+									"publishes": {
+										"selection": true
+									},
+									"twoWayBindable": {
+										"selection": true
+									}
+								},
+								"defaultConfig": {
+									"selection": null,
+									"publishes": {
+										"selection": true
+									},
+									"twoWayBindable": {
+										"selection": true
+									}
+								}
+							},
+							{
+								"class": "Ext.app.bindinspector.ComponentDetail",
+								"superclass": "Ext.panel.Panel",
+								"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.app.bindinspector.ComponentDetail",
+								"xtype": "bindinspector-componentdetail",
+								"xtypes": [
+									"bindinspector-componentdetail"
+								],
+								"config": {},
+								"defaultConfig": {}
+							},
+							{
+								"class": "Ext.tab.Panel",
+								"superclass": "Ext.panel.Panel",
+								"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.tab.Panel",
+								"xtype": "tabpanel",
+								"xtypes": [
+									"tabpanel"
+								],
+								"config": {
+									"tabPosition": "top",
+									"tabRotation": "default",
+									"tabStretchMax": true
+								},
+								"defaultConfig": {
+									"tabPosition": "top",
+									"tabRotation": "default",
+									"tabStretchMax": true
+								}
+							},
+							{
+								"class": "Ext.window.Window",
+								"superclass": "Ext.panel.Panel",
+								"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.window.Window",
+								"children": [
+									{
+										"class": "Ext.window.MessageBox",
+										"superclass": "Ext.window.Window",
+										"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.window.Window||Ext.window.MessageBox",
+										"xtype": "messagebox",
+										"xtypes": [
+											"messagebox"
+										],
+										"config": {
+											"title": "&#160;",
+											"minWidth": null,
+											"maxWidth": null,
+											"minHeight": null,
+											"maxHeight": null
+										},
+										"defaultConfig": {
+											"title": "&#160;",
+											"minWidth": null,
+											"maxWidth": null,
+											"minHeight": null,
+											"maxHeight": null
+										}
+									}
+								],
+								"xtype": "window",
+								"xtypes": [
+									"window"
+								],
+								"config": {
+									"minHeight": 50,
+									"minWidth": 50
+								},
+								"defaultConfig": {
+									"minHeight": 50,
+									"minWidth": 50
+								}
+							},
+							{
+								"class": "Ext.container.ButtonGroup",
+								"superclass": "Ext.panel.Panel",
+								"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.container.ButtonGroup",
+								"xtype": "buttongroup",
+								"xtypes": [
+									"buttongroup"
+								],
+								"config": {
+									"titleAlign": "center"
+								},
+								"defaultConfig": {
+									"titleAlign": "center"
+								}
+							},
+							{
+								"class": "Ext.form.Panel",
+								"superclass": "Ext.panel.Panel",
+								"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.form.Panel",
+								"children": [
+									{
+										"class": "Ext.grid.RowEditor",
+										"superclass": "Ext.form.Panel",
+										"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.form.Panel||Ext.grid.RowEditor",
+										"xtype": "roweditor",
+										"xtypes": [
+											"roweditor"
+										],
+										"config": {},
+										"defaultConfig": {}
+									}
+								],
+								"xtype": "form",
+								"xtypes": [
+									"form"
+								],
+								"config": {},
+								"defaultConfig": {}
+							},
+							{
+								"class": "Ext.menu.Menu",
+								"superclass": "Ext.panel.Panel",
+								"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.menu.Menu",
+								"children": [
+									{
+										"class": "Ext.menu.ColorPicker",
+										"superclass": "Ext.menu.Menu",
+										"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.menu.Menu||Ext.menu.ColorPicker",
+										"xtype": "colormenu",
+										"xtypes": [
+											"colormenu"
+										],
+										"config": {},
+										"defaultConfig": {}
+									},
+									{
+										"class": "Ext.menu.DatePicker",
+										"superclass": "Ext.menu.Menu",
+										"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Ext.menu.Menu||Ext.menu.DatePicker",
+										"xtype": "datemenu",
+										"xtypes": [
+											"datemenu"
+										],
+										"config": {},
+										"defaultConfig": {}
+									}
+								],
+								"xtype": "menu",
+								"xtypes": [
+									"menu"
+								],
+								"config": {},
+								"defaultConfig": {}
+							},
+							{
+								"class": "Etna.grid.plugin.ui.Stateful",
+								"superclass": "Ext.panel.Panel",
+								"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Etna.grid.plugin.ui.Stateful",
+								"xtype": "etnagridstatefului",
+								"xtypes": [
+									"etnagridstatefului"
+								],
+								"config": {
+									"title": "개인화"
+								},
+								"defaultConfig": {
+									"title": "개인화"
+								}
+							},
+							{
+								"class": "Etna.grid.plugin.ui.Import",
+								"superclass": "Ext.panel.Panel",
+								"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Etna.grid.plugin.ui.Import",
+								"xtype": "importui",
+								"xtypes": [
+									"importui"
+								],
+								"config": {
+									"uploader": null,
+									"importer": null,
+									"grid": null,
+									"maxFileSize": "10m",
+									"multipartParams": {},
+									"multipartHeaders": {},
+									"browseButton": null,
+									"moxieElement": null,
+									"container": null,
+									"dropElement": null,
+									"preventDuplicates": false,
+									"multiSelection": true,
+									"minFileSize": 0,
+									"totalFileSize": 0,
+									"publishes": {},
+									"twoWayBindable": {},
+									"childEls": {
+										"frameTable": {
+											"name": "frameTable"
+										},
+										"frameTL": {
+											"name": "frameTL"
+										},
+										"frameTC": {
+											"name": "frameTC"
+										},
+										"frameTR": {
+											"name": "frameTR"
+										},
+										"frameML": {
+											"name": "frameML"
+										},
+										"frameBody": {
+											"name": "frameBody"
+										},
+										"frameMR": {
+											"name": "frameMR"
+										},
+										"frameBL": {
+											"name": "frameBL"
+										},
+										"frameBC": {
+											"name": "frameBC"
+										},
+										"frameBR": {
+											"name": "frameBR"
+										}
+									}
+								},
+								"defaultConfig": {
+									"uploader": null,
+									"importer": null,
+									"grid": null,
+									"maxFileSize": "10m",
+									"multipartParams": {},
+									"multipartHeaders": {},
+									"browseButton": null,
+									"moxieElement": null,
+									"container": null,
+									"dropElement": null,
+									"preventDuplicates": false,
+									"multiSelection": true,
+									"minFileSize": 0,
+									"totalFileSize": 0,
+									"publishes": {},
+									"twoWayBindable": {},
+									"childEls": {
+										"frameTable": {
+											"name": "frameTable"
+										},
+										"frameTL": {
+											"name": "frameTL"
+										},
+										"frameTC": {
+											"name": "frameTC"
+										},
+										"frameTR": {
+											"name": "frameTR"
+										},
+										"frameML": {
+											"name": "frameML"
+										},
+										"frameBody": {
+											"name": "frameBody"
+										},
+										"frameMR": {
+											"name": "frameMR"
+										},
+										"frameBL": {
+											"name": "frameBL"
+										},
+										"frameBC": {
+											"name": "frameBC"
+										},
+										"frameBR": {
+											"name": "frameBR"
+										}
+									}
+								}
+							},
+							{
+								"class": "Etna.upload.StoreBasedUploader",
+								"superclass": "Ext.panel.Panel",
+								"extends": "Ext.Component||Ext.container.Container||Ext.panel.Panel||Etna.upload.StoreBasedUploader",
+								"xtype": "etnastorebaseduploader",
+								"xtypes": [
+									"etnastorebaseduploader"
+								],
+								"config": {
+									"maxFileCount": 0,
+									"minFileCount": 0,
+									"validation": null,
+									"validationField": null,
+									"uploader": null,
+									"multipartParams": {},
+									"multipartHeaders": {},
+									"browseButton": null,
+									"moxieElement": null,
+									"container": null,
+									"dropElement": null,
+									"preventDuplicates": false,
+									"multiSelection": true,
+									"maxFileSize": "10m",
+									"minFileSize": 0,
+									"totalFileSize": 0,
+									"publishes": {},
+									"twoWayBindable": {},
+									"childEls": {
+										"frameTable": {
+											"name": "frameTable"
+										},
+										"frameTL": {
+											"name": "frameTL"
+										},
+										"frameTC": {
+											"name": "frameTC"
+										},
+										"frameTR": {
+											"name": "frameTR"
+										},
+										"frameML": {
+											"name": "frameML"
+										},
+										"frameBody": {
+											"name": "frameBody"
+										},
+										"frameMR": {
+											"name": "frameMR"
+										},
+										"frameBL": {
+											"name": "frameBL"
+										},
+										"frameBC": {
+											"name": "frameBC"
+										},
+										"frameBR": {
+											"name": "frameBR"
+										}
+									}
+								},
+								"defaultConfig": {
+									"maxFileCount": 0,
+									"minFileCount": 0,
+									"validation": null,
+									"validationField": null,
+									"uploader": null,
+									"multipartParams": {},
+									"multipartHeaders": {},
+									"browseButton": null,
+									"moxieElement": null,
+									"container": null,
+									"dropElement": null,
+									"preventDuplicates": false,
+									"multiSelection": true,
+									"maxFileSize": "10m",
+									"minFileSize": 0,
+									"totalFileSize": 0,
+									"publishes": {},
+									"twoWayBindable": {},
+									"childEls": {
+										"frameTable": {
+											"name": "frameTable"
+										},
+										"frameTL": {
+											"name": "frameTL"
+										},
+										"frameTC": {
+											"name": "frameTC"
+										},
+										"frameTR": {
+											"name": "frameTR"
+										},
+										"frameML": {
+											"name": "frameML"
+										},
+										"frameBody": {
+											"name": "frameBody"
+										},
+										"frameMR": {
+											"name": "frameMR"
+										},
+										"frameBL": {
+											"name": "frameBL"
+										},
+										"frameBC": {
+											"name": "frameBC"
+										},
+										"frameBR": {
+											"name": "frameBR"
+										}
+									}
+								}
+							}
+						],
+						"xtype": "panel",
+						"xtypes": [
+							"panel"
+						],
+						"config": {
+							"glyph": null,
+							"headerPosition": null,
+							"icon": null,
+							"iconAlign": null,
+							"iconCls": null,
+							"title": null,
+							"titleAlign": null,
+							"titleRotation": null,
+							"childEls": {
+								"body": {
+									"name": "body",
+									"itemId": "body"
+								}
+							}
+						},
+						"defaultConfig": {
+							"glyph": null,
+							"headerPosition": null,
+							"icon": null,
+							"iconAlign": null,
+							"iconCls": null,
+							"title": null,
+							"titleAlign": null,
+							"titleRotation": null,
+							"childEls": {
+								"body": {
+									"name": "body",
+									"itemId": "body"
+								}
+							}
+						}
+					},
+					{
+						"class": "Ext.app.bindinspector.Container",
+						"superclass": "Ext.container.Container",
+						"extends": "Ext.Component||Ext.container.Container||Ext.app.bindinspector.Container",
+						"xtype": "bindinspector-container",
+						"xtypes": [
+							"bindinspector-container"
+						],
+						"config": {},
+						"defaultConfig": {}
+					},
+					{
+						"class": "Ext.container.Viewport",
+						"superclass": "Ext.container.Container",
+						"extends": "Ext.Component||Ext.container.Container||Ext.container.Viewport",
+						"xtype": "viewport",
+						"xtypes": [
+							"viewport"
+						],
+						"config": {
+							"responsiveFormulas": 0
+						},
+						"defaultConfig": {
+							"responsiveFormulas": 0
+						}
+					},
+					{
+						"class": "Ext.form.FieldContainer",
+						"superclass": "Ext.container.Container",
+						"extends": "Ext.Component||Ext.container.Container||Ext.form.FieldContainer",
+						"children": [
+							{
+								"class": "Ext.form.CheckboxGroup",
+								"superclass": "Ext.form.FieldContainer",
+								"extends": "Ext.Component||Ext.container.Container||Ext.form.FieldContainer||Ext.form.CheckboxGroup",
+								"children": [
+									{
+										"class": "Ext.form.RadioGroup",
+										"superclass": "Ext.form.CheckboxGroup",
+										"extends": "Ext.Component||Ext.container.Container||Ext.form.FieldContainer||Ext.form.CheckboxGroup||Ext.form.RadioGroup",
+										"xtype": "radiogroup",
+										"xtypes": [
+											"radiogroup"
+										],
+										"config": {},
+										"defaultConfig": {}
+									}
+								],
+								"xtype": "checkboxgroup",
+								"xtypes": [
+									"checkboxgroup"
+								],
+								"config": {
+									"validation": null,
+									"validationField": null
+								},
+								"defaultConfig": {
+									"validation": null,
+									"validationField": null
+								}
+							},
+							{
+								"class": "Ext.form.field.HtmlEditor",
+								"superclass": "Ext.form.FieldContainer",
+								"extends": "Ext.Component||Ext.container.Container||Ext.form.FieldContainer||Ext.form.field.HtmlEditor",
+								"xtype": "htmleditor",
+								"xtypes": [
+									"htmleditor"
+								],
+								"config": {
+									"validation": null,
+									"validationField": null
+								},
+								"defaultConfig": {
+									"validation": null,
+									"validationField": null
+								}
+							},
+							{
+								"class": "Etna.form.field.Attachment",
+								"superclass": "Ext.form.FieldContainer",
+								"extends": "Ext.Component||Ext.container.Container||Ext.form.FieldContainer||Etna.form.field.Attachment",
+								"xtype": "etnaattachmentfield",
+								"xtypes": [
+									"etnaattachmentfield"
+								],
+								"config": {
+									"uploader": null
+								},
+								"defaultConfig": {
+									"uploader": null
+								}
+							},
+							{
+								"class": "Etna.form.field.Toggle",
+								"superclass": "Ext.form.FieldContainer",
+								"extends": "Ext.Component||Ext.container.Container||Ext.form.FieldContainer||Etna.form.field.Toggle",
+								"xtype": "etnatogglefield",
+								"xtypes": [
+									"etnatogglefield"
+								],
+								"config": {
+									"onText": "#{Yes}",
+									"offText": "#{No}",
+									"scale": "small",
+									"validation": null,
+									"validationField": null,
+									"childEls": {}
+								},
+								"defaultConfig": {
+									"onText": "#{Yes}",
+									"offText": "#{No}",
+									"scale": "small",
+									"validation": null,
+									"validationField": null,
+									"childEls": {}
+								}
+							}
+						],
+						"xtype": "fieldcontainer",
+						"xtypes": [
+							"fieldcontainer"
+						],
+						"config": {
+							"childEls": {
+								"errorWrapEl": {
+									"name": "errorWrapEl",
+									"itemId": "errorWrapEl"
+								},
+								"errorEl": {
+									"name": "errorEl",
+									"itemId": "errorEl"
+								},
+								"bodyEl": {
+									"name": "bodyEl",
+									"itemId": "bodyEl"
+								},
+								"labelEl": {
+									"name": "labelEl",
+									"itemId": "labelEl"
+								}
+							}
+						},
+						"defaultConfig": {
+							"childEls": {
+								"errorWrapEl": {
+									"name": "errorWrapEl",
+									"itemId": "errorWrapEl"
+								},
+								"errorEl": {
+									"name": "errorEl",
+									"itemId": "errorEl"
+								},
+								"bodyEl": {
+									"name": "bodyEl",
+									"itemId": "bodyEl"
+								},
+								"labelEl": {
+									"name": "labelEl",
+									"itemId": "labelEl"
+								}
+							}
+						}
+					},
+					{
+						"class": "Ext.form.FieldSet",
+						"superclass": "Ext.container.Container",
+						"extends": "Ext.Component||Ext.container.Container||Ext.form.FieldSet",
+						"xtype": "fieldset",
+						"xtypes": [
+							"fieldset"
+						],
+						"config": {
+							"childEls": {
+								"body": {
+									"name": "body",
+									"itemId": "body"
+								}
+							}
+						},
+						"defaultConfig": {
+							"childEls": {
+								"body": {
+									"name": "body",
+									"itemId": "body"
+								}
+							}
+						}
+					},
+					{
+						"class": "Ext.grid.RowEditorButtons",
+						"superclass": "Ext.container.Container",
+						"extends": "Ext.Component||Ext.container.Container||Ext.grid.RowEditorButtons",
+						"xtype": "roweditorbuttons",
+						"xtypes": [
+							"roweditorbuttons"
+						],
+						"config": {},
+						"defaultConfig": {}
+					},
+					{
+						"class": "Etna.picker.BroadDate",
+						"superclass": "Ext.container.Container",
+						"extends": "Ext.Component||Ext.container.Container||Etna.picker.BroadDate",
+						"xtype": "broaddatepicker",
+						"xtypes": [
+							"broaddatepicker"
+						],
+						"config": {
+							"displayMonths": 3,
+							"columnCount": 3
+						},
+						"defaultConfig": {
+							"displayMonths": 3,
+							"columnCount": 3
+						}
+					}
+				],
+				"xtype": "container",
+				"xtypes": [
+					"container"
+				],
+				"config": {},
+				"defaultConfig": {}
+			},
+			{
+				"class": "Ext.view.AbstractView",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.view.AbstractView",
+				"children": [
+					{
+						"class": "Ext.view.View",
+						"superclass": "Ext.view.AbstractView",
+						"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View",
+						"children": [
+							{
+								"class": "Ext.view.Table",
+								"superclass": "Ext.view.View",
+								"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View||Ext.view.Table",
+								"children": [
+									{
+										"class": "Ext.grid.View",
+										"superclass": "Ext.view.Table",
+										"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View||Ext.view.Table||Ext.grid.View",
+										"xtype": "gridview",
+										"xtypes": [
+											"gridview"
+										],
+										"config": {},
+										"defaultConfig": {}
+									},
+									{
+										"class": "Ext.tree.View",
+										"superclass": "Ext.view.Table",
+										"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View||Ext.view.Table||Ext.tree.View",
+										"xtype": "treeview",
+										"xtypes": [
+											"treeview"
+										],
+										"config": {},
+										"defaultConfig": {}
+									}
+								],
+								"xtype": "tableview",
+								"xtypes": [
+									"tableview"
+								],
+								"config": {},
+								"defaultConfig": {}
+							},
+							{
+								"class": "Ext.view.BoundList",
+								"superclass": "Ext.view.View",
+								"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View||Ext.view.BoundList",
+								"children": [
+									{
+										"class": "Ext.picker.Time",
+										"superclass": "Ext.view.BoundList",
+										"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View||Ext.view.BoundList||Ext.picker.Time",
+										"xtype": "timepicker",
+										"xtypes": [
+											"timepicker"
+										],
+										"config": {},
+										"defaultConfig": {}
+									}
+								],
+								"xtype": "boundlist",
+								"xtypes": [
+									"boundlist"
+								],
+								"config": {
+									"navigationModel": "boundlist",
+									"childEls": {
+										"selectAllEl": {
+											"name": "selectAllEl",
+											"itemId": "selectAllEl"
+										}
+									}
+								},
+								"defaultConfig": {
+									"navigationModel": "boundlist",
+									"childEls": {
+										"selectAllEl": {
+											"name": "selectAllEl",
+											"itemId": "selectAllEl"
+										}
+									}
+								}
+							},
+							{
+								"class": "Etna.upload.ui.DataView",
+								"superclass": "Ext.view.View",
+								"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View||Etna.upload.ui.DataView",
+								"xtype": "etnadataviewuploader",
+								"xtypes": [
+									"etnadataviewuploader"
+								],
+								"config": {
+									"uploader": null
+								},
+								"defaultConfig": {
+									"uploader": null
+								}
+							},
+							{
+								"class": "Etna.view.Thumbnail",
+								"superclass": "Ext.view.View",
+								"extends": "Ext.Component||Ext.view.AbstractView||Ext.view.View||Etna.view.Thumbnail",
+								"xtype": "etnathumbnail",
+								"xtypes": [
+									"etnathumbnail"
+								],
+								"config": {
+									"thumbnailConfig": {},
+									"parameterName": "param",
+									"validation": null,
+									"validationField": null
+								},
+								"defaultConfig": {
+									"thumbnailConfig": {},
+									"parameterName": "param",
+									"validation": null,
+									"validationField": null
+								}
+							}
+						],
+						"xtype": "dataview",
+						"xtypes": [
+							"dataview"
+						],
+						"config": {},
+						"defaultConfig": {}
+					}
+				],
+				"xtype": "component",
+				"xtypes": [
+					"component",
+					"box"
+				],
+				"config": {
+					"selection": null,
+					"navigationModel": "default",
+					"publishes": {
+						"selection": true
+					},
+					"twoWayBindable": {
+						"selection": true
+					}
+				},
+				"defaultConfig": {
+					"selection": null,
+					"navigationModel": "default",
+					"publishes": {
+						"selection": true
+					},
+					"twoWayBindable": {
+						"selection": true
+					}
+				}
+			},
+			{
+				"class": "Ext.form.field.Base",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.form.field.Base",
+				"children": [
+					{
+						"class": "Ext.form.field.Display",
+						"superclass": "Ext.form.field.Base",
+						"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Display",
+						"xtype": "displayfield",
+						"xtypes": [
+							"displayfield"
+						],
+						"config": {},
+						"defaultConfig": {}
+					},
+					{
+						"class": "Ext.form.field.Checkbox",
+						"superclass": "Ext.form.field.Base",
+						"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Checkbox",
+						"children": [
+							{
+								"class": "Ext.form.field.Radio",
+								"superclass": "Ext.form.field.Checkbox",
+								"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Checkbox||Ext.form.field.Radio",
+								"xtype": "radiofield",
+								"xtypes": [
+									"radiofield",
+									"radio"
+								],
+								"config": {},
+								"defaultConfig": {}
+							}
+						],
+						"xtype": "checkboxfield",
+						"xtypes": [
+							"checkboxfield",
+							"checkbox"
+						],
+						"config": {
+							"childEls": {
+								"boxLabelEl": {
+									"name": "boxLabelEl",
+									"itemId": "boxLabelEl"
+								}
+							},
+							"publishes": {
+								"checked": 1
+							}
+						},
+						"defaultConfig": {
+							"childEls": {
+								"boxLabelEl": {
+									"name": "boxLabelEl",
+									"itemId": "boxLabelEl"
+								}
+							},
+							"publishes": {
+								"checked": 1
+							}
+						}
+					},
+					{
+						"class": "Ext.form.field.Text",
+						"superclass": "Ext.form.field.Base",
+						"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text",
+						"children": [
+							{
+								"class": "Ext.form.field.TextArea",
+								"superclass": "Ext.form.field.Text",
+								"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.TextArea",
+								"xtype": "textareafield",
+								"xtypes": [
+									"textareafield",
+									"textarea"
+								],
+								"config": {},
+								"defaultConfig": {}
+							},
+							{
+								"class": "Ext.form.field.Picker",
+								"superclass": "Ext.form.field.Text",
+								"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Picker",
+								"children": [
+									{
+										"class": "Ext.form.field.ComboBox",
+										"superclass": "Ext.form.field.Picker",
+										"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Picker||Ext.form.field.ComboBox",
+										"children": [
+											{
+												"class": "Ext.form.field.Time",
+												"superclass": "Ext.form.field.ComboBox",
+												"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Picker||Ext.form.field.ComboBox||Ext.form.field.Time",
+												"xtype": "timefield",
+												"xtypes": [
+													"timefield"
+												],
+												"config": {},
+												"defaultConfig": {}
+											},
+											{
+												"class": "Etna.grid.plugin.ui.Filter",
+												"superclass": "Ext.form.field.ComboBox",
+												"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Picker||Ext.form.field.ComboBox||Etna.grid.plugin.ui.Filter",
+												"xtype": "etnafilter",
+												"xtypes": [
+													"etnafilter"
+												],
+												"config": {
+													"grid": null,
+													"filter": null,
+													"column": null
+												},
+												"defaultConfig": {
+													"grid": null,
+													"filter": null,
+													"column": null
+												}
+											}
+										],
+										"xtype": "combobox",
+										"xtypes": [
+											"combobox",
+											"combo"
+										],
+										"config": {
+											"filters": null,
+											"selection": null,
+											"publishes": {
+												"selection": true
+											},
+											"twoWayBindable": {
+												"selection": true
+											},
+											"childEls": {
+												"hiddenDataEl": {
+													"itemId": "hiddenDataEl",
+													"name": "hiddenDataEl"
+												}
+											}
+										},
+										"defaultConfig": {
+											"filters": null,
+											"selection": null,
+											"publishes": {
+												"selection": true
+											},
+											"twoWayBindable": {
+												"selection": true
+											},
+											"childEls": {
+												"hiddenDataEl": {
+													"itemId": "hiddenDataEl",
+													"name": "hiddenDataEl"
+												}
+											}
+										}
+									},
+									{
+										"class": "Ext.form.field.Date",
+										"superclass": "Ext.form.field.Picker",
+										"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Picker||Ext.form.field.Date",
+										"xtype": "datefield",
+										"xtypes": [
+											"datefield"
+										],
+										"config": {
+											"displayMonths": 3,
+											"columnCount": 3
+										},
+										"defaultConfig": {
+											"displayMonths": 3,
+											"columnCount": 3
+										}
+									},
+									{
+										"class": "Etna.form.field.Month",
+										"superclass": "Ext.form.field.Picker",
+										"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Picker||Etna.form.field.Month",
+										"xtype": "etnamonthfield",
+										"xtypes": [
+											"etnamonthfield"
+										],
+										"config": {
+											"valueAlign": "start"
+										},
+										"defaultConfig": {
+											"valueAlign": "start"
+										}
+									},
+									{
+										"class": "Etna.form.field.MultiLine",
+										"superclass": "Ext.form.field.Picker",
+										"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Picker||Etna.form.field.MultiLine",
+										"xtype": "etnamultilinefield",
+										"xtypes": [
+											"etnamultilinefield"
+										],
+										"config": {},
+										"defaultConfig": {}
+									}
+								],
+								"xtype": "pickerfield",
+								"xtypes": [
+									"pickerfield"
+								],
+								"config": {
+									"triggers": {
+										"picker": {
+											"handler": "onTriggerClick",
+											"scope": "this"
+										}
+									}
+								},
+								"defaultConfig": {
+									"triggers": {
+										"picker": {
+											"handler": "onTriggerClick",
+											"scope": "this"
+										}
+									}
+								}
+							},
+							{
+								"class": "Ext.form.field.Spinner",
+								"superclass": "Ext.form.field.Text",
+								"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Spinner",
+								"children": [
+									{
+										"class": "Ext.form.field.Number",
+										"superclass": "Ext.form.field.Spinner",
+										"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Spinner||Ext.form.field.Number",
+										"children": [
+											{
+												"class": "Etna.form.field.Currency",
+												"superclass": "Ext.form.field.Number",
+												"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Spinner||Ext.form.field.Number||Etna.form.field.Currency",
+												"xtype": "etnacurrencyfield",
+												"xtypes": [
+													"etnacurrencyfield"
+												],
+												"config": {
+													"currency": null
+												},
+												"defaultConfig": {
+													"currency": null
+												}
+											}
+										],
+										"xtype": "numberfield",
+										"xtypes": [
+											"numberfield"
+										],
+										"config": {
+											"coverFormat": null,
+											"kind": null
+										},
+										"defaultConfig": {
+											"coverFormat": null,
+											"kind": null
+										}
+									}
+								],
+								"xtype": "spinnerfield",
+								"xtypes": [
+									"spinnerfield"
+								],
+								"config": {
+									"triggers": {
+										"spinner": {
+											"type": "spinner",
+											"upHandler": "onSpinnerUpClick",
+											"downHandler": "onSpinnerDownClick",
+											"scope": "this"
+										}
+									}
+								},
+								"defaultConfig": {
+									"triggers": {
+										"spinner": {
+											"type": "spinner",
+											"upHandler": "onSpinnerUpClick",
+											"downHandler": "onSpinnerDownClick",
+											"scope": "this"
+										}
+									}
+								}
+							},
+							{
+								"class": "Ext.form.field.File",
+								"superclass": "Ext.form.field.Text",
+								"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.File",
+								"xtype": "filefield",
+								"xtypes": [
+									"filefield",
+									"fileuploadfield"
+								],
+								"config": {
+									"triggers": {
+										"filebutton": {
+											"type": "component",
+											"hideOnReadOnly": false
+										}
+									},
+									"childEls": {
+										"browseButtonWrap": {
+											"name": "browseButtonWrap",
+											"itemId": "browseButtonWrap"
+										}
+									}
+								},
+								"defaultConfig": {
+									"triggers": {
+										"filebutton": {
+											"type": "component",
+											"hideOnReadOnly": false
+										}
+									},
+									"childEls": {
+										"browseButtonWrap": {
+											"name": "browseButtonWrap",
+											"itemId": "browseButtonWrap"
+										}
+									}
+								}
+							},
+							{
+								"class": "Ext.form.field.Trigger",
+								"superclass": "Ext.form.field.Text",
+								"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Trigger",
+								"children": [
+									{
+										"class": "Etna.ux.form.SearchField",
+										"superclass": "Ext.form.field.Trigger",
+										"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Text||Ext.form.field.Trigger||Etna.ux.form.SearchField",
+										"xtype": "etnasearchfield",
+										"xtypes": [
+											"etnasearchfield"
+										],
+										"config": {},
+										"defaultConfig": {}
+									}
+								],
+								"xtype": "triggerfield",
+								"xtypes": [
+									"triggerfield",
+									"trigger"
+								],
+								"config": {},
+								"defaultConfig": {}
+							}
+						],
+						"xtype": "textfield",
+						"xtypes": [
+							"textfield"
+						],
+						"config": {
+							"hideTrigger": false,
+							"childEls": {
+								"inputWrap": {
+									"name": "inputWrap",
+									"itemId": "inputWrap"
+								},
+								"triggerWrap": {
+									"name": "triggerWrap",
+									"itemId": "triggerWrap"
+								}
+							}
+						},
+						"defaultConfig": {
+							"hideTrigger": false,
+							"childEls": {
+								"inputWrap": {
+									"name": "inputWrap",
+									"itemId": "inputWrap"
+								},
+								"triggerWrap": {
+									"name": "triggerWrap",
+									"itemId": "triggerWrap"
+								}
+							}
+						}
+					},
+					{
+						"class": "Ext.form.field.Hidden",
+						"superclass": "Ext.form.field.Base",
+						"extends": "Ext.Component||Ext.form.field.Base||Ext.form.field.Hidden",
+						"xtype": "hiddenfield",
+						"xtypes": [
+							"hiddenfield",
+							"hidden"
+						],
+						"config": {},
+						"defaultConfig": {}
+					},
+					{
+						"class": "Ext.slider.Multi",
+						"superclass": "Ext.form.field.Base",
+						"extends": "Ext.Component||Ext.form.field.Base||Ext.slider.Multi",
+						"children": [
+							{
+								"class": "Ext.slider.Single",
+								"superclass": "Ext.slider.Multi",
+								"extends": "Ext.Component||Ext.form.field.Base||Ext.slider.Multi||Ext.slider.Single",
+								"xtype": "slider",
+								"xtypes": [
+									"slider",
+									"sliderfield"
+								],
+								"config": {},
+								"defaultConfig": {}
+							}
+						],
+						"xtype": "multislider",
+						"xtypes": [
+							"multislider"
+						],
+						"config": {
+							"childEls": {
+								"innerEl": {
+									"name": "innerEl",
+									"itemId": "innerEl"
+								},
+								"endEl": {
+									"name": "endEl",
+									"itemId": "endEl"
+								}
+							}
+						},
+						"defaultConfig": {
+							"childEls": {
+								"innerEl": {
+									"name": "innerEl",
+									"itemId": "innerEl"
+								},
+								"endEl": {
+									"name": "endEl",
+									"itemId": "endEl"
+								}
+							}
+						}
+					}
+				],
+				"xtype": "field",
+				"xtypes": [
+					"field"
+				],
+				"config": {
+					"childEls": {
+						"errorWrapEl": {
+							"name": "errorWrapEl",
+							"itemId": "errorWrapEl"
+						},
+						"errorEl": {
+							"name": "errorEl",
+							"itemId": "errorEl"
+						},
+						"bodyEl": {
+							"name": "bodyEl",
+							"itemId": "bodyEl"
+						},
+						"labelEl": {
+							"name": "labelEl",
+							"itemId": "labelEl"
+						}
+					},
+					"validation": null,
+					"validationField": null,
+					"required": false
+				},
+				"defaultConfig": {
+					"childEls": {
+						"errorWrapEl": {
+							"name": "errorWrapEl",
+							"itemId": "errorWrapEl"
+						},
+						"errorEl": {
+							"name": "errorEl",
+							"itemId": "errorEl"
+						},
+						"bodyEl": {
+							"name": "bodyEl",
+							"itemId": "bodyEl"
+						},
+						"labelEl": {
+							"name": "labelEl",
+							"itemId": "labelEl"
+						}
+					},
+					"validation": null,
+					"validationField": null,
+					"required": false
+				}
+			},
+			{
+				"class": "Ext.resizer.Splitter",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.resizer.Splitter",
+				"children": [
+					{
+						"class": "Ext.resizer.BorderSplitter",
+						"superclass": "Ext.resizer.Splitter",
+						"extends": "Ext.Component||Ext.resizer.Splitter||Ext.resizer.BorderSplitter",
+						"xtype": "bordersplitter",
+						"xtypes": [
+							"bordersplitter"
+						],
+						"config": {},
+						"defaultConfig": {}
+					}
+				],
+				"xtype": "splitter",
+				"xtypes": [
+					"splitter"
+				],
+				"config": {
+					"childEls": {
+						"collapseEl": {
+							"name": "collapseEl",
+							"itemId": "collapseEl"
+						}
+					}
+				},
+				"defaultConfig": {
+					"childEls": {
+						"collapseEl": {
+							"name": "collapseEl",
+							"itemId": "collapseEl"
+						}
+					}
+				}
+			},
+			{
+				"class": "Ext.Img",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.Img",
+				"xtype": "image",
+				"xtypes": [
+					"image",
+					"imagecomponent"
+				],
+				"config": {},
+				"defaultConfig": {}
+			},
+			{
+				"class": "Ext.LoadMask",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.LoadMask",
+				"xtype": "loadmask",
+				"xtypes": [
+					"loadmask"
+				],
+				"config": {
+					"childEls": {
+						"msgTextEl": {
+							"name": "msgTextEl",
+							"itemId": "msgTextEl"
+						},
+						"msgEl": {
+							"name": "msgEl",
+							"itemId": "msgEl"
+						}
+					}
+				},
+				"defaultConfig": {
+					"childEls": {
+						"msgTextEl": {
+							"name": "msgTextEl",
+							"itemId": "msgTextEl"
+						},
+						"msgEl": {
+							"name": "msgEl",
+							"itemId": "msgEl"
+						}
+					}
+				}
+			},
+			{
+				"class": "Ext.ProgressBar",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.ProgressBar",
+				"xtype": "progressbar",
+				"xtypes": [
+					"progressbar"
+				],
+				"config": {
+					"value": 0,
+					"textTpl": null,
+					"childEls": {
+						"bar": {
+							"name": "bar",
+							"itemId": "bar"
+						}
+					}
+				},
+				"defaultConfig": {
+					"value": 0,
+					"textTpl": null,
+					"childEls": {
+						"bar": {
+							"name": "bar",
+							"itemId": "bar"
+						}
+					}
+				}
+			},
+			{
+				"class": "Ext.toolbar.Fill",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.toolbar.Fill",
+				"xtype": "tbfill",
+				"xtypes": [
+					"tbfill"
+				],
+				"config": {},
+				"defaultConfig": {}
+			},
+			{
+				"class": "Ext.toolbar.Item",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.toolbar.Item",
+				"children": [
+					{
+						"class": "Ext.toolbar.Separator",
+						"superclass": "Ext.toolbar.Item",
+						"extends": "Ext.Component||Ext.toolbar.Item||Ext.toolbar.Separator",
+						"xtype": "tbseparator",
+						"xtypes": [
+							"tbseparator"
+						],
+						"config": {},
+						"defaultConfig": {}
+					},
+					{
+						"class": "Ext.toolbar.TextItem",
+						"superclass": "Ext.toolbar.Item",
+						"extends": "Ext.Component||Ext.toolbar.Item||Ext.toolbar.TextItem",
+						"xtype": "tbtext",
+						"xtypes": [
+							"tbtext"
+						],
+						"config": {},
+						"defaultConfig": {}
+					}
+				],
+				"xtype": "tbitem",
+				"xtypes": [
+					"tbitem"
+				],
+				"config": {},
+				"defaultConfig": {}
+			},
+			{
+				"class": "Ext.button.Button",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.button.Button",
+				"children": [
+					{
+						"class": "Ext.tab.Tab",
+						"superclass": "Ext.button.Button",
+						"extends": "Ext.Component||Ext.button.Button||Ext.tab.Tab",
+						"xtype": "tab",
+						"xtypes": [
+							"tab"
+						],
+						"config": {
+							"rotation": "default",
+							"tabPosition": "top",
+							"childEls": {
+								"closeEl": {
+									"name": "closeEl",
+									"itemId": "closeEl"
+								}
+							}
+						},
+						"defaultConfig": {
+							"rotation": "default",
+							"tabPosition": "top",
+							"childEls": {
+								"closeEl": {
+									"name": "closeEl",
+									"itemId": "closeEl"
+								}
+							}
+						}
+					},
+					{
+						"class": "Ext.button.Split",
+						"superclass": "Ext.button.Button",
+						"extends": "Ext.Component||Ext.button.Button||Ext.button.Split",
+						"children": [
+							{
+								"class": "Ext.button.Cycle",
+								"superclass": "Ext.button.Split",
+								"extends": "Ext.Component||Ext.button.Button||Ext.button.Split||Ext.button.Cycle",
+								"xtype": "cycle",
+								"xtypes": [
+									"cycle"
+								],
+								"config": {},
+								"defaultConfig": {}
+							}
+						],
+						"xtype": "splitbutton",
+						"xtypes": [
+							"splitbutton"
+						],
+						"config": {},
+						"defaultConfig": {}
+					},
+					{
+						"class": "Ext.form.field.FileButton",
+						"superclass": "Ext.button.Button",
+						"extends": "Ext.Component||Ext.button.Button||Ext.form.field.FileButton",
+						"xtype": "filebutton",
+						"xtypes": [
+							"filebutton"
+						],
+						"config": {
+							"childEls": {
+								"fileInputEl": {
+									"name": "fileInputEl",
+									"itemId": "fileInputEl"
+								}
+							}
+						},
+						"defaultConfig": {
+							"childEls": {
+								"fileInputEl": {
+									"name": "fileInputEl",
+									"itemId": "fileInputEl"
+								}
+							}
+						}
+					}
+				],
+				"xtype": "button",
+				"xtypes": [
+					"button"
+				],
+				"config": {
+					"iconAlign": "left",
+					"text": null,
+					"textAlign": "center",
+					"arrowVisible": true,
+					"childEls": {
+						"btnIconEl": {
+							"name": "btnIconEl",
+							"itemId": "btnIconEl"
+						},
+						"btnInnerEl": {
+							"name": "btnInnerEl",
+							"itemId": "btnInnerEl"
+						},
+						"btnWrap": {
+							"name": "btnWrap",
+							"itemId": "btnWrap"
+						},
+						"btnEl": {
+							"name": "btnEl",
+							"itemId": "btnEl"
+						}
+					},
+					"publishes": {
+						"pressed": 1
+					}
+				},
+				"defaultConfig": {
+					"iconAlign": "left",
+					"text": null,
+					"textAlign": "center",
+					"arrowVisible": true,
+					"childEls": {
+						"btnIconEl": {
+							"name": "btnIconEl",
+							"itemId": "btnIconEl"
+						},
+						"btnInnerEl": {
+							"name": "btnInnerEl",
+							"itemId": "btnInnerEl"
+						},
+						"btnWrap": {
+							"name": "btnWrap",
+							"itemId": "btnWrap"
+						},
+						"btnEl": {
+							"name": "btnEl",
+							"itemId": "btnEl"
+						}
+					},
+					"publishes": {
+						"pressed": 1
+					}
+				}
+			},
+			{
+				"class": "Ext.flash.Component",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.flash.Component",
+				"xtype": "flash",
+				"xtypes": [
+					"flash"
+				],
+				"config": {},
+				"defaultConfig": {}
+			},
+			{
+				"class": "Ext.form.Label",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.form.Label",
+				"xtype": "label",
+				"xtypes": [
+					"label"
+				],
+				"config": {},
+				"defaultConfig": {}
+			},
+			{
+				"class": "Ext.picker.Month",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.picker.Month",
+				"xtype": "monthpicker",
+				"xtypes": [
+					"monthpicker"
+				],
+				"config": {
+					"childEls": {
+						"yearEl": {
+							"name": "yearEl",
+							"itemId": "yearEl"
+						},
+						"monthEl": {
+							"name": "monthEl",
+							"itemId": "monthEl"
+						},
+						"nextEl": {
+							"name": "nextEl",
+							"itemId": "nextEl"
+						},
+						"prevEl": {
+							"name": "prevEl",
+							"itemId": "prevEl"
+						},
+						"bodyEl": {
+							"name": "bodyEl",
+							"itemId": "bodyEl"
+						}
+					}
+				},
+				"defaultConfig": {
+					"childEls": {
+						"yearEl": {
+							"name": "yearEl",
+							"itemId": "yearEl"
+						},
+						"monthEl": {
+							"name": "monthEl",
+							"itemId": "monthEl"
+						},
+						"nextEl": {
+							"name": "nextEl",
+							"itemId": "nextEl"
+						},
+						"prevEl": {
+							"name": "prevEl",
+							"itemId": "prevEl"
+						},
+						"bodyEl": {
+							"name": "bodyEl",
+							"itemId": "bodyEl"
+						}
+					}
+				}
+			},
+			{
+				"class": "Ext.picker.Date",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.picker.Date",
+				"xtype": "datepicker",
+				"xtypes": [
+					"datepicker"
+				],
+				"config": {
+					"childEls": {
+						"footerEl": {
+							"name": "footerEl",
+							"itemId": "footerEl"
+						},
+						"middleBtnEl": {
+							"name": "middleBtnEl",
+							"itemId": "middleBtnEl"
+						},
+						"nextEl": {
+							"name": "nextEl",
+							"itemId": "nextEl"
+						},
+						"prevEl": {
+							"name": "prevEl",
+							"itemId": "prevEl"
+						},
+						"eventEl": {
+							"name": "eventEl",
+							"itemId": "eventEl"
+						},
+						"innerEl": {
+							"name": "innerEl",
+							"itemId": "innerEl"
+						}
+					}
+				},
+				"defaultConfig": {
+					"childEls": {
+						"footerEl": {
+							"name": "footerEl",
+							"itemId": "footerEl"
+						},
+						"middleBtnEl": {
+							"name": "middleBtnEl",
+							"itemId": "middleBtnEl"
+						},
+						"nextEl": {
+							"name": "nextEl",
+							"itemId": "nextEl"
+						},
+						"prevEl": {
+							"name": "prevEl",
+							"itemId": "prevEl"
+						},
+						"eventEl": {
+							"name": "eventEl",
+							"itemId": "eventEl"
+						},
+						"innerEl": {
+							"name": "innerEl",
+							"itemId": "innerEl"
+						}
+					}
+				}
+			},
+			{
+				"class": "Ext.picker.Color",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.picker.Color",
+				"xtype": "colorpicker",
+				"xtypes": [
+					"colorpicker"
+				],
+				"config": {},
+				"defaultConfig": {}
+			},
+			{
+				"class": "Ext.menu.Item",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.menu.Item",
+				"children": [
+					{
+						"class": "Ext.menu.CheckItem",
+						"superclass": "Ext.menu.Item",
+						"extends": "Ext.Component||Ext.menu.Item||Ext.menu.CheckItem",
+						"xtype": "menucheckitem",
+						"xtypes": [
+							"menucheckitem"
+						],
+						"config": {
+							"childEls": {
+								"checkEl": {
+									"name": "checkEl",
+									"itemId": "checkEl"
+								}
+							}
+						},
+						"defaultConfig": {
+							"childEls": {
+								"checkEl": {
+									"name": "checkEl",
+									"itemId": "checkEl"
+								}
+							}
+						}
+					},
+					{
+						"class": "Ext.menu.Separator",
+						"superclass": "Ext.menu.Item",
+						"extends": "Ext.Component||Ext.menu.Item||Ext.menu.Separator",
+						"xtype": "menuseparator",
+						"xtypes": [
+							"menuseparator"
+						],
+						"config": {},
+						"defaultConfig": {}
+					}
+				],
+				"xtype": "menuitem",
+				"xtypes": [
+					"menuitem"
+				],
+				"config": {
+					"childEls": {
+						"arrowEl": {
+							"name": "arrowEl",
+							"itemId": "arrowEl"
+						},
+						"textEl": {
+							"name": "textEl",
+							"itemId": "textEl"
+						},
+						"iconEl": {
+							"name": "iconEl",
+							"itemId": "iconEl"
+						},
+						"itemEl": {
+							"name": "itemEl",
+							"itemId": "itemEl"
+						}
+					}
+				},
+				"defaultConfig": {
+					"childEls": {
+						"arrowEl": {
+							"name": "arrowEl",
+							"itemId": "arrowEl"
+						},
+						"textEl": {
+							"name": "textEl",
+							"itemId": "textEl"
+						},
+						"iconEl": {
+							"name": "iconEl",
+							"itemId": "iconEl"
+						},
+						"itemEl": {
+							"name": "itemEl",
+							"itemId": "itemEl"
+						}
+					}
+				}
+			},
+			{
+				"class": "Ext.toolbar.Spacer",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Ext.toolbar.Spacer",
+				"xtype": "tbspacer",
+				"xtypes": [
+					"tbspacer"
+				],
+				"config": {},
+				"defaultConfig": {}
+			},
+			{
+				"class": "Etna.upload.Uploader",
+				"superclass": "Ext.Component",
+				"extends": "Ext.Component||Etna.upload.Uploader",
+				"xtype": "etnauploader",
+				"xtypes": [
+					"etnauploader"
+				],
+				"config": {
+					"uploader": null,
+					"multipartParams": {},
+					"multipartHeaders": {},
+					"browseButton": null,
+					"moxieElement": null,
+					"container": null,
+					"dropElement": null,
+					"preventDuplicates": false,
+					"multiSelection": true,
+					"maxFileSize": "10m",
+					"minFileSize": 0,
+					"totalFileSize": 0
+				},
+				"defaultConfig": {
+					"uploader": null,
+					"multipartParams": {},
+					"multipartHeaders": {},
+					"browseButton": null,
+					"moxieElement": null,
+					"container": null,
+					"dropElement": null,
+					"preventDuplicates": false,
+					"multiSelection": true,
+					"maxFileSize": "10m",
+					"minFileSize": 0,
+					"totalFileSize": 0
+				}
+			}
+		],
+		"xtype": "component",
+		"xtypes": [
+			"component",
+			"box"
+		],
+		"config": {
+			"data": null,
+			"maxHeight": null,
+			"maxWidth": null,
+			"minHeight": null,
+			"minWidth": null,
+			"bind": null,
+			"controller": null,
+			"defaultListenerScope": false,
+			"publishes": null,
+			"reference": null,
+			"session": null,
+			"twoWayBindable": null,
+			"viewModel": null,
+			"childEls": {
+				"frameTable": {
+					"frame": true,
+					"itemId": "frameTable",
+					"name": "frameTable"
+				},
+				"frameTL": {
+					"frame": "tl",
+					"itemId": "frameTL",
+					"name": "frameTL"
+				},
+				"frameTC": {
+					"frame": "tc",
+					"itemId": "frameTC",
+					"name": "frameTC"
+				},
+				"frameTR": {
+					"frame": "tr",
+					"itemId": "frameTR",
+					"name": "frameTR"
+				},
+				"frameML": {
+					"frame": "ml",
+					"itemId": "frameML",
+					"name": "frameML"
+				},
+				"frameBody": {
+					"frame": "mc",
+					"itemId": "frameBody",
+					"name": "frameBody"
+				},
+				"frameMR": {
+					"frame": "mr",
+					"itemId": "frameMR",
+					"name": "frameMR"
+				},
+				"frameBL": {
+					"frame": "bl",
+					"itemId": "frameBL",
+					"name": "frameBL"
+				},
+				"frameBC": {
+					"frame": "bc",
+					"itemId": "frameBC",
+					"name": "frameBC"
+				},
+				"frameBR": {
+					"frame": "br",
+					"itemId": "frameBR",
+					"name": "frameBR"
+				}
+			},
+			"activeCounter": 0,
+			"alwaysOnTop": false
+		},
+		"defaultConfig": {
+			"data": null,
+			"maxHeight": null,
+			"maxWidth": null,
+			"minHeight": null,
+			"minWidth": null,
+			"bind": null,
+			"controller": null,
+			"defaultListenerScope": false,
+			"publishes": null,
+			"reference": null,
+			"session": null,
+			"twoWayBindable": null,
+			"viewModel": null,
+			"childEls": {
+				"frameTable": {
+					"frame": true,
+					"itemId": "frameTable",
+					"name": "frameTable"
+				},
+				"frameTL": {
+					"frame": "tl",
+					"itemId": "frameTL",
+					"name": "frameTL"
+				},
+				"frameTC": {
+					"frame": "tc",
+					"itemId": "frameTC",
+					"name": "frameTC"
+				},
+				"frameTR": {
+					"frame": "tr",
+					"itemId": "frameTR",
+					"name": "frameTR"
+				},
+				"frameML": {
+					"frame": "ml",
+					"itemId": "frameML",
+					"name": "frameML"
+				},
+				"frameBody": {
+					"frame": "mc",
+					"itemId": "frameBody",
+					"name": "frameBody"
+				},
+				"frameMR": {
+					"frame": "mr",
+					"itemId": "frameMR",
+					"name": "frameMR"
+				},
+				"frameBL": {
+					"frame": "bl",
+					"itemId": "frameBL",
+					"name": "frameBL"
+				},
+				"frameBC": {
+					"frame": "bc",
+					"itemId": "frameBC",
+					"name": "frameBC"
+				},
+				"frameBR": {
+					"frame": "br",
+					"itemId": "frameBR",
+					"name": "frameBR"
+				}
+			},
+			"activeCounter": 0,
+			"alwaysOnTop": false
+		}
+	},
+	{
+		"class": "Ext.Evented",
+		"superclass": "Ext.Base",
+		"extends": "Ext.Evented",
+		"children": [
+			{
+				"class": "Ext.Widget",
+				"superclass": "Ext.Evented",
+				"extends": "Ext.Evented||Ext.Widget",
+				"children": [
+					{
+						"class": "Ext.sparkline.Base",
+						"superclass": "Ext.Widget",
+						"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base",
+						"children": [
+							{
+								"class": "Ext.sparkline.BarBase",
+								"superclass": "Ext.sparkline.Base",
+								"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.BarBase",
+								"children": [
+									{
+										"class": "Ext.sparkline.Bar",
+										"superclass": "Ext.sparkline.BarBase",
+										"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.BarBase||Ext.sparkline.Bar",
+										"xtype": "sparklinebar",
+										"xtypes": [
+											"sparklinebar"
+										],
+										"config": {
+											"barColor": "#3366cc",
+											"negBarColor": "#f44",
+											"stackedBarColor": [
+												"#3366cc",
+												"#dc3912",
+												"#ff9900",
+												"#109618",
+												"#66aa00",
+												"#dd4477",
+												"#0099c6",
+												"#990099"
+											],
+											"zeroColor": null,
+											"nullColor": null,
+											"zeroAxis": true,
+											"barWidth": 4,
+											"barSpacing": 1,
+											"chartRangeMin": null,
+											"chartRangeMax": null,
+											"chartRangeClip": false,
+											"colorMap": null,
+											"tipTpl": {
+												"initialConfig": {},
+												"html": "&#9679; {prefix}{value}{suffix}"
+											}
+										},
+										"defaultConfig": {
+											"barColor": "#3366cc",
+											"negBarColor": "#f44",
+											"stackedBarColor": [
+												"#3366cc",
+												"#dc3912",
+												"#ff9900",
+												"#109618",
+												"#66aa00",
+												"#dd4477",
+												"#0099c6",
+												"#990099"
+											],
+											"zeroColor": null,
+											"nullColor": null,
+											"zeroAxis": true,
+											"barWidth": 4,
+											"barSpacing": 1,
+											"chartRangeMin": null,
+											"chartRangeMax": null,
+											"chartRangeClip": false,
+											"colorMap": null,
+											"tipTpl": {
+												"initialConfig": {},
+												"html": "&#9679; {prefix}{value}{suffix}"
+											}
+										}
+									},
+									{
+										"class": "Ext.sparkline.Discrete",
+										"superclass": "Ext.sparkline.BarBase",
+										"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.BarBase||Ext.sparkline.Discrete",
+										"xtype": "sparklinediscrete",
+										"xtypes": [
+											"sparklinediscrete"
+										],
+										"config": {
+											"lineHeight": "auto",
+											"thresholdColor": null,
+											"thresholdValue": 0,
+											"chartRangeMax": null,
+											"chartRangeMin": null,
+											"chartRangeClip": false,
+											"tipTpl": {
+												"initialConfig": {},
+												"html": "{prefix}{value}{suffix}"
+											}
+										},
+										"defaultConfig": {
+											"lineHeight": "auto",
+											"thresholdColor": null,
+											"thresholdValue": 0,
+											"chartRangeMax": null,
+											"chartRangeMin": null,
+											"chartRangeClip": false,
+											"tipTpl": {
+												"initialConfig": {},
+												"html": "{prefix}{value}{suffix}"
+											}
+										}
+									},
+									{
+										"class": "Ext.sparkline.TriState",
+										"superclass": "Ext.sparkline.BarBase",
+										"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.BarBase||Ext.sparkline.TriState",
+										"xtype": "sparklinetristate",
+										"xtypes": [
+											"sparklinetristate"
+										],
+										"config": {
+											"barWidth": 4,
+											"barSpacing": 1,
+											"posBarColor": "#6f6",
+											"negBarColor": "#f44",
+											"zeroBarColor": "#999",
+											"colorMap": {},
+											"tipTpl": {
+												"initialConfig": {},
+												"html": "&#9679; {value:this.states}"
+											}
+										},
+										"defaultConfig": {
+											"barWidth": 4,
+											"barSpacing": 1,
+											"posBarColor": "#6f6",
+											"negBarColor": "#f44",
+											"zeroBarColor": "#999",
+											"colorMap": {},
+											"tipTpl": {
+												"initialConfig": {},
+												"html": "&#9679; {value:this.states}"
+											}
+										}
+									}
+								],
+								"xtype": "widget",
+								"xtypes": [
+									"widget"
+								],
+								"config": {},
+								"defaultConfig": {}
+							},
+							{
+								"class": "Ext.sparkline.Box",
+								"superclass": "Ext.sparkline.Base",
+								"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.Box",
+								"xtype": "sparklinebox",
+								"xtypes": [
+									"sparklinebox"
+								],
+								"config": {
+									"raw": false,
+									"boxLineColor": "#000",
+									"boxFillColor": "#cdf",
+									"whiskerColor": "#000",
+									"outlierLineColor": "#333",
+									"outlierFillColor": "#fff",
+									"medianColor": "#f00",
+									"showOutliers": true,
+									"outlierIQR": 1.5,
+									"spotRadius": 1.5,
+									"target": null,
+									"targetColor": "#4a2",
+									"chartRangeMin": null,
+									"chartRangeMax": null,
+									"tipTpl": {
+										"initialConfig": {},
+										"html": "{field:this.fields}: {value}"
+									},
+									"tooltipFormatFieldlistKey": "field"
+								},
+								"defaultConfig": {
+									"raw": false,
+									"boxLineColor": "#000",
+									"boxFillColor": "#cdf",
+									"whiskerColor": "#000",
+									"outlierLineColor": "#333",
+									"outlierFillColor": "#fff",
+									"medianColor": "#f00",
+									"showOutliers": true,
+									"outlierIQR": 1.5,
+									"spotRadius": 1.5,
+									"target": null,
+									"targetColor": "#4a2",
+									"chartRangeMin": null,
+									"chartRangeMax": null,
+									"tipTpl": {
+										"initialConfig": {},
+										"html": "{field:this.fields}: {value}"
+									},
+									"tooltipFormatFieldlistKey": "field"
+								}
+							},
+							{
+								"class": "Ext.sparkline.Bullet",
+								"superclass": "Ext.sparkline.Base",
+								"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.Bullet",
+								"xtype": "sparklinebullet",
+								"xtypes": [
+									"sparklinebullet"
+								],
+								"config": {
+									"targetColor": "#f33",
+									"targetWidth": 3,
+									"performanceColor": "#33f",
+									"rangeColors": [
+										"#d3dafe",
+										"#a8b6ff",
+										"#7f94ff"
+									],
+									"base": null,
+									"tipTpl": {
+										"initialConfig": {},
+										"html": "{fieldkey:this.fields} - {value}"
+									}
+								},
+								"defaultConfig": {
+									"targetColor": "#f33",
+									"targetWidth": 3,
+									"performanceColor": "#33f",
+									"rangeColors": [
+										"#d3dafe",
+										"#a8b6ff",
+										"#7f94ff"
+									],
+									"base": null,
+									"tipTpl": {
+										"initialConfig": {},
+										"html": "{fieldkey:this.fields} - {value}"
+									}
+								}
+							},
+							{
+								"class": "Ext.sparkline.Line",
+								"superclass": "Ext.sparkline.Base",
+								"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.Line",
+								"xtype": "sparklineline",
+								"xtypes": [
+									"sparklineline"
+								],
+								"config": {
+									"spotColor": "#f80",
+									"highlightSpotColor": "#5f5",
+									"highlightLineColor": "#f22",
+									"spotRadius": 1.5,
+									"minSpotColor": "#f80",
+									"maxSpotColor": "#f80",
+									"lineWidth": 1,
+									"normalRangeMin": null,
+									"normalRangeMax": null,
+									"normalRangeColor": "#ccc",
+									"drawNormalOnTop": false,
+									"chartRangeMin": null,
+									"chartRangeMax": null,
+									"chartRangeMinX": null,
+									"chartRangeMaxX": null,
+									"tipTpl": {
+										"initialConfig": {},
+										"html": "&#9679; {prefix}{y}{suffix}"
+									},
+									"valueSpots": null
+								},
+								"defaultConfig": {
+									"spotColor": "#f80",
+									"highlightSpotColor": "#5f5",
+									"highlightLineColor": "#f22",
+									"spotRadius": 1.5,
+									"minSpotColor": "#f80",
+									"maxSpotColor": "#f80",
+									"lineWidth": 1,
+									"normalRangeMin": null,
+									"normalRangeMax": null,
+									"normalRangeColor": "#ccc",
+									"drawNormalOnTop": false,
+									"chartRangeMin": null,
+									"chartRangeMax": null,
+									"chartRangeMinX": null,
+									"chartRangeMaxX": null,
+									"tipTpl": {
+										"initialConfig": {},
+										"html": "&#9679; {prefix}{y}{suffix}"
+									},
+									"valueSpots": null
+								}
+							},
+							{
+								"class": "Ext.sparkline.Pie",
+								"superclass": "Ext.sparkline.Base",
+								"extends": "Ext.Evented||Ext.Widget||Ext.sparkline.Base||Ext.sparkline.Pie",
+								"xtype": "sparklinepie",
+								"xtypes": [
+									"sparklinepie"
+								],
+								"config": {
+									"offset": 0,
+									"sliceColors": [
+										"#3366cc",
+										"#dc3912",
+										"#ff9900",
+										"#109618",
+										"#66aa00",
+										"#dd4477",
+										"#0099c6",
+										"#990099"
+									],
+									"borderWidth": 0,
+									"borderColor": "#000",
+									"tipTpl": {
+										"initialConfig": {},
+										"html": "&#9679; {value} ({percent:number(\"0.0\")}%)"
+									}
+								},
+								"defaultConfig": {
+									"offset": 0,
+									"sliceColors": [
+										"#3366cc",
+										"#dc3912",
+										"#ff9900",
+										"#109618",
+										"#66aa00",
+										"#dd4477",
+										"#0099c6",
+										"#990099"
+									],
+									"borderWidth": 0,
+									"borderColor": "#000",
+									"tipTpl": {
+										"initialConfig": {},
+										"html": "&#9679; {value} ({percent:number(\"0.0\")}%)"
+									}
+								}
+							}
+						],
+						"xtype": "widget",
+						"xtypes": [
+							"widget"
+						],
+						"config": {
+							"values": null,
+							"baseCls": "x-sparkline",
+							"lineColor": "#157fcc",
+							"fillColor": "#def",
+							"defaultPixelsPerValue": 3,
+							"tagValuesAttribute": "values",
+							"enableTagOptions": false,
+							"enableHighlight": true,
+							"highlightColor": null,
+							"highlightLighten": 1.4,
+							"tooltipSkipNull": true,
+							"tooltipPrefix": "",
+							"tooltipSuffix": "",
+							"disableTooltips": false,
+							"disableInteraction": false,
+							"tipTpl": null
+						},
+						"defaultConfig": {
+							"values": null,
+							"baseCls": "x-sparkline",
+							"lineColor": "#157fcc",
+							"fillColor": "#def",
+							"defaultPixelsPerValue": 3,
+							"tagValuesAttribute": "values",
+							"enableTagOptions": false,
+							"enableHighlight": true,
+							"highlightColor": null,
+							"highlightLighten": 1.4,
+							"tooltipSkipNull": true,
+							"tooltipPrefix": "",
+							"tooltipSuffix": "",
+							"disableTooltips": false,
+							"disableInteraction": false,
+							"tipTpl": null
+						}
+					},
+					{
+						"class": "Ext.ProgressBarWidget",
+						"superclass": "Ext.Widget",
+						"extends": "Ext.Evented||Ext.Widget||Ext.ProgressBarWidget",
+						"xtype": "progressbarwidget",
+						"xtypes": [
+							"progressbarwidget"
+						],
+						"config": {
+							"text": null,
+							"value": 0,
+							"animate": false,
+							"textTpl": null,
+							"baseCls": "x-progress",
+							"textCls": "x-progress-text",
+							"ui": "default"
+						},
+						"defaultConfig": {
+							"text": null,
+							"value": 0,
+							"animate": false,
+							"textTpl": null,
+							"baseCls": "x-progress",
+							"textCls": "x-progress-text",
+							"ui": "default"
+						}
+					},
+					{
+						"class": "Ext.slider.Widget",
+						"superclass": "Ext.Widget",
+						"extends": "Ext.Evented||Ext.Widget||Ext.slider.Widget",
+						"xtype": "sliderwidget",
+						"xtypes": [
+							"sliderwidget"
+						],
+						"config": {
+							"clickToChange": true,
+							"ui": "widget",
+							"value": 0,
+							"minValue": 0,
+							"maxValue": 100,
+							"publishOnComplete": true,
+							"twoWayBindable": {
+								"value": 1
+							},
+							"vertical": false
+						},
+						"defaultConfig": {
+							"clickToChange": true,
+							"ui": "widget",
+							"value": 0,
+							"minValue": 0,
+							"maxValue": 100,
+							"publishOnComplete": true,
+							"twoWayBindable": {
+								"value": 1
+							},
+							"vertical": false
+						}
+					}
+				],
+				"xtype": "widget",
+				"xtypes": [
+					"widget"
+				],
+				"config": {
+					"width": null,
+					"height": null,
+					"bind": null,
+					"controller": null,
+					"defaultListenerScope": false,
+					"publishes": null,
+					"reference": null,
+					"session": null,
+					"twoWayBindable": null,
+					"viewModel": null,
+					"baseCls": "x-widget"
+				},
+				"defaultConfig": {
+					"width": null,
+					"height": null,
+					"bind": null,
+					"controller": null,
+					"defaultListenerScope": false,
+					"publishes": null,
+					"reference": null,
+					"session": null,
+					"twoWayBindable": null,
+					"viewModel": null,
+					"baseCls": "x-widget"
+				}
+			}
+		],
+		"config": {
+			"listeners": null,
+			"bubbleEvents": null
+		},
+		"defaultConfig": {
+			"listeners": null,
+			"bubbleEvents": null
+		}
+	}
+]

@@ -1,0 +1,33 @@
+<dom-module id="es-year-month-ex-1">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+    <template>
+        <table class="tb-form">
+            <tr>
+                <td>
+                    <sc-month-field value="{{value}}" string-date="true"></sc-month-field>
+                </td>
+            </tr>
+        </table>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-year-month-ex-1',
+            properties:{
+				value: Object
+            },
+            
+            setValue: function() {
+				var me = this;
+            	
+            	me.set("value", "201206");
+            }
+		});
+	</script>
+
+</dom-module>

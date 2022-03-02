@@ -1,0 +1,1009 @@
+<dom-module id="em-field-attr-test">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+
+        .tb-form {
+            width: 50%;
+        }
+    </style>
+
+    <template>
+        <cc-page-title-bar></cc-page-title-bar>
+
+        <cc-search-contaienr>
+            <table class="tb-form">
+                <tr>
+                    <th>
+                        <sc-label text="속성 필터" i18n-disabled></sc-label>
+                    </th>
+                    <td>
+                        <sc-multi-combobox-field selected-all="true" enable-check-all="true" display-field="label" value-field="data" items="{{searchSelectItem}}" on-change="onChangeFilter"></sc-multi-combobox-field>
+                    </td>
+                    <td>
+                        <sc-button text="Validate" on-click="onValidate" i18n-disabled></sc-button>
+                        <sc-button text="Reset" on-click="onReset" i18n-disabled></sc-button>
+                    </td>
+                </tr>
+            </table>
+        </cc-search-contaienr>
+
+        <div class="flex page" id="wapper" validation-group="wrapper">
+            <cc-sub-title-bar title-text="sc-text-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <sc-text-field value="test"></sc-text-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <sc-text-field required="true" value="test"></sc-text-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="validate-field">validate</th>
+                    <td>
+                        <sc-text-field required="true"></sc-text-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <sc-text-field disabled="true" value="test"></sc-text-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <sc-text-field readonly="true" value="test"></sc-text-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="sc-number-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <sc-number-field></sc-number-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <sc-number-field required="true" value="{{testNumber}}"></sc-number-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="validate-field">validate</th>
+                    <td>
+                        <sc-number-field required="true"></sc-number-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <sc-number-field disabled="true" value="123.34567"></sc-number-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <sc-number-field readonly="true" value="123.34567"></sc-number-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="sc-date-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <sc-date-field value="{{testDate}}"></sc-date-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <sc-date-field required="true" value="{{testDate}}"></sc-date-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="validate-field">validate</th>
+                    <td>
+                        <sc-date-field required="true"></sc-date-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <sc-date-field disabled="true" value="{{testDate}}"></sc-date-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <sc-date-field readonly="true" value="{{testDate}}"></sc-date-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="sc-period-date-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <sc-period-date-field from-value="{{testPeriodDate.begin}}" to-value={{testPeriodDate.end}} string-date="true"></sc-period-date-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <sc-period-date-field required="true" from-value="{{testPeriodDate.begin}}" to-value={{testPeriodDate.end}} string-date="true"></sc-period-date-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="validate-field">valiate</th>
+                    <td>
+                        <sc-period-date-field required="true"></sc-period-date-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <sc-period-date-field disabled="true" from-value="{{testPeriodDate.begin}}" to-value={{testPeriodDate.end}} string-date="true"></sc-period-date-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <sc-period-date-field readonly="true" from-value="{{testPeriodDate.begin}}" to-value={{testPeriodDate.end}} string-date="true"></sc-period-date-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="sc-month-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <sc-month-field value="{{testDate}}"></sc-month-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <sc-month-field required="true" value="{{testDate}}"></sc-month-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="validate-field">validate</th>
+                    <td>
+                        <sc-month-field required="true"></sc-month-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <sc-month-field disabled="true" value="{{testDate}}"></sc-month-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <sc-month-field readonly="true" value="{{testDate}}"></sc-month-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="sc-period-month-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <sc-period-month-field from-value="{{testPeriodMonth.begin}}" to-value={{testPeriodMonth.end}} string-date="true"></sc-period-month-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <sc-period-month-field required="true" from-value="{{testPeriodMonth.begin}}" to-value={{testPeriodMonth.end}} string-date="true"></sc-period-month-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="validate-field">validate</th>
+                    <td>
+                        <sc-period-month-field required="true"></sc-period-month-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <sc-period-month-field disabled="true" from-value="{{testPeriodMonth.begin}}" to-value={{testPeriodMonth.end}} string-date="true"></sc-period-month-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <sc-period-month-field readonly="true" from-value="{{testPeriodMonth.begin}}" to-value={{testPeriodMonth.end}} string-date="true"></sc-period-month-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="sc-checkbox-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <sc-checkbox-field value="test"></sc-checkbox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <sc-checkbox-field required="true" value="test"></sc-checkbox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="validate-field">validate</th>
+                    <td>
+                        <sc-checkbox-field required="true"></sc-checkbox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <sc-checkbox-field disabled="true" value="test"></sc-checkbox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <sc-checkbox-field readonly="true" value="test"></sc-checkbox-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="sc-checkbox-group-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <sc-checkbox-group-field>
+                            <sc-checkbox-field label="우유"></sc-checkbox-field>
+                            <sc-checkbox-field label="계란"></sc-checkbox-field>
+                            <sc-checkbox-field label="빵"></sc-checkbox-field>
+                        </sc-checkbox-group-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <sc-checkbox-group-field required="true">
+                            <sc-checkbox-field label="우유"></sc-checkbox-field>
+                            <sc-checkbox-field label="계란"></sc-checkbox-field>
+                            <sc-checkbox-field label="빵"></sc-checkbox-field>
+                        </sc-checkbox-group-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="validate-field">validate</th>
+                    <td>
+                        <sc-checkbox-group-field required="true">
+                            <sc-checkbox-field label="우유"></sc-checkbox-field>
+                            <sc-checkbox-field label="계란"></sc-checkbox-field>
+                            <sc-checkbox-field label="빵"></sc-checkbox-field>
+                        </sc-checkbox-group-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <sc-checkbox-group-field disabled="true">
+                            <sc-checkbox-field label="우유"></sc-checkbox-field>
+                            <sc-checkbox-field label="계란"></sc-checkbox-field>
+                            <sc-checkbox-field label="빵"></sc-checkbox-field>
+                        </sc-checkbox-group-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <sc-checkbox-group-field readonly="true">
+                            <sc-checkbox-field label="우유"></sc-checkbox-field>
+                            <sc-checkbox-field label="계란"></sc-checkbox-field>
+                            <sc-checkbox-field label="빵"></sc-checkbox-field>
+                        </sc-checkbox-group-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="sc-radio-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <sc-radio-field value="test"></sc-radio-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <sc-radio-field required="true" value="test"></sc-radio-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="validate-field">validate</th>
+                    <td>
+                        <sc-radio-field required="true"></sc-radio-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <sc-radio-field disabled="true" value="test"></sc-radio-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <sc-radio-field readonly="true" value="test"></sc-radio-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="sc-radio-group-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <sc-radio-group-field value="egg">
+                            <sc-radio-field label="우유" input-value="milk"></sc-radio-field>
+                            <sc-radio-field label="계란" input-value="egg"></sc-radio-field>
+                            <sc-radio-field label="빵" input-value="bread"></sc-radio-field>
+                        </sc-radio-group-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <sc-radio-group-field value="egg" required="true">
+                            <sc-radio-field label="우유" input-value="milk"></sc-radio-field>
+                            <sc-radio-field label="계란" input-value="egg"></sc-radio-field>
+                            <sc-radio-field label="빵" input-value="bread"></sc-radio-field>
+                        </sc-radio-group-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="validate-field">validate</th>
+                    <td>
+                        <sc-radio-group-field required="true">
+                            <sc-radio-field label="우유" input-value="milk"></sc-radio-field>
+                            <sc-radio-field label="계란" input-value="egg"></sc-radio-field>
+                            <sc-radio-field label="빵" input-value="bread"></sc-radio-field>
+                        </sc-radio-group-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <sc-radio-group-field disabled="true">
+                            <sc-radio-field label="우유" input-value="milk"></sc-radio-field>
+                            <sc-radio-field label="계란" input-value="egg"></sc-radio-field>
+                            <sc-radio-field label="빵" input-value="bread"></sc-radio-field>
+                        </sc-radio-group-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <sc-radio-group-field readonly="true">
+                            <sc-radio-field label="우유" input-value="milk"></sc-radio-field>
+                            <sc-radio-field label="계란" input-value="egg"></sc-radio-field>
+                            <sc-radio-field label="빵" input-value="bread"></sc-radio-field>
+                        </sc-radio-group-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="sc-combobox-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <sc-combobox-field items="{{testList}}" display-field="label" value-field="data" selected-index="0"></sc-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <sc-combobox-field required="true" items="{{testList}}" display-field="label" value-field="data" selected-index="0"></sc-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="validate-field">validate</th>
+                    <td>
+                        <sc-combobox-field required="true" items="{{testList}}" display-field="label" value-field="data"></sc-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <sc-combobox-field disabled="true" items="{{testList}}" display-field="label" value-field="data" selected-index="0"></sc-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <sc-combobox-field readonly="true" items="{{testList}}" display-field="label" value-field="data" selected-index="0"></sc-combobox-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="sc-multi-combobox-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <sc-multi-combobox-field items="{{testList}}" display-field="label" value-field="data" value="{{testValue}}"></sc-multi-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <sc-multi-combobox-field required="true" items="{{testList}}" display-field="label" value-field="data" value="{{testValue}}"></sc-multi-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="validate-field">validate</th>
+                    <td>
+                        <sc-multi-combobox-field required="true" items="{{testList}}" display-field="label" value-field="data"></sc-multi-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <sc-multi-combobox-field disabled="true" items="{{testList}}" display-field="label" value-field="data" value="{{testValue}}"></sc-multi-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <sc-multi-combobox-field readonly="true" items="{{testList}}" display-field="label" value-field="data" value="{{testValue}}"></sc-multi-combobox-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="sc-filter-combobox-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <sc-filter-combobox-field items="{{testList}}" display-field="label" value-field="data" value="test1"></sc-filter-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <sc-filter-combobox-field required="true" items="{{testList}}" display-field="label" value-field="data" value="test1"></sc-filter-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="validate-field">validate</th>
+                    <td>
+                        <sc-filter-combobox-field required="true" items="{{testList}}" display-field="label" value-field="data"></sc-filter-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <sc-filter-combobox-field disabled="true" items="{{testList}}" display-field="label" value-field="data" value="test1"></sc-filter-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <sc-filter-combobox-field readonly="true" items="{{testList}}" display-field="label" value-field="data" value="test1"></sc-filter-combobox-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="sc-textarea-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <sc-textarea-field value="test"></sc-textarea-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <sc-textarea-field required="true" value="test"></sc-textarea-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="validate-field">validate</th>
+                    <td>
+                        <sc-textarea-field required="true"></sc-textarea-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <sc-textarea-field disabled="true" value="test"></sc-textarea-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <sc-textarea-field readonly="true" value="test"></sc-textarea-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="cc-cate-combobox-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <cc-cate-combobox-field items="{{testList}}" display-field="label" value-field="data" value="{{testValue}}"></cc-cate-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <cc-cate-combobox-field required="true" items="{{testList}}" display-field="label" value-field="data" value="{{testValue}}"></cc-cate-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="validate-field">validate</th>
+                    <td>
+                        <cc-cate-combobox-field required="true" items="{{testList}}" display-field="label" value-field="data"></cc-cate-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <cc-cate-combobox-field disabled="true" items="{{testList}}" display-field="label" value-field="data" value="{{testValue}}"></cc-cate-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <cc-cate-combobox-field readonly="true" items="{{testList}}" display-field="label" value-field="data" value="{{testValue}}"></cc-cate-combobox-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="cc-amt-unit-search"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <cc-amt-unit-search value="{{reqInfo.bas_unit_cd}}" result-nm="{{reqInfo.bas_unit_nm}}"></cc-amt-unit-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <cc-amt-unit-search value="{{reqInfo.bas_unit_cd}}" result-nm="{{reqInfo.bas_unit_nm}}" required="true"></cc-amt-unit-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <cc-amt-unit-search value="{{reqInfo.bas_unit_cd}}" result-nm="{{reqInfo.bas_unit_nm}}" disabled="true"></cc-amt-unit-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <cc-amt-unit-search value="{{reqInfo.bas_unit_cd}}" result-nm="{{reqInfo.bas_unit_nm}}" readonly="true"></cc-amt-unit-search>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="cc-operorg-combobox-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <cc-operorg-combobox-field oper-unit-cd="IO" value="{{reqInfo.oper_org_cd}}" selected-index="0"></cc-operorg-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <cc-operorg-combobox-field oper-unit-cd="IO" value="{{reqInfo.oper_org_cd}}" required="true" selected-index="0"></cc-operorg-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <cc-operorg-combobox-field oper-unit-cd="IO" value="{{reqInfo.oper_org_cd}}" selected-index="0" disabled="true"></cc-operorg-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <cc-operorg-combobox-field oper-unit-cd="IO" value="{{reqInfo.oper_org_cd}}" selected-index="0" readonly="true"></cc-operorg-combobox-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="cc-operorg-multi-combobox-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <cc-operorg-multi-combobox-field oper-unit-cd="IO" value="{{testOperMulti}}" selected-index="0"></cc-operorg-multi-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <cc-operorg-multi-combobox-field oper-unit-cd="IO" value="{{testOperMulti}}" required="true" selected-index="0"></cc-operorg-multi-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <cc-operorg-multi-combobox-field oper-unit-cd="IO" value="{{testOperMulti}}" selected-index="0" disabled="true"></cc-operorg-multi-combobox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <cc-operorg-multi-combobox-field oper-unit-cd="IO" value="{{testOperMulti}}" selected-index="0" readonly="true"></cc-operorg-multi-combobox-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="cc-user-search"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <cc-user-search value="{{searchParam.pr_req_nm}}" result-field="usr_id" result-value="{{searchParam.pr_req_id}}"></cc-user-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <cc-user-search value="{{searchParam.pr_req_nm}}" required="true" result-field="usr_id" result-value="{{searchParam.pr_req_id}}"></cc-user-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <cc-user-search value="{{searchParam.pr_req_nm}}" disabled="true" result-field="usr_id" result-value="{{searchParam.pr_req_id}}"></cc-user-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <cc-user-search value="{{searchParam.pr_req_nm}}" readonly="true" result-field="usr_id" result-value="{{searchParam.pr_req_id}}"></cc-user-search>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="cc-user-dept-search"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <cc-user-dept-search value="{{searchParam.pr_req_nm}}" result-field="usr_id" result-value="{{searchParam.pr_req_id}}"></cc-user-dept-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <cc-user-dept-search value="{{searchParam.pr_req_nm}}" required="true" result-field="usr_id" result-value="{{searchParam.pr_req_id}}"></cc-user-dept-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <cc-user-dept-search value="{{searchParam.pr_req_nm}}" disabled="true" result-field="usr_id" result-value="{{searchParam.pr_req_id}}"></cc-user-dept-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <cc-user-dept-search value="{{searchParam.pr_req_nm}}" readonly="true" result-field="usr_id" result-value="{{searchParam.pr_req_id}}"></cc-user-dept-search>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="cc-vendor-search"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <cc-vendor-search value="{{data2.vd_nm}}" result-field="vd_cd" result-value="{{data2.vd_cd}}" placeholder="검색" link-typ="POEO" oper-unit-cd="PO" oper-org-cd="{{operOrgCd}}"></cc-vendor-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <cc-vendor-search value="{{data2.vd_nm}}" result-field="vd_cd" result-value="{{data2.vd_cd}}" placeholder="검색" link-typ="POEO" oper-unit-cd="PO" required="true" oper-org-cd="{{operOrgCd}}"></cc-vendor-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <cc-vendor-search value="{{data2.vd_nm}}" result-field="vd_cd" result-value="{{data2.vd_cd}}" placeholder="검색" link-typ="POEO" oper-unit-cd="PO" disabled="true" oper-org-cd="{{operOrgCd}}"></cc-vendor-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <cc-vendor-search value="{{data2.vd_nm}}" result-field="vd_cd" result-value="{{data2.vd_cd}}" placeholder="검색" link-typ="POEO" oper-unit-cd="PO" readonly="true" oper-org-cd="{{operOrgCd}}"></cc-vendor-search>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="cc-purc-grp"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <cc-purc-grp value="{{data2.vd_nm}}" result-field="vd_cd" result-value="{{data2.vd_cd}}" placeholder="검색" link-typ="POEO" oper-unit-cd="PO" oper-org-cd="{{operOrgCd}}" purc-grp-typ="PU"></cc-purc-grp>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <cc-purc-grp value="{{data2.vd_nm}}" result-field="vd_cd" result-value="{{data2.vd_cd}}" placeholder="검색" link-typ="POEO" oper-unit-cd="PO" required="true" oper-org-cd="{{operOrgCd}}" purc-grp-typ="PU"></cc-purc-grp>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <cc-purc-grp value="{{data2.vd_nm}}" result-field="vd_cd" result-value="{{data2.vd_cd}}" placeholder="검색" link-typ="POEO" oper-unit-cd="PO" disabled="true" oper-org-cd="{{operOrgCd}}" purc-grp-typ="PU"></cc-purc-grp>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <cc-purc-grp value="{{data2.vd_nm}}" result-field="vd_cd" result-value="{{data2.vd_cd}}" placeholder="검색" link-typ="POEO" oper-unit-cd="PO" readonly="true" oper-org-cd="{{operOrgCd}}" purc-grp-typ="PU"></cc-purc-grp>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="cc-multi-text-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <cc-multi-text-field value="{{data.multitext_value}}" multi-value="{{data.multitext_values}}" placeholder="입력하세요" title="팝업제목"></cc-multi-text-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <cc-multi-text-field value="{{data.multitext_value}}" multi-value="{{data.multitext_values}}" required="true" placeholder="입력하세요" title="팝업제목"></cc-multi-text-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <cc-multi-text-field value="{{data.multitext_value}}" multi-value="{{data.multitext_values}}" placeholder="입력하세요" title="팝업제목" disabled="true"></cc-multi-text-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <cc-multi-text-field value="{{data.multitext_value}}" multi-value="{{data.multitext_values}}" placeholder="입력하세요" title="팝업제목" readonly="true"></cc-multi-text-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="cc-job-search"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <cc-job-search value="test"></cc-job-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <cc-job-search required="true" value="test"></cc-job-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <cc-job-search disabled="true" value="test"></cc-job-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <cc-job-search readonly="true" value="test"></cc-job-search>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="cc-item-search"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <cc-item-search value="test"></cc-item-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <cc-item-search required="true" value="test"></cc-item-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="disabled-field">disabled</th>
+                    <td>
+                        <cc-item-search disabled="true" value="test"></cc-item-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="readonly-field">readonly</th>
+                    <td>
+                        <cc-item-search readonly="true" value="test"></cc-item-search>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="cc-eval-search"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal</th>
+                    <td>
+                        <cc-eval-search value="test"></cc-eval-search>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required</th>
+                    <td>
+                        <cc-eval-search required="true" value="test"></cc-eval-search>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar title-text="cc-upload-field"></cc-sub-title-bar>
+            <table class="tb-form">
+                <tr>
+                    <th class="normal-field">normal<sc-button text="upload" on-click="onUploadClick"></sc-button></th>
+                    <td>
+                        <cc-upload-field id="upload" value="{{testUploadValue}}"></cc-upload-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required-field">required<sc-button text="upload2" on-click="onUploadClick"></sc-button></th>
+                    <td>
+                        <cc-upload-field id="upload2" required="true" on-click="onUploadClick2"></cc-upload-field>
+                    </td>
+                </tr>
+            </table>
+
+            <div style="height:300px;"></div> <!-- Padding -->
+        </div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'em-field-attr-test',
+
+            properties: {
+                testList: {
+                    type: Array,
+                    value: function () {
+                        return [{label: "테스트1", data: "test1"}, {label: "테스트2", data: "test2"}, {label: "테스트3", data: "test3"}, {label: "테스트4", data: "test4"}, {label: "테스트5", data: "test5"}];
+                    }
+                },
+                testValue: {
+                    type: Array,
+                    value: function () {
+                        return ["test1", "test2"];
+                    }
+                },
+                testDate: {
+                    type: Array,
+                    value: function () {
+                        return new Date();
+                    }
+                },
+                testPeriodDate: {
+                    type: Array,
+                    value: function () {
+                        return {
+                            begin: '20160405', end: '20160909'
+                        };
+                    }
+                },
+                testPeriodMonth: {
+                    type: Array,
+                    value: function () {
+                        return {
+                            begin: '201604', end: '201609'
+                        };
+                    }
+                },
+                testNumber: {
+                    type: Number,
+                    value: function () {
+                        return 123.4566;
+                    }
+                },
+                testOperMulti: {
+                    type: Array,
+                    value: function () {
+                        return ["IOC100PL200", "IOC200PL100", "IOC200PL200", "IOC100", "IOC100PL100"];
+                    }
+                },
+                testUploadValue: {
+                    type: String,
+                    value: function () {
+                        return "a8304227-113c-4497-8f8e-13c23f03fd76";
+                    }
+                },
+                searchSelectItem: {
+                    type: Array,
+                    value: function () {
+                        return [
+                            {label: "normal", data: "normal"},
+                            {label: "required", data: "required"},
+                            {label: "validate", data: "validate"},
+                            {label: "disabled", data: "disabled"},
+                            {label: "readonly", data: "readonly"}
+                        ];
+                    }
+                }
+            },
+
+            onChangeFilter: function (event, obj) {
+                var me = this;
+
+                this.$.wapper.hidden = true;
+                var fields = me.$.wapper.querySelectorAll("td, th");
+                for (var i = 0, len = fields.length; i < len; i++) {
+                    fields[i].hidden = true;
+                }
+
+                if (obj.selectedItems && obj.selectedItems.length > 0) {
+                    obj.selectedItems.forEach(function (selectedItem) {
+                        var fields = me.$.wapper.querySelectorAll("th." + selectedItem.data + "-field");
+
+                        for (var i = 0, len = fields.length; i < len; i++) {
+                            fields[i].hidden = false;
+                            fields[i].nextElementSibling.hidden = false;
+                        }
+                    });
+                }
+                this.$.wapper.hidden = false;
+            },
+
+            onValidate: function () {
+                this.validate("wrapper");
+            },
+
+            onReset: function () {
+                this.reset();
+            },
+
+            onUploadClick: function () {
+                this.$.upload.upload();
+            },
+
+            onUpload2Click: function () {
+                this.$.upload2.upload();
+            }
+        });
+    </script>
+</dom-module>

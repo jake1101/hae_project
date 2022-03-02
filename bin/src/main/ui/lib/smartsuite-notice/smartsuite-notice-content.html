@@ -1,0 +1,142 @@
+<dom-module id="smartsuite-notice-content">
+
+    <style>
+		:host {
+           	@apply(--vbox-layout);
+       	}
+	</style>
+    
+    <template>
+		<sc-ajax id="getAlarmNoticeList"
+				 url="getAlarmNoticeList.do"
+				 body="{{searchParam}}"
+				 on-response="completeGetAlarmNoticeList">
+		</sc-ajax>
+		<sc-ajax id="updateAlarmNoticeHidden"
+				 url="updateAlarmNoticeHidden.do"
+				 body="{{searchParam}}"
+				 on-response="completeUpdateAlarmNoticeHidden">
+		</sc-ajax>
+		
+        <sc-grid id="gridPanel"	class="vbox flex" use-state="false"  row-height="60"  data-provider="{{resultList}}"  column-fillstyle="fill" >
+        	<cc-grid-toolbar>
+				<sc-button text="숨김" on-click="onHiddenAlarm" auth-s></sc-button>
+			</cc-grid-toolbar>
+        	<sc-grid-columns>
+        		<sc-date-column data-field="sendDt" header-text="발생시간" width="130" display-format="yyyy/MM/dd HH:mm:ss"></sc-date-column>
+        		<sc-data-column	data-field="alarmTypeKR" header-text="타입" width="150" text-align="center"></sc-data-column>
+        		<sc-data-column	data-field="alarmType" header-text="타입" width="0" text-align="center" ></sc-data-column>
+        		<sc-data-column	data-field="content" header-text="내용" fill-width="500" text-align="left" ></sc-data-column>
+        	</sc-grid-columns>
+        	
+        	<sc-grid-fields>
+        		<sc-grid-field	data-field="seq" data-type="number"></sc-grid-field>
+        		<sc-grid-field	data-field="siteId" data-type="number"></sc-grid-field>
+        		<sc-grid-field	data-field="sensorId" data-type="number"></sc-grid-field>
+        	</sc-grid-fields>
+        </sc-grid>
+        
+    </template>
+    
+    <script>
+    Polymer({
+            is: "smartsuite-notice-content",
+            
+            properties: {
+            	titleText: {
+            		type: Object,
+            		value: function(){
+            			return "알림 목록";
+            		}
+            	},
+            	
+            	searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+            	
+                resultList: {
+                    type: Object,
+                    value: function(){
+                        return [];
+                    }
+                }
+            },
+
+            initialized: function(){
+                var me = this;
+//                 me.doFindList();
+            },
+            
+            load: function(param){
+            	var me = this;
+            	var resultList = [];
+            	param.forEach(function(data, index){
+            		resultList.push({
+            			title : data.content.title
+            			, body : data.content.body
+            			, tzSendDate : data.tzSendDate
+            			});
+            	});
+            	me.set("resultList", resultList);
+            	
+            	UT.request(this.$.getAlarmNoticeList);	
+            },
+            
+            completeGetAlarmNoticeList: function(e,res){
+            	var me = this;
+            	var result = res.response.body || [];
+            	//console.log(JSON.stringify(result));
+            	me.set("resultList", result);
+            },
+            
+            onHiddenAlarm : function(){
+            	var me = this;
+            	
+            	 var provider = me.$.gridPanel.getDataProvider();
+	  			 var selectionItems = provider.selectionCheckedItems();
+	  				
+	  				
+	  			 if (selectionItems.length === 0) {
+                     UT.alert("STD.N1600");
+                     return;
+                 }
+	  			 
+	  			UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+	                me.$.updateAlarmNoticeHidden.body = {
+	                    hiddenList: selectionItems,
+	                };
+	                UT.request(me.$.updateAlarmNoticeHidden);
+              	});
+            	
+            },
+            
+            completeUpdateAlarmNoticeHidden : function(e,res){
+            	var me = this,
+                message = "STD.N2400"; // 저장하였습니다.
+
+	            if(res.response.result_status === 'S'){
+	                UT.alert(message, function(){
+	                	UT.request(me.$.getAlarmNoticeList);	
+	                });
+	            } else {
+	                message = res.response.result_message;
+	                UT.alert(message);
+	            }
+            },
+            
+            clear: function(){
+            	var me = this;
+            	me.reset();
+            },
+            onClose: function() {
+                var me = this;
+                me.fire("close");
+                me.reset();
+            }
+        });
+    </script>
+    
+</dom-module>

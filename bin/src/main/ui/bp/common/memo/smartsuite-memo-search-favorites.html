@@ -1,0 +1,150 @@
+<link rel="import" href="resources/lib/custom/cc-memo-search-container.html">
+
+<dom-module id="smartsuite-memo-search-favorites">
+
+    <style>
+       :host {
+			@apply(--vbox-layout);      
+        }
+    </style>
+    
+    <template>
+    
+        <sc-ajax id="findList" 
+	        url="findListFavorites.do" 
+	        body="{{findList.param}}" 
+	        last-response="{{resultList}}">
+        </sc-ajax>
+        
+        <sc-ajax id="deleteFavorites" 
+	        url="deleteFavorites.do" 
+	        body="{{deleteParam}}"
+	        on-response="completeDeleteFavorites">
+        </sc-ajax>
+        
+        <div class="vbox flex">
+            <cc-memo-search-container on-search="onFindList">
+	            <table>
+	                <tr>
+	                    <th width="60px"><sc-label text="아이디"></sc-label></th>
+	                    <td><sc-text-field value="{{findList.param.usr_id}}" class="w-80" maxLength="50" on-enter="onFindList"></sc-text-field></td>
+	                    
+	                    <th width="60px"><sc-label text="이름"></sc-label></th>
+	                    <td><sc-text-field value="{{findList.param.usr_nm}}" class="w-80" maxLength="50" on-enter="onFindList"></sc-text-field></td>
+	                </tr>
+	                <tr>
+		                <th width="60px"><sc-label text="부서명"></sc-label></th>
+		                <td><sc-text-field value="{{findList.param.dept_nm}}" class="w-80" maxLength="50" on-enter="onFindList"></sc-text-field></td>
+		            </tr>
+	            </table>
+        	</cc-memo-search-container>
+    
+            <div class="smartsuite-memo-vspace-5"></div>
+             
+            <sc-grid id="gridPanel" class="flex" data-provider="{{resultList}}" use-state="false" editable="false">
+	            <sc-toolbar>
+	                <sc-button text="선택" on-click="onSelectedList"></sc-button>
+	                <sc-button text="즐겨찾기삭제" on-click="onDeleteFavorites"></sc-button>
+	            </sc-toolbar>
+	            <sc-grid-columns>
+	                <sc-data-column data-field="usr_id" header-text="아이디" width="90" text-align="center"></sc-data-column>
+	                <sc-data-column data-field="usr_nm" header-text="이름" width="120" text-align="center"></sc-data-column>
+	            	<sc-data-column data-field="dept_nm" header-text="부서명" width="90" text-align="center"></sc-data-column>
+	            </sc-grid-columns>
+	        </sc-grid>   
+        </div>
+
+    </template>
+    
+    <script>
+        Polymer({
+            is: "smartsuite-memo-search-favorites",
+            properties: {
+                findList: {
+                    type: Object,
+                    value: function(){
+                        return {
+                            param: {}
+                        };
+                    }
+                },
+                
+                deleteParam: {
+                	type: Object,
+                	value: function(){
+                		return {
+                			usr_id: []
+                		};
+                	}
+                },
+                
+                resultList: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                }
+            },
+            
+            // 화면 생성 완료
+            attached: function() {
+                this.onFindList();
+            },
+            
+            // 즐겨찾기 삭제 후 목록 리셋
+            reset : function() {
+            	this.onFindList();
+            	this.deleteParam.usr_id = [];
+            },
+            
+            // 검색(조회)
+            onFindList : function() {
+                memoUtil.request(this.$.findList);
+            },
+            
+            // 선택 목록 반환
+            onSelectedList: function() {
+            	var me = this,
+            	provider = me.$.gridPanel.getDataProvider(),
+            	checked = provider.selectionCheckedItems();
+            	
+                me.fire("selected-items", checked);
+            },
+            
+            // 즐겨찾기 목록 삭제
+            deleteFavorites: function(selectedList) {
+            	var me = this,
+            		len = selectedList.length;
+            	
+            	memoUtil.confirm(me.translate("즐겨찾는 사용자 목록에서 삭제하시겠습니까?"), function(btn) {					
+	            	for(var i = 0; i < len; i++){
+		            	me.deleteParam.usr_id[i] = selectedList[i].usr_id;
+	            	}
+                    memoUtil.request(me.$.deleteFavorites);
+               	});
+            },
+            
+         	// 즐겨찾기 삭제 버튼
+            onDeleteFavorites : function() {
+            	var me = this,
+	            	provider = me.$.gridPanel.getDataProvider(),
+	            	checked = provider.selectionCheckedItems();
+            	
+                me.deleteFavorites(checked);
+            },
+            
+         	// 즐겨찾기 목록 삭제 완료
+            completeDeleteFavorites: function(e, res){
+            	memoUtil.alert(this.translate("즐겨찾기 목록에서 삭제되었습니다."));
+            	this.reset();
+            	this.fire('data-deleted');
+            },
+            
+          	//닫기
+            onClose : function(e) {
+            	this.fire('close');
+            }
+        });
+    </script>
+
+</dom-module>

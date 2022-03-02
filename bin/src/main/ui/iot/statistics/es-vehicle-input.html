@@ -1,0 +1,327 @@
+<dom-module id="es-vehicle-input">
+	<!--
+        ******************************************************************************************
+        ** @Program-name    : 기간별 이동장비 투입통계
+        ** @Description     :
+        ** @Author          : jhkim
+        ** @Create Date     : 2020.07.07
+        ** @History         : 2020.07.07 jhkim 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		<sc-ajax id="findVehicleInputStat" url="findVehicleInputStat.do" on-response="completeFindVehicleInputStat" body="{{searchParam}}"></sc-ajax>
+
+		<sc-request-group id="codes" init>
+			<sc-code-group>
+				<sc-code code="IOT004" value="{{codes.vehicleJobList}}"></sc-code>
+			</sc-code-group>
+			<!-- 협력사 조회 -->
+			<sc-ajax url="findListVendor.do"  last-response="{{codes.vendorList}}" body="{{searchParam}}"></sc-ajax>
+			<!-- 직종 조회 -->
+			<sc-ajax url="findListJobType.do"  last-response="{{codes.jobTypeList}}" body="{{searchParam}}"></sc-ajax>
+		</sc-request-group>
+		
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+        
+        <cc-search-container on-search="onSearch" auth-r>
+			<table validation-group="search">
+				<colgroup>
+					<col style="width:60px">
+					<col style="width:200px">
+					<col style="width:50px">
+					<col style="width:200px">
+					<col style="width:50px">
+					<col>
+				</colgroup>
+				<tr>
+					<th><sc-label text="유형"></sc-label></th>
+					<td>
+						<sc-combobox-field class="w-170" input-clear="false" selected-index="0" selected-index="0"
+								items="{{codes.vehicleJobList}}" display-field="label" value-field="data"
+								value="{{searchParam.vehicleTypes2}}" enable-check-all="true">
+	                    </sc-combobox-field>
+                    </td>
+					<th><sc-label text="장비"></sc-label></th>
+					<td>
+						<sc-multi-combobox-field class="w-170" placeholder="전체선택" input-clear="false" selected-all="true"
+								items="{{codes.jobTypeList}}" display-field="jobTypeName" value-field="id" enable-check-all="true"
+								value="{{searchParam.jobTypeIds}}">
+	                    </sc-multi-combobox-field>
+					</td>
+					<th><sc-label text="기간"></sc-label></th>
+					<td>
+						<sc-period-date-field id="period" string-date="true" string-format="YYYY-MM-DD" from-value="{{searchParam.startDt}}" to-value="{{searchParam.endDt}}" 
+							to-required="true" default-from-value="-7d" default-to-value="0d" max-date="{{today}}" range="30d" mark-range="true" input-clear="false"></sc-period-date-field>
+					</td>
+				</tr>
+			</table>
+		</cc-search-container>
+        <div class="vbox flex">
+        	<div class="vspace-10"></div>
+        	<div class="flex" id="chartDiv"></div>
+        </div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-vehicle-input",
+            properties : {
+            	// 공통코드
+				codes : {
+	               	type : Object,
+	               	value : function(){
+		               	return	{
+			               	 vendorList : []				// 협력사 목록
+		               	 	,standards : []
+		               	};
+	               	},
+	               	reset: false
+	            },
+            	searchParam : {
+	            	type : Object,
+	            	value : function(){
+	            		return {
+		            		vehicleIds:[2],
+		            		vehicleTypes : ["excavator"],
+		            		siteId : SCMdiManager.searchParam.site_id
+		            	};
+	            	}
+		        },
+		        today : {
+					type : Object, 
+					value : function(){
+						return new Date();
+					}
+
+			    },
+			    statisticsData : {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				}	
+            },
+            initialized : function() {		// 초기화 완료 후 호출 함수
+                var me = this;
+                me.onSearch();
+            },
+            onSearch : function(){
+                var me = this;
+                if(UT.isEmpty(me.searchParam.startDt) ||UT.isEmpty(me.searchParam.endDt)){
+					UT.alert("검색기간을 입력해주세요");
+					return;
+                }
+
+            	UT.request(me.$.findVehicleInputStat);
+            },
+            completeFindVehicleInputStat : function(e, res){
+				var me = this;
+                //me.setChart(res.response.body);
+                var data = [];
+				var count = 12;
+
+				// 임시데이터 만들기
+				var legend =[];
+				for(var i = 0; i<count; i++){
+					legend[i] = "legend"+i;
+					var arr = [];
+
+					var object = {};
+					for(var j=0; j < 10; j++){
+						arr[j] = Math.floor(Math.random() * 10)+1;
+					}
+					object.data = arr;
+					object.name= legend[i];
+					object.type="line";
+					data[i]=object;
+				}
+
+				var startDate = moment(me.searchParam.startDt);
+				var endDate = moment(me.searchParam.endDt);
+
+				var dateArray = [];
+
+				var currentDate = moment(me.searchParam.startDt);
+
+				while (currentDate <= endDate) {
+					dateArray.push(moment(currentDate).format('YYYY-MM-DD'));
+			        currentDate = moment(currentDate).add(1, 'days');
+			    }
+
+                me.setTestData(data, legend, dateArray);
+            },
+            setTestData(chartData, legend, dateArray){
+				var me = this;
+				echarts.dispose(chartDiv);
+				chart = echarts.init(chartDiv);
+
+				var yaxis = [];
+				var colors=[];
+				for(var i = 0; i <chartData.length; i++){
+					chartData[i].yAxisIndex=i;
+					var random = Math.random();
+					var color = "#"+Math.round(random*0xffffff).toString(16);
+					colors[i] = color;
+					var object = {
+							type: 'value',
+				            position: 'right',
+				            name : 'legend'+i,
+				            offset:40*i,
+				            axisLine: {
+				                lineStyle: {
+				                    color: color
+				                }
+				            }
+				        };
+					yaxis[i] = object;
+				}
+
+				var right = ''+(40*chartData.length);
+
+				var option = {
+						color: colors,
+					    tooltip: {
+					        trigger: 'axis',
+					        axisPointer: {
+					            type: 'cross'
+					        }
+					    },
+					    legend: {
+						    top : '92%',
+					        data: legend
+					    },
+					    grid: {
+					        left: '0',
+					        right: right,
+					        bottom: '15%',
+					        containLabel: false
+					    },
+					    toolbox: {
+					        feature: {
+					            saveAsImage: {title:'다운로드'}
+					        }
+					    },
+					    xAxis: {
+					        type: 'category',
+					        boundaryGap: true,
+					        axisTick: {
+				                alignWithLabel: true
+				            },
+					        data: dateArray,
+					        maxInterval: 3600 * 1000 * 24
+					    },
+					    yAxis:yaxis,
+					    series: chartData
+					};
+
+					chart.setOption(option);
+
+					chart.on('legendselectchanged', function (params) {
+					    var option = chart.getOption();
+					    var idx = 0;
+					    for(var i =0; i < option.yAxis.length; i++){
+							option.yAxis[i].show = params.selected[option.yAxis[i].name];
+							if(params.selected[option.yAxis[i].name]){
+								option.yAxis[i].offset = idx * 40;
+								idx++;
+							}
+						}
+						option.grid[0].right = ''+40*idx;
+					    chart.setOption(option);
+					});
+										
+
+            },
+            setChart(chartData){
+				var me = this;
+				var chartDiv = me.$.chartDiv;
+				echarts.dispose(chartDiv);
+				chart = echarts.init(chartDiv);
+
+				var startDate = moment(me.searchParam.startDt);
+				var endDate = moment(me.searchParam.endDt);
+
+				var dateArray = [];
+
+				var currentDate = moment(me.searchParam.startDt);
+
+				while (currentDate <= endDate) {
+					dateArray.push(moment(currentDate).format('YYYY-MM-DD'));
+			        currentDate = moment(currentDate).add(1, 'days');
+			    }
+				
+				var chartTitle = startDate.format('YYYY-MM-DD')+"~"+endDate.format('YYYY-MM-DD')+" 이동장비 투입 통계";
+
+				var data = chartData.data;
+
+				var option = {
+					    title: {
+					        text : chartTitle
+					    },
+					    tooltip: {
+					        trigger: 'axis'
+					    },
+					    legend: {
+						    top : '92%',
+					        data: chartData.legend
+					    },
+					    grid: {
+					        left: '0',
+					        right: '0',
+					        bottom: '15%',
+					        containLabel: true
+					    },
+					    toolbox: {
+					        feature: {
+					            saveAsImage: {title:'다운로드'}
+					        }
+					    },
+					    xAxis: {
+					        type: 'category',
+					        boundaryGap: true,
+					        axisTick: {
+				                alignWithLabel: true
+				            },
+					        data: dateArray,
+					        maxInterval: 3600 * 1000 * 24
+					    },
+					    yAxis:[ 
+						   	{
+					        	type: 'value'
+					    	},
+						   	{
+					        	type: 'value'
+					    	}
+					    ],
+					    series: data
+					};
+
+					chart.setOption(option);
+				
+            }
+        });
+	</script>
+</dom-module>

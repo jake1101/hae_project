@@ -1,0 +1,99 @@
+<dom-module id="ep-weak-type">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 취약근로자 팝업
+        ** @Description		: 취약근로자 팝업
+        ** @Author 			: JongHoon Baek
+        ** @Create Date 	: 2020.01.16
+        ** @History 		: 2020.01.16 JongHoon Baek 최초작성
+        ******************************************************************************************
+    -->
+
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+	</style>
+	
+	<template>
+	
+		 <sc-request-group init>
+			<sc-code-group>
+				<sc-code code="IOT015" value="{{codes.weakTypeList}}"></sc-code> <!-- 취약근로자 정보 -->
+			</sc-code-group>
+			
+		</sc-request-group>
+	
+		<sc-grid  id="gridPanel"  data-provider="{{weakTypeList}}" on-item-click="onItemClick" editable="true" >
+			<cc-grid-toolbar>
+				<sc-button text="선택" on-click="onSelect" auth-s></sc-button>
+			</cc-grid-toolbar>
+			
+			<sc-grid-columns >
+				<sc-data-column header-text="코드" data-field="data" width="120" text-align="center"  ></sc-data-column>
+				<sc-data-column header-text="타입" data-field="label" width="120" text-align="center"   ></sc-data-column>
+			</sc-grid-columns>
+		</sc-grid>	
+			
+	</template>
+	
+	<script>
+		Polymer({
+			is : "ep-weak-type",
+			
+			properties : {
+				
+				
+				searchParam: {
+					type : Object,
+					value : function(){
+						return {
+						};
+					}
+				},
+				codes: {
+					type : Object,
+					value : function(){
+						return {
+						};
+					}
+				},
+				weakTypeList: {
+					type : Array,
+					value : function(){
+						return [];
+					}
+				},
+				
+			
+			},
+			load:function(weakType){
+ 				var me = this;
+ 				me.weakTypeList = me.codes.weakTypeList;
+
+ 				for(var i in weakType){
+ 					var item = me.$.gridPanel.searchItem('data', weakType[i], 0);
+ 					me.$.gridPanel.selectionCheck(item.itemIndex, true, false);
+ 	 			}
+			},
+			onSelect: function(){
+				var me =this;
+				
+				var provider = me.$.gridPanel.getDataProvider();
+				var selectionItems = provider.selectionCheckedItems();
+				
+				me.fire("show-list",selectionItems);
+                me.onClose();
+				
+			},
+			        
+ 	         onClose: function(){
+ 	        	this.fire('close');
+ 			 } 
+ 			 
+	
+		})
+	
+	</script>
+	
+</dom-module>

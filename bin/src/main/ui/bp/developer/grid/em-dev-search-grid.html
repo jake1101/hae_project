@@ -1,0 +1,205 @@
+<dom-module id="em-dev-search-grid">
+	<!-- layout Style -->
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+	<!--  화면 구성 시작-->
+    <template>
+		<sc-ajax id="findListPr" url="/ui/dev/pr/findListPr.do" body="{{searchParam}}" last-response="{{resultList}}"></sc-ajax>
+		<sc-ajax id="findListPr2" url="/ui/dev/pr/findListPr.do" body="{{searchParam}}" on-response="onResponse"></sc-ajax>
+
+              
+       	<!-- page title toolbar -->
+       	<sc-toolbar>
+       		<sc-label text="그리드 조회 샘플(이벤트)  " ></sc-label>
+            <sc-spacer></sc-spacer>
+            <sc-button text="조회(바인딩)" on-click="onSearch"></sc-button>
+            <sc-button text="조회(callback)" on-click="onSearch2"></sc-button>
+            <sc-button text="데이터 삭제" on-click="onGridDataRemove"></sc-button>
+        </sc-toolbar>
+		<sc-panel collapsible="true">
+			<!--  조회 조건 테이블--> 
+	       <table class="table">
+	        	<colgroup>
+	        		<col style="width:150px"></col>
+	        		<col></col>
+	        		<col style="width:150px"></col>
+	        		<col></col>
+	        	</colgroup>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="운영조직" ></sc-label>
+	        		</th>
+	        		<td>
+	        			<cc-operorg-multi-combobox-field id="operorgcombobox" oper-unit-cd="PO" value="{{searchParam.oper_org_cd}}" placeholder="선택없음" required="true"></cc-operorg-multi-combobox-field>
+	        		</td>
+	        		<th>
+	        			<sc-label text="구매요청일" ></sc-label>
+	        		</th>
+	        		<td colspan="3">
+	        			<sc-period-date-field required="true" from-value="{{searchParam.from_create_date}}" to-value="{{searchParam.to_create_date}}" default-from-value="-1M" string-date="false"></sc-period-date-field>
+	        		</td>
+	        	</tr>	        	
+	           	
+	        </table>
+        </sc-panel>
+        <!-- editable="{{gridEditable}}" -->
+        
+        <sc-grid  id="gridPanel" title-text="구매요청목록" data-provider="{{resultList}}"  editable="[[gridEditable]]"
+                  on-item-click="onItemClick" on-item-edit-end="onItemEditEnd" on-item-edit-begin="onItemEditBegin"
+                  selection-able-function="selectAbleFn" hidden="{{gridHidden}}"
+                >
+    			<sc-toolbar>
+    				<sc-button text="에디트 활성" on-click="onGridEditActivity"></sc-button>
+    				<sc-button text="에디트 비활성" on-click="onGridEditInactive"></sc-button>
+    			</sc-toolbar>
+    			<sc-grid-columns>
+       				<sc-data-column data-field="pr_rev" 			header-text="차수" 			width="50" 		text-align="center" 	editable="false" ></sc-data-column>
+      				<sc-data-column data-field="pr_tit" 			header-text="구매요청 명" 		width="300" 	text-align="left" 		editable="false" ></sc-data-column>
+       				<sc-data-column data-field="cur" 				header-text="통화" 			width="50" 		text-align="center" 	editable="false" ></sc-data-column>
+      				<sc-data-column data-field="pr_tot_amt"         header-text="요청금액" width="100" text-align="right" editable="true"  ></sc-data-column>
+      				<sc-data-column data-field="pr_req_nm" 			header-text="요청자" 			width="100" 	text-align="center" 	editable="false" ></sc-data-column>
+      				<sc-data-column data-field="pr_req_dept_nm" 	header-text="구매요청 부서" 		width="100" 	text-align="center" 	editable="false" ></sc-data-column>
+      				
+      				<sc-data-column data-field="reject_item_cnt" 	header-text="반려 건수" 		width="100" 	text-align="center" 	editable="false" ></sc-data-column>
+      			</sc-grid-columns>
+               <!-- 화면에는 보이지 않은 datatype을  정의하고 싶을때 사용함.
+                <sc-grid-fields> 
+                    <sc-gird-field data-field="pr_req_date" data-type="datetime"></sc-gird-field>
+                </sc-grid-fields>
+               -->
+     	</sc-grid>
+     	
+	</template>
+   	<!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+  	 	
+        Polymer({
+            is: 'em-dev-search-grid',
+            
+            properties : {
+                gridHidden : {
+                    type : Boolean,
+                    value : false
+                },
+	            gridEditable:{
+	                type : Object,
+	                value: true
+	            },
+            	searchParam : {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				},
+                resultList: {
+                	type:Array
+                }
+                
+            },
+            
+            //리스트(바인딩) 조회
+            onSearch : function(){
+                UT.request(this.$.findListPr);
+            },
+			
+			//리스트(callback) 조회
+            onSearch2 : function(){
+                UT.request(this.$.findListPr2);
+            },
+			//sc-ajax callback
+			onResponse : function(e, res){
+            	var result = res.response;
+            	/*
+            	  for(var i = 0,len = result.length; i < len; i++ ){
+            		  데이터 가공
+            	  }
+            	*/
+            	this.$.gridPanel.setDataProvider(result);
+                this.$.gridPanel.getDataProvider().setItemAt()
+            },
+            
+            onGridDataRemove :  function(){
+                this.$.gridPanel.getDataProvider().removeAll();
+            }, 
+          
+            onGridEditActivity : function(){
+                this.set("gridHidden",true);
+                this.set("gridEditable",true);
+            },
+            onGridEditInactive : function(){
+                this.set("gridHidden",false);
+            	this.set("gridEditable",false);
+            },
+               
+            /**그리드 이벤트**/	
+
+			onItemClick : function(event){
+  				var me = this,
+  				data = event.detail.data,   //클릭한 row의 데이터
+  				item = event.detail.item,   //{dataField,rownIndex,columnIndex}
+                provider  = event.detail.provider;
+  				
+                console.log('##onItemClick  [data]: ', data,'  [item] : ',item,'  [provider]: ',provider);  				
+                if(item.dataField === 'pr_no') {
+                   	//me.fire('show-product-pr-detail',data);
+                   	 
+                }
+               
+            },
+
+            onItemEditEnd : function(event){
+            	var me = this, e = event.detail,
+  				    data = e.data,
+  				    item = e.item,
+                    newValue = e.newValue,
+                    oldValue = e.oldValue,
+  				    provider = e.provider;
+
+                console.log('##onItemEditEnd [data]: ', data,'  [item] : ',item,'  [newValue]: ',newValue,'  [oldValue]: ',oldValue);  
+
+           		if(item.dataField == "xxxx"){
+                    //var amount =  data.xxx * data.xxxx;
+                    //provider.setCellValue(item.rowIndex,"amountField",amount);
+                }
+            },
+
+            onItemEditBegin : function(event){
+                var me = this, e = event.detail,
+                    data = e.data,
+                    item = e.item,  
+                    editingValue = e.editingValue,
+                    provider = e.provider;
+
+                    console.log('##onItemEditBegin [data]: ', data,'  [item] : ',item,'  [editingValue]: ',editingValue);
+
+                    if(item.dataField == "pr_tot_amt"){
+                        if(editingValue > 9000000){
+                           SCAlert.show('알림','9000000 보다 큰수는 입력할수 없습니다.');
+                           //edit취소
+                           this.$.gridPanel.cellEditCancel();
+                                                  
+                        }
+                    }
+            },
+
+            selectAbleFn : function(data){
+
+                if(data.pr_tit == '테스트'){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+  		
+			
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

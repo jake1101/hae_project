@@ -1,0 +1,34 @@
+package smartsuite.app.bp.sample;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@Transactional
+public class DeveloperGuideService {
+
+	@Inject
+	private SqlSession sqlSession;
+	
+	private final String namespace = "sample.";
+	
+	/**
+	 * 구매요청 정보 조회
+	 */
+	public Map<String, Object> findPr(Map<String, Object> param) {
+		return sqlSession.selectOne(namespace + "findPr", param);
+	}
+	
+	/**
+	 * 구매요청 품목 목록 조회
+	 */
+	public List<Map<String, Object>> findListPrItem(Map<String, Object> param) {
+		return sqlSession.selectList(namespace + "findListPrItem", param);
+	}
+}

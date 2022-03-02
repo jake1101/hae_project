@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="parenleft" format="1">
+  <advance width="716"/>
+  <unicode hex="0028"/>
+  <outline>
+    <contour>
+      <point x="218" y="527" type="line"/>
+      <point x="218" y="832"/>
+      <point x="435" y="1362"/>
+      <point x="588" y="1454" type="qcurve"/>
+      <point x="593" y="1454" type="line"/>
+      <point x="608" y="1422" type="line"/>
+      <point x="470" y="1331"/>
+      <point x="267" y="815"/>
+      <point x="267" y="531" type="qcurve"/>
+      <point x="267" y="508" type="line"/>
+      <point x="267" y="222"/>
+      <point x="470" y="-293"/>
+      <point x="608" y="-384" type="qcurve"/>
+      <point x="593" y="-417" type="line"/>
+      <point x="588" y="-417" type="line"/>
+      <point x="433" y="-322"/>
+      <point x="218" y="192"/>
+      <point x="218" y="509" type="qcurve"/>
+    </contour>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.typemytype.robofont.layerData</key>
+      <dict>
+      </dict>
+      <key>com.typemytype.robofont.mark</key>
+      <array>
+        <real>1.0</real>
+        <real>0.7255</real>
+        <real>0.7149</real>
+        <real>1.0</real>
+      </array>
+      <key>org.robofab.fontlab.mark</key>
+      <integer>170</integer>
+    </dict>
+  </lib>
+</glyph>

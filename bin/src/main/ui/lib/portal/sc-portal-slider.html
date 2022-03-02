@@ -1,0 +1,133 @@
+
+<dom-module id="sc-portal-slider">
+    <template>
+        <style>
+            :host {
+                
+                
+            }
+            #slideBar {
+				padding: 6px 0px 6px 0px;
+			    border-style: solid;
+			    border-color: #cecece;
+			    border-width: 1px;
+			    background-image: none;
+			    background-color: #f3f3f4;
+			    width:100%;
+			}
+			#slideBar-inner {
+				height: 15px;
+			    overflow: hidden;
+			    position: relative;
+			    left: 0;
+			    top: 0;
+			    
+			}
+			#slideBar-body {
+				background-image: url(../../../bower_components/resources/img/slider-bg.png);
+			    height: 15px;
+			    position: relative;
+			    left: 0;
+			    top: 0;
+			    overflow: visible;
+			    vertical-align: middle;
+			}
+            
+        </style>
+
+		<div class="" id="slideBar">
+			<div id="slideBar-inner" data-ref="innerCt" role="presentation" class="x-box-inner" style="">
+				<div id="slideBar-body">
+					<content></content>
+				</div>
+			</div>
+		</div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'sc-portal-slider',
+            
+            nonReusable: true,
+            
+            behaviors: [
+  				Polymer.SCInteractDraggableBehavior,
+  				Polymer.BehaviorIDGenerator,
+  				Polymer.SCResizableBehavior
+           	],
+
+            properties: {
+                info: {
+                    type: Object
+                },
+                
+                interactDraggableSelector : {
+               		type : String,
+               		value : '.slider-thumb'
+               	},
+               	
+    			interactDraggable : {
+    				type : Object,
+    				value : true
+    			},
+    			
+               	draggable : {
+               		type : Boolean,
+    				value : true
+               	},
+    			
+                listeners : {
+        			'interact-drag-end' : '_onInteractDragEnd',
+        			'interact-drag-start' : '_onInteractDragStart',
+        		},    			
+            },
+            _onInteractDragStart : function(event){
+            	
+            },
+            
+            resize :  function(event){
+            	var pRect = this.parentElement.getBoundingClientRect();
+            	this.$.slideBar.style.width = (pRect.width-40) + "px";
+            },
+            
+        
+			_onInteractDrag : function(event) {
+				var target = event.target,
+					x = (parseFloat(target.style.left.replace('px', '')) || 0) + event.dx;
+			        direction = (event.dx < 0);
+				
+				target.style.left = x + 'px';
+				
+			    this.fire('interact-drag', event);
+			},     
+			
+			_onInteractDragEnd : function(event) {
+				var thumbs = Polymer.dom(this).querySelectorAll('.slider-thumb');
+				var thumbsLeft = [];
+				
+				for(idx in thumbs) {
+					thumbsLeft.push(thumbs[idx].offsetLeft+(thumbs[idx].getBoundingClientRect().width/2));
+				}
+				
+				
+				this.fire('slider-changed', {left:thumbsLeft})				
+			},
+			
+			load : function(thumbList){
+				var thumbs = Polymer.dom(this).querySelectorAll('.slider-thumb');
+				for(idx in thumbs) {
+					Polymer.dom(this).removeChild(thumbs[idx]);	
+				}
+				
+				for(var i=0; i < thumbList.length-1; ++i ){
+					var thumb = document.createElement('div');
+					thumb.setAttribute('class', 'slider-thumb');
+					thumb.style["left"]=(thumbList[i]-13)+"px";
+					Polymer.dom(this).appendChild(thumb);
+				}
+			}
+        
+       		
+        })
+    </script>
+</dom-module>

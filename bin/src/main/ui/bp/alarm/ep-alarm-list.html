@@ -1,0 +1,83 @@
+<dom-module id="ep-alarm-list">
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+	</style>
+	
+	<template>
+		
+			<sc-ajax id="findInfoAlarmHistory"
+				 url="findInfoAlarmHistory.do"
+				 body="{{param}}"
+				 on-response="completeFind"></sc-ajax>
+	
+	
+	
+		<cc-page-title-bar page-title="알림내용"></cc-page-title-bar>
+		<table class="tb-form">
+			<tr>
+				<th><sc-label text="No"></sc-label></th>
+				<td colspan=3><sc-text-field value="{{info.seq}}" placeholder="자동으로입력됩니다" max-length="20" readonly="true"></sc-text-field></td>
+			</tr>
+			<tr>
+				<th><sc-label text="대상"></sc-label></th>
+				<td colspan=3><sc-text-field value="{{info.node_name}}" placeholder="입력하세요" max-length="20" readonly="true"></sc-text-field></td>
+			</tr>
+			<tr>
+				<th><sc-label text="구분"></sc-label></th>
+				<td colspan=3><sc-text-field value="{{info.node_typ}}" placeholder="입력하세요" max-length="20" readonly="true"></sc-text-field></td>
+			</tr>
+			<tr>
+				<th><sc-label text="발생시간"></sc-label></th>
+				<td colspan=3><sc-date-field style="width:100%" value="{{info.send_dt}}" placeholder="입력하세요" format="YYYY/MM/DD HH:mm:ss" readonly="true"><sc-date-field></td>
+			</tr>
+			<tr>
+				<th><sc-label text="제목"></sc-label></th>
+				<td colspan=3><sc-text-field value="{{info.title}}" placeholder="입력하세요" max-length="20" readonly="true"></sc-text-field></td>
+			</tr>
+			<tr>
+				<th><sc-label text="내용"></sc-label></th>
+				<td colspan=3><sc-textarea-field class="h-100" value="{{info.cmmt}}" placeholder="입력하세요" max-length="20" readonly="true"></sc-textarea-field></td>
+			</tr>
+			
+		</table>
+			
+		
+	
+	
+	</template>
+	
+	
+	<script>
+	Polymer({
+		is : "ep-alarm-list",
+		
+		properties : {
+			
+			info : {
+				type : Object,
+				value : function(){
+					return {};
+				}
+			}
+		},
+		
+		load:function(data){
+			var me = this;
+			this.set("param",data);
+		 	UT.request(this.$.findInfoAlarmHistory);
+			
+		},
+		
+		
+		completeFind : function(e, res){
+			var data = res.response;
+			this.set("info", data);
+			
+			//console.log(JSON.stringify(data));
+		}
+		
+	})
+	</script>
+</dom-module>

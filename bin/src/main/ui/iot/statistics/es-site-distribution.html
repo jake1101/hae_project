@@ -1,0 +1,406 @@
+<!-- <sc-link rel="import" href="ep-target-find.html"></sc-link> -->
+<dom-module id="es-site-distribution">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 현장 분포도
+        ** @Description		: 통계 > 현장 분포도
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.05.18
+        ** @History 		: 2020.05.18 jhkim 최초작성
+        ******************************************************************************************
+    -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+            overflow:hidden !important;
+        }
+        .cc-search-container{
+        	padding-right : 15px;
+        }
+    </style>
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		<!-- 공통코드 조회-->
+		<sc-request-group id="codes" init>
+			<sc-code-group>
+				<sc-code code="IOT003" value="{{codes.targetType}}"></sc-code>
+				<sc-code code="IOT004" value="{{codes.vehicleJobList}}"></sc-code>
+			</sc-code-group>
+			<!-- 협력사 조회 -->
+			<sc-ajax url="findListVendor.do"  last-response="{{codes.vendorList}}" body="{{searchParam}}"></sc-ajax>
+			<sc-ajax url="findListJobType.do"  last-response="{{codes.jobTypeList}}" body="{{searchParam}}"></sc-ajax>
+			<!-- 현장 현황 조회 -->
+			<sc-ajax url="findSiteCondition.do" last-response="{{siteCondition}}" body="{{searchParam}}"></sc-ajax>
+		</sc-request-group>
+		<!-- 대상 목록 이력 조회 -->
+		<sc-ajax id="search" url="siteDistribution.do" on-response="completeSearch" body="{{searchParam}}"></sc-ajax>
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<cc-search-container on-search="onSearch" auth-r>
+			<table validation-group="search">
+				<colgroup>
+					<col style="width:60px">
+					<col style="width:200px">
+					<col style="width:90px">
+					<col style="width:200px">
+					<col style="width:100px">
+					<col style="width:200px">
+					<col style="width:80px">
+					<col style="width:200px">
+					<col style="width:50px">
+					<col>
+				</colgroup>
+				<tr>
+					<th><sc-label text="협력사"></sc-label></th>
+					<td>
+						<sc-multi-combobox-field class="w-170" placeholder="전체선택" input-clear="false" selected-all="true"
+								items="{{codes.vendorList}}" display-field="name" value-field="id"
+								value="{{searchParam.vendorIds}}" enable-check-all="true">
+	                    </sc-multi-combobox-field>
+					</td>
+					<th><sc-label text="작업자 유형"></sc-label></th>
+					<td>
+						<sc-multi-combobox-field class="w-170" placeholder="전체선택" input-clear="false" selected-all="true"
+								items="{{codes.jobTypeList}}" display-field="jobTypeName" value-field="id" enable-check-all="true"
+								value="{{searchParam.jobTypeIds}}">
+	                    </sc-multi-combobox-field>
+					</td>
+					<th><sc-label text="이동장비 유형"></sc-label></th>
+					<td>
+						<sc-multi-combobox-field class="w-170" placeholder="전체선택" input-clear="false" selected-all="true"
+								items="{{codes.vehicleJobList}}" display-field="label" value-field="data"
+								value="{{searchParam.vehicleTypes}}" enable-check-all="true">
+	                    </sc-multi-combobox-field>
+					</td>
+					<th><sc-label text="표시대상"></sc-label></th>
+					<td>
+						<sc-multi-combobox-field class="w-170" placeholder="전체선택" input-clear="false" selected-all="true"
+								items="{{codes.targetType}}" display-field="label" value-field="data"
+								value="{{searchParam.targetTypes}}" enable-check-all="true" on-change="changeTargetType">
+	                    </sc-multi-combobox-field>
+					</td>
+					<th><sc-label text="일자"></sc-label></th>
+					<td>
+						<sc-date-field value="{{searchParam.startDt}}" display-format="yyyy-MM-dd" style="width:170px;"></sc-date-field>
+    					<span style="margin:0 2px">  </span>
+						<sc-number-field style="width : 42px;" value="{{startHH}}" min-value="0" max-value="23" default-value="0"></sc-number-field>
+    					<span style="margin:0 2px"> : </span>
+    					<sc-number-field style="width : 42px;" value="{{startmm}}" min-value="0" max-value="59"  default-value="0"></sc-number-field>
+    					~
+	            		<sc-number-field style="width : 42px;" value="{{endHH}}" min-value="0" max-value="23" default-value="23"></sc-number-field>
+    					<span style="margin:0 2px"> : </span>
+    					<sc-number-field style="width : 42px;" value="{{endmm}}" min-value="0" max-value="59" default-value="59"></sc-number-field>
+					</td>
+				</tr>
+			</table>
+		</cc-search-container>
+		<div class="vspace-5"></div>
+			<div class = "vbox flex">
+				<cc-ol-map-container id="mapContainer"></cc-ol-map-container>
+			</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+		Polymer({
+			is : 'es-site-distribution',
+			properties:{
+				// 공통코드
+				codes : {
+	               	type : Object,
+	               	value : function(){
+		               	return	{
+			               	 vendorList : []				// 협력사 목록
+		               	    ,targetType : []				// 표시 유형
+		               		,workerJobList : []			// 작업자 유형
+	               			,vehicleJobList : [] 			// 이동장비 유형
+		               	};
+	               	},
+	               	reset: false
+	            },
+	            test: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+	            searchParam : {
+	            	type : Object,
+	            	value : function(){
+		            	var startDt = new Date();
+		            	startDt.setHours(0,0,0,0);
+		            	var endDt = new Date();
+		            	endDt.setHours(23,59,59,999);
+	            		return {
+		            		siteId : SCMdiManager.searchParam.site_id,
+		            		startDt : startDt,
+		            		endDt : endDt,
+		            		areaType : "site",
+		            		areaId : 0  
+		            	}
+	            	}
+		        },
+		    	 // 지도
+                map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                }
+			},
+			initialized : function(){
+				var me = this;
+
+				me.set("map", me.$.mapContainer.map);
+
+				var heatmapSource = new ol.source.Vector({});
+	    		
+		    	var heatmapLayer = new ol.layer.Heatmap({
+		    		radius: 10,
+		    		source: heatmapSource,
+		    		blur : 30
+		    		,weight: function(feature) {
+			    		var weight = feature.get('weight');
+						return weight;
+			    	}
+		    	});
+
+		    	me.map.addLayer(heatmapLayer);
+		    	me.map.set('heatmapSource', heatmapSource);
+			},
+			completeSearch : function(e, res){
+				var me = this;
+				var heatmapSource = me.map.get('heatmapSource');
+				heatmapSource.clear();
+				if(res.response.length > 0)
+				heatmapSource.addFeatures(me.getFeatureList(res.response));
+			},
+			onSearch : function(){
+				var me = this;
+
+				me.searchParam.startDt.setHours(me.startHH,me.startmm,0,0);
+				me.searchParam.endDt = new Date(me.searchParam.startDt.getTime());
+				me.searchParam.endDt.setHours(me.endHH,me.endmm,0,0);
+
+				UT.request(me.$.search);
+			},
+			getFeatureList : function(list){
+				var me = this;
+				var features = [];
+
+				if(UT.isEmpty(list)) return;
+
+				list.forEach(function (object) {
+			    	var feature = geoJson.readFeature(object.geo);
+					feature.set('weight', object.weight);
+	    	      	features.push(feature);
+				});
+
+				return features;
+			},
+			selectTarget : function(e){
+				var me = this;
+			},
+			changeTargetList : function(){
+				if(!this.isInitialized) return;
+				var me = this;
+				if(me.isEventPrevent) return;
+				me.searchParam.targetId = null;
+				UT.requestNotUseLoading(me.$.findSiteTargetList);
+			},
+			completeFindSiteTargetList : function(){
+				if(!this.isInitialized) return;
+				var me = this;
+				me.$.gridHistoryPanel.dataProvider = [];
+				var list = me.targetComboList;
+				list.unshift(me.codes.targetSearch);
+				me.targetList = list;
+				if(list.length > 0){
+					me.$.targetCombo.value=me.searchParam.targetId;
+					me.targetPlaceholder = "표시대상을 선택해주세요";
+				}else{
+					me.targetPlaceholder = "검색결과가 없습니다";
+				}
+			},
+			completeFindTargetHistory : function(){
+				var me = this;
+				if(me.targetHistory){
+					var historyList = me.targetHistory;
+					for(var i in historyList){
+						historyList[i].index = i; 
+						historyList[i].selected = false; 
+						if(historyList[i].geoJson){
+							if(!historyList[i].areaName){
+								//var lonLat = historyList[i].geoJson.coordinates[0].toString().substring(0,8)+", "+historyList[i].geoJson.coordinates[1].toString().substring(0,7);
+								//historyList[i].areaName = lonLat;
+								historyList[i].areaName = "영역외";
+							}
+							me.createTargetMarker(historyList[i]);
+						}else{
+							historyList[i].areaName = "위치정보 없음";
+						}
+					}
+					me.historyList = historyList;
+				}else{
+					me.historyList = [];
+				}
+			},
+			clearMap : function(){
+				if(!this.isInitialized) return;
+				var me = this;
+				me.lineLayer.removeAllFeatures();
+				me.iconLayer.clearMarkers();
+				me.markerLayer.clearMarkers();
+				while(me.map.popups.length > 0){
+					me.map.removePopup(me.map.popups[0]);
+				}
+			},
+			createTargetMarker : function(object){		// 위치표시 마커 생성
+				var me = this
+				var size = new OpenLayers.Size(20,27);
+				var imgPath = './ui/lib/openlayers/img/marker_red.png';
+				var icon = new OpenLayers.Icon(imgPath, size);
+				var lonlat = new OpenLayers.LonLat(object.geoJson.coordinates[0], object.geoJson.coordinates[1]);
+				lonlat.transform(projection4326, projection900913);
+				var marker =new OpenLayers.Marker(lonlat,icon);
+
+				object.marker = marker;
+
+				var text = '<div id="arrow"></div><div id="text">('+(object.index*1+1)+') '+object.signalDt.hhmmss()+'\n'+object.areaName+'</div>';
+				var popup = new OpenLayers.Popup("targetPopup", lonlat, new OpenLayers.Size('auto','46'), text);
+				
+				marker.events.register("click", marker, function(e){
+					me.$.gridHistoryPanel.searchItem("index", object.index, 0);
+				});
+				
+				marker.events.register("mouseover", marker, function(e){
+					me.map.popups.filter(function(e){
+						me.map.removePopup(e);
+					});
+					me.map.addPopup(popup);
+				});
+
+				marker.events.register("mouseout", marker, function(e){
+					me.map.removePopup(popup);
+				});
+
+	            object.popup = popup;
+			},
+			isSelection : function(data){
+				return (data.geoJson);
+			},
+			onItemClick : function(e){
+				var me = this,
+				data = e.detail.data;
+
+				me.map.popups.filter(function(e){
+					me.map.removePopup(e);
+				});
+
+				me.markerLayer.clearMarkers();
+				
+				if(!data.geoJson) return;
+
+				var lonlat = new OpenLayers.LonLat(data.geoJson.coordinates[0], data.geoJson.coordinates[1]);
+				lonlat.transform(projection4326, projection900913);
+				//var zoom = (me.map.getZoom() > 17)?me.map.getZoom():17;
+				me.map.setCenter(lonlat);
+				me.map.addPopup(data.popup);
+
+				var size = new OpenLayers.Size(20,27);
+				var imgPath = './ui/lib/openlayers/img/marker_green.png';
+				var icon = new OpenLayers.Icon(imgPath, size);
+
+				var marker = new OpenLayers.Marker(data.marker.lonlat, icon);
+				me.markerLayer.addMarker(marker);
+			},
+			onSelectionChk : function(e){
+				var me = this;
+				if(me.isEventPrevent) return;
+				me.isEventPrevent = true;
+
+				var data = e.detail.data;  
+
+				var idx = data.index * 1;
+				
+				var startNo = me.startRowNum;
+				var endNo = me.endRowNum;
+				
+				if(UT.isEmpty(startNo)){		//start 없을때
+					startNo = idx;
+					endNo = idx;				    
+				}else{
+					if(UT.isEmpty(endNo)){
+						if(startNo <= idx){
+							endNo = idx;
+						}else{
+							endNo = startNo;
+							startNo = idx;
+						}
+					}else{
+						if(idx == startNo || idx == endNo){
+							startNo = null;
+							endNo = null;
+							me.historyList[idx].selected = false;
+						}else if(idx < startNo){
+							startNo = idx;
+						}else{
+							endNo = idx;
+						}
+					}
+				}
+
+				var last = me.$.gridHistoryPanel.getDataProvider().getItemSize()-1;
+				if(startNo==0 && endNo ==last){
+					me.redrawGrid(startNo, endNo, false);
+				}else{
+					me.redrawGrid(startNo, endNo, true);
+				}
+
+				me.isEventPrevent = false;
+			},
+			itemAllChecked : function(e){
+				var me = this;
+				if(me.isEventPrevent) return;
+				me.isEventPrevent = true;
+				var check = e.detail.checked;
+				var checked = me.$.gridHistoryPanel.getDataProvider().selectionCheckedIndexes();
+				if(checked.length > 0){
+					me.redrawGrid(null, null, false);
+				}
+				me.isEventPrevent = false;
+			},
+			changeIconVisible : function(e){
+				if(!this.isInitialized) return;
+				var me = this;
+				me.iconLayer.setVisibility(e.target.value);
+			},
+			onImageChange: function(data, item){
+	            return '/ui/assets/img/marker/' +data.iconImage;
+	        },
+            onRowStyle : function(data) {
+                var me = this;
+                var idx = data.index*1;
+                var color = (me.historyList[idx] && me.historyList[idx].selected)?"#96F56E":"#ffffff";
+                return {"background": color};
+            }
+		});
+		Date.prototype.hhmmss = function() {
+		      var hh = this.getHours().toString();
+		      var mm = this.getMinutes().toString();
+		      var ss = this.getSeconds().toString();
+		      return (hh[1] ? hh : "0" + hh[0]) + ":" + (mm[1] ? mm : "0" + mm[0]) + ":" + (ss[1] ? ss : "0" + ss[0]);
+		}
+	</script>
+</dom-module>

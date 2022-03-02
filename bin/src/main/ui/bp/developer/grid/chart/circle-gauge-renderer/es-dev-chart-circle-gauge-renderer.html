@@ -1,0 +1,432 @@
+<dom-module id="es-dev-chart-circle-gauge-renderer">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--fit-layout);
+        }
+    </style>
+
+    <!--  화면 구성 시작-->
+    <template>
+    	<div id="grdMain" class="fit"></div>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-dev-chart-circle-gauge-renderer',
+            
+            	attached: function(){
+                	this.exampleView().init();
+                },
+                
+                exampleView : function (strings) {
+                    var view;
+                    var dsMain;
+                    var grdMain;
+                    
+                    return view = {
+                        init: function () {
+                        	
+                        	var fields = [{
+                                "fieldName": "check_id"
+                            },{
+                                "fieldName": "factory1",
+                                "dataType": "number"
+                            }, {
+                                "fieldName": "factory2",
+                                "dataType": "number"
+                            }, {
+                                "fieldName": "factory3",
+                                "dataType": "number"
+                            }, {
+                                "fieldName": "factory4",
+                                "dataType": "number"
+                            }];
+                            dsMain = DataLudi.createGridDataSet();
+                            dsMain.setFields(fields);
+                        	
+                            var columns = [{
+                                "name": "colCheck",
+                                "fieldName": "check_id",
+                                "header": "CHK #",
+                                "width": 60,
+                                "styles": {
+                                    "background": "#08000000",
+                                    "textAlignment": "center"
+                                }
+                            },{
+                                "name": "ProductGroup1",
+                                "width": "180",
+                                /*"header": "Factory #1",*/
+                                /*"childHeadersVisible": false,*/
+                                "header": false,
+                                "headerDelegate": "UnitPrice1",
+                                "footerDelegate": "UnitPrice1",
+                                "columns": [{
+                                    "name": "Labels",
+                                    "layout": "vertical",
+                                    "width": 60,
+                                    "childFootersVisible": false,
+                                    "childHeadersVisible": false,
+                                    "header": "Category",
+                                    "columns": [{
+                                        "type": "label",
+                                        "text": "MAX.",
+                                        "styles": {
+                                            "textAlignment": "far",
+                                            "background": "#08000000"
+                                        }
+                                    }, {
+                                        "type": "label",
+                                        "text": "1,000",
+                                        "styles": {
+                                            "textAlignment": "far"
+                                        }
+                                    }, {
+                                        "type": "label",
+                                        "text": "CURR.",
+                                        "styles": {
+                                            "textAlignment": "far",
+                                            "background": "#08000000"
+                                        }
+                                    }, {
+                                        "fieldName": "factory1",
+                                        "styles": {
+                                            "textAlignment": "far",
+                                            "numberFormat": "#,##0.0"
+                                        }
+                                    }]
+                                }, {
+                                    "name": "UnitPrice1",
+                                    "fieldName": "factory1",
+                                    "width": 120,
+                                    "styles": {
+                                        "textAlignment": "far",
+                                        "fontSize": 18,
+                                        "color": "#080",
+                                        "shapeInactiveColor": "#10000000",
+                                        "shapeColor": "#80008800",
+                                        "padding": 4,
+                                        "numberFormat": "#,##0.0"
+                                    },
+                                    "header": {
+                                        /*"text": "Value",*/
+                                        "text": "Factory #1"
+                                    },
+                                    "footer": {
+                                        "expression": "avg",
+                                        "styles": {
+                                            "numberFormat": "#,##0.0",
+                                            "fontBold": true,
+                                            "fontSize": 14,
+                                            "color": "#008"
+                                        }
+                                    },
+                                    "renderer": {
+                                        "type": "circleGauge",
+                                        "minValue": 0,
+                                        "maxValue": 1000
+                                    },
+                                    "animations": [{
+                                        "property": "value",
+                                        "duration": 1000
+                                    }]
+                                }]
+                            }, {
+                                "name": "ProductGroup2",
+                                "width": "180",
+                                /* "header": "Factory #2", */
+                                /* "childHeadersVisible": false,*/
+                                "header": false,
+                                "headerDelegate": "UnitPrice2",
+                                "footerDelegate": "UnitPrice2",
+                                "columns": [{
+                                    "name": "Labels",
+                                    "layout": "vertical",
+                                    "width": 60,
+                                    "childFootersVisible": false,
+                                    "childHeadersVisible": false,
+                                    "header": "구분",
+                                    "columns": [{
+                                        "type": "label",
+                                        "text": "MAX.",
+                                        "styles": {
+                                            "textAlignment": "far",
+                                            "background": "#08000000"
+                                        }
+                                    }, {
+                                        "type": "label",
+                                        "text": "1,000",
+                                        "styles": {
+                                            "textAlignment": "far"
+                                        }
+                                    }, {
+                                        "type": "label",
+                                        "text": "CURR.",
+                                        "styles": {
+                                            "textAlignment": "far",
+                                            "background": "#08000000"
+                                        }
+                                    }, {
+                                        "fieldName": "factory2",
+                                        "styles": {
+                                            "textAlignment": "far",
+                                            "numberFormat": "#,##0.0"
+                                        }
+                                    }]
+                                }, {
+                                    "name": "UnitPrice2",
+                                    "fieldName": "factory2",
+                                    "width": 120,
+                                    "styles": {
+                                        "textAlignment": "far",
+                                        "fontSize": 18,
+                                        "color": "#080",
+                                        "shapeInactiveColor": "#10000000",
+                                        "shapeColor": "#80008800",
+                                        "padding": 4,
+                                        "numberFormat": "#,##0.0"
+                                    },
+                                    "header": {
+                                        /* "text": "Value"*/
+                                        "text": "Factory #2"
+                                    },
+                                    "footer": {
+                                        "expression": "avg",
+                                        "styles": {
+                                            "numberFormat": "#,##0.0",
+                                            "fontBold": true,
+                                            "fontSize": 14,
+                                            "color": "#008"
+                                        }
+                                    },
+                                    "renderer": {
+                                        "type": "circleGauge",
+                                        "minValue": 0,
+                                        "maxValue": 1000
+                                    },
+                                    "animations": [{
+                                        "property": "value",
+                                        "duration": 1000
+                                    }]
+                                }]
+                            }, {
+                                "name": "ProductGroup3",
+                                "width": "180",
+                                /* "header": "Factory #3", */
+                                /* "childHeadersVisible": false, */
+                                "header": false,
+                                "headerDelegate": "UnitPrice3",
+                                "footerDelegate": "UnitPrice3",
+                                "columns": [{
+                                    "name": "Labels",
+                                    "layout": "vertical",
+                                    "width": 60,
+                                    "childFootersVisible": false,
+                                    "childHeadersVisible": false,
+                                    "header": "Category",
+                                    "columns": [{
+                                        "type": "label",
+                                        "text": "MAX.",
+                                        "styles": {
+                                            "textAlignment": "far",
+                                            "background": "#08000000"
+                                        }
+                                    }, {
+                                        "type": "label",
+                                        "text": "1,000",
+                                        "styles": {
+                                            "textAlignment": "far"
+                                        }
+                                    }, {
+                                        "type": "label",
+                                        "text": "CURR.",
+                                        "styles": {
+                                            "textAlignment": "far",
+                                            "background": "#08000000"
+                                        }
+                                    }, {
+                                        "fieldName": "factory3",
+                                        "styles": {
+                                            "textAlignment": "far",
+                                            "numberFormat": "#,##0.0"
+                                        }
+                                    }]
+                                }, {
+                                    "name": "UnitPrice3",
+                                    "fieldName": "factory3",
+                                    "width": 120,
+                                    "styles": {
+                                        "textAlignment": "far",
+                                        "fontSize": 18,
+                                        "color": "#080",
+                                        "shapeInactiveColor": "#10000000",
+                                        "shapeColor": "#80008800",
+                                        "padding": 4,
+                                        "numberFormat": "#,##0.0"
+                                    },
+//                                     "header": {
+//                                         /* "text": "Value" */
+//                                         "text": "Factory #3"
+//                                     },
+//                                     "footer": {
+//                                         "expression": "avg",
+//                                         "styles": {
+//                                             "numberFormat": "#,##0.0",
+//                                             "fontBold": true,
+//                                             "fontSize": 14,
+//                                             "color": "#008"
+//                                         }
+//                                     },
+                                    "renderer": {
+                                        "type": "circleGauge",
+                                        "minValue": 0,
+                                        "maxValue": 1000
+                                    },
+                                    "animations": [{
+                                        "property": "value",
+                                        "duration": 1000
+                                    }]
+                                }]
+                            }, {
+                                "name": "ProductGroup4",
+                                "width": "180",
+                                /* "header": "Factory #4", */
+                                /* "childHeadersVisible": false, */
+                                "header": false,
+                                "headerDelegate": "UnitPrice3",
+                                "footerDelegate": "UnitPrice3",
+                                "columns": [{
+                                    "name": "Labels",
+                                    "layout": "vertical",
+                                    "width": 68,
+                                    "childFootersVisible": false,
+                                    "childHeadersVisible": false,
+                                    "header": "Category",
+                                    "columns": [{
+                                        "type": "label",
+                                        "text": "MAX.",
+                                        "styles": {
+                                            "textAlignment": "far",
+                                            "background": "#08000000"
+                                        }
+                                    }, {
+                                        "type": "label",
+                                        "text": "1,000",
+                                        "styles": {
+                                            "textAlignment": "far"
+                                        }
+                                    }, {
+                                        "type": "label",
+                                        "text": "CURR.",
+                                        "styles": {
+                                            "textAlignment": "far",
+                                            "background": "#08000000"
+                                        }
+                                    }, {
+                                        "fieldName": "factory4",
+                                        "styles": {
+                                            "textAlignment": "far",
+                                            "numberFormat": "#,##0.0"
+                                        }
+                                    }]
+                                }, {
+                                    "name": "UnitPrice4",
+                                    "fieldName": "factory4",
+                                    "width": 120,
+                                    "styles": {
+                                        "textAlignment": "far",
+                                        "fontSize": 18,
+                                        "color": "#080",
+                                        "shapeInactiveColor": "#10000000",
+                                        "shapeColor": "#80008800",
+                                        "padding": 4,
+                                        "numberFormat": "#,##0.0"
+                                    },
+//                                     "header": {
+//                                         /* "text": "Value" */
+//                                         "text": "Factory #4"
+//                                     },
+//                                     "footer": {
+//                                         "expression": "avg",
+//                                         "styles": {
+//                                             "numberFormat": "#,##0.0",
+//                                             "fontBold": true,
+//                                             "fontSize": 14,
+//                                             "color": "#008"
+//                                         }
+//                                     },
+                                    "renderer": {
+                                        "type": "circleGauge",
+                                        "minValue": 0,
+                                        "maxValue": 1000
+                                    },
+                                    "animations": [{
+                                        "property": "value",
+                                        "duration": 1000
+                                    }]
+                                }]
+                            }];
+                            grdMain = DataLudi.createGridView('grdMain', null);
+                            grdMain.setColumns(columns);
+                            grdMain.setDataSource(dsMain);
+
+                            grdMain.checkBar().setVisible(false);
+                            grdMain.footer().setVisible(true);
+                            grdMain.effectOptions().setAnimationEnabled(true);
+                            grdMain.autoFill().setEnabled(true);
+                            grdMain.header().head().setPopupMenu({
+                                label: 'DataLudi Grid Version',
+                                callback: function () { alert(DataLudi.getVersion()); }
+                            });
+                            
+//                             grdMain.loadStyles({
+//                                 selection: {
+//                                     background: "#11000000",
+//                                     border: "#88000000,1"
+//                                 },
+//                                 body: {
+//                                     cellDynamic: [{
+//                                         expression: "value >= 700",
+//                                         styles: {
+//                                             color: "#000099",
+//                                             shapeColor: "#000099"
+//                                         }
+//                                     }]
+//                                 }
+//                             });
+                            
+                            this.loadData(dsMain);
+                        },
+                        
+                        loadData: function (ds) {
+                            var rows = [];
+                            var id = 1000;
+                            for (var r = 0; r < 1000; r++) {
+                                var row = [];
+                        
+                                id += 1 + Math.floor(Math.random() * 3);
+                                row.push("#" + id);
+                        
+                                for (var f = 0; f < 4; f++) {
+                                    var v = 50 + Math.random() * 950;
+                                    row.push(v);
+                                }
+                                rows.push(row);
+                            }
+                            ds.setRows(rows);
+                            $("#rowCount").css("color", "blue").text(ds.rowCount().toLocaleString());
+                        }
+                    };  
+                }
+            
+            
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

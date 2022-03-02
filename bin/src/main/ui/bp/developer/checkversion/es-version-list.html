@@ -1,0 +1,73 @@
+<dom-module id="es-version-list">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+
+    </style>
+
+    <template>
+		<sc-ajax id="exctractVersion"
+			body="{{searchParam}}"
+			url="extractJarFilesVersion.do"
+			last-response="{{resultList}}">
+		</sc-ajax>
+		
+        <cc-search-container on-search="onFindVersion">
+            <table>
+                <colgroup>
+                    <col style="width:150px">
+                    <col>
+                </colgroup>
+                <tr>
+                    <th><sc-label text="라이브러리 명"></sc-label></th>
+                    <td>
+                        <sc-text-field value="{{searchParam.keyword}}" on-enter="onFindVersion"></sc-text-field>
+                    </td>
+                </tr>
+            </table>
+        </cc-search-container>
+
+        <sc-grid id="gridPanel" data-provider="{{resultList}}" editable="false" class="flex" use-selection="false" use-state="false">
+            <sc-grid-columns>
+                <sc-data-column data-field="lib_nm" header-text="라이브러리 버전" width="1000" text-align="left" editable="false"></sc-data-column>
+            </sc-grid-columns>
+        </sc-grid>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: "es-version-list",
+            properties: {
+            	
+                searchParam : {
+                    type : Object,
+                    value : function() {
+                        return {
+                        	keyword : ""
+                        };
+                    }
+                },
+
+                resultList: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                }
+            },
+
+           
+            initialized: function() {
+                this.onFindVersion();
+            },
+            
+            onFindVersion: function() {
+                UT.request(this.$.exctractVersion);
+            }
+        });
+    </script>
+
+</dom-module>

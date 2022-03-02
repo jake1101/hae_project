@@ -1,0 +1,61 @@
+<dom-module id="ep-enter-log">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 작업자 출입기록보기
+        ** @Description		: 작업자 출입기록보기 팝업
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.07.08
+        ** @History 		: 2020.07.08 jhkim 최초작성
+        ******************************************************************************************
+    -->
+
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+	</style>
+	
+	<template>
+	
+ 		<sc-ajax id="findEnterLogList"
+			url="findEnterLogList.do"
+			body={{searchParam}}
+			last-response="{{logList}}">
+		</sc-ajax>
+		
+		<sc-grid id="gridPanel" data-provider="{{logList}}" editable="false" class="flex" use-selection="false" use-state="false">
+			<sc-grid-columns>
+				<sc-date-column header-text="시간" 		data-field="createdDt" width="150" text-align="center" display-format="yyyy-MM-dd HH:mm:ss"></sc-date-column>
+				<sc-data-column header-text="출입구명" data-field="gateName" width="285" text-align="center" ></sc-data-column>		
+				<sc-data-column data-field="temperature"  header-text="체온"  text-align="center"  editable="false"></sc-data-column>
+				<!-- <sc-data-column header-text="구분" 		data-field="attendType" width="120" text-align="center"></sc-data-column> -->						
+			</sc-grid-columns>
+		</sc-grid>
+			
+	</template>
+	
+	<script>
+		Polymer({
+			is : "ep-enter-log",
+			properties : {
+				searchParam: {
+					type : Object,
+					value : function(){
+						return {
+							siteId : SCMdiManager.searchParam.site_id
+						};
+					}
+				},
+			},
+			load:function(workerName, phoneNumber, attendDate,workerId){
+ 				var me = this;
+				me.set('searchParam.workerId', workerId);
+				me.set('searchParam.workerName', workerName);
+				me.set('searchParam.phoneNumber', phoneNumber);
+				var date = attendDate  ?  new Date(attendDate) : new Date();
+				me.set('searchParam.attendDate', UT.formatDate(date, "yyyy-MM-dd"));
+				UT.request(me.$.findEnterLogList);	
+			}
+		});
+	</script>
+</dom-module>

@@ -1,0 +1,128 @@
+<dom-module id="es-chart-bar-negative">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-bar-negative',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+				"type": "bar",
+				"palettes":[{
+					"name": "color1",
+					"alpha": 1.0,
+					"fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+						'#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+				}],
+			    "title": {
+				  	"text": "Stacked bar chart"
+			    },
+			    "xAxes": [{
+			        "categories":['0-4', '5-9', '10-14', '15-19',
+						'20-24', '25-29', '30-34', '35-39', '40-44',
+						'45-49', '50-54', '55-59', '60-64', '65-69',
+						'70-74', '75-79', '80-84', '85-89', '90-94',
+						'95-99', '100 + ']
+			    }, {
+					"location": "opposite",
+					"categories":['0-4', '5-9', '10-14', '15-19',
+						'20-24', '25-29', '30-34', '35-39', '40-44',
+						'45-49', '50-54', '55-59', '60-64', '65-69',
+						'70-74', '75-79', '80-84', '85-89', '90-94',
+						'95-99', '100 + ']
+				}],
+			    "yAxes": {
+			        "title": "Total fruit consumption"
+			    },
+			    "seriesGroups" : {
+					"name" : "group1",
+					"stackMode": "normal",
+					"styles": {
+					},
+			        "separatorStyles": {
+			            "line": "#fff"
+			        }
+				},
+			    "series": [{
+			        "name": "Male",
+			    	"group" : "group1",
+					"itemWidth": 0.5,
+			        "items": [-2.2, -2.2, -2.3, -2.5, -2.7, -3.1, -3.2,
+						-3.0, -3.2, -4.3, -4.4, -3.6, -3.1, -2.4,
+						-2.5, -2.3, -1.2, -0.6, -0.2, -0.0, -0.0],
+			        "styles": {
+			            "fill": "p(color1:0)",
+			            "border": null
+			        },
+					"label": {
+						"visible": false,
+						"position": "center",
+						"styles": {
+							"color": "#fff",
+							"textShadow": "#000"
+						}
+					},
+			        "animations": [{
+			            "property": "mask",
+						"start": "ellipse",
+						"duration": 1000
+			        }],
+					"itemAnimations": [{
+						"property": "value"
+					}]
+			    }, {
+			        "name": "Female",
+			    	"group" : "group1",
+					"itemWidth": 0.5,
+			        "items": [2.1, 2.0, 2.2, 2.4, 2.6, 3.0, 3.1, 2.9,
+						3.1, 4.1, 4.3, 3.6, 3.4, 2.6, 2.9, 2.9,
+						1.8, 1.2, 0.6, 0.1, 0.0],
+			        "styles": {
+			            "fill": "p(color1:1)",
+			            "border": null
+			        },
+					"label": {
+						"visible": false,
+						"position": "center",
+						"styles": {
+							"color": "#fff",
+							"textShadow": "#000"
+						}
+					},
+			        "animations": [{
+			            "property": "mask",
+						"start": "ellipse",
+						"duration": 1000
+			        }],
+					"itemAnimations": [{
+						"property": "value"
+					}]
+			    }],
+			    "legend": {
+					"itemStyles": {
+						"fontBold": true
+					}
+				}
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

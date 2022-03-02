@@ -1,0 +1,42 @@
+<!-- 
+
+## 멀티 텍스트 검색
+
+복수 검색을 위한 input field 커스텀 태그입니다. 
+
+우측의 체크박스를 클릭하고 아이콘을 클릭하면 여러 개의 텍스트를 입력할 수 있는 팝업창이 열립니다. 
+
+- *multi-value*는 팝업창에서 입력한 값이 들어옵니다. 
+
+- *value*으로 value값을 입력 또는 받을 수 이있습니다.
+
+- *title*은 팝업의 제목입니다. 
+
+ -->
+<dom-module id="es-multi-text-ex-1">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<table class="tb-form">
+			<tr>
+				<td>
+					<cc-multi-text-field class="w-200" title="타이틀 입력" value="" multi-value="{{value}}" on-enter=""></cc-multi-text-field>
+				</td>
+			</tr>
+		</table>
+	</template>
+
+	<script>
+		Polymer({
+			is: 'es-multi-text-ex-1',
+			properties: {
+				value: Object
+			}
+		});
+	</script>
+
+</dom-module>

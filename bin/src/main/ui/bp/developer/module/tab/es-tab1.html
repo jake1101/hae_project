@@ -1,0 +1,289 @@
+<dom-module id="es-tab1">
+<!-- 
+/**
+ *
+ *	@description : 탭 개발 예제 - 탭1번화면
+ *  <pre>
+ * </pre>
+ * @author : Yeon-u Kim
+ * @FileName : 
+ * @Since 2017. 2. 21.
+ * @변경이력 : [2017. 2. 21.] Yeon-u Kim 최초작성
+ */
+-->
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	
+	<template>
+		<!-- ajax 선언 부 -->
+		<sc-ajax id="findList"
+            url="findList.do"
+            body="{{}}"
+            last-response="{{}}"
+            on-response="completeFindList">
+        </sc-ajax>
+        
+		<div class="flex page">
+				<sc-panel title-text="기본정보" collapsible="true">
+				<!-- form -->
+					<table class="tb-form">
+						<colgroup>
+			        		<col style="width:150px"/>
+			        		<col/>
+			        		<col style="width:150px"/>
+			        		<col/>
+			        	</colgroup>
+						<tr>
+							<th>
+								<sc-label text="명"></sc-label>
+							</th>
+							<td colspan="3">
+								<sc-text-field value="{{data.tit}}" required="true" readonly="[[!formula('editable')]]" max-length="200"></sc-text-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="유형"></sc-label>
+							</th>
+							<td>
+								<sc-combobox-field class="w-150" display-field="label" value-field="data" items="{{codes.purcTypCode}}" value="{{data.purc_typ}}" required="true" disabled></sc-combobox-field>
+							</td>
+							<th>
+								<sc-label text="요청자"></sc-label>
+							</th>
+							<td>
+								<sc-text-field class="w-150" value="{{data.req_nm}}" readonly></sc-text-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="요청부서"></sc-label>
+							</th>
+							<td>
+								<sc-text-field class="w-150" value="{{data.req_dept_nm}}" readonly></sc-text-field>
+							</td>
+							<th>
+								<sc-label text="요청자전화번호"></sc-label>
+							</th>
+							<td>
+								<sc-text-field class="w-150" value="{{data.req_phone_no}}" readonly="[[!formula('editable')]]" mask-re="/[0-9\-]/" strip-chars-re="/[ㄱ-힣]/" max-length="18"></sc-text-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="요청유형"></sc-label>
+							</th>
+							<td>
+								<sc-combobox-field class="w-150" display-field="label" value-field="data" items="{{codes.purcRfqTypCode}}" value="{{data.purc_req_typ}}" required="true" disabled="[[!formula('editable')]]"></sc-combobox-field>
+							</td>
+							<th>
+							</th>
+							<td>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="통화"></sc-label>
+							</th>
+							<td>
+								<!-- 통화 단위는 data를 display-field로 사용함 -->
+								<sc-combobox-field class="w-150" display-field="data" value-field="data" items="{{codes.commCurCode}}" value="{{data.cur}}" selected-index="0" placeholder="필수" required="true" disabled="[[!formula('editable')]]"></sc-combobox-field>
+							</td>
+							<th>
+								<sc-label text="요청합계금액" ></sc-label>
+							</th>
+							<td>
+								<sc-number-field  class="w-150 align-right" value="{{data.tot_amt}}" input-cover="true" format-type="amt" readonly></sc-number-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="용도/비고"></sc-label>
+							</th>
+							<td colspan="3">
+								<sc-textarea-field value="{{data.rem}}"  max-length="1000" readonly="[[!formula('editable')]]"></sc-textarea-field>
+							</td>
+						</tr>					
+					</table>
+				</sc-panel>
+				<sc-panel title-text="기본정보2" collapsible="true">
+				<!-- form -->
+					<table class="tb-form">
+						<colgroup>
+			        		<col style="width:150px"/>
+			        		<col/>
+			        		<col style="width:150px"/>
+			        		<col/>
+			        	</colgroup>
+						<tr>
+							<th>
+								<sc-label text="명"></sc-label>
+							</th>
+							<td colspan="3">
+								<sc-text-field value="{{data.tit}}" required="true" readonly="[[!formula('editable')]]" max-length="200"></sc-text-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="유형"></sc-label>
+							</th>
+							<td>
+								<sc-combobox-field class="w-150" display-field="label" value-field="data" items="{{codes.purcTypCode}}" value="{{data.purc_typ}}" required="true" disabled></sc-combobox-field>
+							</td>
+							<th>
+								<sc-label text="요청자"></sc-label>
+							</th>
+							<td>
+								<sc-text-field class="w-150" value="{{data.req_nm}}" readonly></sc-text-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="요청부서"></sc-label>
+							</th>
+							<td>
+								<sc-text-field class="w-150" value="{{data.req_dept_nm}}" readonly></sc-text-field>
+							</td>
+							<th>
+								<sc-label text="요청자전화번호"></sc-label>
+							</th>
+							<td>
+								<sc-text-field class="w-150" value="{{data.req_phone_no}}" readonly="[[!formula('editable')]]" mask-re="/[0-9\-]/" strip-chars-re="/[ㄱ-힣]/" max-length="18"></sc-text-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="요청유형"></sc-label>
+							</th>
+							<td>
+								<sc-combobox-field class="w-150" display-field="label" value-field="data" items="{{codes.purcRfqTypCode}}" value="{{data.purc_req_typ}}" required="true" disabled="[[!formula('editable')]]"></sc-combobox-field>
+							</td>
+							<th>
+							</th>
+							<td>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="통화"></sc-label>
+							</th>
+							<td>
+								<!-- 통화 단위는 data를 display-field로 사용함 -->
+								<sc-combobox-field class="w-150" display-field="data" value-field="data" items="{{codes.commCurCode}}" value="{{data.cur}}" selected-index="0" placeholder="필수" required="true" disabled="[[!formula('editable')]]"></sc-combobox-field>
+							</td>
+							<th>
+								<sc-label text="요청합계금액" ></sc-label>
+							</th>
+							<td>
+								<sc-number-field  class="w-150 align-right" value="{{data.tot_amt}}" input-cover="true" format-type="amt" readonly></sc-number-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="용도/비고"></sc-label>
+							</th>
+							<td colspan="3">
+								<sc-textarea-field value="{{data.rem}}"  max-length="1000" readonly="[[!formula('editable')]]"></sc-textarea-field>
+							</td>
+						</tr>					
+					</table>
+				</sc-panel>
+				<sc-panel title-text="기본정보3" collapsible="true">
+				<!-- form -->
+					<table class="tb-form">
+						<colgroup>
+			        		<col style="width:150px"/>
+			        		<col/>
+			        		<col style="width:150px"/>
+			        		<col/>
+			        	</colgroup>
+						<tr>
+							<th>
+								<sc-label text="명"></sc-label>
+							</th>
+							<td colspan="3">
+								<sc-text-field value="{{data.tit}}" required="true" readonly="[[!formula('editable')]]" max-length="200"></sc-text-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="유형"></sc-label>
+							</th>
+							<td>
+								<sc-combobox-field class="w-150" display-field="label" value-field="data" items="{{codes.purcTypCode}}" value="{{data.purc_typ}}" required="true" disabled></sc-combobox-field>
+							</td>
+							<th>
+								<sc-label text="요청자"></sc-label>
+							</th>
+							<td>
+								<sc-text-field class="w-150" value="{{data.req_nm}}" readonly></sc-text-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="요청부서"></sc-label>
+							</th>
+							<td>
+								<sc-text-field class="w-150" value="{{data.req_dept_nm}}" readonly></sc-text-field>
+							</td>
+							<th>
+								<sc-label text="요청자전화번호"></sc-label>
+							</th>
+							<td>
+								<sc-text-field class="w-150" value="{{data.req_phone_no}}" readonly="[[!formula('editable')]]" mask-re="/[0-9\-]/" strip-chars-re="/[ㄱ-힣]/" max-length="18"></sc-text-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="요청유형"></sc-label>
+							</th>
+							<td>
+								<sc-combobox-field class="w-150" display-field="label" value-field="data" items="{{codes.purcRfqTypCode}}" value="{{data.purc_req_typ}}" required="true" disabled="[[!formula('editable')]]"></sc-combobox-field>
+							</td>
+							<th>
+							</th>
+							<td>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="통화"></sc-label>
+							</th>
+							<td>
+								<!-- 통화 단위는 data를 display-field로 사용함 -->
+								<sc-combobox-field class="w-150" display-field="data" value-field="data" items="{{codes.commCurCode}}" value="{{data.cur}}" selected-index="0" placeholder="필수" required="true" disabled="[[!formula('editable')]]"></sc-combobox-field>
+							</td>
+							<th>
+								<sc-label text="요청합계금액" ></sc-label>
+							</th>
+							<td>
+								<sc-number-field  class="w-150 align-right" value="{{data.tot_amt}}" input-cover="true" format-type="amt" readonly></sc-number-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="용도/비고"></sc-label>
+							</th>
+							<td colspan="3">
+								<sc-textarea-field value="{{data.rem}}"  max-length="1000" readonly="[[!formula('editable')]]"></sc-textarea-field>
+							</td>
+						</tr>					
+					</table>
+				</sc-panel>
+			</div>
+	</template>
+	
+	<script>
+	Polymer({
+			is : 'es-tab1',
+			properties : {
+			},
+			//최초 호출
+			initialized : function(){
+			}
+		});
+	</script>
+</dom-module>

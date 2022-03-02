@@ -1,0 +1,27 @@
+<dom-module id="cc-sub-title-bar">
+    <template>
+        <h4 hidden="[[formula('titleHidden')]]">[[_title]]</h4>
+        <div class="wrap_btn">
+            <content></content>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: 'cc-sub-title-bar',
+            
+            formulas:{
+            	titleHidden: function(){
+            		return UT.isEmpty(this._title);
+            	}
+            },
+            
+            attached: function(){
+            	this.applyFormula();
+            },
+            
+            behaviors:[
+                       Polymer.CCTitleBarBehavior
+                   ]
+        });
+    </script>
+</dom-module>

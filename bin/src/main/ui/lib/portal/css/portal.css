@@ -1,0 +1,418 @@
+sc-portal-manager {
+	background-color: rgba(223, 223, 223, 0.9);
+	-webkit-box-shadow: 2px 0 2px 0 #aaa;
+	-moz-box-shadow: 2px 0 2px 0 #aaa;
+	box-shadow: 2px 0 2px 0 #aaa
+}
+
+sc-portal-manager .btn_wrap {
+	width: 100px;
+	padding: 10px
+}
+
+sc-portal-manager .sidebar_wrap {
+	width: 120px;
+	height: 100%;
+	margin: 0;
+	padding: 0
+}
+
+sc-portal-manager .sidebar_list {
+	position: relative;
+	text-align: center;
+	border: none;
+	margin: 0 10px 10px;
+	width: 100px
+}
+
+sc-portal-manager .sidebar_list .components {
+	display: block;
+	height: 54px;
+	text-align: center;
+	border: 1px solid #c6c6c6;
+	background-color: #FFF;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box
+}
+
+sc-portal-manager .sidebar_list .components:hover {
+	display: block;
+	height: 54px;
+	text-align: center;
+	border: 2px solid #ff7800;
+	text-decoration: none;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box
+}
+
+sc-portal-manager .sidebar_list .name {
+	font-size: 11px;
+	font-weight: bold;
+	line-height: 1.33em;
+	display: inline-block;
+	vertical-align: middle;
+	height: 20px;
+	padding-left: 2px;
+    padding-right: 2px;
+	width: calc(100% - 4px);
+	text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+sc-portal-manager .sidebar_list .selected .name, sc-portal-manager .sidebar_list .components:hover .name
+	{
+	text-decoration: none
+}
+
+sc-portal-manager .sidebar_ico {
+	display: inline-block;
+	vertical-align: middle
+	user-drag: none; 
+	user-select: none;
+	-moz-user-select: none;
+	-webkit-user-drag: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+}
+
+sc-portal-manager button.upperBtn {
+	width: 100px;
+	height: 14px;
+	background: transparent url("../img/btn_upper_N.png") no-repeat center
+		top;
+	border: none
+}
+
+sc-portal-manager button.upperBtn:hover {
+	background: transparent url("../img/btn_upper_H.png") no-repeat center
+		top
+}
+
+sc-portal-manager button.lowerBtn {
+	width: 100px;
+	height: 14px;
+	background: transparent url("../img/btn_lower_N.png") no-repeat center
+		top;
+	border: none
+}
+
+sc-portal-manager button.lowerBtn:hover {
+	background: transparent url("../img/btn_lower_H.png") no-repeat center
+		top
+}
+
+sc-portal-manager button.showBtn {
+	width: 120px;
+	height: 20px;
+	background: #525252 url("../img/btn_show_N.png") no-repeat right 5px;
+	border: none;
+	-webkit-border-radius: 0;
+	-moz-border-radius: 0;
+	border-radius: 0
+}
+
+sc-portal-manager button.showBtn:hover {
+	background: #c00c3f url("../img/btn_show_N.png") no-repeat right 5px
+}
+
+sc-portal-manager button.hideBtn {
+	width: 120px;
+	height: 20px;
+	background: #525252 url("../img/btn_hide_N.png") no-repeat right 5px;
+	border: none;
+	border-top-left-radius: 4px
+}
+
+sc-portal-manager button.hideBtn:hover {
+	background: #ff7800 url("../img/btn_hide_N.png") no-repeat right 5px
+}
+
+es-portlet-layout-config sc-toolbar {
+	top: 56px !important;
+}
+
+es-portlet-layout-config sc-portal-manager {
+	left: 3px !important;
+    top: 38px !important;
+    height: calc(100% - 46px) !important;
+}
+
+sc-widget {
+	-webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: -ms-flexbox;
+   	display: -webkit-flex;
+   	display: flex;
+    flex-direction: column;
+	position: relative;
+    margin:0 1em 1em 0;
+    min-width:100px;
+	box-shadow: 2px 2px 3px rgb(214 214 214 / 19%) !important;/* 2020.10.05 ch.byeon */
+	border: none !important;/* 2020.10.05 ch.byeon */
+	border-radius: 8px !important; /* 2020.10.05 ch.byeon */
+}
+
+sc-widget[fixed-widget] #titleBar {
+	cursor: default !important;
+}
+
+sc-widget .titleBar {
+	font-weight: bold;
+	height: 35px !important;
+	background:#fff !important;/* 2020.10.05 ch.byeon */
+	border-bottom:1px solid #e3eaf0 !important; /* 2020.10.05 ch.byeon */	
+}
+
+sc-widget .hoverArea {
+	width: 100%;
+	position: absolute;
+	height:10% !important;
+	max-height:25px !important;
+	z-index: 1;
+}
+
+sc-widget .bg-blue {
+    background: #348fe2!important;
+}
+sc-widget .bg-green {
+    background: #00acac!important;
+}
+sc-widget .bg-red {
+    background: #ff5b57!important;
+}
+sc-widget .bg-purple {
+    background: #727cb6!important;
+}
+
+sc-widget #titleBar span {
+	pointer-events: none;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+sc-widget #titleBar div {
+	display: inline-block;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+            
+sc-widget .refreshBtn {
+	margin-top: 10px !important; /* 2020.10.05 ch.byeon */
+	margin-right: 2px;
+	display: inline-block;
+	color: #cecece;
+}
+            
+sc-widget .refreshBtn:hover {
+	color: #3a3a3a;
+}
+
+.gateInput {
+	vertical-align: top;
+	border: 2px solid #d6d6d6;
+	flex: 1
+}
+
+.gateButton {
+	color: #fff;
+	font-weight: 700;
+	background: #c00c3f;
+	border: none;
+	height: 24px;
+	padding-top: 7px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box
+}
+
+.gateButton:hover {
+	background-color: #c00c3f
+}
+
+*[page-id=vueGrid] sc-widget {
+	width: 100%;
+	height: 100%;
+}
+
+*[page-id] #contentContainer {
+	display: table;
+	width: 100%;
+	height: 100%
+}
+	
+*[page-id] #contentContainerItem {
+	display: table-cell;
+	height: 100%;
+}
+
+*[page-id] #managerHandle {
+	width: 19px; height: 19px;
+	position: absolute;
+	cursor: pointer;
+	background: url('../img/icon_portal_setting.png') #525252
+	no-repeat center 3px;
+	border-bottom-right-radius: 5px;
+	border-top-right-radius: 5px;
+	opacity: 0.5;
+	z-index: 2;
+}
+
+*[page-id=slider] .slider-thumb {
+	width: 16px;
+	height: 16px;
+	background-image: url(../img/slider-thumb.png);
+	position: absolute;
+}
+
+*[page-id=slider] .column {
+	height: 100%;
+	position: relative;
+	float: left;
+	min-width: 100px;
+}
+
+*[page-id=slider] .portlet {
+	padding: 5px 5px 5px 5px;
+	min-width: 100px;
+}
+
+*[page-id=slider] .vertical {
+	height: 100px;
+	flex-direction: column;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	-ms-flex-direction: column;
+	-webkit-flex-direction: column;
+	flex-direction: column;
+	position: absolute;
+    top: 26px;
+}
+
+*[page-id] .portal-toolbar {
+	background: rgba(0, 0, 0, .4);
+	border-radius: 3px;
+	position: absolute !important;
+	top: 25px;
+	border-bottom: 1px solid #C2C2C2;
+	display: none;
+	flex-direction: column;
+	padding: 0px;
+}
+
+*[page-id] .portal-toolbar sc-button:hover {
+	opacity: 0.7;
+}
+	
+es-portlet-layout-config *[page-id=vueGrid] .vertical {
+	flex-direction: column;
+	justify-content: space-between;
+	-webkit-justify-content: space-between;
+	-ms-flex-direction: column;
+	-webkit-flex-direction: column;
+	flex-direction: column;
+}
+	
+*[page-id] .portal-tool-button {
+	margin: 0;
+	width: 100px;
+	background: rgba(0, 0, 0, .4);
+	height: 20px;
+	border-radius: 3px;
+	padding: 3px 8px 2px 8px;
+	color: #ffffff;
+	font-weight: bold;
+}
+	
+*[page-id] .portal-tool-button .button-container {
+	margin-right: 8px;
+}
+
+*[page-id=vueGrid] .vue-resizable-handle {
+	z-index: 1 !important;
+}
+
+*[page-id=vueGrid] .box-content {
+	user-select: none;
+	-ms-user-select: none;
+}
+	
+vue-grid-layout-config,vue-grid-layout-config2 .vue-grid-layout-config.portal-toolbar {
+	height: auto !important;
+	padding: 0 0 0px 0px !important;
+}
+	
+*[page-id=vueGrid] .vue-grid-layout-config.portal-tool-button{
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+	
+*[page-id=vueGrid] .vue-grid-layout-config.portal-tool-button:hover{
+	background: #1e5784 !important;
+}
+
+*[page-id=vueGrid] .vue-grid-item:not(.vue-grid-placeholder){
+	background: #FFF;
+	border-radius: 8px !important; /* 2020.10.05 ch.byeon */	
+}
+	
+*[page-id=vueGrid] .borderBlink{
+	-webkit-animation: borderBlink 1s step-end 5;    
+	animation: borderBlink 1s step-end 5;  
+}
+
+*[page-id=vueGrid] sc-widget .interact-resizable-south {
+	display: none !important;
+}
+	
+@-webkit-keyframes borderBlink {    
+	from, to {    
+		border-color: transparent    
+	}    
+	50% {    
+		border-color: blue    
+	}    
+}
+
+@keyframes borderBlink {    
+	from, to {    
+		border-color: transparent 
+	}    
+	50% {    
+		border-color: blue    
+	}
+}
+
+es-portlet-layout-config *[page-id=vueGrid] #managerHandle {
+	z-index: 2;
+}
+
+sc-portal *[page-id=vueGrid] sc-widget[hide-header] #hoverArea {
+	display: none !important;
+}
+
+sc-portal *[page-id=vueGrid] sc-widget[hide-header] #titleBar {
+	display: none !important;
+}
+
+/*# sourceMappingURL=master.css.map */

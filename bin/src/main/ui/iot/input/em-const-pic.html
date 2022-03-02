@@ -1,0 +1,32 @@
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 공종 사진 관리
+    ** @Description     : 
+    ** @Author          : jh.Park
+    ** @Create Date     : 2021-09-08
+    ** @History         : 2021-09-08 jh.Park 최초작성
+    ******************************************************************************************
+-->
+<sc-link rel="import" href="es-const-pic.html"></sc-link>
+
+<dom-module id="em-const-pic">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<div class="hbox flex">
+			<es-const-pic id="safetyEquiListCon" class="flex"></es-const-pic>
+        </div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-const-pic'
+		});
+	</script>
+
+</dom-module>

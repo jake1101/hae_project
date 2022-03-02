@@ -1,0 +1,102 @@
+<!--
+ * @Desc grid group behavior
+ * @Author kjk
+ * @Created 2016-04-07
+ -->
+<script>
+    Polymer.GPGridGroupBehavior = {
+        properties : {
+            tag : {
+            	type : String
+            },
+        	headerText: {
+                type: String,
+                value: ""
+            },
+            width: {
+                type: String,
+                value: ""
+            },
+            orientation : {
+            	type : String
+            },
+            columns : {
+            	type : Array,
+            	value : function(){return [];}
+            },
+            hideHeader : {
+            	type :Boolean,
+            	value : false
+            },
+            hideChildHeaders : {
+            	type :Boolean,
+            	value : false
+            },
+            hideExport : {
+            	type :Boolean,
+            	value : false
+            },
+            hide : {
+            	type :Boolean,
+            	value : false
+            }
+        },
+        
+        attributeChanged : function(name, type)
+        {
+        	var func = null;
+        	switch(name)
+        	{
+        		case "hide" : 
+        			func = this.__setVisible;
+        			break;
+        	}
+        	if(func)
+       		{
+        		this.fire("column-changed", {name : name, value : this.get(name), func : func});
+       		}
+        },
+        
+        __setVisible : function(obj, e)
+        {
+        	var me = typeof e !== "undefined" ? e.target : this;
+			obj.visible = !me.hide;
+        },
+        
+        getChildColumns : function()
+        {
+        	var childList = this.getContentChildren("content");
+        	return childList;
+        },
+
+        /**
+         * 그룹 정보
+         */
+        getGroupInfo : function()
+        {
+        	var returnObj = {type : "group", tag : this.tag};
+        	if(this.headerText)
+       		{
+       			returnObj.name = this.headerText;
+       		}
+        	if(this.width)
+       		{
+       			returnObj.width = this.width;
+       		}
+        	if(this.orientation)
+       		{
+       			returnObj.orientation = this.orientation;
+       		}
+        	if(this.hideHeader == true)
+       		{
+       			returnObj.header = {visible : false};
+       		}
+        	if(this.hideChildHeaders == true)
+       		{
+       			returnObj.hideChildHeaders = true;
+       		}
+        	this.__setVisible(returnObj);
+        	return returnObj;
+        }
+    };
+</script>

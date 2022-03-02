@@ -1,0 +1,590 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="memo">
+	
+	<!-- 전체 메모 조회 -->
+	<select id="findListAllMemo" resultType="java.util.Map">
+	/* memo.findListAllMemo */
+         SELECT MEMO_ID           	/*메모ID */
+             ,MEMO_TITLE      		/*제목 */
+             ,MEMO_CONTENT      	/*내용 */
+             ,MEMO_IMP           	/*중요메모 */
+             ,MEMO_DASHBOARD		/*대쉬보드등록메모*/
+             ,DELETE_YN				/*삭제여부*/
+             ,SHARED_YN				/*공유여부*/
+             ,REG_ID				/*메모작성자*/
+             ,BACKGROUND_COLOR		/*배경색*/
+             ,MOD_DT        		/*수정일시 */
+             
+         FROM ESAMEMO      
+         WHERE UPPER(REG_ID) = UPPER(#{g.username}) 
+         OR MEMO_ID IN (SELECT MEMO_ID
+        	 			FROM ESAMSHR      
+         				WHERE UPPER(SHARE_ID) = UPPER(#{g.username}))
+         ORDER BY MOD_DT DESC
+     </select>
+     
+     <!-- 중요 메모 조회 -->
+	 <select id="findListImptMemo" resultType="java.util.Map">
+	 /* memo.findListImptMemo */
+         SELECT MEMO_ID           	/*메모ID */
+             ,MEMO_TITLE      		/*제목 */
+             ,MEMO_CONTENT      	/*내용 */
+             ,MEMO_IMP           	/*중요메모 */
+             ,MEMO_DASHBOARD		/*대쉬보드등록메모*/
+             ,DELETE_YN				/*삭제여부*/
+             ,SHARED_YN				/*공유여부*/
+             ,REG_ID				/*메모작성자*/
+             ,BACKGROUND_COLOR		/*배경색*/
+             ,MOD_DT        		/*수정일시 */
+         FROM ESAMEMO      
+         WHERE UPPER(REG_ID) = UPPER(#{g.username}) AND MEMO_IMP = 1
+         ORDER BY MOD_DT DESC
+     </select>
+     
+     <!-- 내 메모 조회 -->
+	 <select id="findListMyMemo" resultType="java.util.Map">
+	 /* memo.findListMyMemo */
+         SELECT MEMO_ID           	/*메모ID */
+             ,MEMO_TITLE      		/*제목 */
+             ,MEMO_CONTENT      	/*내용 */
+             ,MEMO_IMP           	/*중요메모 */
+             ,MEMO_DASHBOARD		/*대쉬보드등록메모*/
+             ,DELETE_YN				/*삭제여부*/
+             ,SHARED_YN				/*공유여부*/
+             ,BACKGROUND_COLOR		/*배경색*/
+             ,MOD_DT        		/*수정일시 */
+         FROM ESAMEMO      
+         WHERE UPPER(REG_ID) = UPPER(#{g.username}) AND SHARED_YN = 0
+         ORDER BY MOD_DT DESC
+     </select>
+     
+     <!-- 공유 메모 조회 -->
+	<select id="findListSharedMemo" resultType="java.util.Map">
+	/* memo.findListSharedMemo */
+         SELECT MEMO_ID           	/*메모ID */
+             ,MEMO_TITLE      		/*제목 */
+             ,MEMO_CONTENT      	/*내용 */
+             ,MEMO_IMP           	/*중요메모 */
+             ,MEMO_DASHBOARD		/*대쉬보드등록메모*/
+             ,DELETE_YN				/*삭제여부*/
+             ,SHARED_YN				/*공유여부*/
+             ,BACKGROUND_COLOR		/*배경색*/
+             ,REG_ID				/*메모작성자*/
+             ,MOD_DT        		/*수정일시 */
+         FROM ESAMEMO      
+         WHERE MEMO_ID IN (SELECT MEMO_ID
+					         FROM ESAMSHR      
+					         WHERE UPPER(SHARE_ID) = UPPER(#{g.username}))
+		 OR MEMO_ID IN (SELECT MEMO_ID
+						 FROM ESAMSHR      
+						 WHERE UPPER(REG_ID) = UPPER(#{g.username}))
+         ORDER BY MOD_DT DESC
+     </select>
+     
+     <!-- 삭제된 메모 조회 (휴지통 조회) -->
+	 <select id="findListDeletedMemo" resultType="java.util.Map">
+	 /* memo.findListDeletedMemo */
+         SELECT MEMO_ID           	/*메모ID */
+             ,MEMO_TITLE      		/*제목 */
+             ,MEMO_CONTENT      	/*내용 */
+             ,MEMO_IMP           	/*중요메모 */
+             ,MEMO_DASHBOARD		/*대쉬보드등록메모*/
+             ,DELETE_YN				/*삭제여부*/
+             ,SHARED_YN				/*공유여부*/
+             ,REG_ID				/*메모작성자*/
+             ,BACKGROUND_COLOR		/*배경색*/
+             ,MOD_DT        		/*수정일시 */
+         FROM ESAMEMO      
+         WHERE UPPER(REG_ID) = UPPER(#{g.username}) AND DELETE_YN = 1
+         ORDER BY MOD_DT DESC
+     </select>
+     
+     <!-- 대쉬보드 출력 메모 조회 -->
+	 <select id="findListDashboardMemo" resultType="java.util.Map">
+	 /* memo.findListDashboardMemo */
+         SELECT MEMO_ID           	/*메모ID */
+             ,MEMO_TITLE      		/*제목 */
+             ,MEMO_CONTENT      	/*내용 */
+             ,MEMO_IMP           	/*중요메모 */
+             ,MEMO_DASHBOARD		/*대쉬보드등록메모*/
+             ,DELETE_YN				/*삭제여부*/
+             ,SHARED_YN				/*공유여부*/
+             ,BACKGROUND_COLOR		/*배경색*/
+             ,MOD_DT        		/*수정일시 */
+         FROM ESAMEMO      
+         WHERE UPPER(REG_ID) = UPPER(#{g.username}) 
+           AND SHARED_YN = 0
+           AND MEMO_DASHBOARD = 1
+           AND DELETE_YN = 0
+         ORDER BY MOD_DT DESC
+     </select>
+     
+     <!-- 메모 추가 -->	
+	 <insert id="insertMemo">
+	 /* memo.insertMemo: 메모 등록 */
+	    INSERT INTO ESAMEMO
+		<trim prefix="(" suffix=")" prefixOverrides=",">
+			SYS_ID
+		    , MEMO_ID
+		    , MEMO_TITLE
+		    , MEMO_CONTENT
+		    , MEMO_IMP
+		    , MEMO_DASHBOARD
+		    , DELETE_YN
+		    , SHARED_YN
+		    , BACKGROUND_COLOR
+		    , STS
+		    , REG_ID 
+		    , REG_DT
+		    , MOD_ID 
+		    , MOD_DT
+	    </trim>
+	    <trim prefix="values (" suffix=")" prefixOverrides=",">
+	    	#{g.tenant}
+	 		, #{p.memo_id}
+	 		, #{p.memo_title}
+	 		, #{p.memo_content}
+	 		, #{p.memo_imp}
+	 		, #{p.memo_dashboard}
+	 		, '0'
+	 		, #{p.shared_yn}
+	 		, #{p.background_color}
+	 		, 'C'
+	 		, #{g.username}
+	 		, #{g.now}
+	 		, #{g.username}
+	 		, #{g.now}    
+	 	</trim>
+ 	 </insert>
+ 	 
+     <!-- 메모 데이터 수정 -->
+     <update id="updateMemo">
+     /* memo.updateMemo */
+		UPDATE ESAMEMO
+			SET 
+				MEMO_TITLE = #{p.memo_title}
+				, MEMO_CONTENT = #{p.memo_content}
+				<if test="p.memo_imp != null and p.memo_imp != ''">
+				, MEMO_IMP = #{p.memo_imp}
+				</if>
+				<if test="p.memo_dashboard != null and p.memo_dashboard != ''">
+				, MEMO_DASHBOARD = #{p.memo_dashboard}
+				</if>
+				, BACKGROUND_COLOR = #{p.background_color}
+				, STS = 'U'
+				, MOD_ID = #{g.username}
+				, MOD_DT = #{g.now}
+		WHERE MEMO_ID = #{p.memo_id}
+	 </update>
+	
+	 <!-- 메모 데이터 삭제 (물리적인 삭제는 아님. 휴지통으로 이동) -->
+     <update id="deleteMemo">
+     /* memo.deleteMemo */
+		UPDATE ESAMEMO
+			SET
+				DELETE_YN = 1
+				, SHARED_YN = 0
+				, STS = 'U'
+				, MEMO_IMP = 0
+				, MOD_ID = #{g.username}
+				, MOD_DT = #{g.now}
+		WHERE MEMO_ID = #{p.memo_id}
+	 </update>
+	 
+	 <!-- 삭제된 메모의 공유 정보 삭제 -->
+     <delete id="deleteSharedInfo">
+     /* memo.deleteSharedInfo: 공유 메모 정보 삭제 */
+		DELETE 
+			FROM ESAMSHR
+		WHERE MEMO_ID = #{p.memo_id}
+		<if test="p.usr_id != null and p.usr_id != ''">
+			AND SHARE_ID = #{p.usr_id}
+		</if>
+		AND REG_ID = #{g.username}
+	 </delete>
+	 
+	 <!-- 공유 메모 정보 삭제 -->
+     <delete id="deleteSharedMemo">
+     /* memo.deleteSharedMemo: 공유 메모 정보 삭제 */
+		DELETE 
+			FROM ESAMSHR
+		WHERE MEMO_ID = #{p.memo_id}
+		AND SHARE_ID = #{g.username}
+	 </delete>
+	 
+	 <!-- 메모 중요도 수정 -->
+     <update id="updateMemoImpt">
+     /* memo.updateMemoImpt */
+		UPDATE ESAMEMO
+			SET
+				MEMO_IMP = #{p.memo_imp}
+				, STS = 'U'
+				, MOD_ID = #{g.username}
+				, MOD_DT = #{g.now}
+		WHERE MEMO_ID = #{p.memo_id}
+	 </update>
+	
+	 <!-- 메모 대쉬보드 등록/해제 -->
+     <update id="updateMemoDashboard">
+     /* memo.updateMemoImpt */
+		UPDATE ESAMEMO
+			SET
+				MEMO_DASHBOARD = #{p.memo_dashboard}
+				, STS = 'U'
+				, MOD_ID = #{g.username}
+				, MOD_DT = #{g.now}
+		WHERE MEMO_ID = #{p.memo_id}
+	 </update>
+   
+    <!-- 사용자가 등록한 태그 데이터 조회 -->
+	<select id="findListTag" resultType="java.util.Map">        
+		SELECT TAG_ID
+			, TAG_NM 
+			FROM ESAMTAG 
+			WHERE REG_ID = #{g.username}
+			ORDER BY TAG_NM
+    </select>
+    
+    <!-- 사용자가 등록한 태그 데이터 조회 -->
+	<select id="findListTagByKeyword" resultType="java.util.Map">        
+		SELECT TAG_ID
+			, TAG_NM 
+			FROM ESAMTAG 
+			WHERE REG_ID = #{g.username} 
+			<if test="p.tag_nm != null and p.tag_nm != ''">
+	            <bind name="tagnamePattern" value="'%' + p.tag_nm + '%'" />
+		    AND UPPER(TAG_NM) LIKE UPPER(#{tagnamePattern})
+	        </if>
+			ORDER BY TAG_NM
+    </select>
+    
+    <!-- 특정 메모 태그 데이터 조회 -->
+	<select id="findListMemoTag" resultType="java.util.Map">        
+		SELECT TAG_ID
+			, TAG_NM
+			FROM ESAMTAG 
+			WHERE TAG_ID IN (SELECT TAG_ID
+	         				 FROM ESAMTGM      
+	         				 WHERE UPPER(MEMO_ID) = UPPER(#{p.memo_id}))
+    </select>
+    
+    <!-- 태그 별 메모 데이터 조회 -->
+	<select id="findListMemoByTag" resultType="java.util.Map">        
+		SELECT MEMO_ID           	/*메모ID */
+             ,MEMO_TITLE      		/*제목 */
+             ,MEMO_CONTENT      	/*내용 */
+             ,MEMO_IMP           	/*중요메모 */
+             ,MEMO_DASHBOARD		/*대쉬보드등록메모*/
+             ,DELETE_YN				/*삭제여부*/
+             ,STS					/*상태*/
+             ,SHARED_YN				/*공유여부*/
+             ,BACKGROUND_COLOR      /*배경색*/
+             ,REG_ID				/*등록ID */
+             ,REG_DT        		/*등록일시 */
+             ,MOD_ID            	/*수정ID */
+             ,MOD_DT        		/*수정일시 */
+         FROM ESAMEMO      
+         WHERE MEMO_ID IN (SELECT MEMO_ID
+							FROM ESAMTGM 
+							WHERE TAG_ID IN (SELECT TAG_ID
+					         				FROM ESAMTAG      
+					         				WHERE UPPER(TAG_NM) = UPPER(#{p.tag_nm}) AND REG_ID = #{g.username}))
+    </select>
+    
+ 	<!-- 메모 태그 등록 -->
+    <insert id="insertTagByTagNM">
+	 /* memo.insertTagByTagNM: 메모 태그 등록 */
+	    INSERT INTO ESAMTGM
+		<trim prefix="(" suffix=")" prefixOverrides=",">
+			SYS_ID
+			, TAG_ID
+		    , MEMO_ID
+		    , STS
+		    , REG_ID 
+		    , REG_DT
+		    , MOD_ID 
+		    , MOD_DT
+	    </trim>
+	    <trim prefix="values (" suffix=")" prefixOverrides=",">
+	    	#{g.tenant}
+	    	, 
+	    	<trim prefix="(" suffix=")">
+	    	SELECT TAG_ID
+		    	FROM ESAMTAG
+		    	WHERE TAG_NM = #{p.tag_nm} AND REG_ID = #{g.username}
+		    </trim>
+	 		, #{p.memo_id}
+	 		, 'C'
+	 		, #{g.username}
+	 		, #{g.now}
+	 		, #{g.username}
+	 		, #{g.now}    
+	 	</trim>
+ 	 </insert>
+ 	 
+ 	 <!-- 태그 등록 -->
+ 	 <insert id="insertTag">
+	 /* memo.insertTag: 태그 등록 */
+	    INSERT INTO ESAMTAG
+		<trim prefix="(" suffix=")" prefixOverrides=",">
+			SYS_ID
+		    , TAG_ID
+		    , TAG_NM
+		    , STS
+		    , REG_ID 
+		    , REG_DT
+		    , MOD_ID 
+		    , MOD_DT
+	    </trim>
+	    <trim prefix="values (" suffix=")" prefixOverrides=",">
+	    	#{g.tenant}
+	 		, #{p.tag_id}
+	 		, #{p.tag_nm}
+	 		, 'C'
+	 		, #{g.username}
+	 		, #{g.now}
+	 		, #{g.username}
+	 		, #{g.now}    
+	 	</trim>
+ 	 </insert>
+ 	 
+ 	 <!-- 메모 태그 자체를 삭제 (ESAMTGM 내 삭제)-->
+ 	 <delete id="deleteTagInMTable">
+	 /* memo.deleteTagInMTable: 메모 태그 자체를 삭제 */
+	 	DELETE 
+			FROM ESAMTGM
+		WHERE TAG_ID = (SELECT TAG_ID 
+							FROM ESAMTAG
+							WHERE TAG_NM = #{p.tag_nm} AND REG_ID = #{g.username})
+ 	 </delete>
+ 	 
+ 	 <!-- 메모 태그 자체를 삭제 (ESAMTAG 내 삭제) -->
+ 	 <delete id="deleteTagInTTable">
+	 /* memo.deleteTagInTTable: 메모 태그 자체를 삭제 */
+	 	DELETE 
+			FROM ESAMTAG
+		WHERE TAG_NM = #{p.tag_nm} AND REG_ID = #{g.username}
+ 	 </delete>
+ 	 
+ 	 <!-- 메모 내 태그 데이터 삭제 -->
+ 	 <delete id="deleteTagInMemo">
+	 /* memo.deleteTagInMemo: 메모 내 태그 데이터 삭제 */
+	 	DELETE 
+			FROM ESAMTGM
+		WHERE TAG_ID = #{p.tag_id} AND MEMO_ID = #{p.memo_id}
+ 	 </delete>
+
+ 	 <!-- 메모 아이디를 이용한 태그 데이터 삭제 -->
+ 	 <delete id="deleteTagByMemoID">
+	 /* memo.deleteTagByMemoID: 메모 아이디를 이용한 태그 데이터 삭제 */
+	 	DELETE 
+			FROM ESAMTGM
+		WHERE MEMO_ID = #{p.memo_id}
+ 	 </delete>
+ 	  	 
+ 	 <!-- 메모 완전 삭제 & 휴지통 비우기 -->
+	 <delete id="emptyTrash">
+	 /* memo.emptyTrash */
+		DELETE 
+		    FROM ESAMEMO
+		WHERE MEMO_ID = #{p.memo_id} 		
+	 </delete>
+	
+     <!-- 메모 복원 -->
+     <update id="restoreMemo">
+     /* memo.restoreMemo */
+		UPDATE ESAMEMO
+			SET
+				DELETE_YN = 0
+				, STS = 'U'
+				, MOD_ID = #{g.username}
+				, MOD_DT = #{g.now}
+		WHERE MEMO_ID = #{p.memo_id}
+	 </update>
+	 
+	 <!-- 공유 메모 등록 -->
+ 	 <insert id="insertSharedInfo">
+	 /* memo.insertSharedInfo: 공유 메모 등록 */
+	    INSERT INTO ESAMSHR
+		<trim prefix="(" suffix=")" prefixOverrides=",">
+			SYS_ID
+		    , SHARE_ID
+		    , MEMO_ID
+		    , STS
+		    , REG_ID
+		    , REG_DT
+		    , MOD_ID
+		    , MOD_DT
+	    </trim>
+	    <trim prefix="values (" suffix=")" prefixOverrides=",">
+	    	#{g.tenant}
+	 		, #{p.usr_id}
+	 		, #{p.memo_id}
+	 		, 'C'
+	 		, #{g.username}
+	 		, #{g.now}
+	 		, #{g.username}
+	 		, #{g.now}    
+	 	</trim>
+ 	 </insert>
+ 	 
+ 	 <!-- 메모 테이블 내 공유 여부 업데이트 (sharedYn: no => yes)-->
+ 	 <update id="addSharedYn">
+     /* memo.addSharedYn */
+		UPDATE ESAMEMO
+			SET
+				SHARED_YN = 1
+				, STS = 'U'
+				, MOD_ID = #{g.username}
+				, MOD_DT = #{g.now}
+		WHERE MEMO_ID = #{p.memo_id}
+	 </update>
+	 
+ 	 <!-- 메모 테이블 내 공유 여부 업데이트 (sharedYn: yes => no) -->
+ 	 <update id="removeSharedYn">
+     /* memo.removeSharedYn */
+		UPDATE ESAMEMO
+			SET
+				SHARED_YN = 0
+				, STS = 'U'
+				, MOD_ID = #{g.username}
+				, MOD_DT = #{g.now}
+		WHERE MEMO_ID = #{p.memo_id}
+	 </update>
+	 
+	 <!-- 메모 공유 정보 조회 -->
+	 <select id="findListSharedUsers" resultType="java.util.Map">
+	 /* memo.findListSharedUsers */
+        SELECT A.SHARE_ID as USR_ID,          /*공유 대상자 ID */
+               B.USR_NM,
+               CASE WHEN C.DEPT_NM IS NULL THEN ''
+                  ELSE C.DEPT_NM
+                  END  AS DEPT_NM 
+        FROM ESAMSHR A
+        INNER JOIN ESAUSER B
+        ON A.SHARE_ID = B.USR_ID       
+        LEFT OUTER JOIN ESAOGDP C
+        ON B.SYS_ID = C.SYS_ID
+        AND B.DEPT_CD = C.DEPT_CD
+        AND C.STS != 'D'
+        WHERE A.MEMO_ID = #{p.memo_id}
+        ORDER BY A.SHARE_ID ASC
+     </select>
+     
+     <!-- 메모 공유 대상자 즐겨찾기 정보 조회 -->
+     <select id="findListFavorites" resultType="java.util.Map">
+	 /* memo.findListFavorites */
+        SELECT A.FAVORITES_USER_ID as USR_ID,   /*공유 대상자 ID */
+        	   B.USR_NM,                    /*공유 대상자 명 */
+        	   CASE WHEN C.DEPT_NM IS NULL THEN ''
+                 ELSE C.DEPT_NM
+                 END  AS DEPT_NM
+        FROM ESAMFVR A   
+        INNER JOIN ESAUSER B
+        ON A.FAVORITES_USER_ID = B.USR_ID
+        LEFT OUTER JOIN ESAOGDP C
+        ON B.SYS_ID = C.SYS_ID
+        AND B.DEPT_CD = C.DEPT_CD
+        AND C.STS != 'D' 
+        WHERE A.REG_ID = #{g.username}
+        <if test="p.usr_nm != null and p.usr_nm != ''">
+            <bind name="usernamePattern" value="'%' + p.usr_nm + '%'" />
+        AND UPPER(B.USR_NM) LIKE UPPER(#{usernamePattern})
+        </if>
+        <if test="p.usr_id != null and p.usr_id != ''">
+         	<bind name="userIdPattern" value="'%' + p.usr_id + '%'" />
+        AND UPPER(A.FAVORITES_USER_ID) LIKE UPPER(#{userIdPattern})
+        </if>
+        <if test="p.dept_nm != null and p.dept_nm != ''">
+	    AND C.DEPT_NM LIKE '%' || UPPER(#{p.dept_nm}) || '%'
+	    </if>
+        ORDER BY B.USR_ID ASC 
+     </select>
+     
+     <!-- 등록된 모든 사용자 조회 -->
+	 <select id="findListUserInMemo" resultType="java.util.Map">
+	 /* memo.findListUserInMemo */
+	     SELECT DISTINCT A.USR_ID                         /* 사용자아이디 */
+	          , A.USR_NM                         /* 사용자명 */
+	          , CASE WHEN D.DEPT_NM IS NULL THEN ''
+	            ELSE D.DEPT_NM
+	            END  AS DEPT_NM                  /* 부서명 */
+	       FROM ESAUSER A
+	 INNER JOIN ESAAURP B
+	         ON B.SYS_ID = A.SYS_ID
+	        AND B.USR_ID = A.USR_ID
+	 INNER JOIN ESA_ROLE_SITE C
+	         ON C.SYS_ID = B.SYS_ID
+	        AND C.ROLE_CD = B.ROLE_CD
+LEFT OUTER JOIN ESAOGDP D
+             ON A.SYS_ID = D.SYS_ID
+            AND A.DEPT_CD = D.DEPT_CD
+            AND D.STS != 'D'
+          WHERE A.SYS_ID = #{g.tenant}
+            AND A.STS != 'D'
+            AND (A.USR_ID != 'ADMIN' AND A.USR_ID != 'SUPER')
+		<if test="p.usr_nm != null and p.usr_nm != ''">
+	           <bind name="usernamePattern" value="'%' + p.usr_nm + '%'" />
+	        AND UPPER(A.USR_NM) LIKE UPPER(#{usernamePattern})
+		</if>
+	    <if test="p.usr_id != null and p.usr_id != ''">
+			<bind name="userIdPattern" value="'%' + p.usr_id + '%'" />
+	        AND UPPER(A.USR_ID) LIKE UPPER(#{userIdPattern})
+		</if>
+		<if test="p.dept_nm != null and p.dept_nm != ''">
+	        AND C.DEPT_NM LIKE '%' || UPPER(#{p.dept_nm}) || '%'
+		</if>
+            AND C.SITE_ID IN ( SELECT T3.SITE_ID
+                                 FROM ESAUSER T1
+                           INNER JOIN ESAAURP T2
+                                   ON T2.SYS_ID = T1.SYS_ID
+                                  AND T2.USR_ID = T1.USR_ID
+                           INNER JOIN ESA_ROLE_SITE T3
+                                   ON T3.SYS_ID = T2.SYS_ID
+                                  AND T3.ROLE_CD = T2.ROLE_CD
+                      LEFT OUTER JOIN ESAOGDP T4
+                                   ON T4.SYS_ID = T1.SYS_ID
+                                  AND T4.DEPT_CD = T1.DEPT_CD
+                                  AND T4.STS != 'D'
+                                WHERE T1.USR_ID = #{g.username}
+                             )
+	     ORDER BY A.USR_ID ASC
+     </select>
+     
+ 	 <!-- 즐겨찾기 추가 -->
+ 	 <insert id="insertFavorites">
+	 /* memo.insertFavorites: 즐겨찾기 추가 */
+	    INSERT INTO ESAMFVR
+		<trim prefix="(" suffix=")" prefixOverrides=",">
+			SYS_ID
+			, FAVORITES_ID
+		    , FAVORITES_USER_ID
+		    , STS
+		    , REG_ID 
+		    , REG_DT 
+		    , MOD_ID 
+		    , MOD_DT
+	    </trim>
+	    <trim prefix="values (" suffix=")" prefixOverrides=",">
+	    	#{g.tenant}
+	    	, #{p.fvr_id}
+	 		, #{p.usr_id}
+	 		, 'C'
+	 		, #{g.username}
+	 		, #{g.now}
+	 		, #{g.username}
+	 		, #{g.now}    
+	 	</trim>
+ 	 </insert>
+ 	 
+ 	 <!-- 즐겨찾기 삭제 -->
+     <delete id="deleteFavorites">
+     /* memo.deleteFavorites: 즐겨찾기 삭제 */
+		DELETE 
+			FROM ESAMFVR
+		WHERE FAVORITES_USER_ID = #{p.usr_id}
+		AND REG_ID = #{g.username}
+	 </delete>
+</mapper>

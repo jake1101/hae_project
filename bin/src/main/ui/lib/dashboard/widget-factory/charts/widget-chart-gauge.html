@@ -1,0 +1,149 @@
+<dom-module id="widget-chart-pie">
+
+    <script>
+    /***
+    
+    
+var gaugeOptions = {
+
+    chart: {
+        type: 'solidgauge'
+    },
+
+    title: null,
+
+    pane: {
+        center: ['50%', '85%'],
+        size: '140%',
+        startAngle: -90,
+        endAngle: 90,
+        background: {
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || '#EEE',
+            innerRadius: '60%',
+            outerRadius: '100%',
+            shape: 'arc'
+        }
+    },
+
+    tooltip: {
+        enabled: false
+    },
+
+    // the value axis
+    yAxis: {
+        
+        lineWidth: 0,
+        minorTickInterval: null,
+        tickAmount: 2,
+        title: {
+            y: -70
+        },
+        labels: {
+            y: 16
+        }
+    },
+
+    plotOptions: {
+        solidgauge: {
+            dataLabels: {
+                y: 5,
+                borderWidth: 0,
+                useHTML: true
+            }
+        }
+    }
+};
+
+// The speed gauge
+var chartSpeed = Highcharts.chart('container-speed', Highcharts.merge(gaugeOptions, {
+    yAxis: {
+        min: 0,
+        max: 200,
+        title: {
+            text: 'Speed'
+        }
+    },
+
+    credits: {
+        enabled: false
+    },
+
+    series: [{
+        name: 'Speed',
+        data: [80],
+        dataLabels: {
+            format: '<div style="text-align:center"><span style="font-size:25px;color:' +
+                ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
+                   '<span style="font-size:12px;color:silver">km/h</span></div>'
+        },
+        tooltip: {
+            valueSuffix: ' km/h'
+        }
+    }]
+
+}));
+
+
+
+
+
+****/
+    
+   	/***
+   	WidgetChartPie =  Polymer({
+	            is: "widget-chart-pie",
+	    		getSeriesData : function(datas,labels){
+	    			var compressDatas = {},color;
+	    			datas.forEach(function(data,index){
+	    				for(var key in data){
+	    					compressDatas[key] = Number(data[key]);
+	    				}
+	    			});
+	    			var series = [],index = 0;
+	    			for(var key in compressDatas){
+	    				var serie = {fieldName :key, name: labels[index].name, y :compressDatas[key]};
+	    				if(color = labels[index].color){
+	    					serie.color = color;
+	    				}
+	    				series.push(serie);
+	    				index++;
+	    			}
+	    			return series;
+	    		},
+	    		getTemplate : function(template,datas){
+	    			var me = this, content = template.contents;
+	    			var series = me.getSeriesData(datas,content.series);
+	    			var chartTemplate = {
+	        			    chart : {
+	        			        type: content.type,
+	        			        options3d: {
+	            		            enabled : content.options3d.enabled,
+	            		            alpha   : content.options3d.alpha,
+	            		            beta    : content.options3d.beta 
+	            		        },
+	            		        plotBackgroundColor: null,
+	            		        plotBorderWidth: null
+	        			    },
+	        			    title : {
+	        			        text: content.title
+	        			    },
+	        			    yAxis : {
+	        			        min : 0,
+	        			        title : {
+	        			            text : null
+	        			        }
+	        			    },
+	        			    legend : content.legend ||{},
+	        			    tooltip:{
+	        			    	enabled : false
+	        			    },
+	        			    legend : content.legend ||{},
+	        			    plotOptions: content.plotOptions,
+	        			    series:  [{name:'pie',data :series }]
+	        			}
+	    			return chartTemplate;
+	    		}
+    	});
+    	***/
+    </script>
+</dom-module>

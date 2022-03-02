@@ -1,0 +1,114 @@
+<dom-module id="widget-grid-setting-popup">
+    <style>
+    </style>
+    
+   <template>
+      <sc-toolbar>
+	   	   <sc-spacer></sc-spacer>
+	       <sc-button text="추가" class="dashboard" on-click="onAddItem"></sc-button>
+	       <sc-button text="삭제" class="dashboard" on-click="onRemoveItem"></sc-button>
+	  </sc-toolbar>
+      <sc-grid  id="gridSettingGrid"  style="height: 190px;"
+		             editable="true" sortable="false" use-context-menu="false"
+		             on-item-click="onItemClick" >
+	           <sc-grid-columns>
+	            	<sc-group-column header-text="순서" hide-child-headers="true" width="50">
+	           			<sc-data-column     header-text=""      data-field="up"    width="10" text-align="center" item-style-function="onItemUpStyle" sortable="false"></sc-data-column>
+	           			<sc-data-column     header-text=""      data-field="down"    width="10" text-align="center" item-style-function="onItemDownStyle" sortable="false"></sc-data-column>
+	           		</sc-group-column>	
+	                <sc-data-column     header-text="필드"      data-field="field"        width="100" text-align="center"   editable="true" sortable="false"></sc-data-column>
+	                <sc-data-column     header-text="해더텍스트"  data-field="header_text"   width="120" text-align="center"   editable="true"   sortable="false"></sc-data-column>
+	                <sc-combobox-column header-text="정렬"      data-field="align"        width="80"  text-align="center" editable="true"    display-field="label" value-field="data" items="[[alignCodes]]" sortable="false"></sc-combobox-column>
+	                <sc-combobox-column header-text="dataType" data-field="type"         width="80"  text-align="center" editable="true"    display-field="label" value-field="data" items="{{dataTypeCodes}}" sortable="false"></sc-combobox-column>
+	                <sc-data-column     header-text="넓이"      data-field="width"        width="150" text-align="center" data-type="number"  editable="true" ></sc-data-column>
+	           </sc-grid-columns>
+       </sc-grid>
+       <sc-toolbar style="padding: 4px 0 4px 1px;">
+           <sc-spacer></sc-spacer>
+       	   <sc-button class="dashboard" style="width:80px;text-align:center;" text="저장" on-click="onApply"></sc-button>
+       	   <sc-spacer></sc-spacer>
+       </sc-toolbar>
+    </template>
+    
+    <script>
+        Polymer({
+            is : 'widget-grid-setting-popup',
+            properties : {
+            	resultList: {
+            		type: Array,
+            		value: []
+            	},
+            	alignCodes:{
+            		type: Array,
+            		value:function(){
+            			return [
+            			        {label:'center',data:'center'},
+            			        {label:'left'  ,data:'left'},
+            			        {label:'right' ,data:'right'}
+            			 ]
+            		}
+            	},
+            	dataTypeCodes:{
+            		type: Array,
+            		value:function(){
+            			return [
+            			        {label:'text'   ,data:'text'},
+            			        {label:'number' ,data:'number'},
+            			 ]
+            		}
+            	}
+            },
+            attached : function(){
+            	var me = this;
+            },
+            load: function(param){
+            	var me = this; 
+            	me.$.gridSettingGrid.setDataProvider(param);
+            },
+            onAddItem: function(){
+    			var me = this, 
+    			    provider = me.$.gridSettingGrid.getDataProvider();
+                provider.addItem({align:'center', type:'text',width:100});
+               // me.widgetDraw();
+    		},
+    		onApply: function(){
+    			var me = this,
+   					provider = me.$.gridSettingGrid.getDataProvider();
+    			me.fire('apply',{data:provider.getItems()})
+    		},
+    		onRemoveItem: function(){
+    			var me = this, 
+			    provider = me.$.gridSettingGrid.getDataProvider();
+    			
+    			var checkedIndexs = provider.selectionCheckedIndexes() || [];
+    			if(checkedIndexs.length > 0 ){
+        			me.$.gridSettingGrid._gridView.getDataProvider().deleteRows(checkedIndexs);
+        			//me.widgetDraw();	
+    			}
+    		},
+    		onItemClick: function(event){
+    			 var me = this, detail = event.detail,
+    			    data = detail.data,
+    			    item = detail.item;
+    			    provider = detail.provider;
+    			 if(item.dataField == 'up'){
+    				 if(item.rowIndex != 0){
+	    				 provider.moveRow(item.rowIndex, item.rowIndex-1 );
+	    				 me.widgetDraw();
+    				 }
+    			 }else if(item.dataField == 'down'){
+    				 if(item.rowIndex != provider.getItems().length-1){
+	    				 provider.moveRow(item.rowIndex, item.rowIndex+1 );
+	    				 me.widgetDraw();
+    				 }
+    			 }     
+    		},
+    		onItemUpStyle:  function(data,item){
+    			return {iconLocation: 'center',iconUrl:'ui/lib/dashboard/resources/icons/up.png' }
+    		},
+			onItemDownStyle:  function(data,item){
+				return {iconLocation: 'center',iconUrl:'ui/lib/dashboard/resources/icons/down.png' }
+    		},
+        });
+    </script>
+</dom-module>

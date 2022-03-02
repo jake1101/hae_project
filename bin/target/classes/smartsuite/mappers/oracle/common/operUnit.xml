@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+ESAOGOP: 운영단위
+ESAOOMG: 운영조직
+ -->
+
+<mapper namespace="operUnit">
+
+    <insert id="insertOperUnit">
+    /* operUnit.insertOperUnit: 운영단위 등록 */
+    INSERT 
+      INTO ESAOGOP (
+           SYS_ID
+         , OPER_UNIT_CD
+         , OPER_UNIT_NM
+         , OPER_UNIT_EN_NM
+         , REM
+         , STS
+         , REG_ID
+         , REG_DT
+         , MOD_ID
+         , MOD_DT
+    ) VALUES (
+           #{g.tenant}
+         , #{p.oper_unit_cd}
+         , #{p.oper_unit_nm}
+         , #{p.oper_unit_en_nm}
+         , #{p.rem}
+         , 'C'
+         , #{g.username}
+         , #{g.now}
+         , #{g.username}
+         , #{g.now}
+    )
+    </insert>
+    
+    <update id="updateOperUnit">
+    /* operUnit.updateOperUnit: 운영단위 수정 */
+    UPDATE ESAOGOP
+       SET STS = 'U'
+         , MOD_DT = #{g.now}
+         , MOD_ID = #{g.username}
+         , OPER_UNIT_NM = #{p.oper_unit_nm}
+         , OPER_UNIT_EN_NM = #{p.oper_unit_en_nm}
+         , REM = #{p.rem}
+     WHERE SYS_ID = #{g.tenant}
+       AND OPER_UNIT_CD = #{p.oper_unit_cd}
+    </update>
+    
+    <delete id="deleteOperUnit">
+    /* operUnit.deleteOperUnit: 운영단위 삭제 */
+    DELETE 
+      FROM ESAOGOP
+     WHERE SYS_ID = #{g.tenant}
+       AND OPER_UNIT_CD = #{p.oper_unit_cd}
+    </delete>
+
+    <select id="findListOperUnit" resultType="map">
+    /* operUnit.findListOperUnit: 운영단위 목록 */
+    SELECT A.SYS_ID
+         , A.OPER_UNIT_CD
+         , A.OPER_UNIT_NM
+         , A.OPER_UNIT_EN_NM
+         , A.REM
+         , A.STS
+         , A.REG_ID
+         , A.REG_DT
+         , A.MOD_ID
+         , A.MOD_DT
+         , (SELECT COUNT(*)
+              FROM ESAOOMG
+             WHERE SYS_ID = A.SYS_ID
+               AND OPER_UNIT_CD = A.OPER_UNIT_CD
+               AND STS != 'D'
+           ) AS USE_COUNT_OPER_ORG
+      FROM ESAOGOP A
+     WHERE A.SYS_ID = #{g.tenant}
+       AND A.STS != 'D'
+    </select>
+
+	<select id="findListOperUnitCode" resultType="map">
+    /* operUnit.findListOperUnit: 운영단위 목록(코드성 조회) */
+    SELECT A.SYS_ID
+         , A.OPER_UNIT_CD
+         , CASE WHEN 'ko_KR' = #{g.locale} 
+                THEN A.OPER_UNIT_NM
+                ELSE A.OPER_UNIT_EN_NM
+           END OPER_UNIT_NM
+      FROM ESAOGOP A
+     WHERE A.SYS_ID = #{g.tenant}
+       AND A.STS != 'D'
+    </select>
+    <select id="getCountOperUnitByOperUnitCd" resultType="int">
+    /* operUnit.getCountOperUnitByOperUnitCd: 운영단위 카운트 by 운영단위코드 */
+    SELECT COUNT(*)
+      FROM ESAOGOP
+     WHERE SYS_ID = #{g.tenant}
+       AND OPER_UNIT_CD = #{p.oper_unit_cd}
+    </select>
+    
+</mapper>

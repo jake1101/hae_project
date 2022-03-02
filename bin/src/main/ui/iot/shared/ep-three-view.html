@@ -1,0 +1,395 @@
+<dom-module id="ep-three-view">
+	<style type="text/css">
+		:host{
+			@apply(--vbox-layout);
+			position:absolute;
+			top:0px;
+			left:0px;
+			overflow: hidden;
+			user-select:none;
+		}
+		.splitRight{
+			overflow: hidden !important;
+		}
+		.splitLeft>div {
+		    min-width: 600px;
+		}
+		.combo{
+			width : 120px;
+			display: inline-grid;
+			margin-left:6px; 
+			margin-right:18px; 
+		}
+		sc-grid, .gridArea{
+			height: calc(100% - 20px);
+		}
+		sc-label{
+			font-weight :bold;
+		}
+		.beaconBtn{
+			left :4px;
+			top:4px;
+		}
+		.searchDiv{
+			position: absolute;
+    		top: 20px;
+    		z-index:999;
+		}
+		.sc-tab-navigation
+  	</style>
+	<template>
+		<sc-request-group init>
+			<sc-code-group>
+				<sc-code code="IOT003" value="{{codes.targetType}}"></sc-code>
+			</sc-code-group>
+			<!-- 협력사 조회 -->
+			<sc-ajax url="findListVendor.do" 	last-response="{{codes.vendorList}}"	body="{{searchParam}}"></sc-ajax>
+			<sc-ajax url="findListJobType.do"	last-response="{{codes.jobTypeList}}"	body="{{searchParam}}"></sc-ajax>
+		</sc-request-group>
+
+		<sc-ajax id="findListBeacon"	url="findListBeacon.do" body="{{searchParam}}" last-response="{{beaconList}}" on-response="completeFindListBeacon"></sc-ajax>		
+<!-- 		<sc-ajax id="findGridPositionList" url="findGridPositionList.do" 	body="{{searchParam}}" last-response="{{result}}" on-response="setWorker"></sc-ajax> -->
+
+        <div class="hSplit hbox flex" style="overflow:hidden;">
+			<div id="threeArea" class="splitRight flex">
+				<sc-button id="beaconBtn" class="toggleBtn beaconBtn tooltip tooltip-right" on-click="beaconBtnClick" toggles="true" tooltip-text="비콘 숨김" text="B" active="true" ></sc-button>
+				<div id="splitterBtn" class="splitterBtn ri-arrow-right-s-fill" on-click="splitterClick"></div>
+			</div>        
+			<sc-splitter split-type="vertical" on-area-resize="splitterResize"></sc-splitter>
+			<div id="listArea" class="splitLeft">
+				<div class="vbox">
+			       	<div class="splitLeftTop">
+			       		<i class="xi-renew xi-icon xi-fw" on-click="refresh" title="재조회"></i>
+			       		<i class="xi-close xi-icon xi-fw" on-click="splitterClick" title="닫기"></i>
+			       	</div>
+			       	<div class="splitLeftBottom flex vbox">
+				       	<div class="splitLeftCont vbox flex">
+					       	<sc-tab-navigation id="tabNavi" class="flex">
+				        		<sc-grid title="작업자" id="workerGrid" class="" data-provider="{{gridData}}" use-state ="false" use-selection="false" selection-style="singleRow" show-selection-header="false" 
+									on-item-click="onItemClick"  focus-visible="false" column-fillstyle="fill" row-style-function="onRowStyle">
+						        	<div class="searchDiv">
+							        	<sc-label text="협력사"></sc-label>
+										<sc-multi-combobox-field placeholder="전체선택" input-clear="false" selected-all="true" class="combo"
+												items="{{codes.vendorList}}" display-field="name" value-field="id" on-picker-collapsed="refresh"
+												value="{{searchParam.vendorIds}}" enable-check-all="true">
+					                    </sc-multi-combobox-field>
+										<sc-label text="직종"></sc-label>
+										<sc-multi-combobox-field placeholder="전체선택" input-clear="false" selected-all="true" class="combo"
+												items="{{codes.jobTypeList}}" display-field="jobTypeName" value-field="id" enable-check-all="true"
+												value="{{searchParam.jobTypeIds}}" on-picker-collapsed="refresh">
+					                    </sc-multi-combobox-field>
+									</div>
+							        <cc-grid-toolbar>
+							        </cc-grid-toolbar>
+							        <sc-grid-columns>
+							            <sc-data-column 	width="70" 	text-align="center" 	header-text="협력사"   data-field="vendorName" ></sc-data-column>
+							            <sc-data-column 	width="90" 	text-align="center" 	header-text="직종"   data-field="targetJobName" ></sc-data-column>
+							            <sc-data-column 	fill-width="100" 	text-align="center" 	header-text="작업자명"   data-field="targetName" ></sc-data-column>
+							            <sc-data-column 	fill-width="140" 	text-align="center" 	header-text="위치"   data-field="areaName"></sc-data-column>
+							            <sc-date-column 	width="70" 	text-align="center" 	header-text="수신시간" data-field="updatedDt" display-format = "HH:mm:ss"></sc-date-column>
+							            <sc-data-column 	width="60" 	text-align="left" 		header-text="특이사항"   data-field="weakType" ></sc-data-column>
+							        </sc-grid-columns>
+							        <sc-grid-fields>
+					                    <sc-grid-field data-field="sensorId" data-type="number"></sc-grid-field>
+					                    <sc-grid-field data-field="positionId" data-type="number"></sc-grid-field>
+					                    <sc-grid-field data-field="emergency" ></sc-grid-field>
+					                </sc-grid-fields>
+						        </sc-grid>
+						        <sc-grid title="비콘" id="beaconGrid" class="" data-provider="{{beaconList}}" use-state ="false" use-selection="false" selection-style="singleRow" show-selection-header="false" 
+									on-item-click="onBeaconGridClick"  focus-visible="false" column-fillstyle="fill" row-style-function="onRowStyle">
+									 <cc-grid-toolbar>
+							        </cc-grid-toolbar>
+									<sc-grid-columns>
+							            <sc-data-column 	width="70" 	text-align="center" 	header-text="major"   data-field="major" ></sc-data-column>
+							            <sc-data-column 	width="90" 	text-align="center" 	header-text="minor"   data-field="minor" ></sc-data-column>
+							            <sc-data-column 	fill-width="100" 	text-align="center" 	header-text="표시명1"   data-field="displayName1" ></sc-data-column>
+							            <sc-data-column 	fill-width="100" 	text-align="center" 	header-text="표시명2"   data-field="displayName2" ></sc-data-column>
+							            <sc-data-column 	fill-width="100" 	text-align="center" 	header-text="표시명3"   data-field="displayName3" ></sc-data-column>
+							        </sc-grid-columns>
+							        <sc-grid-fields>
+					                    <sc-grid-field data-field="positionId" data-type="number"></sc-grid-field>
+					                </sc-grid-fields>
+								</sc-grid>
+				            	<div id="gridArea" class="vbox flex gridArea" title="구역"></div>
+							</sc-tab-navigation>
+		        		</div>
+		        	</div>
+        		</div>
+			</div>
+		</div>
+	</template>
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+		Polymer({
+			is: "ep-three-view",
+			behaviors : [
+	    		Polymer.Templatizer
+	    	],
+			properties : {
+				codes : {
+	               	type : Object,
+	               	value : function(){
+		               	return	{};
+	               	},
+	               	reset: false
+	            },
+	            searchParam : {
+	            	type : Object,
+	            	value : function(){
+	            		return {
+		            		siteId : SCMdiManager.searchParam.site_id,
+		            		limitTimeMinute : 30,
+		            		positionNotNullYn : 'Y'
+		            	}
+	            	}
+		        },
+	            rayThree : {
+	        		type: Object,
+	                value: function(){
+	                	return;
+                	}
+            	},
+             	listAreaSize : {
+					type : Number,
+					value : function (){
+						return 678;
+					}
+                }
+			},
+			load : function(areaId, modelName){
+				var me = this;
+				me.searchParam.areaId = areaId;
+				me.modelName = modelName;
+				
+// 				if(gloader.loaded[modelName]){
+// 					me.loadThree(gloader.loaded[modelName].scene.clone(), modelName);
+// 				}else{
+// 					gloader.load(modelName+'.glb', function(model){
+// 						gloader.loaded[modelName] = model;
+// 						me.loadThree(gloader.loaded[modelName].scene.clone(), modelName);
+// 					});
+// 				}
+				gloader.load(modelName+'.glb', function(model){
+					gloader.loaded[modelName] = model;
+					me.loadThree(gloader.loaded[modelName].scene.clone(), modelName);
+				});
+			},
+			loadThree : function(models, modelName){
+				var me = this;
+				
+				me.importLink('/ui/iot/shared/cc-'+modelName+'.html', function(e){
+					me.$.gridArea.innerHTML = null;
+
+					var threeComponent = document.createElement(e);
+					var grid = threeComponent.$.layerGroupGrid;
+					var container = threeComponent.$.container;
+					
+					me.$.gridArea.append(grid);
+					me.$.threeArea.append(container);
+					
+					this.rayThree = new RayThree(container);
+					threeComponent.searchParam.areaId = me.searchParam.areaId;
+					threeComponent.rayThree = this.rayThree;
+					threeComponent.models = models;
+					threeComponent.editable = false;
+					
+					threeComponent.treeHidden = true;
+					threeComponent.panelHidden = true;
+					
+					threeComponent.parent = this;
+					
+					me.threeComponent = threeComponent;
+
+					threeComponent.initThree();
+
+					UT.request(me.$.findListBeacon);
+
+					me.start();
+				}); 
+			},
+            success : function(){
+            	this.querySelector('cc-fd').test();
+           	},
+			splitterResize : function(e){
+				var me = this;
+				if(me.$.listArea.clientWidth == 0){
+					me.$.splitterBtn.classList.remove('ri-arrow-right-s-fill');
+					me.$.splitterBtn.classList.add('ri-arrow-left-s-fill');
+				}else{
+					me.$.splitterBtn.classList.add('ri-arrow-right-s-fill');
+					me.$.splitterBtn.classList.remove('ri-arrow-left-s-fill');
+					me.listAreaSize = me.$.listArea.clientWidth;
+				}
+				this.rayThree.resize();
+				this.$.tabNavi.doContentElementResize();
+			},
+			splitterClick : function(e){
+				var me = this;
+				if(UT.isNotEmpty(e) && me.$.splitterBtn.classList.contains('ri-arrow-right-s-fill')){
+					me.setListAreaSize(0);
+				}else{
+					me.setListAreaSize(me.listAreaSize);
+				}
+				this.rayThree.resize();
+			},
+			setListAreaSize : function(width){
+				var me = this;
+				me.$.listArea.style.width=width+"px";
+				me.$.threeArea.style.width="calc(100% - "+width+"px)";
+				me.splitterResize();
+			},
+			onRowStyle : function(data) {
+			    if(data["emergency"] == "1") {
+			        return {
+			            "background": "#F8D7DA"
+			        };
+			    }
+			},
+			setWorker : function(){
+				var me = this;
+				if(UT.isNotEmpty(this.result)){	 //API 변경 필요
+					this.rayThree.setWorker(this.result.positions, function(e){
+						me.openTooltip(e);
+					});
+					
+					this.gridData = this.result.gridData.workerList;
+				}
+			},
+			openTooltip : function(e){
+				var me = this;
+				var id = e.getAttribute('positionId');
+				var div = me.$.threeTooltip;
+				div.hidden = false;
+
+				div.addEventListener("wheel", function(event){
+					event.stopPropagation();
+				});
+				
+				var tooltip = me.$.tooltip;
+				tooltip.innerHTML = '';	// 초기화
+				
+				me.$.tooltipClose.data = 'countTooltip_'+id;
+
+				var list = me.$.workerGrid.getDataProvider().filterItems({positionId:id});
+				
+				for(var i in list){
+					var item = list[i];
+					
+					var li = document.createElement("li");
+					if(item.emergency == "1") li.className = 'emergency';
+					li.innerHTML = item.vendorName +" [" + item.targetJobName + "] "+item.targetName;
+					li.data = item.sensorId;
+					li.id = "worker_"+item.targetId;
+					li.positionId = item.positionId;
+					
+					li.onclick = function(e){
+						$(e.target.parentElement).find('li.selected').removeClass('selected');
+						e.target.classList.add('selected');
+						me.$.workerGrid.searchItem("sensorId", e.target.data, 0);
+						if(me.$.splitterBtn.classList.contains('ri-arrow-left-s-fill')){
+							me.setListAreaSize(678);
+						}
+						me.$.tabNavi.selectItem(me.$.workerGrid); 
+						e.stopPropagation();
+					}
+					
+					tooltip.appendChild(li);
+				}
+
+				e.appendChild(div);
+			},
+			closeTooltip : function(e){
+				$('#'+e.target.data).removeClass('active');
+				$('#'+e.target.data+' .countLabel').removeClass('active');
+				e.target.parentElement.remove();
+				e.stopPropagation();
+            },
+            completeFindListBeacon : function(){
+				var me = this;
+				me.rayThree.setBeacon(me.beaconList);
+            },
+            beaconBtnClick : function(e){
+            	this.rayThree.beaconGroup.visible = this.$.beaconBtn.active;
+            	e.target.setAttribute("tooltip-text", (e.target.active)?"비콘 숨김":"비콘 표시");
+            },
+            onItemClick : function(e){
+            	var me = this,
+				data = e.detail.data,
+				item = e.detail.item;
+
+				me.threeComponent.focusTarget(data.positionId);      		
+            },
+            onBeaconGridClick : function(e){
+            	var me = this,
+				data = e.detail.data,
+				item = e.detail.item;
+            	
+            	me.threeComponent.hideWorkerTooltip();
+            	
+            	var e = {
+					id : data.layerGroupId,
+					isSearch : true
+            	}
+            	
+				var target = this.rayThree.scene.getObjectByName(data.positionId);
+				me.rayThree.focusObject(target, 20);
+				me.threeComponent.setWorker([data.layerGroupId]);
+				me.threeComponent.onItemClick(e);
+				var list = me.threeComponent.layerGroupList
+            },
+            onLayerGroupGridClick : function(e){
+				var me = this,
+				data = e.detail.data,
+				item = e.detail.item;
+
+				me.threeComponent.hideWorkerTooltip();
+				
+				var camera = data.property.cameraPosition;
+				if(camera){
+					me.rayThree.setCameraPosition(camera);
+				}
+			},
+			setCameraPosition : function(e){
+				if(e.property.cameraPosition){
+					var camera = e.property.cameraPosition.camera;
+					var position = 'x : '+ camera.x.toFixed(0)+ ', y : '+ camera.y.toFixed(0)+ ', z : '+ camera.z.toFixed(0);
+					return position;
+				}
+			},
+            refresh : function(){
+                var me = this;
+                me.threeComponent.refresh();
+           	},
+			start : function(){
+				this.rayThree.animate();
+				this.refresh();
+			},
+			reset : function(){
+				if(this.rayThree){
+					this.rayThree.stopAnimate();					
+				}
+			},
+			focusGrid : function(e, item){
+				var me = this;
+				
+				$(e.target.parentElement).find('li.selected').removeClass('selected');
+				e.target.classList.add('selected');
+				me.$.workerGrid.searchItem("sensorId", e.target.data);
+
+				if(me.$.splitterBtn.classList.contains('ri-arrow-left-s-fill')){
+					me.setListAreaSize(678);
+				}
+				me.$.tabNavi.selectItem(me.$.workerGrid); 
+				e.stopPropagation();
+			},
+			destroyed : function(){
+				var me = this;
+				if(me.rayThree) me.rayThree.stopAnimate();
+			}
+		});
+	</script>
+</dom-module>

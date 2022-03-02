@@ -1,0 +1,29 @@
+<sc-link rel="import" href="es-layer-group-management.html"></sc-link>
+<sc-link rel="import" href="es-three-group-management.html"></sc-link>
+
+<dom-module id="em-layer-group-management">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+<!-- 		<es-layer-group-management class="flex"></es-layer-group-management> -->
+		<es-three-group-management class="flex" id="test"></es-three-group-management>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-layer-group-management',
+			refresh : function(){
+				this.$.test.refresh();
+			},
+			inactive : function() {
+	        },
+		});
+	</script>
+
+
+</dom-module>

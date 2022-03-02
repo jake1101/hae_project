@@ -1,0 +1,78 @@
+<dom-module id="es-pages-description">
+	<style>
+ 	table, th, td {
+ 		border:1px solid black;
+ 		border-collapse:collapse;
+ 		box-sizing: border-box;
+ 		padding: 3px;
+ 	}
+ 	th {
+ 		background-color:lightgray
+ 	}
+    </style>
+    <template>
+    	<p>
+    		<b>sc-pages</b><br/>
+    		복수의 자식 엘리먼트를 관리하는 기능을 제공하며 선택된 하나의 엘리먼트만 화면에 보여진다.<br/>
+    		<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>selectedIndex</td>
+					<td>선택된 자식 엘리먼트의 인덱스</td>
+					<td>0</td>
+				</tr>
+			</table>
+			<br/>
+			<table>
+				<tr>
+					<th>메소드</th>
+					<th>설명</th>
+				</tr>
+				<tr>
+					<td>selectedItem(item, callback)</td>
+					<td>엘리먼트 또는 인덱스 기준으로 엘리먼트를 보여지게 한다.</td>
+				</tr>
+				<tr>
+					<td>selectNextItem(callback)</td>
+					<td>선택된 엘리먼트의 다음 엘리먼트를 보여지게 한다.</td>
+				</tr>
+				<tr>
+					<td>selectPreviousItem(callback)</td>
+					<td>선택된 엘리먼트의 이전 엘리먼트를 보여지게 한다.</td>
+				</tr>
+			</table>
+			<br/>
+			<table>
+				<tr>
+					<th>이벤트</th>
+					<th>설명</th>
+				</tr>
+				<tr>
+					<td>item-activate</td>
+					<td>엘리먼트가 선택되기 전 발생하는 이벤트</td>
+				</tr>
+				<tr>
+					<td>item-deselect</td>
+					<td>선택되어있던 엘리먼트가 선택해지 되었을 때 발생하는 이벤트</td>
+				</tr>
+				<tr>
+					<td>item-select</td>
+					<td>엘리먼트가 선택되면 발생하는 이벤트</td>
+				</tr>
+			</table>
+			<br/>
+    	</p>
+    </template>
+    <script>
+    Polymer({
+    	is : "es-pages-description",
+    	properties : {
+    		
+    	}
+    });
+    </script>
+</dom-module>

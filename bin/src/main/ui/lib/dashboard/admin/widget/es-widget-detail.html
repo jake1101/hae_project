@@ -1,0 +1,343 @@
+<sc-link rel="import" href="setting/widget-grid-setting.html"></sc-link>
+<sc-link rel="import" href="setting/widget-chart-setting.html"></sc-link>
+<sc-link rel="import" href="setting/widget-iframe-setting.html"></sc-link>
+<sc-link rel="import" href="setting/widget-component-setting.html"></sc-link>
+<sc-link rel="import" href="widget-previewer.html"></sc-link>
+<link rel="import" href="../../tools/dashboard-tools-colorpicker.html"></link>
+<script src="/ui/lib/chart/modules/exporting.js"></script>
+<script src="/ui/lib/chart/modules/offline-exporting.js"></script>
+<script src="/ui/lib/chart/modules/canvas-tools.js"></script>
+<dom-module id="es-widget-detail">
+    <style>
+	    :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	
+    <template>
+	    <sc-ajax id="findWidgetDetail"
+					 url="findWidgetDetail.do"
+					 on-response="onFindDetailComplete">
+		</sc-ajax>
+	    
+	    <sc-ajax id="saveWidget"
+					 url="saveWidget.do"
+					 body="{{widgetSaveInfo}}"
+					 on-response="onCompleteWidgetSave">
+		</sc-ajax>
+	    <cc-page-title-bar>
+	    	 <sc-button text="저장" on-click="onSave"></sc-button>
+	    	 <sc-button text="닫기" on-click="onClose"></sc-button>
+	    </cc-page-title-bar>
+	     <div class="hbox flex">
+	        <!-- 설정 -->
+	     	<div class="vbox" style="width:320px;">
+		        <div class="wrap_wm">
+           			<div class="container_lt" style="border-bottom:0px;overflow-y: auto;">
+				        <section class="basic">
+		                    <table>
+		                    <colgroup>
+		                        <col style="width:15%" />
+		                        <col style="width:35%" />
+		                        <col style="width:15%" />
+		                        <col style="width:35%" />
+		                    </colgroup>
+		                    <tr>
+		                    <th><sc-label text="Title"></sc-label></th>
+		                    <td colspan="3">
+		                    	<sc-textarea-field value="{{widgetProperties.widget_title}}" required="true">
+			                    </sc-textarea-field>
+			                </td>
+		                    </tr>
+		                    <tr>
+		                    <th><sc-label text="Width"></sc-label></th>
+		                    <td>
+		                    	<sc-number-field value="{{widgetProperties.widget_width}}" required></sc-number-field>
+		                    </td>
+		                    <th><sc-label text="Height"></sc-label></th>
+		                    <td>
+		                    	<sc-number-field value="{{widgetProperties.widget_height}}" required></sc-number-field>
+		                    </td>
+		                    </tr>
+		                    <tr>
+		                    <th><sc-label text="Type"></sc-label></th>
+		                    <td colspan="3">
+		                    	<sc-combobox-field placeholder="선택" items="[[widgetTypeCodes]]" 
+		                                        display-field="text" value-field="value"
+		                                        on-change="onTypeChanged" value="{{widget_type}}"
+		                                        readonly="[[formula('iswidget_typeEditalbe')]]" required>
+			                    </sc-combobox-field>
+		                    </td>
+		                    </tr>
+		                    </table>
+		                </section>
+		                <sc-pages id="settingViewPage" class="fit" on-item-select="onPageSelected">
+		        			<widget-grid-setting      id="grid" class="widgetGrid" on-re-draw="onPreview"></widget-grid-setting>
+		        			<template>
+		      					<widget-chart-setting     id="chart" class="widgetChart" on-re-draw="onPreview"></widget-chart-setting>
+		      				</template>
+		      				<template>
+		       					<widget-iframe-setting    id="iframe" on-re-draw="onPreview"></widget-iframe-setting>
+		       				</template>
+		       				<template>
+		       					<widget-component-setting id="component" on-re-draw="onPreview"></widget-component-setting>
+	       					</template>
+		        		</sc-pages>
+		       	    </div>
+		        </div>
+			
+		   		</div>
+    		<widget-previewer id="widgetPreview" class="vbox flex widgetPreviewer" on-widget-content-draw="onWidgetDraw"></widget-previewer>
+		</div>
+    </template>
+    <script>
+        Polymer({
+            is: "es-widget-detail",
+
+            properties: {
+               widgetTypeCodes: {
+            	   type : Array,
+            	   value : function(){
+            		   return [
+            		           {text:'grid',value:'grid'},
+            		           {text:'chart',value:'chart'},
+            		           {text:'iframe',value:'iframe'},
+            		           {text:'module',value:'component'}
+            		   ];
+            	   }
+               },
+               widgetProperties: {
+            	   type : Object,
+            	   value : function(){
+            		   return {
+            			   widget_width  : 400,
+            			   widget_height : 400
+            		   }
+            	   }
+               },
+               widgetSaveInfo: {
+            	   type: Object,
+            	   value: function(){
+            		   return {};
+            	   } 
+               },
+               captureSize: {
+            	   type: Object,
+            	   value: function(){
+            		   return {
+            			   width: 200,
+            			   height: 200
+            		   }
+            	   }
+               },
+               widget_type :{
+            	   type: String
+               },
+               viewMode: {
+            	   type: String,
+            	   value: 'C'
+               },
+               usePreview:{
+            	   type: Object,
+            	   value: true
+               }
+            },  
+            listeners : {
+            	
+    		},
+    		formulas:{
+    			iswidget_typeEditalbe : function(){
+    				return this.viewMode == 'U'
+    			}
+    		},
+    		initialized : function(){
+    			var me = this;
+    			me.widgetDetailInitialized = true;
+    		},
+    		
+    		load : function(data){
+    			var me = this;
+    			me.contents = data;
+     			if(data.sts == 'C'){  //생성
+    				me.viewMode = 'C';
+    				me.widget_type = 'grid';
+     				me.currentSettingView.initSetting();
+     			    //화면 초기화 ......
+     			    
+    			}else if(data.sts == 'U'){ //수정
+    				me.viewMode = 'U';
+    				//me.widget_type = data.widget_type;
+    				me.widget_id = data.widget_id;
+    				me.$.findWidgetDetail.body = data;
+        			UT.request(me.$.findWidgetDetail);
+    			}
+     			me.applyFormula();
+    		},
+    		
+    		onFindDetailComplete : function(e,res){
+				var me = this;    			
+				me.widgetSaveInfo = res.response;
+				me.contents = JSON.parse(me.widgetSaveInfo.widget_content);
+				me.widget_type = me.contents.type;
+				me.deliverToWidgetProperties(me.contents);
+    		},
+    		onPageSelected: function(event){
+    		},
+    		onTypeChanged: function(e,item){
+    			var me = this;
+    			//me.$.settingViewPage.selectItem(me.$[item.value]);
+    			 if(me.widgetDetailInitialized){
+    				if(item.value != null){
+	    				me.$.settingViewPage.selectItem(me.$[item.value],function(selectedView){
+	    					me.currentSettingView = selectedView;
+		        			me.widgetProperties.type = item.value;
+		        		 	if(me.viewMode == 'C'){
+	        		 			me.currentSettingView.initSetting({viewMode:me.viewMode});
+		        			}else if(me.viewMode == 'U'){
+		        				me.currentSettingView.setting(me.contents);
+		        			}	
+	    				});
+    				}
+    			} 
+    		},
+    		/* deferExcuterView: function(view,fnName,delay,param){
+    			function excuter(){
+		 			if(!view[fnName]){
+    		 			setTimeout(function(){
+    		 				if(view[fnName]){
+    		 					view[fnName](param);
+    		 				}else{
+    		 					excuter();       		 					
+    		 				}
+    		 			},delay);
+    		 		}
+		 		}
+    			excuter();
+    		}, */
+    		onPreview :  function(){
+    			var me = this;
+    			var template = me.currentSettingView.getTemplateData();
+    			Polymer.$Object.assign(template,me.widgetProperties);
+    			me.$.widgetPreview.showPreview(template);
+    		},
+    		
+    		onSave : function(){
+    			var me = this;
+    			UT.confirm("STD.N1200", function() {
+	    			var previewer = me.$.widgetPreview;
+	    			var widget_type = me.widget_type;
+	    			var tempateData = me.$.settingViewPage.selectedItem.getTemplateData();
+	    			Polymer.$Object.assign(tempateData,me.widgetProperties);
+	    			me.widgetSaveInfo.widget_content = JSON.stringify(tempateData);
+	    			me.capture().then(function(){
+	    				//save 요청
+	    				me.widgetSaveInfo.widget_type = me.widget_type;
+	    				me.widgetSaveInfo.sts = me.viewMode;
+	    				me.widgetSaveInfo.widget_title = me.widgetProperties.widget_title;
+	    				me.widgetSaveInfo.widget_group = "group";
+	    				UT.request(me.$.saveWidget);
+	    			});
+    			});
+    		},
+    		
+    		clearTempElement : function(){
+    			var me = this;
+    			me.tempEle.forEach(function(ele){
+    				document.body.removeChild(ele);
+    			});
+    			me.tempEle =[];
+    		},
+    		
+    		capture : function(){
+    			var me = this;
+    			var previewer = me.$.widgetPreview , base64_img;
+    			me.tempEle = [];
+    			return new Promise(function(resolve, reject){
+    				if(me.widget_type === "chart"){
+        		        var chartSVG =   previewer.content.chart.getSVGForExport();
+        				var rec = previewer.content.chartContainer.getBoundingClientRect()
+        				var canvas = document.createElement('canvas');
+        				canvas.width = me.captureSize.width; 
+        				canvas.height = me.captureSize.height;
+        				document.body.appendChild(canvas);
+        				context = canvas.getContext("2d");
+        				//highchart에서 제공해주는 기능. IE에서도 이미지로 표현가능.
+        				context.drawSvg(chartSVG,0,0,me.captureSize.width,me.captureSize.height)
+        				base64_img = canvas.toDataURL("image/png");
+        				me.set('widgetSaveInfo.captured',base64_img);
+        				resolve();
+       				  
+        			}else{
+        				var captureEle =me.$.widgetPreview.content.getContent();
+        				html2canvas(captureEle, {
+            		        onrendered: function(captureCanvas) {
+            		        	var captureImg = captureCanvas.toDataURL("image/png");
+            		        	var canvas = document.createElement('canvas');
+            		        	canvas.width = me.captureSize.width; 
+                				canvas.height = me.captureSize.height;
+                				document.body.appendChild(canvas);
+                				context = canvas.getContext("2d");
+            		        	var image = document.createElement('img');
+               				    image.src  = captureImg;
+               				    document.body.appendChild(image);
+               				    me.tempEle.push(image);
+               				 	image.onload =  function(){
+                				    context.drawImage(this, 0,0,me.captureSize.width,me.captureSize.height);
+                				 	var base64_img = canvas.toDataURL();
+                				 	me.set('widgetSaveInfo.captured',base64_img);
+                				 	me.clearTempElement.call(me);
+                   				 	resolve();
+            				    } 
+            		        }
+            		    });	
+        			}
+    			});
+    		},
+    		
+    		onCompleteWidgetSave : function(e, res){
+    			  var me = this,
+                  result = res.response;
+
+	            UT.alert("STD.N2400", function(){ // 저장하였습니다.
+	                me.onClose();
+	            });
+    		},
+    		
+    		onClose: function(){
+    			var me = this;
+    			me.fire('widget-detail-close');
+    			me.resetData();
+    			
+    		},
+    		
+    		deliverToWidgetProperties : function(prop){
+    			var me = this;
+    			for(var key in prop){
+    				if(!SCUtil.isObject(prop[key])){
+    					me.set('widgetProperties.'+key,prop[key])
+    				}
+    			}
+    		},
+    		
+    		resetData: function(){
+    			var me = this;
+    			me.widgetSaveInfo = {};
+    			me.widgetProperties = { widget_width  : 400,
+				            			widget_height : 400}
+    			me.set('widget_type', '');
+               	me.viewMode = 'C'; 
+               	me.contents =  null;
+               	me.currentSettingView && me.currentSettingView.resetData();
+               	me.$.widgetPreview.resetData();
+    		},
+    		
+    		onWidgetDraw:  function(e,param){
+    			var me = this;
+    			if(param.type == 'chart'){
+    				me.currentSettingView.widgetContentDrew && me.currentSettingView.widgetContentDrew(param);	
+    			}
+    		}
+    		
+        });
+    </script>
+</dom-module>

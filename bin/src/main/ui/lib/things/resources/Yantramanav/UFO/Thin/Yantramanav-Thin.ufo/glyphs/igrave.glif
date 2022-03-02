@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="igrave" format="1">
+  <advance width="365"/>
+  <unicode hex="00EC"/>
+  <outline>
+    <component base="dotlessi" xOffset="2"/>
+    <component base="grave" xOffset="-148" yOffset="-23"/>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.typemytype.robofont.layerData</key>
+      <dict>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

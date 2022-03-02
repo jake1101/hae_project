@@ -1,0 +1,67 @@
+<link rel="import" href="../widget-factory/widget-factory.html"/>
+<dom-module id="widget-manager">
+    <style>
+   </style>
+
+    <template>
+    	<sc-ajax id="findWidgetDetail"
+					 url="widget/findWidgetDetail.do"
+					 on-response="onFindDetailComplete">
+		</sc-ajax>
+    
+    	<div class="widget-container" id="{{containerId}}">
+    		<content></content> 
+    	</div>
+    </template>
+    <script>
+        WidgetManager = Polymer({
+            is: "widget-manager",
+
+            properties: {
+            	code:{
+    				type:Object
+    			},
+    			containerId:{
+    				type:Object,
+            		value:function(){
+            			var uuid = UT.generateUUID();
+            			return uuid.replace(/-/gi,'');
+            		}
+    			}
+    			
+            }, 
+            listeners : {
+            	
+    		},
+    		/***
+    		*  1. 리사이즈 처리
+    		*  2. 화면 크기 처리
+    		***/
+    		attached : function(){
+    			var me = this;
+    			if(me.code){
+    				me.$.findWidgetDetail.body = {widget_code: me.code}
+        			UT.request(me.$.findWidgetDetail);	
+    			}else{
+    				console.warn('Code value not registered');
+    			}
+    			
+    		},
+    		onFindDetailComplete : function(e,res){
+    			var me = this;
+    			var widgetInfo = res.response;
+    			var contents = JSON.parse(widgetInfo.widget_content);
+    			var widgetFactory =  new WidgetFactory(widgetInfo.widget_type);
+                var content = widgetFactory.getContent(contents);
+                Polymer.dom(me).appendChild(content);
+    		},
+    		get container(){
+				if(!this._container){
+					this._container = this.querySelector('.widget-container');
+				}
+				return this._container;
+			}
+    		
+    	});
+    </script>
+</dom-module>

@@ -1,0 +1,31 @@
+<sc-link rel="import" href="sliding-listbox-example3.html"></sc-link>
+
+<dom-module id="es-sliding-listbox-with-attachment">
+	<style>
+		:host {
+			@apply(--hbox-layout);
+			width: 100%;
+			height: 100%;
+		}
+	</style>
+	
+	<template>
+		<div class="flex">
+			<sliding-listbox-example3></sliding-listbox-example3>
+		</div>
+		<div class="flex">
+			<span style="font-weight:bold;font-size:16px;">코드 예제</span>
+			<es-source-viewer 
+				id="code" 
+				style="padding:2px;border:1px solid silver;width:calc(100% - 9px);;height:400px;overflow:auto;"
+				url="/ui/bp/developer/imagelist/sliding-listbox-example3.html">
+			</es-source-viewer>
+		</div>		
+	</template>
+	
+	<script>
+		Polymer({
+			is: 'es-sliding-listbox-with-attachment'
+		});
+	</script>
+</dom-module>

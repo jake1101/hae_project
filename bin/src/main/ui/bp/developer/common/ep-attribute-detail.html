@@ -1,0 +1,38 @@
+<sc-link rel="import" href="../lib/prettify-element/prettify-element.html"></sc-link>
+<sc-link rel="import" href="style/code-theme-style.html"></sc-link>
+
+<dom-module id="ep-attribute-detail">
+    <template>
+	   <style include="code-theme-style">
+	   :host {
+			@apply(--vbox-layout);
+			background-color: #fafafa; 
+	   }
+	   </style>
+	   
+	   <prettify-element id="atv" class="json-theme" text="[[atv]]" ></prettify-element>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'ep-attribute-detail',
+            properties:{
+            	atv: Object
+            },
+            
+            /**
+    		 * param 설정
+    		 */
+            load: function(atv) {
+            	//JSON일 경우 정렬을 위한 재변환
+            	try {
+            		this.atv = JSON.stringify(JSON.parse(atv),null,2);
+            	}
+            	//JSON이 아닐 경우
+            	catch(e) {
+            		this.atv = atv;
+            	}
+            }
+		});
+	</script>
+</dom-module>

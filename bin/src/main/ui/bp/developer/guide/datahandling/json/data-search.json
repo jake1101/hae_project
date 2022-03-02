@@ -1,0 +1,41 @@
+{
+	"prData": {
+		"pr_id"       : "PR_SAMPLE",
+		"oper_org_nm" : "엠로구매",
+		"pr_no"       : "PR99999999",
+		"pr_rev"      : 1,
+		"pr_tit"      : "조회 테스트를 위한 구매요청입니다."
+	},
+	"prItemList": [
+		{
+			"pr_item_id" : "PR_ITEM_SAMPLE_1",
+			"pr_id"      : "PR_SAMPLE",
+			"pr_no"      : "PR99999999",
+			"pr_rev"     : 1,
+			"pr_lno"     : "10",
+			"item_cd"    : "ITEM_CD_001",
+			"item_nm"    : "품목 001",
+			"item_qty"   : 3
+		},
+		{
+			"pr_item_id" : "PR_ITEM_SAMPLE_2",
+			"pr_id"      : "PR_SAMPLE",
+			"pr_no"      : "PR99999999",
+			"pr_rev"     : 1,
+			"pr_lno"     : "20",
+			"item_cd"    : "ITEM_CD_002",
+			"item_nm"    : "품목 002",
+			"item_qty"   : 5
+		},
+		{
+			"pr_item_id" : "PR_ITEM_SAMPLE_3",
+			"pr_id"      : "PR_SAMPLE",
+			"pr_no"      : "PR99999999",
+			"pr_rev"     : 1,
+			"pr_lno"     : "30",
+			"item_cd"    : "ITEM_CD_003",
+			"item_nm"    : "품목 003",
+			"item_qty"   : 2
+		}
+	]
+}

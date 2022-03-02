@@ -1,0 +1,147 @@
+<!-- 
+/**
+ * 평가 조회 (cc-eval-search) 커스텀 태그
+ *
+ *     <cc-eval-search value="{{value}}" display="{{displayValue}}" exc_sts="30"></cc-eval-search>
+ *
+ * @element cc-eval-search
+ *
+ *
+ * @attribute value purc_grp_cd값 binding value <br>
+ * [string]
+ *
+ *
+ * @attribute display purc_grp_nm값 binding value <br>
+ * [string]
+ *
+ *
+ * @attribute value-field value로 binding될 필드명. 기본값:purc_grp_cd <br>
+ * [string] [optional] 
+ *
+ *
+ * @attribute display-field input 영역에 표시될 필드명. 기본값:purc_grp_nm <br>
+ * [string] [optional] 
+ *
+ *
+ * @attribute purc-grp-typ 직무유형<br>
+ * [string]
+ *
+ */
+-->
+<sc-link rel="import" href="../../../bp/srm/shared/ep-eval-list.html" lazy></sc-link>
+<dom-module id="cc-eval-search">
+    <template>
+        <div class="field-box">
+            <sc-text-field value="{{display}}" 
+                trigger-cls="search" on-trigger-click="onShowPopupFind" on-enter="onShowPopupFind" on-keydown="onKeyDown" maxLength="200"
+                class$="[[class]]" placeholder$="[[placeholder]]" readonly="[[readonly]]" required="[[required]]" disabled="[[disabled]]">
+            </sc-text-field>
+            <span style="margin:4px 0 0 5px;" hidden$="[[labelDisabled]]" readOnly$="[[disabled]]">{{value}}</span>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: "cc-eval-search",
+            properties: {
+                value: {
+                    type: String,
+                    value: "",
+                    notify: true
+                },
+                display: {
+                    type: String,
+                    value: "",
+                    notify: true
+                },
+                valueField: {
+                    type: String,
+                    value: "eval_id"
+                },
+                displayField: {
+                    type: String,
+                    value: "eval_nm"
+                },
+                param: {
+                	type: Object,
+                	value: function(){
+                		return {};
+                	}
+                },
+                evalTypCd : {
+                	type : Object,
+                	value : function(){
+                		return {};
+                	}
+                },
+                excSts: {
+                    type: String,
+                    value: "80"
+                },
+                labelDisabled : {
+                    type : Object,
+                    value : function(){
+                        return false;    
+                    }
+                },
+                disabled: {
+                    type: Object,
+                    value : function(){
+                        return false;
+                    }
+                },
+                required: {
+                    type: Object,
+                    value : function(){
+                        return false;
+                    }
+                },
+                readonly: {
+                    type: Object,
+                    value : function(){
+                        return false;
+                    }
+                }
+            },
+
+            // 사용자의 keydown
+            onKeyDown: function(e) {
+                var me = this;
+                if (me.readonly === true || UT.isSpecialKeyDown(e)) {
+                    return;
+                }
+                me.set("value", "");
+            },
+            onShowPopupFind: function(){
+                var me = this;
+                if (me.readonly === true) {
+                    return;
+                }
+                if(!me.excSts){
+                    UT.alert("STD.SRM1093");
+                    return;
+                }
+                var param = me.get("param");
+                param["exc_sts"] = me.get("excSts")
+                param["eval_typ_cd"] = me.get("evalTypCd");
+                
+                param[me.displayField] = me.get("display");
+                
+                var options = {
+                		defaultParam : param, singleSelect : true, titleText : "평가검색"
+                };
+               	var evalListPop = UT.popup('ep-eval-list', me, 650, 500, {
+                    "selected-items": function(popup, e) {
+	                   	var items = e.detail;
+	                   	var result = items[0];
+	                   	//결과값 처리하는 callback
+	                   	me.set("display", result[me.displayField]);
+	                    me.set("value", result[me.valueField]);
+                    	popup.close();
+                    }
+                },options);
+                evalListPop.show();
+                evalListPop.getWindowContent().load(options);
+            }
+        });
+    </script>
+</dom-module>

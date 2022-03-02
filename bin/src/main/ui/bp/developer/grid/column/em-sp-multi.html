@@ -1,0 +1,89 @@
+<script src="/ui/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<sc-link rel="import" href="es-sp-multi.html"></sc-link>
+<sc-link rel="import" href="../shared/es-source-viewer.html"></sc-link>
+<dom-module id="em-sp-multi">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <!--  화면 구성 시작-->
+    <template>
+		<cc-page-title-bar></cc-page-title-bar>		        
+        <sc-panel class="vbox flex-5" collapsible="false" >
+            <sc-toolbar >
+                <sc-spacer></sc-spacer>
+                <sc-button text="조회" on-click="onSearch"></sc-button>
+            </sc-toolbar>        
+           <es-sp-multi id="grid"></es-sp-multi>
+        </sc-panel>	
+        <sc-panel class="vbox flex-5" collapsible="false" title-text="Source Viewer">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/grid/column/es-sp-multi.html"></es-source-viewer>
+        </sc-panel>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'em-sp-multi',
+            
+            properties : {
+                source : {
+                    type : String,
+                    value : null
+                },
+                data : {
+                    type: Array,
+                    value:  [
+                                {colunm_1:'Test 1', colunm_2:'테스트 1', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+                                {colunm_1:'Test 1', colunm_2:'테스트 1', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+                                {colunm_1:'Test 1', colunm_2:'테스트 1', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+                                {colunm_1:'Test 1', colunm_2:'테스트 1', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+                                {colunm_1:'Test 1', colunm_2:'테스트 2', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+                                {colunm_1:'Test 1', colunm_2:'테스트 2', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+                                {colunm_1:'Test 1', colunm_2:'테스트 2', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+                                {colunm_1:'Test 1', colunm_2:'테스트 2', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+                                {colunm_1:'Test 2', colunm_2:'테스트 1', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+                                {colunm_1:'Test 2', colunm_2:'테스트 1', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+                                {colunm_1:'Test 2', colunm_2:'테스트 1', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+                                {colunm_1:'Test 2', colunm_2:'테스트 1', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+                                {colunm_1:'Test 2', colunm_2:'테스트 2', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+                                {colunm_1:'Test 2', colunm_2:'테스트 2', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+                                {colunm_1:'Test 2', colunm_2:'테스트 2', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+                                {colunm_1:'Test 2', colunm_2:'테스트 2', colunm_3:'colunm_3 1', colunm_4:'2500.12', colunm_5:'2500.12', colunm_6:'edit 1', colunm_7:'colunm_7'  },
+
+
+                            ]
+                }
+            },
+            
+            
+           // 화면 생성 완료
+            initialized: function() {
+                var me = this;
+                this.$.viewer.setData(JSON.stringify(me.data, null, "\t"));
+            },
+            _onResponse: function(e, res){
+            	var me = this;
+            	var result = res.response;
+            	me.$.viewer.setSource(result);
+
+            },
+            onSearch: function(){
+                var me = this;
+                me.$.grid.resultList = me.data;
+            },
+            _onResponse: function(e, res){
+            	
+            }
+        
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

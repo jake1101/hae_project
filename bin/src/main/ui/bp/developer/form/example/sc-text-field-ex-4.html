@@ -1,0 +1,36 @@
+<!-- 
+
+## 주민등록번호/외국인번호를 입력
+
+ - *input-mask*를 이용하여 포맷을 지정하엿습니다. 
+
+ -->
+
+<dom-module id="sc-text-field-ex-4">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+    <template>
+		<sc-text-field input-mask="999999-9999999" value="{{value}}"></sc-text-field>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'sc-text-field-ex-4',
+            properties:{
+                value: String
+            },
+            
+            setValue: function() {
+            	var me = this;
+            	
+            	me.set("value", "123456-1234567");
+            }
+		});
+	</script>
+
+</dom-module>

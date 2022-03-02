@@ -1,0 +1,93 @@
+<script src="/ui/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<sc-link rel="import" href="es-sp-data.html"></sc-link>
+<sc-link rel="import" href="../shared/es-source-viewer.html"></sc-link>
+<dom-module id="em-sp-data">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <!--  화면 구성 시작-->
+    <template>
+
+		<cc-page-title-bar></cc-page-title-bar>		        
+        
+        <es-sp-data id="grid" on-search="onSearch" class="vbox flex-5"></es-sp-data>	
+        <sc-panel class="vbox flex-5" collapsible="false" title-text="Source Viewer">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/grid/column/es-sp-data.html"></es-source-viewer>
+        </sc-panel>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'em-sp-data',
+            
+            properties : {
+                source : {
+                    type : String,
+                    value : null
+                },
+                data : {
+                    type: Array,
+                    value:  [
+                                {colunm_1:'Test 1', colunm_2:'테스트 1', colunm_3:'2500.12', colunm_4:'edit 1'},
+                                {colunm_1:'Test 2', colunm_2:'테스트 2', colunm_3:'3500.45', colunm_4:'edit 2'},
+                                {colunm_1:'Test 3', colunm_2:'테스트 3', colunm_3:'4500.85', colunm_4:'edit 3'}
+
+                            ]
+                }
+            },
+            
+            
+           // 화면 생성 완료
+            initialized: function() {
+                var me = this;
+                this.$.viewer.setData(JSON.stringify(me.data, null, "\t"));
+            },
+            _onResponse: function(e, res){
+            	var me = this;
+            	var result = res.response;
+            	me.$.viewer.setSource(result);
+
+            },
+            onSearch: function(){
+                var me = this;
+                me.$.grid.resultList = me.data;
+            },
+            
+            setVisible:function(){
+            	var me = this;
+            	me.$.grid.visible = !me.$.grid.visible;
+            },
+            
+            setRequired:function(){
+            	var me = this;
+            	me.$.grid.required = !me.$.grid.required;
+            },
+            
+            setEditable:function(){
+            	var me = this;
+            	me.$.grid.editable= !me.$.grid.editable;
+            },
+            
+            setHeader:function(){
+            	var me = this;
+            	/* me.$.grid.header= me.$.grid.header+"a"; */
+            	me.$.grid.regex = "/^[-]?[0123456789]+([.]?[0-9]{0,5})$/";
+            },
+            
+            _onResponse: function(e, res){
+            	
+            }
+        
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

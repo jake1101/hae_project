@@ -1,0 +1,73 @@
+<script src="/ui/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<sc-link rel="import" href="es-sp-mergecallback.html"></sc-link>
+<sc-link rel="import" href="../shared/es-source-viewer.html"></sc-link>
+<dom-module id="em-sp-mergecallback">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <!--  화면 구성 시작-->
+    <template>
+		        
+		<cc-page-title-bar></cc-page-title-bar>		        
+                
+        <es-sp-mergecallback id="grid" on-search="onSearch" class="vbox flex-5"></es-sp-mergecallback>
+        <sc-panel class="vbox flex-5" collapsible="false" title-text="Source Viewer">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/grid/column/es-sp-mergecallback.html"></es-source-viewer>
+        </sc-panel>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'em-sp-mergecallback',
+            
+            properties : {
+                source : {
+                    type : String,
+                    value : null
+                },
+                data : {
+                    type: Array,
+                    value:  [
+                                {column_1:'A', column_2:'A업체', column_3: '고길동', column_4: 'USD'},
+                                {column_1:'A', column_2:'A업체', column_3: '고길동', column_4: 'CNY'},
+                                {column_1:'B', column_2:'B업체', column_3: '박길동', column_4: 'CNY'},
+                                {column_1:'B', column_2:'B업체', column_3: '홍길동', column_4: 'JPY'},
+                                {column_1:'C', column_2:'C업체', column_3: '홍길동', column_4: 'ATS'},
+                                {column_1:'C', column_2:'C업체', column_3: '최길동', column_4: 'ATS'},
+                            ]
+                }
+            },
+            
+            
+           // 화면 생성 완료
+            initialized: function() {
+                var me = this;
+                this.$.viewer.setData(JSON.stringify(me.data, null, "\t"));
+            },
+            _onResponse: function(e, res){
+            	var me = this;
+            	var result = res.response;
+            	me.$.viewer.setSource(result);
+
+            },
+            onSearch: function(){
+                var me = this;
+                me.$.grid.resultList = UT.copy(me.data);
+            },
+            _onResponse: function(e, res){
+            	
+            }
+        
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

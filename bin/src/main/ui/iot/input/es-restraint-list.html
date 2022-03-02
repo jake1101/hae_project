@@ -1,0 +1,189 @@
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 운행 지역 관리
+    ** @Description     : 사토지 및 회피저역
+    ** @Author          : jhPark
+    ** @Create Date     : 2021-09-17
+    ** @History         : 2021-09-17 jhPark 최초작성
+    ******************************************************************************************
+-->
+<sc-link rel="import" href="ep-drive-map.html"></sc-link>
+
+<dom-module id="es-restraint-list">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		<!-- 코드 조회-->
+		<sc-request-group init></sc-request-group>
+			
+		<!-- 사토지 및 운행 제한 지역 조회 -->
+		<sc-ajax id="findListDriveArea" 	url="findListDriveArea.do"	on-response="completeFindListDriveArea"	body="{{searchParam}}"></sc-ajax>
+		<!-- 운행 지역 삭제 -->
+		<sc-ajax id="deleteDriveArea" 	url="deleteDriveArea.do"	on-response="completeDeleteDriveArea"></sc-ajax>
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<!-- 운행 제한 지역 그리드 Strat -->
+		<div id="restrictionsBox" class="hbox flex">
+			<div class="vbox flex-5">
+				<sc-grid id="gridAreaList" data-provider="{{driveAreaList}}"  class="flex"
+							use-selection="true" use-state="false" on-item-click="onItemClick">
+					<cc-grid-toolbar title-text="{{searchType}}">
+					<sc-button text="추가" on-click="onAddArea" auth-s></sc-button>
+					<sc-button text="삭제" on-click="onDelete" auth-s></sc-button>
+					</cc-grid-toolbar>
+					<sc-grid-columns>
+						<sc-data-column data-field="name" header-text="이름" width="200" text-align="center"></sc-data-column>
+						<sc-data-column data-field="writerId" header-text="작성자" width="150" text-align="center"></sc-data-column>
+						<sc-data-column data-field="description"      header-text="설명" width="500" text-align="center"></sc-data-column>
+						<sc-image-column data-field="area_icon"       header-text="영역관리" width="70" image-cls="search"></sc-image-column>
+					</sc-grid-columns>
+					<sc-grid-fields>
+						<sc-grid-field data-field="id" data-type="number"></sc-grid-field>
+						<sc-grid-field data-field="polygon" data-type="object"></sc-grid-field>
+						<sc-grid-field data-field="geoJson" data-type="object"></sc-grid-field>
+						<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+						<sc-grid-field data-field="startDt" data-type="object"></sc-grid-field>
+						<sc-grid-field data-field="endDt" data-type="object"></sc-grid-field>
+					</sc-grid-fields>
+				</sc-grid>
+			</div>
+		</div>
+		<!-- 운행 제한 지역 그리드 End -->
+
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-restraint-list",
+            properties : {
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {
+                        	siteId : SCMdiManager.searchParam.site_id
+                        };
+                    }
+                },
+            },
+            /** 초기화 Start **/
+            load : function(title) {
+                var me = this;
+                me.onSearch(title);
+            },  
+            onSearch : function(title) {
+                var me = this;
+                me.searchParam.includeTypes = ["restrictions"];
+                me.searchParam.title = title || "";
+                UT.request(me.$.findListDriveArea);
+            },
+            /** 초기화 End **/
+            
+            /** 이벤트 Start **/
+            //새로운 영역 추가
+            onAddArea : function(){
+            	var me = this;
+            	var provider = me.$.gridAreaList.getDataProvider();
+				me.showAreaPopup(me.searchParam.searchType);
+            },
+            // 영역 삭제
+            onDelete: function(){
+				var me =this;
+				
+				var provider = me.$.gridAreaList.getDataProvider();
+				var selectionItems = provider.selectionCheckedItems();
+				
+				if (selectionItems.length === 0) {
+                    UT.alert("STD.N1600");
+                    return;
+                }
+
+				var notiIds = [];
+				for(var i in selectionItems){
+					notiIds.push(selectionItems[i].notiId);
+				}
+
+				UT.confirm("STD.N1300", function() {
+					var deleted = provider.removeItems();
+					if(deleted.length > 0){
+						me.$.deleteDriveArea.body = {
+								deleteList : selectionItems
+						};
+						UT.request(me.$.deleteDriveArea);
+					}
+				});
+            },
+            // 영역 아이템 클릭
+            onItemClick : function(event){
+            	var me = this
+				,data = event.detail.data
+				,item = event.detail.item
+				,provider = event.detail.provider;
+				
+				me.rowIndex = item.rowIndex;
+
+				// 영역 팝업 호출
+				if(item.dataField === "area_icon"){
+					me.showAreaPopup(me.searchParam.searchType, data);
+				}
+            },
+            /** 이벤트 End **/
+            
+            /** API Start **/
+            completeFindListDriveArea: function(e, res){
+            	var me = this;
+            	me.set("driveAreaList", res.response);
+            },
+            completeDeleteDriveArea: function(e, res){
+				var me = this,
+                result = res.response;
+
+	            if (result.result_status === 'S') {
+	                UT.alert("STD.N2500", function () { // 삭제하였습니다.
+						me.onSearch();
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+            },
+            /** API End **/
+            
+            /** 기타 Start **/
+            // 영역 팝업
+            showAreaPopup : function(searchType, data){
+            	var me = this;
+				var areaPopup = UT.popup("ep-drive-map", me, 1400, 800,{
+					'close' : function(popup) {
+						popup.close();
+						me.onSearch();
+					}
+				},{resizable:false});
+				areaPopup.show();
+				areaPopup.getWindowContent().load(searchType, data);
+            },
+            /** 기타 End **/
+            
+        });
+	</script>
+
+</dom-module>

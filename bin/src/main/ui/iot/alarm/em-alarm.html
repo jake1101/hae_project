@@ -1,0 +1,26 @@
+<sc-link rel="import" href="es-alarm-list.html"></sc-link>
+
+<dom-module id="em-alarm">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<es-alarm-list id="alarmList" class="flex"></es-alarm-list>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-alarm',
+			load: function(param){
+				var me = this;
+				me.$.alarmList.onSearch(param);
+			}
+		});
+	</script>
+
+
+</dom-module>

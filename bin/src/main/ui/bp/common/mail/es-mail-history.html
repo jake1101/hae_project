@@ -1,0 +1,134 @@
+<dom-module id="es-mail-history">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <!-- 조회 -->
+        <sc-ajax id="findListHistory"
+                 url="findListHistory.do"
+                 body="{{searchParam}}"
+                 last-response="{{resultList}}">
+        </sc-ajax>
+
+        <!-- 공통코드 조회( C009 : 사용여부, C015: 메일전송구분 ) -->
+        <sc-code-group>
+            <sc-code id="findListCode" code="C009" value="{{codes.snd_yn}}"></sc-code>
+            <sc-code id="findListCode" code="C015" value="{{codes.snd_cls}}"></sc-code>
+        </sc-code-group>
+
+        <cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+
+        <cc-search-container on-search="onSearch" auth-r>
+            <table>
+                <colgroup>
+                    <col style="width:120px">
+                    <col>
+                </colgroup>
+                <tr>
+                    <th><sc-label text="전송일자"></sc-label></th>
+                    <td>
+                        <sc-period-date-field from-value="{{searchParam.from_date}}" to-value="{{searchParam.to_date}}"
+                                               default-from-value="-1M" string-date="false" on-enter="onSearch"></sc-period-date-field>
+                    </td>
+                </tr>
+            </table>
+        </cc-search-container>
+
+        <sc-grid id="gridPanel" data-provider="{{resultList}}" editable="true" class="flex" use-selection="false" use-state="false">
+            <sc-grid-columns>
+                <sc-data-column data-field="to_addr" header-text="수신자주소" width="150" text-align="center"></sc-data-column>
+                <sc-data-column data-field="from_addr" header-text="발신자주소" width="150" text-align="center"></sc-data-column>
+                <sc-date-column data-field="snd_dt" header-text="전송일시" width="100" text-align="center"></sc-date-column>
+                <sc-data-column data-field="mail_tit" header-text="메일제목" width="200" text-align="center"></sc-data-column>
+                <sc-combobox-column data-field="snd_yn" header-text="전송여부" width="80" text-align="center" items="{{codes.snd_yn}}" display-field="label" value-field="data"></sc-combobox-column>
+                <sc-combobox-column data-field="snd_cls" header-text="전송방법" width="80" text-align="center" items="{{codes.snd_cls}}" display-field="label" value-field="data"></sc-combobox-column>
+            </sc-grid-columns>
+            <sc-grid-fields>
+                <sc-grid-field data-field="grp_cd"></sc-grid-field>
+            </sc-grid-fields>
+        </sc-grid>
+
+
+    </template>
+
+    <script>
+        Polymer({
+            is: "es-mail-history",
+
+
+            properties: {
+
+                codes: {
+                    type: Object,
+                    reset: false,
+                    value: function() {
+                        return {
+                            snd_yn: [],
+                            snd_cls: []
+                        };
+                    }
+                },
+
+                // 조회 조건
+                searchParam: {
+                    type: Object,
+                    value: function() {
+                        return {};
+                    }
+                },
+
+                // 조회 결과
+                resultList: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                }
+            },
+
+            formulas : {
+                // 신규 상태
+                isNew: function() {
+                    return this.mailInfo.isNew === true;
+                },
+
+                // 수정 가능 상태
+                isEditable : function() {
+                    return !UT.isEmpty(this.searchParam.mail_set_id);
+                }
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            load: function (data) {
+                var me = this;
+                me.set("searchParam.mail_set_id", data.mail_set_id);
+                me.onSearch();
+            },
+
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+            // 조회
+            onSearch: function () {
+                var me = this;
+
+                if(!me.formula('isEditable')){
+                    UT.alert(me.translate("STD.E1012",null,me.translate('메일아이디')),null,true); //"'{0}'을(를) 선택하십시오"
+                    return;
+                }
+
+                UT.request(me.$.findListHistory);
+
+            }
+
+        });
+    </script>
+
+
+</dom-module>

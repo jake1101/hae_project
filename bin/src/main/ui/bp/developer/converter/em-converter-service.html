@@ -1,0 +1,38 @@
+<script src="/ui/lib/converter/jsxml/lib/jsxml.js"></script>
+<sc-link rel="import" href="es-converter-file.html"></sc-link>
+<sc-link rel="import" href="es-converter-service.html"></sc-link>
+
+<dom-module id="em-converter-service">
+    
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    	<cc-page-title-bar></cc-page-title-bar>
+    	<div class="vbox flex">
+	        <sc-tab-navigation id="tabNavi"  class="flex">
+	            <es-converter-service title="Editor Server"></es-converter-service>
+	            <es-converter-file id="file" title="Folder"></es-converter-file>
+	        </sc-tab-navigation>   
+        </div>         
+
+    </template>
+    
+    <script>
+        Polymer({
+            is: "em-converter-service",
+            
+            properties : {
+            },
+            
+            initialized : function(e) {
+				
+				this.$.file.param.type = "server";
+			},
+        });
+    </script>
+
+</dom-module>

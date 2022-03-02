@@ -1,0 +1,118 @@
+<dom-module id="es-number-field-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+    	<sc-panel title-text="sc-number-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:150px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th>
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<sc-number-field value="{{data.value_1}}" placeholder="입력하세요"></sc-number-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="trigger click"></sc-label>
+    				</th>
+    				<td>
+    					<sc-number-field value="{{data.value_2}}" on-trigger-click="onTriggerClick"></sc-number-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="trigger hidden"></sc-label>
+    				</th>
+    				<td>
+    					<sc-number-field value="{{data.value_3}}" hide-trigger="true"></sc-number-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="changeByMousewheel"></sc-label>
+    				</th>
+    				<td>
+    					<sc-number-field value="{{data.value_4}}" change-by-mousewheel="true"></sc-number-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="step 10"></sc-label>
+    				</th>
+    				<td>
+    					<sc-number-field value="{{data.value_5}}" step="10"></sc-number-field>
+    				</td>
+     			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="minValue / maxValue"></sc-label>
+    				</th>
+    				<td>
+    					<div class="field-box" style="width:100%">
+	    					<sc-number-field class="w-80" value="{{data.value_6}}" min-value="0" max-value="23"></sc-number-field>
+	    					<span style="margin:0 2px"> : </span>
+	    					<sc-number-field class="w-80" value="{{data.value_7}}" min-value="0" max-value="59"></sc-number-field>
+	    				</div>
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    	<sc-panel title-text="sc-text-field로 숫자 입력" collapsible="true">
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th>
+    					<sc-label text="inputCover"></sc-label>
+    				</th>
+    				<td>
+    					<sc-text-field value="{{data.text_value_1}}" input-cover="true" format-type="number"></sc-text-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="inputMask"></sc-label>
+    				</th>
+    				<td>
+    					<sc-text-field value="{{data.text_value_2}}" input-mask="999-999" show-mask="true"></sc-text-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="inputRegex"></sc-label>
+    				</th>
+    				<td>
+    					<sc-text-field value="{{data.text_value_3}}" mask-re="/[0-9]/"></sc-text-field>
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    </template>
+    <script>
+    Polymer({
+    	is : "es-number-field-sample",
+    	properties : {
+    		data : {
+    			type : Object,
+    			value : function() {
+    				return {}
+    			}
+    		}
+    	},
+    	onTriggerClick: function(e) {
+    		UT.alert("trigger click!", null, true);
+    	},
+    	
+    });
+    </script>
+</dom-module>

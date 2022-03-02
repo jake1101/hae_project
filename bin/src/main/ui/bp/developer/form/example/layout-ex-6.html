@@ -1,0 +1,114 @@
+<!-- 
+
+## Layout 
+
+참고 [http://alm.emro.co.kr/browse/NFCH-843](http://alm.emro.co.kr/browse/NFCH-843)
+
+ -->
+
+<dom-module id="layout-ex-6">
+    <template>
+	    <style>
+			:host {
+				@apply(--vbox-layout);
+			}
+		</style>
+ 	<!-- 화면 -->
+        <sc-toolbar>
+            <sc-label text="계약서식"></sc-label>
+            <sc-spacer></sc-spacer>
+            <sc-button text="저장" on-click="onSaveCont"></sc-button>
+            <sc-button text="닫기" on-click="onClose"></sc-button>
+        </sc-toolbar>
+
+		<div class="hbox flex">
+			<div class="flex-3">
+				<sc-panel title-text="계약항목" class="vbox flex">
+					<!-- 툴바 -->
+					<cc-sub-title-bar title-text="항목목록"></cc-sub-title-bar>
+
+					<!-- 조회조건 -->
+					<cc-search-container on-search="onSearchItem">
+						<table>
+							<col style="width:100px;">
+							<tr>
+								<th>
+									<sc-label text="항목명">
+								</th>
+								<td>
+									<sc-text-field value="{{findListCntrItem.param.attr_ko_nm}}" class="w-150"
+												   on-enter="onSearchItem"></sc-text-field>
+								</td>
+							</tr>
+						</table>
+					</cc-search-container>
+				</sc-panel>
+			</div>
+			<div class="hspace-5"></div>
+			<div class="flex-7">
+				<sc-panel title-text="계약서식작성" class="fit">
+					<div class="vbox fit">
+						<cc-editor id="editor" class="flex-7" value="{{cntrFormCont.info.cntr_form_cont}}"
+								   editable="true"></cc-editor>
+
+						<div class="flex-3">
+							<sc-panel title-text="Description" class="fit">
+								<div class="vbox fit">
+									<sc-textarea-field id="textArea" class="flex"></sc-textarea-field>
+								</div>
+							</sc-panel>
+						</div>
+					</div>
+				</sc-panel>
+				<sc-panel title-text="계약서식작성" class="fit">
+					<div class="vbox fit">
+						<cc-editor id="editor" class="flex-7" value="{{cntrFormCont.info.cntr_form_cont}}"
+								   editable="true"></cc-editor>
+
+						<div class="flex-3">
+							<sc-panel title-text="Description" class="fit">
+								<div class="vbox fit">
+									<sc-textarea-field id="textArea" class="flex"></sc-textarea-field>
+								</div>
+							</sc-panel>
+						</div>
+					</div>
+				</sc-panel>
+				<sc-panel title-text="계약서식작성" class="fit">
+					<div class="vbox fit">
+						<cc-editor id="editor" class="flex-7" value="{{cntrFormCont.info.cntr_form_cont}}"
+								   editable="true"></cc-editor>
+
+						<div class="flex-3">
+							<sc-panel title-text="Description" class="fit">
+								<div class="vbox fit">
+									<sc-textarea-field id="textArea" class="flex"></sc-textarea-field>
+								</div>
+							</sc-panel>
+						</div>
+					</div>
+				</sc-panel>
+				<sc-panel title-text="계약서식작성" class="fit">
+					<div class="vbox fit">
+						<cc-editor id="editor" class="flex-7" value="{{cntrFormCont.info.cntr_form_cont}}"
+								   editable="true"></cc-editor>
+
+						<div class="flex-3">
+							<sc-panel title-text="Description" class="fit">
+								<div class="vbox fit">
+									<sc-textarea-field id="textArea" class="flex"></sc-textarea-field>
+								</div>
+							</sc-panel>
+						</div>
+					</div>
+				</sc-panel>
+			</div>
+		</div>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'layout-ex-6'
+		});
+	</script>
+</dom-module>

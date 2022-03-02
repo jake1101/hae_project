@@ -1,0 +1,89 @@
+<dom-module id="es-import-list">
+
+	<style>
+		:host {
+            @apply(--vbox-layout); 
+        }
+	</style>
+	
+	<template>
+		<div class="vbox flex">
+			<sc-toolbar>
+				<sc-label text="엑셀 업로드 예제"></sc-label>
+				<sc-spacer></sc-spacer>
+				<sc-button text="엑셀 업로드" on-click="onImport"></sc-button>
+			</sc-toolbar>
+			
+			<sc-grid id="gridPanel" class="flex">
+				<sc-grid-columns>
+					<sc-data-column	data-field="id"	header-text="아이디"	width="150"></sc-data-column>
+					<sc-data-column	data-field="no"	header-text="넘버"		width="150"></sc-data-column>
+					<sc-data-column	data-field="name"	header-text="이름"	width="150"></sc-data-column>
+					<sc-data-column	data-field="type"	header-text="유형"	width="150"></sc-data-column>
+					<sc-data-column	data-field="requesttype"	header-text="요청유형"	width="150"></sc-data-column>
+					<sc-data-column	data-field="createdatetime"	header-text="요청일자"	width="150"></sc-data-column>
+					<sc-data-column	data-field="boolean"		header-text="참 거짓"	width="150"></sc-data-column>
+				</sc-grid-columns>
+				<sc-grid-fields>
+					<sc-grid-field	data-field="id"></sc-grid-field>
+					<sc-grid-field data-field="no"></sc-grid-field>
+					<sc-grid-field data-field="name"></sc-grid-field>
+					<sc-grid-field data-field="type"></sc-grid-field>
+					<sc-grid-field data-field="requesttype"></sc-grid-field>
+					<sc-grid-field data-field="createdatetime"></sc-grid-field>
+					<sc-grid-field	data-field="boolean"	data-type="boolean"></sc-grid-field>
+				</sc-grid-fields>
+			</sc-grid>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is: 'es-import-list',
+			properties : {
+                importerPopup: Object
+			},
+			
+			/**
+				Grid Initialize Functions
+			*/
+			_addResizeEvent: function(gridView, container){
+				var me = this,
+					resizeListener = function(){
+		        		gridView.resetSize();
+		        	};
+	            container.addEventListener("content-resize", resizeListener);
+	            me._removeResizeEvent = function(){
+	        		container.removeEventListener("content-resize", resizeListener);
+	        		resizeListener = null;
+	        		gridView = null;
+	        		container = null;
+	        		me = null;
+	        	};
+		    },
+		    
+		    _removeResizeEvent: function(){
+		    	// defined _addResizeEvent Fn
+		    },
+			
+			onImport : function() {
+				var me = this;
+				
+				var importerPopup = UT.popup('cc-excel-import', me, 800, 600, null, {closable : false});
+				var importer = importerPopup.getContent();
+				importer.doImport(me.$.gridPanel, function(rows){
+					this.$.gridPanel.setDataProvider(rows);
+				}, me);
+				
+				importerPopup.show();
+				
+			},
+			
+			
+			initialized : function() {
+				var me = this;
+			}
+		});
+	</script>
+
+</dom-module>

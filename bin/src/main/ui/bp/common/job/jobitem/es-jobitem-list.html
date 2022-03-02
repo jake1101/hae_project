@@ -1,0 +1,440 @@
+
+<dom-module id="es-jobitem-list">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+
+    <template>
+
+        <!-- 직무별 품목 조회 -->
+        <sc-ajax id="findListJobItem"
+                 url="findListJobItem.do"
+                 body="{{searchParam}}"
+                 on-response="completeFindList">
+        </sc-ajax>
+
+        <!-- 직무에 연결된 품목 삭제 -->
+        <sc-ajax id="deleteListItemFromJob"
+                 url="deleteListItemFromJob.do"
+                 on-response="completeDeleteList">
+        </sc-ajax>
+
+        <!-- 직무별 품목 저장 -->
+        <sc-ajax id="saveListItemToJob"
+                 url="saveListItemToJob.do"
+                 on-response="completeSaveList">
+        </sc-ajax>
+
+        <cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+        <div class="vbox flex">
+        	<cc-sub-title-bar title-text="품목분류">
+        	</cc-sub-title-bar>
+        	<cc-search-container on-search="onFindItemFromGrid" auth-r>
+                <table class="tb-search">
+                    <colgroup>
+                        <col style="width:100px">
+                        <col>
+                        <col style="width:100px">
+                        <col>
+                    </colgroup>
+                    <tr>
+                        <th>
+                            <sc-label text="분류코드"></sc-label>
+                        </th>
+                        <td>
+                            <sc-text-field value="{{searchParam.cate_cd}}" on-enter="onFindItemFromGrid" maxlength="18"></sc-text-field>
+                        </td>
+
+                        <th>
+                            <sc-label text="분류명"></sc-label>
+                        </th>
+                        <td>
+                            <sc-text-field value="{{searchParam.cate_nm}}" on-enter="onFindItemFromGrid" maxlength="100"></sc-text-field>
+                        </td>
+                    </tr>
+                </table>
+            </cc-search-container>
+
+            <sc-grid  id="gridPanel" is-tree="true"  class="flex" use-state="false"
+                      selection-able-function="onSelectionOption">
+                <cc-grid-toolbar title-text="[[searchParam.purc_grp_nm]]" i18n-disabled>
+                    <sc-button text="펼침" on-click="onExpandAll" auth-r></sc-button>
+                    <sc-button text="접기" on-click="onCollapseAll" auth-r></sc-button>
+                    <sc-button text="직무연결" on-click="onSaveList" auth-s></sc-button>
+                    <sc-button text="연결삭제" on-click="onDeleteList" auth-s></sc-button>
+                </cc-grid-toolbar>
+
+                <sc-grid-columns>
+                    <sc-data-column data-field="cate_nm" header-text="품목분류" width="350" text-align="left"></sc-data-column>
+                    <sc-data-column data-field="purc_grp_cd" header-text="직무코드" width="80" text-align="center"></sc-data-column>
+                    <sc-data-column data-field="purc_grp_nm" header-text="직무명" width="150" text-align="left"></sc-data-column>
+                    <sc-data-column data-field="cate_lvl" header-text="분류레벨" width="60" text-align="center"  ></sc-data-column>
+                    <sc-data-column data-field="cate_cd" header-text="분류코드" width="100" text-align="center"></sc-data-column>
+                </sc-grid-columns>
+
+                <sc-grid-fields>
+                    <sc-grid-field	data-field="purc_grp_typ"></sc-grid-field>
+                    <sc-grid-field	data-field="comp_cd"></sc-grid-field>
+                    <sc-grid-field	data-field="use_yn"></sc-grid-field>
+                    <sc-grid-field	data-field="up_cate_cd"></sc-grid-field>
+                </sc-grid-fields>
+
+            </sc-grid>
+        </div>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: "es-jobitem-list",
+            properties: {
+                // 조회 조건
+                searchParam : {
+                    type : Object,
+                    value : function() {
+                        return {};
+                    }
+                },
+
+                // UI Binding Object
+                uiBind : {
+                    type : Object,
+                    value : function() {
+                        return {
+                            // 버튼 숨김 여부
+                            btnHidden: false
+                        }
+                    }
+                }
+            },
+
+            observers: [ 'setBtnHidden(searchParam.cate_cd, searchParam.cate_nm)' ],
+
+            formulas : {
+                // 수정 가능 상태
+                isEditable : function() {
+                    // 직무 코드가 선택 되었을 경우 true
+                    return this.searchParam.purc_grp_cd;
+                }
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            load: function(data) {
+                var me = this,
+                    grid = me.$.gridPanel;
+
+                // 선택된 직무의 회사코드 또는 직무유형이 변경된 경우 품목분류목록 재조회
+                if(me.searchParam.comp_cd != data.comp_cd || me.searchParam.purc_grp_typ != data.purc_grp_typ) {
+
+                    // 회사코드, 직무유형이 바뀐 경우 직무별 품목목록 초기화
+                    me.clear();
+                    me.set("searchParam.comp_cd", data.comp_cd);
+                    me.set("searchParam.purc_grp_typ", data.purc_grp_typ);
+                    me.set("searchParam.purc_grp_cd", data.purc_grp_cd);
+                    // 품목분류 목록 조회
+                    me.onFindList();
+
+                } else {
+                    grid.selectionCheckAll(false);
+                    me.onCollapseAll();
+                }
+                me.set("searchParam", data);
+                me.applyFormula();
+            },
+
+            /******************************
+             * 그리드 이벤트
+             ******************************/
+            // checkBar editable 제어
+            onSelectionOption: function(item){
+                // 분류레벨이 4이고 leaf 노드 만 체크 가능
+                return (item.isLeaf && item.cate_lvl === "4");
+            },
+
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+
+            // 조회
+            onFindList: function() {
+                UT.request(this.$.findListJobItem);
+            },
+
+            // 검색(조회) 완료
+            completeFindList: function(e, res) {
+                var me = this,
+                    result = res.response;
+
+                var hier = new CCHierachicalData();
+                var hierachiDatas = hier.HierachyTransformByKey(result, "cate_cd", "up_cate_cd", "children", "0", null, true);
+                me.$.gridPanel.setHierachyDataProvider(hierachiDatas, "children");
+            },
+
+            // 초기화
+            clear: function(){
+                var me = this;
+                me.reset();
+            },
+
+            setBtnHidden : function() {
+                var me = this;
+                if(me.get("uiBind.btnHidden")){
+                    me.set("uiBind.btnHidden", false);
+                }
+            },
+
+            // 펼침
+            onExpandAll:function(){
+                var me = this;
+
+                if(!me.formula('isEditable')){
+                    UT.alert(me.translate("STD.E1012",null,me.translate('직무코드')),null,true); // "'{0}'을(를) 선택하십시오"
+                    return;
+                }
+
+                me.$.gridPanel.expandAll();
+            },
+
+            // 접기
+            onCollapseAll:function(){
+                var me = this;
+
+                if(!me.formula('isEditable')){
+                    UT.alert(me.translate("STD.E1012",null,me.translate('직무코드')),null,true); // "'{0}'을(를) 선택하십시오"
+                    return;
+                }
+
+                me.$.gridPanel.collapseAll();
+            },
+
+
+
+            // 삭제
+            onDeleteList: function() {
+                var me = this,
+                    grid = me.$.gridPanel,
+                    provider = grid.getDataProvider();
+
+                var checked = provider.selectionCheckedIndexes();
+                var deletes = [];
+
+                if(checked.length < 1){
+                    UT.alert("STD.N1600");
+                    return;
+                }
+
+                for (var i=0; i < checked.length; i++ ){
+                    var row = provider.getItemAt(checked[i]);
+                    // check된 항목중 직무가 연결된 항목만 삭제 대상리스트에 추가
+                    if(row.purc_grp_cd){
+                        deletes.push(row);
+                    }
+                }
+
+                if(deletes.length < 1){
+                    UT.alert("STD.ADM1013"); // 연결된 직무가 없습니다.
+                    return;
+                }
+
+                UT.confirm("STD.N1300", function() { // 삭제 하시겠습니까?
+                    me.$.deleteListItemFromJob.set("body",{
+                        deleteList: deletes
+                    });
+                    UT.request(me.$.deleteListItemFromJob);
+                });
+            },
+
+            // 삭제 완료
+            completeDeleteList: function(e, res) {
+                var me = this,
+                    result = res.response;
+
+                if(result.result_status === 'S'){ // 삭제하였습니다.
+                    UT.alert("STD.N2500", function(){
+                        me.onFindList();
+                    });
+                } else {
+                    UT.alert(result.result_message);
+                }
+            },
+
+            // 저장
+            onSaveList: function() {
+                var me = this,
+                    provider = me.$.gridPanel.getDataProvider();
+
+                var job = me.get("searchParam"), // 직무목록에서 선택한 직무 Object
+                    checked = provider.selectionCheckedIndexes(),
+                    inserts = [],
+                    updates = [],
+                    sts = "",
+                    cnt = 0;
+
+                // check된 품목분류가 없는 경우 처리
+                if(checked.length < 1){
+                    UT.alert("STD.N1600");
+                    return;
+                }
+
+                for (var i=0; i < checked.length; i++ ){
+                    var row = provider.getItemAt(checked[i]);
+
+                    if(!row.purc_grp_cd){
+                        sts = "I";
+                        cnt++;
+                    }else if(row.comp_cd != job.comp_cd || row.purc_grp_typ != job.purc_grp_typ || row.purc_grp_cd != job.purc_grp_cd){
+                        sts = "U";
+                        cnt++;
+                    }
+
+                    row.purc_grp_cd = job.purc_grp_cd;
+                    row.purc_grp_typ = job.purc_grp_typ;
+                    row.comp_cd = job.comp_cd;
+
+                    if(sts == "U"){
+                        updates.push(row);
+                    }else if (sts == "I"){
+                        inserts.push(row);
+                    }
+                }
+
+                if(cnt <1){
+                    // 선택한 직무와 연결된 직무가 같은 경우 처리
+                    UT.alert("STD.ADM1014"); //"선택한 직무와 연결된 품목입니다."
+                    return;
+                }
+
+                UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+                    me.$.saveListItemToJob.set("body", {
+                        insertList: inserts,
+                        updateList: updates
+                    });
+                    UT.request(me.$.saveListItemToJob);
+                });
+            },
+
+            // 저장 완료
+            completeSaveList: function(e, res) {
+                var me = this,
+                    message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                        me.onFindList();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+            },
+
+            // 조건을 만족하는 Item 검색
+            onFindItemFromGrid: function() {
+                var me = this;
+                var treeGrid = me.$.gridPanel;
+                var codeValues = me.searchParam.cate_cd;    // 분류코드 필드 값
+                var nameValues = me.searchParam.cate_nm;    // 분류명 필드 값
+                var fields = [];    // 검색 옵션 조건 필드 목록
+                var values = [];    // 검색 옵션 조건 값 목록
+                var startIndex = 0;
+
+                if(!me.formula('isEditable')){
+                    UT.alert(me.translate("STD.E1012",null, me.translate('직무코드')),null,true); // "'{0}'을(를) 선택하십시오"
+                    return;
+                }
+
+                if(codeValues && codeValues != ''){
+                    fields.push("cate_cd");
+                    values.push(codeValues);
+                }
+                if(nameValues && nameValues != ''){
+                    fields.push("cate_nm");
+                    values.push(nameValues);
+                }
+
+                if(fields.length <1){
+                    //입력 받은 필드/값 없는 경우 return
+                    UT.alert("STD.N2700");
+                    return;
+                }
+
+                if(!me.get("uiBind.btnHidden")){
+                    me.set("uiBind.btnHidden", true);
+                }else{
+                    startIndex = treeGrid.getCurrentCell().rowIndex;
+                }
+                me.searchTreeItemFunc(treeGrid, fields, values, startIndex);
+            },
+
+            // 직무 품목 검색(Grid 내 조건 만족하는 Item 검색)
+            searchTreeItemFunc: function (treeGrid, fields, values, startIndex){
+
+                // 그리드 검색 옵션 설정
+                /* var options = new RealGridJS.SearchOptions();
+                 options.fields = fields;
+                 options.values = values;
+                 options.caseSensitive = false; // 대소문자 구분 여부
+                 options.partialMatch = true; // 부분검색 여부(Like검색)
+                 options.wrap = true; // 검색 완료 시 처음부터 다시 검색
+                 options.allFields = true; // 모든 필드의 조건을 만족하는 항목만 검색
+                 options.select = true; // focus 이동 여부
+                 options.startIndex = startIndex; // 검색 시작 index */
+                // treeGird 경우 펼쳐진 노드에 대해서만 searchItem 기능 제공
+                var me = this;
+                var currentCell = treeGrid.getCurrentCell();
+                var searchData = {};
+                for(var i = 0,len = fields.length ; i<len ; i++){
+                    searchData[fields[i]] = values[i];
+                }
+                // treeGird 경우 펼쳐진 노드에 대해서만 searchItem 기능 제공
+                // 트리를 모드 펼친 상태로 검색
+                treeGrid.expandAll();
+
+                var findNodeIndex = function(searchData,startIndex){
+                    var nodeIndex = 0;
+                    var startIndex = (startIndex+1) || 0;
+                    var items = treeGrid.getDataProvider().getItems();
+                    for(var i = startIndex,len=items.length; i <len; i++){
+                        nodeIndex = i;
+                        var data = items[i];
+                        var matched= true;
+                        for (var p in searchData){
+                            if (data[p].indexOf(searchData[p]) < 0) {
+                                matched = false;
+                                break;
+                            }
+                        }
+                        if(matched){
+                            nodeIndex++;
+                            break;
+                        }
+                        nodeIndex = -1;
+                    }
+                    return nodeIndex;
+                };
+
+                var nodeIndex = findNodeIndex(searchData,startIndex);
+
+                if (nodeIndex < 0) {
+                    UT.alert("STD.N2800");
+                    return;
+                }
+
+                // focusing
+                treeGrid.setCurrentCell({
+                    nodeIndex: nodeIndex,
+                    column: fields[fields.length-1]
+                });
+            }
+
+        });
+    </script>
+
+</dom-module>

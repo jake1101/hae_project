@@ -1,0 +1,162 @@
+<dom-module id="es-tree-grid-description">
+	<style>
+		table, th, td {
+	 		border:1px solid black;
+	 		border-collapse:collapse;
+	 		box-sizing: border-box;
+	 		padding: 3px;
+	 	}
+	 	th {
+	 		background-color:lightgray
+	 	}
+	</style>
+	<template>
+		<p>
+			<b>트리 그리드 관련 config</b><br/>
+			<table>
+				<tr>
+					<th>config</th>
+					<th>type</th>
+					<th>설명</th>
+				</tr>
+				<tr>
+					<td>isTree</td>
+					<td>Boolean<br/>default : false</td>
+					<td>트리 그리드 사용 여부</td>
+				</tr>
+				<tr>
+					<td>useTreeCheckbox</td>
+					<td>Boolean<br/>default : false</td>
+					<td>트리 컬럼에 checkbox 표현 여부</td>
+				</tr>
+			</table>
+			<br/>
+			<b>트리 그리드 관련 method</b><br/>
+			<table>
+				<tr>
+					<th>method</th>
+					<th>parameters</th>
+					<th>설명</th>
+				</tr>
+				<tr>
+					<td>setHierachyDataProvider</td>
+					<td>
+					1. source : 계층형 구조 데이터<br/>
+					2. childName
+					</td>
+					<td>트리 그리드에 계층형 구조 데이터를 연결한다.</td>
+				</tr>
+				<tr>
+					<td>expand</td>
+					<td>
+					1. rowIndex : 확장하려는 아이템 행의 index<br/>
+					2. recursive(default=false) : 자식 아이템까지 확장 여부
+					</td>
+					<td>특정 노드를 펼친다.</td>
+				</tr>
+				<tr>
+					<td>expandAll</td>
+					<td>none</td>
+					<td>트리뷰의 전체 노드들을 펼친다.</td>
+				</tr>
+				<tr>
+					<td>collapse</td>
+					<td>
+					1. rowIndex : 접으려는 아이템 행의 index<br/>
+					2. recursive(default=false) : 자식 아이템까지 접을 지 여부
+					</td>
+					<td>특정 노드를 접는다.</td>
+				</tr>
+				<tr>
+					<td>collapseAll</td>
+					<td>none</td>
+					<td>트리뷰의 전체 노드들을 접는다.</td>
+				</tr>
+				<tr>
+					<td>selectionChild</td>
+					<td>
+					1. rowIndex : check할 행의 index<br/>
+					2. checked : 체크/해제 여부<br/>
+					3. recursive(default=false)<br/>
+					4. checkableOnly
+					</td>
+					<td>특정 행의 자식 노드들을 모두 체크하거나 해제한다.</td>
+				</tr>
+			</table>
+			<br/>
+			<b>트리 그리드 관련 dataProvider method</b><br/>
+			<table>
+				<tr>
+					<th>dataProvider method</th>
+					<th>parameters</th>
+					<th>return</th>
+					<th>설명</th>
+				</tr>
+				<tr>
+					<td>addChildItem</td>
+					<td>
+					1. nodeIndex : parent행의 nodeIndex<br/>
+					2. item : 추가할 데이터 object
+					</td>
+					<td>새로 추가된 행의 nodeIndex</td>
+					<td>지정한 트리 행의 자식 행을 추가한다.</td>
+				</tr>
+				<tr>
+					<td>getParentIndex</td>
+					<td>
+					1. nodeIndex : nodeIndex
+					</td>
+					<td>parentIndex : parent의 nodeIndex</td>
+					<td>지정한 데이터 행의 부모 nodeIndex를 가져온다.</td>
+				</tr>
+				<tr>
+					<td>getParentItem</td>
+					<td>
+					1. nodeIndex : nodeIndex
+					</td>
+					<td>부모 데이터 object</td>
+					<td>지정한 행의 부모 데이터를 가져온다.</td>
+				</tr>
+				<tr>
+					<td>getChildIndexes</td>
+					<td>
+					1. nodeIndex : nodeIndex
+					</td>
+					<td>childIndexes : 자식 행들의 인덱스 array</td>
+					<td>지정한 행의 모든 자식 nodeIndex들을 가져온다.</td>
+				</tr>
+				<tr>
+					<td>getChildItems</td>
+					<td>
+					1. nodeIndex : nodeIndex
+					</td>
+					<td>childItems : 자식 행들의 데이터 array</td>
+					<td>지정한 행의 모든 자식 데이터들을 가져온다.</td>
+				</tr>
+				<tr>
+					<td>getAncestorsIndexes</td>
+					<td>
+					1. nodeIndex : nodeIndex
+					</td>
+					<td>ancestorsIndexes : 모든 조상 행들의 인덱스 array</td>
+					<td>모든 조상 행들의 nodeIndex를 가져온다.</td>
+				</tr>
+				<tr>
+					<td>getAncestorsItems</td>
+					<td>
+					1. nodeIndex : nodeIndex
+					</td>
+					<td>ancestorsItems : 모든 조상 행들의 데이터 array</td>
+					<td>모든 조상 행들의 데이터들을 가져온다.</td>
+				</tr>
+			</table>
+			<br/>
+		</p>
+		
+	</template>
+	<script>
+	Polymer({
+		is : 'es-tree-grid-description'
+	});
+	</script>
+</dom-module>

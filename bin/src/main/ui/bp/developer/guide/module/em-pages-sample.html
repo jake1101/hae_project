@@ -1,0 +1,56 @@
+<sc-link rel="import" href="es-list-page-sample.html"></sc-link>
+<sc-link rel="import" href="es-detail-page-sample.html"></sc-link>
+
+<dom-module id="em-pages-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+    	<sc-pages id="pages" class="fit" selected-index="0"
+    			on-item-activate="onItemActivate" on-item-deselect="onItemDeselect" on-item-select="onItemSelect">
+    		
+    		<!-- 모듈의 이벤트는 태그에 이벤트 리스너를 정의하여 사용한다 -->
+			<es-list-page-sample id="list" on-show-detail="onShowDetail"></es-list-page-sample>
+			<!-- 최초 생성되는 화면을 제외한 나머지 페이지는 template 태그를 이용하여 동적생성 하도록 한다 -->
+			<template>
+				<es-detail-page-sample id="detail" on-close="onShowList"></es-detail-page-sample>
+			</template>
+		</sc-pages>
+    </template>
+    
+    <script>
+    Polymer({
+    	is : "em-pages-sample",
+    	onItemActivate : function(event) {
+    		var me = this;
+    		console.log(event.type + " : ", event.detail);
+    	},
+    	onItemDeselect : function(event) {
+    		var me = this;
+    		console.log(event.type + " : ", event.detail);
+    	},
+    	onItemSelect : function(event) {
+    		var me = this;
+    		console.log(event.type + " : ", event.detail);
+    	},
+    	// 상세 화면 이동
+    	onShowDetail : function(e, data) {
+    		var me = this;
+    		
+    		// 상세 화면으로 페이지 전환
+    		me.$.pages.selectItem(me.$.detail);
+    		// 상세 화면 load 함수 호출
+    		me.$.detail.load(data);
+    	},
+    	// 리스트 화면 이동
+    	onShowList : function(e, data) {
+    		var me = this;
+    		
+    		// 리스트 화면으로 페이지 전환
+    		me.$.pages.selectItem(me.$.list);
+    	}
+    });
+    </script>
+</dom-module>

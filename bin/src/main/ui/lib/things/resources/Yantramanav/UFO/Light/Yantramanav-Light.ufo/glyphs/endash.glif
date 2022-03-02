@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="endash" format="1">
+  <advance width="1273"/>
+  <unicode hex="2013"/>
+  <outline>
+    <component base="minus" xScale="1.16998901367" yScale="0.9" xOffset="-34" yOffset="69"/>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.typemytype.robofont.layerData</key>
+      <dict>
+      </dict>
+    </dict>
+  </lib>
+</glyph>

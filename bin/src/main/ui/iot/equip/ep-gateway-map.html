@@ -1,0 +1,321 @@
+<dom-module id="ep-gateway-map">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+		
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<table class="tb-form" >
+			<colgroup>
+				<col>
+				<col>
+				<col>
+				<col>
+				<col style="width:60px;">
+			</colgroup>
+			<tr>
+				<th><sc-label text="위도"></sc-label></th>
+				<td><sc-text-field id="lat" value="{{lat}}" required="true" readonly="true"></sc-text-field></td>
+				<th><sc-label text="경도"></sc-label></th>
+				<td><sc-text-field id="lon" value="{{lon}}" required="true" readonly="true"></sc-text-field></td>
+				<td>
+					<sc-button text="적용" on-click="onApplyBtnClick"></sc-button>
+				</td>
+			</tr>
+		</table>
+		<div class="vspace-5"></div>
+		<!-- 지도 영역 -->
+		<cc-ol-map-container id="mapContainer" show-view-label="true"></cc-ol-map-container>
+	</template>
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "ep-gateway-map",
+            properties : {
+            	titleText:{
+	                type: String,
+					value: "게이트웨이 위치 지정"
+				},
+                // 지도
+                map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+                gatewayId : {
+		            type : Number,
+		            value : null
+		        },
+                lon : Number,
+                lat : Number,
+                latlonVal:{
+					type : Object,
+					value : function(){
+						return{};
+					}
+                },
+                transFlag: {
+                    type: Boolean,
+                    value : function() {
+                    	return  true;
+                    }
+                },
+                vectorLayer:{
+					type : Object,
+					value : function(){
+						return{};
+					}
+                }
+            },
+            load: function(dataInfo, allList){
+            	var me = this;
+
+            	setTimeout(function(){
+					var featureData={};
+	            	var lonlat=[];
+	            	
+	            	me.set('gatewayId', dataInfo.id);
+	            	
+	            	// 지도 객체 추가
+	            	me.set("map", me.$.mapContainer.map);
+	            	
+	            	if(!UT.isEmpty(dataInfo.lat) && !UT.isEmpty(dataInfo.lon)){
+	            		me.set('lon', dataInfo.lon);
+	            		me.set('lat', dataInfo.lat);
+	            		lonlat.push(dataInfo.lon);
+	            		lonlat.push(dataInfo.lat);
+	            		featureData.coordinates=lonlat;
+	                }else{
+	                	var center= me.map.getView().getCenter();
+	                	var rCenter= ol.proj.transform(center, 'EPSG:900913', 'EPSG:4326') ;
+	                	me.set('lon', rCenter[0]);
+	            		me.set('lat', rCenter[1]);
+	                	
+	                	featureData.coordinates = rCenter;
+	                }
+	            	
+					var markerAllSource = new ol.source.Vector({});
+	 				
+	 				var markerAllLayer = new ol.layer.Vector({
+	 					source: markerAllSource
+	 				});
+	            	
+	 				me.map.addLayer(markerAllLayer);
+	 				me.map.set('markerAllSource', markerAllSource);
+	            	
+	 				if(allList){
+	            		var features = me.getFeatureList(allList);
+	            		markerAllSource.addFeatures(features);
+					}
+	            	
+	            	
+	            	featureData.type="Point";
+	            	var markerSource = new ol.source.Vector({});
+	 				
+	 				var markerLayer = new ol.layer.Vector({
+	 					source: markerSource
+	 				});
+	 			
+	 				me.map.addLayer(markerLayer);
+	 				me.map.set('markerSource', markerSource);
+	 				
+	 				var feature = geoJson.readFeature(featureData);
+	 				var currDataInfo={};
+	 				currDataInfo=dataInfo;
+	 				currDataInfo.geoJson = featureData;
+	 				feature.setStyle(new ol.style.Style({
+	    	      		image: new ol.style.Icon({
+	    	      		    crossOrigin: 'anonymous',
+	    	      		    size: [40, 60],
+	    	      		    scale : 0.5,
+	    	      		    anchor : [0.5,1],
+	    	      		    src: './ui/lib/openlayers/img/marker.png',
+	    	      		  }),
+		    	    }));
+	 				feature.set('type', 'currMarker');
+			    	feature.set('targetInfo', currDataInfo);
+	 				markerSource.addFeature(feature);
+	 				
+	 				me.map.on('pointermove', function(e) {
+						  var selected = null;
+						  
+						  me.map.removeOverlay(me.map.getOverlayById('targetPopup'));
+						  if (e.dragging){
+							  return;
+						  }else{
+							  $('*').css('cursor','');
+		  			  		if (selected !== null) {
+		 			  		    	selected = null;
+		 			  		  	}
+		
+		 			  		  	me.map.forEachFeatureAtPixel(e.pixel, function(f) {
+		 			  		    	selected = f;
+		 			  		    	return true;
+		 			  		  	});
+		
+				  		  		
+		 			  		  	if (selected) {
+		 			  		  		
+		 			  		  		function makePop(p_flag){
+			 			  		  		me.map.removeOverlay(me.map.getOverlayById('targetClickPopup'));
+			   	   			  		  	var object = selected.get('targetInfo');
+			    						var text ;
+			    						if(object.id){
+			    							text = '<div id="arrow2"></div><div id="text2">'+object.name+'</div>';
+			    						}else{
+			    							return;
+			    						}
+			    		    	      	var popup = document.createElement("div");
+			    						popup.classList.add('targetPopup');
+			    						popup.innerHTML=text;
+										var p_coord;
+			    						if(p_flag){
+			    							p_coord = object.geoJson.coordinates;
+			    						}else{
+			    							p_coord = me.latlonVal; 
+			    						}
+			    						var overlay = new ol.Overlay({
+				    						id : 'targetPopup',
+			    							element : popup,
+			    							positioning : 'bottom-center',
+			    							offset : [0,-28],
+			    							position : ol.proj.fromLonLat(p_coord)
+			    						});
+			    						
+			    						me.map.addOverlay(overlay);
+			    						$('*').css('cursor','pointer');
+		 			  		  		}
+		 			  		  		
+			 			  		  	if(selected.get('type') =='currMarker'){
+						  		   		var marker =selected;
+						 				var translate = new ol.interaction.Translate({
+						 				    features: new ol.Collection([marker])
+						 				});
+						 				me.map.addInteraction(translate);
+						 				var translating = false;
+						 				
+						 				translate.on('translatestart', function (evt) {
+						 				    translating = true;
+						 				});
+		
+						 				translate.on('translateend', function (evt) {
+						 				      translating = false;
+							 				  var feature = evt.features.array_[0].clone();
+							 				  feature.getGeometry().transform('EPSG:900913', 'EPSG:4326');
+							 				  
+							 				  me.set("lat",feature.getGeometry().flatCoordinates[1]);
+							 				  me.set("lon",feature.getGeometry().flatCoordinates[0]);
+							 				  me.latlonVal = feature.getGeometry().flatCoordinates;
+							 				  me.transFlag = false;
+						 				});
+						 				
+					 					makePop(me.transFlag);
+				   			  		}
+			 			  		  	
+		 	   			  		  	if(selected.get('type') =='targetMarker'){
+		 	   			  		  		makePop(true);
+		 	   			  		  	}
+		          				}
+						  }
+						});
+	 				
+		 				var center = ol.proj.fromLonLat(featureData.coordinates);
+						me.map.getView().setCenter(center);
+	 				
+            	},100);
+            },
+            onApplyBtnClick: function(){	// 적용버튼 클릭
+            	var me = this;
+	            this.fire("apply-point", {lat : me.lat, lon : me.lon});
+            },
+            
+            getFeatureList : function(list){
+				var me = this;
+				var features = [];
+				var allList= list;
+				for(var i = 0 ; i<allList.length; i++){
+					var lonlat=[];
+					if( (UT.isNotEmpty(allList[i].lon) && UT.isNotEmpty(allList[i].lat)) && (me.gatewayId != allList[i].id)){
+						lonlat.push(allList[i].lon);
+	            		lonlat.push(allList[i].lat);
+	            		allList[i].geoJson = {};
+	            		allList[i].geoJson.coordinates=lonlat;
+					}
+				}
+				
+				allList.forEach(function (object) {
+					if(object.geoJson){
+						object.geoJson.type = "Point";
+				    	var feature = geoJson.readFeature(object.geoJson);
+				    	feature.setStyle(new ol.style.Style({
+		    	      		image: new ol.style.Icon({
+		    	      		    crossOrigin: 'anonymous',
+		    	      		    size: [45, 45],
+		    	      		    scale : 0.5,
+		    	      		    anchor : [0.5,1],
+		    	      		    src: './ui/lib/openlayers/img/gray.png',
+		    	      		  }),
+			    	    }));
+				    	feature.set('type', 'targetMarker');
+				    	feature.set('targetInfo', object);
+		    	      	features.push(feature);
+					}
+				});
+
+				return features;
+			}, 
+//             initialized : function(){
+//                 var me = this;
+            	// 지도 객체 추가
+//             	me.map = me.$.mapContainer.map;
+
+// 		       	// 벡터 레이어 추가
+// 		       	vectorLayer = new OpenLayers.Layer.Vector("vectorLayer");
+// 		       	me.map.addLayer(vectorLayer);
+
+// 		       	var editControl = addEditControl(me.map, vectorLayer);
+
+// 		     	// 객체 추가 이벤트
+//         		vectorLayer.onFeatureInsert = function(e){
+//         			editControl.selectFeature(this.getFeatureById(e.id));
+// 	        	};
+
+// 	        	// 좌표 이동 이벤트
+// 	        	vectorLayer.events.register('vertexmodified', vectorLayer, function(e){
+// 	        		me.map.target = this.getDataExtent();
+// 	        		var point =e.feature.geometry.clone();
+// 	        		point.transform(projection900913, projection4326);
+
+//    	            	me.set('lat',point.y);
+//    	            	me.set('lon',point.x);
+// 		        });
+
+// 		       	if(UT.isEmpty(me.lat) || UT.isEmpty(me.lon)){
+// 		       		var lonlat = me.map.target.getCenterLonLat().transform(projection900913, projection4326);
+//             		me.set('lon', lonlat.lon);
+//             		me.set('lat', lonlat.lat);
+//                 }
+
+// 		       	addPositionMarker(vectorLayer, me.get('lon'), me.get('lat'));
+//             },
+        });
+	</script>
+</dom-module>

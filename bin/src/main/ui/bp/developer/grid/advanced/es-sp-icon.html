@@ -1,0 +1,114 @@
+<!-- 
+	item style function을 이용하여 
+	이미지, 폰트, 색상 등을 변경하여 사용할 수 있다.
+	
+ -->
+
+<dom-module id="es-sp-icon">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" row-height="30" row-resizable="true" editable="{{gridEditable}}" >
+        	<cc-grid-toolbar>
+        		<sc-button text="조회" on-click="onSearch" auth-s></sc-button>
+        	</cc-grid-toolbar>
+			<sc-grid-columns>
+			    <sc-data-column data-field="product_id"			header-text="product_id"		width="150" text-align="left"   editable="false" item-style-function="onItemStyle"></sc-data-column>
+			    <sc-data-column data-field="product_name"		header-text="product_name"		width="150" text-align="left"   editable="false" item-style-function="onItemStyle"></sc-data-column>
+			    <sc-data-column data-field="unit"   			header-text="unit"				width="150" text-align="center"  editable="false" item-style-function="onItemStyle"></sc-data-column>
+			    <sc-data-column data-field="unit_price"   		header-text="unit_price"		width="150" text-align="right"   editable="true"  item-style-function="onItemStyle"></sc-data-column>
+			    <sc-data-column data-field="quantity"   		header-text="quantity"			width="150" text-align="right"   editable="true"  item-style-function="onItemStyle"></sc-data-column>
+			    <sc-data-column data-field="order_date"   		header-text="order_date"		width="100" text-align="center"   editable="true" ></sc-data-column>
+			    <sc-data-column data-field="customer_name"   	header-text="customer_name"		width="150" text-align="left"   editable="true" ></sc-data-column>
+			    <sc-data-column data-field="customer_id"  		header-text="customer_id" 		width="150" text-align="left"   editable="true" ></sc-data-column>
+			</sc-grid-columns>
+        </sc-grid>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-sp-icon',
+            
+            properties : {
+                resultList: {
+                    type:Array
+                }
+            },
+            
+            onSearch:function(){
+            	this.fire('search');
+            },
+            
+            onItemStyle: function(data, item){
+            	if(item.dataField === 'unit_price'){
+            		if(data[item.dataField] < 500){
+            			return {
+                            fontColor : "#0054FF",
+                            iconUrl : "img/arrow_down.png"
+                           };
+            		}else if(data[item.dataField] > 600){
+            			return {
+                          fontColor : "#FF0000",
+                          iconUrl : "img/arrow_up.png"
+                         };
+            		}
+            	}
+            	if(item.dataField === 'quantity'){
+            		if(data[item.dataField] < 300){
+            			return {
+            				background : "#90E4FF",
+                           };
+            		}else if(data[item.dataField] > 500){
+            			return {
+            				background : "#FF7E7E",
+                         };
+            		}
+            	}
+            	if(item.dataField === 'product_name'){
+            		if(item.rowIndex % 3 === 0){
+            			return {
+            				fontStyle: "italic",
+            				fontWeight : "bold",
+                          };
+            		}
+            	}
+            	
+            	if(item.dataField === 'product_id'){
+            		if(item.rowIndex % 4 === 0){
+            			return {
+            				fontStyle: "underline",
+            				fontWeight : "bold",
+                          };
+            		}
+            	}
+            	
+            	if(item.dataField === 'unit'){
+            		if(item.rowIndex % 5 === 0){
+            			return {
+            				fontColor: "#0054FF",
+                          };
+            		}
+            		else if(item.rowIndex % 3 === 0){
+            			return {
+            				fontColor: "#FF0000",
+                          };
+            		}
+            	}
+            	
+            	
+
+            }, 
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

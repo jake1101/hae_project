@@ -1,0 +1,44 @@
+[
+	{
+		"rfx_item_lno" : "10",
+		"item_cd" : "ITEM_0001",
+		"itemQtaList" : [
+			{
+				"vd_cd" : "VA10001",
+				"vd_nm" : "협력사1",
+				"item_amt" : 900
+			},
+			{
+				"vd_cd" : "VA10002",
+				"vd_nm" : "협력사2",
+				"item_amt" : 800
+			},
+			{
+				"vd_cd" : "VA10003",
+				"vd_nm" : "협력사3",
+				"item_amt" : 700
+			}
+		]
+	},
+	{
+		"rfx_item_lno" : "20",
+		"item_cd" : "ITEM_0002",
+		"itemQtaList" : [
+			{
+				"vd_cd" : "VA10001",
+				"vd_nm" : "협력사1",
+				"item_amt" : 850
+			},
+			{
+				"vd_cd" : "VA10002",
+				"vd_nm" : "협력사2",
+				"item_amt" : 680
+			},
+			{
+				"vd_cd" : "VA10003",
+				"vd_nm" : "협력사3",
+				"item_amt" : 990
+			}
+		]
+	}
+]

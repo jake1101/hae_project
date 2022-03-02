@@ -1,0 +1,50 @@
+/**
+ * CASE 1. 메일발송과 같은 비즈니스 로직 외 별도로 실행되어야 하는 프로세스가 있는 경우
+ *  조건 1) 비지니스 로직에서 예외 발생 시 메일은 발송되지 않음
+ *       2) 메일에서 예외 발생 시 비지니스 로직은 정상적으로 실행완료됨
+ */
+
+@Service
+@Transactional
+public class EvalService {
+	
+	...
+	
+	@Inject
+	MailService mailService;
+	
+	// 평가 생성 요청
+	public void excuteEvalNotify() {
+		
+		// 평가 데이터 생성
+		createEval();
+		
+		// 메일 발송
+		mailService.sendMail();
+	}
+}
+
+@Service
+@Transactional
+public class MailService {
+	
+	...
+	
+	// 메일 발송
+	public void sendMail() {
+		
+		...
+		
+		try {
+			// 메일 발송
+			javaSmtpMailSender.send(mail);
+			mailParam.put("snd_yn", "Y");
+		} catch(Exception e) {
+			// 메일 발송 시 오류 처리
+			mailParam.put("snd_yn", "N");
+			LOG.error(e.getMessage(), e);
+		} finally {
+			sqlSession.update(NAMESPACE + "updateSendComplete", mailParam);
+		}
+	}
+}

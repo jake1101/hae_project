@@ -1,0 +1,59 @@
+<link href="/ui/lib/dashboard/resources/js/bootstrap-colorpicker/css/bootstrap.css" rel="stylesheet"></link>
+<link href="/ui/lib/dashboard/resources/js/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css" rel="stylesheet"></link>
+<script src="../resources/js/bootstrap-colorpicker/js/bootstrap.min.js"></script>
+<script	src="../resources/js/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
+
+<dom-module id="dashboard-tools-colorpicker">
+
+<style>
+.inl-bl {
+        display: inline-block;
+    }
+</style>
+
+<template>
+<sc-toolbar>
+	<sc-spacer></sc-spacer>
+	<sc-button text="적용" on-click="onColorApply"></sc-button>
+</sc-toolbar>
+<div id$="{{colorPickerId}}" class="inl-bl"></div>
+</template>
+
+ <script>
+	 Polymer({
+		is : 'dashboard-tools-colorpicker',
+		properties : {
+			colorPickerId :{
+				type: String,
+				value: "colorpicker"
+			}
+		},
+		
+		attached: function(){
+			var me = this;
+		},
+		setColorData: function(param){
+			var me = this;
+			var addId = param.pickerId || "$";
+			me.set('colorPickerId',me.colorPickerId+param.pickerId);
+			 $('#'+me.colorPickerId).colorpicker({
+		            color: param.color,
+		            container: true,
+		            inline: true
+		        });	
+			
+		},
+		onColorApply: function(){
+			var me = this;
+			var selectColor = $('#'+me.colorPickerId).colorpicker('getValue');
+			me.fire('color-selected',{color:selectColor});
+		},
+		reset: function(){
+			var me = this;
+			$('#'+me.colorPickerId).colorpicker('update');
+			me.set('colorPickerId','colorpicker');
+			
+		}
+		
+	});
+</script> </dom-module>

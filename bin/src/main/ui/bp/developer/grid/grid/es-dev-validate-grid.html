@@ -1,0 +1,81 @@
+<dom-module id="es-dev-validate-grid">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-toolbar>
+            <sc-label text="그리드 유효성 검사 샘플" ></sc-label>
+            <sc-spacer></sc-spacer>
+            <sc-button text="조회" on-click="onSearch"></sc-button>
+            <sc-button text="유효성 검사" on-click="onValidate"></sc-button>
+            
+        </sc-toolbar>
+        <div class="flex">
+	        <sc-grid  id="gridPanel"  style="flex" editable="true" data-provider="{{resultList}}">
+	                <sc-grid-columns>
+	               
+	                    <sc-data-column header-text="reqired"            data-field="col1"     width="80"   editable="true"  required="true"     text-align="center" ></sc-data-column>
+	                    <sc-data-column header-text="maxLength"          data-field="col2"     width="100"  editable="true"  text-align="center" max-length="5" ></sc-data-column>
+	                    <sc-data-column header-text="minLength"          data-field="col3"     width="100"  editable="true"  text-align="center" min-length="2"  ></sc-data-column>
+	                    <sc-data-column header-text="maxValue(number)"   data-field="col4"     width="150"  editable="true"  text-align="center"  data-type="number" max-value="100"></sc-data-column>
+	                    <sc-data-column header-text="minValue(number)"   data-field="col5"     width="150"  editable="true"  text-align="center"  data-type="number" min-value="10"></sc-data-column>
+	                    <sc-date-column header-text="maxDate(date)"      data-field="col6"     width="100"  editable="true"  max-date="2017-02-18"   display-format="yyyy/MM/dd"   value-format="yyyy-MM-dd"></sc-date-column>
+	                    <sc-date-column header-text="minDate(date)"      data-field="col7"     width="100"  editable="true"  min-date="2017-02-18"   display-format="yyyy/MM/dd"   value-format="yyyy-MM-dd"></sc-date-column>
+	                    <sc-data-column header-text="customValidate"     data-field="col8"     width="100"  editable="true" text-align="left" validator-type="custom"></sc-data-column>
+	                    <sc-data-column header-text="validatorFunction"     data-field="col9"  width="150"  editable="true" text-align="left" data-type="number" validator-function="validateFunction"></sc-data-column>
+	                </sc-grid-columns>
+	        </sc-grid>
+        </div>
+    </template>
+          
+    <script>
+        Polymer({
+            is: 'es-dev-validate-grid',
+            
+            properties : {
+                resultList: {
+                    type:Array
+                }
+            },
+            //검증실패시 메세지 리턴(string), 통과시 true
+            validateFunction :  function(headerText,dataField,data){
+            	if(data['col4'] > data[dataField] ){
+            		return headerText + ' 은  maxValue(number)컬럼보다 커야합니다.';	
+            	}else{
+            		return true;
+            	}
+            	
+            },
+            initialized : function(){
+            	//custom validator등록
+            	SCValidator.factory({
+	            						 type:'custom',
+	            						 //검증실패시 메세지 리턴(string), 통과시 true
+	            		                 validator : function(value){
+	            		                   	if(value != "pass"){
+	            		                    		return value +"는 유효하지 않는 문자입니다. \n pass만 허용 합니다.";
+	            		                    	}else{
+	            		                    		return true;
+	            		                    	}
+	            		                  }
+            						 });
+            },
+            onSearch : function(){
+            	this.fire('search');
+            },
+            onValidate :  function(){
+            	var isValidate = this.$.gridPanel.validate();
+            	if(!isValidate){
+            		alert('검증실패');
+            	}
+            }
+            
+
+            
+        });
+    </script>
+
+</dom-module>

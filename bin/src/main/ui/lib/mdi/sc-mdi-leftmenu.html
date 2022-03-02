@@ -1,0 +1,549 @@
+<dom-module id="sc-mdi-leftmenu">
+
+	<template>
+		<!-- 즐겨찾기 리스트 저장 -->
+		<sc-ajax id="saveMyFavorite"
+				url="/saveMyFavorite.do">
+		</sc-ajax>
+		
+		<!-- 즐겨찾기 순서 변경 -->
+		<sc-ajax id="updateMyFavoriteOrder"
+				url="/updateMyFavoriteOrder.do">
+		</sc-ajax>
+		
+		<div id="leftWrap" class="leftWrap">
+			<div id="leftTabArea" class="leftTabArea">
+				<!-- 다국어처리해야함 -->
+				<div id="leftMenuTit" class="leftMenuTit"><span>[[menuName]]</span></div>
+				<div id="leftCloseBtn" class="leftCloseBtn"><span></span></div>
+				<div id="leftFavoritBtn" class="leftFavoritBtn"><span></span></div>
+			</div>
+			<div id="menuListDiv" class="menuList"></div>
+		</div>
+		<div id="leftSideBar" class="leftSplitter">
+			<aside>
+				<ul>
+					<li><a title="Menu" id="leftSideBarCloseBtn"></a></li>
+					<!-- <li><a title="Setting"></a></li> -->
+<!-- 					<li><a id="leftMyFavorite" title="Favorite" data-args="favor"></a> -->
+<!-- 						<div class="wrap_sb_content fav_content"> -->
+<!-- 	                        <h2>Favorite</h2> -->
+<!-- 	                        <ul> -->
+<!-- 	                        	<template is="dom-repeat" items="[[favoritList]]" as="favorite"> -->
+<!-- 	                        		<li> -->
+<!-- 	                        			<a on-click="_onSelectFavoritMenu">{{favorite.menu_nm}}</a> -->
+<!-- 	                        			<span class="moveup-fav" on-click="_onMoveUpFavorite" title="Move Up"></span> -->
+<!-- 	                        			<span class="movedown-fav" on-click="_onMoveDownFavorite" title="Move Down"></span> -->
+<!-- 	                        			<span class="delete-fav" on-click="_onDeleteFavorite" title="Delete"></span> -->
+<!-- 	                        		</li> -->
+<!-- 	                        	</template> -->
+<!-- 		                        <li><a>구매요청접수</a><span title="Delete"></span></li>
+<!-- 		                        <li><a>RFx현황</a><span title="Delete"></span></li> -->
+<!-- 		                        <li><a>조직정보관리</a><span title="Delete"></span></li> -->
+<!-- 		                        <li><a>기준정보관리</a><span title="Delete"></span></li> -->
+<!-- 		                        <li><a>발주품목현황</a><span title="Delete"></span></li> -->
+<!-- 		                        <li><a>평가대상(SG-VD)</a><span title="Delete"></span></li> -->
+<!-- 		                        <li><a>운영단위 유형 관리</a><span title="Delete"></span></li> --> -->
+<!-- 	                        </ul> -->
+<!-- 	                    </div>  -->
+<!-- 					</li> -->
+
+<!-- 					<li><a id="leftSysLink" title="System Link" data-args="link"></a> -->
+<!-- 						<div class="wrap_sb_content link_content"> -->
+<!-- 	                        <h2>System Link</h2> -->
+<!-- 	                        <ul> -->
+<!-- 	                        <li><a>Related System</a></li> -->
+<!-- 	                        <li><a>Related System</a></li> -->
+<!-- 	                        <li><a>Related System</a></li> -->
+<!-- 	                        <li><a>Related System</a></li> -->
+<!-- 	                        </ul> -->
+<!-- 	                    </div>  -->
+<!-- 					</li> -->
+<!-- 					<li><a id="myMemo" title="Memo"></a></li> -->
+<!-- 					<li><a id="myApp" title="My App"></a></li> -->
+<!-- 					<li><a id="calendar" title="Calendar"></a></li> -->
+				</ul>
+			</aside>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			
+	    	is: 'sc-mdi-leftmenu',
+	    	
+	    	properties: {
+	    		
+	    		menuName : {
+	    			type : String
+	    		},
+	    		
+				treeMenuList: {
+					type: Array,
+			        observer: '_treeMenuListChanged',
+					notify: true
+				}, 
+				
+				menuNodeMap: {
+					type: Object
+				}, 
+				
+				menuClose : {
+					type : Boolean,
+					value : true,
+					observer : '_menuCloseChanged'
+				},
+				
+				selectedItem : {
+					type : Object,
+					observer : '_selectedItemChanged'
+				},
+				
+				rootMenuId: {
+					type: String,
+					value: ""
+				},
+				
+				_beginParentMenuId: {
+					type: String
+				},
+				
+				oldLeftMenuWidth : {
+					type : String
+				},
+				
+				favoritList: {
+					type: Array,
+					notify: true
+				},
+				_boundOnCaptureClick: {
+                    type: Function,
+                    value: function() {
+                        return this._onCaptureClick.bind(this);
+                    }
+                },
+			},
+
+			_onCaptureClick: function(event) {
+
+                var target = event.target;
+                if(target.id !== "leftSideBarCloseBtn" && target.classList.contains('sc-mdi-leftmenu')){
+                    return;
+                }
+                this._toggleListeners(false);
+                this._closeWrapSbContent();
+            },
+			
+			get leftWrapHeight() {
+				if(!this._leftWrapRect) {
+					this._leftWrapRect = this.$.leftWrap.getBoundingClientRect();
+				}
+				return this._leftWrapRect.height;
+			},
+
+            get leftSideBarHeight() {
+                if(!this._leftSideBarRect) {
+                    this._leftSideBarRect = this.$.leftSideBar.getBoundingClientRect();
+                }
+                return this._leftSideBarRect.height;
+            },
+
+            get leftSideBarWidth() {
+                if(!this._leftSideBarRect) {
+                    this._leftSideBarRect = this.$.leftSideBar.getBoundingClientRect();
+                }
+                return this._leftSideBarRect.width;
+            },
+	
+			listeners: {
+				"leftSideBar.click" : "_onLeftSideBarClick",
+				"menuListDiv.click": "itemClickHandler",
+				'leftCloseBtn.click': '_onSplitterClick',
+	         	'leftSideBarCloseBtn.click': '_onSplitterClick'
+//                 'myMemo.click' : '_onShowMyMemo',
+//                 'myApp.click' : '_onShowListBoxMyapp',
+//                 'calendar.click' : '_onShowCalendar'
+
+			},
+			
+			_onMdiLeftMenuIronResize : function(containerHeight, leftmenuWidth) {
+				this.$.menuListDiv.style.height = (containerHeight - this.$.leftTabArea.getBoundingClientRect().height) + 'px';
+                this.$.leftSideBar.style.height = containerHeight + 'px';
+				this.$.leftWrap.style.width = leftmenuWidth + 'px';
+				
+				// RAYCOM 추가 : 대시보드 전체화면 로직 (첫번째 왼쪽 메뉴 펼치고 확대시, 되돌아 올때 왼쪽메뉴 표시안됨 문제 해결)
+				if(leftmenuWidth != 0){
+					$('#mdiLeftMenu').css("width", leftmenuWidth + "px");
+				}
+			},
+			
+			_onSplitterClick: function(event){
+	    		this.menuClose = !this.menuClose;
+				this.fire('splitter-click', null, {bubbles : false});
+	    	},
+			
+	    	
+	    	_toggleListener: function(enable, node, event, boundListener, capture) {
+				if (enable) {
+			    	if (event === 'tap') {
+			        	Polymer.Gestures.add(document, 'tap', null);
+			        }
+			        node.addEventListener(event, boundListener, capture);
+				} else {
+			        if (event === 'tap') {
+			          Polymer.Gestures.remove(document, 'tap', null);
+			        }
+			        node.removeEventListener(event, boundListener, capture);
+				}
+			},
+			
+			_toggleListeners: function(opened) {
+		    	this._toggleListener(opened, document, 'tap', this._boundOnCaptureClick, true);
+			},
+			
+	    	_onLeftSideBarClick: function(e){
+	    		var me = this;
+	    		var data = e.target.dataset.args;
+	    		var classList = e.target.parentElement.classList;
+	    		
+	    		
+	    		if(classList.contains(data)){
+	    			return;
+	    		}
+	    		
+	    		if(UT.isNotEmpty(UT.closest(e.target,".wrap_sb_content"))){
+	    			return;
+	    		}
+	    		
+	    		this._toggleListeners(false);
+				this._toggleListeners(true);
+				
+	    		e.target.parentElement.classList.add('select');
+	    		e.target.parentElement.classList.add(data);
+	    		
+	    		//li a태그에 mouseover이벤트를 건다
+	    		var lis = me._liSelector();
+	   			for(var i = 0, len = lis.length ; i<len; i++){
+	   				var atag = lis[i].querySelector("a");
+	   				this.listen(atag, 'mouseover', 'leftOverHandler');
+	   			}
+	    	},
+	    	
+	    	_liSelector: function(){
+	    		var me = this;
+	    		var ul = me.$.leftSideBar.querySelector('ul');
+	    		return [].filter.call(ul.querySelectorAll("li"), function(element) {
+	    		    return element.parentNode == ul;
+	    		});
+	    	},
+	    	
+	    	leftOverHandler: function(e){
+	    		var me = this;
+	    		var data = e.target.dataset.args;
+	    		var classList = e.target.parentElement.classList;
+	    		var li = me.$.leftSideBar.querySelectorAll('li');
+	    		
+	    		
+	    		this._toggleListeners(false);
+				this._toggleListeners(true);
+				
+	    		for(var i = 0, len = li.length; i < len; i++){
+	    			li[i].classList.remove("select");
+	    			li[i].classList.remove('link');
+	    			li[i].classList.remove('favor');
+	    		}
+	    		if(data){
+	    			e.target.parentElement.classList.add('select');
+		    		e.target.parentElement.classList.add(data);
+	    		}
+	    	},
+	    	
+	    	_closeWrapSbContent: function(e){
+	    		var me = this;
+	    		var li = me.$.leftSideBar.querySelectorAll('li');
+	    		
+	    		for(var i = 0, len = li.length; i < len; i++){
+	    			li[i].classList.remove("select");
+	    			li[i].classList.remove('link');
+	    			li[i].classList.remove('favor');
+	    		}
+	    		
+	    		var dataArgsATag = me.$.leftSideBar.querySelectorAll('li>a[data-args]');
+	   			for(var i = 0, len = dataArgsATag.length ; i<len; i++){
+	   				this.unlisten(dataArgsATag[i], 'mouseover', 'leftOverHandler');
+	   			}
+	    	},
+	    	
+	    	/******************************
+	    	 *	즐겨찾기
+	    	 ******************************/
+	    	//즐겨찾기 이동
+	    	_onSelectFavoritMenu: function(e){
+	    		var me = this,
+	    		menuCd = e.model.favorite.menu_cd;
+	    		//top menu select
+				var mdiMain = document.querySelector("sc-mdi");
+				var menuInfo = mdiMain.$.mdiTopMenu.getMenuNode(menuCd);
+	    		me.selectMenu(menuInfo);
+	    		
+	    		me._toggleListeners(false);
+	    		me._closeWrapSbContent();
+	    	},
+	    	//즐겨찾기 위로이동
+	    	_onMoveUpFavorite: function(e){
+	    		var me = this;
+	    		me._updateMyFavoriteOrder("UP", e.model.favorite.menu_cd);
+	    	},
+	    	//즐겨찾기 아래로이동
+	    	_onMoveDownFavorite: function(e){
+	    		var me = this;
+	    		me._updateMyFavoriteOrder("DOWN", e.model.favorite.menu_cd);
+	    	},
+	    	// 즐겨찾기 순서변경
+	    	_updateMyFavoriteOrder: function(moveType, menuCd) {
+	    		var me = this;
+	    		me.$.updateMyFavoriteOrder.body = {
+	    			move_type: moveType,
+	    			menu_cd: menuCd
+	    		};
+	    		UT.request(me.$.updateMyFavoriteOrder, function(e,res) {
+	    			var result = res.response;
+	    			SCMdiManager.setFavoritList(result);
+	    			me.set("favoritList",SCMdiManager.getFavoritList());
+	    		});
+	    	},
+	    	//즐겨찾기 삭제
+	    	_onDeleteFavorite: function(e){
+	    		var me = this,
+	    		menuCd = e.model.favorite.menu_cd;
+	    		SCMdiManager.toogleFavorite(menuCd);
+	    	},
+            /******************************
+             * 메모
+             ******************************/
+            _onShowMyMemo: function() {
+				var me = this,
+					handler = function() {
+						var memoPopup = UT.popup("smartsuite-memo-list", me, 930, 520, {
+							"close": function () {
+								memoPopup.classList.remove('smartsuite-memo-popup-super');
+							}
+						},
+						{
+							title: "SMART MEMO",
+							resizable: true,
+							collapsible: true,
+							modal: false
+						});
+
+						memoPopup.classList.add('smartsuite-memo-popup-super');
+						memoPopup.addEventListener('interact-resize-end', me._updateColumnCount);
+						
+						memoPopup.show();
+						memoPopup.getWindowContent().load();
+				};
+				
+				if(!SCLinkManager.isLoaded('sc-grid')) {
+					SCLinkManager.load('sc-grid').then(handler);
+				}
+				else {
+					handler();
+				}
+			},
+			
+			// 메모 팝업 사이즈 변경 로직
+			_updateColumnCount : function() {
+                var me = this,
+                    width,
+                    memoColumns,
+                    checkedSize = ['680', '930', '1150', '1350'];
+
+                width = me.getBoundingClientRect().width;
+                memoColumns = me.querySelector('#memoColumns');
+
+                if(width <= checkedSize[0]){
+                    memoColumns.style.columnCount = 2;
+                }
+                else if(width > checkedSize[0] && width <= checkedSize[1]) {
+                    memoColumns.style.columnCount = 3;
+                }
+                else if(width > checkedSize[1] && width <= checkedSize[2]) {
+                    memoColumns.style.columnCount = 4;
+                }
+                else if(width > checkedSize[2] && width < checkedSize[3]) {
+                    memoColumns.style.columnCount = 5;
+                }
+                else {
+                    memoColumns.style.columnCount = 6;
+                }
+            },
+
+            /******************************
+             * 앱스토어
+             ******************************/
+            _onShowListBoxMyapp: function(){
+                var me = this;
+              	var popup = UT.popup("smartsuite-myapp", me, 850, 600, {
+                   'on-close' : function() {
+                       popup.close();
+                   }
+                }, {
+                    titleText: me.translate("SMART MYAPP"),
+                    maximizable: false,
+                    resizable:true,
+                    draggable:true,
+                    closable:true
+                });
+                popup.show();
+            },
+            
+            /******************************
+             * 캘린더
+             ******************************/
+
+            _onShowCalendar: function(){
+            	var me = this,
+            		calenderMenu = this.getMenuNode("ADM50100");
+            	
+            	if(calenderMenu){
+            		me.selectMenu(calenderMenu);
+            	}else{
+            		SCMdiManager.createWindow('CAL50100', 'Calendar', 'bower_components/smartsuite/calendar/smartsuite-calendar-mgt.html');
+            	}
+			},
+	    	
+	    	_menuCloseChanged : function(leftWrapClose, oldValue) {
+			    if(leftWrapClose){
+			    	this.$.leftSideBar.style.display = '';
+			    	this.oldLeftMenuWidth = this.$.leftWrap.style.width;
+			    	this.$.leftWrap.style.width = 0 + 'px';
+			    	this.style.width = window.getComputedStyle(this.$.leftSideBar).width;
+			    	this.$.leftWrap.style.display = 'none';
+			    }else{
+			    	this.$.leftSideBar.style.display = 'none';
+			    	this.$.leftWrap.style.width = this.oldLeftMenuWidth;
+			    	this.style.width = this.oldLeftMenuWidth;
+			    	this.$.leftWrap.style.display = '';
+			    }
+	    	},
+	
+	        _selectedItemChanged : function(newitem, olditem) {
+	        	if(olditem){ 
+	        		this.toggleClass('selected', false, Polymer.dom(this.root).querySelector('#'+olditem.menu_id));
+	        	}        	
+	        	if(newitem){
+	        		this.toggleClass('selected', true, Polymer.dom(this.root).querySelector('#'+newitem.menu_id));
+	        		this.toggleClass('lnb-closed', false, Polymer.dom(this.root).querySelector('#'+newitem.menu_id).parentElement );
+	        	}
+	        },
+	        
+	        getMenuNode: function(menuId){
+	        	var menuNode = this.menuNodeMap[menuId];
+				if(menuNode){
+					return menuNode;
+				}
+				var getNode = function(nodes, id, keyName, childKeyName){
+					var result;
+					for(var i=0, child; child = nodes[i]; i++) {
+						if(child[keyName] === id) {
+							return child;
+						}
+						else{
+							if(!child[childKeyName]){
+								continue;
+							}
+							result = arguments.callee(child[childKeyName], id, keyName, childKeyName) || result;
+							if(result){
+								return result;
+							}
+						}
+					}
+					return result;
+				};
+				
+				return getNode(this.treeMenuList, menuId, "menu_id", "sub_menu_list"); 
+			},
+			
+			itemClickHandler: function(event) {
+				var parentElement = event.target.parentElement;			
+				while(parentElement) {
+					if(parentElement.getAttribute('issubmenu') == 'Y') {
+						var toggle = parentElement.querySelector('ul').classList.contains('lnb-closed');
+						this.toggleClass('lnb-closed', !toggle, parentElement.querySelector('ul'));
+						var imgUrl = "";
+						if(toggle){
+						    if(Array.prototype.slice.call(parentElement.parentElement.classList).indexOf("lnb2depth") > -1) {
+                                imgUrl = Polymer.ResolveUrl.resolveUrl("img/bul_aw_s_up.png", this._template.ownerDocument.baseURI);
+							} else {
+                                imgUrl = Polymer.ResolveUrl.resolveUrl("img/arw_leftup.png", this._template.ownerDocument.baseURI);
+							}
+						}else{
+                            if(Array.prototype.slice.call(parentElement.parentElement.classList).indexOf("lnb2depth") > -1) {
+                                imgUrl = Polymer.ResolveUrl.resolveUrl("img/bul_aw_s_down.png", this._template.ownerDocument.baseURI);
+                            } else {
+                                imgUrl = Polymer.ResolveUrl.resolveUrl("img/arw_leftdown.png", this._template.ownerDocument.baseURI);
+                            }
+						}
+						parentElement.querySelector("img").setAttribute("src", imgUrl);
+						break;
+					}
+					if(parentElement.getAttribute('ismenuitem') == 'Y') {
+						this.selectMenu(this.getMenuNode(parentElement.getAttribute('id')));
+						break;
+					}
+					parentElement = parentElement.parentElement;
+				}	
+			},
+			
+			generateTreeMenuList: function(childNodes, imgUrl, menuNodeMap) {
+				var me = this;
+
+				var subImgUrl = "img/bul_aw_s_down.png";
+                subImgUrl = Polymer.ResolveUrl.resolveUrl(subImgUrl, this._template.ownerDocument.baseURI);
+
+				return childNodes.map(function(node){
+					if(menuNodeMap){
+						menuNodeMap[node.menu_id] = node;
+					}
+					var exists = (Object.prototype.toString.call(node['sub_menu_list']) === '[object Array]' && node['sub_menu_list'].length > 0);
+					var subMenu = (exists) ? '<ul '+((node.level == 1) ? 'class="lnb2depth lnb-closed"' : 'class="lnb-closed"')+'>'+ me.generateTreeMenuList(node.sub_menu_list, imgUrl, menuNodeMap).join('') + '</ul>' : '';
+			        return '<li '+""+'id="'+node.menu_id+'" ismenuitem="Y" ' + (subMenu ? ' isSubmenu="Y" ':'') + '><a><span title="'+node.menu_nm+'">' + node.menu_nm + '</span>'+(subMenu ? '<img src="'+ (node.level == 1 ? imgUrl : subImgUrl) +'" alt="downArrow" />':'')+'</a>' + (subMenu) + '</li>' ;
+				});
+			},
+			
+			selectMenu: function(menuItem) {
+				this.fire('menu-click', menuItem);
+			},
+			
+			_treeMenuListChanged : function(newValue, oldValue){
+				if(newValue.length === 0){
+					Polymer.dom(Polymer.dom(this.root).querySelector("#menuListDiv")).innerHTML = '<ul id="leftMenu" class="lnbMenu"></ul>';
+					return;
+				}
+				
+				var imgUrl = "img/arw_leftdown.png",
+					menuListHtml = ''; 
+				
+				imgUrl = Polymer.ResolveUrl.resolveUrl(imgUrl, this._template.ownerDocument.baseURI);
+				this._beginParentMenuId = newValue[0].parent_menu_id;
+				if(newValue.length > 0) {
+					this.menuNodeMap = {};
+					menuListHtml = this.generateTreeMenuList(this.treeMenuList, imgUrl, this.menuNodeMap);
+				}
+				Polymer.dom(Polymer.dom(this.root).querySelector("#menuListDiv")).innerHTML = '<ul id="leftMenu" class="lnbMenu">'+menuListHtml.join('')+ '</ul>';
+			},
+			
+			_destroy: function(){
+				this.menuName = null;
+				this.treeMenuList = null;
+				this.menuNodeMap = null;
+				this.menuClose = null;
+				this.selectedItem = null;
+				this.rootMenuId = null;
+				this._beginParentMenuId = null;
+				this.oldLeftMenuWidth = null;
+				this.favoritList = null;
+				this._boundOnCaptureClick = null;
+			}
+	  	});
+	</script>
+</dom-module>

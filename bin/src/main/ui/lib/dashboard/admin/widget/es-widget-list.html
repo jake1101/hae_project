@@ -1,0 +1,197 @@
+<!-- <script src="graystyle.js"></script> -->
+<dom-module id="es-widget-list">
+    <style>
+	    :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    
+    <sc-ajax id="findWidgetList"
+				 url="findWidgetList.do"
+				 body="{{searchParam}}"
+				 last-response="{{widgetList}}">
+	</sc-ajax>
+	
+	<sc-ajax id="deleteWidgets"
+			 url="deleteWidgets.do">
+	</sc-ajax>
+	
+	<sc-ajax id="updateWidgetCode"
+			 url="updateWidgetCode.do">
+	</sc-ajax>
+    
+    <cc-page-title-bar></cc-page-title-bar>
+    	<cc-search-container on-search="onWidgetSearch" auth-r>
+			<table>
+				<colgroup>
+					<col style="width:120px"/>
+					<col></col>
+					<col style="width:120px"/>
+					<col></col>
+					<col style="width:120px"/>
+					<col></col>
+				</colgroup>
+				<tr>
+					<th>
+						<sc-label text="위젯제목" ></sc-label>
+					</th>
+					<td>
+						<sc-text-field  value="{{searchParam.widget_title}}" on-enter="onWidgetSearch"></sc-text-field>
+					</td>
+					<th>
+						<sc-label text="위젯종류" ></sc-label>
+					</th>
+					<td>
+						<sc-combobox-field  placeholder="선택" items="[[widgetTypeCodes]]" display-field="text" 
+											value-field="value" value="{{searchParam.widget_type}}">
+	                    </sc-combobox-field>
+					</td>
+				</tr>
+			</table>
+		</cc-search-container>
+    
+   		<sc-grid id="widgetGridPanel" data-provider="{{widgetList}}" class="flex"
+				 on-item-click="onItemClick" row-height="200" editable="true">
+			<cc-grid-toolbar>
+				<sc-button text="위젯 생성"  on-click="onShowCreateWidget"></sc-button>
+				<sc-button text="위젯 코드저장"  on-click="onSaveWidget"></sc-button>
+				<sc-button text="삭제"  on-click="onDeleteWidget"></sc-button>
+			</cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-image-column data-field="captured"   header-text="위젯이미지"  width="200"  editable="false"></sc-image-column>
+				<sc-data-column data-field="widget_title" header-text="타이틀" width="180" text-align="center" style-name="link"></sc-data-column>
+				<sc-data-column data-field="widget_type" header-text="위젯타입" width="180" text-align="center" item-label-function="onItemLabel"></sc-data-column>
+				<sc-data-column data-field="widget_code" header-text="위젯코드" width="180" text-align="center" editable="true" max-length="18"></sc-data-column>
+			</sc-grid-columns>
+		</sc-grid>
+    </template>
+    <script>
+        Polymer({
+            is: "es-widget-list",
+
+            properties: {
+            	widgetList : {
+            		type: Array
+            	},
+            	searchParam :{
+            		type: Object,
+            		value: function(){
+                        return {};
+                    }
+            	},
+            	widgetTypeCodes: {
+             	   type : Array,
+             	   value : function(){
+             		   return [
+             		           {text:'grid',value:'grid'},
+             		           {text:'chart',value:'chart'},
+             		           {text:'iframe',value:'iframe'},
+             		           {text:'module',value:'component'}
+             		   ];
+             	   }
+                }
+            },  
+            listeners : {
+            	
+    		},
+    		initialized: function(){
+    			var me = this;
+    		},
+    		load: function(){
+    			var me = this;
+    			me.onWidgetSearch();
+    		},
+    		onWidgetSearch: function(){
+    			var me = this;
+    			UT.request(me.$.findWidgetList);
+    		},
+    		
+    		onShowCreateWidget: function(){
+    			var me = this,
+    			    param = {sts : 'C'};
+    			me.fire('show-widget-detail',param);
+    		},
+    		
+    		onDeleteWidget: function(){
+    			var me = this,
+    				provider = me.$.widgetGridPanel.getDataProvider();
+    			var removeItems = provider.removeItems();
+    			if(removeItems.length > 0){
+    				UT.confirm("STD.N1300", function() {
+        				var ids = removeItems.map(function(data){
+            				return data.widget_id
+            			});
+            			me.$.deleteWidgets.body = {widget_ids :ids};
+            			UT.request(me.$.deleteWidgets, function(){
+            				UT.alert("STD.N2500");
+            				me.onWidgetSearch();
+            			});	
+        			
+    				});
+    			}else{
+    				UT.alert("N1600");
+    			}
+    		},
+    		
+    		onItemClick : function(e){
+    			var me = this,
+    			    detail = event.detail,
+	  				data = detail.data,
+	  				item = detail.item;
+    			if(item.dataField == 'widget_title'){
+    				data.sts = 'U';
+        			me.fire('show-widget-detail',data);	
+    			}
+    			
+    		},
+    		onItemLabel: function(data, item){
+    			var me = this;
+    			var value = data[item.dataField];
+    			if(value == 'component'){
+    				return 'module';
+    			}
+    			return value;
+    		},
+    		onSaveWidget: function(){
+    			var me =  this,
+    			provider = me.$.widgetGridPanel.getDataProvider();
+    			if(!me.validation()){
+    				return;
+    			}
+    			var updateList = provider.getUpdateItems();
+    			me.$.updateWidgetCode.body = {
+    					updateList : updateList
+    			};
+    			UT.request(me.$.updateWidgetCode,function(){
+    				UT.alert("STD.N2400", function(){ // 저장하였습니다.
+    	                me.onWidgetSearch();
+    	            });
+    			});
+    		},
+    		validation: function() {
+                var me = this;
+
+                // 중복 체크
+                var provider = me.$.widgetGridPanel.getDataProvider(),
+                    rows = provider.getItems();
+                var unique_check = {};
+                for (var i=0, len = rows.length; i<len; i++) {
+                	var widgetCode = rows[i].widget_code;
+                	if(widgetCode != null ){
+                		if(typeof unique_check[rows[i].widget_code] == "undefined"){
+                            unique_check[rows[i].widget_code] = 0;
+                        } else {
+                            UT.alert(me.translate("STD.E1000",null, me.translate('위젯코드')),null,true); // "'{0}'에 동일한 값이 존재합니다"
+                            return false;
+                        }	
+                	}
+                    
+                }
+
+                return true;
+            }
+        });
+    </script>
+</dom-module>

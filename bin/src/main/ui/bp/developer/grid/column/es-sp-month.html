@@ -1,0 +1,79 @@
+
+<dom-module id="es-sp-month">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid id="gridPanel" class="flex" editable="true" data-provider="{{resultList}}"	 >
+			<cc-grid-toolbar>
+        		<sc-button text="조회" on-click="onSearch"></sc-button>
+        		<sc-button text="데이터확인" on-click="onDataConfirm"></sc-button>
+        	</cc-grid-toolbar> 				 
+            <sc-grid-columns>
+				 <sc-month-column header-text="기본"  data-field="date_1"   width="150" editable="true" ></sc-month-column>
+                 <sc-month-column header-text="displayForamt(yyyy-MM)" data-field="date_2"   display-format="yyyy-MM" width="150" editable="true"></sc-month-column>	
+                 <sc-month-column header-text="mask-display(yyyy/MM)" data-field="date_3"   display-format="yyyy/MM" use-displayformat-inputmask="true"  width="150" editable="true"></sc-month-column>
+                 <sc-month-column header-text="valueForamt(yyyy-MM)"  data-field="date_4"   value-format="yyyy/MM"    width="150" editable="true"></sc-month-column>	
+                 <sc-month-column header-text="maxDate(201805)" data-field="date_5"  width="150" editable="true" editor-max-date="{{maxDate}}"    display-format="yyyy-MM"></sc-month-column>	
+                 <sc-month-column header-text="minDate(198506)" data-field="date_6"  width="150" editable="true" editor-min-date="{{minDate}}"    display-format="yyyy-MM"></sc-month-column>	
+             </sc-grid-columns>
+        </sc-grid>
+        
+        <sc-dialog id="dialog" title="데이터 확인" title-align="left" style="width:600px;height:300px" modal="true">
+			<sc-textarea-field id="paramViewer" class="fit" readonly></sc-textarea-field>
+		</sc-dialog>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-sp-month',
+            
+            properties : {
+                resultList: {
+                    type: Array
+                },
+                maxDate:{
+                	type: Object,
+                	value: new Date(2018,4)
+                },
+                minDate:{
+                	type: Object,
+                	value: new Date(1985,5)
+                }
+            },
+            onSearch : function(){
+            	this.fire('search');
+            },
+            initialized: function(){
+            	this.onSearch();
+            },
+            //데이터 확인 버튼 클릭
+            onDataConfirm : function() {
+    			var me = this;
+    			
+    			var provider = me.$.gridPanel.getDataProvider();
+    			var param =  provider.getItems();
+    			
+    			me.$.dialog.show();
+    			me.$.paramViewer.value = JSON.stringify(param, null, "\t");
+            },
+            //Dialog 닫기
+    		onCloseDialog : function() {
+    			var me = this;
+    			
+    			me.$.dialog.close();
+    			me.$.paramViewer.value = "";
+    		}
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

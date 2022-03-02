@@ -1,0 +1,41 @@
+<!-- 9.1 Version  -->
+
+<script>
+DevBaseBehavior = {
+	
+	properties: {
+        linkTarget: {
+          type: String,
+          value: "es-dev-item"
+        },
+        dirPath: {
+			type: String,
+			value: "example"
+		}
+    },
+    
+	/**
+	 * 해당 example 폴더 이하를 동적 로딩
+	 */
+	_dynamicLoad: function() {
+		var me = this;
+		var hrefs = [];
+		
+		var items = this.querySelectorAll(this.linkTarget);
+
+		for(var i=0, len=items.length; i<len ; i++) {
+			if(items[i].target) {
+				this.importLink(me.resolveUrl(this.dirPath + '/' + items[i].target + '.html')); 
+			}
+		}
+	},
+	
+	/**
+	 * Attached 시점에 호출
+	 */	
+	attached: function() {
+		this._dynamicLoad();
+	}
+	
+};
+</script>

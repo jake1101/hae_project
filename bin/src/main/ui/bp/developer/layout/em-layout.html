@@ -1,0 +1,36 @@
+<link rel="import" href="../common/behavior/dev-base-behavior.html">
+<link rel="import" href="es-layout-layout.html">
+<link rel="import" href="es-layout-item.html">
+
+<dom-module id="em-layout">
+    <style>
+		:host {
+			@apply(--vbox-layout);
+		}
+
+        .page {
+        	overflow: auto;
+        	width: 100%;
+        }
+    </style>
+
+	<template>
+		<div class="page">
+	       	<es-dev-item-group title="날짜 Elements">
+	       		<es-layout-item target="sc-date-field-ex-1" title="날짜(년월일)" docs="sc-date-field"></es-layout-item>
+	       		<es-layout-item target="sc-date-field-ex-2" title="날짜(년월일) 포맷 변경" docs="sc-date-field"></es-layout-item>
+	       		<es-layout-item target="cc-year-combo-ex-1" title="년도"></es-layout-item>
+	       		<es-layout-item target="sc-date-field-ex-4" title="년도 + 월" docs="sc-date-field"></es-layout-item>
+	       		<es-layout-item target="cc-date-hms-field-ex-1" title="날짜 + 시:분"></es-layout-item>
+	       		<es-layout-item target="sc-period-date-field-ex-1" title="날짜(년월일) 기간"></es-layout-item>
+	       	</es-dev-item-group>
+       	</div>
+	</template>
+
+	<script>
+		Polymer({
+			is: "em-layout",
+			behaviors: [DevBaseBehavior]
+		});
+	</script>
+</dom-module>

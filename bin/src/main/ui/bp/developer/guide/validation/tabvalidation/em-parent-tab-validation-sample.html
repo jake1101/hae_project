@@ -1,0 +1,90 @@
+<sc-link rel="import" href="es-sub-tab1-validation-sample.html"></sc-link>
+<sc-link rel="import" href="es-sub-tab2-validation-sample.html"></sc-link>
+<sc-link rel="import" href="es-sub-tab3-validation-sample.html"></sc-link>
+<sc-link rel="import" href="es-sub-tab4-validation-sample.html"></sc-link>
+
+<dom-module id="em-parent-tab-validation-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<cc-page-title-bar>
+			<sc-button text="저장" on-click="onSaveBtnClick"></sc-button>
+			<sc-button text="상신"></sc-button>
+		</cc-page-title-bar>
+		<sc-tab-navigation id="tabNavi" class="flex" selected="0">
+			<es-sub-tab1-validation-sample id="sub1" title-text="서브탭1"></es-sub-tab1-validation-sample>
+			<template>
+				<es-sub-tab2-validation-sample id="sub2" title-text="서브탭2"></es-sub-tab2-validation-sample>
+			</template>
+			<template>
+				<es-sub-tab3-validation-sample id="sub3" title-text="서브탭3"></es-sub-tab3-validation-sample>
+			</template>
+			<template>
+				<es-sub-tab4-validation-sample id="sub4" title-text="서브탭4"></es-sub-tab4-validation-sample>
+			</template>
+		</sc-tab-navigation>
+	</template>
+
+	<script>
+        Polymer({
+            is: 'em-parent-tab-validation-sample',
+
+            behaviors: [
+                Polymer.CCTabValidateBehavior
+            ],
+
+            properties: {
+                isNew: {
+                    type: Boolean,
+                    value: false
+                },
+                param: {
+                    type: Object,
+                    value: function () {
+                        return {};
+                    }
+                }
+            },
+
+            initialized: function () {
+            },
+
+            onSaveBtnClick: function () {
+                var me = this;
+                var targetTabs = me.getTargetValidateTabs();
+                me.totalTabCnt = targetTabs.length;
+                me.validateTabNavigation(me.$.tabNavi, targetTabs, me.param, me.validParam, function (isValid, resultObjs) {
+                    if(isValid) {
+                        //성공
+                    } else {
+                        //실패 (필요에 따라 가공)
+                        var message = "";
+
+                        for(var i=0, len=resultObjs.length; i<len; i++) {
+                            var obj = resultObjs[i];
+                            if(UT.isString(obj.result)) { //Tab Valid
+                                message += obj.result + "\n";
+                            }
+                        }
+
+                        //
+                        UT.alert(message, null, true);
+                    }
+                });
+            },
+
+            getTargetValidateTabs: function () {
+                var me = this;
+                if(me.isNew) {
+                    return [me.$.sub1];
+                } else {
+                    return [me.$.sub1, me.$.sub2, me.$.sub3, me.$.sub4];
+                }
+            }
+        });
+	</script>
+</dom-module>

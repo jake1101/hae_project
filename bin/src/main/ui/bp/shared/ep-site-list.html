@@ -1,0 +1,86 @@
+<dom-module id="ep-site-list">
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+		
+		.siteDiv {
+			align:center; height:50px; width : 300px; text-align: center;  margin :5px auto; color:white;
+			background-color:lightblue; font-size:25px; padding-top:15px; cursor: pointer; border-radius: 6px 6px 6px 6px;
+		}
+	</style>
+	
+	<template>
+		<!-- -- 조회조건 Site 콤보 데이터 조회 -->
+		<sc-ajax id="findListSiteCombo" 
+			url="findListSiteCombo.do"
+			on-response="completeFindListSite"> 
+		</sc-ajax>
+			
+		<div id="siteContainer" class="flex vbox">
+		</div>	
+	</template>
+	
+	
+	<script>
+	Polymer({
+		is : "ep-site-list",
+		
+		properties : {
+			siteList: {
+				type : Object,
+				value : function(){
+					return [];
+				}
+			},
+			
+			info : {
+				type : Object,
+				value : function(){
+					return {};
+				}
+			}
+		},
+		
+		load:function(){
+			var me = this;
+			
+			UT.request(me.$.findListSiteCombo);
+		},
+		
+		completeFindListSite: function(e, res){
+			var me = this;
+			
+			var data = res.response || [];
+			
+			var siteContainer = me.$.siteContainer;
+			
+			for(var i=0; i < data.length; i ++){
+				var siteId=data[i].data
+				var siteName=data[i].label
+				
+				var obj = document.createElement('div');
+				obj.innerHTML = siteName;
+				obj.setAttribute("class", "siteDiv");
+				obj.setAttribute("data-value",siteId);
+				obj.setAttribute("name",siteName);
+				me.listen(obj, "tap", "onClickSite");
+				Polymer.dom(siteContainer).appendChild(obj);
+			}
+		},
+		
+		onClickSite: function(e){
+        	var me = this;
+        	var target = e.target;
+			var site_id = target.getAttribute("data-value");
+			var site_name = target.getAttribute("name");
+			var data = {
+				site_id : Number(site_id),
+				site_name : site_name
+			};
+            me.fire("show-site-list", data);
+        }
+		
+	})
+	</script>
+</dom-module>

@@ -1,0 +1,38 @@
+<dom-module id="ep-three-list">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: ep-three-list
+        ** @Description		: 3d 영역 목록 팝업
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.06.23
+        ** @History 		: 2020.06.23 jhkim 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+	</style>
+	<template>
+		<template is="dom-repeat" items="{{items}}">
+			<div class="siteName sc-mdi" on-click="onItemClick" data="{{item}}">{{item.name}}</div>
+		</template>
+	</template>
+	<script>
+		Polymer({
+			is : "ep-three-list",
+			properties : {
+				
+			},
+			load:function(threeList){
+ 				var me = this;
+ 				me.set('items' ,threeList.splice(0));
+			},
+			onItemClick : function(event) {
+				var me = this,
+				item = event.target.data;
+				me.fire("close", item);
+            }
+		})
+	</script>
+</dom-module>

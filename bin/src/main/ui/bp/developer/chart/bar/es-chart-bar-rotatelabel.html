@@ -1,0 +1,101 @@
+<dom-module id="es-chart-bar-rotatelabel">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-bar-rotatelabel',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer, {
+			    "type": "bar",
+				"palettes":[{
+					"name": "color1",
+			        "alpha": 1.0,
+					"fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+						'#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+				}],
+				"styles": {
+					//"fill": "#10ffff00",
+					//"border": "#888800"
+				},
+			    "title": {
+			        "text": "World's largest cities per 2014",
+			        "styles" : {
+					},
+			    },
+				"subtitle": {
+					"visible": true,
+					"anchor": "title",
+					"anchorAlign": "bottom",
+					"text": "Source: Wikipedia",
+					"styles": {
+					}
+				},
+				"titlePane": {
+					"styles": {
+						"padding": 4
+					}
+				},
+			    "xAxes": {
+			        "title": "",
+			        "tick": {
+			            "styles": {
+			                "fontSize": 13,
+			                "textRotation": -70,
+			                "paddingTop": 0,
+			                "paddingBottom": 0
+			            }
+			        }
+			    },
+			    "yAxes": {
+			        "title": "Rainfall (mm)"
+			    },
+			    "series": [{
+			        "name": "Tokyo",
+					"itemWidth": 0.5,
+			        "items": [
+			            ['Shanghai', 23.7],
+			            ['Lagos', 16.1],
+			            ['Istanbul', 14.2],
+			            ['Karachi', 14.0],
+			            ['Mumbai', 12.5],
+			            ['Moscow', 12.1],
+			            ['São Paulo', 11.8],
+			        ],
+			        "styles": {
+			            "fill": "p(color1:0)",
+						"border":"",
+						"hovered": {
+							fillBrightness: 1.5
+						}
+			       	},
+					"animations": [{
+					}],
+					"itemAnimations": [{
+						"property": "value"
+					}]
+				}],
+			    "legend": false
+			} );
+			me.chartMain = me.chartContainer.chartView();
+		}
+	})
+	</script>
+</dom-module>

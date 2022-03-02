@@ -1,0 +1,39 @@
+<sc-link rel="import" href="es-grid-event-sample.html"></sc-link>
+<sc-link rel="import" href="es-grid-event-description.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-grid-event-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="hbox flex" title-text="그리드 event">
+            <es-grid-event-description class="fit flex"></es-grid-event-description>
+            <es-grid-event-sample id="sample" class="box flex"></es-grid-event-sample>
+        </sc-panel>
+        <es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-grid-event-guide',
+		properties : {
+			srcList : {
+                type : Array,
+                value : function() {
+                    return [{
+                        title        : "es-grid-event-sample.html",
+                        i18nDisabled : true,
+                        extension    : "html",
+                        url          : "/ui/bp/developer/guide/grid/es-grid-event-sample.html"
+                    }]
+                }
+            }
+		},
+		initialized : function() {
+			
+		}
+	});
+	</script>
+</dom-module>

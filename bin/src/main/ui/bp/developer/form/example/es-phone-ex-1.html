@@ -1,0 +1,52 @@
+<!-- 
+
+##전화번호 입력 필드
+
+- 해외 사용자를 고려한 전화번호 입력 폼입니다. 일반 sc-text-field에 mask-re 속성과 maxlength 속성을 주었습니다. 
+
+##Validation
+
+- mask-re : 0-9까지의 숫자, '-', '+'의 숫자를 입력 가능하도록 설정
+- maxlength : 최대 60자 까지 입력 가능(DB ESAUSER.phone_no 기준)   
+
+ -->
+
+<dom-module id="es-phone-ex-1">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+    <template>
+        <table class="tb-form">
+            <tr>
+                <td>
+                    <sc-text-field class="w-200" value="{{baseInfo.phone}}" max-length="60" mask-re="/[0-9\-+]/"></sc-text-field>
+                </td>
+            </tr>
+        </table>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-phone-ex-1',
+            properties:{
+            	baseInfo: {
+            		type: Object,
+            		value: function() {
+            			return {};
+            		}
+            	}
+            },
+            
+            setValue: function() {
+            	var me = this;
+            	
+            	me.set("baseInfo.phone", "010-1234-1235");
+
+            }
+		});
+	</script>
+
+</dom-module>

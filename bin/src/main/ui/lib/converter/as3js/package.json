@@ -1,0 +1,82 @@
+{
+  "_args": [
+    [
+      "as3js",
+      "D:\\polymer\\workspace\\smartx9-webapp\\src\\main\\ui\\lib"
+    ]
+  ],
+  "_from": "as3js@*",
+  "_id": "as3js@0.3.0",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/as3js",
+  "_nodeVersion": "4.1.0",
+  "_npmUser": {
+    "email": "cleod9@gmail.com",
+    "name": "cleod9"
+  },
+  "_npmVersion": "3.3.9",
+  "_phantomChildren": {},
+  "_requested": {
+    "name": "as3js",
+    "raw": "as3js",
+    "rawSpec": "",
+    "scope": null,
+    "spec": "*",
+    "type": "range"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/as3js/-/as3js-0.3.0.tgz",
+  "_shasum": "94cb5b9f594c85f7b164ae735be81590c1024259",
+  "_shrinkwrap": null,
+  "_spec": "as3js",
+  "_where": "D:\\polymer\\workspace\\smartx9-webapp\\src\\main\\ui\\lib",
+  "author": {
+    "email": "cleod9@gmail.com",
+    "name": "Greg McLeod"
+  },
+  "bin": {
+    "as3js": "./bin/as3jsc.js"
+  },
+  "bugs": {
+    "url": "https://github.com/cleod9/as3js/issues"
+  },
+  "dependencies": {},
+  "description": "AS3 to JS converter.",
+  "devDependencies": {
+    "js-beautify": "1.5.10"
+  },
+  "directories": {},
+  "dist": {
+    "shasum": "94cb5b9f594c85f7b164ae735be81590c1024259",
+    "tarball": "https://registry.npmjs.org/as3js/-/as3js-0.3.0.tgz"
+  },
+  "gitHead": "a0bb828c4bc3bb88a72e1d12566d17b78c4ef1db",
+  "homepage": "https://github.com/cleod9/as3js#readme",
+  "keywords": [
+    "as3",
+    "converter",
+    "import",
+    "js",
+    "oop"
+  ],
+  "license": "MIT",
+  "main": "./index.js",
+  "maintainers": [
+    {
+      "name": "cleod9",
+      "email": "cleod9@gmail.com"
+    }
+  ],
+  "name": "as3js",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cleod9/as3js.git"
+  },
+  "scripts": {},
+  "version": "0.3.0"
+}

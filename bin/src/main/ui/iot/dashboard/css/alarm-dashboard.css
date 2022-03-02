@@ -1,0 +1,112 @@
+@import url("dashboard.css");
+
+@charset "utf-8";
+
+/* BACKGROUND */
+.alarm-back-ground-color {background: #14203C; color: white;}
+.alarm-sub-back-ground-color {background: #182747; margin:33px 33px 33px 33px; border-radius: 13px;}
+
+/* AREA */
+.alarm-top-area {min-height:79px; border: 1px solid #2C4670; overflow: hidden !important; border-radius: 13px 13px 0px 0px;}
+.alarm-top-left-area {align-self: center; padding-left: 30px; padding-right: 29px;}
+.alarm-top-site-text {font-size: 27px; font-weight: 900;}
+.alarm-top-time-text {font-size: 18px; font-weight: 500; justify-content: flex-end;}
+.alarm-top-right-area {align-self: center; padding-left: 29px; padding-right: 30px;}
+
+.alarm-middle-area{border-right: 1px solid #2C4670; border-left: 1px solid #2C4670;}
+.alarm-middle-left-area{min-width:637px; background: #1E3155; border-radius: 10px;}
+.alarm-middle-right-area{min-width:809px; background: #1E3155; text-align:center; border: 1px solid #2C4670;}
+.alarm-table-selected{background:#E7574F}
+.alarm-grey{color:#5C6A84}
+
+.alarm-bottom-area{min-height:58px; border-top: 3px solid #5EA0EF; border-right: 1px solid #2C4670; border-bottom: 1px solid #2C4670; border-left: 1px solid #2C4670; border-radius: 0px 0px 13px 13px;}
+.alarm-bottom-left-area{min-width:119px; padding-left: 18px;}
+.alarm-bottom-right-area{min-width:119px; text-align: center; cursor:pointer;}
+
+/* SUB TITLE */
+.alarm-sub-title {font-size: 22px; font-weight: 700; display: table-cell; vertical-align: bottom; padding-bottom: 10px;}
+
+/* ICON */
+.alarm-message-icon{background: url(../icon/main/message.png) no-repeat; background-position: center;}
+.alarm-arrow-up{background: url(../icon/main/arrow-up.png) no-repeat; cursor: pointer;}
+.alarm-arrow-down{background: url(../icon/main/arrow-down.png) no-repeat; cursor: pointer;}
+
+.alarm-black-select-icon{min-width: 32px; height: 33px; background: url(../icon/black-select.png) no-repeat; background-position: center;}
+.alarm-white-select-icon{min-width: 32px; height: 33px; background: url(../icon/white-no-select.png) no-repeat; background-position: center;}
+
+.alarm-action-icon{min-width: 32px; background: url(../icon/alarm/action.png) no-repeat; background-position: center;}
+.alarm-noaction-icon{min-width: 32px; background: url(../icon/alarm/noaction.png) no-repeat; background-position: center;}
+
+.alarm-msg-line{border-right: 1px solid #2C4770;}
+
+/* Message ticker */
+.none{display:none}
+#_alarmTicker{float:left;width:100%;}
+.alarm-ticker-area {overflow: hidden;}
+.alarm-ticker-area ul,
+.alarm-ticker-area li {margin:0; padding:0; list-style:none; display:block; height:58px; line-height:58px; text-decoration:none;}
+
+em-alarm-dashboard #gridAlarmPanel{
+	background: #182747;
+}
+
+em-alarm-dashboard cc-grid-toolbar .wrap_result {
+    margin-top: 5px !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+}
+
+em-alarm-dashboard cc-grid-toolbar {
+	margin-top: 20px;
+	height: 35px;
+}
+
+em-alarm-dashboard #columnList {
+	background: url(../icon/alarm/column_list.png) no-repeat !important;
+	border: none !important;
+	width: 38px !important;
+	height: 38px !important;
+	margin-right: 4px;
+}
+em-alarm-dashboard #columnList:hover {
+	background: url(../icon/alarm/column_list_hover.png) no-repeat !important;
+}
+em-alarm-dashboard .excel-download {
+	background: url(../icon/alarm/excel.png) no-repeat !important;
+	border: none !important;
+	width: 38px !important;
+	height: 38px !important;
+	margin-right: 4px;
+}
+em-alarm-dashboard .excel-download:hover{
+	background: url(../icon/alarm/excel_hover.png) no-repeat !important;
+}
+em-alarm-dashboard .personalized-save {
+	background: url(../icon/alarm/personalized_save.png) no-repeat !important;
+	border: none !important;
+	width: 38px !important;
+	height: 38px !important;
+	margin-right: 4px;
+}
+em-alarm-dashboard .personalized-save:hover{
+	background: url(../icon/alarm/personalized_save_hover.png) no-repeat !important;
+}
+em-alarm-dashboard .personalized-init {
+	background: url(../icon/alarm/personalized_init.png) no-repeat !important;
+	border: none !important;
+	width: 38px !important;
+	height: 38px !important;
+	margin-right: 10px;
+}
+em-alarm-dashboard .personalized-init:hover {
+	background: url(../icon/alarm/personalized_init_hover.png) no-repeat !important;
+}
+
+em-alarm-dashboard .grid-container {
+	border: 0px solid #314E7B;
+	-ms-overflow-style: none !important; /* IE에서 스크롤바 감춤 */
+}
+
+em-alarm-dashboard .grid-container >div> canvas {
+	background: #182747 !important;
+}

@@ -1,0 +1,66 @@
+<!--
+	sc-button-column은 셀에 이미지를 이용하여 버튼처럼 동작하게 한 컬럼이다. 아래 속성들을 이용하여 버튼 상태에 맞게 이미지를 지정 할 수 있다.
+	버튼은 disabled 상태를 가질 수 있는데 enabledFunction과 enabled 속성을 이용하여 활성화 여부를 결정 할 수 있다
+	기존 셀과 다르게 버튼을 클릭하면 button-click 이벤트를 발생 시킨다. 
+ -->
+
+
+<dom-module id="es-sp-button">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" editable="true" row-height="40" on-button-click="buttonClick">
+        	<cc-grid-toolbar>
+        		<sc-button text="조회" on-click="onSearch"></sc-button>
+        	</cc-grid-toolbar>
+        	
+			<sc-grid-columns>
+			    <sc-data-column data-field="column_1"   header-text="colunm_1" width="150" text-align="left"   editable="true" ></sc-data-column>
+			    <sc-button-column data-field="button_1" header-text="button_1" width="150" text="button_1" text-align="left"  image="bower_components/sc-grid/resources/img/btn_normal.png"  enabled="true" ></sc-button-column>
+			    <sc-button-column data-field="button_2" header-text="button_2" width="150" text="button_2" text-align="left"  image="bower_components/sc-grid/resources/img/btn_normal.png" disabled-image="bower_components/sc-grid/resources/img/btn_disabled.png" enabled-function="enabledFunction" ></sc-button-column>
+			    <sc-button-column data-field="button_3" header-text="button_3" width="150"  text-align="left"  image="bower_components/sc-grid/resources/img/btn_normal.png" hovered-image="bower_components/sc-grid/resources/img/btn_hover.png"  enabled="true" image-display="height"></sc-button-column>
+			    <sc-button-column data-field="button_4" header-text="button_4" width="150" text="button_4" text-align="center"  image="bower_components/sc-grid/resources/img/btn_normal.png" disabled-image="bower_components/sc-grid/resources/img/btn_disabled.png" enabled="false" image-display="auto"></sc-button-column>
+			    
+			</sc-grid-columns>
+        </sc-grid>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-sp-button',
+            
+            properties : {
+                resultList: {
+                    type:Array
+                },
+            },
+            onSearch : function(){
+            	this.fire('search');
+            },
+
+            buttonClick: function(e){
+            	var dataField = e.detail.item.dataField;
+            	
+				alert(dataField +" click");
+            },
+            
+            enabledFunction: function(data, item){
+            	if(data["column_1"] === "B"){
+            		return false;
+            	}
+            	return true;
+            }
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

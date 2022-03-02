@@ -1,0 +1,622 @@
+<!--
+	전체 예제
+ -->
+<dom-module id="map-test-module">
+	<style>
+        :host {
+            @apply(--hbox-layout);
+        }
+        
+		.mapContent {
+			display : inline-block;
+			width : calc(100% - 310px);
+			height : 100%;
+			float : left;
+		}
+
+		.upper {
+			width : 100%;
+			height : calc(100% - 200px);
+		}
+
+		.lower {
+			width : 100%;
+			height : 199px;
+		}
+
+		.header {
+			background-color:#efefef;
+			font-weight:bold;
+			height : 22px;
+		}
+
+		.wrapper {
+			display : inline-block;
+			width : 100%;
+			border : 1px solid silver;
+			margin-bottom : 2px;
+		}
+
+		.interactContent {
+			display : inline-block;
+			width : 300px;
+			height : 100%;
+			float : left;
+			padding-left : 2px;
+			padding-right: 2px;
+			overflow : auto;
+		}
+
+		.repeatItem {
+			border-bottom : 1px solid silver;
+		}
+	</style>
+
+	<template>
+		<!-- 
+			맵과 콘솔
+		 -->
+		<div class="hbox flex-7">
+			<div class="vbox flex">
+				<div class="flex-7">
+					<sc-map id="map1" type="{{mapType}}" key="{{key}}" longitude="129.577" latitude="38" 
+							zoom-level="6" search-result="{{searchResult}}"
+							on-click-map="onClickMap" on-dblclick-map="onDblClickMap" on-ready="onReadyMap" 
+							on-zoom-end="onZoomEnd" on-move-end="onMoveEnd">
+						<sc-map-contextmenu>
+							<sc-map-contextmenu-item text="마킹" icon="marker" on-click-item="onClickMakeMarker"></sc-map-contextmenu-item>
+							<sc-map-contextmenu-item text="이동" icon="move" on-click-item="onClickMove"></sc-map-contextmenu-item>
+							<sc-map-contextmenu-item text="줌 인" icon="zoomin" on-click="onClickZoomIn"></sc-map-contextmenu-item>
+							<sc-map-contextmenu-item text="줌 아웃" icon="zoomout" on-click="onClickZoomOut"></sc-map-contextmenu-item>
+						</sc-map-contextmenu>
+
+						<!-- 사용자 입력 -->
+						<sc-map-marker-group id="customGroup" on-click-marker="onClickMarker" on-dblclick-marker="onDblClickMarker"
+							on-enter-marker="onEnterMarker" on-leave-marker="onLeaveMarker">
+							<sc-map-contextmenu>
+								<sc-map-contextmenu-item text="마커 삭제" on-click-item="onClickDeleteMarker"></sc-map-contextmenu-item>
+							</sc-map-contextmenu>
+							
+							<sc-map-info-popup>
+								<template>
+									<div item-info="{{item}}">
+										<div>자연 재해로 변경</div>
+										<div>
+											<span>타입</span>
+											<select id="changeTypeItem">
+												<option value="earthquakes">지진</option>
+												<option value="tornado">태풍</option>
+												<option value="volcano">화산</option>
+												<option value="floods">홍수</option>
+											</select>
+										</div>
+										<div>
+											<span>이름</span>
+											<input id="changeTypeName">
+										</div>
+										<div>
+											<span>영향범위</span>
+											<input id="changeTypeEffect"> km
+										</div>
+										<button style="float:right" on-click="onClickChangeMarkerType">변경</button>
+									</div>
+								</template>
+							</sc-map-info-popup>							
+						</sc-map-marker-group>
+
+						<!-- 건물 관련 그룹 -->
+						<sc-map-marker-group id="buildingGroup" on-click-marker="onClickMarker" on-dblclick-marker="onDblClickMarker"
+							on-enter-marker="onEnterMarker" on-leave-marker="onLeaveMarker">
+							<sc-map-contextmenu>
+								<sc-map-contextmenu-item text="건물 삭제" on-click-item="onClickDeleteMarker"></sc-map-contextmenu-item>
+							</sc-map-contextmenu>
+
+							<sc-map-info-popup>
+								<template>
+									<div>
+										<div>이름 : {{item.detailInfo.name}}</div>
+										<div>수입 : {{item.detailInfo.income}}</div>
+									</div>
+								</template>
+							</sc-map-info-popup>
+						</sc-map-marker-group>
+
+						<!-- 자연 관련 그룹 -->
+						<sc-map-marker-group id="weatherGroup" on-click-marker="onClickMarker" on-dblclick-marker="onDblClickMarker"
+							on-enter-marker="onEnterMarker" on-leave-marker="onLeaveMarker">
+							<sc-map-contextmenu>
+								<sc-map-contextmenu-item text="환경 삭제" on-click-item="onClickDeleteMarker"></sc-map-contextmenu-item>
+							</sc-map-contextmenu>
+
+							<sc-map-info-popup>
+								<template>
+									<div>
+										<div>환경 : {{item.detailInfo.name}}</div>
+									</div>
+								</template>
+							</sc-map-info-popup>
+						</sc-map-marker-group>
+
+						<!-- 자연 재해 관련 그룹 -->
+						<sc-map-marker-group id="naturaldisasterGroup" on-click-marker="onClickMarker" on-dblclick-marker="onDblClickMarker"
+							on-enter-marker="onEnterMarker" on-leave-marker="onLeaveMarker">
+							<sc-map-contextmenu>
+								<sc-map-contextmenu-item text="범위 확인" on-click-item="onClickShowArea"></sc-map-contextmenu-item>
+								<sc-map-contextmenu-item text="재해 삭제" on-click-item="onClickDeleteMarker"></sc-map-contextmenu-item>
+							</sc-map-contextmenu>
+
+							<sc-map-info-popup>
+								<template>
+									<div item-info="{{item}}">
+										<img src="{{item.iconUrl}}">
+										<div>이름 : {{item.detailInfo.name}}</div>
+										<div>영향범위 : 반경 {{item.detailInfo.radius}}km</div>
+										<button on-click="onClickSearch">범위내 검색</button><br/>
+										<input id="showOnlyResult" type="checkbox" on-change="onChangeShowOnly">검색 결과만 표시
+										<input id="showArea" type="checkbox" on-change="onChangeShowArea">영역표시
+									</div>
+								</template>
+							</sc-map-info-popup>
+						</sc-map-marker-group>
+					</sc-map>
+				</div>
+
+				<sc-panel class="flex-3" title-text="발생한 이벤트">
+					<div id="console" style="height:100%;overflow:auto;"></div>
+				</sc-panel>
+			</div>
+		</div>
+
+		<!--
+			제어 부
+		 -->
+		<div class="vbox flex-3">
+			<!-- 지도 종류 -->
+			<sc-panel class="flex-1" title-text="지도 종류">
+				<span>맵 종류</span>
+				<select id="mapType" on-change="onChangeMapType">
+					<option>Google</option>
+					<option>Bing</option>
+					<option>OSM</option>
+				</select>
+			</sc-panel>
+
+			<!-- 마커 정보 -->
+			<sc-panel class="flex-1" title-text="마커 정보">
+				<div id="detailMarkerInfo" hidden="{{!isMarker}}"></div>
+				<div hidden="{{isMarker}}">마커가 선택되지 않았습니다.</div>
+			</sc-panel>
+
+			<!-- 검색 -->
+			<sc-panel class="flex-1" title-text="검색">
+				<div hidden="{{!isMarker}}">
+					<div>
+						<span>반경</span>
+						<input id="globalSearchArea"> km
+						<button on-click="onClickGlobalSearch">적용</button><br/>
+						<input id="globalShowOnlyResult" type="checkbox" on-change="onChangeShowOnly">검색 결과만 표시
+					</div>
+					<div>
+						<sc-map-search id="searchResultList" search-result="{{searchResult}}">
+							<template>
+								<div class="repeatItem" item-info="{{item}}" on-click="onClickResultItem">
+									<img src="{{item.iconUrl}}">
+									<div>
+										<div>이름 : {{item.detailInfo.name}}</div>
+										<div>마커 타입 : {{item.markerType}}</div>
+									</div>
+								</div>
+							</template>
+						</sc-map-search>
+					</div>
+				</div>
+				<div hidden="{{isMarker}}">마커가 선택되지 않았습니다.</div>
+			</sc-panel>
+			
+			<!-- 위치 정보 -->
+			<sc-panel class="flex-1" title-text="위치 정보">
+				<div>
+					<table>
+						<tr>
+							<td><span>위도</span></td>
+							<td><input id="longitudeInput"></td>
+						</tr>
+						<tr>
+							<td><span>경도</span></td>
+							<td><input id="latitudeInput"></td>
+						</tr>
+					</table>
+					<button on-click="onClickMoveTo">이동</button>
+				</div>
+			</sc-panel>
+
+			<!-- 재해 정보 -->
+			<sc-panel class="flex-1" title-text="재해 그룹">
+				<input target-type="earthquakes" type="checkbox" checked on-change="onChangeNaturalDisasterValue">지진<br/>
+				<input target-type="tornado" type="checkbox" checked on-change="onChangeNaturalDisasterValue">태풍<br/>
+				<input target-type="volcano" type="checkbox" checked on-change="onChangeNaturalDisasterValue">화산<br/>
+				<input target-type="floods" type="checkbox" checked on-change="onChangeNaturalDisasterValue">홍수<br/>
+			</sc-panel>
+
+			<!-- 마커 정보 -->
+			<sc-panel class="flex-1" title-text="마커 그룹">
+				<input id="bu" type="checkbox" checked on-change="onChangeBuilding">건물<br/>
+				<input id="we" type="checkbox" checked on-change="onChangeWeather">기후<br/>
+				<input id="cu" type="checkbox" checked on-change="onChangeCustomMarker">사용자 추가<br/>
+			</sc-panel>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'map-test-module',
+
+			properties : {
+				/**
+				 * 검색 결과
+				 */
+				searchResult : {
+					type : Object,
+					value : function() {
+						return [];
+					},
+					notify : true
+				},
+				/**
+				 * 맵 타입
+				 */
+				mapType : {
+					type : String,
+					value : function() { return 'Google' }
+				},
+
+				/**
+				 * 맵 인증 키
+				 */
+				key : {
+					type : String
+				},
+				/**
+				 * 로그 정보
+				 */
+				logInfo : {
+					type : Object,
+					value : function() {
+						return { maxLog : 100, logNum : 0 };
+					}
+				},
+				/**
+				 * 현재 선택된 마커
+				 */
+				currentMarker : {
+					type : Object
+				},
+				/**
+				 * 마커 클릭 여부
+				 */
+				isMarker : {
+					type : Object,
+					value : function() { return false; }
+				},
+
+				/**
+				 * 현재 선택된 타겟 엘리먼트
+				 */
+				selectedTarget : {
+					type : Object
+				}
+			},
+
+			// ==================
+			// 맵 관련
+			// ==================
+			// 맵 타입 변경시
+			onChangeMapType : function() {
+				var me = this;
+				if(me.mapType === 'Bing') {
+					me.key = 'AvMLyzDo_XP_EgzxCZ-zpKZTVYgoky5Hq0j08QqXgBCwZgmi8zynuswd8jOx8kHr';
+				}
+				me.mapType = me.$.mapType.value;
+			},
+			// 맵 준비 완료 - 데이터를 넣음
+			onReadyMap : function(event, data) {
+				var me = this;
+				me.addLog('ready-map');
+
+				// 자연재해 정보 입력
+				me.$.naturaldisasterGroup.addMarkers(earthQuakeData);
+				me.$.naturaldisasterGroup.addMarkers(volcanoData);
+				me.$.naturaldisasterGroup.addMarkers(tornadoData);
+				me.$.naturaldisasterGroup.addMarkers(floodData);
+
+				// 날씨 정보 입력
+				me.$.weatherGroup.addMarkers(weatherData);
+
+				// 건물 정보 입력
+				me.$.buildingGroup.addMarkers(factoryData);
+			},
+
+
+			// ===================
+			// 컨택스트 메뉴
+			// ===================
+			// 마커 추가
+			onClickMakeMarker : function(event, data) {
+				var me = this;
+				me.$.map1.removeAllPopup();
+				me.$.customGroup.addMarker(data.location);
+			},
+			// 마커 삭제
+			onClickDeleteMarker : function(event, data) {
+				var me = this;
+				data.element.deleteMarker();
+			},
+			// 줌 인
+			onClickZoomIn : function() {
+				var me = this;
+				me.$.map1.zoomIn();
+			},
+			// 줌 아웃
+			onClickZoomOut : function() {
+				var me = this;
+				me.$.map1.zoomOut();
+			},
+			// 이동
+			onClickMove : function(event, data) {
+				var me = this;
+				me.$.map1.moveTo(data.location[0], data.location[1], true);
+			},
+			// 영역을 보여줌
+			onClickShowArea : function(event, data) {
+				var me = this;
+				me.currentMarker = data.element;
+				me.currentMarker.showCircleEffect();
+			},
+
+			// =================
+			// 클릭 관련
+			// =================
+			// 맵 클릭시
+			onClickMap : function(event, data) {
+				var me = this;
+				me.addLog('click-map');
+				me.$.longitudeInput.value = data.location[0];
+				me.$.latitudeInput.value = data.location[1];
+				me.isMarker = false;
+				me.$.map1.showOnlyResult(false);
+				me.$.map1.removeAllPopup();
+
+				// 기존 클릭한 마커가 있다면 영역을 삭제
+				if(me.currentMarker) {
+					me.currentMarker.hideCircleEffect();
+					me.currentMarker = undefined;
+				}
+			},
+			// 마커 클릭시
+			onClickMarker : function(event, data) {
+				var me = this;
+				me.$.map1.showOnlyResult(false);
+
+				// 기존 클릭한 마커가 있다면 영역을 삭제
+				if(me.currentMarker) {
+					me.currentMarker.hideCircleEffect();
+				}
+
+				me.isMarker = true;
+				me.currentMarker = data.element;
+				me.searchResult = [];
+				me.$.globalShowOnlyResult.checked = false;
+				
+				// 반경 정보가 존재한다면 설정한다.
+				if(me.currentMarker.detailInfo.radius) {
+					me.$.globalSearchArea.value = me.currentMarker.detailInfo.radius;
+				} else {
+					me.$.globalSearchArea.value = '';
+				}
+				
+				me.$.map1.moveTo(me.currentMarker.longitude, me.currentMarker.latitude);
+
+				// 위치
+				me.$.longitudeInput.value = data.location[0];
+				me.$.latitudeInput.value = data.location[1];
+
+				me.addLog('click-marker');
+				
+				// 상세 내용
+				var element = data.element;
+				var info = element.detailInfo;
+				var infoStr = '';
+				for(var index in info) {
+					infoStr += (index + ' : ' + info[index] + '<br/>');
+				}
+				me.$.detailMarkerInfo.innerHTML = infoStr;
+
+				// 팝업 표시
+				me.currentMarker.showInfoPopup(element.longitude, element.latitude, me.currentMarker);
+			},
+			// 맵 더블 클릭
+			onDblClickMap : function(event, data) {
+				var me = this;
+				me.$.map1.removeAllPopup();
+				me.addLog('dblclick-map - lon : ' + data.location[0] + ', lat : ' + data.location[1]);
+			},
+			// 더블 클릭 관련
+			onDblClickMarker : function(event, data) {
+				var me = this;
+				me.$.map1.removeAllPopup();
+				me.addLog('dblclick-marker - lon : ' + data.location[0] + ', lat : ' + data.location[1]);
+			},
+			// 이동 클릭
+			onClickMoveTo : function(event, data) {
+				var me = this;
+				me.$.map1.removeAllPopup();
+				var latitude = parseFloat(me.$.latitudeInput.value);
+				var longitude = parseFloat(me.$.longitudeInput.value);
+				
+				me.$.map1.moveTo(longitude, latitude, true);
+			},
+			// 
+			onClickResultItem : function(event, data) {
+				var me = this;
+				me.$.map1.removeAllPopup();
+				var targetMarkerEl = event.currentTarget.itemInfo;
+
+				me.selectedTarget = targetMarkerEl;
+				me.$.map1.moveTo(targetMarkerEl.longitude, targetMarkerEl.latitude, true);
+			},
+			// 마커 타입 변경
+			onClickChangeMarkerType : function(event) {
+				var me = this;
+				var rootEl = event.currentTarget.parentElement;
+				var marker = rootEl.itemInfo;
+
+				marker.setMarkerInfo({
+					markerClass : 'naturaldisaster',
+					markerType : rootEl.querySelector('select').value,
+					detailInfo : {
+						name : rootEl.querySelector('#changeTypeName').value,
+						radius : parseFloat(rootEl.querySelector('#changeTypeEffect').value)
+					}
+				});
+
+				Polymer.dom(me.$.naturaldisasterGroup).appendChild(marker);
+				me.$.map1.removeAllPopup();
+			},
+
+			// ===============
+			// 이벤트 리스너
+			// ===============
+			onZoomEnd : function(event, data) {
+				var me = this;
+				me.addLog('zoom-end - new : ' + data.newZoomLevel + ', old : ' + data.oldZoomLevel);
+			},
+			// 이동 완료 이벤트 처리
+			onMoveEnd : function(event, data) {
+				var me = this;
+				me.addLog('move-end - lon : ' + data.longitude + ', lat : ' + data.latitude);
+				if(me.selectedTarget) {
+					me.selectedTarget.showInfoPopup(data.longitude, data.latitude, me.selectedTarget);
+					me.selectedTarget = undefined;
+				}
+			},
+			// 마커에 커서가 들어갔을때
+			onEnterMarker : function(event, data) {
+				var me = this;
+				me.addLog('enter-marker');
+			},
+			// 마커에서 커서가 나왔을때
+			onLeaveMarker : function(event, data) {
+				var me = this;
+				me.addLog('leave-marker');
+			},
+
+			// ================
+			// 검색 관련
+			// ================
+			// 검색한 항목만 보여줌
+			onChangeShowOnly : function(event) {
+				var me = this;
+				if(event.currentTarget.checked && me.searchResult.length === 0) {
+					alert('검색된 항목이 존재하지 않습니다.');
+					event.currentTarget.checked = false;
+					return;
+				}
+				me.$.map1.showOnlyResult(event.currentTarget.checked);
+			},
+			
+			// 
+			onClickGlobalSearch : function() {
+				var me = this;
+				var radius = me.$.globalSearchArea.value;
+				me.currentMarker.detailInfo.radius = radius;
+				me.$.map1.removeAllPopup();
+				me.currentMarker.showInfoPopup(me.currentMarker.longitude, me.currentMarker.latitude, me.currentMarker);
+				me.currentMarker.showCircleEffect(radius);
+				me.$.map1.searchCircleArea([me.currentMarker.longitude, me.currentMarker.latitude], radius);
+				//me.$.globalShowArea.checked = true;
+			},
+			
+			// 검색 버튼
+			onClickSearch : function(event) {
+				var me = this;
+				var targetMarkerEl = event.currentTarget.parentElement.itemInfo;
+				var radius = parseFloat(targetMarkerEl.detailInfo.radius);
+				targetMarkerEl.showCircleEffect(radius);
+				me.$.map1.searchCircleArea([targetMarkerEl.longitude, targetMarkerEl.latitude], radius);
+				var showArea = event.currentTarget.parentElement.querySelector('#showArea');
+				showArea.checked = true;
+			},
+
+			// ============
+			// 선택 관련
+			// ============
+			// 지도
+			onChangeDoubleClick : function() {
+				var me = this;
+				me.$.map1.setDoubleClickZoom(!me.$.dblOption.checked);
+			},
+			// 값 변경
+			onChangeNaturalDisasterValue : function(event) {
+				var me = this;
+				var target = event.currentTarget;
+				var targetType = target.getAttribute('target-type');
+				if(target.checked) { 
+					me.$.naturaldisasterGroup.showMatchedMarker(targetType); 
+				} else { 
+					me.$.naturaldisasterGroup.hideMatchedMarker(targetType);
+				}
+			},
+			// 빌딩 선택 변경
+			onChangeBuilding : function(event) {
+				var me = this;
+				var target = event.currentTarget;
+				if(target.checked) { me.$.buildingGroup.show(); } 
+				else { me.$.buildingGroup.hide(); }
+			},
+			// 자연 선택 변경
+			onChangeWeather : function(event) {
+				var me = this;
+				var target = event.currentTarget;
+				if(target.checked) { me.$.weatherGroup.show(); } 
+				else { me.$.weatherGroup.hide(); }
+			},
+			// 사용자 마커 선택 변경
+			onChangeCustomMarker : function(event) {
+				var me = this;
+				var target = event.currentTarget;
+				if(target.checked) { me.$.customGroup.show(); } 
+				else { me.$.customGroup.hide(); }	
+			},
+
+			// =============
+			// 영역표시 관련
+			// =============
+			// 영역을 보여준다.
+			onChangeShowArea : function(event) {
+				var me = this;
+				var rootEl = event.currentTarget.parentElement.itemInfo
+				if(event.currentTarget.checked) {
+					var radius = rootEl.detailInfo.radius;
+					if(radius) {
+						rootEl.showCircleEffect(radius);
+					}
+				} else {
+					rootEl.hideCircleEffect();
+				}
+			},
+			// 로그를 추가한다.
+			addLog : function(msg) {
+				var me = this;
+				var logRow = document.createElement('div');
+				logRow.innerHTML = msg;
+				if(me.logInfo.logNum >=  me.logInfo.maxLog) {
+					me.$.console.removeChild(me.$.console.children[0]);
+				} else {
+					me.logInfo.logNum++;
+				}
+				me.$.console.appendChild(logRow);
+				me.$.console.scrollTop = me.$.console.scrollHeight;
+			}
+		});
+	</script>
+</dom-module>

@@ -1,0 +1,80 @@
+<dom-module id="es-checkbox-field-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+    	<sc-panel title-text="sc-checkbox-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th rowspan="3">
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<sc-checkbox-field label="햄" input-value="{{data.value_1}}" checked-value="Y" un-checked-value="N" default-value="N" on-checkchange="onCheckchange"></sc-checkbox-field>
+	    				[[data.value_1]]
+    				</td>
+    			</tr>
+    			<tr>
+    				<td>
+    					<sc-checkbox-field label="치즈" input-value="{{data.value_2}}" checked-value="Y" un-checked-value="N" default-value="N" on-checkchange="onCheckchange"></sc-checkbox-field>
+	    				[[data.value_2]]
+    				</td>
+    			</tr>
+    			<tr>
+    				<td>
+    					<sc-checkbox-field label="계란" input-value="{{data.value_3}}" checked-value="Y" un-checked-value="N" default-value="N" on-checkchange="onCheckchange"></sc-checkbox-field>
+	    				[[data.value_3]]
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    	<sc-panel title-text="sc-checkbox-group-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th rowspan="3">
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<sc-checkbox-group-field name="checkgroup" value="{{data.groupvalue_1}}" on-change="onCheckGroupChange">
+	    					<sc-checkbox-field label="햄" checked-value="ham" un-checked-value="" default-value=""></sc-checkbox-field>
+	    					<sc-checkbox-field label="치즈" checked-value="cheese" un-checked-value="" default-value=""></sc-checkbox-field>
+	    					<sc-checkbox-field label="계란" checked-value="egg" un-checked-value="" default-value=""></sc-checkbox-field>
+	    				</sc-checkbox-group-field>
+	    				[[data.groupvalue_1]]
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    </template>
+    <script>
+    Polymer({
+    	is : "es-checkbox-field-sample",
+    	properties : {
+    		data : {
+    			type : Object,
+    			value : function() {
+    				return {}
+    			}
+    		}
+    	},
+    	onCheckchange : function(event) {
+    		var me = this, checked = event.detail;
+    		console.log("checkchange => " + event.target.label + " : " + event.target.inputValue);
+    	},
+    	onCheckGroupChange : function(event) {
+    		var me = this;
+    		console.log("change => " + event.target.name + " : " + event.target.value);
+    	}
+    });
+    </script>
+</dom-module>

@@ -1,0 +1,58 @@
+<dom-module id="es-map-contextmenu">
+	<style>
+        :host {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+
+	<template>
+		<sc-map id="map1" type="Google" longitude="129.577" latitude="38" zoom-level="6">
+			<sc-map-contextmenu> 
+				<sc-map-contextmenu-item text="이동" icon="move" on-click-item="onClickMove"></sc-map-contextmenu-item>
+				<sc-map-contextmenu-item text="메뉴1" icon="zoomin" on-click="onClickZoomIn"></sc-map-contextmenu-item>
+				<sc-map-contextmenu-item text="메뉴3" icon="zoomout" on-click="onClickZoomOut"></sc-map-contextmenu-item>
+			</sc-map-contextmenu>
+				
+			<sc-map-marker longitude="129.577" latitude="38">
+				<sc-map-contextmenu>
+					<sc-map-contextmenu-item text="메뉴4" icon="move" on-click-item="onClickMove"></sc-map-contextmenu-item>
+					<sc-map-contextmenu-item text="메뉴5" icon="zoomin" on-click="onClickZoomIn"></sc-map-contextmenu-item>
+					<sc-map-contextmenu-item text="메뉴6" icon="zoomout" on-click="onClickZoomOut"></sc-map-contextmenu-item>
+				</sc-map-contextmenu>
+			</sc-map-marker> 
+			
+			<sc-map-marker-group id="weatherGroup" on-click-marker="onClickMarker">
+				<sc-map-marker longitude="129.577" latitude="39"></sc-map-marker>
+				
+				<sc-map-contextmenu> 
+					<sc-map-contextmenu-item text="이동" icon="move" on-click-item="onClickMoveMarker"></sc-map-contextmenu-item>
+					<sc-map-contextmenu-item text="메뉴8" icon="zoomin" on-click="onClickZoomIn"></sc-map-contextmenu-item>
+					<sc-map-contextmenu-item text="메뉴9" icon="zoomout" on-click="onClickZoomOut"></sc-map-contextmenu-item>
+				</sc-map-contextmenu>
+				
+			</sc-map-marker-group>
+		</sc-map>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'es-map-contextmenu',
+			
+			onClickMoveTo: function(event, data) {
+				var me = this;
+				var longitude = data.location[0];
+				var latitude = data.location[1];
+				me.$.map1.moveTo(longitude, latitude, true);
+			},
+			
+			onClickMoveMarkerTo: function() {
+				
+			},
+			
+			onClickMarker : function(event, data) {
+				data.element.showCircleEffect(100);
+			}
+		});
+	</script>
+</dom-module>

@@ -1,0 +1,157 @@
+<dom-module id="es-operorg-org-list">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <!-- 코드 조회 -->
+        <sc-request-group init>
+            <sc-code-group>
+                <sc-code code="C009" value="{{codes.useYn}}" ></sc-code> <!-- 사용여부 -->
+            </sc-code-group>
+            <sc-ajax url="getAllCompanyList.do" last-response="{{codes.company}}"></sc-ajax> <!-- 회사목록 -->
+            <sc-ajax url="../operunit/getAllListOperUnit.do" last-response="{{codes.operUnit}}"></sc-ajax> <!-- 운영단위 -->
+        </sc-request-group>
+
+        <!-- 목록 조회 -->
+        <sc-ajax id="findList"
+                 url="../org/findListOrg.do"
+                 body="{{searchParam}}"
+                 last-response="{{resultList}}">
+        </sc-ajax>
+
+        <cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+        <div class="vbox flex">
+        	<cc-search-container on-search="onFindList" auth-r>
+	            <table>
+	                <colgroup>
+	                    <col style="width:80px">
+	                    <col>
+	                    <col style="width:80px">
+	                    <col>
+	                </colgroup>
+	                <tr>
+	                    <th><sc-label text="운영단위" ></sc-label></th>
+	                    <td>
+	                        <sc-combobox-field value="{{searchParam.oper_unit_cd}}" items="{{codes.operUnit}}" display-field="oper_unit_nm" value-field="oper_unit_cd"
+	                                           selected-index="0" placeholder="선택" readonly="true">
+	                        </sc-combobox-field>
+	                    </td>
+	                    <th><sc-label text="회사"></sc-label></th>
+	                    <td>
+	                        <sc-combobox-field value="{{searchParam.comp_cd}}" items="{{codes.company}}" display-field="comp_nm" value-field="comp_cd"
+	                                           placeholder="전체">
+	                        </sc-combobox-field>
+	                    </td>
+	                </tr>
+	                <tr>
+	                    <th><sc-label text="조직명"></sc-label></th>
+	                    <td>
+	                        <sc-text-field value="{{searchParam.org_nm}}" on-enter="onFindList"></sc-text-field>
+	                    </td>
+	                </tr>
+	            </table>
+        	</cc-search-container>
+        	
+            <sc-grid id="gridPanel" data-provider="{{resultList}}" editable="true" class="flex" useState="false"
+                     selection-able-function="onSelectionOption">
+                <cc-grid-toolbar >
+                    <sc-button id="addCurrentBtn" text="운영조직에추가(현재노드)" on-click="onAddList" auth-s></sc-button>
+                    <sc-button id="addChildBtn" text="운영조직에추가(하위노드)" on-click="onAddList" auth-s></sc-button>
+                </cc-grid-toolbar>
+                <sc-grid-columns>
+                    <sc-data-column data-field="org_nm" header-text="조직명" width="150" text-align="left"></sc-data-column>
+                    <sc-data-column data-field="org_typ_nm" header-text="조직유형명" width="150" text-align="center"></sc-data-column>
+                    <sc-data-column data-field="org_cd" header-text="조직코드" width="150" text-align="center"></sc-data-column>
+                    <sc-combobox-column data-field="use_yn" header-text="사용"  width="60" text-align="center" items="{{codes.useYn}}" display-field="label" value-field="data"></sc-combobox-column>
+                </sc-grid-columns>
+                <sc-grid-fields>
+                	<sc-grid-field	data-field="use_count_oper_org" data-type="number"></sc-grid-field>
+                </sc-grid-fields>
+            </sc-grid>
+        </div>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: "es-operorg-org-list",
+            properties: {
+                // 조회 조건
+                searchParam: {
+                    type: Object,
+                    value: function() {
+                        return {};
+                    }
+                },
+                // 조회 목록
+                resultList:{
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                },
+                // 코드 데이터
+                codes: {
+                    type: Object,
+                    reset: false,
+                    value: function() {
+                        return {
+                            company: [],
+                            operUnit: [],
+                            useYn: []
+                        };
+                    }
+                }
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            load: function(param) {
+                var me = this;
+                me.set("searchParam", {
+                    oper_unit_cd: param.oper_unit_cd,
+                    comp_cd: param.comp_cd
+                });
+                me.onFindList();
+            },
+
+            /******************************
+             * 그리드 이벤트
+             ******************************/
+            onSelectionOption: function(item){
+                return (item.use_count_oper_org === 0);
+            },
+
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+            // 검색(조회)
+            onFindList: function() {
+                var me = this;
+
+                UT.request(me.$.findList);
+            },
+
+            onAddList: function(e) {
+                var me = this,
+                    provider = me.$.gridPanel.getDataProvider(),
+                    checked = provider.selectionCheckedItems(),
+                    buttonId = e.target.id;
+
+                if (checked.length === 0) {
+                    UT.alert("STD.N1600"); // "선택된 항목이 없습니다",
+                    return;
+                }
+
+                me.fire("addto-operorg", {selected: checked, target: (buttonId == "addCurrentBtn") ? "current" : "child"});
+            }
+        });
+    </script>
+
+</dom-module>

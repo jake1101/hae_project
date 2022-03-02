@@ -1,0 +1,3917 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+******************************************************************************************
+** @Program-name        : PR생성
+** @Description            : 조달구매 > PR관리 > PR생성 메인
+** @Author                : 김병철(phatchul)
+** @Create Date            : 2012.03.05
+** @History                : 1) 2012.03.05-최초 생성
+**                        2) 2012.04.18 - 고현철수정
+**                         3) 2012.05.24 - 김병철 수정
+******************************************************************************************
+-->
+
+<cc:CCContentBase xmlns:mx="http://www.adobe.com/2006/mxml" 
+                  xmlns:vc="http://www.emro.co.kr/volcano"
+                  xmlns:uxcom="volcano.uxcom.*"
+                  xmlns:cc="custom.uxcom.*"
+                  menuCode="PRO10120"
+                  creationComplete="Init();" xmlns:control="custom.uxcom.control.*">
+    
+    <!--
+    ********************************************************************************************************
+    **************       Metadata : CCContentBase에서 SCModule의 Function을 호출하는 Event        ***************   
+    ********************************************************************************************************
+    -->
+    <mx:Metadata>
+        //NOPMD
+        [Event(name="gridItemClickEvent" , type="volcano.uxcom.events.SCEvent")] //Grid Item Click Event
+        //NOPMD
+        [Event(name="closeBtnClickEvent" , type="volcano.uxcom.events.SCEvent")] //닫기버튼 Click Event
+    </mx:Metadata>
+    
+    <!--
+    ********************************************************************************************************
+    **************       Script Area            ************************************************************
+    ********************************************************************************************************
+    -->
+    <mx:Script>
+        <![CDATA[
+            import custom.uxcom.CCCodeInformation;
+            import custom.uxcom.CCDeciManager;
+            import custom.uxcom.event.CCCodeSupporterEvent;
+            import custom.uxcom.event.SCModulePopupEvent;
+            import custom.uxcom.model.CCOrgDataProviderProxy;
+            import custom.uxcom.popup.CCModulePopup;
+            
+            import modules.bp.admin.org.EPDeptTree;
+            import modules.bp.approval.ESAprvInput;
+            import modules.bp.procurement.comm.ESCommConst;
+            import modules.bp.procurement.comm.ESConditionMatrix;
+            import modules.bp.procurement.comm.ESPConditionMatrix;
+            import modules.bp.trade.comm.ESCommUtil;
+            
+            import mx.collections.ArrayCollection;
+            import mx.controls.Alert;
+            import mx.controls.DateField;
+            import mx.controls.TextInput;
+            import mx.core.Application;
+            import mx.core.IFlexDisplayObject;
+            import mx.events.CloseEvent;
+            import mx.events.DataGridEventReason;
+            import mx.events.ListEvent;
+            import mx.managers.PopUpManager;
+            import mx.rpc.events.ResultEvent;
+            import mx.utils.ObjectUtil;
+            
+            import volcano.excel.SCXLUploadEvent;
+            import volcano.excel.SCXLUploader;
+            import volcano.uxcom.collections.SCCollection;
+            import volcano.uxcom.collections.SCObject;
+            import volcano.uxcom.controls.SCAlert;
+            import volcano.uxcom.controls.SCPopupSelector;
+            import volcano.uxcom.controls.file.SCFileUpDownEvent;
+            import volcano.uxcom.controls.popup.SCPopUpUtil;
+            import volcano.uxcom.events.SCEvent;
+            import volcano.uxcom.events.SCPopupSelectorEvent;
+            import volcano.uxcom.managers.SCPopupManager;
+            import volcano.uxvisual.sfadvanceddatagrid.events.SFAdvancedDataGridEvent;
+            
+            /*
+            * Data Binding 선언
+            * ※ 주의 - '[Bindable]'을 선언하지 않으면 해당 객체에 값이 Binding이 되지 않음
+            */
+            [Bindable] private var paramDeptSO:SCObject       = new SCObject();                                  //부서 조회조건 Object
+            [Bindable] private var rtnDeptLvlSO:SCObject      = new SCObject();                                  //부서레벨 결과 Object
+            [Bindable] private var rtnSO:SCObject             = new SCObject();                                  //Return Object
+            [Bindable] private var searchSO:SCObject          = new SCObject();                                  //Header정보 Object
+            [Bindable] private var headerSO:SCObject          = new SCObject();                                  //Header정보 Object
+            [Bindable] private var tmpSO:SCObject             = new SCObject();                                  //Header정보 Object
+            [Bindable] private var aprvSO:SCObject            = new SCObject();                                  //Header정보 Object
+            [Bindable] private var compare:SCObject           = new SCObject();                                  //Header정보 Object
+            [Bindable] private var rtnSOExcel:SCObject        = new SCObject();                                  //Return Object
+            [Bindable] private var errSC:SCCollection         = new SCCollection();                      
+            [Bindable] private var gridSC:SCCollection        = new SCCollection();                              //물품/공사정보 Grid Collection
+            [Bindable] private var excelSC:SCCollection       = new SCCollection();                              //품목목록
+            [Bindable] private var updateSC:SCCollection      = new SCCollection();                              //수정된 Grid Collection
+            [Bindable] private var deleteSC:SCCollection      = new SCCollection();
+            [Bindable] private var costSC:SCCollection        = new SCCollection();
+            [Bindable] private var sendSC:SCCollection        = new SCCollection();                              //물품/공사정보 Grid Collection
+            [Bindable] private var accountSC:SCCollection     = new SCCollection();                              //회계정보 Grid Collection
+            [Bindable] private var rtnSC:SCCollection         = new SCCollection();                               //Return Object
+            [Bindable] private var purcTypItemSC:SCCollection = new SCCollection();                              //Item구매유형 Collection
+            [Bindable] private var prTypSC:SCCollection       = new SCCollection();                              //구매요청유형 Collection
+            [Bindable] private var purcTypSC:SCCollection     = new SCCollection();                              //구매유형 RadioButton Collection
+            [Bindable] private var ynSC:SCCollection          = new SCCollection();                              //예/아니오 RadioButton Collection
+            [Bindable] private var storeFrmSC:SCCollection    = new SCCollection();                              //매장형태 Combo Collection
+            [Bindable] private var costTypSC:SCCollection     = new SCCollection();                              //계정지정범주 Combo Collection
+            [Bindable] private var accTypSC:SCCollection      = new SCCollection();                              //계정유형 Combo Collection
+            [Bindable] private var platCdSC:SCCollection      = new SCCollection();                              //플랫폼 Combo Collection
+            [Bindable] private var platSvcCdSC:SCCollection   = new SCCollection();                              //서비스 Combo Collection
+            [Bindable] private var valList:SCCollection       = new SCCollection();
+            [Bindable] private var returnval:SCObject         = new SCObject();                                  //WS결과
+            [Bindable] private var returnvalSC:SCCollection   = new SCCollection();                              //WS결과상세리스트
+            [Bindable] private var sSingularSource:String     = "assets/images/new_link.png";                    //Grid PopUp Image
+            [Bindable] private var deleteImg:String              = "assets/images/ifproxy/remove.png";            //Grid delete Image
+            [Bindable] private var sToDay:String              = DateField.dateToString(new Date(), "YYYYMMDD");  //오늘날짜
+            [Bindable] private var iGridRow:int               = -1;                                              //GridRow
+            [Bindable] private var isaproval:Boolean          = new Boolean();                                   //결재일때 
+            
+            private var conMtr:ESConditionMatrix              = new ESConditionMatrix();                         //관계사별 화면제어를 위한 Matrix
+            private var conPMtr:ESPConditionMatrix            = new ESPConditionMatrix();
+            private var orgnTransmitFiles:Object              = new Object();                                    //시행품의생성첨부파일
+            private var orgnDeleteFiles:Object                = new Object();                                    //시행품의삭제첨부파일
+            private var transmitFiles:Object                  = new Object();                                    //생성첨부파일
+            private var deleteFiles:Object                    = new Object();                                    //삭제첨부파일
+            private var bPrSend:Boolean                       = true;
+            private var bCloseVisible:Boolean;                                                                   //닫기버튼
+            private var isApproveSave:Boolean;
+            private var bModChg:Boolean;
+            private var bPr:Boolean;
+            
+            private var deciMgt:CCDeciManager = CCDeciManager.getInstance();
+            
+            /********************************************************************************************************
+             ****************                 Override / creationComplete Function            ***********************
+             *******************************************************************************************************/
+            /**
+             * @protected
+             * 1.parameter 변경에 대한 처리
+             * 2.isPopup 변경에 대한 처리
+             */
+            override protected function commitProperties():void 
+            {
+                super.commitProperties();
+                
+                //팝업으로 호출시 parameter에 값을 넘겨주지 않으면 해당 event는 발생하지 않는다.
+                if( parameterChanged ) 
+                {   
+                    creationComplete();
+                    parameterChanged = false;
+                }
+                
+                if( isPopupChanged )
+                {
+                    closeVisible   = isPopup;
+                    isPopupChanged = false;
+                }
+                
+                compare = new SCObject();
+                compare.oper_org_sn = headerSO.oper_org_sn;
+                
+                //상태별 Title명 변경
+                if( mode == CREATE )
+                    subTitle.text = translator.translate("구매요청생성");
+                else if( mode == EDIT )
+                    subTitle.text = translator.translate("구매요청수정");
+                else if( mode == VIEW )
+                    subTitle.text = translator.translate("구매요청상세");
+            }
+            
+            /**
+             * @private
+             * 초기 화면 설정
+             */ 
+            private function Init():void
+            {
+                getConditionMatrix();
+            }
+            
+            /**
+             * @private
+             * 초기 데이터 설정
+             */ 
+            private function creationComplete():void    
+            {
+                this.addEventListener( 'modeChanged', function(event:Event):void
+                {
+                    conMtr.resultConditionMatrix();
+                    conPMtr.resultConditionMatrix();
+                } );
+                
+                this.addEventListener( 'orgnChanged', function(event:Event):void
+                {
+                    conMtr.resultConditionMatrix();
+                } );
+                
+                getCombo();           //화면에서 사용하는 콤보 조회
+                getConditionMatrix(); //관계사별 화면 Matrix
+                
+            }
+            
+            /**
+             * @private
+             * 관계사별 화면 제어 Matrix Call(ESConditionMatrix)
+             */
+            private function getConditionMatrix():void
+            {
+                if( isRoleChecked() && mode != "view" )
+                    conMtr.setConditionMatrix(menuCode, this, null, {prsend:true});
+                else
+                    conMtr.setConditionMatrix(menuCode, this);
+                
+                conPMtr.setConditionMatrix("erp_typ", "ALL", this);
+                conPMtr.costTypeValidateServiceStarter();
+            }
+            
+            /********************************************************************************************************
+             ****************                 Button Function                                 ***********************
+             *******************************************************************************************************/
+            /**
+             * @public
+             * PR생성(물품) 정보 조회
+             */
+            public function doQuery( obj:Object = null ):void 
+            {
+                headerSO  = new SCObject();
+                gridSC.removeAll();
+                accountSC.removeAll();
+                searchSO  = new SCObject( obj );
+                
+                if( bModChg )
+                    searchSO.mod_flag = "Y";
+                else
+                    searchSO.mod_flag = "N";
+                
+                searchSO.mode         = mode;
+                searchSO.purc_req_typ = "NC";
+                
+                searchSP.service();
+            }
+            
+            /**
+             * @private
+             * 저장  또는 결재요청   버튼 Click시
+             * PR(물품) 정보 저장 또는 결재요청
+             * param1 : value 결재상신 클릭여부
+             */
+            private function doData(value:String=null):void
+            {
+                if( !chkValidate(value) )//유효성 체크
+                    return;
+                
+                //결재 상신 버튼 클릭 여부
+                isApproveSave       = false;
+                headerSO.trans_flag = value;
+                updateSC            = updateItemsCustom();
+                
+                if( value == "app" )
+                {
+                    if( isNull( headerSO.aprv_sts ) || headerSO.aprv_sts == ESCommConst.P011_T || 
+                        headerSO.aprv_sts == ESCommConst.P011_R || headerSO.aprv_sts == ESCommConst.P011_D )//T:결재미상신 N:결재전송 R:결재반려 D:결재취소
+                    {
+                        if( headerSO.purc_typ != "CT" )
+                        {
+                            if( rdDateChecked() )
+                                SCAlert.show(translator.translate("납기일자가 현재일자 이전인 물품이 존재합니다.") + "\n" + 
+                                    translator.translate("계속 진행하시겠습니까?"), translator.translate("확인"), true, Alert.YES | Alert.NO, this, aprvPrConfirm );
+                            else
+                                preApproval();
+                        }
+                        else
+                        {
+                            preApproval();
+                        }
+                    }
+                    else
+                    {
+                        SCAlert.show(translator.translate("결재상신 가능 상태가 아닙니다."));
+                        return;
+                    }
+                }
+                else if( value == "temp" )//임시저장
+                {
+                    headerSO.aprv_sts  = "T";
+                    file.upload();
+                }
+                else if( value == "send" )//구매팀 전송
+                {
+                    if( headerSO.purc_typ != "CT" )
+                    {
+                        if(rdDateChecked())
+                            SCAlert.show(translator.translate("납기일자가 현재일자 이전인 물품이 존재합니다.") + "\n" + 
+                                translator.translate("계속 진행하시겠습니까?"), translator.translate("확인"), true, Alert.YES | Alert.NO, this, sendPrConfirm );
+                        else
+                            sendPrDo();
+                    }
+                    else
+                    {
+                        sendPrDo();
+                    }
+                }
+                else if( value == "change" )//PR 변경
+                {
+                    SCAlert.show(translator.translate("PR변경 하시겠습니까?"), translator.translate("확인"), true, Alert.YES | Alert.NO, this, 
+                        function (event:CloseEvent):void 
+                        {
+                            if ( event.detail == Alert.YES )
+                            {
+                                headerSO.isPr = isPr;
+                                file.upload();
+                            }
+                        }
+                    );
+                }
+            }
+            
+            /**
+             * 결재 전 pr번호 생성 위해 임시저장 진행
+             */
+            private function preApproval():void{
+                
+                isApproveSave         = true;
+                headerSO.trans_flag = 'temp';
+                headerSO.isPr = isPr;
+                headerSO.aprv_sts  = "T";
+                updateSC            = updateItemsCustom();
+                file.upload();                
+            }
+            
+            private function sendPrDo():void
+            {
+                var sendStr:String = translator.translate("구매팀으로 전송 하시겠습니까?");
+                
+                if(approve.visible && prsend1.visible)
+                {
+                    sendStr = translator.translate("구매팀전송 버튼 선택 시 소속부서장의 승인없이 구매팀으로 전송됩니다.") +
+                        translator.translate("구매팀 사전협의품목만 해당되오니 자세한 사항은 구매담당자에게 문의 바랍니다.") +
+                        translator.translate("전송 하시겠습니까?");
+                }
+                
+                SCAlert.show( sendStr, translator.translate("확인"), true, Alert.YES | Alert.NO, this, 
+                    function (event:CloseEvent):void 
+                    {
+                        if ( event.detail == Alert.YES )
+                        {
+                            headerSO.elec_aprv_yn = "N";
+                            headerSO.aprv_sts     = "C";
+                            file.upload();
+                        }
+                    }
+                );
+            }
+            
+            private function sendPrConfirm(event:CloseEvent):void
+            {
+                if ( event.detail == Alert.YES )
+                {
+                    var sendStr:String = translator.translate("구매팀으로 전송 하시겠습니까?");
+                    
+                    if(approve.visible && prsend1.visible)
+                    {
+                        sendStr = translator.translate("구매팀전송 버튼 선택 시 소속부서장의 승인없이 구매팀으로 전송됩니다.") +
+                            translator.translate("구매팀 사전협의품목만 해당되오니 자세한 사항은 구매담당자에게 문의 바랍니다.") +
+                            translator.translate("전송 하시겠습니까?");
+                    }
+                    
+                    SCAlert.show( sendStr, translator.translate("확인"), true, Alert.YES | Alert.NO, this, 
+                        function (event:CloseEvent):void 
+                        {
+                            if ( event.detail == Alert.YES )
+                            {
+                                headerSO.elec_aprv_yn = "N";
+                                headerSO.aprv_sts     = "C";
+                                file.upload();
+                            }
+                        }
+                    );
+                }
+            }
+            
+            private function aprvPrConfirm(event:CloseEvent):void
+            {
+                if ( event.detail == Alert.YES )
+                {
+                    if(headerSO.pre_bid == "N" && gridSC.filterItems({cost_typ:"A"}).length > 0 )
+                    {
+                        costSC = gridSC.filterItems({cost_typ:"A"}); 
+                        
+                        validationSP.service();
+                    }
+                    else
+                    {
+                        validationFun("Nan");    
+                    }
+                }
+            }
+            
+            /**
+             * @private
+             * 화면에 사용하는 콤보 조회
+             */
+            private function getCombo():void
+            {
+                searchSO.usr_id  = session.user.usr_id;
+                searchSO.comp_cd = session.user.comp_cd;
+                
+                codeSP.service();
+            }
+            
+            /**
+             * @private 
+             * 초기화 Function
+             */
+            private function doClear():void
+            {
+                headerSO  = new SCObject();
+                gridSC    = new SCCollection();
+                accountSC = new SCCollection();
+                
+                searchSO  = new SCObject();
+                searchSO.purc_req_typ = "NC";
+                
+                isApproveSave = false;
+                
+                searchSP.service();    
+            }
+            
+            /**
+             * @private
+             * PR Transaction 없는 Event
+             */
+            private function doPrEvent(value:String=null):void
+            {
+                if( !copyValidate(value) )//유효성 체크
+                    return;
+                
+                if(value=="copy")
+                {
+                    searchSO.copy_flag = "Y";
+                    SCAlert.show(translator.translate("복사하시겠습니까?"), translator.translate("확인"), true, Alert.YES | Alert.NO, this, doCopyConfirmHandler);
+                }
+                else if(value=="prsearch")
+                {
+                    //CCModulePopup을 통해 팝업을 호출한다.
+                    var popup:CCModulePopup = new CCModulePopup();
+                    popup.popup("modules/bp/procurement/comm/EPPrList.swf", translator.translate("구매요청목록"), 900, 400, this, true);
+                    
+                    var pltSelectedFunction:Function = function(event:SCModulePopupEvent):void {
+                        //호출후 반드시 removeEvent 해준다.
+                        popup.removeEventListener(SCModulePopupEvent.SELECTED_ITEM, pltSelectedFunction);
+                        var _item:Object = event.object;
+                        
+                        _item.copy_flag = "Y";
+                        doQuery(_item);
+                    }
+                    popup.addEventListener(SCModulePopupEvent.SELECTED_ITEM, pltSelectedFunction);
+                }
+            }
+            
+            /**
+             * @private
+             * 복사 ConfirmHandler
+             */
+            private function doCopyConfirmHandler( event:CloseEvent ):void 
+            {
+                if ( event.detail == Alert.YES )
+                {
+                    searchSO.pr_no = headerSO.pr_no;
+                    doQuery(searchSO);
+                }
+            }
+            
+            /**
+             * @private
+             * 닫기 버튼 Click시 Event 처리 (다른 Module에서 호출할 경우)
+             */
+            private function doClose():void 
+            {
+                if(!isaproval) {
+                    dispatchEvent(new Event(Event.CLOSE, true, true));
+                } else {
+                    this.dispatchEvent(new SCEvent("closeBtnClickEvent", headerSO));
+                }
+            }
+            
+            private function addItem():void
+            {
+                var newitem:SCObject = new SCObject();
+                var now:Date         = new Date();
+                now.setDate(now.getDate() + 15); //Number("10") ) ;
+                var rd_date:String   = DateField.dateToString(now, "YYYYMMDD");
+                now.setDate(now.getDate() + 30); //Number("10") ) ;
+                var prd_ed:String    = DateField.dateToString(now, "YYYYMMDD");
+                
+                //기본정보 Setting
+                newitem.$newitem               = true;
+                newitem.pr_no                  = headerSO.pr_no          ; //구매요청 번호
+                newitem.purc_typ               = headerSO.purc_typ       ; //구매 유형                        
+                newitem.cur                    = headerSO.cur            ; //통화                                                                        
+                newitem.price_unit             = "1"                     ; //가격단위                                                                           
+                newitem.item_qty               = "0"                     ; //품목 수량                                                                          
+                newitem.gr_chr_id              = headerSO.pr_req_id      ; //검수담당자                                                                         
+                newitem.gr_chr_nm              = headerSO.pr_req_nm      ; //검수담당자명
+                newitem.purc_org               = headerSO.purc_org       ;
+                newitem.purc_org_nm            = headerSO.purc_org_nm    ;
+                newitem.plt_cd                 = headerSO.plt_cd         ;
+                newitem.plt_nm                 = headerSO.plt_nm         ;
+                
+                if( headerSO.purc_typ == ESCommConst.P045_MT )  
+                    newitem.rd_date            = rd_date                 ; //납품요청일
+                else
+                {
+                    newitem.prd_sd             = rd_date                 ; //프로젝트 시작일                                                                    
+                    newitem.prd_ed             = prd_ed                  ; //프로젝트 종료일
+                }
+                gridSC.addItem(newitem);
+            }
+            
+            /**
+             * @private
+             * 아이템 복사 Event
+             */ 
+            private function getItemCopy():void
+            {
+                var sel_row:Number = 0;
+                
+                for each(var o:Object in gridSC) 
+                {
+                    if( o.check_select == true ) 
+                        sel_row++;
+                }
+                
+                if( sel_row == 0 ) 
+                {
+                    SCAlert.show(translator.translate("복사 할 품목을 선택하십시요."));
+                    return;                    
+                }
+                else if( sel_row > 1 ) 
+                {
+                    SCAlert.show(translator.translate("한 품목만 선택하세요."));
+                    return;                    
+                }
+                
+                for each( var o:Object in gridSC ) 
+                {
+                    if ( o.check_select == true ) 
+                    {
+                        var newitem:SCObject      = o.clone();
+                        newitem.$newitem          = true;
+                        newitem.check_select      = false;
+                        newitem.pr_lno            = "";
+                        newitem.line_no           = "";
+                        newitem.sap_pr_no         = "";
+                        newitem.sap_pr_lno        = "";
+                        gridSC.addItem(newitem);
+                    }
+                }
+                
+                setPrTotAmt();
+            }
+            
+            /**
+             * @private
+             * ExceUpload
+             * Grid에 신규 아이템 추가
+             * DataGrid에 binding되어있는 Collection 객체에 Object 추가
+             */
+            private function excelUpload():void
+            {
+                if( gridSC.length > 0 )
+                {
+                    SCAlert.show(translator.translate("엑셀업로드 시 기존에 입력된 물품 정보는 삭제됩니다. 계속 진행하시겠습니까?"), translator.translate("확인"), true, Alert.YES | Alert.NO, this, 
+                        function(event:CloseEvent):void
+                        {
+                            if( event.detail == Alert.YES )
+                                excelPopup();
+                            else
+                                return;
+                        }
+                    );
+                }
+                else
+                    excelPopup();
+            }
+            
+            private function excelPopup():void
+            {
+                var bErr:Boolean = false;
+                var uploader:SCXLUploader = new SCXLUploader();
+                uploader.open(excelGrid, this);
+                uploader.addEventListener(SCXLUploadEvent.CONFIRM, 
+                    function(event:SCXLUploadEvent):void 
+                    {
+                        var uploadCollection:SCCollection = event.object as SCCollection;
+                        
+                        
+                        if( uploadCollection.filterItems({plt_cd:null},true).distinct('plt_cd').length > 1 )
+                        {
+                            SCAlert.show(translator.translate("모든 아이템의 Plant는 동일해야합니다."));
+                            bErr = true;
+                        }
+                        else  
+                        {
+                            for each( var obj:Object in uploadCollection.filterItems({item_qty:null,item_price:null,price_unit:null},true) )
+                            {
+                                
+                                if (ESCommUtil.isNullTrim(obj.item_cd)){
+                                    SCAlert.show(translator.translate("품목코드는 필수 입니다."));
+                                    bErr = true;
+                                    break;                                    
+                                }
+                                
+                                if( isNaN(obj.item_qty) )
+                                {
+                                    SCAlert.show(translator.translate("수량은 숫자를 입력 해야합니다."));
+                                    bErr = true;
+                                    break;
+                                }
+                                
+                                if( obj.item_price != 'null' )
+                                {
+                                    if( isNaN(obj.item_price) )
+                                    {
+                                        SCAlert.show(translator.translate("단가는 숫자를 입력해야합니다."));
+                                        bErr = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        if( !bErr )
+                        {
+                            var param:Object = new Object();
+                            param.oper_org_sn = oper_org_sn.selectedValue.toString();
+                            addExcelItemSP.clearInputs();
+                            addExcelItemSP.addInput("uploadSC", uploadCollection);
+                            addExcelItemSP.addInput("param", param);
+                            addExcelItemSP.service();
+                        }
+                    }
+                );
+            }
+            
+            //전자결재링크
+            private function getEleAppInfo():void
+            {
+                var url:String = headerSO.aprv_url;
+                navigateToURL(new URLRequest(url), "_blank");
+            }
+            
+            /** 
+             * @private
+             * 결재테스트 
+             */
+            private function doAprv(div:String=null):void
+            {
+                aprvSO            = headerSO.clone();
+                aprvSO.aprv_typ   = div;
+                aprvSO.trans_flag = "app";
+                aprvSP.service();    
+            }
+            
+            /**
+             * 아이템 삭제 클릭시 임시저장 타게 수정
+             */
+            private function delItem():void{
+                var iDelCnt:int           = 0;
+                var selectedItem:SCObject = gridSC.filterItem({check_select:true}) as SCObject;
+                
+                if( !selectedItem )
+                {
+                    SCAlert.show(translator.translate("선택된 물품정보가 없습니다."));
+                    return;
+                }
+                
+                for( var i:int = gridSC.length - 1; i >= 0; i-- ) 
+                {
+                    var row:Object = gridSC[i];
+                    
+                    if( row.check_select == true )
+                    {
+                        if( row.editstatus == "I" )
+                        {
+                            gridSC.removeItemAt(i);
+                            setPrTotAmt();
+                        }
+                        else
+                        {
+                            iDelCnt++;
+                            row.check_delete = true;
+                        }
+                    }
+                }
+                
+                if( iDelCnt > 0 )
+                {
+                    if( gridSC.length == iDelCnt )
+                    {
+                        SCAlert.show(translator.translate("품목 전체 삭제는 구매요청목록에서 하셔야 합니다."));
+                        rollback();
+                        return;
+                    }
+                    
+                    SCAlert.show(translator.translate("선택하신 품목을 삭제하시겠습니까?"), translator.translate("확인"), true, Alert.YES | Alert.NO, this,
+                        function (event:CloseEvent):void 
+                        {
+                            if ( event.detail == Alert.YES )
+                            {
+                                delItemGrid();
+                            }
+                            else
+                            {
+                                rollback();
+                            }
+                        }
+                    );
+                }
+            }
+                
+            /**
+             * @private
+             * 상태 rollback Function
+             */ 
+            private function rollback():void
+            {
+                for each(var item:Object in gridSC)
+                {
+                    item.check_delete = false;
+                }
+            }
+            
+            /********************************************************************************************************
+             ****************                 Validation Function                             ***********************
+             *******************************************************************************************************/
+            private function rdDateChecked():Boolean
+            {
+                var returnFlag:Boolean = false;
+                
+                for each( var itemObj:Object in gridSC)
+                {
+                    if(!itemObj.check_delete && itemObj.rd_date && ( sToDay > itemObj.rd_date ) )
+                    {
+                        returnFlag = true;
+                        break;
+                    }
+                }
+                return returnFlag;
+            }
+            
+            /**
+             * @private
+             * 필수 저장조건 Check
+             */
+            private function chkValidate(value:String=null):Boolean 
+            {
+                if( value == "del" )
+                    return true;
+                
+                // 신규/수정/삭제 건이 있을 경우에만 저장
+                if( gridSC.filterItems({check_delete:true},true).length == 0 )
+                {
+                    SCAlert.show(translator.translate("물품정보가 없습니다."));
+                    return false;
+                }
+                
+                pr_tit_validation.validate();
+                
+                if( !headerSO.pr_tit ) 
+                {
+                    pr_tit.setFocus();
+                    SCAlert.show(translator.translate("제목을 입력하세요"));
+                    return false;
+                }
+                
+//                cur_validation.validate();        
+                
+                if( !headerSO.cur ) 
+                {
+                    cur.setFocus();
+                    SCAlert.show(translator.translate("통화를 입력하세요"));
+                    return false;
+                }
+                
+//                biz_place_validation.validate();
+//                
+//                if( reqBiz )
+//                {
+//                    if( !headerSO.biz_place )
+//                    {
+//                        biz_place.setFocus();
+//                        SCAlert.show(translator.translate("사업장을 입력하세요."));
+//                        return false;
+//                    }    
+//                }
+                
+                if(headerSO.orgn_rpt_yn == "Y")
+                {
+                    if( !headerSO.orgn_rpt_no )
+                    {
+                        orgn_rpt_no.setFocus();
+                        SCAlert.show(translator.translate("시행품의명/번호를 입력하세요."));
+                        return false;
+                    }
+                    
+                }
+                
+                var rownum:Number = 0;
+                
+                for each(var obj:Object in gridSC)
+                {
+                    rownum++;
+                    
+                    if( headerSO.purc_typ != "CT" && !obj.rd_date )
+                    {
+                        SCAlert.show(translator.translate("{0}번 줄의 납기일자를 입력하세요.", [rownum.toString()]));
+                        return false;
+                    }
+					
+					if(obj.pr_amt >= 1000000000000000)
+					{
+						SCAlert.show(translator.translate("{0}번 줄의 요청금액은 1경이 넘는 금액입니다. 처리 할 수 없습니다.", [rownum.toString()]));
+						return false;
+					}
+                    
+                }
+				
+				
+				var deciCheckList:SCCollection = gridSC;
+				if(!deciMgt.deciChecked(deciCheckList, headerSO.cur,"pr_price","unit_cd","item_qty","price_unit"))  
+					return false;
+				
+				if(!deciMgt.singleDeciChecked(deciCheckList,"unit_cd","item_qty","price_unit", CCDeciManager.UNIT)) 
+					return false;
+                
+                if( value == "temp" )
+                    return true;
+                
+                //현재 날짜
+                var row:Number     = 0;
+                var sPltCd:String  = gridSC.getItemAt(0).plt_cd; 
+                var tmpCheck:Boolean = false;
+                
+                for each( var itemObj:Object in gridSC )
+                {
+                    row++;
+                    
+                    if( headerSO.purc_typ == "CT" && itemObj.sap_item_cd ) 
+                    {
+                        SCAlert.show(translator.translate("구매유형이 공사/용역일경우") + "\n" + translator.translate("{0}번 줄의 품목을 추가할 수 없습니다.", [row.toString()]));
+                        return false;
+                    }
+                    if( !itemObj.item_nm ) 
+                    {
+                        SCAlert.show(translator.translate("{0}번 줄의 품목명을 입력하세요.", [row.toString()]));
+                        return false;
+                    }
+                    if( !itemObj.unit_cd ) 
+                    {
+                        SCAlert.show(translator.translate("{0}번 줄의 단위를 입력하세요.", [row.toString()]));
+                        return false;
+                    }
+                    if( !itemObj.price_unit || parseFloat(itemObj.price_unit) == 0 )
+                    {
+                        SCAlert.show(translator.translate("{0}번 줄의 가격단위는 0 보다 커야합니다.", [row.toString()]));
+                        return false;
+                    }
+                    if( !itemObj.item_qty || parseFloat(itemObj.item_qty) == 0 )
+                    {
+                        SCAlert.show(translator.translate("{0}번 줄의 수량을 입력하세요.", [row.toString()]));
+                        return false;
+                    }
+                    if( prcReq && parseFloat(itemObj.pr_price) == 0)
+                    {
+                        SCAlert.show(translator.translate("{0}번 줄의 요청단가를 입력하세요.", [row.toString()]));
+                        return false;
+                    }
+                    if( headerSO.purc_typ != "CT" && !itemObj.rd_date )
+                    {
+                        SCAlert.show(translator.translate("{0}번 줄의 납기일자를 입력하세요.", [row.toString()]));
+                        return false;
+                    }
+                    if( headerSO.purc_typ != "MT" && !itemObj.prd_sd )
+                    {
+                        SCAlert.show(translator.translate("{0}번 줄의 수행시작일 입력하세요.", [row.toString()]));
+                        return false;
+                    }
+                    if( headerSO.purc_typ != "MT" && !itemObj.prd_ed )
+                    {
+                        SCAlert.show(translator.translate("{0}번 줄의 수행종료일 입력하세요.", [row.toString()]));
+                        return false;
+                    }
+                    if( headerSO.purc_typ != "MT" && itemObj.prd_sd && itemObj.prd_ed && itemObj.prd_sd > itemObj.prd_ed )
+                    {
+                        SCAlert.show(translator.translate("{0}번 줄의 수행종료일은 시작일 이전으로 지정 할 수 없습니다.", [row.toString()]));
+                        return false;
+                    }
+                    if( !itemObj.pr_sug_nm )
+                    {
+                        SCAlert.show(translator.translate("{0}번 줄의 구매의뢰자를 입력하세요.", [row.toString()]));
+                        return false;
+                    }
+                    if( !itemObj.gr_chr_nm )
+                    {
+                        SCAlert.show(translator.translate("{0}번 줄의 검수담당자를 입력하세요.", [row.toString()]));
+                        return false;
+                    }
+					
+//                    // 회사별속성 - ERP 관리 여부
+//                    if (!itemObj.sap_grp_cd )
+//                    {
+//                        SCAlert.show(translator.translate("{0}번 줄의 ERP 구매그룹을 입력하세요.", [row.toString()]));
+//                        return false;
+//                    }
+                    if( !itemObj.purc_grp_cd )
+                    {
+                        SCAlert.show(translator.translate("{0}번 줄의 구매담당을 입력하세요.", [row.toString()]));
+                        return false;
+                    }
+                    if( !itemObj.plt_cd )
+                    {
+                        SCAlert.show(translator.translate("{0}번 줄의 Plant를 입력하세요.", [row.toString()]));
+                        return false;
+                    }
+                    if(row > 1 )
+                    {
+                        if( sPltCd != itemObj.plt_cd )
+                        {
+                            SCAlert.show(translator.translate("모든 아이템의 Plant는 동일해야합니다."));
+                            return false;
+                        }        
+                    }
+//                    // 회사별속성 - ERP 관리 여부
+//                    if (!itemObj.sap_item_cd && !itemObj.cate_cd )
+//                    {
+//                        SCAlert.show(translator.translate("{0}번 줄의 ERP자재그룹을 입력하세요.", [row.toString()]));
+//                        return false;
+//                    }
+                    
+                    //                    추천업체가있을때
+                    if(!isNull(itemObj.ref_vd)){
+                        tmpCheck = true;
+                    }else{
+                        //                    추천업업체가 없을때
+                        if(isNull(headerSO.ref_vd_cause)){
+                            tmpCheck = true;
+                        }
+                    }
+                }
+                
+                if(!tmpCheck){
+                    SCAlert.show(translator.translate("추천업체정보 및 사유를 삭제해야합니다.", [row.toString()]));
+                    return false;
+                }
+                
+                return true;
+            }
+            
+            /**
+             * @private
+             * 자산등록 시 validation check
+             */
+			/*
+            private function saveValidation():Boolean
+            {
+                var row:Number     = 0;
+                var sel_row:Number = 0;
+                
+                if( gridSC.filterItems({check_select:true}).length == 0 )
+                {
+                    SCAlert.show(translator.translate("선택한 정보가 없습니다."));
+                    return false;
+                }
+                for each(var item:Object in gridSC)
+                {
+                    if(item.check_select == true ) 
+                    {
+                        row++;
+                        if(item.cost_typ != "A")
+                        {
+                            SCAlert.show(translator.translate("{0}번 줄: 계정지정범주가 자산이여야합니다.", [row.toString()]));
+                            return false;
+                        }
+                        sel_row++;
+                    }
+                }
+                if( sel_row > 1 )
+                {
+                    SCAlert.show(translator.translate("한개만 선택하세요."));
+                    return false;
+                }
+                return true;
+            }
+            */
+			
+            /**
+             * @private
+             * 구매요청 복사시 유효성 체크
+             */ 
+            private function copyValidate(value:String=null):Boolean
+            {
+                if(value == "copy")
+                {
+                    if(headerSO.pr_no.toString().substr(0,2) != "PR")
+                    {
+                        SCAlert.show(translator.translate("Interface된 구매요청건으로 구매요청복사를 할 수 없습니다."));
+                        return false;
+                    }
+                }
+                return true;
+            }
+            
+            /**
+             * @private
+             * Role Check Function
+             */ 
+            private function isRoleChecked():Boolean
+            {
+                return true;
+            }
+            
+            /**
+             * @private
+             * 결재요청 Function
+             */ 
+            private function validationFun(value:String=null):void
+            {
+                var aprvStr:String = translator.translate("결재상신 하시겠습니까?");
+                
+                if(value != "Nan")
+                {
+                    aprvStr = translator.translate("투자예산번호 ") + value + translator.translate("의") + "\n" + translator.translate("구매요청금액이 예산잔액을 초과합니다.");
+                    SCAlert.show( aprvStr );
+                    return;
+                }
+                else
+                {
+                    SCAlert.show( aprvStr, translator.translate("확인"), true, Alert.YES | Alert.NO, this, function (event:CloseEvent):void 
+                    {
+                        if ( event.detail == Alert.YES )
+                        {
+                            isApproveSave         = true;
+                            headerSO.elec_aprv_yn = "Y";
+                            headerSO.aprv_sts     = "T";
+                            file.upload();
+                        }
+                    });
+                }
+            }
+            
+            /********************************************************************************************************
+             ****************                 ResultHandler Function                          ***********************
+             *******************************************************************************************************/
+            /**
+             * @private
+             * 결재 결과 이벤트 처리
+             */ 
+            private function aprvSP_resultHandler():void
+            {
+                if( headerSO.aprv_typ == "P" ) //전자결재 공통모듈 호출 해야 함.
+                {
+                    var pop:CCModulePopup = new CCModulePopup();
+                    pop.popup("modules/bp/esourcing/comm/EPApprovalPopup.swf", translator.translate("전자결재"),800, 500, this, true);
+                    pop.parameter = aprvSO;
+                }
+                else
+                {
+                    modules.bp.trade.comm.ESCommUtil.callCompanyApproval(aprvSO.url, aprvSO.aprv_req_id, aprvSO.aprv_doc_typ, aprvSO.aprv_ref_no, aprvSO.aprv_xml, 500, 500);
+                }
+            }
+            
+            /**
+             * @private
+             * PR(물품) 정보 저장  - 파일 업로드 후에 처리
+             */
+            private function uploadCompleteAndSave(event:SCFileUpDownEvent):void 
+            {
+                switch(event.target)
+                {
+                    case file:
+                        transmitFiles = event.transmitFiles;
+                        deleteFiles   = event.deleteFiles;
+                        
+                        saveSP.addInput("transmitFiles", transmitFiles);
+                        saveSP.addInput("deleteFiles"  , deleteFiles  );
+                        
+                        searchSO.copy_flag  = "";
+                        headerSO.copy_flag  = "";
+                        headerSO.mod_flag   = "N";
+                        
+                        saveSP.service();
+                        break;
+                }
+            }
+            
+            /**
+             * @private
+             * resultHandler - ServiceProvider 결과처리
+             */
+            private function resultHandler(event:ResultEvent):void    
+            {    
+                switch( event.target )
+                {
+                    case codeSP :
+                        doQuery( parameter );
+                        break;
+                    
+                    case payCalcSP :
+                        payCalcSP_resultHandler();
+                        break;
+                    
+                    case searchSP : //PR조회 후 처리
+                        for each( var obj:Object in gridSC )
+                    {
+                        if(obj.accList != null)
+                            (obj.accList as SCCollection).changeComparable = true;
+                    }
+                        if( !isEmpty(rtnSO.rtrn_msg) )
+                            SCAlert.show( translator.translate( rtnSO.rtrn_msg ) );
+                        
+                        if( rtnSO.rtrn_code == "S" )
+                        {
+                            searchSP_resultHandler();
+                        }
+                        bPrModifyCtrl();
+                        
+                        break;
+                    
+                    case saveSP : //저장 후 처리
+                        if( !isEmpty(rtnSO.rtrn_msg) && !isApproveSave){
+                            SCAlert.show( translator.translate( rtnSO.rtrn_msg ) );
+                        }
+                        headerSO.pr_no = rtnSO.pr_no;
+                        
+                        saveSP_resultHandler(rtnSO,event);
+                        break;
+                    
+                    case aprvSP : //결재 후 처리
+                        if( rtnSO.rtrn_code == "S" )
+                        {
+                            aprvSP_resultHandler();
+                        }
+                        break;
+                    case validationSP :
+                        if( rtnSO.rtrn_code == "S" )
+                        {
+                            var value:String = "Nan";
+                            
+                            for each(var obj:Object in valList)
+                            {
+                                if(obj.rslt_val == "Y")
+                                {
+                                    value = obj.order_no;
+                                    
+                                    break;
+                                }
+                            }
+                            validationFun(value);
+                        }
+                        break;
+                    
+                    case addExcelItemSP :
+                        if(rtnSOExcel.rtrn_code == "F"){//엑셀 업로드시 체크로직 실패
+                            SCAlert.show(rtnSOExcel.rtrn_msg);
+                            break;
+                        }
+                        if( excelSC.length == 0 )
+                        {
+                            SCAlert.show(translator.translate("엑셀파일에 입력된 해당 정보가 없습니다."));
+                            break;
+                        }
+                        
+                        gridSC.removeAll();
+                        for each( var obj:Object in excelSC )
+                    {
+                        var newitem:Object   = new Object();
+                        newitem              = obj;
+                        newitem["$newitem" ] = true;
+                        newitem.excel_flag   = "Y";
+                        newitem.pr_no        = headerSO.pr_no;       //구매요청 번호
+                        newitem.purc_typ     = headerSO.purc_typ;    //구매 유형                        
+                        newitem.cur          = headerSO.cur;         //통화                                                                        
+                        newitem.pr_sug_id    = headerSO.pr_req_id;   //구매의뢰자                                                                         
+                        newitem.pr_sug_nm    = headerSO.pr_req_nm;   //구매의뢰자명 
+                        newitem.purc_grp_cd  = headerSO.purc_grp_cd; //구매담당
+                        newitem.purc_grp_nm  = headerSO.purc_grp_nm; //구매담당명
+                        newitem.cost_typ     = headerSO.cost_typ;    //계정지정범주
+                        
+                        
+                        newitem.unit_cd = obj.bas_unit_cd;
+                        newitem.ref_vd_nm = obj.vd_nm_loc;
+                        
+                        if( isEmpty(obj.plt_cd) )
+                        {
+                            newitem.plt_cd = headerSO.plt_cd; //공장 코드                                                                          
+                            newitem.plt_nm = headerSO.plt_nm; //공장 명
+                        }
+                        
+                        if( isNull(obj.purc_grp_cd) )
+                        {
+                            newitem.purc_grp_cd = headerSO.purc_grp_cd; //구매 담당 코드                                                                     
+                            newitem.purc_grp_nm = headerSO.purc_grp_nm; //구매 담당명
+                        }
+                        
+                        if( isEmpty(obj.sap_grp_cd) )
+                        {
+                            newitem.sap_grp_cd = headerSO.sap_grp_cd; //구매그룹
+                            newitem.sap_grp_nm = headerSO.sap_grp_nm; //구매그룹명    
+                        }
+                        
+                        var sPrcUnit:String = "1";
+                        if( isEmpty(obj.price_unit) )
+                            sPrcUnit = "1";
+                        else
+                            sPrcUnit = obj.price_unit;
+                        
+                        newitem.price_unit = sPrcUnit; //가격단위
+                        
+                        if( isEmpty(obj.item_price) )
+                            newitem.pr_price = "0"; //구매요청 단가
+                        else
+                            newitem.pr_price = obj.item_price 
+                        
+                        newitem.purc_org    = headerSO.purc_org       ; //구매조직
+                        newitem.purc_org_nm = headerSO.purc_org_nm    ; //구매조직명
+                        newitem.pr_amt      = obj.tot_amt             ; //금액
+                        newitem.rep_cd_yn   = obj.rep_cd_yn           ; //대표품목여부
+                        newitem.sap_item_yn = obj.erpcd_cre_yn        ; //ERP 아이템 관리여부     
+                        
+                        gridSC.addItem(newitem); 
+                    }
+                        compare.noAct = "N";//물품 추가시  alert 창 반응하게 수정 
+                        if( errSC.length > 0 )
+                            excelErrListPop();
+                        
+                        setPrTotAmt();
+                        
+                        break;
+                }
+            }
+            
+            /**
+             * @private
+             * 금액계산 결과 이벤트 처리
+             */ 
+            private function payCalcSP_resultHandler():void
+            {
+                headerSO.po_tot_amt = rtnSO.po_tot_amt;
+                
+                for( var i:int = 0 ; i < rtnSC.length ; i++ )
+                {
+                    var rtnItem:SCObject = rtnSC.getItemAt(i) as SCObject;
+                    
+                    for( var j:int = 0 ; j < gridSC.length ; j++ )
+                    {
+                        var gridItem:SCObject = gridSC.getItemAt(j) as SCObject;
+                        
+                        if( gridItem.pr_lno && rtnItem.pr_lno == gridItem.pr_lno )
+                        {
+                            gridItem.pr_amt = rtnItem.pr_amt;
+                        }
+                        else if( !gridItem.pr_lno && rtnItem.pr_lno == j.toString() )  
+                        {
+                            gridItem.pr_amt = rtnItem.pr_amt;
+                        }
+                    }
+                }
+            }
+            
+            /**
+             * @private
+             * PR조회 후처리
+             */
+            private function searchSP_resultHandler():void 
+            {
+                tmpSO = headerSO.clone();
+                chgPurcTyp();
+                chgOrgnRpt();
+                setPrTotAmt();
+                
+                if( isApproveSave ){
+                    //결재시 타는 소스 
+                    approval();
+                }
+                
+                if(searchSO.isAprv  == "Y"){
+                    //결재상세 화면일때
+                    isaproval = false;
+                }else{
+                    isaproval = true;
+                }
+                
+                if(headerSO.cur == null || headerSO.cur == ''){
+                    headerSO.cur = 'KRW';//통화 초기 값 krw 설정
+                    headerSO.cur_nm= 'KRW';    
+                }
+                
+                dispatchEvent(new Event("modeChanged"));
+                dispatchEvent(new Event("bhqChanged"));
+                dispatchEvent(new Event("qtyChanged"));
+                
+            }
+            
+            private function approval():void{
+                var item:SCObject = new SCObject();
+                item = headerSO.clone();
+                item['comp_cd'] = headerSO.comp_cd;
+                item['aprv_docno'] = ''; //자동생성됨
+                item['aprv_typcd'] = 'PR'; //결재문서유형코드 G003 PR 구매요청
+                item['job_docno'] = 'PR_'+headerSO.comp_cd+'_'+headerSO.pr_no; //업무문서번호 자동생성됨
+                item['job_docno_rev']         = '1'; // 업무문서번호 차수
+                item['doc_tit'] = headerSO.pr_tit+"_결재상신"; // 제목
+                item['md_nm'] = 'modules/bp/procurement/pr/EMPRInfo.swf';//상세화면에 보여줄  화면 경록
+                item['md_param'] = 'mode=view&isAprv=Y&mod_flag=Y&aprv_flag=N&pr_no='+item.pr_no+
+                    '&purc_req_typ='+item.purc_req_typ+'&comp_cd='+item.comp_cd;
+                
+                aprvPopup(item);
+            }
+            
+            /**
+             * @private
+             * 저장 결과 이벤트 처리
+             */
+            private function saveSP_resultHandler(rtnSO:Object,event:ResultEvent=null):void 
+            {
+                aprvSO = headerSO.clone();
+                aprvSO.changeRequest = searchSO.changeRequest;//구매요청변경할때 타는 건지 확인 
+                if( rtnSO.requery_flag == "Y" )
+                    doQuery( headerSO );
+                
+                if( rtnSO.rtrn_code == "S" )
+                {
+                    tmpSO = new SCObject();
+                    if(aprvSO.changeRequest == "Y" && aprvSO.aprv_sts == "C"){
+                        //구매요청변경에서 구매전송 후  구매요청 수정 냉겨 화면 닫기
+                        doClose();
+                    }
+                }
+                else if( rtnSO.rtrn_code == "E")
+                {
+                    if(event && event.result.ceilingErrList && event.result.ceilingErrList.length > 0)
+                    {
+                        callErrPopup(event.result.ceilingErrList);
+                    }
+                    else
+                        doQuery( headerSO );
+                }
+            }
+
+            /********************************************************************************************************
+             ****************                 Grid Function                                   ***********************
+             *******************************************************************************************************/
+            /**
+             * @private
+             * Grid 아이템(ROW) 클릭 이벤트 처리 - 물품  정보
+             */
+            private function gridItemClickEvent(event:ListEvent):void 
+            {
+                var grid:SCDataGrid               = event.currentTarget as SCDataGrid;
+                var item:Object                   = event.itemRenderer.data;
+                var datafield:String              = event.itemRenderer["dataField"];
+                //var accList:SCCollection          = new SCCollection();
+                var obj:Object                   = ObjectUtil.copy(item);
+                obj.datafield                    = datafield;
+                
+                if( grid.id == "ItemGrid" ) //물품/공사/용역정보 Grid 
+                {
+                    switch( datafield ) 
+                    {
+                        case "item_cd" : //품목코드
+                            if( !item.item_cd )
+                                return;
+                            
+                            if(searchSO.view_mod == "Y" && obj.mod_req_prog_sts != "A")
+                                return;
+                            
+                            this.dispatchEvent(new SCEvent("gridItemClickEvent", obj));
+                            break;
+                        
+                        case "img_unit_cd" ://단위(공통팝업)
+                            if(item.$newitem != true && searchSO.changeRequest == "Y" && obj.mod_req_prog_sts != "A") return ;
+                            
+                            if( !editable || item.sap_item_yn == "Y" || item.sap_pr_no )
+                                return;
+                            callGridPopup("C007", datafield, item);
+                            break;
+                        
+                        case "img_pr_sug_nm" :
+                            if(searchSO.view_mod == "Y" && obj.mod_req_prog_sts != "A")
+                                return;
+                            break;
+                            
+                        case "img_gr_chr_nm" : //검수담당자(공통팝업)
+                            if(item.$newitem != true && searchSO.changeRequest == "Y" && obj.mod_req_prog_sts != "A") return ;
+                            
+                            if(searchSO.view_mod == "Y" && obj.mod_req_prog_sts != "A")
+                                return;
+                            
+                            if( !editable )
+                                return;
+                            
+                            callGridPopup("SP001", datafield, item);
+                            break;
+                        
+                        
+                        case "img_purc_org" : //구매조직
+                            if(searchSO.view_mod == "Y" && obj.mod_req_prog_sts != "A")
+                                return;
+                            
+                            if( !editable )
+                                return;
+                            
+                            callGridPopup("SP002", datafield, item);
+                            break;
+                        
+                        case "img_sap_grp_cd" : //구매그룹(공통팝업)
+                            if( searchSO.view_mod == "Y" && obj.mod_req_prog_sts != "A" )
+                                return;
+                            
+                            if( !editable || item.sap_pr_no )
+                                return;
+                            
+                            callGridPopup("SP002", datafield, item);
+                            break;
+                        
+                        case "img_purc_grp_cd" : //구매담당(공통팝업)
+                            if(item.$newitem != true && searchSO.changeRequest == "Y" && obj.mod_req_prog_sts != "A") return ;
+                            
+                            if( searchSO.view_mod == "Y" && obj.mod_req_prog_sts != "A" )
+                                return;
+                            
+                            if( !editable )
+                                return;
+                            
+                            callGridPopup("SP009", datafield, item);
+                            break;
+                        
+                        case "img_ref_vd" : //추천업체(공통팝업)
+                            //자동발주 O 단가계약 O
+                            if ("Y" == obj.prc_yn || "Y" == obj.auto_po_yn) return;
+                            
+                            if( editable && !item.price_cntr_no )
+                                getVendorPop(item);
+                            break;
+                        case "img_del_vd" :
+                            //자동발주 O 단가계약 O
+                            if ("Y" == obj.prc_yn || "Y" == obj.auto_po_yn) return;                        
+                            
+                            item.ref_vd    = "";
+                            item.ref_vd_nm = "";
+                            item.sap_vd_cd = "";
+                            
+                            //                            만약 items에서  추천업체가 없다면 사유를 날리고
+                            //                            아직 다른 items에 추천업체가 있다면 사유를 내비둔다.
+                            var tmpCheck:Boolean = true;
+                            
+                            for each( var itemObj:Object in gridSC ){
+                                //                                추천업체가 있을때    
+                                tmpCheck = false;                                    
+                            }
+                            
+                            if(tmpCheck){
+                                headerSO.ref_vd_cause = "";
+                            }
+                            
+                            break;
+                        
+                        case "img_plt_cd" : //Plant
+                            if(searchSO.view_mod == "Y" && obj.mod_req_prog_sts != "A")
+                                return;
+                            
+                            if( !editable || item.sap_item_yn == "Y" || item.sap_pr_no )
+                                return;
+                            
+                            callGridSapPopup( grid, datafield, item );
+                            break;
+                        
+                        case "img_wh_cd" : //저장위치
+                            if(searchSO.view_mod == "Y" && obj.mod_req_prog_sts != "A")
+                                return;
+                            
+                            if( !editable || item.sap_pr_no )
+                                return;
+                            
+                            if( editable )
+                            {
+                                if (!item.plt_cd) 
+                                {
+                                    SCAlert.show(translator.translate("Plant를 먼저 선택하세요."));
+                                    break;
+                                }
+                                callGridPopup("SP004", datafield, item);
+                            }
+                            break;
+                        
+                        case "img_att_no" :
+                            if(searchSO.view_mod == "Y" && obj.mod_req_prog_sts != "A")
+                                return;
+                            break;
+                        
+                        case "img_tbe_dept_cd" : //기술검토부서
+                            if(searchSO.view_mod == "Y" && obj.mod_req_prog_sts != "A")
+                                return;
+                            
+                            if( !editable )
+                                return;
+                            
+                            callGridDeptPopup(item);
+                            break;
+                        
+                        case "img_ef_nm" :  //기술평가
+                            break;
+                    }
+                    
+                }
+            }
+            
+            /**
+             * @private
+             * Grid 아이템(ROW) 수정 이벤트 처리 - 물품  정보
+             */
+            private function gridItemEditEndHandler(event:SFAdvancedDataGridEvent):void 
+            {
+                if( event.reason == DataGridEventReason.CANCELLED )
+                    return;
+                
+                var sOldValue:String    = "";
+                var sNewValue:String    = "";
+                var nItemQty:Number     = new Number();
+                var nItemPrc:Number     = new Number();
+                var nPriceUnit:Number   = new Number();
+                var grid:SCDataGrid     = event.currentTarget as SCDataGrid;
+                var item:Object         = event.itemRenderer.data;
+                var datafield:String    = event.dataField;
+                var codeInfos:Array     = codeSupporter.codeInfomations;
+                
+                if( codeSupporter.isSearching ) 
+                    return; 
+                
+                for each( var codeInfo:CCCodeInformation in codeInfos )
+                {
+                    //공통코드여서 같은 쿼리를 사용하는 경우 check해서 grp_cd를 넣어준다.
+                    switch( datafield )
+                    {
+                        
+                        case "unit_cd"          : //단위
+                            item.__grp_cd = "C007";
+                            break;
+                        case "purc_grp_cd_grid" : //구매담당
+                            break;
+                        case "cost_acc_cd"      : //Cost Ctr
+                            break;
+                        case "plt_cd"           : //플랜트
+                            break;
+                        case "fund_center_cd"   : 
+                            break;
+                        case "gl_acc_cd"        : //GL계정
+                            break;
+                        case "wbs_cd"           : //WBS
+                            break;
+                        case "asset_no"         : //자산번호
+                            break;
+                        case "order_no"         : //투자예산번호
+                            break;
+                        case "svc_master"       : //서비스
+                            item.grp_cd = "P063";
+                            break;
+                        
+                    }
+                    
+                    if( codeInfo.name == datafield )
+                    { 
+                        sOldValue = grid.getOldValue(event);
+                        sNewValue = grid.getNewValue(event);
+                        
+                        if(sOldValue != sNewValue)
+                        {
+                            var newVal:String = grid.getNewValue(event);
+                            
+                            item[datafield] = newVal;
+                            
+                            codeSupporter.target = item as SCObject;
+                            
+                            var codeSupporterHandler:Function = function(event:CCCodeSupporterEvent):void
+                            {
+                                codeSupporter.removeEventListener(CCCodeSupporterEvent.DATA_FOUND,codeSupporterHandler);
+                                
+                                item.order_no_amt = null;
+                                
+                                if(codeInfo.name=='asset_no')
+                                {
+                                    item.asset_sub_no = event.object.dtl_no2;
+                                    
+                                    if( event.object.eaufn != null )
+                                    {
+                                        item.order_no     = event.object.eaufn;
+                                        item.order_no_nm  = event.object.ktext;
+                                    }
+                                    
+                                    if( event.object.kostl != null )
+                                    {
+                                        item.cost_acc_cd  = event.object.kostl;
+                                        item.cost_acc_nm  = event.object.ktext;
+                                    }
+                                }
+                                
+                                addOrderNo(event.object);
+                            };
+                            
+//                            codeSupporter.addEventListener(CCCodeSupporterEvent.DATA_FOUND,codeSupporterHandler);
+//                            
+//                            codeSupporter.searchCode(datafield);
+                            break;
+                        }
+                    }
+                }
+                
+                if( grid.id == "ItemGrid" )
+                {
+                    switch( event.dataField )
+                    {
+                        //가격단위
+                        case "price_unit" :
+                        case "item_qty" :
+                        case "pr_price" :
+                            sOldValue = grid.getOldValue(event);
+                            sNewValue = grid.getNewValue(event);
+                            
+                            if( isEmpty(event.currentTarget.itemEditorInstance.text) )
+                            {
+                                event.currentTarget.itemEditorInstance.text = "0";
+                            }
+                            
+                            if( sNewValue != sOldValue )
+                            {
+                                callLater( 
+                                    function():void
+                                    {
+                                        var curDeci:Number  = deciMgt.getCurDeci(headerSO.cur);
+                                        nPriceUnit = Number(item.price_unit);
+                                        nItemQty   = Number(item.item_qty  );
+                                        nItemPrc   = Number(item.pr_price);
+                                        
+                                        item.pr_amt = (nItemPrc * nItemQty / nPriceUnit).toFixed(curDeci);
+                                        
+                                        setPrTotAmt();
+                                    } 
+                                );
+                            }
+                            break;
+                        
+                        //계정지정범주
+                        case "cost_typ" :
+                            sOldValue = event.currentTarget.getOldEditingValue(event).toString();
+                            sNewValue = event.currentTarget.getNewEditingValue(event).toString();
+                            
+                            if( sNewValue != sOldValue )
+                            {
+                                callLater( function():void
+                                {
+                                    var costObj:Object      = item.cost_typ;
+                                    var cost_typ:String     = "";
+                                    
+                                    item.accList            = createAccList(item);
+                                    item.accList.changeComparable = true;
+                                    iGridRow                = event.currentTarget.selectedIndex;
+                                    
+                                    if( costObj )
+                                        cost_typ = costObj.toString();
+                                } );
+                            }
+                            break;
+                    }
+                }
+            }
+            
+            /**
+             * @private
+             * DataGrid 컬럼 별 Editable 처리
+             */
+            private function gridItemEditableEvent(item:Object, column:SCDataGridColumn):Boolean 
+            {
+                if( !editable ) 
+                    return false;
+                
+                if (item.$newitem != true && searchSO.changeRequest == "Y" && item.mod_req_prog_sts != "A")
+                    return false;                
+                switch( column.dataField )
+                {
+                    
+                    //구매유형
+                    case "purc_typ" :
+                        //Header의 구매유형이 혼형(물품/공사/용역)인 경우 품목의 구매유형은 수정 가능
+                        if( headerSO.purc_typ == ESCommConst.P045_MC )
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            //Header의 구매유형이 물품인 경우 품목의 구매유형은 물품이고 수정 불가능
+                            if( headerSO.purc_typ == ESCommConst.P045_MT )
+                            {
+                                item.purc_typ = ESCommConst.P045_MT;
+                            }
+                                //Header의 구매유형이 공사인 경우 품목의 구매유형은 공사이고 수정 불가능
+                            else if( headerSO.purc_typ == ESCommConst.P045_CT )
+                            {
+                                item.purc_typ = ESCommConst.P045_CT;
+                            }
+                            return false;
+                        }
+                        break;
+                    
+                    //품명
+                    case "item_nm" :
+                        //규격
+                    case "spec" :
+                        if( item.rep_cd_yn == "N" || item.sap_pr_no )
+                            return false;
+                        else
+                            return true;
+                        break;
+                    //단위
+                    case "unit_cd" :
+                        //자동발주 O , 단가계약 O                        
+                        if ("Y" == item.prc_yn || "Y" == item.auto_po_yn) return false;
+                        
+                        return true;
+                        break;
+                    case "cate_cd" :
+                        //ERP에서 코드를 관리를 하는 경우 수정 불가
+                        if( item.sap_item_yn == "Y" || item.sap_pr_no )
+                            return false;
+                        else
+                            return true;
+                        break;
+                    
+                    //계정지정범주
+                    case "cost_typ" :
+                        //SAP 전송 후에는 계정지정범주를 수정할 수 없다.(ERP에서 에러가 발생함)
+                        if( !item.sap_pr_no )
+                            return true;
+                        else
+                            return false;
+                        break;
+                    
+                    //단가
+                    case "pr_price" : // prc_chg_yn (단가변경가능 여부)
+                        //자동발주 O , 단가계약 O
+                        if ("Y" == item.prc_yn || "Y" == item.auto_po_yn) return false;
+                        
+                        return true;
+                        
+                        break;
+                    
+                    //추천업체
+                    case "ref_vd" :
+                        //계약번호가 존재하는 품목은 수정 불가
+                        if( item.price_cntr_no ) 
+                            return false;
+                        else
+                            return true;
+                        break;
+                    
+                    default:
+                        return editable;
+                        break;
+                }
+                gridSC.refresh();
+            }
+            
+            /**
+             * @private
+             * 회계계정 컬럼 별 Editable 처리
+             */
+			/*
+            private function accGridItemEditableEvent(item:Object, column:SCDataGridColumn):Boolean 
+            {
+                if( !editable ) 
+                    return false;
+                
+                switch( column.dataField )
+                {
+                    //G/L계정코드
+                    case "gl_acc_cd" :
+                        //Cost Ctr코드
+                    case "cost_acc_cd" :
+                        //Fund Ctr코드
+                    case "fund_center_cd" :
+                        //WBS
+                    case "wbs_cd" :
+                        //자산번호
+                    case "asset_no" :
+                        //임시자산번호
+                    case "tmp_asset_no" :
+                        //SAP_PR_NO 없을 시에만 변경 가능
+                        if( item.sap_pr_no)
+                            return false;
+                        else
+                            return true;
+                        break;
+                    //오더번호
+                    case "order_no" :
+                        //SAP_PR_NO 없을 시에만 변경 가능
+                        if( item.sap_pr_no )
+                            return false;
+                        else
+                        {
+                            if( item.order_editable )
+                                return false;
+                            else
+                                return true;
+                        }
+                        break;
+                    
+                    default:
+                        return editable;
+                        break;
+                }
+                accountSC.refresh();
+            }
+			*/
+            
+            /**
+             * @private 
+             * Oder_NO 추가(itemGrid)
+             */ 
+            private function addOrderNo(item:Object):void
+            {
+                for each(var obj:Object in gridSC)
+                {
+                    if( obj.accList != null && obj.accList.length > 0 )
+                    {
+                        var accInfo:Object = obj.accList.getItemAt(0);
+                        
+                        if( accInfo.order_no == item.order_no )
+                        {
+                            obj.s_order_no  = item.order_no;
+                            obj.s_order_amt = item.order_no_amt;
+                        }
+                    }
+                }
+            }
+            
+            
+            /**
+             * @private
+             * Grid에 신규 아이템 추가 - 물품정보
+             * DataGrid에 binding되어있는 Collection 객체에 Object 추가
+             */
+            private function addRowByCatalog(itemList:SCCollection):void 
+            {
+                var cnt:Number      = 0;
+                var now:Date        = new Date();
+                now.setDate(now.getDate() + 15); 
+                var rd_date:String  = DateField.dateToString(now, "YYYYMMDD");
+                now.setDate(now.getDate() + 15); 
+                var sPrcUnit:String = "1";
+                
+                for each( var obj:Object in itemList )
+                {    
+                    var newitem:SCObject = new SCObject();
+                    
+                    for( var key:Object in obj )
+                    {
+                        if(key != "oldObj")
+                            newitem[key] = obj[key];
+                    }
+                    
+                    //기본정보 Setting
+                    newitem.$newitem               = true;
+                    newitem.pr_no                  = headerSO.pr_no          ; //구매요청 번호
+                    newitem.purc_typ               = headerSO.purc_typ       ; //구매 유형                        
+                    newitem.cur                    = headerSO.cur            ; //통화                                                                        
+                    
+                    if(headerSO.purc_typ == "CT")
+                        newitem.item_qty           = "1"                     ; //품목 수량    
+                    else
+                        newitem.item_qty           = "0"                     ; //품목 수량
+                    
+                    newitem.pr_sug_id              = headerSO.pr_req_id      ; //구매의뢰자                                                                         
+                    newitem.pr_sug_nm              = headerSO.pr_req_nm      ; //구매의뢰자명 
+                    
+                    if( !isNull(obj.job_grp_cd) )
+                    {
+                        newitem.purc_grp_cd        = obj.job_grp_cd          ; //구매담당
+                        newitem.purc_grp_nm        = obj.job_grp_nm          ; //구매담당명                        
+                    }
+                    else
+                    {
+                        newitem.purc_grp_cd        = headerSO.purc_grp_cd    ; //구매담당
+                        newitem.purc_grp_nm        = headerSO.purc_grp_nm    ; //구매담당명    
+                    }
+                    
+                    if(headerSO.purc_typ == ESCommConst.P045_CT)
+                    {
+                        newitem.cost_typ           = "U";                            
+                    }
+                    else
+                    {
+                        newitem.cost_typ           = headerSO.cost_typ       ; //계정지정범주    
+                    }
+                    
+                    if( headerSO.purc_typ == ESCommConst.P045_MT )  
+                        newitem.rd_date            = rd_date                 ; //납품요청일
+                    
+                    //선택한 품목정보 Setting
+                    if( !isEmpty(obj.plt_cd) )
+                    {
+                        newitem.plt_cd             = obj.plt_cd              ; //공장 코드                                                                          
+                        newitem.plt_nm             = obj.plt_nm              ; //공장 명
+                    }
+                    else
+                    {
+                        newitem.plt_cd             = headerSO.plt_cd         ; //공장 코드                                                                          
+                        newitem.plt_nm             = headerSO.plt_nm         ; //공장 명
+                    }
+                    
+                    newitem.prc_chg_yn             = obj.prc_chg_yn          ; //단가변경가능 여부
+                    newitem.wh_cd                  = obj.wh_cd               ; //저장위치
+                    newitem.wh_nm                  = obj.wh_nm               ; //저장위치명
+                    newitem.item_cd                = obj.item_cd             ; //품목 코드                                                                          
+                    newitem.item_nm                = obj.item_nm             ; //품목 명                                                                            
+                    newitem.item_en_nm             = obj.item_en_nm          ; //품목 영문명                                                                        
+                    newitem.spec                   = obj.spec                ; //규격                                                                               
+                    newitem.unit_cd                = obj.bas_unit_cd         ; //단위 코드
+                    
+                    if( isEmpty(obj.prc_unit) )
+                        sPrcUnit                   = "1"                     ;
+                    else
+                        sPrcUnit                   = obj.prc_unit            ;
+                    
+                    newitem.price_unit             = sPrcUnit                ; //가격단위
+                    
+                    if( isEmpty(obj.item_price) )
+                        newitem.pr_price           = "0"                     ; //구매요청 단가
+                    else
+                        newitem.pr_price           = obj.item_price          ; //구매요청 단가
+                    
+                    newitem.ref_vd                 = obj.vd_cd               ; //참조 업체                                                                          
+                    newitem.ref_vd_nm              = obj.vd_nm               ; //참조 업체명
+                    newitem.biz_reg_no             = obj.biz_reg_no          ; //참조 업체명
+                    newitem.cate_cd                = obj.mat_grp             ; //ERP자재그룹코드
+                    newitem.cate_nm                = obj.mat_grp_nm          ; //ERP자재그룹명
+                    
+                    if( isEmpty(obj.sap_grp_cd) )
+                    {
+                        newitem.sap_grp_cd         = headerSO.sap_grp_cd     ; //구매그룹
+                        newitem.sap_grp_nm         = headerSO.sap_grp_nm     ; //구매그룹명    
+                    }
+                    else
+                    {
+                        newitem.sap_grp_cd         = obj.sap_grp_cd          ; //구매 그룹 코드                                                                     
+                        newitem.sap_grp_nm         = obj.sap_grp_nm          ; //구매 그룹명
+                    }
+                    
+                    newitem.price_cntr_no          = obj.price_cntr_no       ; //계약번호    
+                    newitem.cntr_no                = obj.cntr_no             ; //계약번호
+                    newitem.cntr_lno               = obj.info_sn             ; //일련번호
+                    newitem.item_cate              = obj.item_cate           ; //품목범주                                                                           
+                    newitem.sg_sn                  = obj.sg_sn               ; //SG일련번호                                                                         
+                    newitem.sg_cd                  = obj.sg_cd               ; //SG코드                                                                             
+                    newitem.auto_po_yn             = obj.auto_po_yn          ; //자동발주여부
+                    newitem.auto_po_yn_nm             = obj.auto_po_yn_nm          ; //자동발주여부
+                    newitem.rep_cd_yn              = obj.rep_cd_yn           ; //대표품목여부
+                    newitem.sap_item_yn            = obj.erpcd_cre_yn        ; //ERP 아이템 관리여부                                                                
+                    newitem.sap_item_cd            = obj.comp_item_cd        ; //ERP 아이템 코드                                                                    
+                    newitem.sap_cate_cd            = obj.mat_grp             ; //ERP 자재그룹 코드    
+                    newitem.purc_org               = headerSO.purc_org       ; //구매조직
+                    newitem.purc_org_nm            = headerSO.purc_org_nm    ; //구매조직명
+                    newitem.mat_typ                = obj.mat_typ             ; //자재유형
+                    newitem.gl_acc_cd              = obj.gl_acc_cd           ;
+                    newitem.gl_acc_nm              = obj.gl_acc_nm           ;
+                    
+                    newitem.accList = null;
+                    
+					//중복 선택한 아이템 추가 불가
+					if(gridSC.filterItems({item_cd:newitem.item_cd}).length == 0)
+					{
+						gridSC.addItem(newitem);
+						cnt++;
+					}
+                }
+                
+                compare.noAct = "N";//물품 추가시  alert 창 반응하게 수정 
+                
+				if(cnt > 0)
+					SCAlert.show( cnt + translator.translate("건이 추가되었습니다."), translator.translate("알림"));
+				else
+					SCAlert.show( translator.translate("선택하신 ") + itemList.length + translator.translate("건이 이미 추가 되어 있습니다."), translator.translate("알림"));
+            }
+            
+            /**
+             * @private
+             * 계정지정범주 정보 생성
+             */ 
+            private function createAccList( selectedItem:Object ):SCCollection
+            {
+                if( selectedItem )
+                {
+                    var accList:SCCollection = new SCCollection();
+                    var accItem:SCObject     = new SCObject();
+                    
+                    accItem.$newitem     = true;
+                    accItem.pr_no        = selectedItem.pr_no;
+                    accItem.pr_lno       = selectedItem.pr_lno;
+                    accItem.pr_line_no   = selectedItem.line_no;
+                    accItem.acc_typ      = "Q";
+                    accItem.qty_or_rate  = "100";
+                    
+                    // 회사별속성 - 제조화학업종 여부
+                    if(selectedItem.cost_typ == "K" || selectedItem.cost_typ == "P")
+                    {
+                        accItem.gl_acc_cd   = selectedItem.gl_acc_cd;
+                        accItem.gl_acc_nm   = selectedItem.gl_acc_nm;    
+                    }
+                        // 회사별속성 - 정보통신업종 여부
+                    else if(selectedItem.cost_typ == "C")
+                    {
+                        accItem.gl_acc_cd   = selectedItem.gl_acc_cd;
+                        accItem.gl_acc_nm   = selectedItem.gl_acc_nm;
+                    }
+                    else
+                    {
+                        accItem.gl_acc_cd   = null;
+                        accItem.gl_acc_nm   = null;
+                    } 
+                    
+                    accList.addItem(accItem);
+                    
+                    return accList;
+                }
+                else
+                    return null;
+            }
+            
+            private function updateItemsCustom():SCCollection
+            {
+                var updateItems:SCCollection = new SCCollection();
+                
+                for each( var obj:Object in gridSC )
+                {
+                    /** 물품정보가 수정상태이거나 해당 물품정보의 회계정보가 수정상태일 경우 */
+                    if( obj.editstatus == 'U' )
+                    {
+                        updateItems.addItem( obj );
+                    }
+                    else if( obj.editstatus == null || obj.editstatus == '' )
+                    {
+                        if( obj.accList != null && obj.accList.length > 0 )
+                        {
+                            if( obj.accList.getItemAt(0).editstatus == 'U' )
+                                updateItems.addItem( obj );
+                        }
+                    }
+                }
+                
+                return updateItems;
+            }
+            
+            /**
+             * 운영조직 변경시 물품정보 DB에서 삭제
+             */
+            private function delItemGrid():void{
+                headerSO.isPr = isPr;
+                //결재 상신 버튼 클릭 여부
+                isApproveSave       = false;
+                headerSO.trans_flag = 'temp';
+                updateSC            = updateItemsCustom();
+                headerSO.aprv_sts  = "T";
+                file.upload();
+            }
+            
+            /**
+             * @private
+             * grid의 변경상태 style 적용
+             */
+            private function gridItemStyleFunction(data:Object, col:SCDataGridColumn):Object
+            {
+                if( col.dataField == "sts_nm")     // 서류제출
+                {
+                    if(data.sts_cd == "A")        // 구매반려, 삭제
+                        return {color:0xE30000};
+                } 
+                return {color:0x232323};
+            }
+            
+            /********************************************************************************************************
+             ****************                 Change Event Function                           ***********************
+             *******************************************************************************************************/
+            private function bPrModifyCtrl():void {
+                if (EDIT == mode  && "Y" == searchSO.changeRequest ){
+                    templatedownload.visible                  = false;
+                    templatedownload.includeInLayout     = false;
+                    
+                    excelupload.visible                          = false;
+                    excelupload.includeInLayout             = false;
+                    
+                    itemcopy.visible                              = false;
+                    itemcopy.includeInLayout                 = false;
+                    
+                    exbtn.visible                                  = false;
+                    exbtn.includeInLayout                     = false;
+                }
+            }         
+            
+            /**
+             * @private
+             * PR 총금액 계산
+             */
+            private function setPrTotAmt():void 
+            {
+                var prTotAmt:Number = 0;
+                
+                for each (var o:Object in gridSC) 
+                {
+                    if( o.pr_amt && !(o.editstatus == "D" || o.sts == "D") ) 
+                    {
+                        prTotAmt = prTotAmt + Number(o.pr_amt);
+                    }
+                }
+                
+                headerSO.pr_tot_amt = prTotAmt;
+            }
+            
+            /**
+             * @private
+             * 시행품의여부 라디오버튼 이벤트
+             */ 
+            private function chgOrgnRpt():void
+            {
+                
+                if(headerSO.orgn_rpt_yn == "N"){
+                    headerSO.orgn_rpt_no =""; 
+                }
+                
+                dispatchEvent(new Event("orgnChanged"));
+            }
+            
+            /**
+             * @private
+             * 구매유형 콤보박스 변경시 필드제어
+             */
+            private function chgPurcTyp():void
+            {
+                if( headerSO.purc_typ == ESCommConst.P045_MT )  //purc_typ.selectedValue : MT 물품
+                {
+                    //Title 변경
+                    basic_title.label        = translator.translate("물품정보"); 
+                    //Grid Title 변경
+                    item_nm_grid.headerText  = translator.translate("품명");
+                    rd_locat_grid.headerText = translator.translate("납품장소");
+                }
+                else if( headerSO.purc_typ == ESCommConst.P045_CT ) //purc_typ.selectedValue : CT 공사/용역
+                {
+                    //Title 변경
+                    basic_title.label        = translator.translate("공사/용역정보");
+                    //Grid Title 변경
+                    item_nm_grid.headerText  = translator.translate("공사/용역명");
+                    rd_locat_grid.headerText = translator.translate("수행장소");
+                }
+                else if( headerSO.purc_typ == ESCommConst.P045_MC ) //purc_typ.selectedValue : MC 물품 , 공사/용역
+                {
+                    //Title 변경
+                    basic_title.label        = translator.translate("물품/공사/용역정보");
+                    //Grid Title 변경
+                    item_nm_grid.headerText  = translator.translate("품명/공사/용역명");
+                    rd_locat_grid.headerText = translator.translate("납품/수행장소");
+                }
+                
+                dispatchEvent(new Event("bhqChanged"));
+                dispatchEvent(new Event("qtyChanged"));
+                conPMtr.setConditionMatrix("purc_typ", headerSO.purc_typ, this);
+                getCostTyp();
+            }
+            
+            
+            /**
+             * @private
+             * 계정지정범주 콤보박스 조회 Function
+             */ 
+            private function getCostTyp():void
+            {
+                costTypSP.service();        
+            }
+            
+            /**
+             * @private
+             * Input Box 내용 변경시
+             */
+            private function changeTextInput(event:Event):void 
+            {
+                var textinput:TextInput = event.target as TextInput ;
+                
+                switch(textinput.id) 
+                {
+                    case "cur":    //통화
+                        headerSO.cur_nm = "";
+                        break;
+                    
+                    case "biz_place": //사업장
+                        headerSO.biz_place_nm = "";
+                        break;
+                }
+            }
+            
+            private function common_focusOutHandler(event:Event):void
+            {
+                var id:String       = event.currentTarget.id
+                var codeInfos:Array = codeSupporter.codeInfomations;
+                
+                if(editable){
+                    if( codeSupporter.isSearching ) 
+                        return;
+                    
+                    if(!isNull(headerSO['cur_nm'])) {
+                        return;
+                    }
+                    
+                    for each( var codeInfo:CCCodeInformation in codeInfos )
+                    {
+                        //공통코드여서 같은 쿼리를 사용하는 경우 check해서 grp_cd를 넣어준다.
+                        switch( id )
+                        {
+                            case "cur" :       //통화
+                                headerSO.__grp_cd = "C003";
+                                break;
+                            
+                            case "biz_place" : //사업장
+                                break;
+                        }
+                        
+                        if( codeInfo.name == id )
+                        { 
+                            codeSupporter.target = headerSO;
+                            
+                            codeSupporter.searchCode(id);
+                            
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            /**
+             * 운영조직 변경시  물품정보 초기화
+             */
+            private function changeOperOrgSn():void{
+                if(compare.oper_org_sn != null && compare.oper_org_sn != ''){
+                    compare.noAct = "N";
+                    compare.oper_org_sn_befo = compare.oper_org_sn;
+                }
+                if(compare.oper_org_sn_befo != headerSO.oper_org_sn){
+                    compare.oper_org_sn_after = headerSO.oper_org_sn;
+                    compare.oper_org_sn = headerSO.oper_org_sn;
+                }
+                
+                if(editable && gridSC.length > 0){
+                    // 구매운영조직을 수정 할 수 있고 물품에 값이 들어 있을때
+                    if(compare.noAct == "N"){
+                        SCAlert.show(translator.translate("운영조직이 변경되면 입력값이 초기화 됩니다.") + "\n" + 
+                            translator.translate("계속 진행하시겠습니까?"), translator.translate("확인"), true, Alert.YES | Alert.NO, this, changeOperOrgSnConfirm );
+                    }
+                    compare.noAct = "N";
+                }
+            }
+            
+            /**
+             * 운영조직 변경시 물품정보 초기화
+             */
+            private function changeOperOrgSnConfirm(event:CloseEvent):void{
+                if ( event.detail == Alert.YES )
+                {
+                    var updateItems:SCCollection = gridSC.filterItems(({sts :"I"})); 
+                    
+                    if(updateItems.length > 0){
+                        for( var i:int = gridSC.length - 1; i >= 0; i-- ) 
+                        {
+                            var row:Object = gridSC[i];
+                            
+                            row.check_delete = true;
+                            
+                        }
+                        delItemGrid();
+                    }else{
+                        gridSC.removeAll();
+                        accountSC.removeAll();
+                    }
+                    compare.noAct = "N";
+                }else{
+                    headerSO.oper_org_sn = compare.oper_org_sn_befo;
+                    compare.noAct = "N";
+                }
+                compare.oper_org_sn_befo = compare.oper_org_sn_after;
+            }
+            
+            /********************************************************************************************************
+             ****************                 PopUp / Code Support Function                    **********************
+             *******************************************************************************************************/
+            /**
+             * @private
+             * 공통 팝업 호출
+             */
+            private function callPopup(popcode:String, datafield:String):void 
+            {
+                if( !editable )
+                    return;
+                
+                var pu:SCPopupSelector = SCPopupManager.getInstance().popup(popcode);
+                pu.addEventListener(SCPopupSelectorEvent.POPUP_LOADED, function(event:SCPopupSelectorEvent):void {
+                    // 파라 미터 추가 및 속성 변경
+                    var popupParam:Object = new Object();
+                    var listlabel:String  = null;
+                    
+                    switch (datafield) 
+                    {
+                        case "pr_req_dept" : // 구매요청부서
+                            popupParam.comp_cd = session.user.comp_cd;
+                            listlabel          = translator.translate("구매요청부서") + " " + translator.translate("조회");
+                            break;
+                        case "cur" : // 통화
+                            popupParam.grp_cd = "C003";
+                            listlabel         = translator.translate("통화") + " " + translator.translate("조회");
+                            break;
+                    }
+                    
+                    pu.parameter = popupParam;
+                    
+                    if (listlabel) 
+                    {
+                        pu.titleLabel = listlabel;
+                    }
+                });
+                pu.addEventListener(SCPopupSelectorEvent.POPUP_SELECTED, function(event:SCPopupSelectorEvent):void 
+                {
+                    // 복수 : event.selectedItems
+                    // 단일 : event.selectedItem
+                    // 중복아이템 (pu.duplicateCheckFunction 사용시: event.duplicateItems
+                    var item:Object = event.selectedItem;
+                    
+                    switch( datafield ) 
+                    {
+                        case "pr_req_dept" : // 구매요청부서
+                            headerSO.pr_req_dept    = item.dept_cd;
+                            headerSO.pr_req_dept_nm = item.dept_nm;
+                            break;
+                        
+                        case "cur" : // 통화
+                            headerSO.cur    = item.dtl_cd;
+                            headerSO.cur_nm = item.dtl_cd_nm;
+                            break;
+                    }
+                });
+                pu.popup(Application.application as DisplayObject);
+            }
+            
+            private function callAssetPopup(value:String):void
+            {
+                var popup:CCModulePopup = new CCModulePopup();
+                var popupSC:SCObject    = new SCObject();
+                
+                switch( value )
+                {
+                    // Biz Place
+                    case "bp":
+                        popupSC        = new SCObject();
+                        popupSC.url    = "modules/bp/procurement/comm/EPBizPlacePopup.swf";
+                        popupSC.title  = translator.translate("Biz Place") + " " + translator.translate("조회");
+                        popupSC.width  = "700";
+                        popupSC.height = "420";
+                        break
+                }
+                popup.popup( popupSC.url, popupSC.title, popupSC.width, popupSC.height, this, true);
+                popup.parameter = {type: CCOrgDataProviderProxy.TYPE_PURCHASE};
+                
+                var pltSelectedFunction:Function = function(event:SCModulePopupEvent):void 
+                {
+                    //호출후 반드시 removeEvent 해준다.
+                    popup.removeEventListener(SCModulePopupEvent.SELECTED_ITEM, pltSelectedFunction);
+                    var selectedItem:Object = event.object;
+                    
+                    switch( value ) 
+                    {
+                        // Biz Place
+                        case "bp": 
+                            headerSO.biz_place    = selectedItem.branch;
+                            headerSO.biz_place_nm = selectedItem.btext;
+                            break;
+                    }
+                }
+                popup.addEventListener(SCModulePopupEvent.SELECTED_ITEM, pltSelectedFunction);
+            }
+            
+            /**
+             * @private
+             * Grid 공통 팝업 호출
+             */
+            private function callGridPopup(popcode:String, datafield:String, nowitem:Object):void 
+            {
+                var pu:SCPopupSelector = SCPopupManager.getInstance().popup(popcode);
+                pu.addEventListener(SCPopupSelectorEvent.POPUP_LOADED, function(event:SCPopupSelectorEvent):void 
+                {
+                    // 파라 미터 추가 및 속성 변경
+                    var popupParam:Object = new Object();
+                    var listlabel:String  = null;
+                    
+                    switch( datafield ) 
+                    {
+                        //단위
+                        case "img_unit_cd" : 
+                            popupParam.grp_cd = "C007";
+                            listlabel = translator.translate("단위") + " " + translator.translate("조회");
+                            break;
+                        
+                        //구매조직
+                        case "img_purc_org" :
+                            popupParam.grp_cd = "C028";
+                            listlabel = translator.translate("구매조직") + " " + translator.translate("조회");
+                            break;
+                        
+                        //구매의뢰자
+                        case "img_pr_sug_nm" :
+                            listlabel = translator.translate("구매의뢰자") + " " + translator.translate("조회");
+                            break;
+                        
+                        //검수담당자
+                        case "img_gr_chr_nm" : 
+                            listlabel = translator.translate("검수담당자") + " " + translator.translate("조회");
+                            break;
+                        
+                        //구매담당
+                        case "img_purc_grp_cd" : 
+                            listlabel = translator.translate("구매담당") + " " + translator.translate("조회");
+                            break;
+                        
+                        //추천업체
+                        case "img_ref_vd" : 
+                            listlabel = translator.translate("추천업체") + " " + translator.translate("조회");
+                            break;
+                        
+                        //저장위치
+                        case "img_wh_cd" :
+                            popupParam.comp_cd = headerSO.comp_cd;
+                            popupParam.plt_cd  = nowitem.plt_cd;
+                            listlabel = translator.translate("저장위치") + " " + translator.translate("조회");
+                            break;
+                        case "img_svc_master" :
+                            popupParam.grp_cd = "P063";
+                            popupParam.comp_cd = headerSO.comp_cd;
+                            popupParam.plt_cd  = nowitem.plt_cd;
+                            listlabel = translator.translate("서비스") + " " + translator.translate("조회");
+                            break;
+                    }
+                    pu.parameter = popupParam;
+                    
+                    if( listlabel ) 
+                    {
+                        pu.titleLabel = listlabel;
+                    }
+                });
+                pu.addEventListener(SCPopupSelectorEvent.POPUP_SELECTED, 
+                    function(event:SCPopupSelectorEvent):void 
+                    {
+                        // 복수 : event.selectedItems
+                        // 단일 : event.selectedItem
+                        // 중복아이템 (pu.duplicateCheckFunction 사용시: event.duplicateItems
+                        var popupitem:Object = event.selectedItem;
+                        
+                        switch (datafield) 
+                        {
+                            //단위
+                            case "img_unit_cd" : 
+                                nowitem.unit_cd = popupitem.dtl_cd;
+                                break;
+                            
+                            //구매조직
+                            case "img_purc_org" :
+                                nowitem.purc_org    = popupitem.dtl_cd;
+                                nowitem.purc_org_nm = popupitem.dtl_cd_nm;
+                                break;
+                            
+                            //구매의뢰자
+                            case "img_pr_sug_nm" :
+                                nowitem.pr_sug_id = popupitem.usr_id;
+                                nowitem.pr_sug_nm = popupitem.usr_nm;
+                                break;
+                            
+                            //검수담당자
+                            case "img_gr_chr_nm" :
+                                nowitem.gr_chr_id = popupitem.usr_id;
+                                nowitem.gr_chr_nm = popupitem.usr_nm;
+                                break;
+                            
+                            //구매그룹
+                            case "img_sap_grp_cd" :
+                                nowitem.sap_grp_cd = popupitem.dtl_cd;
+                                nowitem.sap_grp_nm = popupitem.dtl_cd_nm;
+                                break;
+                            
+                            //구매담당
+                            case "img_purc_grp_cd" :
+                                nowitem.purc_grp_cd = popupitem.purc_grp_cd;
+                                nowitem.purc_grp_nm = popupitem.purc_grp_nm;
+                                break;
+                            
+                            //추천업체
+                            case "img_ref_vd" :
+                                nowitem.ref_vd    = popupitem.vd_cd;
+                                nowitem.ref_vd_nm = popupitem.vd_nm_eng;
+                                nowitem.sap_vd_cd = popupitem.erp_vd_cd;
+                                
+                                if ( session.user.locale == "ko_KR" ) 
+                                {
+                                    nowitem.ref_vd_nm = popupitem.vd_nm_loc;
+                                }
+                                break;
+                            
+                            //저장위치
+                            case "img_wh_cd" :
+                                nowitem.wh_cd = popupitem.wh_cd;
+                                nowitem.wh_nm = popupitem.wh_nm;
+                                break;
+                            
+                            //서비스마스터
+                            case "img_svc_master" :
+                                nowitem.svc_master    = popupitem.dtl_cd;
+                                nowitem.svc_master_nm = popupitem.dtl_cd_nm;
+                                break;
+                        }
+                    }
+                );
+                pu.popup(Application.application as DisplayObject);
+            }
+            
+            private function callGridSapPopup( grid:SCDataGrid, datafield:String, nowitem:Object ):void
+            {
+                var popup:CCModulePopup = new CCModulePopup();
+                var popupSC:SCObject    = new SCObject();
+                
+                switch( datafield ) 
+                {    
+                    //Plant
+                    case "img_plt_cd" : 
+                        popupSC        = new SCObject();
+                        popupSC.url    = "modules/bp/procurement/comm/EPOrgPopup.swf";
+                        popupSC.title  = translator.translate("Plant") + " " + translator.translate("조회");
+                        popupSC.width  = "400";
+                        popupSC.height = "300";
+                        
+                        break;
+                    
+                    //G/L계정
+                    case "img_gl_acc_cd" : 
+                        popupSC        = new SCObject();
+                        popupSC.url    = "modules/bp/procurement/comm/EPGLAccPopup.swf";
+                        popupSC.title  = translator.translate("G/L계정") + " " + translator.translate("조회");
+                        popupSC.width  = "500";
+                        popupSC.height = "500";
+                        
+                        break; 
+                    
+                    //Cost Ctr
+                    case "img_cost_acc_cd" :
+                        popupSC        = new SCObject();
+                        popupSC.url    = "modules/bp/procurement/comm/EPCostCtrPopup.swf";
+                        popupSC.title  = translator.translate("Cost Ctr") + " " + translator.translate("조회");
+                        popupSC.width  = "500";
+                        popupSC.height = "500";
+                        
+                        break;
+                    
+                    //Fund Ctr
+                    case "img_fund_center_cd" :
+                        popupSC        = new SCObject();
+                        popupSC.url    = "modules/bp/procurement/comm/EPFundCtrPopup.swf";
+                        popupSC.title  = translator.translate("Fund Ctr") + " " + translator.translate("조회");
+                        popupSC.width  = "500";
+                        popupSC.height = "500";
+                        
+                        break; 
+                    
+                    //WBS
+                    case "img_wbs_cd" : // WBS 
+                        popupSC        = new SCObject();
+                        popupSC.url    = "modules/bp/procurement/comm/EPWBSCdPopup.swf";
+                        popupSC.title  = translator.translate("WBS") + " " + translator.translate("조회");
+                        popupSC.width  = "500";
+                        popupSC.height = "500";
+                        
+                        break;
+                    
+                    //자산번호
+                    case "img_asset_no" :
+                        popupSC        = new SCObject();
+                        popupSC.url    = "modules/bp/procurement/comm/EPAssetNumRcvPopup.swf";
+                        popupSC.title  = translator.translate("자산번호") + " " + translator.translate("조회");
+                        popupSC.width  = "800";
+                        popupSC.height = "500";
+                        
+                        break;
+                    
+                    case "img_order_no_chk" :
+                        if( !nowitem.order_no )
+                        {
+                            SCAlert.show(translator.translate("투자오더번호를 먼저 입력하셔야 합니다."));
+                            return;
+                        }
+                        else
+                        {
+                            popupSC        = new SCObject();
+                            popupSC.url    = "modules/bp/procurement/comm/EPInvestSpendPopup.swf";
+                            popupSC.title  = translator.translate("투자예산") + " " + translator.translate("조회");
+                            popupSC.width  = "400";
+                            popupSC.height = "200";
+                        }
+                        
+                        break;
+                    
+                    //오더번호
+                    case "img_order_no" :
+                        popupSC        = new SCObject();
+                        popupSC.url    = "modules/bp/procurement/comm/EPIntOrdPopup.swf";
+                        popupSC.title  = translator.translate("투자예산번호(오더번호)") + " " + translator.translate("조회");
+                        popupSC.width  = "600";
+                        popupSC.height = "500";
+                        
+                        break; 
+                }
+                
+                popup.popup( popupSC.url, popupSC.title, popupSC.width, popupSC.height, this, true);
+                popup.parameter = {type: CCOrgDataProviderProxy.TYPE_PURCHASE, sendparam:nowitem};
+                
+                var pltSelectedFunction:Function = 
+                    function(event:SCModulePopupEvent):void 
+                    {
+                        //호출후 반드시 removeEvent 해준다.
+                        popup.removeEventListener(SCModulePopupEvent.SELECTED_ITEM, pltSelectedFunction);
+                        var selectedItem:Object = event.object;
+                        
+                        switch( datafield ) 
+                        {
+                            //Plant
+                            case "img_plt_cd" :
+                                if( nowitem.plt_cd != selectedItem.plt_cd )
+                                {
+                                    nowitem.wh_cd = null;
+                                    nowitem.wh_nm = null;
+                                }
+                                
+                                nowitem.plt_cd = selectedItem.plt_cd; //plant 코드 
+                                nowitem.plt_nm = selectedItem.plt_nm; //plant 명 
+                                break;
+                            
+                            //Cost Ctr
+                            case "img_cost_acc_cd" :
+                                nowitem.cost_acc_cd = selectedItem.dtl_cd;
+                                nowitem.cost_acc_nm = selectedItem.dtl_cd_nm;
+                                break;
+                            
+                            //G/L계정
+                            case "img_gl_acc_cd" : 
+                                nowitem.gl_acc_cd = selectedItem.dtl_cd;
+                                nowitem.gl_acc_nm = selectedItem.rem;
+                                break;
+                            
+                            //Fund Ctr
+                            case "img_fund_center_cd" : 
+                                nowitem.fund_center_cd = selectedItem.dtl_cd;
+                                nowitem.fund_center_nm = selectedItem.dtl_cd_nm;
+                                break;
+                            
+                            //자산번호
+                            case "img_asset_no" : 
+                                nowitem.asset_no     = selectedItem.dtl_no;
+                                nowitem.asset_sub_no = selectedItem.dtl_no2;
+                                nowitem.asset_no_nm  = selectedItem.rem;
+                                
+                                if( !ESCommUtil.isNullTrim(selectedItem.eaufn ))
+                                {
+                                    nowitem.order_no       = selectedItem.eaufn;
+                                    nowitem.order_no_nm    = selectedItem.ktext;
+                                    nowitem.order_editable = false;
+                                }
+                                
+                                if( !ESCommUtil.isNullTrim(selectedItem.kostl ))
+                                {
+                                    nowitem.cost_acc_cd  = selectedItem.kostl;
+                                    nowitem.cost_acc_nm  = selectedItem.ktext;
+                                }
+                                
+                                break;
+                            
+                            //오더번호
+                            case "img_order_no" : 
+                                nowitem.order_no       = selectedItem.dtl_cd;
+                                nowitem.order_no_nm    = selectedItem.dtl_cd_nm;
+                                nowitem.order_editable = true;
+                                
+                                nowitem.order_no_amt   = null;
+                                addOrderNo(nowitem);
+                                break;
+                            
+                            case "img_order_no_chk" :
+                                nowitem.order_no_amt = selectedItem.amt;
+                                addOrderNo(nowitem);
+                                break;
+                            
+                            //WBS
+                            case "img_wbs_cd" : 
+                                nowitem.wbs_cd = selectedItem.dtl_cd;
+                                nowitem.wbs_nm = selectedItem.dtl_cd_nm;
+                                break;
+                        }
+                        
+                        grid.dataProvider.refresh();
+                    }
+                popup.addEventListener(SCModulePopupEvent.SELECTED_ITEM, pltSelectedFunction);
+            }
+            
+            /**
+             * @private
+             * 업체검색 팝업 호출 (Grid)
+             */
+            private function getVendorPop(item:Object=null):void
+            {    
+                var vendorSC:SCCollection = new SCCollection();
+                
+                vendorSC.addItem(item);
+                
+                var popup:CCModulePopup = new CCModulePopup();
+                popup.popup("modules/bp/procurement/comm/EPVendorList.swf", translator.translate("추천업체 선택"), 1000, 500, this, true);
+                popup.parameter = {rfx_flag:"X", ext_cd:"003", itemList: vendorSC ,oper_org_sn:headerSO.oper_org_sn};
+                popup.childProperties = {isMultiple: false};
+                
+                var pltSelectedFunction:Function = function(event:SCModulePopupEvent):void
+                {
+                    popup.removeEventListener(SCModulePopupEvent.SELECTED_ITEM, pltSelectedFunction);
+                    
+                    var selectItem:SCObject = event.object as SCObject;
+                    
+                    item.ref_vd    = selectItem.vd_cd;
+                    item.ref_vd_nm = selectItem.vd_nm_loc;
+                    item.sap_vd_cd = selectItem.erp_vd_cd;
+                }
+                popup.addEventListener(SCModulePopupEvent.SELECTED_ITEM, pltSelectedFunction);
+            }
+            
+            /**
+             * @private
+             * 팝업 이벤트 - 구매요청부서
+             */
+            private function callGridDeptPopup(nowitem:Object):void 
+            {
+                var view:EPDeptTree = new EPDeptTree();
+                var pu:IFlexDisplayObject = SCPopupManager.getInstance().createPopUp(translator.translate("부서검색"), 400, 500, view, this, true, "center");
+                var param:Object = new Object();
+                
+                param.comp_cd = session.user.comp_cd;
+                param.plt_cd = nowitem.plt_cd;
+                view.popup(param);
+                
+                pu.addEventListener(SCPopupSelectorEvent.POPUP_SELECTED, 
+                    function(event:SCPopupSelectorEvent):void 
+                    {
+                        var popupitem:Object = event.selectedItem;
+                        if (rtnDeptLvlSO.delt_lvl == "PLT") {
+                            if (!nowitem.plt_cd) {
+                                nowitem.plt_cd = popupitem.plt_cd;
+                            } else if (nowitem.plt_cd != popupitem.plt_cd) {
+                                SCAlert.show(translator.translate("기술검토부서의 Plant와 Plant정보가 상이합니다."));
+                                return;
+                            }
+                        }
+                        
+                        nowitem.tbe_dept_cd = popupitem.dept_cd;
+                        nowitem.tbe_dept_nm = popupitem.dept_nm;
+                    }
+                );
+            }
+            
+            
+            /**
+             * @private
+             * 아이템추가 버튼 Click
+             */
+            private function getItemCatalog():void 
+            {
+                //CCModulePopup을 통해 팝업을 호출한다.
+                var popup:CCModulePopup = new CCModulePopup();
+                popup.popup("modules/bp/procurement/comm/EPPRItemCatalog.swf", translator.translate("품목마스터"), this.width-250, 500, this, true);
+                var param:Object = new Object();
+                param.multiple   = true; // 다중선택 여부
+                param.oneplt     = true;
+                param.itemList   = gridSC;
+                param.oper_org_sn = oper_org_sn.selectedValue.toString();
+                popup.parameter  = param;
+                
+                var pltSelectedFunction:Function = function(event:SCModulePopupEvent):void 
+                {                    
+                    var selectedItems:SCCollection = event.object as SCCollection;
+                    addRowByCatalog(selectedItems);
+                }
+                
+                popup.addEventListener(SCModulePopupEvent.SELECTED_ITEM, pltSelectedFunction);
+            }
+            
+            /**
+             * @private
+             * 일괄 적용 팝업 생성
+             */
+            private function applyAll():void 
+            {
+                var view:EPPRAllApply    = new EPPRAllApply();
+                var param:Object         = new Object();
+                var nItemAmt:Number      = new Number();
+                var nItemQty:Number      = new Number();
+                var nItemUit:Number      = new Number();
+                var nItemPrc:Number      = new Number();
+                
+                var selectedItems:SCCollection = gridSC.filterItems({check_select:true}) as SCCollection;
+                
+                if( selectedItems.length == 0 )
+                {
+                    SCAlert.show(translator.translate("선택된 물품정보가 없습니다."));
+                    return;
+                }
+                
+                param = selectedItems.getItemAt(0);
+                param.purc_typ = headerSO.purc_typ;
+                param.oper_org_sn = oper_org_sn.selectedValue.toString();
+                
+                view.popup(param);
+                view.costTypSC = costTypSC;
+                var pu:IFlexDisplayObject = SCPopupManager.getInstance().createPopUp(translator.translate("일괄적용"), 500, 270, view, this, true, "center");
+                
+                pu.addEventListener( SCPopupSelectorEvent.POPUP_SELECTED, 
+                    function(event:SCPopupSelectorEvent):void 
+                    {
+                        var item:Object = event.selectedItem;
+                        
+                        for each( var row:Object in selectedItems )
+                        {
+                            if( row.accList == null )
+                            {
+                                row.accList = createAccList(row);
+                                row.accList.changeComparable = true;
+                            }                            
+                            
+                            //단위 O
+                            if( item.chk_unit_cd == "Y" && row.sap_item_yn != "Y" && !row.sap_pr_no && editable )
+                                row.unit_cd = item.unit_cd;
+                            
+                            //수량
+                            if( item.chk_item_qty == "Y" && editable) {
+								var unitDeci:Number = deciMgt.getUnitDeci(row.unit_cd);
+								row.item_qty = Number(item.item_qty).toFixed(unitDeci);
+							}
+                            
+                            //단가 - prc_chg_yn (단가변경가능 여부)
+                            if( item.chk_pr_price == "Y" && !(row.price_cntr_no && row.prc_chg_yn == "N") && editable)
+                                row.pr_price = item.pr_price;
+                            
+                            //가격단위
+                            if( item.chk_price_unit == "Y" && editable)
+                                row.price_unit = item.price_unit;
+                            
+                            //납기일자
+                            if( item.chk_rd_date == "Y" && editable)
+                                row.rd_date = item.rd_date;
+                            
+                            //프로젝트시작일
+                            if( item.chk_prd_sd == "Y" && editable)
+                                row.prd_sd = item.prd_sd;
+                            
+                            //프로젝트종료일
+                            if( item.chk_prd_ed == "Y" && editable)
+                                row.prd_ed = item.prd_ed;
+                            
+                            //납품장소/수행장소
+                            if( item.chk_rd_locat == "Y" && editable)
+                                row.rd_locat = item.rd_locat;
+                            
+                            //구매의뢰자명
+                            if( item.chk_pr_sug_id == "Y" && editable)
+                            {
+                                row.pr_sug_id = item.pr_sug_id;
+                                row.pr_sug_nm = item.pr_sug_nm;
+                            }
+                            
+                            //검수담당자 O
+                            if( item.chk_gr_chr_id == "Y" && editable )
+                            {
+                                row.gr_chr_id = item.gr_chr_id;
+                                row.gr_chr_nm = item.gr_chr_nm;
+                            }
+                            
+                            //계정지정범주
+                            if( item.chk_cost_typ == "Y" && editable && !row.sap_pr_no )
+                                row.cost_typ = item.cost_typ;
+                            
+                            //구매그룹
+                            if( item.chk_sap_grp_cd == "Y" && editable && !row.sap_pr_no )
+                            {
+                                row.sap_grp_cd = item.sap_grp_cd;
+                                row.sap_grp_nm = item.sap_grp_nm;
+                            }
+                            
+                            //구매담당
+                            if( item.chk_purc_grp_cd == "Y" && editable )
+                            {
+                                row.purc_grp_cd = item.purc_grp_cd;
+                                row.purc_grp_nm = item.purc_grp_nm;
+                            }
+                            
+                            //ERP자재그룹 O
+                            if( item.chk_cate_cd == "Y" && row.sap_item_yn != "Y" && editable && !row.sap_pr_no )
+                            {
+                                row.cate_cd = item.cate_cd;
+                                row.cate_nm = item.cate_nm;
+                            } 
+                            
+                            //추천업체 O
+                            if( item.chk_ref_vd == "Y" && editable && !("Y" == row.prc_yn || "Y" == row.auto_po_yn))
+                            {
+                                row.ref_vd    = item.ref_vd;
+                                row.ref_vd_nm = item.ref_vd_nm;
+                                row.sap_vd_cd = item.sap_vd_cd;
+                            }
+                            
+                            //Plant O
+                            if( item.chk_plt_cd == "Y" && row.sap_item_yn != "Y" && !row.sap_pr_no && editable )
+                            {
+                                row.plt_cd = item.plt_cd;
+                                row.plt_nm = item.plt_nm;
+                            }
+                            
+                            //저장위치 O
+                            if( item.chk_wh_cd == "Y" && !row.sap_pr_no && editable )
+                            {
+                                row.wh_cd = item.wh_cd;
+                                row.wh_nm = item.wh_nm;
+                            }
+                            
+                            //플랫폼
+                            if( item.chk_plat_cd == "Y" && editable)
+                                row.plat_cd = item.plat_cd;
+                            
+                            //서비스
+                            if( item.chk_plat_svc_cd == "Y" && editable)
+                                row.plat_svc_cd = item.plat_svc_cd;
+                            
+                            //고객정보취급여부
+                            if( item.chk_cust_info_treat_yn == "Y" && editable)
+                                row.cust_info_treat_yn = item.cust_info_treat_yn;
+                            
+                            //단가변경시 수량*단가=금액 재계산
+                            nItemPrc    = parseFloat(isEmptyNum(row.pr_price )); //단가
+                            nItemQty    = parseFloat(isEmptyNum(row.item_qty )); //수량
+                            nItemUit    = parseFloat(isEmptyNum(row.price_unit )); //가격단위 
+                            nItemAmt    = nItemQty * nItemPrc / nItemUit; // 금액 = 수량 * 단가 / 가격단위
+                            row.pr_amt  = nItemAmt.toString();
+                            
+                            setPrTotAmt();
+                            
+                            if( row.accList.length > 0 )
+                            {
+                                if( !(row.sap_pr_no))
+                                {
+                                    var accSO:Object = row.accList.getItemAt(0);
+                                    
+                                    /*
+                                    * 회계정보 Setting 
+                                    */
+                                    //G/L 계정 코드
+                                    if( item.chk_gl_acc_cd == "Y")
+                                    {
+                                        if(row.cost_typ == "K" && row.cost_typ == "P" )
+                                        {
+                                            accSO.gl_acc_cd   = item.gl_acc_cd;
+                                            accSO.gl_acc_nm   = item.gl_acc_nm;
+                                            
+                                            if( !item.gl_acc_cd)
+                                            {
+                                                accSO.gl_acc_cd = row.gl_acc_cd;
+                                                accSO.gl_acc_nm = row.gl_acc_nm;
+                                            }
+                                        }
+                                        else if(row.cost_typ == "C")
+                                        {
+                                            accSO.gl_acc_cd   = item.gl_acc_cd;
+                                            accSO.gl_acc_nm   = item.gl_acc_nm;
+                                            
+                                            if( !item.gl_acc_cd)
+                                            {
+                                                accSO.gl_acc_cd = row.gl_acc_cd;
+                                                accSO.gl_acc_nm = row.gl_acc_nm;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            accSO.gl_acc_cd   = item.gl_acc_cd;
+                                            accSO.gl_acc_nm   = item.gl_acc_nm;
+                                        }
+                                    }
+                                    
+                                    //G/L 일자
+                                    if( item.chk_gl_dt == "Y" )
+                                    {
+                                        accSO.gl_dt = item.gl_dt;
+                                    }
+                                    
+                                    //Cost Ctr 코드
+                                    if( item.chk_cost_acc_cd == "Y" )
+                                    {
+                                        accSO.cost_acc_cd = item.cost_acc_cd;
+                                        accSO.cost_acc_nm = item.cost_acc_nm;
+                                    }
+                                    
+                                    //Fund Ctr 코드
+                                    if( item.chk_fund_center_cd == "Y")
+                                    {
+                                        accSO.fund_center_cd = item.fund_center_cd;
+                                        accSO.fund_center_nm = item.fund_center_nm;
+                                    }
+                                    
+                                    //WBS 코드
+                                    if( item.chk_wbs_cd == "Y" )
+                                    {
+                                        accSO.wbs_cd = item.wbs_cd;
+                                        accSO.wbs_nm = item.wbs_nm;
+                                    }
+                                    
+                                    //자산번호
+                                    if( item.chk_asset_no == "Y" )
+                                    {
+                                        accSO.asset_no     = item.asset_no;
+                                        accSO.asset_no_nm  = item.asset_no_nm;
+                                        accSO.asset_sub_no = item.asset_sub_no
+                                    }
+                                    
+                                    //임시자산번호
+                                    if( item.chk_tmp_asset_no == "Y" )
+                                    {
+                                        accSO.tmp_asset_no     = item.tmp_asset_no;
+                                    }
+                                    
+                                    //오더번호
+                                    if( item.chk_order_no == "Y" )
+                                    {
+                                        accSO.order_no     = item.order_no;
+                                        accSO.order_no_nm  = item.order_no_nm;
+                                        accSO.order_no_amt = null;
+                                    }
+                                    
+                                    //오더번호 - 예산잔액
+                                    if( item.chk_order_no_amt == "Y" )
+                                    {
+                                        accSO.order_no_amt = item.order_no_amt;
+                                    }
+                                    
+                                    //서비스
+                                    if( item.chk_svc_master == "Y" )
+                                    {
+                                        accSO.svc_master     = item.svc_master;
+                                        accSO.svc_master_nm  = item.svc_master_nm;
+                                    }
+                                }
+                            }
+                            
+                            row.s_order_no  = item.order_no;
+                            row.s_order_amt = item.order_no_amt
+                        }
+                        
+                    }
+                );
+            }
+            
+            /**
+             * @private
+             * 엑셀업로드 제외 데이터 팝업
+             */ 
+            private function excelErrListPop():void
+            {
+                var pop:CCModulePopup = new CCModulePopup();
+                pop.popup("modules/bp/procurement/comm/EPExcelErrListPop.swf", translator.translate("엑셀 업로드 제외 데이터"),650, 300, this, true);
+                var item:Object = new Object();
+                item.isMode = "PR";
+                item.errSC      = errSC;
+                pop.parameter   = item;
+            }
+            
+            private function callErrPopup(errList:ArrayCollection):void
+            {
+                var errPopup:EPCeilingErrListPopup = new EPCeilingErrListPopup();
+                errPopup.setErrList = errList;
+                errPopup.title = translator.translate("한도가 초과되었습니다.");
+                
+                SCPopUpUtil.getInstance().createPopUp(
+                    translator.translate("한도초과"),
+                    600,
+                    350,
+                    errPopup,
+                    DisplayObject(Application.application),
+                    true,
+                    "center");
+            }
+            
+            /**
+             * @private
+             * TextInput Enter Event - Code Supporter
+             */  
+            private function enterHandler(event:Event):void
+            {
+                var id:String       = event.currentTarget.id
+                var codeInfos:Array = codeSupporter.codeInfomations;
+                
+                if(editable){
+                    if( codeSupporter.isSearching ) 
+                        return;
+                    
+                    for each( var codeInfo:CCCodeInformation in codeInfos )
+                    {
+                        //공통코드여서 같은 쿼리를 사용하는 경우 check해서 grp_cd를 넣어준다.
+                        switch( id )
+                        {
+                            case "cur" :       //통화
+                                headerSO.__grp_cd = "C003";
+                                break;
+                            
+                            case "biz_place" : //사업장
+                                break;
+                        }
+                        
+                        if( codeInfo.name == id )
+                        { 
+                            codeSupporter.target = headerSO;
+                            
+                            codeSupporter.searchCode(id);
+                            
+                            break;
+                        }
+                    }
+                }
+                
+            }
+            
+            private function aprvPopup(item:SCObject):void{
+                var esAprvInput:ESAprvInput = new ESAprvInput();
+                esAprvInput.setParam(item.clone());
+                esAprvInput.menuCode = menuCode;
+                var pu:IFlexDisplayObject = SCPopupManager.getInstance().createPopUp("결재요청",1000,500,
+                    esAprvInput,this,true,"center");
+                //결재요청
+                pu.addEventListener("saveComplete", function(event:SCEvent):void{
+                    pu.dispatchEvent( new CloseEvent(CloseEvent.CLOSE , true,true));
+                    PopUpManager.removePopUp(pu);
+                    
+                    isApproveSave         = false;//결재 로직 다시 뛰울 필요 없으므로 
+                    headerSO.trans_flag   ="app";
+                    headerSO.elec_aprv_yn = "Y";
+                    headerSO.aprv_sts     = "P";
+                    
+                    file.upload();
+                });
+                //팝업닫기
+                pu.addEventListener("closeAprv", function(event:SCEvent):void{
+                    pu.dispatchEvent( new CloseEvent(CloseEvent.CLOSE , true,true));
+                    PopUpManager.removePopUp(pu);
+                });
+            }
+            
+            /********************************************************************************************************
+             ****************                 Get/Set Changed Function                         **********************
+             *******************************************************************************************************/
+            [Bindable("modeChanged")]
+            private function get creatable():Boolean
+            {
+                if( mode == CREATE && !closeVisible )
+                    return true;
+                else
+                    return false;
+            }
+            
+            [Bindable("modeChanged")]
+            private function get copytable():Boolean
+            {
+                if( closeVisible && searchSO.copy_flag != "Y" && headerSO.mod_flag != "Y" )
+                    return true;
+                else
+                    return false;
+            }
+            
+            /**
+             * @private
+             * 기본 Editing 체크
+             */
+            [Bindable("modeChanged")]
+            private function get editable():Boolean 
+            {
+                if( mode != VIEW || searchSO.copy_flag == "Y" )
+                    return true;
+                else
+                    return false;
+            }
+            
+            /**
+             * @private
+             * 기본 Editing 체크
+             */
+            [Bindable("modeChanged")]
+            private function get chgeditable():Boolean 
+            {
+                if( ( mode != VIEW || searchSO.copy_flag == "Y" ) && searchSO.view_mod != "Y")
+                    return true;
+                else
+                    return false;
+            }
+            
+            /**
+             * @private
+             * 기본 Editing 체크
+             */
+            [Bindable("qtyChanged")]
+            private function get qtyeditable():Boolean 
+            {
+                // 회사별속성 - 공사용역 수량고정 여부
+                if(editable && headerSO.purc_typ == "CT")
+                {
+                    return false;
+                }
+                else
+                    return true;
+            }
+            
+            /**
+             * @private
+             * WCMS visible 체크
+             */
+            [Bindable("modeChanged")]
+            private function get visiWcms():Boolean 
+            {
+                if( !headerSO.wcms_link_url )
+                    return false;
+                else
+                    return true;
+            }
+            
+            [Bindable("modeChanged")]
+            private function get sapeditable():Boolean 
+            {
+                if( mode == VIEW && searchSO.copy_flag != "Y" )
+                    return false;
+                else
+                {
+                    if( headerSO.sap_pr_no )
+                        return false;
+                    else
+                        return true;
+                }
+            }
+            
+            [Bindable("modeChanged")]
+            private function get hasEnabled():Boolean 
+            {
+                if( headerSO.sap_pr_no )
+                    return false;
+                else
+                    return !hasAprvNo;
+                
+            }
+            
+            /**
+             * @private
+             * 시행품의여부
+             */
+            [Bindable("orgnChanged")]
+            private function get orgntable():Boolean
+            {
+                if( !editable )
+                    return false;
+                else
+                {
+                    if( headerSO.orgn_rpt_yn == "Y" )
+                        return true;
+                    else
+                        return false;
+                }
+            }
+            
+            [Bindable("modeChanged")]
+            [Bindable("orgnChanged")]
+            private function get prsendeditable():Boolean
+            {
+                if( mode == VIEW )
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            
+            /**
+             * @private
+             * 결재번호 존재 여부
+             */
+            [Bindable("modeChanged")]
+            private function get hasAprvNo():Boolean 
+            {
+                if( headerSO.aprv_sts == ESCommConst.P011_C || 
+                    headerSO.aprv_sts == ESCommConst.P011_S || 
+                    headerSO.aprv_sts == ESCommConst.P011_P ) 
+                    return true;
+                else if(!isPr)
+                    return true;
+                else
+                    return false;
+            }
+            
+            [Bindable("modeChanged")]
+            private function get hasSapPrNo():Boolean
+            {
+                if( headerSO.sap_pr_no )
+                    return true;
+                else
+                    return false;
+            }
+            
+            [Bindable("modeChanged")]
+            private function get reqBiz():Boolean
+            {
+                return false;
+            }
+            
+			/*
+            [Bindable("modeChanged")]
+            private function get reqOdr():Boolean
+            {
+                return false;
+            }
+			*/
+            
+            [Bindable("bhqChanged")]
+            private function get bhqEditable():Boolean
+            {
+                if(headerSO.purc_typ == "CT")
+                    return true;
+                else 
+                    return false;
+            }
+            
+            /**
+             * @public
+             * pr에서 넘어왔을 때 true(PR변경 버튼 제어)
+             * 1)2012.11.02 그리드클릭후 상세전환시 PR변경버튼 Visible 제어 (view mode 조건 추가 - 개선사항 No.161)
+             */
+            [Bindable("modeChanged")]
+            public function get isPr():Boolean
+            {
+                if( bPr && mode != VIEW ){
+                    return false;
+                }else{
+                    return true;
+                }
+            }
+            
+            /**
+             * @private
+             * 구매요청단가 required 제어 
+             */
+            [Bindable("modeChanged")]
+            public function get prcReq():Boolean
+            {
+                return false;
+            }
+            
+            /**
+             * @public
+             * 닫기버튼 제어
+             */
+            [Bindable("closeVisibleChanged")]
+            public function get closeVisible():Boolean 
+            {
+                return bCloseVisible;
+            }
+            
+            public function set isPr(value:Boolean):void
+            {
+                bPr = value;
+                invalidateProperties();
+                dispatchEvent(new Event("modeChanged"));
+            }
+            
+            public function set closeVisible(value:Boolean):void 
+            {
+                bCloseVisible = value;
+                dispatchEvent(new Event("closeVisibleChanged"));
+            }
+            
+            public function set isMod(value:Boolean):void
+            {
+                bModChg = value;
+            }
+            
+            /********************************************************************************************************
+             ****************                 Util Function                                    **********************
+             *******************************************************************************************************/
+            /**
+             * @private
+             * Null 값 Check
+             */                        
+            private function isNull(value:String):Boolean 
+            {
+                if( value == "undefined" || value == "" || value == null ) return true;
+                return false;
+            }
+            
+            /**
+             * @private
+             * Data에 공백체크 - 값이 존재하면 false 존재하지 않으면 true
+             */
+            private function isEmpty(data:String):Boolean
+            {
+                if( data == null )
+                    return true;
+                else
+                {
+                    for( var i:int = 0 ; i < data.length ; i++ ) 
+                    {
+                        if( data.substring(i, i+1) != " " ) 
+                            return false;
+                    }
+                }
+                return true;
+            }
+            
+            /**
+             * @private
+             * 숫자 Data 공백체크 - 값이 존재하지 않으면 0으로 Return
+             */
+            private function isEmptyNum(data:String):String
+            {
+                var str:String = "";
+                
+                if( isEmpty(data) )
+                    str = "0";
+                else
+                    str = data.replace(",", "");
+                
+                return str;
+            }
+            
+        ]]>
+    </mx:Script>
+    
+    <!--
+    *********************************************************************************************************
+    *************************         ValidatorGroup : 필수값 Check                       ********************   
+    *********************************************************************************************************
+    -->
+    <vc:SCValidatorGroup>
+        <vc:validators>
+            <!--제목-->
+            <vc:SCStringValidator id="pr_tit_validation"    required="true"     property="pr_tit"    source="{headerSO}" listener="{pr_tit}"/>
+            <!--통화-->
+            <vc:SCStringValidator id="cur_validation"       required="true"     property="cur"       source="{headerSO}" listener="{cur}"/>
+            <!--사업장
+            <vc:SCStringValidator id="biz_place_validation" required="{reqBiz}" property="biz_place" source="{headerSO}" listener="{biz_place}"/>
+            -->
+        </vc:validators>
+    </vc:SCValidatorGroup>
+    
+    <!--
+    *********************************************************************************************************
+    *************************         CodeSupporter : 코드 Like 검색                              *********************   
+    *********************************************************************************************************
+    -->
+    <cc:CCCodeSupporter id="codeSupporter" locks="{[this]}" monitors="{[this]}"
+                        parent="{this}"  noData="SCAlert.show(translator.translate('입력하신 데이터가 존재하지 않습니다.'));">
+        <!-- 통화 -->
+        <cc:CCCodeInformation name="cur" minChars="1"/>
+        <!-- 사업장 -->
+        <cc:CCCodeInformation name="biz_place" minChars="1"/>
+        <!-- 플랜트 -->
+        <cc:CCCodeInformation name="plt_cd" minChars="2"/>
+        <!-- 단위 -->
+        <cc:CCCodeInformation name="unit_cd" minChars="2"/>
+        <!-- 검수담당자 -->
+        <cc:CCCodeInformation name="gr_chr_nm" minChars="2"/>
+        <!-- 구매그룹 -->
+        <cc:CCCodeInformation name="sap_grp_cd" minChars="1"/>
+        <!-- 구매담당 -->
+        <cc:CCCodeInformation name="purc_grp_cd" minChars="1"/>
+        <!-- 추천업체 -->
+        <cc:CCCodeInformation name="ref_vd" minChars="1"/>
+        <!-- 코스트센터 -->        
+        <cc:CCCodeInformation name="cost_acc_cd" minChars="3"/>
+        <!-- Fund Ctr -->        
+        <cc:CCCodeInformation name="fund_center_cd" minChars="3"/>
+        <!-- G/L 계정 -->        
+        <cc:CCCodeInformation name="gl_acc_cd" minChars="3"/>
+        <!-- WBS -->        
+        <cc:CCCodeInformation name="wbs_cd" minChars="3"/>
+        <!-- 자산번호 -->        
+        <cc:CCCodeInformation name="asset_no" minChars="3"/>
+        <!-- 투자예산번호 -->        
+        <cc:CCCodeInformation name="order_no" minChars="3"/>
+        <!-- 서비스 -->        
+        <cc:CCCodeInformation name="svc_master" minChars="3"/>
+    </cc:CCCodeSupporter>
+    
+    <!--
+    *********************************************************************************************************
+    *************************         ServiceProvider : 호출 할 RemoteObject 서비스 정보       *********************   
+    *********************************************************************************************************
+    -->
+    <!-- Code 조회 ServiceProvider ComboBox나 기타 최초 화면로딩에 필요한 정보를 불러올 때 사용된다. -->
+    <vc:SCServiceProvider id="codeSP" descriptor="procurement/pr" serviceId="get.pr.code.list" result="resultHandler(event)">
+        <vc:outputs>
+            <!--여부-->
+            <vc:SCServiceOutput name="C022" target="{ynSC}"/>
+            <!--계정유형 Combo-->
+            <vc:SCServiceOutput name="P008" target="{accTypSC}"/>
+            <!--구매유형 Combo-->
+            <vc:SCServiceOutput name="P045" target="{purcTypSC}"/>
+            <!--매장형태-->
+            <vc:SCServiceOutput name="P050" target="{storeFrmSC}"/>
+            <!--계정지정범주 Combo-->
+            <vc:SCServiceOutput name="P052" target="{costTypSC}"/>
+            <!--구매요청 Type Combo-->
+            <vc:SCServiceOutput name="P053" target="{prTypSC}"/>
+            <!--구매유형 Combo-->
+            <vc:SCServiceOutput name="P056" target="{purcTypItemSC}"/>
+        </vc:outputs>
+    </vc:SCServiceProvider>
+    
+    <!--
+    Code 조회 Service ComboBox나 기타 최초 화면로딩에 필요한 정보를 불러올 때 사용된다.
+    monitors="{[this]}" locks="{[this]}" 을 넣으면 안됨
+    -->
+    <vc:SCServiceProvider id="costTypSP" descriptor="procurement/pr" serviceId="get.pr.getcosttyp.list" result="resultHandler(event)">
+        <vc:outputs>
+            <!--계정지정범주 Combo-->
+            <vc:SCServiceOutput name="P052" target="{costTypSC}"/>
+        </vc:outputs>
+    </vc:SCServiceProvider>
+    
+    <!-- PR 조회 ServiceProvider -->
+    <vc:SCServiceProvider id="searchSP" descriptor="procurement/pr" serviceId="get.prinfo" result="resultHandler(event);" monitors="{[this]}" locks="{[this]}">
+        <vc:inputs>
+            <vc:SCServiceInput name="searchSO" value="{searchSO}"/>
+        </vc:inputs>
+        <vc:outputs>
+            <vc:SCServiceOutput name="headerSO" target="{headerSO}"/>
+            <vc:SCServiceOutput name="gridSC" target="{gridSC}" changeComparable="true"/>
+            <vc:SCServiceOutput name="rtnSO" target="{rtnSO}"/>
+        </vc:outputs>
+    </vc:SCServiceProvider>
+    
+    <!-- 금액계산 ServiceProvider -->
+    <vc:SCServiceProvider id="payCalcSP" descriptor="procurement/pr" serviceId="get.pay.calc" result="resultHandler(event);">
+        <vc:inputs>
+            <vc:SCServiceInput name="gridSC" value="{gridSC}"/>
+        </vc:inputs>
+        <vc:outputs>
+            <vc:SCServiceOutput name="rtnSO" target="{rtnSO}"/>
+            <vc:SCServiceOutput name="rtnSC" target="{rtnSC}"/>
+        </vc:outputs>
+    </vc:SCServiceProvider>
+    
+    <!-- PR 저장 ServiceProvider -->
+    <vc:SCServiceProvider id="saveSP" descriptor="procurement/pr" serviceId="save.prinfo" result="resultHandler(event)" monitors="{[this]}" locks="{[this]}">
+        <vc:inputs>
+            <vc:SCServiceInput name="headerSO" value="{headerSO}"/>
+            <vc:SCServiceInput name="tmpSO"    value="{tmpSO}"/>
+            <vc:SCServiceInput name="gridSC"   value="{gridSC}"/>
+            <vc:SCServiceInput name="updateSC" value="{updateSC}"/>
+        </vc:inputs>
+        <vc:outputs>
+            <vc:SCServiceOutput name="rtnSO"  target="{rtnSO}"/>
+            <vc:SCServiceOutput name="aprvSO" target="{aprvSO}"/>
+        </vc:outputs>
+    </vc:SCServiceProvider>
+    
+    <!-- 오더정보 Validation ServiceProvider -->
+    <vc:SCServiceProvider id="validationSP" descriptor="procurement/pr" serviceId="validation.prdt" result="resultHandler(event)" monitors="{[this]}" locks="{[this]}">
+        <vc:inputs>
+            <vc:SCServiceInput name="gridSC" value="{costSC}"/>
+        </vc:inputs>
+        <vc:outputs>
+            <vc:SCServiceOutput name="resultList"  target="{valList}" changeComparable="true"/>
+            <vc:SCServiceOutput name="rtnSO"       target="{rtnSO}"/>
+        </vc:outputs>  
+    </vc:SCServiceProvider>
+    
+    <!-- PR 결재 ServiceProvider -->
+    <vc:SCServiceProvider id="aprvSP" descriptor="procurement/pr" serviceId="get.aprv" result="resultHandler(event)" monitors="{[this]}" locks="{[this]}">
+        <vc:inputs>
+            <vc:SCServiceInput name="aprvSO" value="{aprvSO}"/>
+        </vc:inputs>
+        <vc:outputs>
+            <vc:SCServiceOutput name="rtnSO" target="{rtnSO}"/>
+            <vc:SCServiceOutput name="aprvSO" target="{aprvSO}"/>
+        </vc:outputs>
+    </vc:SCServiceProvider>
+    
+    <vc:SCServiceProvider id="addExcelItemSP" descriptor="procurement/pr" serviceId="select.pr.excel.item" result="resultHandler(event)" monitors="{[this]}" locks="{[this]}">
+        <vc:outputs>
+            <vc:SCServiceOutput name="excelSC" target="{excelSC}"/>
+            <vc:SCServiceOutput name="errorSC" target="{errSC}"/>
+            <vc:SCServiceOutput name="rtnSO"       target="{rtnSOExcel}"/>
+        </vc:outputs>
+    </vc:SCServiceProvider>
+    
+    <!--
+    *********************************************************************************************************
+    *************************         UI Area                                          **********************   
+    *********************************************************************************************************
+    -->
+    <vc:SCForm width="100%" height="100%" bindingObject="{headerSO}">
+        <vc:SCFHead>
+            <vc:SCBulletLabel id="subTitle" text="구매요청생성" styleName="subTitleLabel"/>
+            <vc:SCSpacer/>
+            <vc:SCButtonBar group="tr" unit="{menuCode}">
+                <!-- 초기화 -->
+                <vc:SCButtonProperty name="dataclear"   id="dataclear"   click="doClear();"             visible="{creatable}"      includeInLayout="{creatable}"/>
+                <!-- 구매요청조회 -->
+                <vc:SCButtonProperty name="prsearch"    id="prsearch"    click="doPrEvent('prsearch');" visible="{creatable}"      includeInLayout="{creatable}"/>
+                <!-- 구매요청복사 -->
+                <vc:SCButtonProperty name="prcopy"      id="prcopy"      click="doPrEvent('copy');"     visible="{editable&amp;&amp;copytable&amp;&amp; isaproval}"      includeInLayout="{editable&amp;&amp;copytable&amp;&amp; isaproval}"      enabled="{isPr}"/>
+                <!-- 임시저장 --> 
+                <vc:SCButtonProperty name="exbtn"       id="exbtn"       click="doData('temp');"        visible="{chgeditable}"       includeInLayout="{chgeditable}"       enabled="{hasEnabled}"/>
+                <!-- 구매전송 -->
+                <vc:SCButtonProperty name="prsend"      id="prsend1"      click="doData('send');"        visible="{prsendeditable}" includeInLayout="{prsendeditable}" enabled="{!hasAprvNo}"/>
+                <!-- 결재상신 -->
+                <vc:SCButtonProperty name="approve"     id="approve"     click="doData('app')"         visible="{editable}"       includeInLayout="{editable}"       enabled="{!hasAprvNo}"/>
+                <!-- 인쇄 -->
+                <vc:SCButtonProperty name="print"       id="print"       click=""             visible="false"            includeInLayout="false"/>
+                <!-- PR변경 -->
+                <vc:SCButtonProperty name="chg_pr"      id="chg_pr"      click="doData('change')"       visible="{!isPr}"          includeInLayout="{!isPr}"/>
+                <!-- 닫기 -->
+                <vc:SCButtonProperty name="windowclose" id="windowclose" click="doClose();"             visible="{closeVisible}"   includeInLayout="{closeVisible}"/>
+            </vc:SCButtonBar>
+            <vc:SCButton label="결재테스트" click="doAprv('B')" visible="false" includeInLayout="false"/>
+        </vc:SCFHead>
+        <!-- 본문 Scroll -->
+        <vc:SCContentBox>
+            <!-- 기본정보 -->
+            
+            <vc:SCCollapseContainer label="기본정보" width="100%" opened="true">
+                <vc:SCTable styleName="formTable">
+                    <vc:SCTR height="0">
+                        <vc:SCTD width="10%"/>
+                        <vc:SCTD width="40%"/>
+                        <vc:SCTD width="10%"/>
+                        <vc:SCTD width="40%"/>
+                    </vc:SCTR>
+                    <vc:SCTR>
+                        <vc:SCTD label="구매 운영조직"/>
+                        <vc:SCTD>
+                            <control:CCOrgComboBox id="oper_org_sn" width="200" height="100%" operUnitCd="PO" editable="{editable}"
+                                                   required="true" change="changeOperOrgSn()"/>
+                        </vc:SCTD>
+                    </vc:SCTR>                    
+                    <vc:SCTR>
+                        <vc:SCTD label="제목" styleName="itemLabel"/>
+                        <vc:SCTD>
+                            <vc:SCTextInput id="pr_tit" width="200" editable="{editable}" required="true" maxChars="100" imeMode="KOREAN"/>
+                        </vc:SCTD>
+                        <vc:SCTD label="구매유형" styleName="itemLabel"/>
+                        <vc:SCTD>
+                            <vc:SCGroupRadioButton id="purc_typ" dataProvider="{purcTypSC}" width="100%" editable="{sapeditable}" change="chgPurcTyp()"/>
+                        </vc:SCTD>
+                    </vc:SCTR>
+                    <vc:SCTR>
+                        <vc:SCTD label="구매요청번호" styleName="itemLabel"/>
+                        <vc:SCTD>
+                            <vc:SCTextInput id="pr_no" width="40%" editable="false"/>
+                        </vc:SCTD>
+                        <vc:SCTD label="구매요청생성일" styleName="itemLabel"/>
+                        <vc:SCTD>
+                            <vc:SCTextInput id="pr_req_date" width="120" editable="false" formatType="date" textAlign="center"/>
+                        </vc:SCTD>
+                    </vc:SCTR>
+                    <vc:SCTR visible="{hasSapPrNo}" includeInLayout="{hasSapPrNo}">
+                        <vc:SCTD label="ERP PR NO" styleName="itemLabel"/>
+                        <vc:SCTD colSpan="3">
+                            <vc:SCTextInput id="sap_pr_no" width="100" editable="false"/>
+                        </vc:SCTD>
+                    </vc:SCTR>
+                    <vc:SCTR visible="{hasAprvNo}" includeInLayout="{hasAprvNo}">
+                        <vc:SCTD label="결재상태" styleName="itemLabel"/>
+                        <vc:SCTD>
+                            <vc:SCTextInput id="aprv_sts_nm" width="100" editable="false"/>
+                            <vc:SCButtonBar group="eleapp" unit="{menuCode}" horizontalAlign="right">
+                                <!--전자결재-->
+                                <vc:SCButtonProperty name="eleappbtn" click="getEleAppInfo();"/>
+                            </vc:SCButtonBar>
+                        </vc:SCTD>
+                        <vc:SCTD label="결재승인일" styleName="itemLabel"/>
+                        <vc:SCTD>
+                            <vc:SCTextInput id="aprv_date" width="120" editable="false" formatType="date" textAlign="center"/>
+                        </vc:SCTD>
+                    </vc:SCTR>
+                    <vc:SCTR>
+                        <vc:SCTD label="구매요청담당자" styleName="itemLabel"/>
+                        <vc:SCTD>
+                            <vc:SCTextInput id="pr_req_id" width="100" editable="false"/>
+                            <vc:SCLabel width="10" textAlign="center"/>
+                            <vc:SCLabel text="/" width="20" textAlign="center"/>
+                            <vc:SCLabel width="10" textAlign="center"/>
+                            <vc:SCTextInput id="pr_req_nm" width="100" editable="false"/>
+                        </vc:SCTD>
+                        <vc:SCTD label="구매요청자전화번호" styleName="itemLabel"/>
+                        <vc:SCTD>
+                            <vc:SCTextInput id="pr_req_phone_no" width="120" textAlign="left" editable="{editable}" maxChars="18" restrict="0-9\-"/>
+                        </vc:SCTD>
+                    </vc:SCTR>
+                    <vc:SCTR>
+                        <vc:SCTD label="구매요청부서" styleName="itemLabel"/>
+                        <vc:SCTD colSpan="3">
+                            <vc:SCTextInput id="pr_req_dept_nm" width="100" textAlign="left" editable="{false}" bindingField="pr_req_dept_nm"/>
+                            <vc:SCTextInput id="pr_req_dept" width="100" editable="{false}" restrict="A-Z\0-9" visible="false"/>
+                        </vc:SCTD>
+                    </vc:SCTR>
+                    <vc:SCTR>
+                        <vc:SCTD label="구매요청총금액" styleName="itemLabel"/>
+                        <vc:SCTD>
+                            <vc:SCTextInput id="pr_tot_amt" width="100" editable="false" textAlign="right" formatType="amt"/>
+                        </vc:SCTD>
+                        <vc:SCTD label="통화" styleName="itemLabel"/>
+                        <vc:SCTD>
+                            <vc:SCTextInput id="cur" width="50" textAlign="center" editable="{editable}" maxChars="18" restrict="A-Z" required="true"
+                                            enter="enterHandler(event)" change="changeTextInput(event)" focusOut="common_focusOutHandler(event)"/>
+                            <vc:SCButton styleName="linkIcon" click="callPopup('SP002','cur');" visible="{editable}" includeInLayout="{editable}"/>
+                            <vc:SCText id="cur_nm" width="100%"/>
+                        </vc:SCTD>
+                    </vc:SCTR>
+                    <vc:SCTR id="pr_typ_tr" visible="false" includeInLayout="false">
+                        <vc:SCTD label="구매요청유형" styleName="itemLabel" visible="false"/>
+                        <vc:SCTD colSpan="3" visible="false">
+                            <vc:SCComboBox id="pr_typ" dataProvider="{prTypSC}" editable="{editable &amp;&amp; !hasSapPrNo}" rowCount="15"/>
+                        </vc:SCTD>
+                    </vc:SCTR>
+					<!--
+                    <vc:SCTR id="pre_bid_tr" visible="false" includeInLayout="false">
+                        <vc:SCTD label="선입찰" styleName="itemLabel"/>
+                        <vc:SCTD colSpan="3">
+                            <vc:SCGroupRadioButton id="pre_bid" dataProvider="{ynSC}" editable="{editable}"/>
+                        </vc:SCTD>
+                    </vc:SCTR>
+					-->
+                    <vc:SCTR>
+                        <vc:SCTD label="시행품의여부" styleName="itemLabel"/>
+                        <vc:SCTD>
+                            <vc:SCGroupRadioButton id="orgn_rpt_yn" dataProvider="{ynSC}" editable="{editable}" change="chgOrgnRpt()"/>
+                        </vc:SCTD>    
+                        <vc:SCTD label="사업시행품의명/번호" styleName="itemLabel"/>
+                        <vc:SCTD>
+                            <vc:SCTextInput id="orgn_rpt_no" width="200" editable="{orgntable}" required="false" maxChars="30"/>
+                        </vc:SCTD>
+                    </vc:SCTR>
+                    
+                    <!--
+                    <vc:SCTR id="biz_place_tr" visible="false" includeInLayout="false">
+                        <vc:SCTD label="사업장" styleName="itemLabel"/>
+                        <vc:SCTD colSpan="3">
+                            <vc:SCTextInput id="biz_place" width="100" textAlign="center" editable="{editable}" required="{reqBiz}" maxChars="18" upper="true" restrict="0-9\A-Z" enter="enterHandler(event)" change="changeTextInput(event)"/>
+                            <vc:SCButton styleName="linkIcon" click="callAssetPopup('bp');" visible="{editable}" includeInLayout="{editable}"/>
+                            <vc:SCText id="biz_place_nm" width="15%"/>
+                        </vc:SCTD>
+                    </vc:SCTR>
+                    -->
+                    <vc:SCTR id="pr_rem_tr">
+                        <vc:SCTD label="비고" styleName="itemLabel"/>
+                        <vc:SCTD colSpan="3">
+                            <vc:SCTextArea id="pr_rem" width="99%" height="50" editable="{editable}" required="false" maxChars="1000"/>
+                        </vc:SCTD>
+                    </vc:SCTR>
+                    <vc:SCTR id="ref_vd_cause_tr">
+                        <vc:SCTD label="추천업체정보 및 사유" styleName="itemLabel"/>
+                        <vc:SCTD colSpan="3">
+                            <vc:SCTextArea id="ref_vd_cause" width="99%" height="50" editable="{editable}" required="false" maxChars="1000"/>
+                        </vc:SCTD>
+                    </vc:SCTR>
+                    <!--
+                    <vc:SCTR id="wcms_link_tr" visible="{visiWcms}" includeInLayout="{visiWcms}">
+                        <vc:SCTD label="WCMS 첨부이미지" styleName="itemLabel"/>
+                        <vc:SCTD>
+                            <uxcom:CCWCFileLoader keyData="{headerSO.pr_no}" width="100%" height="100"/>
+                        </vc:SCTD>
+                        <vc:SCTD width="100%" colSpan="2"/>
+                    </vc:SCTR>
+                    -->
+                    <vc:SCTR>
+                        <vc:SCTD label="시행품의원안 및 첨부파일" styleName="itemLabel"/>
+                        <vc:SCTD colSpan="3">
+                            <vc:SCForm width="99%">
+                                <vc:SCFHead visible="{editable}" includeInLayout="{editable}">
+                                    <vc:SCSpacer/>
+                                    <vc:SCButtonBar group="file" unit="{menuCode}">
+                                        <!-- 파일선택 -->
+                                        <vc:SCButtonProperty name="browse" click="file.browse();"/>
+                                    </vc:SCButtonBar>
+                                </vc:SCFHead>
+                                <cc:CCFileUpDownLoader id="file" sharedGroup="{headerSO.att_no}" width="100%" height="100" readOnly="{!editable}" 
+                                                       enabledUploadCompleteAlert="false" uploadComplete="uploadCompleteAndSave(event)" disabledTargetsOnInvoking="{[this]}"/>
+                            </vc:SCForm>
+                        </vc:SCTD>
+                    </vc:SCTR>
+                </vc:SCTable>
+            </vc:SCCollapseContainer>
+            
+            <!-- 물품기본정보 -->
+            <vc:SCCollapseContainer id="basic_title" label="물품정보" width="100%" opened="true">
+                <vc:SCFHead includeInLayout="{editable}">
+                    <vc:SCSpacer/>
+                    <vc:SCButtonBar group="mr" unit="{menuCode}" horizontalAlign="right" >
+                        <!-- 추가 테스트를 위한 버튼 마스터 셋팅이 완료되면 제거해야 함-->
+                        <vc:SCButtonProperty name="add"              id="add"              click="addItem();"           enabled="{isPr}"  visible="false" includeInLayout="false" />
+                        <!--아이템추가-->
+                        <vc:SCButtonProperty name="additem"          id="additem"          click="getItemCatalog();"    />
+                        <!--아이템복사-->
+                        <vc:SCButtonProperty name="itemcopy"         id="itemcopy"         click="getItemCopy();" />
+                        <!--아이템삭제-->
+                        <vc:SCButtonProperty name="delitem"          id="delitem"          click="delItem()"        />
+                        <!--일괄적용-->
+                        <vc:SCButtonProperty name="applying"         id="applying"         click="applyAll();"          />
+                        <!--엑셀업로드-->
+                        <vc:SCButtonProperty name="excelupload"      id="excelupload"      click="excelUpload();"       enabled="{isPr}"  />
+                        <!-- 양식다운로드 --> 
+                        <vc:SCButtonProperty name="templatedownload" id="templatedownload" click="{excelGrid.export()}" enabled="{isPr}" />
+                    </vc:SCButtonBar>
+                </vc:SCFHead>
+                
+                <vc:SCDataGridBox>
+                    <vc:SCDataGrid id="ItemGrid" horizontalScrollPolicy="auto" width="100%" height="270" 
+                                   dataProvider="{gridSC}" sortExpertMode="true" useCustomSelector="true" useCopyAndPaste="true" editable="true"
+                                   itemClick="gridItemClickEvent(event)" itemEditEnd="gridItemEditEndHandler(event)" focusEnabled="false">
+                        <vc:groupedColumns>
+                            
+                            <vc:SCStatusColumn      width="20"  textAlign="center" headerText="-" visible="{editable}"/>
+                            <vc:SCCheckBoxColumn    width="50"  textAlign="center" editable="true"       dataField="check_select"        id="check_select_grid"       headerText="선택"          itemEditableFunction="gridItemEditableEvent" visible="{editable}" enabledCheckAll="true" displayCheckBox="true" />
+                            <vc:SCDataGridColumn    width="80"  textAlign="center" editable="false"      dataField="sts_nm"              id="sts_nm_grid"             headerText="상태" visible="{!editable}" styleFunction="gridItemStyleFunction"/> 
+                            <vc:SCDataGridColumn    width="80"  textAlign="center" editable="false"      dataField="line_no"             id="line_no_grid"            headerText="Line No"/> 
+                            <vc:SCComboBoxColumn    width="90"  textAlign="center" editable="{editable}" dataField="purc_typ"            id="purc_typ_grid"           headerText="구매유형" itemEditableFunction="gridItemEditableEvent" defaultValue="{data.purc_typ}" comboDataField="data" comboLabelField="label" dataProvider="{purcTypItemSC}"/>
+                            <vc:SCDataGridColumn    width="100" textAlign="center" editable="false"      dataField="item_cd"             id="item_cd_grid"            headerText="품목코드" styleName="linkColumn"/>
+                            <vc:SCDataGridColumn    width="180" textAlign="left"   editable="{editable}" dataField="item_nm"             id="item_nm_grid"            headerText="품명" required="{editable}" itemEditableFunction="gridItemEditableEvent" editorProperties="{{maxChars:100}}"/>
+                            <vc:SCDataGridColumn    width="180" textAlign="left"   editable="{editable}" dataField="spec"                id="spec_grid"               headerText="규격" itemEditableFunction="gridItemEditableEvent" visible="{!bhqEditable}" editorProperties="{{maxChars:500}}"/>
+                            
+                            <vc:SCDataGridColumnGroup headerText="" id="unit_grp_grid">
+                                <vc:SCDataGridColumn    width="50"  textAlign="center" editable="{editable}" dataField="unit_cd"             id="unit_cd_grid"        headerText="단위"          itemEditableFunction="gridItemEditableEvent" required="{editable}" editorProperties="{{restrict:'A-Z\0-9', maxChars:18}}" />
+                                <vc:SCImageColumn       width="20"  textAlign="center" editable="false"      dataField="img_unit_cd"         id="img_unit_cd_grid"    headerText=""             visible="{editable}" singularSource="{sSingularSource}"/>
+                            </vc:SCDataGridColumnGroup>
+                            
+                            <vc:SCDataGridColumn    width="70"  textAlign="right"  editable="{qtyeditable}" dataField="item_qty"         id="item_qty_grid"           headerText="요청수량"       itemEditableFunction="gridItemEditableEvent"  required="{editable}"  formatType="qty"
+                                                    editorProperties="{{restrict:'.0-9', maxChars:11, decimalLength:3}}"  
+                                                    itemEditor="custom.uxcom.CCDecimalCheckItemEditor"
+                                                    sortCompareFunction="{ESCommUtil.stringCompare('item_qty')}"
+                                                    />
+                            <vc:SCDataGridColumn    width="90"  textAlign="right"  editable="{editable}"    dataField="pr_price"         id="pr_price_grid"           headerText="요청단가"       itemEditableFunction="gridItemEditableEvent" formatType="amt"  required="{prcReq}"
+                                                    editorProperties="{({restrict:'.0-9', maxChars:11, decimalLength:2})}"
+                                                    itemEditor="custom.uxcom.CCDecimalCheckItemEditor"
+                                                    />
+                            <vc:SCDataGridColumn    width="100" textAlign="right"  editable="{editable}"     dataField="price_unit"       id="price_unit_grid"         headerText="PER(가격단위)"  itemEditableFunction="gridItemEditableEvent" visible="false"  formatType="number" formatProperties="{{precision:0}}" editorProperties="{{restrict:'0-9', maxChars:5}}"/>
+                            <vc:SCDataGridColumn    width="100" textAlign="right"  editable="false"          dataField="pr_amt"           id="pr_amt_grid"             headerText="요청금액"       formatType="amt"/>
+                            <vc:SCDateFieldColumn   width="100" textAlign="center" editable="{editable}"     dataField="rd_date"          id="rd_date_grid"            headerText="납기일자"       itemEditableFunction="gridItemEditableEvent" required="{editable}"  visible="{!bhqEditable}" formatType="date"/>
+                            <vc:SCDataGridColumn    width="120" textAlign="left"   editable="{editable}"     dataField="rd_locat"         id="rd_locat_grid"           headerText="납품장소"       itemEditableFunction="gridItemEditableEvent" editorProperties="{{maxChars:72}}"/>
+                            <vc:SCDateFieldColumn   width="120" textAlign="center" editable="{editable}"     dataField="prd_sd"           id="prd_sd_grid"             headerText="수행 시작일"     itemEditableFunction="gridItemEditableEvent" required="{editable}"  visible="{bhqEditable}" formatType="date"/>
+                            <vc:SCDateFieldColumn   width="120" textAlign="center" editable="{editable}"     dataField="prd_ed"           id="prd_ed_grid"             headerText="수행 종료일"     itemEditableFunction="gridItemEditableEvent" required="{editable}"  visible="{bhqEditable}" formatType="date"/>
+                            
+                            <vc:SCDataGridColumnGroup headerText="" id="pr_sug_grp_grid" >
+                                <vc:SCDataGridColumn    width="100" textAlign="center" editable="false"      dataField="pr_sug_nm"       id="pr_sug_nm_grid"          headerText="구매의뢰자명" required="{editable}" />
+                                <vc:SCImageColumn       width="20"  textAlign="center" editable="false"      dataField="img_pr_sug_nm"   id="img_pr_sug_nm_grid"      headerText="" visible="{editable}" singularSource="{sSingularSource}"/>
+                            </vc:SCDataGridColumnGroup>
+                            
+                            <vc:SCDataGridColumnGroup headerText="" id="gr_chr_grp_grid" >
+                                <vc:SCDataGridColumn    width="100" textAlign="center" editable="false"      dataField="gr_chr_nm"       id="gr_chr_nm_grid"          headerText="검수담당자명" required="{editable}"/>
+                                <vc:SCImageColumn       width="20"  textAlign="center" editable="false"      dataField="img_gr_chr_nm"   id="img_gr_chr_nm_grid"      headerText="" visible="{editable}" singularSource="{sSingularSource}"/>
+                            </vc:SCDataGridColumnGroup>
+                            <!--
+                            <vc:SCDataGridColumn    width="80"  textAlign="center"   editable="false"      dataField="auto_po_yn_nm"       id="auto_po_yn_nm_grid"      headerText="자동발주여부"/>
+                            -->
+                           
+                            <vc:SCDataGridColumnGroup headerText="" id="purcgrp_grp_grid">
+                                <vc:SCDataGridColumn    width="150" textAlign="left"   editable="false"      dataField="purc_grp_nm"     id="purc_grp_nm_grid"        headerText="구매담당명" required="{editable}"/>
+                                <vc:SCImageColumn       width="20"  textAlign="center" editable="false"      dataField="img_purc_grp_cd" id="img_purc_grp_cd_grid"    headerText="" visible="{editable}" singularSource="assets/images/new_link.png"/>
+                            </vc:SCDataGridColumnGroup>
+                            
+                            <vc:SCDataGridColumnGroup headerText="" id="ref_vd_grp_grid">
+                                <vc:SCDataGridColumn    width="70"  textAlign="left"   editable="false"      dataField="ref_vd_nm"       id="ref_vd_nm_grid"          headerText="추천업체명" itemEditableFunction="gridItemEditableEvent" editorProperties="{{maxChars:72}}"/>
+                                <vc:SCImageColumn       width="20"  textAlign="center" editable="false"      dataField="img_ref_vd"      id="img_ref_vd_grid"         headerText="" visible="{editable}" singularSource="{sSingularSource}"/>
+                                <vc:SCImageColumn       width="20"  textAlign="center" editable="false"      dataField="img_del_vd"      id="img_del_vd_grid"         headerText="" visible="{editable}" singularSource="{deleteImg}"/>
+                            </vc:SCDataGridColumnGroup>
+                            
+                            <vc:SCComboBoxColumn    width="90"  textAlign="center" editable="{editable}" dataField="plat_svc_cd"         id="plat_svc_cd"             headerText="서비스" visible="false" itemEditableFunction="gridItemEditableEvent" comboDataField="data" comboLabelField="label" dataProvider="{platSvcCdSC}"/>
+                            <vc:SCDataGridDumyColumn/>
+                        </vc:groupedColumns> 
+                    </vc:SCDataGrid>
+                </vc:SCDataGridBox>
+                
+                <vc:SCDataGrid id="excelGrid" visible="false" includeInLayout="false">
+                    <vc:columns>
+                        <vc:SCDataGridColumn width="100" textAlign="center" editable="false" dataField="item_cd"     id="item_cd_excel_grid"     headerText="품목코드"/>
+                        <vc:SCDataGridColumn width="70"  textAlign="right"  editable="false" dataField="item_qty"    id="item_qty_excel_grid"    headerText="수량"/>
+                        <vc:SCDataGridColumn width="100" textAlign="right"  editable="false" dataField="item_price"  id="item_price_excel_grid"  headerText="단가"/>
+                        <vc:SCDataGridColumn width="100" textAlign="right"  editable="false" dataField="price_unit"  id="price_unit_excel_grid"  headerText="PER(가격단위)" visible="false"/>
+                        <vc:SCDataGridColumn width="70"  textAlign="center" editable="false" dataField="plt_cd"      id="plt_cd_excel_grid"      headerText="Plant"/>
+                        <vc:SCDataGridColumn width="120" textAlign="center" editable="false" dataField="rd_locat"    id="rd_locat_excel_grid"    headerText="납품장소"/>
+                        <vc:SCDataGridColumn width="120" textAlign="center" editable="false" dataField="vd_cd"       id="vd_cd_excel_grid"       headerText="업체코드"/>
+                    </vc:columns>
+                </vc:SCDataGrid>
+            </vc:SCCollapseContainer>
+        </vc:SCContentBox>
+    </vc:SCForm>
+</cc:CCContentBase> 

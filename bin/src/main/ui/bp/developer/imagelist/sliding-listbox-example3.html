@@ -1,0 +1,137 @@
+<link rel="import" href="ep-image-view-sample.html">
+
+<dom-module id="sliding-listbox-example3">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+			width: 100%;
+			height: 100%;
+		}
+	</style>
+	
+	<template>
+		<!-- 
+			이미지 목록 가져오기
+		 -->
+		<sc-ajax 
+			id="getImageList"
+			url="upload/list.do"
+			on-response="onResponseGetImageList">
+		</sc-ajax>
+	
+		<!--
+			업로드 
+		 -->
+		<div style="display:flex;">
+			<span style="font-size:20px;font-weight:bold">그룹 코드: sitest1로 이미지 업로드</span>
+			<sc-spacer></sc-spacer>	
+			<sc-button text="업로드" on-click="onClickUploadButton"></sc-button>
+		</div>
+		<div>
+			<sc-upload id="upload" style="height:200px" 
+				value="sitest1"
+				view-type="thumbnail"
+				on-upload-completed="uploadCompleted"
+				on-delete-completed="deleteCompleted"
+				on-item-select="onItemSelect">
+			</sc-upload>
+		</div>
+		
+		<!--
+			 업로드 이미지 가져오기
+		 -->
+		<div style="display:flex;">
+			<span style="font-size:20px;font-weight:bold">그룹 코드: sitest1에서 이미지 가져오기</span>
+			<sc-spacer></sc-spacer>
+			<sc-button text="그룹코드로 이미지 가져오기" on-click="onClickTransButton"></sc-button>
+		</div>
+		<div style="width:calc(100% - 2px);height:150px;border:1px solid silver;">
+			<sc-sliding-listbox
+				on-click-item="onClickItem"
+				items="{{imageList}}">
+				<template>
+					<div style="width: 100px; height:120px;display:flex;flex-direction:column;">
+						<img src="[[data]]" style="height:90px;width:100px;margin:auto;">
+						<div style="text-align:center;width:100%;text-overflow:ellipsis">[[name]]</div>
+						<div style="text-align:center;width:100%;text-overflow:ellipsis">[[size]]</div>
+					</div>
+				</template>
+			</sc-sliding-listbox>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is: 'sliding-listbox-example3',
+			
+			properties: {
+				imageList: {
+					type: Object,
+					value: function() {
+						return [];
+					}
+				}
+			},
+			
+			onItemSelect: function(event, detail) {
+				var me = this;
+				if(detail.item) {
+					if(detail.item.id.indexOf('-file') !== -1) {
+						var imageReader = new FileReader();
+						imageReader.onload = (function(aFile) {
+							return function(e) {
+								var popup = UT.popup('ep-image-view-sample', me, 600, 500, {}, {});
+								popup.show();
+								var popupContent = popup.getWindowContent();
+								popupContent.initData(e.target.result, true);
+							};
+						})(detail.item.orgFile);
+						imageReader.readAsDataURL(detail.item.orgFile);
+					} else {
+						var popup = UT.popup('ep-image-view-sample', me, 600, 500, {}, {});
+						popup.show();
+						var popupContent = popup.getWindowContent();
+						popupContent.initData(detail.item.id);		
+					}
+				}
+			},
+			
+			onClickUploadButton: function() {
+				var me = this;
+				me.$.upload.upload();
+			},
+			_getImageUrl: function(id) {
+				return 'upload/download.do?id=' + encodeURIComponent(id);
+			},
+			onClickTransButton: function() {
+				var me = this;
+				getImageList.body = {
+					groupId: 'sitest1'	
+				};
+				UT.request(me.$.getImageList);
+			},
+			onResponseGetImageList: function(response, detail) {
+				var me = this;
+				var respList = response.detail.response;
+				var imageList = [];
+				for(var i = 0; i < respList.length; i++) {
+					imageList.push({
+						name: respList[i].name,
+						data: 'upload/download.do?id=' + encodeURIComponent(respList[i].id)
+					});
+				}
+				me.set('imageList', imageList);
+			},
+			
+			onClickItem: function(event, detail) {
+				var me = this;
+				var popup = UT.popup('sc-image-viewer', me, 600, 500, {}, {});
+				popup.show();
+				var popupContent = popup.getWindowContent();
+				popupContent.infoField = 'name';				
+				var index = (detail.index) ? detail.index : 0;
+				popupContent.initData(me.imageList, index);	
+			}
+		});
+	</script>
+</dom-module>

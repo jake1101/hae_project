@@ -1,0 +1,661 @@
+<dom-module id="es-fields-description">
+	<style>
+ 	table, th, td {
+ 		border:1px solid black;
+ 		border-collapse:collapse;
+ 		box-sizing: border-box;
+ 		padding: 3px;
+ 	}
+ 	th {
+ 		background-color:lightgray
+ 	}
+    </style>
+    <template>
+    	<p>
+    		<b>sc-text-field</b><br/>
+    		텍스트를 입력하기 위한 엘리먼트<br/>
+    		SCFieldBehavior를 구현하여 field 속성이 가지는 공통기능(readonly, required, hidden, disabled 등)을 사용할 수 있다.<br/>
+    		<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>maskRe</td>
+					<td>정규식으로 입력 제어를 하기 위한 문자열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>maxLengh</td>
+					<td>사용자가 입력하여 텍스트 필드에 포함될 수 있는 최대 문자열 수</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>minLengh</td>
+					<td>사용자가 입력하여 텍스트 필드에 포함될 수 있는 최소 문자열 수</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>placeholder</td>
+					<td>힌트 문자열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>selectOnFocus</td>
+					<td>true인 경우 엘리먼트의 focus가 들어가면 input 엘리먼트의 모든 문자를 선택한다.</td>
+					<td>false</td>
+				</tr>
+			</table>
+			<br/>
+			<b>sc-textarea-field</b><br/>
+    		여러 라인의 장문을 입력할때 사용하는 엘리먼트<br/>
+    		<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>maxLengh</td>
+					<td>사용자가 입력하여 텍스트 필드에 포함될 수 있는 최대 문자열 수</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>minLengh</td>
+					<td>사용자가 입력하여 텍스트 필드에 포함될 수 있는 최소 문자열 수</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>placeholder</td>
+					<td>힌트 문자열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>selectOnFocus</td>
+					<td>true인 경우 엘리먼트의 focus가 들어가면 input 엘리먼트의 모든 문자를 선택한다.</td>
+					<td>false</td>
+				</tr>
+			</table>
+			<br/>
+			<b>cc-multi-text-field</b><br/>
+			복수의 입력값을 받기위한 input 엘리먼트 커스텀 태그<br/>
+    		<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>multiValue</td>
+					<td>trigger를 클릭하여 팝업에서 입력받은 데이터 Array</td>
+					<td></td>
+				</tr>
+			</table>
+			<br/>
+    	</p>
+    	
+    	<p>
+    		<b>sc-number-field</b><br/>
+    		key 입력을 필터링하여 자동으로 숫자가 아닌 입력값을 제거하는 컴포넌트<br/>
+    		기본적으로 up/down spinner button이 포함되어 있으며 마우스로 각 버튼을 클릭하여 숫자를 증감시킬 수 있다.<br/>
+    		<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>changeByMousewheel</td>
+					<td>true 값이면 커서 진입 후 마우스 스크롤로 값을 증감할 수 있다.</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>decimalPrecision</td>
+					<td>최대 허용 소수점 자리수</td>
+					<td>2</td>
+				</tr>
+				<tr>
+					<td>formatType</td>
+					<td>SCNumberField의 input-cover가 표시될 형식을 지정하기 위한 속성</td>
+					<td>number</td>
+				</tr>
+				<tr>
+					<td>inputCover</td>
+					<td>SCNumberField의 input-cover를 활성화 시키기 위한 속성</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<td>maskRe</td>
+					<td>정규식으로 입력 제어를 하기 위한 문자열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>maxLengh</td>
+					<td>사용자가 입력하여 텍스트 필드에 포함될 수 있는 최대 문자열 수</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>maxValue</td>
+					<td>SCNumberField 에 입력이 허용되는 최대 값</td>
+					<td>Number.MAX_VALUE</td>
+				</tr>
+				<tr>
+					<td>minLengh</td>
+					<td>사용자가 입력하여 텍스트 필드에 포함될 수 있는 최소 문자열 수</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>minValue</td>
+					<td>SCNumberField 에 입력이 허용되는 최소 값</td>
+					<td>Number.NEGATIVE_INFINITY</td>
+				</tr>
+				<tr>
+					<td>placeholder</td>
+					<td>힌트 문자열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>selectOnFocus</td>
+					<td>true인 경우 엘리먼트의 focus가 들어가면 input 엘리먼트의 모든 문자를 선택한다.</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>step</td>
+					<td>사용자가 spinner를 동작시킬 때 value가 증감되는 숫자 범위</td>
+					<td>1</td>
+				</tr>
+			</table>
+    		<br/>
+    	</p>
+    	
+    	<p>
+    		<b>sc-date-field</b><br/>
+    		년/월/일 지정 가능한 달력 엘리면트<br/>
+    		<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>format</td>
+					<td>날짜 형식</td>
+					<td>YYYY/MM/DD</td>
+				</tr>
+				<tr>
+					<td>maxDate</td>
+					<td>최대일자 (해당 일자 이후로는 선택 불가)</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>minDate</td>
+					<td>최소일자 (해당 일자 이전으로는 선택 불가)</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>placeholder</td>
+					<td>힌트 문자열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>selectOnFocus</td>
+					<td>true인 경우 엘리먼트의 focus가 들어가면 input 엘리먼트의 모든 문자를 선택한다.</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>stringDate</td>
+					<td>true 값인 경우 value를 String 값으로 사용</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>stringFormat</td>
+					<td>string-date="true" 로 지정 하였을 경우에 value 값에 바인딩할 string format을 지정</td>
+					<td>YYYYMMDD</td>
+				</tr>
+			</table>
+			<br/>
+			<b>sc-period-date-field</b><br/>
+			년/월/일 기준으로 기간설정이 가능한 달력 엘리먼트와 날짜 입력 필드를 제공하는 엘리먼트<br/>
+			<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>format</td>
+					<td>날짜 형식</td>
+					<td>YYYY/MM/DD</td>
+				</tr>
+				<tr>
+					<td>maxDate</td>
+					<td>&lt;sc-period-date-field&gt; 엘리먼트의 최대일자</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>minDate</td>
+					<td>&lt;sc-period-date-field&gt; 엘리먼트의 최소일자</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>placeholder</td>
+					<td>힌트 문자열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>selectOnFocus</td>
+					<td>true인 경우 엘리먼트의 focus가 들어가면 input 엘리먼트의 모든 문자를 선택한다.</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>stringDate</td>
+					<td>true 값인 경우 value를 String 값으로 사용</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>stringFormat</td>
+					<td>string-date="true" 로 지정 하였을 경우에 value 값에 바인딩할 string format을 지정</td>
+					<td>YYYYMMDD</td>
+				</tr>
+				<tr>
+					<td>fromValue</td>
+					<td>from 필드의 바인딩 value</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>defaultFromValue</td>
+					<td>fromValue 프로퍼티의 기본값 프로퍼티</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>toValue</td>
+					<td>to 필드의 바인딩 value</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>defaultToValue</td>
+					<td>toValue 프로퍼티의 기본값 프로퍼티</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>fromRequired</td>
+					<td>from 필드의 필수여부</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>toRequired</td>
+					<td>to 필드의 필수여부</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>range</td>
+					<td>선택날짜 기준 최대 기간 설정 (ex: range="1y 3m 20d")</td>
+					<td>false</td>
+				</tr>
+			</table>
+			<br/>
+			<b>sc-month-field</b><br/>
+			년/월 지정 가능한 월 달력 엘리먼트<br/>
+			<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>format</td>
+					<td>날짜 형식</td>
+					<td>YYYY/MM</td>
+				</tr>
+				<tr>
+					<td>maxDate</td>
+					<td>최대일자 (해당 일자 이후로는 선택 불가)</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>minDate</td>
+					<td>최소일자 (해당 일자 이전으로는 선택 불가)</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>placeholder</td>
+					<td>힌트 문자열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>selectOnFocus</td>
+					<td>true인 경우 엘리먼트의 focus가 들어가면 input 엘리먼트의 모든 문자를 선택한다.</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>stringDate</td>
+					<td>true 값인 경우 value를 String 값으로 사용</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>stringFormat</td>
+					<td>string-date="true" 로 지정 하였을 경우에 value 값에 바인딩할 string format을 지정</td>
+					<td>YYYYMM</td>
+				</tr>
+			</table>
+			<br/>
+			<b>sc-period-month-field</b><br/>
+			년/월 기준으로 기간설정이 가능한 달력 엘리먼트와 날짜 입력 필드를 제공하는 엘리먼트<br/>
+			<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>format</td>
+					<td>날짜 형식</td>
+					<td>YYYY/MM</td>
+				</tr>
+				<tr>
+					<td>maxDate</td>
+					<td>&lt;sc-period-date-field&gt; 엘리먼트의 최대 선택가능한 년/월</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>minDate</td>
+					<td>&lt;sc-period-month-field&gt; 엘리먼트의 최소 선택가능한 년/월</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>placeholder</td>
+					<td>힌트 문자열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>selectOnFocus</td>
+					<td>true인 경우 엘리먼트의 focus가 들어가면 input 엘리먼트의 모든 문자를 선택한다.</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>stringDate</td>
+					<td>true 값인 경우 value를 String 값으로 사용</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>stringFormat</td>
+					<td>string-date="true" 로 지정 하였을 경우에 value 값에 바인딩할 string format을 지정</td>
+					<td>YYYYMM</td>
+				</tr>
+				<tr>
+					<td>fromValue</td>
+					<td>from 필드의 바인딩 value</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>defaultFromValue</td>
+					<td>fromValue 프로퍼티의 기본값 프로퍼티</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>toValue</td>
+					<td>to 필드의 바인딩 value</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>defaultToValue</td>
+					<td>toValue 프로퍼티의 기본값 프로퍼티</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>fromRequired</td>
+					<td>from 필드의 필수여부</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>toRequired</td>
+					<td>to 필드의 필수여부</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>range</td>
+					<td>선택날짜 기준 최대 기간 설정 (ex: range="1y 3m")</td>
+					<td>false</td>
+				</tr>
+			</table>
+			<br/>
+		</p>
+		
+		<p>
+			<b>sc-combobox-field</b><br/>
+			드롭다운 목록에서 하나의 값을 선택할 수 있는 엘리먼트<br/>
+			<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>items</td>
+					<td>드롭다운에 표시될 item의 배열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>displayField</td>
+					<td>items배열 중 화면에 보여질 값의 프로퍼티를 지정</td>
+					<td>text</td>
+				</tr>
+				<tr>
+					<td>valueField</td>
+					<td>items배열 중 value 값의 프로퍼티를 지정</td>
+					<td>value</td>
+				</tr>
+				<tr>
+					<td>placeholder</td>
+					<td>힌트 문자열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>selectOnFocus</td>
+					<td>true인 경우 엘리먼트의 focus가 들어가면 input 엘리먼트의 모든 문자를 선택한다.</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>selectedIndex</td>
+					<td>items 배열 중 선택된 오브젝트의 index</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>selectItem</td>
+					<td>items 배열 중 선택된 오브젝트</td>
+					<td></td>
+				</tr>
+			</table>
+			<br/>
+			<b>sc-multi-combobox-field</b><br/>
+			복수의 값을 선택할 수 있는 콤보박스<br/>
+			<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>items</td>
+					<td>드롭다운에 표시될 item의 배열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>displayField</td>
+					<td>items배열 중 화면에 보여질 값의 프로퍼티를 지정</td>
+					<td>text</td>
+				</tr>
+				<tr>
+					<td>valueField</td>
+					<td>items배열 중 value 값의 프로퍼티를 지정</td>
+					<td>value</td>
+				</tr>
+				<tr>
+					<td>placeholder</td>
+					<td>힌트 문자열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>selectOnFocus</td>
+					<td>true인 경우 엘리먼트의 focus가 들어가면 input 엘리먼트의 모든 문자를 선택한다.</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>enableCheckAll</td>
+					<td>전체선택 기능 사용여부</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>selectedAll</td>
+					<td>items 전체선택 사용여부</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>selectedIndexes</td>
+					<td>items 중 선택된 값들의 index를 가지고있는 배열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>selectItems</td>
+					<td>선택된 값들의 item을 가지고있는 배열</td>
+					<td></td>
+				</tr>
+			</table>
+			<br/>
+			<b>cc-operorg-combobox-field / cc-sp-operorg-combobox-field</b><br/>
+			내부/외부 사용자의 운영조직 목록을 items로 가지는 콤보박스<br/>
+			<b>cc-operorg-multi-combobox-field / cc-sp-operorg-multi-combobox-field</b><br/>
+			내부/외부 사용자의 운영조직 목록을 items로 가지는 멀티 콤보박스<br/>
+			<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+				</tr>
+				<tr>
+					<td>operUnitCd</td>
+					<td>운영단위유형<br/>(ex) PU :구매유형</td>
+				</tr>
+			</table>
+			<br/>
+    	</p>
+    	
+    	<p>
+    		<b>sc-checkbox-field</b><br/>
+    		SCCheckedElementBehavior를 구현하여, 체크하거나 체크를 취소 할 수 있는 엘리먼트<br/>
+    		&lt;sc-checkbox-group-field&gt;를 사용하여 그룹으로 사용할 수 있으며, 그룹 내의 체크박스 필드들 중에서 다중선택을 할 때 사용된다.<br/>
+			<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>checkedValue</td>
+					<td>check 상태의 값을 지정</td>
+					<td>true</td>
+				</tr>
+				<tr>
+					<td>unCheckedValue</td>
+					<td>uncheck 상태의 값을 지정</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>inputValue</td>
+					<td>사용자가 정의한 element가 가지는 값</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>label</td>
+					<td>체크박스 라벨값</td>
+					<td></td>
+				</tr>
+			</table>
+    		<br/>
+    		<b>sc-checkbox-group-field</b><br/>
+    		SCCheckedGroupFieldBehavior를 구현하여 &lt;sc-checkbox-field&gt;를 그룹으로 사용할 수 있는 엘리먼트<br/>
+			<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>items</td>
+					<td>sc-checkbox-group-field와 sc-radio-group-field를 동적생성 시 사용되는 item 배열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>group element의 값</td>
+					<td></td>
+				</tr>
+			</table>
+    		<br/>
+    	</p>
+    	
+    	<p>
+    		<b>sc-radio-field</b><br/>
+    		SCCheckedElementBehavior를 구현하여, 체크하거나 체크를 취소 할 수 있는 엘리먼트<br/>
+    		&lt;sc-radio-group-field&gt;를 사용하여 그룹으로 사용할 수 있으며, 그룹 내의 라디오 필드 중에서 하나의 라디오 필드만 체크 할 수 있다.<br/>
+			<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>inputValue</td>
+					<td>사용자가 정의한 element가 가지는 값</td>
+					<td>on</td>
+				</tr>
+				<tr>
+					<td>label</td>
+					<td>라디오버튼 라벨값</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>toggles</td>
+					<td>true 인 경우, 체크 할 때마다 체크상태를 전환</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>element의 값으로, 체크된 경우 true 체크되지 않은 경우 false</td>
+					<td>false</td>
+				</tr>
+			</table>
+    		<br/>
+    		<b>sc-radio-group-field</b><br/>
+    		SCCheckedGroupFieldBehavior를 구현하여 &lt;sc-radio-field&gt;를 그룹으로 사용할 수 있는 엘리먼트<br/>
+			<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>items</td>
+					<td>sc-checkbox-group-field와 sc-radio-group-field를 동적생성 시 사용되는 item 배열</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>group element의 값</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>disableAutoSelect</td>
+					<td>true 값이면 그룹 라디오 버튼의 첫번째 엘리먼트를 자동선택하는 기능을 비활성화한다.</td>
+					<td>false</td>
+				</tr>
+			</table>
+    		<br/>
+    	</p>
+    </template>
+    <script>
+    Polymer({
+    	is : "es-fields-description"
+    });
+    </script>
+</dom-module>

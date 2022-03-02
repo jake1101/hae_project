@@ -1,0 +1,4 @@
+[
+	{"id": "1", "name": "홍길동1", "vendorName": "협력사1" ,"jobType": "직종1" }
+	,{"id": "2", "name": "홍길동2", "vendorName": "협력사2" , "jobType": "직종2"}
+]

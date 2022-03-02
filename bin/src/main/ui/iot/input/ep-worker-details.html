@@ -1,0 +1,676 @@
+<sc-link rel="import" href="ep-image-view.html"></sc-link>
+<sc-link rel="import" href="ep-sign-test.html"></sc-link>
+<dom-module id="ep-worker-details">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 작업자 상세팝업
+        ** @Description		: 작업자 상세팝업업
+        ** @Author 			: JongHoon Baek
+        ** @Create Date 	: 2020.02.25
+        ** @History 		: 2020.02.25 JongHoon Baek 최초작성
+        ******************************************************************************************
+    -->
+
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+		.agreementTable {
+			width : 100%;
+		}
+		.agreementTable th {
+			background : none !important;
+		}
+	</style>
+	
+	<template>
+	
+	
+		<sc-request-group init>
+				<sc-code-group>
+					<sc-code code="IOT017" value="{{protectList}}"></sc-code>
+					<sc-code code="IOT019" value="{{nationList}}"></sc-code>
+					<sc-code code="IOT020" value="{{bloodTypeList}}"></sc-code>
+				</sc-code-group>
+		</sc-request-group>
+		
+	
+		<sc-ajax id="findWorkerDetail"
+				url="findWorkerDetail.do"
+				body="{{searchParam}}"
+				on-response="completeFindeWorkerDetail">
+		</sc-ajax>
+		
+		<sc-ajax
+				id="findJobTypeList"
+				url="findJobTypeList.do"
+				body="{{searchParam}}"
+				last-response="{{jobTypeList}}">
+		</sc-ajax>
+		
+		<sc-ajax
+				id="findListVendor"
+				url="findListVendor.do"
+				body="{{searchParam}}"
+				last-response="{{vendorList}}">
+		</sc-ajax>
+		
+		<sc-ajax
+				id="findImgFile"
+				url="findImgFile.do"
+				on-response="completeFindImgFile">
+		</sc-ajax>
+		
+		
+		<cc-sub-title-bar  title-text="문서번호 [[workerInfo.docNumber]]">
+          <sc-button  text="레포트 출력" on-click="onOpenReport" ></sc-button>
+          <sc-button  text="저장" on-click="onSave" hidden="{{saveFlag}}" auth-s></sc-button>
+		</cc-sub-title-bar>
+
+<div class="vspace-5"></div>
+		<div class="flex page">
+	        <table class="tb-form">
+	            <colgroup>
+            		<col style="width:150px">
+	                <col style="width:150px">
+	                <col>
+	                <col style="width:150px">
+	                <col>
+	            </colgroup>
+	            <tr>
+	            	<td rowspan="5">
+	            		<div style="height:100%">
+	            		<img  id="workerFaceImg" src=""  onerror="this.onerror=null; this.src='/ui/assets/img/empty.png';"  style ="width:100%; height : 100%" on-click="onUpload" ></img>
+	            		</div>
+	            	</td>
+	                <th><sc-label text="이름"></sc-label></th>
+	                <td>
+	                <sc-text-field value="{{workerInfo.name}}"  max-length="100" ></sc-text-field>
+	                </td>								
+	                								
+	                <th><sc-label text="생년월일"></sc-label></th>
+	                <td>
+	               	<sc-date-field class="w-200" value="{{workerInfo.birthDt}}"  format="YYYY-MM-DD"></sc-date-field>
+	                </td>								
+	            </tr>
+	            <tr>
+	                <th><sc-label text="국적"></sc-label></th>
+	                <td>
+		            <sc-combobox-field id="nation" items="{{nationList}}" display-field="label" value-field="data" value="{{workerInfo.nation}}" placeholder="선택"></sc-combobox-field>
+<!-- 		            <sc-combobox-field id="nation" items="{{nationList}}" readonly="{{editableFlag}}" display-field="label" value-field="data" value="{{workerInfo.nation}}" placeholder="선택"></sc-combobox-field> -->
+	                </td>							
+	                								
+	                <th><sc-label text="연락처"></sc-label></th>
+	                <td>
+	                <sc-text-field value="{{workerInfo.phoneNumber}}"  max-length="100" ></sc-text-field>
+	                </td>								
+	            </tr>
+	            <tr>
+	                <th><sc-label text="혈액형"></sc-label></th>
+	                <td>
+		            <sc-combobox-field id="bloodType" items="{{bloodTypeList}}"  display-field="label" value-field="data" value="{{workerInfo.bloodType}}" placeholder="선택"></sc-combobox-field>
+<!-- 		            <sc-combobox-field id="bloodType" items="{{bloodTypeList}}" readonly="{{editableFlag}}" display-field="label" value-field="data" value="{{workerInfo.bloodType}}" placeholder="선택"></sc-combobox-field> -->
+	                </td>							
+	                								
+	                <th><sc-label text="비상연락망"></sc-label></th>
+	                <td>
+	                <sc-text-field value="{{workerInfo.emergencyNumber}}"  max-length="100" ></sc-text-field>
+	                </td>								
+	            </tr>
+	            <tr>
+	                <th><sc-label text="소속회사명"></sc-label></th>
+	                <td>
+		            <sc-combobox-field id="vendorId" items="{{vendorList}}"   display-field="name" value-field="id" value="{{workerInfo.vendorId}}" placeholder="선택"></sc-combobox-field>
+<!-- 		            <sc-combobox-field id="vendorId" items="{{vendorList}}"  readonly="{{editableFlag}}" display-field="name" value-field="id" value="{{workerInfo.vendorId}}" placeholder="선택"></sc-combobox-field> -->
+	                </td>							
+	                <th><sc-label text="직종"></sc-label></th>
+	                <td>
+		            <sc-combobox-field id="jobTypeId" items="{{jobTypeList}}"   display-field="jobTypeName" value-field="id" value="{{workerInfo.jobTypeId}}" placeholder="선택"></sc-combobox-field>
+	                </td>							
+	            </tr>
+	            <tr>
+	                <th><sc-label text="동종경력"></sc-label></th>
+	                <td>
+	                <sc-text-field value="{{workerInfo.career}}"  max-length="100" ></sc-text-field>
+	                </td>							
+	                <th><sc-label text="이전 근무지"></sc-label></th>
+	                <td>
+	                <sc-text-field value="{{workerInfo.beforeWorkPlace}}"  max-length="100" ></sc-text-field>
+	                </td>							
+	            </tr>
+	            <tr>
+	                <th><sc-label text="기타 첨부파일"></sc-label></th>
+	                <td colspan='4'>
+	                  <sc-upload id="uploadPanel" style="height:200px" 
+							value="{{workerInfo.etcFileGrpCode}}"
+							on-upload-completed="uploadCompleted"
+							on-delete-completed="deleteCompleted"
+							on-item-select="onItemSelect"
+							view-type="thumbnail"
+							downloadable="true"
+							>
+						</sc-upload>
+	                </td>	
+	            </tr>
+	            <tr>
+	                <th><sc-label text="주소"></sc-label></th>
+	                <td colspan='4'>
+	                <sc-text-field value="{{workerInfo.address1}}"  max-length="100" ></sc-text-field><br>
+	                <sc-text-field value="{{workerInfo.address2}}"  max-length="100" ></sc-text-field><br>
+	                <sc-text-field value="{{workerInfo.address3}}"  max-length="100" ></sc-text-field>
+	                </td>	
+	            </tr>
+	            <tr>
+	                <th><sc-label text="가족사항"></sc-label></th>
+	                <td>
+	                	</sc-label><sc-checkbox-field label="부" input-value="{{workerInfo.fatherYn}}" checked-value="Y" un-checked-value="N" ></sc-checkbox-field>
+	                	</sc-label><sc-checkbox-field label="모" input-value="{{workerInfo.motherYn}}" checked-value="Y" un-checked-value="N" ></sc-checkbox-field>
+	                </td>
+	                <td>
+						<sc-radio-group-field name="checkgroup" value="{{workerInfo.marryYn}}" >
+	    					<sc-radio-field label="기혼" input-value="Y"></sc-radio-field>
+	    					<sc-radio-field label="미혼" input-value="N"></sc-radio-field>
+	    				</sc-radio-group-field>
+					</td>
+					<td></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="개인보호구 수령확인"></sc-label></th>
+	                <td id='protectList' colspan='4'>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="서명"></sc-label></th>
+	                <td colspan='4' style="text-align:center" on-click="signTest">
+	                	  <img  id="protectSignImg" src=""  onerror="this.onerror=null; this.src='/ui/assets/img/empty.png';" style ="width:300px; height : 200px"></img>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="근로자서약서"></sc-label></th>
+	                <td colspan='4'>
+		               	<sc-textarea-field readonly="true" style="height:250px" value="[[workerPledge.mainString]]" max-length="1000"></sc-textarea-field>
+		               	<div class="vspace-10"></div>
+		 				<sc-textarea-field readonly="true" style="height:110px; width:49%; float:left" value="[[workerPledge.sixth]]" max-length="1000"></sc-textarea-field>
+		                <sc-textarea-field readonly="true" style="height:110px; width:49%; float:right" value="[[workerPledge.fortieth]]" max-length="1000"></sc-textarea-field>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="근로자 개인정보 수집 및 이용 동의서"></sc-label></th>
+	                <td colspan='4'>
+		               	<sc-textarea-field readonly="true" style="height:50px" value="[[agreement.mainString]]" max-length="1000"></sc-textarea-field>
+						<sc-label text="1. 개인정보의 수집 이용 [필수]"></sc-label>
+		   				<br/>
+						<sc-radio-group-field name="checkgroup" value="{{workerInfo.personnelYn}}" >
+		   					<sc-radio-field label="수집 및 이용에 동의함" input-value="Y"></sc-radio-field>
+		   					<sc-radio-field label="수집 및 이용에 동의하지 않음 " input-value="N"></sc-radio-field>
+		   				</sc-radio-group-field>
+		   				<div class="vspace-10"></div>
+						<!-- 1번항목 시작 -->
+						<!-- 1번항목 시작 -->
+						<div style= "padding:3px; background-color : #E8E8E8;"> 
+			   				<div class="vspace-10"></div>
+			   				<table class="agreementTable tb-form">
+					            <colgroup>
+					            	<col width='30%'/>
+					                <col width='70%'/>
+								</colgroup>
+								<tr>
+									<th>수집하는 기본개인정보 항목</th>
+									<td>-필수정보 : 성명, 직무, 차량번호, 연락처, 주민등록 번호 앞에 7자리(생년월일, 내/외국인 표시용)</td>
+								</tr>
+								<tr>
+									<th>개인정보의 수집 및 이용목적</th>
+									<td>『Hi Smart』는 개인정보를 다음의 목적을 위해서만 활용되며 수집된 개인정보는 안전관리 이외의 목적으로는 이용되지 않습니다.
+										<br/>-산업 활동 중인 작업자의 위급상황 시 관리자에게 위험사항 전파 조치
+									</td>
+								</tr>
+								<tr>
+									<th>개인정보의 보유 및 이용기간</th>
+									<td>『Hi Smart』는 개인정보 수집 및 이용목적이 달성된 후에는 해당정보를 지체없이 파기합니다. 단, 필수정보에 대해서는 아래의 이유로 명시한 기간동안 보존합니다.
+										<br/>-사고이력 관리 차원에서 현장 준공 후 3년 간 보존
+									</td>
+								</tr>
+								<tr>
+				                	<th>개인정보 제공 동의 거부 권리 및 동의 거부 따른 불이익 내용 또는 제한사항</th>
+				                	<td>작업자는 상기내용 동의를 거부할 권리가 있으며, 동의 거부에 따라서 현장출입에 제한이 있을 수 있음을 알려드립니다.</td>	
+								</tr>
+				            </table>
+			            </div>
+			            <!-- 1번항목 끝 -->
+						<!-- 1번항목 끝 -->
+		   				<div class="vspace-10"></div>
+		   				<div class="vspace-10"></div>
+		   				<div class="vspace-10"></div>
+						<sc-label text="2. 고유식별졍보의 수집 이용 [필수]"></sc-label>
+						<br/>
+						<sc-radio-group-field name="checkgroup" value="{{workerInfo.identificationYn}}" >
+		   					<sc-radio-field label="수집 및 이용에 동의함" input-value="Y"></sc-radio-field>
+		   					<sc-radio-field label="수집 및 이용에 동의하지 않음 " input-value="N"></sc-radio-field>
+		   				</sc-radio-group-field>
+		   				<div class="vspace-10"></div>
+		   				<!-- 2번항목 시작 -->
+						<!-- 2번항목 시작 -->
+						<div style= "padding:3px; background-color : #E8E8E8;">
+			   				<table class="agreementTable tb-form">
+								<colgroup>
+									<col width='30%' />
+									<col width='70%' />
+								</colgroup>
+								<tr>
+									<th>수집하는 개인위치정보 항목</th>
+									<td>-휴대폰 GPS 개인위치정보, GPS태그(Beacon)를 통한 개인위치정보</td>
+								</tr>
+								<tr>
+									<th>개인위치정보의 수집 및 이용목적</th>
+									<td>『Hi Smart』는 개인위치정보를 다음의 목적을 위해서만 활용되며 수집된 개인위치정보는 안전관리 이외의 목적으로는 이용되지 않습니다.
+										<br/> -산업 활동 중인 작업자의 위급상황 시 관리자에게 위험사항 전파 조치
+									</td>
+								</tr>
+								<tr>
+									<th>개인위치정보의 보유 및 이용기간</th>
+									<td>『Hi Smart』는 개인위치정보 수집 및 이용목적이 달성된 후에는 해당정보를 지체없이 파기합니다. 
+									단, 개인위치정보에 대해서는 아래의 이유로 명시한 기간동안 보존합니다.<br/> -사고이력 관리 차원에서 현장 준공 후 3년 간 보존
+									</td>
+								</tr>
+								<tr>
+									<th>개인위치정보 제공 동의 거부 권리 및 동의 거부 따른 불이익 내용 또는 제한사항</th>
+									<td>작업자는 상기내용 동의를 거부할 권리가 있으며, 동의 거부에 따라서 현장출입에 제한이 있을 수 있음을 알려드립니다.</td>
+								</tr>
+							</table>
+							<div class="vspace-10"></div>
+							<table class="agreementTable tb-form"> 
+								<colgroup>
+									<col width='33%' />
+									<col width='33%' />
+									<col width='34%' />
+								</colgroup>
+								<tr>
+									<th>제공받은 자</th>
+									<th>제공하는 목적</th>
+									<th>제공하는 개인정보 항목</th>
+								</tr>
+								<tr>
+									<td>주식회사 메이사</td>
+									<td>현위치정보제공</td>
+									<td>현위치</td>
+								</tr>
+							</table>
+						</div>
+						<!-- 2번항목 끝 -->
+						<!-- 2번항목 끝 -->
+		   				<div class="vspace-10"></div>
+		   				<div class="vspace-10"></div>
+		   				<div class="vspace-10"></div>
+						<sc-label text="3. 민감정보 처리 동의 [필수]"></sc-label>
+						<br/>
+						<sc-radio-group-field name="checkgroup" value="{{workerInfo.sensitiveYn}}" >
+		   					<sc-radio-field label="수집 및 이용에 동의함" input-value="Y"></sc-radio-field>
+		   					<sc-radio-field label="수집 및 이용에 동의하지 않음 " input-value="N"></sc-radio-field>
+		   				</sc-radio-group-field>
+		   				<div class="vspace-10"></div>
+		   				<!-- 3번항목 시작 -->
+						<!-- 3번항목 시작 -->
+						<div style= "padding:3px; background-color : #E8E8E8;">
+			   				『Hi Smart』는 사상•신념, 노동조합•정당의 가입•탈퇴, 정치적 견해, 건강, 성생활 등에 관한 정보, 
+							그 밖에 정보주체의 사생활을 현저히 침해할 우려가 있는 개인정보를 수집•처리하지 않습니다. 
+							<br/>다만 안전관리를 위해 건강사항에 대하여 수집•처리하며 안전관리 이외의 목적으로는 이용되지 않습니다.
+							<div class="vspace-10"></div>
+							<table class="agreementTable tb-form">
+								<colgroup>
+									<col width='30%' />
+									<col width='70%' />
+								</colgroup>
+								<tr>
+									<th>수집하는 민감정보 항목</th>
+									<td>필수정보 : 체온, 혈액형, 혈압 <br/> 그외 : 가족사항, 의사소견서</td>
+								</tr>
+								<tr>
+									<th>민감정보의 수집 및 이용목적</th>
+									<td>
+										『Hi Smart』는 민감정보를 다음의 목적을 위해서만 활용되며 수집된 민감정보는 안전관리 이외의 목적으로는 이용되지 않습니다.<br/> -산업 활동 중인 작업자의 건강정보 관리
+									</td>
+								</tr>
+								<tr>
+									<th>민감정보의 보유 및 이용기간</th>
+									<td>
+										『Hi Smart』는 민감정보 수집 및 이용목적이 달성된 후에는 해당정보를 지체없이 파기합니다. 단, 필수정보에 대해서는 아래의 이유로 명시한 기간동안 보존합니다.
+										<br/> -사고이력 관리 차원에서 현장 준공 후 3년 간 보존
+									</td>
+								</tr>
+								<tr>
+									<th>민감정보 제공 동의 거부 권리 및 동의 거부 따른 불이익 내용 또는 제한사항</th>
+									<td>작업자는 상기내용 동의를 거부할 권리가 있으며, 동의 거부에 따라서 현장출입에 제한이 있을 수 있음을 알려드립니다.</td>
+								</tr>
+							</table>
+						</div>
+						<!-- 3번항목 끝 -->
+						<!-- 3번항목 끝 -->
+	                </td>
+	            </tr>
+	        </table>
+	        <table class="tb-form">
+	            <colgroup>
+	                <col style="width:150px">
+	                <col>
+	                <col style="width:150px">
+	                <col>
+	            </colgroup>
+	            <tr>
+	                <td colspan='4'>
+	                		<sc-textarea-field readonly="true"  value="[[agreement.lastComment]]" max-length="1000"></sc-textarea-field>
+	                		<div class="vspace-10"></div>
+	                		<sc-checkbox-field label="기초안전교육 수료여부" input-value="{{workerInfo.safeEducationYn}}" checked-value="Y" un-checked-value="N" ></sc-checkbox-field>
+	                		<sc-label style="margin-left:10px" text="수료일자 :"></sc-label><sc-date-field style="width:30%" value="{{workerInfo.safeEducationDt}}" format="YYYY-MM-DD" readonly="false"></sc-date-field>
+	                		<sc-label style="margin-left:10px" text="작성일자 :"></sc-label><sc-date-field style="width:30%" value="{{workerInfo.createdDt}}" format="YYYY-MM-DD" readonly="false" ></sc-date-field>
+	                </td>
+	            </tr>
+		        <tr>
+	                <td colspan='2' style="text-align:center">
+	                	<sc-label text="안전 교육 실시자"></sc-label><br>
+	                	<sc-label text="교육 실시자 :">
+	                	</sc-label>
+	                	<sc-text-field style="width:30%" value="{{workerInfo.educatorCompanyName}}" readonly="false" max-length="100" ></sc-text-field>
+	                </td>
+	                <td colspan='2' style="text-align:center">
+	                	<sc-label text="성명 :"> 
+	                	</sc-label>
+	                	<sc-text-field style="width:30%" value="{{workerInfo.workerName}}" readonly="false" max-length="100" ></sc-text-field>
+	                </td>
+	            </tr>
+	        </table>
+        </div>
+        <input type="hidden" id = "f_worker_detail_object" />
+	</template>
+	
+	<script>
+		Polymer({
+			is : "ep-worker-details",
+			
+			properties : {
+				
+				
+				searchParam: {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				},
+				protectList: {
+					type : Array,
+					value : function(){
+						return [];
+					}
+				},
+				workerInfo: {
+					type : Object,
+					value : function(){
+						return {
+							
+						};
+					}
+				},
+				editableFlag:{
+					type : Boolean,
+					value : function(){
+						return true;
+					}
+					
+				},
+				saveFlag:{
+					type : Boolean,
+					value : function(){
+						return false;
+					}
+					
+				},
+				photoInfo : {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				},
+				
+				workerPledge : {
+					type : Object,
+					value : function(){
+						return {
+							"mainString" : "1. 상기 지급받은 개인보호구는 현장 경계구역 출입 시 반드시 착용하고 올바르게 관리하며, 지급받은 보호구를 착용하지 않아 발생되는 모든 문제는 본인이 책임을 진다.\n"+
+											"2. 모든 기계기구는 사용전 승인을 득하고, 폭발․발화․인화성 물질 취급시 화재예방조치를 한다.\n"+
+											"3. 현장 내 위험장소에 출입을 금하며, 위험사항 발견시 관리자에게 즉시 통보한다. \n"+
+											"4. 쾌적한 작업환경을 조성을 위하여 작업 전,중,후 정리정돈 철저히 실시한다.\n"+
+											"5. 현장내 이동시 지정된 통로를 이용하며, 지정장소 외 흡연을 하지 않는다.\n"+
+											"6. 유해․위험기계기구의 안전장치 및 안전시설물은 임의로 제거하지 않는다. \n"+
+											"7. 현장내 분전함, 전선 등의 가설전기는 임의로 사용하지 않는다.\n"+
+											"8. 모든 작업에 있어 작업순서 및 안전수칙을 준수하고 불안전행동을 하지 않는다.\n"+
+											"9. 안전수칙 위반시 벌금제(흡연, 보호구 미착용등) 및 3진 아웃제(위험작업)실시에 동의한다.\n"+
+											"\n"+
+											"위 사항을 모두 준수할 것이며 신규채용안전교육에서 언급된 현장기본안전수칙(공도구사용기준,작업발판등) 미 이행시 현장퇴출 조치함."
+							,"sixth" :  "▣ 산업안전보건법 제6조 (근로자의 의무)\n"+
+										"근로자는 이 법과 이 법에 따른 명령으로 정하는 산업재해 예방을 위한 기준을 지켜야 하며, 사업주 또는 「근로기준법」 제101조에 따른 근로감독관, 공단 등 관계인이 실시하는 산업재해 예방에 관한 조치에 따라야 한다.\n"
+							,"fortieth" : "▣산업안전보건법 제40조 (근로자의 안전조치 및 보건조치 준수) \n"+
+										"근로자는 제38조 및 제39조에 따라 사업주가 한 조치로서 고용노동부령으로 정하는 조치 사항을 지켜야 한다.\n"+
+										"※ 300만원 이하의 과태료\n"
+							
+						};
+					}
+				},
+				agreement : {
+					type : Object,
+					value : function(){
+						return {
+							"mainString" : "본인은 개인정보보호법 제15조에 따라 귀하의 개인정보의 수집, 이용목적과 수집하려는 개인정보의 항목, 개인정보 보유 기간에 대해 동의합니다."
+							
+							,"lastComment" : "※ 현장에서 근무하는 기간동안 상기사항 및 안전수칙을 준수하고 산업안전보건법"+
+											"(제6조 근로자의 의무, 제25조 근로자 준수사항)을 준수하여 재해예방에 적극적으로 노력하며 "+
+											"이에 불응시에는 현장책임자의 지시에 따라 퇴사할 것이며, 위에 기재한 사항이 사실임을 서약합니다."
+						};
+					}
+				}
+				
+			},
+			
+			 initialized : function() {
+                var me = this;
+                UT.request(me.$.findListVendor);
+                UT.request(me.$.findJobTypeList);
+            },
+			load:function(data,type){
+ 				var me = this;
+ 				me.set('searchParam',data);
+ 				me.set('searchParam.workerId',data.id);
+ 				me.set('searchParam.workerType',type);
+ 				
+ 				UT.request(me.$.findWorkerDetail);
+				var html='';
+				if(type == "temp" ){
+					me.editableFlag=false;
+				}else if(type == "vehicle"){
+					me.saveFlag=true;
+				}
+				$('#protectList').empty();
+				
+				var protectList = me.$.protectList;
+				
+				for(var i = 0 ; i < me.protectList.length; i++){
+					var obj;
+					obj = document.createElement('sc-checkbox-field');
+					obj.setAttribute("label", me.protectList[i].label);
+					obj.setAttribute("class", "protectList");
+					obj.setAttribute("data", me.protectList[i].data);
+					obj.checkedValue="Y";
+					obj.unCheckedValue="N";
+					Polymer.dom(protectList).appendChild(obj);
+				}
+				
+			},
+			
+			
+			completeFindeWorkerDetail : function(e,res){
+				var me = this,
+					result = res.response;
+				me.photoInfo.workerFaceGrpCode = result.workerFaceGrpCode;
+				var protectObj = me.$.protectList;
+				if(result.privateProtectionList){
+					for(var i = 0 ; i < me.protectList.length ; i ++){
+						for(var j = 0 ; j< result.privateProtectionList.length ; j++){
+							if(result.privateProtectionList[j] == me.protectList[i].data){
+								protectObj.childNodes[i].inputValue ='Y';
+								break;
+							}else{
+								protectObj.childNodes[i].inputValue ='N';
+							}
+						}
+					}
+				}
+				if(result.privateProtetcionSignature){
+					$("#protectSignImg").attr("src","/repository/"+result.privateProtetcionSignature[0].attFilePath);
+				}
+				if(result.workerFace){
+					$("#workerFaceImg").attr("src","/repository/"+result.workerFace[0].attFilePath);
+				}
+				if(result.educatorSignature){
+					$("#educatorSignImg").attr("src","/repository/"+result.educatorSignature[0].attFilePath);
+				}
+				if(result.workerSignature){
+					$("#workerSignImg").attr("src","/repository/"+result.workerSignature[0].attFilePath);
+				}
+				result.birthDt = new Date(result.birthDt); 	
+				
+				result.safeEducationDt = new Date(result.safeEducationDt); 	
+				result.createdDt = new Date(result.createdDt); 	
+				result.marryYn="Y";
+				result.personnelYn="Y";
+				result.identificationYn="Y";
+				me.set("workerInfo" , result);
+			},
+			
+			
+			onSave : function(){
+                var me = this;
+                var protectList = $('.protectList');
+                me.workerInfo.privateProtectionList = [];
+                for(var i=0; i<protectList.length;i++){
+                	if(protectList[i].value){
+                		me.workerInfo.privateProtectionList.push(protectList[i].getAttribute("data"));
+                	}
+                }
+                var birthDt =  UT.formatDate( me.workerInfo.birthDt, "yyyy-MM-dd");
+                me.workerInfo.birthDt = birthDt;
+                
+                me.$.uploadPanel.upload().then(function(){
+                    me.fire("save-property",me.workerInfo);
+                	
+                })
+                	
+                
+            },
+            
+            
+            onUpload : function(e){
+            	 var me = this;
+	             UT.popupAttach(me, me.photoInfo.workerFaceGrpCode, function(result) {
+					// 1. 메인 화면의 property 에 담아질 예정 추후에 저장 누르면 저장됨.
+					me.workerInfo.workerFaceGrpCode = result.grp_cd;
+					
+					// 2. API호출 
+				 	me.$.findImgFile.body = {
+                    	grpCd : result.grp_cd
+                    };
+					UT.request(me.$.findImgFile);
+	             },{maxTotalFileCount : 1});
+            },
+            //API complete
+            // src 를 변경을 해줘라.
+            completeFindImgFile : function(e,res){
+            	var me = this,
+            		result= res.response;
+            	
+            	$("#workerFaceImg").attr("src","/repository/"+result[0].attFilePath);
+            },
+            
+            onItemSelect: function(event, detail) {
+				var me = this;
+				console.log(detail);
+				if(detail.item) {
+					if(detail.item.id.indexOf('-file') !== -1) {
+						var imageReader = new FileReader();
+						imageReader.onload = (function(aFile) {
+							return function(e) {
+								var popup = UT.popup('ep-image-view', me, 600, 500, {}, {});
+								popup.show();
+								var popupContent = popup.getWindowContent();
+								popupContent.load(e.target.result, true);
+							};
+						})(detail.item.orgFile);
+						imageReader.readAsDataURL(detail.item.orgFile);
+					} else {
+						var popup = UT.popup('ep-image-view', me, 600, 500, {}, {});
+						popup.show();
+						var popupContent = popup.getWindowContent();
+						popupContent.load(detail.item.id);		
+					}
+				}
+			},
+			
+			signTest : function(){
+				var me = this;
+// 				var popup = UT.popup('ep-sign-test', me, 600, 500, {}, {});
+// 				popup.show();
+// 				var popupContent = popup.getWindowContent();
+// 				popupContent.load();		
+			},
+			
+			onOpenReport : function(){
+            	var me = this;
+      			console.log(me.workerInfo);
+      			me.workerInfo.vendorName = me.$.vendorId.selectedItem ? me.$.vendorId.selectedItem.name : "";
+      			me.workerInfo.jobTypeName = me.$.jobTypeId.selectedItem ? me.$.jobTypeId.selectedItem.jobTypeName : "";
+      			me.workerInfo.nationName = me.$.nation.selectedItem ? me.$.nation.selectedItem.label : "";
+      			me.workerInfo.bloodTypeName = me.$.bloodType.selectedItem ? me.$.bloodType.selectedItem.label : "";
+      			me.workerInfo.workerFaceImg =window.location.protocol+"//"+window.location.hostname+":"+window.location.port+ ($("#workerFaceImg").attr("src")).split("\\").join("/");
+      			me.workerInfo.protectSignImg =window.location.protocol+"//"+window.location.hostname+":"+window.location.port+ ($("#protectSignImg").attr("src")).split("\\").join("/");
+      			
+      			var ectFile;
+      			if(me.workerInfo.etcFile) {
+      				ectFile = (me.workerInfo.etcFile[0].attFilePath).split("\\").join("/");
+      			}
+      			me.workerInfo.etcFileName =window.location.protocol+"//"+window.location.hostname+":"+window.location.port+ "/repository/" + ectFile;
+      			
+      			var protectNameStr="";
+      			for(var i = 0 ; i < me.$.protectList.childNodes.length ; i++) {
+      				if(me.$.protectList.childNodes[i].inputValue == "Y"){
+      					protectNameStr +=  " " + me.$.protectList.childNodes[i].label 
+      				}
+      			}
+      			me.workerInfo.protectNameStr =protectNameStr;
+      			
+	   			var agent = navigator.userAgent.toLowerCase();
+
+				if ( (navigator.appName == 'Netscape' && navigator.userAgent.search('Trident') != -1) || (agent.indexOf("msie") != -1) ) {
+		   		 	$("#f_worker_detail_object").val(JSON.stringify(me.workerInfo));
+		   			var popupWidth = 850;
+		   			var popupHeight = 1000;
+
+		   			var left= (window.screen.width / 2) - (popupWidth / 2);
+		   			var top= (window.screen.height / 2) - (popupHeight / 2);
+		   			
+		   			var workerReportPopup = UT.popupWindow("/report/jsp/workerReport.jsp",me,"width=850 , height=1000 , top="+top+",left="+left + ",toolbar=no,location=no,menubar=no,status=no");
+			
+				}else {
+					$("#f_worker_detail_object").val(JSON.stringify(me.workerInfo));
+		   			var popupWidth = 850;
+		   			var popupHeight = 1000;
+
+		   			var left= (window.screen.width / 2) - (popupWidth / 2);
+		   			var top= (window.screen.height / 2) - (popupHeight / 2);
+		   			
+		   			var workerReportPopup = UT.popupWindow("/report/jsp/workerReportChrome.jsp",me,"width=850 , height=1000 , top="+top+",left="+left + ",toolbar=no,location=no,menubar=no,status=no");
+				}
+	   			
+            }
+	
+		})
+	
+	</script>
+	
+</dom-module>

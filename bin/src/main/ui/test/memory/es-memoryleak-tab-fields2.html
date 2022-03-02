@@ -1,0 +1,245 @@
+<dom-module id="es-memoryleak-tab-fields2">
+
+    <style>
+        :host {
+            @apply(--layout-vertical);
+            flex : 1;
+        }
+        .fieldContainers {
+			margin-bottom: 30px;
+			border : 1px solid;
+		}
+    </style>
+    
+	<template>
+		<div class="page-flex page">
+		<div id="textFieldsContainer" class="fieldContainers">
+			textField<br>
+			<sc-text-field></sc-text-field>
+			<sc-text-field autofocus="true" ></sc-text-field>
+			<sc-text-field placeholder="입력하세요" value="{{textField2_value}}"></sc-text-field>
+			<sc-text-field readonly="true" value="{{textField3_value}}"></sc-text-field>
+			<sc-text-field disabled="true" value="{{textField4_value}}"></sc-text-field>
+			<sc-text-field required="true" value="{{textField5_value}}"></sc-text-field>
+			<sc-text-field maxlength="20" value="{{textField6_value}}"></sc-text-field>
+			<sc-text-field hidden="true"></sc-text-field>
+			<sc-text-field input-cover="true" format-type="number"></sc-text-field>
+			<sc-text-field input-clear="true"></sc-text-field>
+			<sc-text-field input-mask="999-999"></sc-text-field>
+			<sc-text-field placeholder="트리거" trigger-cls="search"></sc-text-field>
+			<sc-text-field placeholder="트리거">
+				<div class="trigger cloud"></div>
+			</sc-text-field>
+			<sc-text-field regex="/[a-z]/"></sc-text-field>
+		</div>
+		<div id="numberFieldsContainer" class="fieldContainers">
+			numberField<br>
+			<sc-number-field></sc-number-field>
+			<sc-number-field min-value="{{numberField2_min}}"></sc-number-field>
+			<sc-number-field max-value="{{numberField3_max}}"></sc-number-field>
+		</div>
+		<div id="textAreaContainer" class="fieldContainers">
+			textArea<br>
+			<sc-textarea-field></sc-textarea-field>
+		</div>
+		<div id="multiComboContainer" class="fieldContainers">
+			multicomboBox<br>
+			<sc-multi-combobox-field placeholder="선택없음" items="[[multiComboBoxField1_items]]" value="[[multiComboBoxField1_value]]"></sc-multi-combobox-field>
+			<sc-multi-combobox-field selected-indexes="[3,4]" placeholder="선택없음" items="[[multiComboBoxField2_items]]" ></sc-multi-combobox-field>
+			<sc-multi-combobox-field enable-check-all="true" placeholder="선택없음" items="[[multiComboBoxField3_items]]"  value="{{multiComboBoxField3_value}}" ></sc-multi-combobox-field>
+			<sc-multi-combobox-field selected-all="true" placeholder="선택없음" items="[[multiComboBoxField4_items]]" value="{{multiComboBoxField4_value}}" ></sc-multi-combobox-field>
+		</div>
+		<div id="pickerFieldContainer" class="fieldContainers">
+			pickerField<br>
+			<sc-picker-field>
+				<div class="trigger search"></div>
+		        <template class="picker-template">
+		            <sc-dropdown>
+		               <div class="picker dropdown">picker</div>
+		            </sc-dropdown>
+		        </template>
+		    </sc-picker-field>
+		</div>
+		<div id="radioGroupFieldContainer" class="fieldContainers">
+			radioGroupField<br>
+			<sc-radio-group-field value="{{radioGroupField1_value}}" >
+				<sc-radio-field label="radio1" input-value="Y"></sc-radio-field>
+				<sc-radio-field label="radio2" input-value="N"></sc-radio-field>
+			</sc-radio-group-field>
+			
+			
+			<sc-radio-group-field items="{{radioGroupField2_items}}" value="{{radioGroupField2_value}}" >
+			</sc-radio-group-field>
+		</div>
+		<div id="monthFieldContainer" class="fieldContainers">
+			monthField<br>
+			<sc-month-field></sc-month-field>
+			<sc-month-field value = "{{monthField1_value}}" format="YYYY-MM"></sc-month-field>
+			<sc-month-field value = "{{monthField2_value}}" string-date="true"></sc-month-field>
+			<sc-month-field min-date = "{{monthField3_min}}" input-clear="true"></sc-month-field>
+			<sc-month-field max-date = "{{monthField4_max}}" input-clear="true"></sc-month-field>
+		</div>
+		<div id="dateFieldContainer" class="fieldContainers">
+			dateField<br>
+			<sc-date-field value="{{dateField1_value}}"></sc-date-field>
+			<sc-date-field value="{{dateField2_value}}" readonly="true"></sc-date-field>
+			<sc-date-field min-date="{{dateField3_min}}"></sc-date-field>
+			<sc-date-field max-date="{{dateField4_max}}"></sc-date-field>
+			<sc-date-field value="{{dateField5_value}}" input-clear="true"></sc-date-field>
+			<sc-date-field value="{{dateField6_value}}" format="YYYY-MM-DD"></sc-date-field>
+			<sc-date-field first-day-of-week=1></sc-date-field>
+			
+		</div>
+		<div id="triggerFieldContainer" class="fieldContainers">
+			triggerField<br>
+			<sc-trigger-field on-trigger-click="onTriggerClick">
+				<sc-text-field class="field"></sc-text-field>
+				<div class="trigger search"></div>
+			</sc-trigger-field>
+		</div>
+		<div id="checkBoxFieldContainer" class="fieldContainers">
+			checkBoxField<br>
+			<sc-checkbox-field label="우유" checked-value="on" un-checked-value="off"></sc-checkbox-field>
+			<sc-checkbox-field label="계란" checked-value="Y" un-checked-value="N" input-value="Y"></sc-checkbox-field>
+			<sc-checkbox-field label="빵" checked-value="on" un-checked-value="off" input-value="off"></sc-checkbox-field>
+		</div>
+		</div>
+		
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'es-memoryleak-tab-fields2',
+			properties :{
+				textField2_value : {
+					type : String,
+					value : 'textField2_value'
+				},
+				
+				numberField2_min : {
+					type : Number,
+					value : 1
+				},
+				
+				numberField3_max : {
+					type : Number,
+					value : 100
+				},
+				
+				multiComboBoxField1_items : {
+					type : Array,
+					value : []
+				},
+				
+				multiComboBoxField1_value : {
+					type : Array,
+					value : []
+				},
+				
+				multiComboBoxField2_items : {
+					type : Array,
+					value : []
+				},
+				
+				multiComboBoxField3_items : {
+					type : Array,
+					value : []
+				},
+				
+				multiComboBoxField3_value: {
+					type : Array,
+					value : []
+				},
+				
+				multiComboBoxField4_items: {
+					type : Array,
+					value : []
+				},
+				
+				multiComboBoxField4_value: {
+					type : Array,
+					value : []
+				},
+				
+				radioGroupField1_value: {
+					type : String,
+					value : 'test'
+				},
+				
+				radioGroupField2_items: {
+					type : Array,
+					value : []
+				},
+				
+				radioGroupField2_value: {
+					type : String,
+					value : 'test'
+				},
+				
+				monthField1_value : {
+					type : Date,
+					value : new Date()
+				},
+				
+				monthField2_value : {
+					type : Date,
+					value : new Date()
+				},
+				
+				monthField3_min : {
+					type : Date,
+					value : new Date()
+				},
+				
+				monthField4_max : {
+					type : Date,
+					value : new Date()
+				},
+				
+				dateField1_value : {
+					type : Date,
+					value : function(){
+						return new Date("2016/01/01");
+					}
+				},
+				
+				dateField2_value : {
+					type : Date,
+					value : function(){
+						return new Date("2016/01/02");
+					}
+				},
+				
+				dateField3_min : {
+					type : Date,
+					value : function(){
+						return new Date('2016/01/03');
+					}
+				},
+				
+				dateField4_max : {
+					type : Date,
+					value : function(){
+						return new Date('2016/01/04');
+					}
+				},
+				
+				dateField5_value : {
+					type : Date,
+					value : function(){
+						return new Date('2016/01/05');
+					}
+				},
+				
+				dateField6_value : {
+					type : Date,
+					value : function(){
+						return new Date('2016/01/06');
+					}
+				}
+			}
+		});
+	</script>
+
+
+</dom-module>

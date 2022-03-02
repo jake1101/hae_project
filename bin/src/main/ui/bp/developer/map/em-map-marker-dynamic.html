@@ -1,0 +1,45 @@
+<link rel="import" href="./shared/es-source-viewer.html">
+<link rel="import" href="./es-map-marker-dynamic.html">
+
+<dom-module id="em-map-marker-dynamic">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+	<template>
+		<sc-panel class="vbox flex-5" collapsible="false" title-text="동적 마커 생성">
+           <es-map-marker-dynamic id="map"></es-map-marker-dynamic>
+        </sc-panel>
+        <sc-panel class="vbox flex-5" collapsible="false" title-text="Source Viewer">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/map/es-map-marker-dynamic.html"></es-source-viewer>
+        </sc-panel>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-map-marker-dynamic',
+			
+			properties : {
+				source : {
+					type : String,
+					value : null
+				},
+				data : {
+                    type: Array,
+                    value: [
+                            {loc: [129.577, 37], options: { detailInfo: { name: '임시2' } }},
+                            {loc: [129.577, 39], options: { detailInfo: { name: '임시3' } }}
+                           ]
+				}
+			},
+			
+			initialized: function() {
+				var me = this;
+                me.$.viewer.setData(JSON.stringify(me.data, null, "\t"));
+                me.$.map.setMarker(me.data);
+            },
+		});
+	</script>
+</dom-module>

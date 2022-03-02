@@ -1,0 +1,311 @@
+<link rel="stylesheet" href="./fullcalendar.min.css">
+<script src="fullcalendar.min.js"></script>
+
+<!--
+	full calendar 3.0.1 polymer wrapper module 
+ -->
+<dom-module id="full-calendar">
+
+<style>
+	:host {
+		display: -ms-flexbox;
+		display: -webkit-flex;
+		display: flex;
+		-ms-flex-direction: column;
+		-webkit-flex-direction: column;
+		flex-direction: column;
+		-ms-flex: 1 1 0.000000001px;
+		-webkit-flex: 1;
+		flex: 1;
+		-webkit-flex-basis: 0.000000001px;
+		flex-basis: 0.000000001px;
+	}
+	
+	#_calendarWrapper {
+		padding : 5px;
+	}
+</style>
+
+<template>
+	<div id="_calendarWrapper"></div>
+</template>
+
+<script>
+Polymer({
+	is : 'full-calendar',
+	
+	properties : {
+		// 캘린더의 상단 좌측에 표시할 정보
+		left : {
+			type : String,
+			value : function() {
+				return '';
+			}
+		},
+
+		// 캘린더의 중앙에 표시할 정보
+		center : {
+			type : String,
+			value : function() {
+				return '';
+			}
+		},
+		
+		// 캘린더의 우측에 표시할 정보
+		right : {
+			type : String,
+			value : function() {
+				return '';	
+			}
+		},
+		
+		// 편집 가능 여부
+		editable : {
+			type : Boolean,
+			value : function() {
+				return true;
+			}
+		},
+		
+		// 이벤트 개수 제한 여부
+		enableEventLimit : {
+			type : Boolean,
+			value : function() {
+				return true
+			}
+		},
+		
+		// 이벤트 보여주는 것 제한
+		eventLimit: {
+			type : Number,
+			value : function() {
+				return 6;
+			}
+		},
+		
+		// 캘린더 높이
+		height : {
+			type : Object,
+			value : function() {
+				return "parent";
+			}
+		},
+		
+		// 캘린더 컨텐츠 높이
+		contentHeight : {
+			type : String,
+			value : function() {
+				return "auto";
+			}
+		},
+		
+		// 글자 크기
+		fontSize : {
+			type : Number,
+			value : function() {
+				return 10;
+			}
+		},
+		
+		//
+		weekMode : 'fixed',
+		
+		header : {
+			type : Boolean,
+			value : function() {
+				return false;
+			}
+		},
+		
+		/**
+		 * 현재 일정 리스트
+		 */
+		currentScheduleList : {
+			type : Array,
+			value : function() {
+				return [];
+			}
+		}
+	},
+
+	/**
+	 * attach 되었을 때, 캘린더를 생성한다.
+	 */
+	attached : function() {
+		var me = this;
+		
+		// 캘린더 설정
+		$(me.$._calendarWrapper).fullCalendar({
+			
+			// 캘린더 헤더에 표현할 항목들
+			header: {
+				left: me.left,
+				center: me.center,
+				right: me.right
+			},
+			
+			// 
+			nowIndicator: true,
+			
+			// 
+			views : {
+				agenda : {
+					eventLimit : me.eventLimit	
+				}
+			},
+			
+			// 뷰 렌더링시 이벤트
+			viewRender : function(view, element) {
+				me.fire('full-calendar-viewrender', {
+					view : view,
+					element : element
+				});
+			},
+			
+			// 보여주는 이벤트 개수
+			eventLimit: me.enableEventLimit,
+			
+			// 수정 가능 여부
+			editable: me.editable,
+			
+			// 비어있는 일을 클릭할 경우 - 이벤트 발생
+			dayClick : function(date, jsEvent, view) {
+				me.fire('full-calendar-dayclick', {
+					date : date,
+					view : view
+				});	
+			},
+			
+			// 일정을 클릭할 경우 - 이벤트 발생
+			eventClick: function(calEvent, jsEvent, view) {
+				me.fire('full-calendar-scheduleclick', {
+					scheduleInfo : calEvent,
+					view : view
+				});
+			},
+			
+			// 일정을 drop할 경우 - 이벤트 발생
+			eventDrop: function(event, delta, revertFunc) {
+				me.fire('full-calendar-scheduledrop', {
+					eventInfo: event,
+					delta: delta,
+					revertFunc : revertFunc
+				});
+			 },
+			 
+			 // 일정 위에 마우스를 올릴 경우 발생
+			 eventMouseover : function(event, jsEvent, view) {
+				 me.fire('full-calendar-mouseover', {
+					eventInfo: event,
+					jsEvent: jsEvent,
+					view : view
+				}); 
+			 },
+			 			 
+			 // 높이
+			 height : this.height,
+			 
+			 nextDayThreshold : "00:00",
+			 
+			 // 시간 표현 양식
+			 timeFormat: '(HH:mm)',
+			 
+			 // 렌더링시 툴팁
+			 eventRender: function(event, element) {
+				 element.attr('title', event.tip);
+			 },
+			 
+			 header : me.header,
+			 
+			 lazyFetching : true
+		});
+	},
+	
+	/**
+	 * 다음으로 이동
+	 */
+	next : function() {
+		$(this.$._calendarWrapper).fullCalendar('next');
+	},
+	
+	/**
+	 * 이전으로 이동
+	 */
+	prev : function() {
+		$(this.$._calendarWrapper).fullCalendar('prev');
+	},
+	
+	/**
+	 * 현재 일정에 보여지는 방법을 변경한다.
+	 */ 
+	changeView : function(viewName) {
+		$(this.$._calendarWrapper).fullCalendar('changeView', viewName);
+	},
+	
+	/**
+	 * 일자를 설정한다.
+	 */
+	setDate : function(date) {
+		$(this.$._calendarWrapper).fullCalendar('gotoDate', date);
+	},
+	
+	/**
+	 * 현재 보여지는 날짜 구간을 가져온다.
+	 */
+	getDateRange : function() {
+		var calendarView = $(this.$._calendarWrapper).fullCalendar('getCalendar').view;
+		var date = this.getDate();
+		return { currentDate : date, start : calendarView.start, end : calendarView.end };
+	},
+	
+	/**
+	 * 현재 일자를 가져온다.
+	 */
+	getDate : function() {
+		return $(this.$._calendarWrapper).fullCalendar('getDate');
+	},
+	
+	/**
+	 * 스케줄을 추가한다.
+	 */
+	addSchedule : function(scheduleInfo, doRefetch) {
+		var me = this;
+		
+		me.currentScheduleList.push(scheduleInfo);
+		
+		if(doRefetch) {
+			$(me.$._calendarWrapper).fullCalendar('addEventSource', me.currentScheduleList);		
+		}
+	},
+	
+	/**
+	 * 일정을 모두 보여준다.
+	 */
+	refetch : function() {
+		var me = this;
+		$(me.$._calendarWrapper).fullCalendar('addEventSource', me.currentScheduleList);
+	},
+	
+	/**
+	 * 스케줄을 삭제한다.
+	 */
+	delSchedule : function(scheduleInfo) {
+		var me = this;
+		$(me.$._calendarWrapper).fullCalendar('removeEventSource', [scheduleInfo]);
+	},
+	
+	/**
+	 * 현재 스케줄을 모두 삭제한다.
+	 */
+	clearSchedule : function(doRefetch) {
+		var me = this;
+		me.currentScheduleList = [];
+		$(me.$._calendarWrapper).fullCalendar('removeEvents');
+		if(doRefetch) {
+			me.refetch();	
+		}
+	}
+});
+</script>
+
+</dom-module>

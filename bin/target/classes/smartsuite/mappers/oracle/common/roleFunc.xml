@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+ESAAURF: 롤기능
+ -->
+
+<mapper namespace="roleFunc">
+
+    <insert id="insertRoleFunc">
+    /* roleFunc.insertRoleFunc: 롤기능 등록 */
+    INSERT 
+      INTO ESAAURF (
+           SYS_ID
+         , ROLE_CD
+         , MENU_CD
+         , FUNC_CD
+         , REG_ID
+         , REG_DT
+    ) VALUES (
+           #{g.tenant}
+         , #{p.role_cd}
+         , #{p.menu_cd}
+         , #{p.func_cd}
+         , #{g.username}
+         , #{g.now}
+    )
+    </insert>
+    
+    <delete id="deleteRoleFunc">
+    /* roleFunc.deleteRoleFunc: 롤기능 삭제 */
+    DELETE 
+      FROM ESAAURF
+     WHERE SYS_ID = #{g.tenant}
+       AND ROLE_CD = #{p.role_cd}
+       AND MENU_CD = #{p.menu_cd}
+       AND FUNC_CD = #{p.func_cd}
+    </delete>
+
+    <select id="getCountRoleFunc" resultType="int">
+    /* roleFunc.getCountRoleFunc: 롤기능 카운트 */
+    SELECT COUNT(*)
+      FROM ESAAURF
+     WHERE SYS_ID = #{g.tenant}
+       <if test='p.role_cd != null'>
+       AND ROLE_CD = #{p.role_cd}
+       </if>
+       AND MENU_CD = #{p.menu_cd}
+       AND FUNC_CD = #{p.func_cd}
+    </select>
+    
+</mapper>

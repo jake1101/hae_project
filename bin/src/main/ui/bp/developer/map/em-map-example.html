@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="./resource/full.css">
+
+<script src="data/factoryData.js"></script>
+<script src="data/weatherData.js"></script>
+<script src="data/naturaldisasterData.js"></script>
+
+<link rel="import" href="map-test-module.html">
+
+<dom-module id="em-map-example">
+	<style>
+		:host {
+            @apply(--vbox-layout);
+        }
+	</style>
+
+	<template>
+		<map-test-module></map-test-module>
+	</template>
+	
+	<script>
+		Polymer({
+			is: 'em-map-example'
+		});
+	</script>
+</dom-module>

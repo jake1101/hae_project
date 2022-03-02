@@ -1,0 +1,28 @@
+<html>
+<head>
+</head>
+<script type="text/javascript" src="sha.js"></script>
+<script type="text/javascript" >
+var shaObj = new jsSHA("SHA-512", "TEXT");
+shaObj.update("1111");
+var hash = shaObj.getHash("HEX");
+console.log(hash);
+console.log(hexToBase64(hash));
+
+
+function hexToBase64(str) {
+  return btoa(String.fromCharCode.apply(null,
+    str.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" "))
+  );
+}
+
+function base64ToHex(str) {
+  for (var i = 0, bin = atob(str.replace(/[ \r\n]+$/, "")), hex = []; i < bin.length; ++i) {
+    var tmp = bin.charCodeAt(i).toString(16);
+    if (tmp.length === 1) tmp = "0" + tmp;
+    hex[hex.length] = tmp;
+  }
+  return hex.join(" ");
+}
+</script>
+</html>

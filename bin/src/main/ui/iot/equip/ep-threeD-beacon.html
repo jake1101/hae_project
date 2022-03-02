@@ -1,0 +1,891 @@
+<dom-module id="ep-threeD-beacon">
+	<!--
+        ******************************************************************************************
+   		** @Program-name 	: 비콘 선택 팝업
+        ** @Description		: 공간정보맵핑 참고
+        ** @Author 			: jh.Park
+        ** @Create Date 	: 2021-08-31
+        ** @History 		: 2021-08-31 jh.Park 최초작성
+        ******************************************************************************************
+    -->
+	<style type="text/css">
+		:host{
+			@apply(--vbox-layout);
+		}
+  		 html, body { height:100%; overflow:hidden } .row {height:96% ; margin:1% 1% 1% 1%;} 
+  	</style>
+	
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+	
+		<sc-request-group init></sc-request-group>
+		
+		
+		<!-- 영역 콤보 조회 -->
+		<sc-ajax id="findAreaInfo" url="findAreaList.do" body="{{searchParam}}" on-response= "completeFindAreaList"></sc-ajax>
+		<!-- 그룹 콤보 조회 -->
+		<sc-ajax id="findGroupList" url="findGroupList.do" body="{{searchParam}}" on-response="completeFind"></sc-ajax>
+		<!-- Beacon 목록 조회 -->
+		<sc-ajax id="findNoDangerBeacon" url="findNoDangerBeacon.do" body="{{searchParam}}" on-response="completeFindNoDangerBeacon"></sc-ajax>
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<cc-page-title-bar></cc-page-title-bar>
+		<!-- 레이어 및 비콘 정보 Start -->
+		<table class="tb-form">
+			<colgroup>
+				<col style="width:120px"/>
+				<col style="width:200px"/>
+				<col style="width:120px"/>
+				<col style="width:200px"/>
+				<col style="width:50px" />
+				<col/>
+				<col style="width:50px" />
+				<col/>
+				<col style="width:50px" />
+				<col/>
+				<col>
+			</colgroup>
+			<tr>
+				<th><sc-label text="영역"></sc-label></th>
+				<td>
+					<sc-combobox-field id="areaCombo" selected-index="0" id="combo" items="{{areaInfoList}}" value="{{searchParam.areaId}}" placeholder="선택"
+									display-field="name" value-field="id"  on-change="onSelectCombo" required="true">
+				</td>
+				<th><sc-label text="그룹"></sc-label></th>
+				<td>
+					<sc-tree-combobox-field id="groupCombo" items="{{hierachGroupInfoList}}" 
+						input-clear = "true"
+						enable-check-box-only-childs="false" value="{{searchParam.layerGroupIds}}" placeholder="전체"
+						display-field="name" value-field="id"  on-change="onSelectGroup">
+					</sc-tree-combobox-field>
+				</td>
+    			<th><sc-label text="X"></sc-label></th>
+				<td><sc-number-field id="valueX"  value="{{searchParam.valueX}}"  on-click="showPointer"></sc-number-field></td>
+				<th><sc-label text="Y"></sc-label></th>
+				<td><sc-number-field id="valueY"  value="{{searchParam.valueY}}" on-click="showPointer"></sc-number-field></td>
+				<th><sc-label text="Z"></sc-label></th>
+				<td><sc-number-field id="valueZ"  value="{{searchParam.valueZ}}"  on-click="showPointer"></sc-number-field></td>
+			</tr>
+		</table>
+		<!-- 레이어 및 비콘 정보 End -->
+				
+		<div id="canvasDiv" class="flex hbox">
+			<!-- 3D Model Start -->
+			<div id="canvasDiv1" class="flex-6 vbox" style="position: relative; overflow: hidden;">
+				<div id="mycanvas1" class="canvasDiv" style="width: 100%; height: 100%;"></div>
+				<div id="textBoxDivforMapping" style="position: absolute;"></div>		
+			</div>
+			<!-- 3D Model End -->
+			
+			<!-- Beacon List Start -->
+			<div id="canvasDiv2" class="flex-4 vbox">
+				<sc-tab-navigation id="tabNavi" class="vbox flex-5">
+		            <div id="beaconDiv" title-text="Beacon" class="vbox flex">
+		            	<sc-grid id="noDangerBeaconGrid" data-provider="{{noDangerBeaconList}}" class="flex" on-item-click="onItemClick"editable="true">
+			                <cc-grid-toolbar>
+			                    <sc-button text="저장" on-click="onSaveBeacon" data-args="bc" auth-s></sc-button>
+			                </cc-grid-toolbar>
+			                
+			                <sc-grid-columns>
+			                    <sc-data-column data-field="major" 		header-text="Major" width="100" 	text-align="center" data-type="number"></sc-data-column>
+			                    <sc-data-column data-field="minor" 		header-text="Minor" width="100" 	text-align="center" data-type="number"></sc-data-column>
+			                    <sc-data-column data-field="fullName" 	header-text="위치명" 	width="200" text-align="center"></sc-data-column>
+			                </sc-grid-columns>
+			                 <sc-grid-fields>
+								<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+								<sc-grid-field data-field="id"></sc-grid-field>
+								<sc-grid-field data-field="x"></sc-grid-field>
+								<sc-grid-field data-field="y"></sc-grid-field>
+								<sc-grid-field data-field="z"></sc-grid-field>
+							</sc-grid-fields>
+		            	</sc-grid>
+		            </div>	            
+		        </sc-tab-navigation>
+			</div>
+			<!-- Beacon List End -->
+		</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+		
+	<script>
+		Polymer({
+			is: "ep-threeD-beacon",
+			
+			properties : {
+            	titleText:{
+	                type: String,
+					value: "위험 비콘 설정"
+				},
+                codes: {
+                    type : Object,
+                    reset : false,
+                    value : function() {
+                        return {
+                            companyList: [],
+                            seqRefreshUnitList: []
+                        }
+                    }
+                },
+                projectTagObject : {
+                	type : Object,
+                	value : function(){
+                		return {}
+                	}
+                },
+                existCamera : {
+                	type : Object,
+                	value : function(){
+                		return {"value":false}
+                	}
+                },
+                siteList: {
+					 type : Array,
+					 value : function(){
+						 return [];
+					 }
+				},
+				selectedComboInfo : {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				},
+				searchParam: {
+                	type : Object,
+                	value: function(){
+                		return {
+                			valueX: 0
+                			,valueY: 0
+                			,valueZ: 0
+                			,onlyHavingModelYn :"Y"
+                			,positionNotNullYn : "Y"
+                			,isNoDanger: true
+                		};
+                	}
+                },
+	            areaInfoList:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                	}
+	            },
+	            groupInfoList:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+	            },
+	            resultList0:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+	            },
+	            resultList1:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+	            },
+	            resultList2:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+	            },
+	            areaInfoListOrigin:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+	            },
+	            groupName :{
+	            	type : Object,
+					value : function(){
+						return {};
+					}
+	            },
+	            firstAreaInfo :{
+	            	type:Object,
+	            	value : function(){
+	            		return {};
+	            	}
+	           	},
+	            mouse: {
+	            	type:Object,
+	            	value : function(){
+	            		return {
+	            			"clientClickX" : 0,
+	            			"clientClickY" : 0
+	            		};
+	            	}
+	            },
+	            voxelInterval: {
+	            	type: Object,
+	            	value: function(){
+	            		 return null;
+	            	 }
+	            },
+	            gwFlag :{
+	           		type: Boolean,
+	           		value : false
+	            },
+	            beaconFlag :{
+	           		type: Boolean,
+	           		value : false
+	            },
+	            changeBtnName :{
+	           		type: String,
+	           		value : "내부 보기"
+	            },
+	            isBusan: {
+                	type: Boolean,
+	                value : function() {
+                    	return true;
+                    }
+                },
+                isInside : {
+                	type : Boolean,
+                	value : false
+                }
+            },
+			
+            /******************************
+             * 초기화 설정
+             ******************************/
+            formulas: {               
+                isAreaTypSite : function(){
+                	var areaInfoList = this.areaInfoList;	       
+                	var selected_area_id = this.selectedComboInfo.areaId;
+                	 
+                	for(var i = 0; i<areaInfoList.length; i++){
+                		if(areaInfoList[i].type=='site'){
+                			return true; 
+                		}
+                	}
+                	return false;	                	
+                }
+            },
+              
+            load : function(areaInfo, dangerBeacons) {
+                var me = this;
+                me.set("dangerBeacons", dangerBeacons);
+                UT.request(me.$.findAreaInfo);
+                me.initMouseEvent();		// 마우스 이벤트 설정
+                me.initKeyEvent();			// 키보드 이벤트 설정
+                SCLoadMask.show();
+            },
+            
+            onSearch : function() {
+            	var me = this;
+                UT.request(me.$.findAreaInfo);
+            },
+            
+            completeFindAreaList : function(e,res){
+            	var me = this;
+				var areaInfoList = res.response;
+                me.set("areaInfoList", areaInfoList);
+                if(areaInfoList.length > 0){
+                	me.firstAreaInfo = areaInfoList[0];
+                	me.set("searchParam.areaId", areaInfoList[0].id);
+                	me.selectedComboInfo.areaId = areaInfoList[0].id;
+                }else{
+                	UT.alert("3D모델을 갖고 있는 영역이 없습니다.");
+                }
+            },
+	
+            //Beacon 목록 조회
+            findSearch : function(){
+            	 var me = this;
+            	 UT.request(me.$.findNoDangerBeacon);
+            },
+            
+            //Beacon 목록 조회 완료
+			completeFindNoDangerBeacon :function(e, res){
+            	var me = this;
+				var result = res.response;
+	            
+	            //비콘 위치명 합치기
+	            result.forEach(function(r){
+	            	if(r.displayName1){
+	            		r.fullName = r.displayName1;
+	            	}
+	            	if(r.displayName2){
+	            		r.fullName = r.fullName + "[" + r.displayName2 + "]";
+	            	}
+	            	if(r.displayName3){
+	            		r.fullName = r.fullName + "(" + r.displayName3 + ")";
+	            	}
+	            })
+	            me.set("noDangerBeaconList", result);
+				var dangerBeacons = me.get("dangerBeacons");
+				
+				if(dangerBeacons){
+
+	            	
+	            	var grid = me.$.noDangerBeaconGrid;
+	            	var dataProvider = grid.getDataProvider();
+	            	var target = [];
+
+	            	for(var i in dangerBeacons){
+						target.push(grid.searchItem("id", dangerBeacons[i].id));
+	            	}
+
+	            	for(var i in target){
+	            		grid.selectionCheck(target[i].itemIndex, true, false);
+	            	}
+				}
+            	
+            	UT.request(me.$.findGroupList);
+			},
+            
+            // 그룹 콤보 조회 완료
+            completeFind : function(e, res){
+            	var me = this;
+				var data = res.response;
+				
+				SCLoadMask.show();
+				if(data== null){
+					UT.request(me.$.findGroupList);
+				}
+				me.groupInfoList = null;
+				
+				me.set("groupInfoList", data);
+				
+				var hier = new CCHierachicalData();
+            	var hierachiDatas = hier.HierachyTransformByKey(data, "id", "parentId", "children", 0, null, true);
+				me.set("hierachGroupInfoList", hierachiDatas.children);
+				
+				
+				
+				// 3D-MODEL : 텍스트 말품성 초기화
+            	while(this.$.textBoxDivforMapping.hasChildNodes()){
+            		this.$.textBoxDivforMapping.removeChild(this.$.textBoxDivforMapping.firstChild);
+               	}
+				
+				if(!UT.isEmpty(me.player)) {
+					me.player.stop();
+					me.player.dispose();
+					clearInterval(me.voxelInterval);
+					me.player = null;
+				}
+				
+				var jsonFile = "";
+				
+				//area 테이블의 view_3d컬럼에서 3d모델의 파일 명을 가지고 와서 판별한다.
+				
+				if (!UT.isEmpty(me.areaInfoList)) {
+					if (!UT.isEmpty(me.searchParam.areaId)) {
+						for(var i=0; i<me.areaInfoList.length; i++) {
+							if(me.areaInfoList[i].id == me.searchParam.areaId) {
+								jsonFile = me.areaInfoList[i].modelName;
+							}
+						}
+					}
+				}
+				
+				if(UT.isEmpty(jsonFile)) {
+                	UT.alert("3D 모델링 파일이 없습니다.");
+                	return;
+				}
+				
+				try{
+					var threejs_json = {};
+					
+					// 전역변수 THREEJS_MODEL_ARR에서 해당 json 모델 존재 여부 확인 
+					for(var idx in THREEJS_MODEL_ARR){
+						if (THREEJS_MODEL_ARR[idx].name == jsonFile) {
+							threejs_json = THREEJS_MODEL_ARR[idx].json;
+							break;
+						}
+					}
+					
+					// 해당 json 모델 미존재시 json압축파일 압축해제 및 전역변수에 push
+					if (UT.isEmpty(threejs_json)) {
+						ZipLoader.install( { THREE: THREE } );
+						var loader = new ZipLoader( '/ui/lib/threejs/json/' + jsonFile + '.zip' );
+						
+						loader.on( 'progress', function ( e ) {
+							console.log( 'loading', e.loaded / e.total * 100 + '%' );
+						} );
+						
+						loader.on( 'load', function ( e ) {
+							var threejs_json = loader.loadThreeJSON( jsonFile + '.json' );
+							THREEJS_MODEL_ARR.push({name : jsonFile, json : threejs_json});
+							me.loadThreeJs(threejs_json,jsonFile);		// json에 대한 threeJs 생성
+						});
+						
+						loader.load();
+					} else {
+						me.loadThreeJs(threejs_json,jsonFile);		// json에 대한 threeJs 생성
+					}
+                	
+				}catch(e){
+					console.log(e);
+				}
+			},
+			/******************************
+			 * 이벤트
+			 ******************************/
+			onSaveBeacon : function(e){
+				var me = this
+				var args = e.target.dataset.args;
+				var provider = me.$.noDangerBeaconGrid.getDataProvider();
+				var selectionItmes = provider.selectionCheckedItems();
+				
+				me.set("selectionItmes", selectionItmes);
+				
+				UT.confirm("위험 비콘으로 설정하시겠습니까?",function(){
+					me.fire('close', me);
+				});
+			},
+			
+            // grid 클릭 이벤트 리스너
+			onItemClick : function(e,res){
+				var me = this;
+				var rowData = res.data;
+				
+				if(!rowData.x){
+					rowData.x = 0;
+					rowData.y = 0;
+					rowData.z = 0;
+				};
+				
+				var layerGroupId =  UT.isEmpty(rowData.layerGroupId) ? "" : Number(rowData.layerGroupId) ;
+				me.set("searchParam.layerGroupIds", [layerGroupId]);
+				
+				$("#valueX").val(Number(rowData.x));
+				$("#valueY").val(Number(rowData.y));
+				$("#valueZ").val(Number(rowData.z));
+				//$("#groupCombo").val(rowData.layerGroupId);
+				
+				me.showPointer();
+			},
+			
+        	// '그룹' 콤보박스 변경
+        	onSelectGroup: function(event) {
+        		var me = this;
+        		
+//         		var layerGroupId = "";
+//         		var groupName = "";
+				var selectedItem = event.target.selectedItems[0];
+				me.set("selectedLayerGroup", selectedItem);
+        		
+				if(me.isBusan == false){
+					
+					if (!UT.isEmpty(selectedItem)) {
+	        			if(selectedItem.property && selectedItem.property.modelNames){
+		        			var groupNames = selectedItem.property.modelNames;
+		        			me.player.getScene().getObjectByName("siteGroup").children.forEach(function(e){
+				    				if(groupNames.indexOf(e.name)!=-1){
+				    					if(me.isInside==false || e.name.indexOf("_OUT")==-1){
+				    						e.visible = true;
+				    					}else{
+				    						e.visible = false;
+				    					}
+// 				    					e.traverse(function(e2){
+// 					    					if(e2.type== "Mesh"){
+// 					    						e2.material.transparent=true;
+// 					    						e2.material.opacity=1;
+// 						    				}
+// 				    					})
+				    				}else{
+				    					e.visible = false;
+// 				    					e.traverse(function(e2){
+// 					    					if(e2.type== "Mesh"){
+// 					    						e2.material.transparent=true;
+// 					    						e2.material.opacity=0.05;
+// 						    				}
+// 				    					})
+				    				}
+			    			})
+	        			}
+	        		}else{
+	        			if(UT.isNotEmpty(me.player)){
+		        			me.player.getScene().getObjectByName("siteGroup").children.forEach(function(e){
+		        				if(me.isInside==false || e.name.indexOf("_OUT")==-1){
+		    						e.visible = true;
+		    					}else{
+		    						e.visible = false;
+		    					}
+// 			    					e.traverse(function(e2){
+// 				    					if(e2.type== "Mesh"){
+// 				    						e2.material.transparent=true;
+// 				    						e2.material.opacity=1;
+// 					    				}
+// 			    					})
+		    				})
+	        			}
+	        		}
+				}
+        		
+        		me.applyFormula();
+        	},
+        	
+        	// 영역 콤보 on-change
+        	onSelectCombo : function(event) {
+        		var me = this;
+        		var values = event.detail.value; 
+        		
+        		if(values){
+        		 	me.set("selectedComboInfo.areaId",values);
+	        		me.applyFormula();
+	        			
+	        		if(me.areaInfoList){
+	                	if(me.searchParam.areaId == me.areaInfoList[0].id ){
+							me.searchParam.tag = me.areaInfoList[0].tag;
+	                	}
+	                	// gw, Beacon 목록 조회
+		                me.findSearch();
+	        		}
+        		}
+        	},
+			/******************************
+			 * ThreeD.js 관련
+			 ******************************/
+			// json에 대한 threeJs 생성
+			loadThreeJs: function(threejs_json,model_name) {
+				var me = this;
+				
+				me.player = new APP.Player();
+				me.player.load( threejs_json );
+				me.player.setSize( document.getElementById("canvasDiv1").offsetWidth, document.getElementById("canvasDiv1").offsetHeight );
+				me.player.play();
+				
+				
+				document.getElementById("mycanvas1").appendChild( me.player.dom );
+         
+                var cubeGeo = new THREE.BoxBufferGeometry( 1, 1, 1 );
+                var cubeMaterial = new THREE.MeshLambertMaterial( { color: 0xff000d} );
+                me.voxel = new THREE.Mesh( cubeGeo, cubeMaterial );
+                me.voxel.position.set(0, 0, 0);
+                me.voxel.material.transparent = true;
+                
+                me.showPointer();
+                
+                me.voxelInterval = setInterval(function() {
+                	if(!UT.isEmpty(me.voxelInterval)) {
+                		if (me.voxel.material.opacity >= 1) {
+                			me.voxel.material.opacity = 0.3;
+                		} else {
+                			me.voxel.material.opacity = 1;
+                		}
+                	}
+				}, 100);
+                me.player.getScene().add(me.voxel);
+
+				window.addEventListener( 'resize', function () {
+					me.player.setSize( document.getElementById("canvasDiv1").offsetWidth, document.getElementById("canvasDiv1").offsetHeight );
+				} );
+				if(model_name == "fd"){
+					me.initCasenSetting();
+				}
+				SCLoadMask.hide();
+			},
+		    //casen 3D MODEL 생성
+			createCasenModel: function(casenList){
+				var me = this;
+				var casenList = casenList;
+				
+				for(var idx in casenList){
+					var item  = casenList[idx];
+					
+					var param = {
+							x : item.x,
+							y : item.y,
+							z : item.z,
+							groupName : item.groupName
+					};
+					
+					// sensor 모델 생성
+					me.player.addCasen(param);
+				}
+			},
+			//첫 케이슨 설정
+			initCasenSetting  : function (){
+				var me = this;
+				if(me.player.getScene().getChildByName("casenGroup")){
+					me.player.getScene().remove((me.player.getScene().getChildByName("casenGroup")));
+				}
+				var casenList = [];
+				var xInit = -40;
+				var xVar = 25.951;
+				for(var i = 0 ; i < 9; i++){
+					var temp = {};
+					temp.x= xInit;
+					temp.y= i* 0.9  ;
+					temp.z= 0 ;
+					temp.groupName="casen4";
+					casenList.push(temp);
+				}
+				for(var i = 0 ; i < 9 ; i++){
+					var temp = {};
+					temp.x= xInit + xVar;
+					temp.y= i* 0.9  ;
+					temp.z= 0 ;
+					temp.groupName="casen3";
+					casenList.push(temp);
+				}
+				for(var i = 0 ; i < 9 ; i++){
+					var temp = {};
+					temp.x= xInit + xVar * 2;
+					temp.y= i* 0.9  ;
+					temp.z= 0 ;
+					temp.groupName="casen2";
+					casenList.push(temp);
+				}
+				for(var i = 0 ; i < 9; i++){
+					var temp = {};
+					temp.x= xInit + xVar * 3 ;
+					temp.y= i * 0.9 ;
+					temp.z= 0 ;
+					temp.groupName="casen1";
+					casenList.push(temp);
+				}
+				
+				me.createCasenModel( casenList);
+			},
+            //SENSOR 3D MODEL 생성
+			createSensorModel: function(positionList){
+				var me = this;
+				var positionList = positionList;
+				var color;
+				var message;
+				for(var idx in positionList){
+					var item  = positionList[idx];
+					if(!item.property){
+						continue;
+					}
+					if(item.property && (item.property.type =="gateway")){
+						color = "green",
+						message = item.name
+					}else{
+						color = "red",
+						message = item.minor
+					}
+					
+					var param = {
+							radius : 1,
+							color : color,
+							x : item.x,
+							y : item.y,
+							z : item.z,
+							message : message,
+							positionId : item.id,
+							layerId : item.layerGroupId,
+							groupName : item.property.type
+					};
+					
+					// sensor 모델 생성
+					me.player.addSphere(param);
+				}
+			},
+			/******************************
+			 * 기타
+			 ******************************/
+			//내부 외관 전환
+			changeInOut : function(e){
+				var me = this;
+				
+				if(me.changeBtnName == "내부 보기"){
+					me.changeBtnName = "외관 보기";
+					me.isInside = true;
+				}else{
+					me.changeBtnName = "내부 보기";
+					me.isInside = false;
+				}
+				if (!UT.isEmpty(me.player.getScene().getChildByName("siteGroup"))) {
+// 					if( me.player.getScene().getChildByName("outGruop")){
+						var siteGroup = me.player.getScene().getChildByName("siteGroup");
+						var outList =[];
+						for(var i = 0 ; i < siteGroup.children.length; i++){
+							if((!me.selectedLayerGroup && siteGroup.children[i].name.indexOf("_OUT") != -1 )
+									 || (siteGroup.children[i].name.indexOf("_OUT") != -1 
+									&& me.selectedLayerGroup.property 
+									&& me.selectedLayerGroup.property.modelNames.includes(siteGroup.children[i].name))){
+								siteGroup.children[i].visible = !siteGroup.children[i].visible;
+							}
+						}
+					}
+					
+// 				}
+			},
+            // 박스 포인터 표시
+            showPointer: function(){
+            	var me = this;
+            	var x = me.get("searchParam.valueX");
+               	var y = me.get("searchParam.valueY");
+	    		var z = me.get("searchParam.valueZ");
+	    		
+	    		me.player.setCameraPosition(me.player.getCamera().position.x + (x - me.voxel.position.x),
+	    				me.player.getCamera().position.y + (y - me.voxel.position.y),
+	    				me.player.getCamera().position.z + (z - me.voxel.position.z));
+	    		me.voxel.position.set(x, y, z);
+	    		me.player.setControlsTarget(x, y, z);
+            },
+            /**
+             * 3D-MODEL : 좌표 이동 Canvas 키보드 이벤트리스너 추가
+             */
+            initKeyEvent: function(){
+            	var me = this;
+                
+                me.$.mycanvas1.addEventListener('keydown', function(e){
+                	var x = me.get("searchParam.valueX");
+                	var y = me.get("searchParam.valueY");
+		    		var z = me.get("searchParam.valueZ");
+		    		
+                	if(e.ctrlKey){
+                		if(e.keyCode == 38){ // up
+	                		me.set("searchParam.valueZ", Number(z)-10);
+	                	}else if(e.keyCode == 40){ // down
+	                		me.set("searchParam.valueZ", Number(z)+10);
+	                	}else if(e.keyCode == 37){ // left
+	                		me.set("searchParam.valueX", Number(x)-10);
+	                	}else if(e.keyCode == 39){ // right
+	                		me.set("searchParam.valueX", Number(x)+10);
+	                	}
+                	}else{
+                		if(e.keyCode == 38){ // up
+	                		me.set("searchParam.valueZ", Number(z)-1);
+	                	}else if(e.keyCode == 40){ // down
+	                		me.set("searchParam.valueZ", Number(z)+1);
+	                	}else if(e.keyCode == 37){ // left
+	                		me.set("searchParam.valueX", Number(x)-1);
+	                	}else if(e.keyCode == 39){ // right
+	                		me.set("searchParam.valueX", Number(x)+1);
+	                	}else if(e.keyCode == 33){ // pgup
+	                		me.set("searchParam.valueY", Number(y)+1);
+	                	}else if(e.keyCode == 34){ // pgdn
+	                		me.set("searchParam.valueY", Number(y)-1);
+	                	}
+               		me.showPointer();
+                	}
+                }, false);
+            },
+         	// 마우스 이벤트 설정
+            initMouseEvent: function(){
+            	var me = this;
+            	
+            	me.$.mycanvas1.addEventListener('click', function(e){
+                    me.mouse.clientClickX = e.clientX;
+                    me.mouse.clientClickY = e.clientY;
+                    
+                    var mouse = {};
+                    mouse.x = ((event.clientX - $("#mycanvas1").offset().left)/ me.player.dom.clientWidth ) * 2 - 1;
+        			mouse.y = - (( (event.clientY - $("#mycanvas1").offset().top) / me.player.dom.clientHeight ) * 2 - 1);
+        			me.player.getRayCaster().setFromCamera(mouse, me.player.getCamera());
+        			
+                    if(!UT.isEmpty(me.player.getScene().getObjectByName("sphereGroup"))) {
+        				var intersects = me.player.getRayCaster().intersectObjects(me.player.getScene().getObjectByName("sphereGroup").children, true);
+        				var sphere;
+        				
+        				if (intersects.length > 0) {
+        					sphere = intersects[0].object;
+        					var selectDiv;
+        					if(sphere.groupName =='gateway'){
+        						selectDiv = me.$.gatewayDiv;
+        					}else{
+        						selectDiv = me.$.beaconDiv;
+        					}
+        					var grid = (sphere.groupName =='gateway')? me.$.gridPanel1 : me.$.noDangerBeaconGrid ;
+	   						grid.searchItem("id", sphere.positionId, 0);
+	   					  me.$.tabNavi.selectItem(selectDiv);
+        				}
+                    }
+                    if(UT.isNotEmpty(me.player.getScene().getObjectByName("casenGroup"))) {
+        				var intersects = me.player.getRayCaster().intersectObjects(me.player.getScene().getObjectByName("casenGroup").children, true);
+        				var casen;
+        				
+        				if (intersects.length > 0) {
+        					casen = intersects[0].object.parent;
+        					
+        					for( var i = 0 ; i < me.groupInfoList.length ; i++){
+        						if(me.groupInfoList[i].name == casen.groupName){
+        							me.set("searchParam.layerGroupIds",[me.groupInfoList[i].id]);
+        						}
+        					}
+        				}
+                    }
+                }, false);
+            	
+            	me.$.mycanvas1.addEventListener( 'click', function(e){
+            		e.preventDefault();
+            		if( me.mouse.clientClickX != e.clientX || me.mouse.clientClickY != e.clientY )
+                        return;
+
+    				me.player.getMouse().x = ((e.clientX - $("#mycanvas1").offset().left)/ me.player.dom.clientWidth ) * 2 - 1;
+    				me.player.getMouse().y = - (( (e.clientY - $("#mycanvas1").offset().top) / me.player.dom.clientHeight ) * 2 - 1);
+    				me.player.getRayCaster().setFromCamera( me.player.getMouse(), me.player.getCamera() );
+
+//     				var intersects = me.player.getRayCaster().intersectObjects( me.player.getScene().getObjectByName("siteGroup").children, true);
+    				
+    				var visibleArray = [];
+    				var wholeGroup = me.player.getScene().getObjectByName("siteGroup").children;
+    				for(var i =0; i<wholeGroup.length;i++){
+    					if(wholeGroup[i].visible==true){
+    						visibleArray.push(wholeGroup[i]); 
+    					}
+    				}
+    				
+    				var intersects = me.player.getRayCaster().intersectObjects( visibleArray, true);
+    				if ( intersects.length > 0 ) {
+    					var intersect = intersects[ 0 ];
+
+	    				$("#valueX").val(Math.round(intersect.point.x));
+	    				$("#valueY").val(Math.round(intersect.point.y));
+	    				$("#valueZ").val(Math.round(intersect.point.z));
+    					me.showPointer();
+    					
+    					var obj = intersect.object.parent;
+    					while(true) {
+    						if(UT.isEmpty(obj)) {
+    							break;
+    						}
+    						
+    						if (obj.parent.name == "siteGroup") {
+    							break;
+    						} else {
+    							obj = obj.parent;
+    						}
+    					}
+    					
+    					var groupName = "";
+    					var selectedItem = me.$.groupCombo.selectedItems[0];
+    					if(selectedItem 
+    							&& selectedItem.property 
+    							&& selectedItem.property.modelNames 
+    							&& selectedItem.property.modelNames.indexOf(obj.name)!=-1){
+   							//me.set("searchParam.layerGroupId", [selectedItem.id]);
+    						return;
+    					}
+    					for(var i=0; i<me.groupInfoList.length; i++) {
+    						if(me.groupInfoList[i].property && me.groupInfoList[i].property.modelNames){
+
+	    						groupNames = me.groupInfoList[i].property.modelNames;
+	    						
+	    						if(groupNames.indexOf(obj.name)!=-1) {
+	    							me.set("searchParam.layerGroupIds", [me.groupInfoList[i].id]);
+	    							return;
+	    						}
+    						}
+    					}
+    				}
+            	}, false );
+            	
+            },
+		});
+	</script>
+
+</dom-module>

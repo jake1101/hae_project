@@ -1,0 +1,96 @@
+<dom-module id="es-dev-dynamic-group-col-grid">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+  
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" editable="true">
+            <sc-toolbar>
+                <sc-button text="동적 컬럼추가" on-click="onDynamicCol"></sc-button>
+                <sc-button text="컬럼 초기화"   on-click="onRemoveColumn"></sc-button>
+                <sc-spacer></sc-spacer>
+                <sc-button text="템플릿 컬럼추가" on-click="onDynamicTmpCol"></sc-button>
+            </sc-toolbar>
+            <sc-grid-columns>
+                
+            </sc-grid-columns>
+        </sc-grid>
+        
+         <!-- group columns 템플릿  -->
+         <template id="defaultColumnsTemplate">
+	         <sc-grid-columns id="groupTmpCols">
+	              <sc-group-column header-text="group_1" width="300">
+	                  <sc-data-column data-field="colunm_1"   header-text="colunm_1"  width="150" text-align="left"   editable="false" ></sc-data-column>
+	                  <sc-data-column data-field="colunm_2"   header-text="colunm_2"  width="150" text-align="left"   editable="false"    style-name="link"   ></sc-data-column>
+	              </sc-group-column>
+	              
+	              <sc-group-column header-text="group_2(hideChildHeaders)" width="300" hide-child-headers="true">
+	                  <sc-data-column data-field="colunm_3"   header-text="colunm_3"  width="150" text-align="left"   editable="false"    format-type="amt"   data-type="number"></sc-data-column>
+	                  <sc-data-column data-field="colunm_4"   header-text="colunm_4"  width="150" text-align="left"   editable="true" ></sc-data-column>
+	              </sc-group-column>
+	          </sc-grid-columns>
+          </template>
+    </template>
+          
+    <script>
+        Polymer({
+            is: 'es-dev-dynamic-group-col-grid',
+            
+            behaviors : [
+    			Polymer.Templatizer
+    		],
+            
+            properties : {
+                searchParam : {
+                    type : Object,
+                    value : function(){
+                        return {};
+                    }
+                },
+                resultList: {
+                    type:Array
+                }
+                
+            },
+          //동적으로 column Element를 생성하여 추가하는 방법입니다.
+            onDynamicCol : function(){
+            	var me = this,columns = [];
+            	//그룹컬럼 생성
+            	var group = document.createElement('sc-group-column');
+            	group.headerText = "그룹컬럼";
+            	group.width = 300;
+            	for(var i = 0; i < 2; i++){
+            		//일반 컬럼 생성
+            		var col = document.createElement('sc-data-column');
+                    col.dataField = "col"+i;
+                    col.headerText = "컬럼"+i;
+                    col.width= 100;
+                    //그룹컬럼에 일반컬럼을 추가합니다.ㅣ
+                    group.appendChild(col);
+            	}
+            	columns.push(group);
+  				this.$.gridPanel.setColumns(columns);
+            },
+            
+          	//추가할 컬럼을 미리 생성하여 추가하는 방법입니다.
+            onDynamicTmpCol : function(){
+            	var me = this;
+            	
+            	var groupTmpCols = UT.templateColumns(this, '#defaultColumnsTemplate', '#groupTmpCols');
+            	
+ 				me.$.gridPanel.setColumns(groupTmpCols);
+            },
+            
+          	//컬럼을 모두 제거합니다.
+            onRemoveColumn :  function(){
+            	this.$.gridPanel.setColumns([])
+            },
+            
+            
+        });
+    </script>
+
+</dom-module>

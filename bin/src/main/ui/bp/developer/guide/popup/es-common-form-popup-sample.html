@@ -1,0 +1,305 @@
+<sc-link rel="import" href="../../../shared/ep-dept-list.html"></sc-link>
+<sc-link rel="import" href="../../../shared/ep-job-list.html"></sc-link>
+<sc-link rel="import" href="../../../shared/ep-user-list.html"></sc-link>
+<sc-link rel="import" href="../../../shared/ep-vendor-list.html"></sc-link>
+
+<dom-module id="es-common-form-popup-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<sc-panel title-text="텍스트필드에서의 팝업" collapsible="true">
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+	        	</colgroup>
+	            <tr>
+	            	<th>
+	            		<sc-label text="부서"></sc-label>
+	            	</th>
+	                <td>
+	                	<div class="field-box" style="width:100%">
+		                	<sc-text-field id="dept" class="w-150" value="{{data1.dept_nm}}" placeholder="검색"
+		                			on-enter="onShowPopupDept" on-keydown="onKeyDown" 
+		                			trigger-cls="search" on-trigger-click="onShowPopupDept">
+		                	</sc-text-field>
+		                	<span style="margin-left:5px">[[data1.dept_cd]]</span>
+	                	</div>
+	                </td>
+	            </tr>
+	            <tr>
+	            	<th>
+	            		<sc-label text="구매그룹"></sc-label>
+	            	</th>
+	                <td>
+	                	<div class="field-box" style="width:100%">
+		                	<sc-text-field id="purc_grp" class="w-150" value="{{data1.purc_grp_nm}}" placeholder="검색"
+		                			on-enter="onShowPopupJop" on-keydown="onKeyDown" 
+		                			trigger-cls="search" on-trigger-click="onShowPopupJop">
+		                	</sc-text-field>
+		                	<span style="margin-left:5px">[[data1.purc_grp_cd]]</span>
+	                	</div>
+	                </td>
+	            </tr>
+	            <tr>
+	            	<th>
+	            		<sc-label text="사용자"></sc-label>
+	            	</th>
+	                <td>
+	                	<div class="field-box" style="width:100%">
+		                	<sc-text-field id="usr" class="w-150" value="{{data1.usr_nm}}" placeholder="검색"
+		                			on-enter="onShowPopupUser" on-keydown="onKeyDown" 
+		                			trigger-cls="search" on-trigger-click="onShowPopupUser">
+		                	</sc-text-field>
+		                	<span style="margin-left:5px">[[data1.usr_id]]</span>
+	                	</div>
+	                </td>
+	            </tr>
+	            <tr>
+	            	<th>
+	            		<sc-label text="품목"></sc-label>
+	            	</th>
+	                <td>
+	                	<div class="field-box" style="width:100%">
+		                	<sc-text-field id="item" class="w-150" value="{{data1.item_nm}}" placeholder="검색"
+		                			on-enter="onShowPopupItem" on-keydown="onKeyDown" 
+		                			trigger-cls="search" on-trigger-click="onShowPopupItem">
+		                	</sc-text-field>
+		                	<span style="margin-left:5px">[[data1.item_cd]]</span>
+	                	</div>
+	                </td>
+	            </tr>
+	            <tr>
+	            	<th>
+	            		<sc-label text="협력사"></sc-label>
+	            	</th>
+	                <td>
+	                	<div class="field-box" style="width:100%">
+		                	<sc-text-field id="vd" class="w-150" value="{{data1.vd_nm}}" placeholder="검색"
+		                			on-enter="onShowPopupVendor" on-keydown="onKeyDown" 
+		                			trigger-cls="search" on-trigger-click="onShowPopupVendor">
+		                	</sc-text-field>
+		                	<span style="margin-left:5px">[[data1.vd_cd]]</span>
+	                	</div>
+	                </td>
+	            </tr>
+	        </table>
+		</sc-panel>
+		
+		<sc-panel title-text="자동완성 필드" collapsible="true">
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+	        	</colgroup>
+	            <tr>
+	            	<th>
+	            		<sc-label text="부서"></sc-label>
+	            	</th>
+	                <td>
+	                	<cc-dept-search class="w-150" value="{{data2.dept_nm}}" result-field="dept_cd" result-value="{{data2.dept_cd}}" placeholder="검색"></cc-dept-search>
+	                </td>
+	            </tr>
+	            <tr>
+	            	<th>
+	            		<sc-label text="멀티부서"></sc-label>
+	            	</th>
+	                <td>
+	                	<cc-dept-multi-search class="w-150" value="{{data2.dept_nm}}" result-field="dept_cd" result-value="{{data2.dept_cd}}" placeholder="검색"></cc-dept-multi-search>
+	                </td>
+	            </tr>
+	            <tr>
+	            	<th>
+	            		<sc-label text="구매그룹"></sc-label>
+	            	</th>
+	                <td>
+	                	<cc-job-search class="w-150" value="{{data2.purc_grp_cd}}" display="{{data2.purc_grp_nm}}" result-field="purc_grp_cd" purc-grp-typ="PU" placeholder="검색"></cc-job-search>
+	                </td>
+	            </tr>
+	            <tr>
+	            	<th>
+	            		<sc-label text="사용자"></sc-label>
+	            	</th>
+	                <td>
+	                	<cc-user-search class="w-150" value="{{data2.usr_nm}}" result-field="usr_id" result-value="{{data2.usr_id}}" placeholder="검색"></cc-user-search>
+	                </td>
+	            </tr>
+	            <tr>
+	            	<th>
+	            		<sc-label text="품목"></sc-label>
+	            	</th>
+	                <td>
+	                	<cc-item-search class="w-150" value="{{data2.item_cd}}" multi-value="{{data2.item_cds}}" oper-org-cd="{{operOrgCd}}" placeholder="검색"></cc-item-search>
+	                </td>
+	            </tr>
+	            <tr>
+	            	<th>
+	            		<sc-label text="협력사"></sc-label>
+	            	</th>
+	                <td>
+	                	<cc-vendor-search class="w-150" value="{{data2.vd_nm}}" result-field="vd_cd" result-value="{{data2.vd_cd}}" placeholder="검색"
+	                					  link-typ="POEO" oper-unit-cd="PO" oper-org-cd="{{operOrgCd}}"></cc-vendor-search>
+	                </td>
+	            </tr>
+	        </table>
+		</sc-panel>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'es-common-form-popup-sample',
+			properties : {
+				param : {
+					type : Object,
+					value : function() {
+						var currentUser = SCSessionManager.currentUser;
+						
+						return {
+							comp_cd      : currentUser.comp_cd,
+							oper_unit_cd : "PO",	// 운영단위 유형 (PO : 구매)
+							link_typ     : "POEO",	// 운영단위 연결 유형 (POEO : 구매-협력사)
+							purc_grp_typ : "PU",	// 구매그룹 유형 (PU : 구매)
+							job_cls_cd   : "RX"		// 직무유형 (RX : RFX 담당자)
+						}
+					}
+				},
+				operOrgCd : {
+					type : Object,
+					value : function() {
+						return {}
+					}
+				},
+				data1 : {
+					type : Object,
+					value : function() {
+						return {}
+					}
+				},
+				data2 : {
+					type : Object,
+					value : function() {
+						return {}
+					}
+				}
+			},
+			// 텍스트필드 key-down 시(특수키 제외)
+			onKeyDown : function(e) {
+				var me = this;
+				var target = e.currentTarget.id;
+
+				if (UT.isSpecialKeyDown(e)) { // special key 입력인 경우 label 값 유지
+				    return;
+				}
+				
+				if(target === "usr") {
+					me.set("data1." + target + "_id", "");
+				} else {
+					me.set("data1." + target + "_cd", "");
+				}
+			},
+			// 부서 팝업 호출
+			onShowPopupDept : function() {
+				var me = this;
+				
+				var param = {
+					org_cd  : me.get("param.comp_cd"),
+					dept_nm : me.get("data1.dept_nm")
+				};
+				
+               	var deptPopup = UT.popup('ep-dept-list', me, 650, 500, {
+               		'selected-items' : function(popup, e) {
+               			var selected = e.detail[0];
+                        me.set("data1.dept_cd", selected.dept_cd);
+                        me.set("data1.dept_nm", selected.dept_nm);
+                        popup.close();
+               		}
+               	}, {titleText : "부서검색"});
+				deptPopup.show();
+                deptPopup.getWindowContent().load({singleSelect : true, defaultParam : param, autoComplete : false});
+			},
+			// 구매그룹 팝업 호출
+			onShowPopupJop : function() {
+				var me = this;
+				
+				var param = {
+                    comp_cd      : me.get("param.comp_cd"),
+                    purc_grp_typ : me.get("param.purc_grp_typ"),
+                    purc_grp_nm  : me.get("data1.purc_grp_nm")
+                };
+           		var jobPopup = UT.popup('ep-job-list', me, 650, 500, {
+           			'selected-items' : function(popup,e){
+           				var selected = e.detail[0];
+                        me.set("data1.purc_grp_cd", selected.purc_grp_cd);
+                        me.set("data1.purc_grp_nm", selected.purc_grp_nm);
+                        popup.close();
+           			}
+           		},{titleText : "구매그룹검색"});
+				jobPopup.show();
+				jobPopup.getWindowContent().load({singleSelect : true, defaultParam : param, autoComplete : false});
+			},
+			// 사용자 팝업 호출
+			onShowPopupUser : function() {
+				var me = this;
+				
+				var param = {
+					usr_nm : me.get("data1.usr_nm")
+				};
+               	var userPopup = UT.popup('ep-user-list', me, 650, 500, {
+					'selected-items' : function(popup, e) {
+						var selected = e.detail[0];
+						me.set("data1.usr_id", selected.usr_id);
+                        me.set("data1.usr_nm", selected.usr_nm);
+                        popup.close();
+					}
+               	}, {titleText : "사용자검색"});
+                userPopup.show();
+                userPopup.getWindowContent().load({singleSelect : true, defaultParam : param, autoComplete : false});
+            },
+            // 품목 팝업 호출
+            onShowPopupItem : function() {
+				var me = this;
+				
+            	var param = {
+           			oper_org_cd  : me.get("operOrgCd"),
+   					purc_grp_typ : me.get("param.purc_grp_typ"),
+   					singleSelect : true
+            	};
+            	
+            	UT.popupItemSearch(me, param, function(selectedItems) {
+            		var selected = selectedItems[0];
+            		me.set("data1.item_cd", selected.item_cd);
+       				me.set("data1.item_nm", selected.item_nm);
+				});
+            },
+            // 협력사 팝업 호출
+            onShowPopupVendor : function() {
+				var me = this;
+            	
+            	var param = {
+                		comp_cd      : me.get("param.comp_cd"),
+            			link_typ     : me.get("param.link_typ"),		// 운영단위 연결유형
+            			job_cls_cd   : me.get("param.job_cls_cd"),		// 직무유형
+            			oper_unit_cd : me.get("param.oper_unit_cd"),
+            			oper_org_cd  : me.get("operOrgCd"),
+            			vd_nm        : me.get("data1.vd_nm")
+        		};
+				var vendorPopup = UT.popup("ep-vendor-list", me, 1000, 500,{
+		            "selected-items": function(popup, e) {
+		            	var selected = e.detail[0];
+		            	
+		            	me.set("data1.vd_cd", selected.vd_cd);
+                        me.set("data1.vd_nm", selected.vd_nm);
+                        
+	                    popup.close();
+		            }
+				},{titleText : "협력사 검색", maximizable : true});
+				vendorPopup.show();
+				vendorPopup.getWindowContent().load({singleSelect : true, defaultParam : param});
+            }
+		});
+	</script>
+</dom-module>

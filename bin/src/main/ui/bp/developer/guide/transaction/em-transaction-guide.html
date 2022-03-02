@@ -1,0 +1,47 @@
+<sc-link rel="import" href="es-transaction-description.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-transaction-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="hbox flex" title-text="트랜잭션 전파/격리 및 예외처리">
+			<es-transaction-description class="flex fit"></es-transaction-description>
+			<es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+		</sc-panel>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-transaction-guide',
+		properties : {
+			srcList : {
+				type : Array,
+				value : function() {
+					return [{
+						title        : "CASE 1",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/transaction/source/send-mail-example-java.txt"
+					}, {
+						title        : "CASE 2",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/transaction/source/docno-example-java.txt"
+					}, {
+						title        : "CASE 3",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/transaction/source/throw-exception-example-java.txt"
+					}]
+				}
+			}
+		},
+		initialized : function() {
+			
+		}
+	});
+	</script>
+</dom-module>

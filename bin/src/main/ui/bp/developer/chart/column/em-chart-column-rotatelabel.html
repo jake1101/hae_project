@@ -1,0 +1,38 @@
+<sc-link rel="import" href="es-chart-column-rotatelabel.html"></sc-link>
+<sc-link rel="import" href="../es-chart-source-viewer.html"></sc-link>
+
+<dom-module id="em-chart-column-rotatelabel">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-panel class="vbox flex" title-text="column chart rotatelabel">
+			<es-chart-column-rotatelabel class="fit flex" on-chart-load="onChartLoad"></es-chart-column-rotatelabel>
+			<es-chart-source-viewer id="viewer" url="/ui/bp/developer/chart/column/es-chart-column-rotatelabel.html" class="flex"></es-chart-source-viewer>
+		</sc-panel>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-chart-column-rotatelabel',
+		properties : {
+			data : {
+				type : Object,
+				value : function() {
+					return {}
+				}
+			}
+		},
+		initialized : function() {
+		},
+		setViewerData : function() {
+			var me = this;
+			me.$.viewer.setData(JSON.stringify(me.get("data"), null, "\t"));
+		},
+		onChartLoad : function(){
+			//this.setViewerData();
+		}
+	});
+	</script>
+</dom-module>

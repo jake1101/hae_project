@@ -1,0 +1,21 @@
+<sc-link rel="import" href="es-alarm-list.html"></sc-link>
+
+<dom-module id="em-alarm">
+	<style>
+		:host{
+			@apply(--fit-layout);
+		}
+	</style>
+
+	<template>
+		<sc-pages id="pages" class="fit">
+			<es-alarm-list></es-alarm-list>
+		</sc-pages>
+	</template>
+	
+	<script>
+		Polymer({
+			is : "em-alarm",
+		})
+	</script>
+</dom-module>

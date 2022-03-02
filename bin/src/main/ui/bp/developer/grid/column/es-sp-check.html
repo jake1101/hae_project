@@ -1,0 +1,62 @@
+<!--
+	그리드 내에 checkbox Editor를 사용하게 할 수있는 column으로
+	checked-value와 un-checked-value를 설정하여 데이터를 설정 할 수 있다.
+ -->
+
+
+<dom-module id="es-sp-check">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" editable="true" on-item-edit-end="onEditEnd">
+        		<cc-grid-toolbar>
+        			<sc-button text="조회" on-click="onSearch"></sc-button>
+        		</cc-grid-toolbar>
+                <sc-grid-columns>
+                    <sc-checkbox-column data-field="check_1"   header-text="check_1"  width="150"    editable="true" display-checkbox="true"></sc-checkbox-column>
+                    <sc-checkbox-column data-field="check_2"   header-text="check_2"  width="150"    editable="false" checked-value="YES" un-checked-value="NO"></sc-checkbox-column>
+                    <sc-checkbox-column data-field="check_3"   header-text="check_3"  width="150"    editable="true" checked-value="true" un-checked-value="false"></sc-checkbox-column>
+                </sc-grid-columns>
+        </sc-grid>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-sp-check',
+            
+            properties : {
+                resultList: {
+                    type:Array
+                },
+                check:{
+                	type:Object,
+                	value:true
+                },
+                editable:{
+                	type:Object,
+                	value:false
+                },
+                	
+            },
+            
+            onSearch : function(){
+            	this.fire('search');
+            },            
+
+            onEditEnd : function(e){
+                UT.alert("check value : " + e.detail.newValue, null, true);
+            }
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

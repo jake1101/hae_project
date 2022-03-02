@@ -1,0 +1,94 @@
+<dom-module id="ep-custom-popup">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<cc-page-title-bar>
+            <sc-button text="적용" on-click="onApply"></sc-button>
+       	</cc-page-title-bar>
+       	
+       	<table class="tb-form">
+			<colgroup>
+        		<col style="width:120px"/>
+        		<col/>
+        	</colgroup>
+            <tr>
+            	<th>
+            		<sc-label text="품목명"></sc-label>
+            	</th>
+            	<td>
+            		<sc-text-field value="{{param.item_nm}}" readonly></sc-text-field>
+            	</td>
+            </tr>
+            <tr>
+            	<th>
+            		<sc-label text="수량"></sc-label>
+            	</th>
+            	<td>
+            		<sc-number-field class="w-150 align-right" value="{{data.item_qty}}" input-cover="true" format-type="amt" min-value="0" max-length="8"></sc-number-field>
+            	</td>
+            </tr>
+            <tr>
+            	<th>
+            		<sc-label text="단가"></sc-label>
+            	</th>
+            	<td>
+            		<sc-number-field class="w-150 align-right" value="{{data.item_price}}" input-cover="true" format-type="amt" min-value="0" max-length="13"></sc-number-field>
+            	</td>
+            </tr>
+            <tr>
+            	<th>
+            		<sc-label text="납품요청일"></sc-label>
+            	</th>
+                <td>
+                	<sc-date-field class="w-150" value="{{data.rd_date}}"></sc-date-field>
+                </td>
+            </tr>
+            <tr>
+        		<th>
+          			<sc-label text="기타"></sc-label>
+        		</th>
+        		<td>
+        			<sc-textarea-field class="h-80" value="{{data.rem}}" max-length="500"></sc-textarea-field>
+        		</td>
+        	</tr>
+        </table>
+	</template>
+	<script>
+	Polymer({
+		is : 'ep-custom-popup',
+		properties : {
+			param : {
+				type : Object,
+				value : function() {
+					return {}
+				}
+			},
+			data : {
+				type : Object,
+				value : function() {
+					return {}
+				}
+			}
+		},
+		initialized : function() {
+			
+		},
+		load : function(param) {
+			var me = this;
+			
+			if(UT.isNotEmpty(param)) {
+				me.set("param", UT.copy(param));
+			}
+		},
+		onApply : function() {
+			var me = this;
+			
+			me.fire('apply-data', me.get("data"));
+			me.reset();
+		}
+	});
+	</script>
+</dom-module>

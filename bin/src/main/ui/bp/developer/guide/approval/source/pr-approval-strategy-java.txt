@@ -1,0 +1,147 @@
+package smartsuite.app.bp.pro.pr.approval;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import smartsuite.app.bp.approval.ApprovalStrategy;
+import smartsuite.app.bp.pro.constant.PrConstant;
+import smartsuite.app.bp.pro.pr.PrPoService;
+import smartsuite.app.bp.pro.pr.PrService;
+import smartsuite.app.bp.pro.shared.ProStatusProcessor;
+import smartsuite.app.common.shared.SharedService;
+
+/**
+ * Pr 관련 처리하는 서비스 Class입니다.
+ *
+ * @author Yeon-u Kim
+ * @see
+ * @FileName PrService.java
+ * @package smartsuite.app.bp.pro
+ * @Since 2016. 3. 8
+ * @변경이력 : [2016. 3. 8] Yeon-u Kim 최초작성
+ */
+@Service
+@Transactional
+public class PrApprovalService implements ApprovalStrategy {
+
+	@Inject
+	ProStatusProcessor proStatusProcessor;
+
+	@Inject
+	PrPoService prPoService;
+	
+	@Inject
+	private PrService prService;
+	
+	@Inject
+	private SharedService sharedService;
+	
+	/**
+	 * 승인.
+	 *
+	 * @param approvalType the approval type
+	 * @param appId the app id
+	 */
+	@Override
+	public void doApprove(String approvalType, String appId) throws Exception{
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("pr_id", appId);
+		param.put("pr_mod_prog_sts", PrConstant.PR_MOD_PROG_STS_T);
+		proStatusProcessor.approveApprovalPr(param);
+		prPoService.createAutoPoPr(param);
+	}
+
+	/**
+	 * 반려.
+	 *
+	 * @param approvalType the approval type
+	 * @param appId the app id
+	 */
+	@Override
+	public void doReject(String approvalType, String appId) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("pr_id", appId);
+		param.put("pr_mod_prog_sts", PrConstant.PR_MOD_PROG_STS_T);
+		proStatusProcessor.rejectApprovalPr(param);
+	}
+
+	/**
+	 * 결재 취소.
+	 *
+	 * @param approvalType the approval type
+	 * @param appId the app id
+	 */
+	@Override
+	public void doCancel(String approvalType, String appId) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("pr_id", appId);
+		param.put("pr_mod_prog_sts", PrConstant.PR_MOD_PROG_STS_T);
+		proStatusProcessor.cancelApprovalPr(param);
+	}
+
+	/**
+	 * 상신.
+	 *
+	 * @param approvalType the approval type
+	 * @param appId the app id
+	 */
+	@Override
+	public void doSubmit(String approvalType, String appId) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("pr_id", appId);
+		param.put("pr_mod_prog_sts", PrConstant.PR_MOD_PROG_STS_T);
+		proStatusProcessor.submitApprovalPr(param);
+	}
+
+	/**
+	 * 임시저장.
+	 *
+	 * @param approvalType the approval type
+	 * @param appId the app id
+	 */
+	@Override
+	public void doTemporary(String approvalType, String appId) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("pr_id", appId);
+		/*param.put("pr_aprv_sts", "T");
+		// 접수대기
+		param.put("pr_prog_sts", "RN");*/
+		//proStatusProcessor.saveDraftPr(param);
+	}
+
+	/**
+	 * 결재서식 param을 위해 업무단 정보 조회
+	 *
+	 * @param approvalType, appId
+	 */
+	@Override
+	public Map<String, Object> makeParam(String approvalType, String appId) {
+		Map<String, Object> newParam = new HashMap<String, Object>();
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		newParam.put("pr_id", appId);
+		
+		Map<String, Object> prData =  prService.findPr(newParam);
+		if(prData != null) {
+			// 구매유형(P045), 계약형태(P049), 구매운영조직 코드값 변환
+			String purc_typ_nm = sharedService.getCodeName(prData.get("purc_typ"), "P045");				//구매유형
+			String purc_req_typ_nm = sharedService.getCodeName(prData.get("purc_req_typ"), "P049");		//계약형태
+			
+			String oper_org_cd_nm = sharedService.findOperOrgNameByCode(prData.get("oper_org_cd"));		//구매운영조직
+			
+			prData.put("purc_typ_nm", purc_typ_nm);
+			prData.put("purc_req_typ_nm", purc_req_typ_nm);
+			prData.put("oper_org_cd_nm", oper_org_cd_nm);
+			
+			resultMap.put("prInfo", prData);
+			resultMap.put("prItems", prService.findListPrItem(prData));
+		}
+		return resultMap;
+	}
+	
+}

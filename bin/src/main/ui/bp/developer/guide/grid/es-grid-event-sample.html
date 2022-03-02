@@ -1,0 +1,151 @@
+<dom-module id="es-grid-event-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-label text="점수를 입력하세요."></sc-label>
+		<sc-grid id="gridPanel" class="flex"
+				 editable="true"
+				 on-item-click="onItemClick"
+				 on-item-edit-begin="onItemEditBegin"
+				 on-item-edit-end="onItemEditEnd"
+				 on-item-all-checked="onItemAllChecked"
+				 on-selection-checked="onSelectionChecked"
+				 on-header-click="onHeaderClick"
+				 >
+			<sc-grid-columns>
+				<sc-data-column	data-field="name"	header-text="이름"></sc-data-column>
+				<sc-data-column	data-field="score1"	header-text="영어점수"	editable="true"	text-align="right"	data-type="number"></sc-data-column>
+				<sc-data-column	data-field="score2"	header-text="수학점수"	editable="true"	text-align="right"	data-type="number"></sc-data-column>
+				<sc-checkbox-column	data-field="stl_yn"	header-text="선택"	editable="true"	text-align="center"	checked-value="Y"	un-checked-value="N"></sc-checkbox-column>
+			</sc-grid-columns>
+		</sc-grid>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-grid-event-sample',
+		properties : {
+			resultList : {
+				type : Array,
+				value : function() {
+					return [
+						{name : "김길동", stl_yn : "N"},
+						{name : "박길동", stl_yn : "N"},
+						{name : "최길동", stl_yn : "N"},
+					]
+				}
+			}
+		},
+		initialized : function() {
+			var me = this;
+			me.$.gridPanel.setDataProvider(me.resultList);
+		},
+		/**************************************************
+		 * [sc-grid > itemClick event]
+		 *
+		 *  사용자가 데이터 셀을 마우스 click 했을 때 호출
+		 **************************************************/
+		onItemClick : function(event) {
+			var me = this, e = event.detail,
+				data     = e.data,		// 해당 row의 데이터
+				item     = e.item,		// item.dataField, item.columnIndex, item.rowIndex (tree인 경우 item.nodeIndex)
+				provider = e.provider;	// 해당 sc-grid의 provider
+			
+			if(item.dataField === "name") {
+				UT.alert("[" + data["name"] + "] " + "영어점수 : " + (data["score1"]||0) + ", 수학점수 : " + (data["score2"]||0) + ", 평균 : " + ((data["score1"]||0) + (data["score2"]||0))/2, null, true);
+			}
+		},
+		/**************************************************
+		 * [sc-grid > itemEditBegin event]
+		 *
+		 *  사용자의 key입력 등오로 셀의 값이 변경될 때 호출
+		 **************************************************/
+		onItemEditBegin : function(event) {
+			var me = this, e = event.detail,
+				data         = e.data,			// 해당 row의 데이터
+				item         = e.item,			// item.dataField, item.columnIndex, item.rowIndex (tree인 경우 item.nodeIndex)
+				editingValue = e.editingValue,	// 입력중인 데이터
+				provider     = e.provider;		// 해당 sc-grid의 provider
+			
+			if(item.dataField === "score1" && editingValue > 100) {
+				UT.alert("100점 이상은 줄 수 없어요", null, true);
+				
+				// edit 취소
+				me.$.gridPanel.cellEditCancel();
+			}
+			console.log("itemEditBegin : [" + item.dataField + "] " + editingValue);
+		},
+		/**************************************************
+		 * [sc-grid > itemEditEnd event]
+		 *
+		 *  셀의 편집이 완료되었을 때 호출
+		 **************************************************/
+		onItemEditEnd : function(event) {
+			var me = this, e = event.detail,
+				data     = e.data,			// 해당 row의 데이터
+				item     = e.item,			// item.dataField, item.columnIndex, item.rowIndex (tree인 경우 item.nodeIndex)
+				provider = e.provider,		// 해당 sc-grid의 provider
+				oldValue = e.oldValue,		// 수정 전 데이터
+				newValue = e.newValue,		// 수정 후 데이터
+				grid     = e.grid;			// 해당 grid instance
+			
+			if(item.dataField === "score2" && newValue > 100) {
+				UT.alert("100점 이상은 줄 수 없어요", null, true);
+				
+				// oldValue로 값을 다시 셋팅해줌
+				var obj = {};
+				obj[item.dataField] = oldValue;
+				
+				provider.setItemAt(item.rowIndex, obj);
+			}
+			console.log("itemEditEnd : [" + item.dataField + "] " + oldValue + " -> " + newValue);
+		},
+		/**************************************************
+		 * [sc-grid > itemAllChecked event]
+		 *
+		 *  checkBar의 Header를 click 하여 전체선택 또는 전체해제를 할 때 호출
+		 **************************************************/
+		onItemAllChecked : function(event) {
+			var isAllChecked = event.detail.checked;	// 체크여부 (true/false)
+			
+			if(isAllChecked) {
+				console.log("item all checked");
+			} else {
+				console.log("item all unchecked");
+			}
+		},
+		/**************************************************
+		 * [sc-grid > selectionChecked event]
+		 *
+		 *  selection을 click 하여 체크를 변경할 때 호출
+		 **************************************************/
+		onSelectionChecked : function(event) {
+			var me = this, e = event.detail,
+				checked  = e.checked,	// 체크여부 (true/false)
+				data     = e.data,		// 해당 row의 데이터
+				rowIndex = e.rowIndex,	// 해당 row의 index (tree인 경우 e.nodeIndex)
+				provider = e.provider;	// 해당 sc-grid의 provider
+			
+			if(checked) {
+				console.log(data["name"] + " : " + rowIndex + " row selection checked");
+			} else {
+				console.log(data["name"] + " : " + rowIndex + " row selection unchecked");
+			}
+		},
+		/**************************************************
+		 * [sc-grid > headerClick event]
+		 *
+		 * column header click 시 호출
+		 **************************************************/
+		onHeaderClick : function(event) {
+			var me = this, e = event.detail,
+				dataField  = e.dataField,	// click한 header의 dataField
+				headerText = e.headerText;	// click한 header의 headerText
+			
+			console.log(headerText + "(" + dataField + ")" + " clicked");
+		}
+	});
+	</script>
+</dom-module>

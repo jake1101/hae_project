@@ -1,0 +1,48 @@
+<!-- 
+
+## 사업자 등록번호
+
+이 예제는 국내에서 사용되는 기준으로 작성되었습니다.
+
+## Validation
+
+- input-mask : 999-99-99999
+- input-mask로 인해 제한이 거려 maxlength는 지정하지 않았습니다. 
+
+ -->
+
+<dom-module id="es-biz-reg-no-ex-1">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+    <template>
+        <table class="tb-form">
+            <tr>
+                <td>
+                    <sc-text-field class="w-100" input-mask="999-99-99999" value="{{value}}"></sc-text-field>
+                </td>
+            </tr>
+        </table>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-biz-reg-no-ex-1',
+            properties:{
+                value: String
+            },
+            
+            setValue: function() {
+            	var me = this;
+            	
+            	// (-)을 포함한 값을 Set
+            	me.set("value", "123-13-11231");
+            }
+		});
+	</script>
+
+</dom-module>

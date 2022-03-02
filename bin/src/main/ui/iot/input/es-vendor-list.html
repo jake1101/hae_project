@@ -1,0 +1,643 @@
+<dom-module id="es-vendor-list">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+	
+	
+	 <sc-request-group init>
+		<sc-code-group>
+			<sc-code code="USEFLAG" value="{{useList}}"></sc-code>
+			<sc-code code="IOT008V" value="{{smsList}}"></sc-code>
+		</sc-code-group>
+		
+	</sc-request-group>
+		
+		<!-- 		완료 -->
+		<sc-ajax id="findListVendor"
+			url="findListVendor.do"
+			body="{{searchParam}}"
+			on-response="completeFindListVendor">
+		</sc-ajax>
+		<!-- 		완료 -->
+		<sc-ajax id="saveVendor"
+			url="saveVendor.do"
+			on-response="completeSaveVendor">
+		</sc-ajax>
+		
+		<sc-ajax id="findSmsInfo"
+			url="findSmsInfo.do"
+			body="{{smsInfo}}"
+			on-response="completeFindSmsInfo">
+		</sc-ajax>
+		<sc-ajax id="findSmsInfoAll"
+			url="findSmsInfo.do"
+			body="{{smsInfoAll}}"
+			on-response="completeFindSmsInfoAll">
+		</sc-ajax>
+		<sc-ajax id="sendSms"
+			url="sendSms.do"
+			body="{{smsInfo}}"
+			on-response="completeSendSms">
+		</sc-ajax>
+		<sc-ajax id="sendSmsAll"
+			url="sendSmsAll.do"
+			body="{{smsInfoAll}}"
+			on-response="completeSendSmsAll">
+		</sc-ajax>
+		
+		<sc-ajax id="deleteVendor"
+			url="deleteVendor.do"
+			on-response="completeDeleteVendor">
+		</sc-ajax>
+		
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+
+		<div class="vbox flex">
+		<cc-page-title-bar></cc-page-title-bar>
+			<cc-search-container on-search="onSearch" auth-r >
+				<table>
+					<colgroup>
+						<col style="width:120px">
+						<col>
+						<col style="width:120px">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="협력사명" ></sc-label></th>
+						<td>
+							<sc-text-field value="{{searchParam.name}}" on-enter="onSearch"></sc-text-field>
+						</td>
+						<th><sc-label text="관리자" ></sc-label></th>
+						<td>
+							<sc-text-field value="{{searchParam.manager}}" on-enter="onSearch"></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="관리자 연락처" ></sc-label></th>
+						<td>
+							<sc-text-field value="{{searchParam.managerNumber}}" on-enter="onSearch"></sc-text-field>
+						</td>
+						<th><sc-label text="대표" ></sc-label></th>
+						<td>
+							<sc-text-field value="{{searchParam.ceo}}" on-enter="onSearch"></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="사무실 연락처" ></sc-label></th>
+						<td>
+							<sc-text-field value="{{searchParam.officeNumber}}" on-enter="onSearch"></sc-text-field>
+						</td>
+						<th><sc-label text="사용중지 포함"></sc-label></th>
+						<td>
+							<sc-checkbox-field input-value="{{searchParam.includeNotUse}}" checked-value="Y" un-checked-value="N"></sc-text-field>
+						</td>
+					</tr>
+				</table>
+			</cc-search-container>
+			<!-- vendor 관리 -->
+            <div class="hbox flex">
+            	<div class="vbox flex-5">
+            		<sc-grid id="gridPanel1" data-provider="{{vendorList}}"  class="flex" 
+            			use-selection="true"  on-item-click="onItemClick"  editable="true">
+						<cc-grid-toolbar title-text="협력사 목록" >
+							<sc-button text="SMS 일괄전송" on-click="onSendAll" auth-s></sc-button>
+							<sc-button text="추가" on-click="onAdd" auth-s></sc-button>
+							<sc-button text="저장" on-click="onSave" auth-s></sc-button>
+							<sc-button text="삭제" on-click="onDelete" auth-s></sc-button>
+						</cc-grid-toolbar>
+						<sc-grid-columns>
+							<sc-data-column data-field="id" header-text="ID" width="0" text-align="center" data-type="number"  editable="true"></sc-data-column>
+							<sc-data-column data-field="name" header-text="협력사" width="100" text-align="center" style-name="link" editable="true"></sc-data-column>   <!-- item-editable-function="onGrpCdEditable" -->
+							<sc-data-column data-field="ceo" header-text="대표" width="100" text-align="center"   editable="true"></sc-data-column>
+							<sc-data-column data-field="manager" header-text="관리자" width="100" text-align="center"   editable="true"></sc-data-column>
+							<sc-data-column data-field="serialNumber" header-text="사업자번호" width="200" text-align="center"   editable="true" input-mask="900-00-00000"></sc-data-column>
+							<sc-data-column data-field="managerNumber" header-text="관리자 연락처" width="200" text-align="center"  editable="true"  input-mask="900-0000-0000"></sc-data-column>
+							<sc-data-column data-field="officeNumber" header-text="사무실 연락처" width="200" text-align="center"  editable="true"  max-length="13"></sc-data-column>
+			            	<sc-image-column 	width="50"	header-text="SMS" data-field="sms" singular-source="ui/assets/img/grid/icon_sms.png" image-display ="auto"></sc-image-column>
+<!-- 							<sc-combobox-column	data-field="useFlag"	header-text="사용여부"	width="100"	required="true" domain-only-or-empty="true"	 -->
+<!-- 									display-field="label"	value-field="data"	items="[[useList]]" editable="true"></sc-combobox-column> -->
+							<sc-checkbox-column data-field="useFlag" header-text="사용여부" width="100" text-align="center" editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+						</sc-grid-columns>
+					</sc-grid>
+				</div>
+            </div>
+		</div>
+		
+		<sc-dialog id="smsDialog" title-text="SMS보내기" style="width:400px; height:280px"
+			modal="true" draggable="true" >
+	        <table class="tb-form">
+	        	<colgroup>
+	        		<col style="width:100px;"/>
+	        		<col/>
+	        	</colgroup>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="수신자"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-text-field value="{{smsInfo.phoneNumber}}" readonly ="true"></sc-text-field>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="구분"></sc-label>
+	        		</th>
+	        		<td>
+        				<sc-combobox-field items="[[smsList]]" value="{{smsInfo.smsType}}" placeholder="선택"
+   									display-field="label" value-field="data" on-select="onSelectType">
+    					</sc-combobox-field>
+	        		</td>
+	        	</tr>
+<!-- 	        	<tr> -->
+<!-- 	        		<th> -->
+<!-- 	        			<sc-label text="제목"></sc-label> -->
+<!-- 	        		</th> -->
+<!-- 	        		<td> -->
+<!-- 	        			<sc-text-field value="{{smsInfo.title}}"  readonly ="[[!formula('isInput')]]" required="true"></sc-text-field> -->
+<!-- 	        		</td> -->
+<!-- 	        	</tr> -->
+	        	<tr>
+	        		<th>
+	        			<sc-label text="SMS 내용"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-textarea-field class="h-100" max-length="70" placeholder="센터에서 연락을 요청하였습니다." value="{{smsInfo.body}}"  readonly ="[[!formula('isInput')]]" required="true"></sc-textarea-field>
+	        		</td>
+	        	</tr>
+	        </table>
+	        <div  style= "text-align:center; margin-top: 5%;">
+	        	 <sc-button  text="확인" on-click="onOk" ></sc-button>
+	        	 <sc-button style="margin-left: 10px;" text="취소" on-click="onCancle"></sc-button>
+	        </div>
+		</sc-dialog>
+
+
+		<sc-dialog id="smsDialogAll" title-text="일괄 SMS보내기" style="width:400px; height:280px"
+			modal="true" draggable="true">
+	        <table class="tb-form">
+	        	<colgroup>
+	        		<col style="width:100px;"/>
+	        		<col/>
+	        	</colgroup>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="수신자"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-text-field value="{{smsInfoAll.managerNumber}}" readonly ="true"></sc-text-field>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="구분"></sc-label>
+	        		</th>
+	        		<td>
+        				<sc-combobox-field id="combo"  items="[[smsList]]" value="{{smsInfoAll.smsType}}" placeholder="선택"
+   									display-field="label" value-field="data" on-select="onSelectTypeAll" >
+    					</sc-combobox-field>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="SMS 내용"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-textarea-field class="h-100" max-length="70" placeholder="센터에서 연락을 요청하였습니다." value="{{smsInfoAll.body}}"  readonly ="[[!formula('isAllInput')]]"></sc-textarea-field>
+	        		</td>
+	        	</tr>
+	        </table>
+	        <div  style= "text-align:center; margin-top: 5%;">
+	        	 <sc-button  text="확인" on-click="onAllOk" ></sc-button>
+	        	 <sc-button style="margin-left: 10px;" text="취소" on-click="onAllCancle"></sc-button>
+	        </div>
+		</sc-dialog>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-vendor-list",
+            properties : {
+                
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                
+                smsInfo: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                smsInfoAll: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                smsVendorList: {
+                    type: Array,
+                    value: function(){
+                        return [];
+                    }
+                },
+                smsResult: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                
+                typList: {
+                    type: Array,
+                    value: function(){
+                        return [];
+                    }
+                }
+
+            },
+            
+            initialized : function() {
+                var me = this;
+                me.onSearch();
+            },
+            
+            formulas : {
+				isInput :function(){
+					return  ( this.get("smsInfo.smsType") != undefined && this.get("smsInfo.smsType") == "input"  )
+				},
+				isAllInput :function(){
+					return  ( this.get("smsInfoAll.smsType") != undefined && this.get("smsInfoAll.smsType") == "input"  )
+				}
+			},
+			
+            onSearch : function() {
+                var me = this;
+                
+                UT.request(me.$.findListVendor);
+            },
+            
+            completeFindListVendor : function(e,res){
+            	var me = this;
+            	
+            	me.set("vendorList",res.response);
+
+            	//첫번째 행 선택
+            	me.$.gridPanel1.setSelectionable(1,true);
+            },
+            
+            onItemClick : function(event){
+            	var me = this
+				,data = event.detail.data
+				,item = event.detail.item
+				,provider = event.detail.provider;
+				
+				me.rowIndex = item.rowIndex;
+				
+				if(item.dataField == "name"){
+				   if(provider.getItemState(item.rowIndex) == "created"){
+	                    return;
+	                }
+					me.fire('find-vendorinfo', data);
+					 me.fire('init-vendor', data);
+				}else if (item.dataField == "sms") {
+					
+					var smsDialog = me.$.smsDialog;
+					
+					me.set("smsInfo.phoneNumber", data.managerNumber);
+					me.set("smsInfo.receiveId", data.manager);
+					me.set("smsInfo.vendorId", data.id);
+					me.set("smsInfo.smsType", "");
+					me.set("smsInfo.body", "");
+					me.applyFormula();
+					smsDialog.show();
+				}
+				
+				
+            },
+            
+            completeFindSmsInfo : function(e,res){
+            	var me = this;
+            	
+            	me.smsResult = res.response.body;
+//             	me.set("smsInfo.title",res.response.body.title1);
+            	me.set("smsInfo.body",res.response.body.body1);
+            },
+            
+            completeFindSmsInfoAll : function(e,res){
+            	var me = this;
+            	
+            	me.smsResult = res.response.body;
+//             	me.set("smsInfo.title",res.response.body.title1);
+            	me.set("smsInfoAll.body",res.response.body.body1);
+            },
+            
+            onSelectType : function(data){
+            	var me= this;
+            	
+            	if(data.detail.selectedItem.data == "worker_regist"){
+            		me.set("smsInfo.smsType", "worker_regist");
+            		me.applyFormula();
+            		//api호출 sms내용 받아오기
+            		UT.request(me.$.findSmsInfo);
+            		
+            	}else if(data.detail.selectedItem.data == "vendor"){
+            		me.set("smsInfo.smsType", "vendor");
+            		me.applyFormula();
+            		//api호출 sms내용 받아오기
+            		UT.request(me.$.findSmsInfo);
+            		
+            	}else if( data.detail.selectedItem.data == "input"){
+//             		me.set("smsInfo.title","");
+            		me.set("smsInfo.body","");
+            		me.smsResult = {};
+            		me.applyFormula();
+            	}
+            	
+            	
+            },
+            
+            onSelectTypeAll : function(data){
+            	var me= this;
+            	
+            	if(data.detail.selectedItem.data == "worker_regist"){
+            		me.set("smsInfoAll.smsType", "worker_regist");
+            		me.applyFormula();
+            		//api호출 sms내용 받아오기
+            		UT.request(me.$.findSmsInfoAll);
+            		
+            	}else if(data.detail.selectedItem.data == "vendor"){
+            		me.set("smsInfoAll.smsType", "vendor");
+            		me.applyFormula();
+            		//api호출 sms내용 받아오기
+            		UT.request(me.$.findSmsInfoAll);
+            		
+            	}else if( data.detail.selectedItem.data == "input"){
+//             		me.set("smsInfoAll.title","");
+            		me.set("smsInfoAll.body","");
+            		me.smsResult = {};
+            		me.applyFormula();
+            	}
+            },
+            onSendAll : function(){
+          	   var me =this;
+  			   			
+  			   var provider = me.$.gridPanel1.getDataProvider();
+  			   var selectionItems = provider.selectionCheckedItems();
+  				
+  			   console.log(selectionItems);
+  			   if (selectionItems.length === 0) {
+  	               UT.alert("STD.N1600");
+  	               return;
+  	           }
+  			 me.smsVendorList=[];
+  			   var smsDialogAll = me.$.smsDialogAll;
+  			   for( var i = 0 ; i <selectionItems.length ; i++){
+  				  me.smsVendorList.push({"id" : selectionItems[i].id , "managerNumber" : selectionItems[i].managerNumber});
+  			   }
+  			   
+  			   me.set("smsInfoAll.vendors",me.smsVendorList);
+  			   me.set("smsInfoAll.managerNumber", selectionItems[0].managerNumber + "(외" + selectionItems.length + "명)");
+ 			   me.set("smsInfoAll.vendorId", selectionItems[0].id);
+  			   me.set("smsInfoAll.smsType", "");
+  		       me.set("smsInfoAll.body", "");
+  			   smsDialogAll.show();
+       				
+              },
+//             onSmsDialogBtnClick : function(btn) {
+// 				var me = this;
+// 				// 'ok' 버튼일 때
+// 				if(btn === "ok") {
+// 					//  sms 전송
+// 					if(me.smsResult.title2){
+						
+// 						UT.request(me.$.sendSms);
+// 						me.set("smsInfo.title",me.smsResult.title2);
+// 						me.set("smsInfo.body",me.smsResult.body2);
+// 						UT.request(me.$.sendSms);
+// 					}else{
+// 						UT.request(me.$.sendSms);
+// 					}
+// 				}
+// 			},
+
+            onOk : function(){
+				var me = this;
+				if(me.smsResult.title2){
+					
+					UT.request(me.$.sendSms);
+					me.set("smsInfo.title",me.smsResult.title2);
+					me.set("smsInfo.body",me.smsResult.body2);
+					UT.request(me.$.sendSms);
+					me.$.smsDialog.hide();
+				}else{
+					UT.request(me.$.sendSms);
+					me.$.smsDialog.hide();
+				}
+				
+			},
+			onCancle : function(){
+				var me = this;
+				me.set("smsInfo.smsType", "");
+				me.set("smsInfo.body", "");
+				me.$.smsDialog.hide();
+			},
+			
+			onAllOk : function(){
+				var me = this;
+				
+				UT.request(me.$.sendSmsAll);
+				me.$.smsDialogAll.hide();
+				
+			},
+			onAllCancle : function(){
+				var me = this;
+				me.set("smsInfo.smsType", "");
+				me.set("smsInfo.body", "");
+				me.$.smsDialogAll.hide();
+			},
+			
+			completeSendSms : function(e,res){
+				var me = this,
+					result = res.response;
+				
+				if(result.result_status === 'S'){
+	                UT.alert("전송에 성공하였습니다", function(){ // 저장하였습니다.
+	                    me.onSearch();
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+				
+			},
+			completeSendSmsAll : function(e,res){
+				var me = this,
+					result = res.response;
+				
+				if(result.result_status === 'S'){
+	                UT.alert("전송에 성공하였습니다", function(){ // 저장하였습니다.
+	                    me.onSearch();
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+				
+			},
+            
+            showAttPopup :  function(data, item, provider){
+	            var me = this,
+	                grp_cd = item.grp_cd,
+	                itemIndex = item.rowIndex,
+	                fieldName = item.dataField,
+	                provider = me.$.gridPanel1.getDataProvider();
+	            
+	            UT.popupAttach(me, item.grpCd, function(result) {
+	            	var obj = {};
+	            	obj.img_name = result.inserts[0].name;
+	            	
+	                provider.setItemAt(itemIndex, obj);
+	            }, {maxTotalFileCount:1});
+	        },
+            
+            
+            onAdd : function(){
+                var me = this,
+                    searchParam = this.get("searchParam"),
+                    provider = me.$.gridPanel1.getDataProvider(),
+                    currCell = me.$.gridPanel1.getCurrentCell();
+				
+                if(!me.validate('search')){
+                    UT.alert("STD.E0000");
+                    return false;
+                }
+
+                // 그리드 신규행 추가
+                
+                var row = {
+                    useFlag: 'Y'                     // 사용여부
+                };
+                
+                if( currCell == null || currCell.rowIndex == 0){
+               	 provider.addItemAt(0,row);
+               }else{
+           	    provider.addItemAt(currCell.rowIndex+1, row);
+               }
+                
+                me.fire('init-vendor-mgnt', "Y");
+                
+            },
+            
+            onGrpCdEditable: function(data, item) {
+                var me = this,
+                    provider = me.$.gridPanel1.getDataProvider();
+                return (provider.getItemState(item.rowIndex) == "created");
+            },
+            
+            onSave : function(){
+            	var me = this;
+
+                if(!me.validate()){
+                    UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return;
+                }
+
+                var provider = me.$.gridPanel1.getDataProvider(),
+                created = provider.getNewItems(),
+                updated = provider.getUpdateItems();
+            
+            
+	           if(created.length + updated.length === 0) {
+	               UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+	               return;
+	           }
+                
+                UT.confirm("STD.N1200", function() { //저장 하시겠습니까?
+                      me.$.saveVendor.body = {
+                    		  insertList: created,
+                              updateList: updated
+                      };
+                        UT.request(me.$.saveVendor);
+                });
+            },
+            
+            completeSaveVendor : function(e,res){
+            	var me = this,
+                result = res.response;
+
+	            if(result.result_status === 'S'){
+	                UT.alert("STD.N2400", function(){ // 저장하였습니다.
+	                    me.onSearch();
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+            },
+            
+            
+            onDelete : function(){		
+			  var me =this;
+			
+			  var provider = me.$.gridPanel1.getDataProvider();
+			  var selectionItems = provider.selectionCheckedItems();
+				
+				
+			  if (selectionItems.length === 0) {
+                  UT.alert("STD.N1600");
+                  return;
+              }
+
+              UT.confirm("STD.N1300", function() {
+                  var deleted = provider.removeItems();
+                  if(deleted.length > 0){
+                      me.$.deleteVendor.body = {
+                    		  deleteList : deleted
+                      };
+                     UT.request(me.$.deleteVendor);
+                  }
+              });
+				
+			},
+			
+			completeDeleteVendor: function(e,res){
+				var me = this,
+                result = res.response;
+
+	            if (result.result_status === 'S') {
+	                UT.alert("STD.N2500", function () { // 삭제하였습니다.
+	                    me.onSearch();
+	                    me.fire('init-vendor-mgnt', "Y");
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+			}
+            
+        });
+	</script>
+
+</dom-module>

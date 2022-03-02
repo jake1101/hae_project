@@ -1,0 +1,56 @@
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 안전장비 관리
+    ** @Description     : 이동장비 관리 차용
+    ** @Author          : jhPark
+    ** @Create Date     : 2021.08.02
+    ** @History         : 2021.08.02 jhPark 최초작성
+    ******************************************************************************************
+-->
+
+<sc-link rel="import" href="es-safety-equi-management.html"></sc-link>
+<sc-link rel="import" href="es-safety-equi-info.html"></sc-link>
+<sc-link rel="import" href="es-location.html"></sc-link>
+
+<dom-module id="em-safety-equi">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<div class="hbox flex">
+			<es-safety-equi-management id="safetyEquiListCon" class="flex" on-init-safetyequi="onInitSafetyEqui"
+				on-find-safetyequiinfo="onFindSafetyEquiInfo" on-clear="onClear"></es-safety-equi-management>
+			<div class="hspace-10"></div>
+			<sc-tab-navigation id="tabNavi"  class="flex">
+	            <es-safety-equi-info id="safetyEquiInfoCon" title-text="상세정보" on-find-list="onFindSafetyEquiList"></es-safety-equi-info>
+	        </sc-tab-navigation>
+        </div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-safety-equi',
+			
+			onFindSafetyEquiInfo: function(e, equiId) {
+                var me = this;
+                me.$.safetyEquiInfoCon.load(equiId);
+            },
+            
+            onFindSafetyEquiList: function() {
+                var me = this;
+                me.$.safetyEquiListCon.onSearch();
+            },
+            
+            onInitSafetyEqui: function() {
+                var me  = this;
+
+                me.$.safetyEquiInfoCon.initSafetyEqui();
+            },
+		});
+	</script>
+
+</dom-module>

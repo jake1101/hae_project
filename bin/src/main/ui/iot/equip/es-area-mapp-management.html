@@ -1,0 +1,1147 @@
+<dom-module id="es-area-mapp-management">
+	<!--
+        ******************************************************************************************
+   		** @Program-name 	: 공간정보맵핑(new)
+        ** @Description		: 자원관리 > 공간정보맵핑(new)
+        ** @Author 			: JongHoon Baek
+        ** @Create Date 	: 2020.06.29
+        ** @History 		: 2020.06.29  JongHoon Baek 최초작성
+        					  2021.04.14  Yshong 수정 - 불필요한 소스 제거. layerGroupId 컬럼을 sc-combobox-column 로 변경.
+        ******************************************************************************************
+    -->
+
+	<style type="text/css">
+		:host{
+			@apply(--vbox-layout);
+		}
+  		 html, body { height:100%; overflow:hidden } .row {height:96% ; margin:1% 1% 1% 1%;}
+  		#mycanvas1 {
+			overflow: hidden;
+		    position: absolute;
+		    top: 0px;
+		    width: 1127px;
+		    height: 712px;
+/* 		    z-index: -1; */
+		}
+  	</style>
+	
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+	
+		<sc-request-group init>
+		</sc-request-group>
+		
+		
+		<!-- 영역 콤보 조회 -->
+		<sc-ajax id="findAreaInfo" url="findAreaList.do" body="{{searchParam}}" on-response= "completeFindAreaList"></sc-ajax>
+		<!-- 그룹 콤보 조회 -->
+		<sc-ajax id="findGroupList" url="findGroupList.do" body="{{searchParam}}" on-response="completeFind"> </sc-ajax>
+		<!-- gw,  Beacon 목록 조회 -->
+		<sc-ajax id="findListGrid" url="findListGrid.do" body="{{searchParam}}" on-response="completeFindGrid"></sc-ajax>
+		
+		<sc-ajax id="saveGatewayInfo" url="saveGatewayMappingInfo.do" on-response="completeSave"></sc-ajax>
+		
+		<sc-ajax id="saveBeaconInfo" url="saveBeaconMappingInfo.do" on-response="completeSave"></sc-ajax>
+	
+		<sc-ajax id="onResetGateway" url="onResetGatewayMapping.do" on-response="completeReset"></sc-ajax>
+
+		<sc-ajax id="onResetBeacon" url="onResetBeaconMapping.do" on-response="completeReset"></sc-ajax>
+		
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<cc-page-title-bar></cc-page-title-bar>
+		
+		
+<!-- 		<div class="vspace-10"></div> -->
+<!-- 		<div class="vspace-10"></div> -->
+<!-- 		<div class="vspace-10"></div> -->
+		<div><sc-button style="float:right;" text="재조회" on-click="onSearch"></sc-button> </div>
+		
+		
+		<table class="tb-form">
+			<colgroup>
+				<col style="width:120px"/>
+				<col style="width:200px"/>
+				<col style="width:120px"/>
+				<col style="width:200px"/>
+				<col style="width:50px" />
+				<col style="width:70px" />
+				<col style="width:50px" />
+				<col style="width:70px" />
+				<col style="width:50px" />
+				<col style="width:70px" />
+				<col style="width:100px;" hidden = "{{isBusan}}"/>
+				<col>
+			</colgroup>
+			<tr>
+				<th><sc-label text="영역"></sc-label></th>
+				<td>
+					<sc-combobox-field id="areaCombo" selected-index="0" id="combo" items="{{areaInfoList}}" value="{{searchParam.areaId}}" placeholder="선택"
+									display-field="name" value-field="id"  on-change="onSelectCombo" required="true"></sc-combobox-field>
+				</td>
+				<th><sc-label text="그룹"></sc-label></th>
+				<td>
+					<sc-tree-combobox-field id="groupCombo" items="{{hierachGroupInfoList}}"  input-clear = "true"
+						enable-check-box-only-childs="false" value="{{searchParam.layerGroupIds}}" placeholder="전체"
+						display-field="name" value-field="id"  on-change="onSelectGroup"></sc-tree-combobox-field>
+				</td>
+    			<th><sc-label text="X"></sc-label></th>
+				<td><sc-number-field id="valueX"  value="{{searchParam.valueX}}"  on-click="showPointer"></sc-number-field></td>
+				<th><sc-label text="Y"></sc-label></th>
+				<td><sc-number-field id="valueY"  value="{{searchParam.valueY}}" on-click="showPointer"></sc-number-field></td>
+				<th><sc-label text="Z"></sc-label></th>
+				<td><sc-number-field id="valueZ"  value="{{searchParam.valueZ}}"  on-click="showPointer"></sc-number-field></td>
+				<td style="text-align : center;" hidden = "{{isBusan}}" ><sc-button id="changeBtn" text="{{changeBtnName}}" on-click = "changeInOut"></sc-button></td>
+				<td style="text-align : right; width : 100%;"><sc-button text="화면 가로세로 전환" on-click = "changeView"></sc-button></td>
+			</tr>
+		</table>
+		
+		<div id="canvasDiv" class="flex vbox">
+			<div id="canvasDiv1" class="flex-6 vbox" style="position: relative; overflow: hidden;">
+				<div id="textBoxDivforMapping" style="position: absolute;"></div>		
+			</div>
+			
+			<div id="canvasDiv2" class="flex-4 vbox">
+				<sc-tab-navigation id="tabNavi" class="vbox flex-5">
+					<!-- 비콘 센서-->
+		            <div id="beaconDiv" title-text="Beacon" class="vbox flex">
+		            	<sc-grid id="gridPanel2" data-provider="{{resultList3}}" class="flex" on-item-click="onItemClick"
+		            			selection-mode="radio" editable="true">
+			                <cc-grid-toolbar>
+			                	<sc-button id="beaconBtn" text="위치 보기" on-click="onShowBeacon" auth-s></sc-button>
+				                <sc-button text="위치설정" on-click="onSettingBeacon" data-args="bc" auth-s></sc-button>
+				                <sc-button text="초기화" on-click="onResetBeacon" data-args="bc" auth-s></sc-button>
+			                    <sc-button text="저장" on-click="onSaveBeacon" data-args="bc" auth-s></sc-button>
+			                </cc-grid-toolbar>
+			                
+			                <sc-grid-columns>
+			                    <sc-data-column data-field="id" header-text="Id" width="0" text-align="center" data-type="number"></sc-data-column>
+			                    <sc-data-column data-field="major" data-type="number" header-text="Major" width="50" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="minor" data-type="number" header-text="Minor" width="50" text-align="center"></sc-data-column>
+			                    
+			                    <sc-combobox-column data-field="layerGroupId" header-text="그룹" text-align="center" editable="true" domain-only-or-empty="true" width ="150"
+									display-field="name" value-field="id" items="{{groupInfoList}}" data-type="number"></sc-combobox-column>
+			                    <sc-data-column data-field="groupId" header-text="그룹아이디" width="0" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="x" header-text="X" editable="true" width="50" text-align="center" data-type="number"></sc-data-column>
+			                    <sc-data-column data-field="y" header-text="Y" editable="true" width="50" text-align="center" data-type="number"></sc-data-column>
+			                    <sc-data-column data-field="z" header-text="Z" editable="true" width="50" text-align="center" data-type="number"></sc-data-column>
+			                    <sc-data-column data-field="displayName1" editable="true" header-text="위치명(대)" width="150" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="displayName2" editable="true" header-text="위치명(중)" width="150" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="displayName3" editable="true" header-text="위치명(소)" width="150" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="modDt" header-text="수정일" width="250" text-align="center"></sc-data-column>
+			               		<sc-data-column data-field="positionId" header-text="position_id" width="0" text-align="center" editable="false"></sc-data-column>
+			                </sc-grid-columns>
+			                 <sc-grid-fields>
+								<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+							</sc-grid-fields>
+		            	</sc-grid>
+		            </div>
+		            
+					<!-- Gateway-->
+		            <div id="gatewayDiv" title-text="Gateway" class="vbox flex">
+		            	<sc-grid id="gridPanel1" data-provider="{{resultList1}}" class="flex" on-item-click="onItemClick"
+		            				selection-mode="radio" editable="true" >
+			                <cc-grid-toolbar>
+			                    <sc-button id="gatewayBtn" text="위치 보기" on-click="onShowGateWay" auth-s></sc-button>
+			                    <sc-button text="위치설정" on-click="onSettingGateway" auth-s></sc-button>
+				                <sc-button text="초기화" on-click="onResetGateway" auth-s></sc-button>
+			                    <sc-button text="저장" on-click="onSaveGateway" auth-s></sc-button>
+			                </cc-grid-toolbar>
+			                
+			                <sc-grid-columns>
+			                     <sc-data-column data-field="id" header-text="Id" width="0" text-align="center" data-type="number"></sc-data-column>
+			                    <sc-data-column data-field="name" header-text="Gateway" width="150" text-align="center" ></sc-data-column>
+			                    <sc-combobox-column data-field="layerGroupId" header-text="그룹" text-align="center" editable="true" domain-only-or-empty="true" width ="150"
+									display-field="name" value-field="id" items="{{groupInfoList}}"  data-type="number"></sc-combobox-column>
+			                    <sc-data-column data-field="groupId" header-text="그룹아이디" width="0" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="x" header-text="X" width="50" text-align="center" data-type="number"></sc-data-column>
+			                    <sc-data-column data-field="y" header-text="Y" width="50" text-align="center" data-type="number"></sc-data-column>
+			                    <sc-data-column data-field="z" header-text="Z" width="50" text-align="center" data-type="number"></sc-data-column>
+			                    <sc-data-column data-field="displayName1" header-text="위치명(대)" width="150" text-align="center" editable="true"></sc-data-column>
+			                    <sc-data-column data-field="displayName2" header-text="위치명(중)" width="150" text-align="center" editable="true"></sc-data-column>
+			                    <sc-data-column data-field="displayName3" header-text="위치명(소)" width="150" text-align="center" editable="true"></sc-data-column>
+			                    <sc-data-column data-field="modDt" header-text="수정일" width="250" text-align="center"></sc-data-column>
+			              		<sc-data-column data-field="positionId" header-text="position_id" width="0" text-align="center" editable="false"></sc-data-column>
+			               </sc-grid-columns>
+			               <sc-grid-fields>
+								<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+							</sc-grid-fields>
+		            	</sc-grid>
+		            </div>
+				            
+		        </sc-tab-navigation>
+			</div>
+		</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+		
+	<script>
+		Polymer({
+			is: "es-area-mapp-management",
+			
+			properties : {
+				
+                codes: {
+                    type : Object,
+                    reset : false,
+                    value : function() {
+                        return {
+                            companyList: [],
+                            seqRefreshUnitList: []
+                        }
+                    }
+                },
+                projectTagObject : {
+                	type : Object,
+                	value : function(){
+                		return {}
+                	}
+                },
+                existCamera : {
+                	type : Object,
+                	value : function(){
+                		return {"value":false}
+                	}
+                },
+                siteList: {
+					 type : Array,
+					 value : function(){
+						 return [];
+					 }
+				},
+				selectedComboInfo : {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				},
+				searchParam: {
+                	type : Object,
+                	value: function(){
+                		return {
+                			valueX: 0
+                			,valueY: 0
+                			,valueZ: 0
+                			,onlyHavingModelYn :"Y"
+                		};
+                	}
+                },
+	            areaInfoList:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                	}
+	            },
+	            groupInfoList:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+	            },
+	            resultList0:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+	            },
+	            resultList1:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+	            },
+	            resultList2:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+	            },
+	            areaInfoListOrigin:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+	            },
+	            groupName :{
+	            	type : Object,
+					value : function(){
+						return {};
+					}
+	            },
+	            firstAreaInfo :{
+	            	type:Object,
+	            	value : function(){
+	            		return {};
+	            	}
+	           	},
+	            mouse: {
+	            	type:Object,
+	            	value : function(){
+	            		return {
+	            			"clientClickX" : 0,
+	            			"clientClickY" : 0
+	            		};
+	            	}
+	            },
+	            voxelInterval: {
+	            	type: Object,
+	            	value: function(){
+	            		 return null;
+	            	 }
+	            },
+	            gwFlag :{
+	           		type: Boolean,
+	           		value : false
+	            },
+	            beaconFlag :{
+	           		type: Boolean,
+	           		value : false
+	            },
+	            changeBtnName :{
+	           		type: String,
+	           		value : "내부 보기"
+	            },
+	            isBusan: {
+                	type: Boolean,
+	                value : function() {
+                    	return true;
+                    }
+                },
+                isInside : {
+                	type : Boolean,
+                	value : false
+                }
+            },
+			
+            /******************************
+             * 초기화 설정
+             ******************************/
+            formulas: {               
+                isAreaTypSite : function(){
+                	var areaInfoList = this.areaInfoList;	       
+                	var selected_area_id = this.selectedComboInfo.areaId;
+                	 
+                	for(var i = 0; i<areaInfoList.length; i++){
+                		if(areaInfoList[i].type=='site'){
+                			return true; 
+                		}
+                	}
+                	return false;	                	
+                }
+            },
+              
+            initialized : function() {
+                var me = this;
+                if(SCMdiManager.searchParam.site_name.indexOf("부산") != -1) {
+           			me.isBusan = true;
+          		}else {
+          			me.isBusan = false;
+          		}
+                UT.request(me.$.findAreaInfo);
+//                 me.initMouseEvent();		// 마우스 이벤트 설정
+//                 me.initKeyEvent();			// 키보드 이벤트 설정
+                SCLoadMask.show();
+                me.changeView();
+            },
+            
+            onSearch : function() {
+            	var me = this;
+                UT.request(me.$.findAreaInfo);
+            },
+            
+            completeFindAreaList : function(e,res){
+            	var me = this;
+				var areaInfoList = res.response;
+                me.set("areaInfoList", areaInfoList);
+                if(areaInfoList.length > 0){
+                	me.firstAreaInfo = areaInfoList[0];
+                	me.set("searchParam.areaId", areaInfoList[0].id);
+                	me.selectedComboInfo.areaId = areaInfoList[0].id;
+                }else{
+                	UT.alert("3D모델을 갖고 있는 영역이 없습니다.");
+                }
+            },
+            
+         	// 마우스 이벤트 설정
+            initMouseEvent: function(div){
+            	var me = this;
+            	div.addEventListener('click', function(e){
+                    me.mouse.clientClickX = e.clientX;
+                    me.mouse.clientClickY = e.clientY;
+                    
+                    var mouse = new THREE.Vector2();
+                    mouse.x = ((event.clientX - $(div).offset().left)/ div.clientWidth ) * 2 - 1;
+        			mouse.y = - (( (event.clientY - $(div).offset().top) / div.clientHeight ) * 2 - 1);
+        			me.rayThree.raycaster.setFromCamera(mouse, me.rayThree.camera);
+                }, false);
+            	
+            	div.addEventListener('click', function(e){
+            		if( me.mouse.clientClickX != e.clientX || me.mouse.clientClickY != e.clientY ) return;
+
+            		var children = me.rayThree.modelGroup.children;
+            		var meshArr = [];
+            		for(var i in children) {
+            			if(children[i].children != null && children[i].children[0].type != "Mesh") {
+            				meshArr = meshArr.concat(children[i].children[0].children);
+            			}
+            			else {
+            				meshArr = meshArr.concat(children[i].children);
+            			}
+            		}
+    				var intersects = me.rayThree.raycaster.intersectObjects(meshArr, true);
+    				if ( intersects.length > 0 ) {
+    					var intersect = intersects[0];
+
+	    				$("#valueX").val(Math.round(intersect.point.x));
+	    				$("#valueY").val(Math.round(intersect.point.y));
+	    				$("#valueZ").val(Math.round(intersect.point.z));
+    					me.showPointer();	    					
+	    				
+// 	    				var parent = intersect.object.parent;
+// 	    				var selectItem;
+// 	    				for(var i in me.groupInfoList){ 
+// 	    					var group = me.groupInfoList[i];
+// 	    					if(group.property.modelNames.includes(parent.name)){
+// 	    						me.searchParam.layerGroupIds = group.id
+// 	    						selectItem = group;
+// 			    				me.threeComponent.onSelectGroup(selectItem);
+// 			    				break;
+// 	    					}
+// 	    				}
+    				}
+            	}, false );
+            	
+            },
+            
+            /**
+             * 3D-MODEL : 좌표 이동 Canvas 키보드 이벤트리스너 추가
+             */
+            initKeyEvent: function(div){
+            	var me = this;
+                
+            	div.addEventListener('keydown', function(e){
+                	var x = me.get("searchParam.valueX");
+                	var y = me.get("searchParam.valueY");
+		    		var z = me.get("searchParam.valueZ");
+		    		
+                	if(e.ctrlKey){
+//                 		if(e.keyCode == 38){ // up
+// 	                		me.set("searchParam.valueZ", Number(z)-10);
+// 	                	}else if(e.keyCode == 40){ // down
+// 	                		me.set("searchParam.valueZ", Number(z)+10);
+// 	                	}else if(e.keyCode == 37){ // left
+// 	                		me.set("searchParam.valueX", Number(x)-10);
+// 	                	}else if(e.keyCode == 39){ // right
+// 	                		me.set("searchParam.valueX", Number(x)+10);
+// 	                	}
+                	}else{
+                		if(e.keyCode == 38){ // up
+	                		me.set("searchParam.valueZ", Number(z)-1);
+	                	}else if(e.keyCode == 40){ // down
+	                		me.set("searchParam.valueZ", Number(z)+1);
+	                	}else if(e.keyCode == 37){ // left
+	                		me.set("searchParam.valueX", Number(x)-1);
+	                	}else if(e.keyCode == 39){ // right
+	                		me.set("searchParam.valueX", Number(x)+1);
+	                	}else if(e.keyCode == 33){ // pgup
+	                		me.set("searchParam.valueY", Number(y)+1);
+	                	}else if(e.keyCode == 34){ // pgdn
+	                		me.set("searchParam.valueY", Number(y)-1);
+	                	}
+               		me.showPointer();
+                	}
+                }, false);
+            },
+	            
+            // 박스 포인터 표시
+            showPointer: function(){
+            	var me = this;
+            	var x = me.get("searchParam.valueX");
+               	var y = me.get("searchParam.valueY");
+	    		var z = me.get("searchParam.valueZ");
+	    		
+	    		var position ={
+	    				target : {
+	    					x : x, y : y, z : z
+	    				},
+	    				camera : {
+	    					x : me.rayThree.getCameraPosition().camera.x + (x - me.voxel.position.x),
+	    					y : me.rayThree.getCameraPosition().camera.y + (y - me.voxel.position.y),
+	    					z : me.rayThree.getCameraPosition().camera.z + (z - me.voxel.position.z)
+	    				}
+	    		}
+	    		me.rayThree.setCameraPosition(position);
+	    		me.voxel.position.set(x, y, z);
+            },
+				
+            // gw,  Beacon 목록 조회
+            findSearch : function(){
+            	 var me = this;
+            	 UT.request(me.$.findListGrid);
+            },
+            
+            // gw, 센서, Beacon 목록 조회 완료
+			completeFindGrid :function(e, res){
+            	var me = this;
+				var result = res.response;
+        		
+            	me.set("resultList1", result.gatewayList);
+            	me.set("resultList3", result.beaconList);
+            	
+            	UT.request(me.$.findGroupList);
+			},
+            
+            // 그룹 콤보 조회 완료
+            completeFind : function(e, res){
+            	var me = this;
+				var data = res.response;
+				
+				SCLoadMask.show();
+				if(data== null){
+					UT.request(me.$.findGroupList);
+				}
+				me.groupInfoList = null;
+				
+				me.set("groupInfoList", data);
+				
+                var selectedId = 0;
+                
+                data.filter(function (e) {
+            	  return e.property && e.property.selected == "Y";
+            	}).forEach(function (e) {
+            	  return selectedId = e.id;
+            	});
+				
+				var hier = new CCHierachicalData();
+            	var hierachiDatas = hier.HierachyTransformByKey(data, "id", "parentId", "children", 0, null, true);
+				hierachiDatas.name = "전체";
+				me.set("hierachGroupInfoList", hierachiDatas.children);
+				
+                me.set("layerGroupIds", [selectedId]);
+                $("#groupCombo").val([selectedId]).trigger("change");
+				
+				
+				
+				// 3D-MODEL : 텍스트 말품성 초기화
+            	while(this.$.textBoxDivforMapping.hasChildNodes()){
+            		this.$.textBoxDivforMapping.removeChild(this.$.textBoxDivforMapping.firstChild);
+               	}
+				
+				if(!UT.isEmpty(me.player)) {
+					me.player.stop();
+					me.player.dispose();
+					clearInterval(me.voxelInterval);
+					me.player = null;
+				}
+
+				var modelName = "";
+				
+				//area 테이블의 view_3d컬럼에서 3d모델의 파일 명을 가지고 와서 판별한다.
+				
+				if (!UT.isEmpty(me.areaInfoList)) {
+					if (!UT.isEmpty(me.searchParam.areaId)) {
+						for(var i=0; i<me.areaInfoList.length; i++) {
+							if(me.areaInfoList[i].id == me.searchParam.areaId) {
+								modelName = me.areaInfoList[i].modelName;
+							}
+						}
+					}
+				}
+				
+				if(UT.isEmpty(modelName)) {
+                	UT.alert("3D 모델링 파일이 없습니다.");
+                	return;
+				}
+				
+				try{	
+// 					if(gloader.loaded[modelName]){
+// 						me.loadThree(gloader.loaded[modelName].scene.clone(), modelName);
+// 					}else{
+// 						gloader.load(modelName+'.glb', function(model){
+// 							gloader.loaded[modelName] = model;
+// 							me.loadThree(gloader.loaded[modelName].scene.clone(), modelName);
+// 						});
+// 					}
+					gloader.load(modelName+'.glb', function(model){
+						gloader.loaded[modelName] = model;
+						me.loadThree(gloader.loaded[modelName].scene.clone(), modelName);
+					});
+                	
+				}catch(e){
+					console.log(e);
+				}
+			},
+			
+			/* 3D 부분 호출 */
+			loadThree : function(models, modelName){
+				var me = this;
+
+				me.importLink('/ui/iot/shared/cc-'+modelName+'.html', function(e){
+					me.$.canvasDiv1.innerHTML = null;
+					var threeComponent = document.createElement(e);
+					var container = threeComponent.$.container;
+					me.$.canvasDiv1.append(container);
+					
+					if(this.rayThree != null) {
+						this.rayThree.modelGroup.clear();
+					}
+					
+					
+					this.rayThree = new RayThree(container);
+					threeComponent.searchParam.areaId = me.searchParam.areaId;
+					threeComponent.rayThree = this.rayThree;
+					threeComponent.models = models;
+					threeComponent.editable = false;
+					threeComponent.panelHidden = true;
+					threeComponent.treeHidden = true;
+					threeComponent.noSetWorker = true;
+					
+					threeComponent.parent = this;
+					this.threeComponent = threeComponent;
+					
+					threeComponent.initThree();
+					this.rayThree.animate();
+				});
+		        
+				
+                var cubeGeo = new THREE.BoxBufferGeometry(1, 1, 1);
+                var cubeMaterial = new THREE.MeshLambertMaterial( { color: 0xff000d} );
+                me.voxel = new THREE.Mesh( cubeGeo, cubeMaterial );
+                me.voxel.position.set(0, 0, 0);
+                me.voxel.material.transparent = true;
+                
+                setTimeout(function(){                	
+	                me.showPointer();
+	                me.initMouseEvent(me.rayThree.container);
+	                me.initKeyEvent(me.rayThree.container);
+	                me.voxelInterval = setInterval(function() {
+	                	if(!UT.isEmpty(me.voxelInterval)) {
+	                		if (me.voxel.material.opacity >= 1) {
+	                			me.voxel.material.opacity = 0.3;
+	                		} else {
+	                			me.voxel.material.opacity = 1;
+	                		}
+	                	}
+					}, 100);
+	                
+	                me.rayThree.scene.add(me.voxel);
+                }, 100);
+
+			},
+			
+			// json에 대한 threeJs 생성
+			loadThreeJs: function(threejs_json,model_name) {
+				var me = this;
+				
+				me.player = new APP.Player();
+				me.player.load( threejs_json );
+				me.player.setSize( document.getElementById("canvasDiv1").offsetWidth, document.getElementById("canvasDiv1").offsetHeight );
+				me.player.play();
+				
+				
+				document.getElementById("mycanvas1").appendChild( me.player.dom );
+         
+                var cubeGeo = new THREE.BoxBufferGeometry( 1, 1, 1 );
+                var cubeMaterial = new THREE.MeshLambertMaterial( { color: 0xff000d} );
+                me.voxel = new THREE.Mesh( cubeGeo, cubeMaterial );
+                me.voxel.position.set(0, 0, 0);
+                me.voxel.material.transparent = true;
+                
+                me.showPointer();
+                
+                me.voxelInterval = setInterval(function() {
+                	if(!UT.isEmpty(me.voxelInterval)) {
+                		if (me.voxel.material.opacity >= 1) {
+                			me.voxel.material.opacity = 0.3;
+                		} else {
+                			me.voxel.material.opacity = 1;
+                		}
+                	}
+				}, 100);
+                me.player.getScene().add(me.voxel);
+
+				window.addEventListener( 'resize', function () {
+					me.player.setSize( document.getElementById("canvasDiv1").offsetWidth, document.getElementById("canvasDiv1").offsetHeight );
+				} );
+				if(model_name == "fd"){
+					me.initCasenSetting();
+				}
+				SCLoadMask.hide();
+			},
+		        	  
+        	// 영역 콤보 on-change
+        	onSelectCombo : function(event) {
+        		var me = this;
+        		var values = event.detail.value; 
+        		
+        		if(values){
+        		 	me.set("selectedComboInfo.areaId",values);
+	        		me.applyFormula();
+	        			
+	        		if(me.areaInfoList){
+	                	if(me.searchParam.areaId == me.areaInfoList[0].id ){
+							me.searchParam.tag = me.areaInfoList[0].tag;
+	                	}
+	                	// gw, Beacon 목록 조회
+		                me.findSearch();
+	        		}
+        		}
+        	},
+	        	
+        	// '그룹' 콤보박스 변경
+        	onSelectGroup: function(event) {
+        		var me = this;
+
+				var selectedItem = event.target.selectedItems[0];
+				me.set("selectedLayerGroup", selectedItem);
+				if(me.threeComponent){
+					me.threeComponent.onSelectGroup(selectedItem);					
+				}
+        		me.applyFormula();
+        	},
+        	
+        	// 화면 가로세로 전환
+        	changeView : function(){
+				var me = this;
+				
+				$("#canvasDiv").toggleClass("vbox");
+				$("#canvasDiv").toggleClass("hbox");
+				$("#canvasDiv1").removeClass("flex-6 vbox").addClass("flex-6 vbox");
+				$("#canvasDiv2").removeClass("flex-4 vbox").addClass("flex-4 vbox");
+				if(UT.isNotEmpty(me.player)){
+					me.player.setSize( document.getElementById("canvasDiv1").offsetWidth, document.getElementById("canvasDiv1").offsetHeight );
+				}
+				me.$.tabNavi.doContentElementResize();
+				
+				me.$.gridPanel1.reSize();
+				me.$.gridPanel2.reSize();
+			},
+	        	
+			// 'Gateway' 탭 위치설정 버튼
+        	onSettingGateway : function(){
+				var me = this;
+				var provider = me.$.gridPanel1.getDataProvider();
+				var indexes = provider.selectionCheckedIndexes();
+				
+				var x = me.get("searchParam.valueX");
+	    		var y = me.get("searchParam.valueY");
+	    		var z = me.get("searchParam.valueZ");
+	    		
+	    		var layerGroupId = me.$.groupCombo.value;
+	    		
+				provider.setItemAt(indexes[0],{x:x,y:y,z:z,layerGroupName:groupName, layerGroupId:layerGroupId[0]});
+			},
+			
+			
+			onSaveGateway : function(){
+				var me = this;
+				var provider = me.$.gridPanel1.getDataProvider();
+				var arr = provider.getUpdateItems();
+				
+				for(var i =0; i<arr.length; i++){
+					arr[i].siteId =me.searchParam.siteId;
+					arr[i].areaId =me.searchParam.areaId;
+					arr[i].tag = me.resultList1[0].tag;
+					arr[i].property={"type":"gateway"};
+				}
+				
+				if(!this.validate()){
+					UT.alert("STD.E0000");	// 입력하신 필드를 다시 확인 해 주세요.
+					return;
+				}
+				
+				this.$.saveGatewayInfo.body = {
+						arr: arr
+				};
+				
+				UT.confirm("STD.N1200",function(){	//저장하시겠습니까?
+					UT.request(me.$.saveGatewayInfo);
+				});
+			},
+				
+				
+			completeSave: function(e, res){
+				var me = this,
+					message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                    	 me.findSearch();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+	        },
+		          
+	        onResetGateway : function(){		
+	        	var me =this;
+				var provider = me.$.gridPanel1.getDataProvider();
+				var selectionItems = provider.selectionCheckedItems();
+				
+				this.$.onResetGateway.body = {
+						selectionItems: selectionItems
+				};
+				
+				if(selectionItems.length>0){
+					UT.confirm("STD.N1300",function(){	//삭제하시겠습니까?
+						UT.request(me.$.onResetGateway);
+					});
+				}else{
+					 UT.alert("STD.N1600");
+				}
+			},
+				
+	        	 
+			completeReset: function(e, res){
+                var me = this,
+                    message = "STD.N2500"; // 삭제하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                    	me.findSearch();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+            },
+				
+            // grid 클릭 이벤트 리스너
+			onItemClick : function(e,res){
+				var me = this;
+				var rowData = res.data;
+				
+				if(!rowData.x){
+					rowData.x = 0;
+					rowData.y = 0;
+					rowData.z = 0;
+				};
+				
+				var layerGroupId =  UT.isEmpty(rowData.layerGroupId) ? "" : Number(rowData.layerGroupId) ;
+				me.set("searchParam.layerGroupIds", [layerGroupId]);
+				
+				$("#valueX").val(Number(rowData.x));
+				$("#valueY").val(Number(rowData.y));
+				$("#valueZ").val(Number(rowData.z));
+				//$("#groupCombo").val(rowData.layerGroupId);
+				
+				me.showPointer();
+			},
+				
+			// Beacon 탭 위치설정 버튼
+			onSettingBeacon: function(e){
+				var me = this,
+					args = e.target.dataset.args;
+				var provider;
+				
+				// 비콘
+				if(args == "bc"){
+					provider = me.$.gridPanel2.getDataProvider();
+				}
+				
+				var indexes = provider.selectionCheckedIndexes();
+				
+				if (indexes.length === 0) {
+                    UT.alert("STD.N1600");
+                    return;
+                }
+				
+				var x = me.get("searchParam.valueX");
+	    		var y = me.get("searchParam.valueY");
+	    		var z = me.get("searchParam.valueZ");
+	    		
+	    		var layerGroupId = me.$.groupCombo.value;
+	    		
+				provider.setItemAt(indexes[0], {x:x, y:y, z:z, layerGroupId:Number(layerGroupId[0])});
+			},
+			
+			onResetBeacon : function(e){		
+				var me =this,
+					args = e.target.dataset.args;
+				var provider;
+				
+				// 비콘
+				if(args == "bc"){
+					provider = me.$.gridPanel2.getDataProvider();
+				}
+				
+				var selectionItems = provider.selectionCheckedItems();
+				
+				if (selectionItems.length === 0) {
+                    UT.alert("STD.N1600");
+                    return;
+                }
+				
+				this.$.onResetBeacon.body = {
+					selectionItems: selectionItems
+				};
+				
+				UT.confirm("STD.N1300",function(){	//삭제하시겠습니까?
+					// 비콘
+					if(args == "bc"){
+						UT.request(me.$.onResetBeacon);
+					}
+				});
+			},
+				
+			onSaveBeacon : function(e){
+				var me = this,
+					args = e.target.dataset.args;
+				var provider;
+				
+				// 비콘
+				if(args == "bc"){
+					provider = me.$.gridPanel2.getDataProvider();
+				}
+				
+				var updateItems = provider.getUpdateItems();
+				
+				for(var i =0; i<updateItems.length; i++){
+					updateItems[i].siteId = me.searchParam.siteId;
+					updateItems[i].areaId = me.searchParam.areaId;
+					updateItems[i].tag = me.resultList3[0].tag;
+					updateItems[i].property={"type":"beacon"};
+				}
+				
+				if(!this.validate()){
+					UT.alert("STD.E0000");	// 입력하신 필드를 다시 확인 해 주세요.
+					return;
+				}
+				
+				this.$.saveBeaconInfo.body = {
+					updateItems: updateItems
+				};
+				
+				UT.confirm("STD.N1200",function(){	//저장하시겠습니까?
+					UT.request(me.$.saveBeaconInfo);
+				});
+			},
+            
+			destroyed : function(popup, e) {
+                var me = this;
+                
+            	clearInterval(me.voxelInterval);
+            	if(me.player){
+					me.player.stop();
+					me.player.dispose();            		
+            	}
+            	if(me.rayThree) me.rayThree.stopAnimate();
+            },
+            
+            onShowGateWay : function(){
+            	var me = this;
+				var provider = me.$.gridPanel1.getDataProvider();
+				var allList = provider.getItems();
+				
+			
+				if(me.gwFlag){
+					if (!UT.isEmpty(me.player.getScene().getChildByName("sphereGroup"))) {
+						if( me.player.getScene().getChildByName("gateway")){
+							var sphereList = me.player.getScene().getChildByName("gateway").children;
+							if(sphereList){
+								for(var i=0; i<sphereList.length; i++) {
+									var len = sphereList[i].children.length;
+									
+									for(var k = len-1 ; k>=0; k--) {
+										// 게이트웨이 id 툴팁 제거
+										sphereList[i].remove(sphereList[i].children[k]);
+									}
+								}
+								me.player.getScene().getChildByName("sphereGroup").remove((me.player.getScene().getChildByName("sphereGroup").getChildByName("gateway")));
+					
+							}
+						}
+						
+					}
+					me.$.gatewayBtn.text = "위치 보기";
+					me.gwFlag = false;
+					return;
+				}else{
+					
+					me.createSensorModel(allList);
+					me.$.gatewayBtn.text = "위치 숨기기";
+					me.gwFlag = true;
+				}
+            },
+            
+            onShowBeacon : function(){
+            	var me = this;
+				var provider = me.$.gridPanel2.getDataProvider();
+				var allList = provider.getItems();
+				
+				
+				if(me.beaconFlag){
+					if (!UT.isEmpty(me.player.getScene().getChildByName("sphereGroup"))) {
+						if(me.player.getScene().getChildByName("beacon")){
+							var sphereList = me.player.getScene().getChildByName("beacon").children;
+							if(sphereList){
+								for(var i=0; i<sphereList.length; i++) {
+									var len = sphereList[i].children.length;
+									
+									for(var k = len-1 ; k>=0; k--) {
+										// 비콘 id 툴팁 제거
+										sphereList[i].remove(sphereList[i].children[k]);
+									}
+								}
+								me.player.getScene().getChildByName("sphereGroup").remove(me.player.getScene().getChildByName("sphereGroup").getChildByName("beacon"));
+							}
+						}
+					}
+					me.$.beaconBtn.text = "위치 보기";
+					me.beaconFlag = false;
+					return;
+				}else{
+					me.createSensorModel(allList);
+					me.$.beaconBtn.text = "위치 숨기기";
+					me.beaconFlag = true;
+				}
+            },
+            
+            /**
+			 * SENSOR 3D MODEL 생성
+			 */
+			createSensorModel: function(positionList){
+				var me = this;
+				var positionList = positionList;
+				var color;
+				var message;
+				for(var idx in positionList){
+					var item  = positionList[idx];
+					if(!item.property){
+						continue;
+					}
+					if(item.property && (item.property.type =="gateway")){
+						color = "green",
+						message = item.name
+					}else{
+						color = "red",
+						message = item.minor
+					}
+					
+					var param = {
+							radius : 1,
+							color : color,
+							x : item.x,
+							y : item.y,
+							z : item.z,
+							message : message,
+							positionId : item.id,
+							layerId : item.layerGroupId,
+							groupName : item.property.type
+					};
+					
+					// sensor 모델 생성
+					me.player.addSphere(param);
+				}
+			},
+            
+			
+			initCasenSetting  : function (){
+				var me = this;
+				if(me.player.getScene().getChildByName("casenGroup")){
+					me.player.getScene().remove((me.player.getScene().getChildByName("casenGroup")));
+				}
+				var casenList = [];
+				var xInit = -40;
+				var xVar = 25.951;
+				for(var i = 0 ; i < 9; i++){
+					var temp = {};
+					temp.x= xInit;
+					temp.y= i* 0.9  ;
+					temp.z= 0 ;
+					temp.groupName="casen4";
+					casenList.push(temp);
+				}
+				for(var i = 0 ; i < 9 ; i++){
+					var temp = {};
+					temp.x= xInit + xVar;
+					temp.y= i* 0.9  ;
+					temp.z= 0 ;
+					temp.groupName="casen3";
+					casenList.push(temp);
+				}
+				for(var i = 0 ; i < 9 ; i++){
+					var temp = {};
+					temp.x= xInit + xVar * 2;
+					temp.y= i* 0.9  ;
+					temp.z= 0 ;
+					temp.groupName="casen2";
+					casenList.push(temp);
+				}
+				for(var i = 0 ; i < 9; i++){
+					var temp = {};
+					temp.x= xInit + xVar * 3 ;
+					temp.y= i * 0.9 ;
+					temp.z= 0 ;
+					temp.groupName="casen1";
+					casenList.push(temp);
+				}
+				
+				me.createCasenModel( casenList);
+			},
+		    /**
+			 * casen 3D MODEL 생성
+			 */
+			createCasenModel: function(casenList){
+				var me = this;
+				var casenList = casenList;
+				
+				for(var idx in casenList){
+					var item  = casenList[idx];
+					
+					var param = {
+							x : item.x,
+							y : item.y,
+							z : item.z,
+							groupName : item.groupName
+					};
+					
+					// sensor 모델 생성
+					me.player.addCasen(param);
+				}
+			},
+
+			changeInOut : function(e){
+				var me = this;
+				
+				if(me.changeBtnName == "내부 보기"){
+					me.changeBtnName = "외관 보기";
+					me.isInside = true;
+				}else{
+					me.changeBtnName = "내부 보기";
+					me.isInside = false;
+				}
+				if (!UT.isEmpty(me.player.getScene().getChildByName("siteGroup"))) {
+// 					if( me.player.getScene().getChildByName("outGruop")){
+						var siteGroup = me.player.getScene().getChildByName("siteGroup");
+						var outList =[];
+						for(var i = 0 ; i < siteGroup.children.length; i++){
+							if((!me.selectedLayerGroup && siteGroup.children[i].name.indexOf("_OUT") != -1 )
+									 || (siteGroup.children[i].name.indexOf("_OUT") != -1 
+									&& me.selectedLayerGroup.property 
+									&& me.selectedLayerGroup.property.modelNames.includes(siteGroup.children[i].name))){
+								siteGroup.children[i].visible = !siteGroup.children[i].visible;
+							}
+						}
+					}
+					
+// 				}
+			}
+            
+		});
+	</script>
+
+</dom-module>

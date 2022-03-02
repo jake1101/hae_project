@@ -1,0 +1,325 @@
+<dom-module id="es-heartbeat-history">
+	<!--
+        ******************************************************************************************
+        ** @Program-name    : 심박수 이력 조회 
+        ** @Description     :
+        ** @Author          : jhbaek
+        ** @Create Date     : 2020.12.03
+        ** @History         : 2020.12.03 jhbaek 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+         -->
+		<!-- 코드 조회-->
+		<sc-request-group init>
+			<sc-code-group>
+				<sc-code id="findListUseFlag" code="USEFLAG" value="{{codes.useFlag}}" ></sc-code> 
+<!-- 				<sc-code code="IOT035" value="{{codes.perType}}" ></sc-code>  -->
+			</sc-code-group>
+		
+		</sc-request-group>
+
+		
+		<sc-ajax	
+				id="findListWorkerHeartBeat"		
+				url="findListWorkerHeartBeat.do"
+				body="{{searchParam}}"
+				on-response="completeFindListWorkerHeartBeat"
+				>
+		</sc-ajax>
+		
+		<sc-ajax	
+				id="findHeartBeatGraphInfo"		
+				url="findHeartBeatGraphInfo.do"
+				body="{{searchParam}}"
+				on-response="completeFindHeartBeatGraphInfo"
+				>
+		</sc-ajax>
+
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		
+		<div class="hbox flex" >
+			<div class="vbox flex-4">
+				<cc-search-container on-search="onSearch" auth-r>
+					<table validation-group="search">
+						<colgroup>
+							<col style="width:80px">
+							<col />
+							<col style="width:80px">
+							<col />
+						</colgroup>
+						<tr>
+							<th><sc-label text="기간"></sc-label></th>
+							<td >
+									<sc-date-field value="{{startDt}}" string-date="true" required="true" default-value="-1d" style="width : 100px;"></sc-date-field>
+			    					~
+									<sc-date-field value="{{endDt}}" string-date="true"  required="true" default-value="0d" style="width : 100px;"></sc-date-field>
+							</td>
+						</tr>
+					</table>
+				</cc-search-container>
+				<sc-grid id="gridPanel" data-provider="{{resultList}}" editable="true" class="flex" on-item-click="onItemClick"	 validation-group="save">
+					<cc-grid-toolbar title-text="작업자 목록">
+<!-- 						<sc-button text="조회"        on-click="onSearch" auth-s></sc-button> -->
+					</cc-grid-toolbar>
+					<sc-grid-columns>
+						<sc-data-column data-field="name"   header-text="작업자" width="150" text-align="left" required="true" editable="false"></sc-data-column>
+ 						<sc-data-column	width="100" text-align="center"   header-text="협력사"    data-field="vendorName"   ></sc-data-column>
+                   		<sc-data-column width="100" text-align="center" header-text="직종"      data-field="jobTypeName" ></sc-data-column>
+					</sc-grid-columns>
+					<sc-grid-fields>
+						<sc-grid-field data-field="siteId"></sc-grid-field>
+						<sc-grid-field data-field="id" data-type="number"></sc-grid-field>
+					</sc-grid-fields>
+				</sc-grid>
+			</div>
+			<div class="flex-6">
+				<div class="flex" id= "heartBeatChartDiv" style="width: 98%;height:100% ; margin :auto;"></div>
+			</div>
+		</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-heartbeat-history",
+            properties : {
+                codes: {
+                    type : Object,
+                    reset : false,
+                    value : function() {
+                        return {
+                        }
+                    }
+                },
+                
+                currentRowIndex:Number,
+
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                resultList: {
+                    type: Array,
+                    value: function(){
+                        return [];
+                    }
+                },
+                myChart: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                }
+                
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            // 초기화 완료 후 호출 함수
+            initialized : function() {
+                var me = this;
+                UT.request(me.$.findListWorkerHeartBeat);
+                
+                var dom = document.getElementById("heartBeatChartDiv");
+                me.myChart = echarts.init(dom);
+
+            	option = {
+            			tooltip: {
+            		        trigger: 'axis'
+            		    },
+            		    legend: {
+            		    	
+					     	right: 10,
+					        top : 25,
+	
+		   				    textStyle: {
+		                         fontSize: 12,
+		                         fontWeight:'bold'
+		                    },
+	
+				        },
+            		    grid: {
+       				        left: '3%',
+       				        right: '3%',
+       				        bottom: '3%',
+       				        containLabel: true
+       				    },
+       					xAxis : [
+	       			        {
+	       			            type: 'time',
+	       			            boundaryGap:false,
+	       			            
+	       			        }
+	       			    ],
+            		    yAxis: {
+            		        type: 'value'
+            		    },
+            		    series: [{
+            		        data: [],
+            		        type: 'line',
+            		        smooth: true
+            		    }]
+            		};
+            	
+            	 
+            	  me.myChart.setOption(option);
+           },
+           
+           
+           
+           completeFindListWorkerHeartBeat : function(e, res){
+        	 var me = this,
+        	 	 resultList = res.response;
+        	 
+        	 me.set("resultList",resultList);
+           },
+			// grid item click 이벤트
+			onItemClick : function(event) {
+				var me = this,
+					data = event.detail.data,
+					item = event.detail.item,
+                	provider = event.detail.provider;
+				
+				me.currentRowIndex = item.rowIndex;
+				
+            },
+            
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+            onSearch : function() {
+                var me = this;
+                var year =me.startDt.substring(0,4);
+				var month =me.startDt.substring(4,6);
+				var day =me.startDt.substring(6,8);
+				
+				var startTime = new Date(year, month-1, day);
+				
+				var year2 =me.endDt.substring(0,4);
+				var month2 =me.endDt.substring(4,6);
+				var day2 =me.endDt.substring(6,8);
+				
+				var finishTime = new Date(year2, month2-1, day2);
+			
+				me.searchParam.startDt = UT.formatDate(  startTime, "yyyy-MM-dd");
+				me.searchParam.endDt =UT.formatDate(  finishTime, "yyyy-MM-dd");
+                
+                var provider = me.$.gridPanel.getDataProvider(),
+	                checked = provider.selectionCheckedIndexes(),
+	                checkedItems = provider.selectionCheckedItems();
+               
+                var workerIds = [] ;
+                
+                if (checked && checked.length > 0) {
+               	    for(var i = 0 ; i < checkedItems.length ; i++){
+               	    	workerIds.push(checkedItems[i].id);
+               	    }
+               	    me.searchParam.targetIds = workerIds;
+                	UT.request(me.$.findHeartBeatGraphInfo);
+                }
+                else{
+                    UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+                }
+            },
+            
+            completeFindHeartBeatGraphInfo : function(e,res){
+            	var me =  this;
+            	var resultList = res.response;
+            	
+            	me.loadLineGraph(resultList);
+            },
+            
+            loadLineGraph : function(graphInfo){
+            	var me = this;
+    			var option = null;
+    			
+    			var dom = document.getElementById("heartBeatChartDiv");
+    			echarts.dispose(dom);
+    			me.myChart = echarts.init(dom);
+    			
+    			var  mySeries = graphInfo;
+    			
+    			option = {
+   				    title: {
+   				        text: '심박수'
+   				    },
+   				    tooltip: {
+   				        trigger: 'axis'
+   				    },
+	   				legend: {
+					     	right: 10,
+					        top : 25,
+		   				    textStyle: {
+		                         fontSize: 12,
+		                         fontWeight:'bold'
+		                    },
+				     },
+	   				 dataZoom: [
+	   			        {
+	   			            show: true,
+	   			            realtime: true,
+	   			            start: 0,
+	   			            end: 100
+	   			        },
+	   			        {
+	   			            type: 'inside',
+	   			            realtime: true,
+	   			            start: 0,
+	   			            end: 100
+	   			        }
+	   			    ],
+   				    grid: {
+   				        left: '3%',
+   				        right: '3%',
+   				        bottom: '3%',
+   				        top:'15%',
+   				        containLabel: true
+   				    },
+				    xAxis : [
+       			        {
+       			            type: 'time',
+       			            boundaryGap:false,
+       			        }
+       			    ],
+   				    yAxis: {
+   				        type: 'value'
+   				    },
+   				    series: mySeries
+   				    
+   				};
+   			
+   			 	me.myChart.setOption(option);
+	   			me.myChart.setOption({
+	   	            series: mySeries
+	   	        })
+            }
+        });
+	</script>
+
+</dom-module>

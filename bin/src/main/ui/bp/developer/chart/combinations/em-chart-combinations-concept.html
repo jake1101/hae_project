@@ -1,0 +1,263 @@
+<script src="/ui/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<dom-module id="em-chart-combinations-concept">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+        
+        .concept table, th, td {
+	 		border:1px solid black;
+	 		border-collapse:collapse;
+	 		box-sizing: border-box;
+	 		padding: 3px;
+	 	}
+	 	th {
+	 		background-color:lightgray
+	 	}
+    </style>
+	<template>
+	   
+		    <sc-panel class="hbox flex" title-text="동시 표시 가능한 시리즈 타입들">
+				<table class="fit" >
+					<tr>
+						<th>Series Type</th>
+						<th>Other Series Types</th>
+					</tr>
+					<tr>
+						<td>'column' - ColumnSeries
+						</td>
+						<td>'column', 'columnrange', 'line', 'area', 'arearange', 'ohlc', 'candlestick', 'boxplot', 'waterfall', 'errorbar'
+						</td>
+					</tr>
+					<tr>
+						<td>'columnrange' - ColumnRangeSeries
+						
+						</td>
+						<td>'columnrange', 'column', 'line', 'area', 'arearange', 'ohlc', 'candlestick', 'boxplot', 'waterfall', 'errorbar'
+						</td>
+					</tr>
+					<tr>
+						<td>'bar' - BarSeries
+						
+						</td>
+						<td>'bar', 'barrange'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'barrange' - BarRangeSeries
+						
+						</td>
+						<td>'barrange', 'bar'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'line' - LineSeries
+						
+						</td>
+						<td>'line', 'column', 'columnrange', 'area', 'arearange', 'ohlc', 'candlestick', 'boxplot', 'waterfall', 'errorbar'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'area' - AreaSeries
+						
+						</td>
+						<td>'area', 'arearange', 'line', 'column', 'columnrange', 'ohlc', 'candlestick', 'boxplot', 'waterfall', 'errorbar'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'arearange' - AreaRangeSeries
+						
+						</td>
+						<td>'arearange', 'area', 'line', 'column', 'columnrange', 'ohlc', 'candlestick', 'boxplot', 'waterfall', 'errorbar'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'ohlc' - OhlcSeries
+						
+						</td>
+						<td>'ohlc', 'column', 'columnrange', 'line', 'area', 'arearange', candlestick', 'boxplot', 'waterfall', 'errorbar'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'candlestick' - CandleStickSeries
+						
+						</td>
+						<td>'candlestick', 'column', 'columnrange', 'line', 'area', 'arearange', 'ohlc', 'boxplot', 'waterfall', 'errorbar'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'boxplot' - BoxplotSeries
+						
+						</td>
+						<td>'boxplot', 'column', 'columnrange', 'line', 'area', 'arearange', 'ohlc', 'candlestick', 'waterfall', 'errorbar'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'waterfall' - WaterfallSeries
+						
+						</td>
+						<td>'waterfall', 'column', 'columnrange', 'line', 'area', 'arearange', 'ohlc', 'candlestick', 'boxplot', 'errorbar'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'errorbar' - ErrorBarSeries
+						
+						</td>
+						<td>'errorbar', 'column', 'columnrange', 'line', 'area', 'arearange', 'ohlc', 'candlestick', 'boxplot', 'waterfall'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'bubble' - BubbleSeries
+						
+						</td>
+						<td>'bubble'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'scatter' - ScatterSeries
+						
+						</td>
+						<td>'scatter'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'histogram' - HistogramSeries
+						
+						</td>
+						<td>'histogram'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'pie' - PieSeries
+						
+						</td>
+						<td>'pie'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'polarline' - PolarLineSeries
+						
+						</td>
+						<td>'polarline', 'polarcolumn', 'polararea'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'radar' - PolarLineSeries
+						
+						</td>
+						<td>'radar'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'spiderweb' - PolarLineSeries
+						
+						</td>
+						<td>'spicerweb'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'polararea' - PolarAreaSeries
+						
+						</td>
+						<td>'polararea', 'polarline', 'polarcolumn'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'polarcolumn' - PolarColumnSeries
+						
+						</td>
+						<td>'polarcolumn', 'polararea', 'polarline'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'treemap' - TreemapSeries
+						
+						</td>
+						<td>'treemap'
+						
+						</td>
+					</tr>
+					<tr>
+						<td>'heatmap' - HeatmapSeries
+						
+						</td>
+						<td>'heatmap
+						
+						</td>
+					</tr>
+				</table>
+				<sc-container  title-text="source" class="fit" ></sc-container>
+		</sc-panel>
+		<div id="explan" style="display:none;">
+			// serie별로 type을 지정하여 하나이상의 차트를 조합할수 있다.
+			// 좌측의 표를 보고 여러종류의 차트를 조합할수있다.
+			{
+			    //type을 column으로 지정하면 기본 serie 타입은 column이 되고    serie에 각각 지정한 타입이 적용된다.
+			    //모든 타입을 조합할수는 없고 좌측에 표에 나열된 종류별로 조합이 가능하다. 
+				"type": "column",  
+				..
+				"series":[
+					{
+					   //type을 지정하지 않으면 차트에 지정된 type(column) 으로 지정된다.
+					   'name': 'London',
+					   ...					   
+					},
+					{
+					   // line 차트가 그려짐 
+					   'type': 'line',
+					   'name': 'Tokyo',
+					   ....
+					}
+				]
+				 
+			}
+		</div>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-chart-combinations-concept',
+		behaviors:[
+	                Polymer.SCAutoGenIdBehavior
+	    ],
+		initialized: function() {
+            var me = this;
+            var sourceId = this.generateId();
+            me.sourceEditorEle._contentElement.id = sourceId;
+            me.sourceEditor = ace.edit(sourceId);
+            me.sourceEditor.setTheme("ace/theme/crimson_editor");
+            me.sourceEditor.getSession().setMode("ace/mode/javascript");
+            me.sourceEditor.setReadOnly(true);
+     		this.sourceEditor.setValue(me.getText());
+       		this.sourceEditor.selection.clearSelection();
+       		this.sourceEditor.gotoLine(0);
+         },
+        getText : function(){
+           var  explain = 'asdasd';
+           return  this.$.explan.innerText;
+        },
+        get sourceEditorEle(){
+            return this.querySelector('[title-text=source]');
+        }
+		
+	});
+	</script>
+</dom-module>

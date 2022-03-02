@@ -1,0 +1,157 @@
+<!-- 
+/**
+ * 구매그룹(cc-job-search) 커스텀 태그
+ *
+ *     <cc-job-searchvalue="{{value}}" display="{{displayValue}}" purc-grp-typ="PU"></cc-job-search>
+ *
+ * @element cc-purc-grp
+ *
+ *
+ * @attribute value purc_grp_cd값 binding value <br>
+ * [string]
+ *
+ *
+ * @attribute display purc_grp_nm값 binding value <br>
+ * [string]
+ *
+ *
+ * @attribute value-field value로 binding될 필드명. 기본값:purc_grp_cd <br>
+ * [string] [optional] 
+ *
+ *
+ * @attribute display-field input 영역에 표시될 필드명. 기본값:purc_grp_nm <br>
+ * [string] [optional] 
+ *
+ *
+ * @attribute purc-grp-typ 직무유형<br>
+ * [string]
+ *
+ */
+-->
+<sc-link rel="import" href="../../../bp/shared/ep-job-list.html" lazy></sc-link>
+<dom-module id="cc-job-search">
+    <template>
+        <div class="field-box">
+            <sc-text-field value="{{display}}" 
+                trigger-cls="search" on-trigger-click="onFind" on-enter="onFind" on-keydown="onKeyDown" maxLength="200" disabled="[[disabled]]" readonly="[[readonly]]" required="[[required]]" class$="[[class]]" placeholder$="[[placeholder]]">
+            </sc-text-field>
+            <span style="margin:4px 0 0 5px;" hidden$="[[labelDisabled]]">{{value}}</span>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: "cc-job-search",
+            properties: {
+                value: {
+                    type: String,
+                    value: "",
+                    notify: true
+                },
+                display: {
+                    type: String,
+                    value: "",
+                    notify: true
+                },
+                valueField: {
+                    type: String,
+                    value: "purc_grp_cd"
+                },
+                displayField: {
+                    type: String,
+                    value: "purc_grp_nm"
+                },
+                purcGrpTyp: {
+                    type: String,
+                    value: ""
+                },
+                labelDisabled : {
+                    type : Object,
+                    value : function(){
+                        return false;    
+                    }
+                },
+                disabled: {
+                    type: Object,
+                    value : function(){
+                        return false;
+                    }
+                },
+                required: {
+                    type: Object,
+                    value : function(){
+                        return false;
+                    }
+                },
+                readonly: {
+                    type: Object,
+                    value : function(){
+                        return false;
+                    }
+                }
+            },
+
+            attached: function(){
+
+            },
+    
+            // 사용자의 keydown
+            onKeyDown: function(e) {
+                var me = this;
+                if (me.readonly === true || UT.isSpecialKeyDown(e)) {
+                    return;
+                }
+                me.set("value", "");
+            },
+            onShowPopupFind: function(){
+                var me = this;
+                if (me.readonly === true) {
+                    return;
+                }
+                if(!me.purcGrpTyp){
+                    UT.alert("STD.ADM1028");
+                    return;
+                }
+                var param = {
+                    comp_cd: SCSessionManager.currentUser.comp_cd,
+                    purc_grp_typ: me.get("purcGrpTyp"), //직무유형
+                };
+                param[me.displayField] = me.get("display");
+                var jobPopup = me.createPopup();
+                jobPopup.show();
+                jobPopup.getWindowContent().load({singleSelect : true, defaultParam : param});
+            },
+            createPopup: function(){
+            	var me = this;
+           		return UT.popup('ep-job-list', me, 650, 500, {
+           			'selected-items' : function(popup,e){
+           				var result = e.detail[0];
+           				//결과값 처리하는 callback
+                        me.set("display", result[me.displayField]);
+                        me.set("value", result[me.valueField]);
+                        popup.close();
+           			}
+           		},{titleText : "구매그룹검색"});
+            },
+            // 구매그룹 찾기
+            onFind: function(){
+                var me = this;
+                if (me.readonly === true) {
+                    return;
+                }
+                if(!me.purcGrpTyp){
+                    UT.alert("STD.ADM1028");
+                    return;
+                }
+                var param = {
+                    comp_cd: SCSessionManager.currentUser.comp_cd,
+                    purc_grp_typ: me.get("purcGrpTyp"), //직무유형
+                };
+                param[me.displayField] = me.get("display");
+                
+                var jobPopup = me.createPopup();
+                jobPopup.show();
+                jobPopup.getWindowContent().load({singleSelect : true, defaultParam : param, autoComplete : true});
+            }
+        });
+    </script>
+</dom-module>

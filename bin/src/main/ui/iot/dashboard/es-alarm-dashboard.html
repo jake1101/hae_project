@@ -1,0 +1,958 @@
+<sc-link rel="stylesheet" type="text/css" href="./css/alarm-dashboard.css"></sc-link>
+<sc-link rel="import" href="../shared/ep-postion-popup-map.html"></sc-link>
+<sc-link rel="import" href="../shared/ep-target-history.html"></sc-link>
+<sc-link rel="import" href="../alarm/ep-alarm-details.html"></sc-link>
+<sc-link rel="import" href="ep-safedate-setting.html"></sc-link>
+
+<dom-module id="es-alarm-dashboard">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+			
+			font-family:'Noto Sans KR';
+		}
+	</style>
+
+	<template>
+<!--
+   ************************************************************************************************************
+   * Service Area
+   ************************************************************************************************************
+-->
+		<!-- 조회 -->
+		<sc-ajax id="getAlarmDashboard"
+			url="getAlarmDashboard.do"
+			body="{{searchParam}}"
+			on-response="completeGetAlarmDashboard">
+		</sc-ajax>
+		
+		<sc-ajax
+				id="saveListAlarm"
+				url="saveListAlarm.do"
+				on-response="completeSaveListAlarm">
+		</sc-ajax>
+		
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+<!--
+    ************************************************************************************************************
+    * UI Area
+    ************************************************************************************************************
+-->
+		<!-- 바깥 배경 -->
+		<div class="vbox flex alarm-back-ground-color">
+			<!-- 안쪽 배경 -->
+			<div class="vbox flex alarm-sub-back-ground-color">
+				<!-- 상단 타이틀 -->
+				<div class="hbox alarm-top-area">
+					<div class="vbox alarm-top-left-area">
+						<div class="hbox">
+							<div class="vbox alarm-top-site-text">알림 대시보드</div>
+							<div class="hspace-50"></div>
+							<div class="vbox alarm-top-time-text">[[currentDate]] [[dayOfWeek]] [[currentTime]]</div>
+							<div class="vbox safeday-text"><sc-label text="무재해 달성 {{safeDate}}일차" on-click="changeSafeDate"></sc-label></div>
+						</div>
+					</div>
+					
+					<div class="vbox flex alarm-top-right-area">
+						<div class="hbox a-flex-end">
+							<div class="vbox alarm-top-time-text">새로고침 : [[refreshSecond]]</div>
+							<div class="hspace-30"></div>
+							<div class="hbox">
+								<div class="vbox font-15 a-center">UI컬러</div>
+								<div class="hspace-10"></div>
+								<div class="vbox flex alarm-black-select-icon" data-args="black" on-click="changeTone"></div>
+								<div class="hspace-10"></div>
+								<div class="vbox flex alarm-white-select-icon" data-args="white" on-click="changeTone"></div>
+							</div>
+							<div class="hspace-30"></div>
+							<div id="windowmax" class="window-max" on-click="onWindowMax"></div>
+						</div>
+					</div>
+				</div>
+				
+				<!-- 중단 영역 -->
+				<div class="hbox flex alarm-middle-area scroll-none">
+					<!-- 중단 내용 -->
+					<div class="hbox flex alarm-middle-content-area">
+						<!-- 지도 -->
+						<div class="vbox flex alarm-middle-left-area">
+							<cc-ol-map-container id="mapContainer" show-view-marker="true" show-view-label="true"></cc-ol-map-container>
+						</div>
+						<div class="hspace-10"></div>
+						<div class="vbox" style="width:750px">
+							<sc-grid id="gridAlarmPanel" data-provider="{{alarmList}}" title-text="" use-state ="false" use-selection="false" selection-style="singleRow" show-selection-header="false" on-item-click="onItemClick" 
+								 sortable="false" focus-visible="false" row-style-function="onRowStyle" column-fillstyle="fill">
+						        <cc-grid-toolbar>
+					            </cc-grid-toolbar>
+						        <sc-grid-columns>
+						            <sc-date-column data-field="sendDt" 	  header-text="시간"  	width="80" text-align="center"   display-format="HH:mm:ss"></sc-date-column>
+									<sc-data-column data-field="alarmTypeName" header-text="유형"  fill-width="180" text-align="center" 	editable="false"  max-length="60"   ></sc-data-column>
+									<sc-data-column data-field="content"  	  header-text="내용"	 text-align="left" width="400"	editable="false" max-length="300"></sc-data-column>
+									<sc-image-column data-field="image" header-text="조치" width="60" image-change-function="onImageChange"   image-display ="center" ></sc-image-column>
+						        </sc-grid-columns>
+						        <sc-grid-fields>
+				                    <sc-grid-field data-field="seq" data-type="number"></sc-grid-field>
+				                    <sc-grid-field data-field="popup" data-type="object"></sc-grid-field>
+				                    <sc-grid-field data-field="marker" data-type="object"></sc-grid-field>
+				                    <sc-grid-field data-field="geoJson" data-type="object"></sc-grid-field>
+				                    <sc-grid-field data-field="id"></sc-grid-field>
+									<sc-grid-field data-field="recipient"></sc-grid-field>
+									<sc-grid-field data-field="answerer"></sc-grid-field>
+									<sc-grid-field data-field="siteId" data-type="number"></sc-grid-field>
+									<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+									<sc-grid-field data-field="targetInfo" data-type="object"></sc-grid-field>
+									<sc-grid-field data-field="location" data-type="object"></sc-grid-field>
+				                </sc-grid-fields>
+					        </sc-grid>
+				        </div>
+					</div>
+				</div>
+				
+				<!-- 하단 내용 -->
+				<div class="hbox alarm-bottom-area">
+					<div class="hbox alarm-bottom-left-area">
+						<div class="vbox flex alarm-message-icon"></div>
+						<div class="vbox font-20-700 a-center">메시지</div>
+					</div>
+					
+					<div class="hspace-30 alarm-msg-line"></div>
+					<div class="hspace-20"></div>
+					
+					<div class="vbox flex alarm-ticker-area font-20-700 a-center">
+						<ul id="_alarmTicker">
+						</ul>
+					</div>
+					
+					<div class="vbox" style="min-width:37px;">
+						<div class="flex alarm-arrow-up" on-click="onPrevMessage"></div>
+						<div class="flex alarm-arrow-down" on-click="onNextMessage"></div>
+					</div>
+					<div class="vbox alarm-bottom-right-area a-center font-20-700" on-click="onClearMessage">초기화</div>
+				</div>
+			</div>
+		</div>
+
+	</template>
+
+<!--
+    ************************************************************************************************************
+    * Script Area
+    ************************************************************************************************************
+-->
+	<script>
+        Polymer({
+            is: "es-alarm-dashboard",
+            
+            properties : {
+            	currentRowIndex:Number,
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                
+                currentDate: {
+                    type: Object,
+                    value: function(){
+                        return "";
+                    }
+                },
+                
+                dayOfWeek: {
+                    type: Object,
+                    value: function(){
+                        return "";
+                    }
+                },
+                
+                currentTime: {
+                    type: Object,
+                    value: function(){
+                        return "";
+                    }
+                },
+
+                safeDay: {
+                    type: Object,
+                    value: function(){
+                        return new Date();
+                    }
+                },
+                
+                safeDate: {
+                    type: Object,
+                    value: function(){
+                        return 1;
+                    }
+                },    
+                
+                refreshSecond: {
+                	type: Object,
+                	value: function(){
+                		return 60;
+                	}
+                },
+                
+                colorTone: {
+                	type: Object,
+                	value: function(){
+                		return 'black';
+                	}
+                },
+             // 지도
+                map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+                alarmLayer: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                }
+            },
+            
+            // 초기화 완료 후 호출 함수
+            initialized : function() {
+                var me = this;
+                me.set("map", me.$.mapContainer.map);
+
+                me.set("safeDay", this.$.mapContainer.areaList[0].safeDay);
+            	me.set("safeDate", this.$.mapContainer.areaList[0].safeDayCount);
+
+				var markerSource = new ol.source.Vector({});
+				
+				var markerLayer = new ol.layer.Vector({
+					source: markerSource
+				});
+			
+				me.map.addLayer(markerLayer);
+				me.map.set('markerSource', markerSource);
+
+				me.map.on('click', function(e) {
+			    	var selected = null;
+
+			    	me.map.forEachFeatureAtPixel(e.pixel, function(f) {
+		  		    	selected = f;
+		  		    	return true;
+		  		  	});
+
+			    	if (selected) {
+   			  		  	if(selected.get('type') =='targetMarker'){
+   			  		  		var object = selected.get('targetInfo');
+	   			  		  	var grid = me.$.gridAlarmPanel;
+	   						grid.searchItem("seq", object.seq, 0);
+	   			  		}
+			    	}
+			    });
+
+		    	me.map.on('pointermove', function(e) {
+			    	var selected = null;
+			    	
+   			  		me.map.removeOverlay(me.map.getOverlayById('targetPopup'));
+    		  		if (e.dragging) {
+    			    	return;
+    			  	}else{
+    			  		$('*').css('cursor','');
+    			  		if (selected !== null) {
+   			  		    	selected = null;
+   			  		  	}
+
+   			  		  	me.map.forEachFeatureAtPixel(e.pixel, function(f) {
+   			  		    	selected = f;
+   			  		    	return true;
+   			  		  	});
+
+   			  		  	if (selected) {
+   	   			  		  	if(selected.get('type') =='targetMarker'){
+   	   			  				me.map.removeOverlay(me.map.getOverlayById('targetClickPopup'));
+   	   	   			  		  	var object = selected.get('targetInfo');
+		   	   	   			  	var name = (object.targetName)?object.targetName:'';
+		
+		   	 					var text = '<div id="arrow"></div><div id="text">'+object.alarmTypeName+'<br/>'+name+'</div>';
+	
+	    		    	      	var popup = document.createElement("div");
+	    						popup.classList.add('targetPopup');
+	    						popup.innerHTML=text;
+	    						
+	    						var overlay = new ol.Overlay({
+		    						id : 'targetPopup',
+	    							element : popup,
+	    							positioning : 'bottom-center',
+	    							offset : [0,-20],
+	    							position : selected.getGeometry().getCoordinates()
+	    						});
+
+	    						me.map.addOverlay(overlay);
+	    						$('*').css('cursor','pointer');
+   	   			  		  	}
+            			}
+        			}
+    			});
+				
+                var d = new Date();
+                var currentDate = d.getFullYear() + "년 " + ( d.getMonth() + 1 ) + "월 " + d.getDate() + "일";
+
+                //UT.request(me.$.saveListAlarm);
+                
+                // 현재일자
+                me.set("currentDate", currentDate);
+                
+                // 요일
+                var week = ['일', '월', '화', '수', '목', '금', '토'];
+                var dayOfWeek = week[d.getDay()];
+                
+                me.set("dayOfWeek", dayOfWeek + "요일");
+                
+                // 현재시간
+                me.timeInterval = setInterval(function() {
+               		me.setTimeText();
+				}, 1000); // 1초
+
+				var blackStyles = {
+					    "default" : {
+					    	"fontSize" : "15",
+					        "fontName" : "Noto Sans KR",
+					        "borderTop" : "#314E7B,0px",
+					        "borderLeft" : "#314E7B,0px",
+					        "borderRight" : "#314E7B,0px",
+					        "borderBottom" : "#314E7B,1px",
+	    				    "background" : "#1E3155",
+	    				    "color" : "#FFF"
+						},
+						grid : {
+							borderLeft : "#314E7B,0px",
+				            borderRight : "#314E7B,0px",
+				            borderTop : "#314E7B,0px",
+				            borderBottom : "#314E7B,0px"
+						},
+			            header: { //컬럼해더의 스타일을 변경한다. 위에 설명된 스타일 시트를 참고하여 설정한다.
+			                background: "#1E3155",
+			                color : "#FFF",
+			                borderLeft : "#314E7B,0px",
+				            borderRight : "#314E7B,0px",
+				            borderTop : "#314E7B,0px",
+				            borderBottom : "#314E7B,1px",
+				            selectedColor : "#FFF",
+				            selectedBackground : "#1E3155",
+				            hoveredColor:"#FFF",
+				            hoveredBackground : "#1E3155",
+				            fontSize : "17px"
+			            },
+			            body : {
+			            	background: "#fff",
+			            	color: "#FFF",
+			            	borderLeft : "#314E7B,0px",
+				            borderRight : "#314E7B,0px",
+				            borderTop : "#314E7B,0px",
+				            borderBottom : "#314E7B,0px"
+			            },
+			            rowIndicator : {
+			            	background: "#1E3155",
+	                        color : "#FFF",
+				            borderLeft : "#fff,0px",
+				            borderRight : "#fff,0px",
+				            borderTop : "#A7B7DB,0px",
+				            borderBottom : "#314E7B,1px"
+				        }
+				    };
+
+			       	me.set("blackStyles",blackStyles);
+			       	
+				    var whiteStyles = {
+	    				    "default" : {
+	    				    	"fontSize" : "15",
+	    				        "fontName" : "Noto Sans KR",
+	        				    "background" : "#fff",
+	        				    "color" : "#000",
+	        				   	"borderLeft" : "#A7B7DB,0px",
+	        			        "borderRight" : "#A7B7DB,0px",
+	        			        "borderTop" : "#A7B7DB,0px",
+	        			        "borderBottom" : "#A7B7DB,1px"
+	    					},
+	    					grid : {
+	    						borderLeft : "#A7B7DB,0px",
+	    			            borderRight : "#A7B7DB,0px",
+	    			            borderTop : "#A7B7DB,0px",
+	    			            borderBottom : "#A7B7DB,0px"
+	    					},
+	    		            header: { //컬럼해더의 스타일을 변경한다. 위에 설명된 스타일 시트를 참고하여 설정한다.
+	    		                background: "#fff",
+	    		                color : "#000",
+	    			            selectedColor : "#000",
+	    			            selectedBackground : "#fff",
+	    			            hoveredColor:"#000",
+	    			            hoveredBackground : "#fff",
+	    			            fontSize : "17px",
+	   			            	borderLeft : "#A7B7DB,0px",
+	       			            borderRight : "#A7B7DB,0px",
+	       			            borderTop : "#A7B7DB,0px",
+	       			            borderBottom : "#A7B7DB,1px"
+	    		            },
+	    		            body : {
+	    		            	background: "#fff",
+	    		            	color: "#000",
+	    		            	borderLeft : "#A7B7DB,0px",
+	    			            borderRight : "#A7B7DB,0px",
+	    			            borderTop : "#A7B7DB,0px",
+	    			            borderBottom : "#A7B7DB,0px"
+	    		            },
+	    		            rowIndicator : {
+	    		            	background: "#fff",
+	                            color : "#000",
+	    			            borderLeft : "#fff,0px",
+	    			            borderRight : "#fff,0px",
+	    			            borderTop : "#A7B7DB,0px",
+	    			            borderBottom : "#A7B7DB,1px"
+	    			        }
+	    			    };
+
+				    me.set("whiteStyles",whiteStyles);
+				    
+			       	me.$.gridAlarmPanel.loadStyles(blackStyles);
+                
+				// webSoceck 연결
+    			me.connectSocketServer();
+				
+				// 데이터 조회
+                me.searchData();
+				
+                me.onWindowMax();
+            },
+            onImageChange: function(data, item){
+				if(data.state == 5){
+					if(this.colorTone == 'black'){
+	            		return '/ui/iot/dashboard/icon/alarm/action.png';
+	            	}else{
+	            		return '/ui/iot/dashboard/icon/alarm/white/action.png';
+		            }
+				}else{
+					if(this.colorTone == 'black'){
+	            		return '/ui/iot/dashboard/icon/alarm/noaction.png';
+	            	}else{
+	            		return '/ui/iot/dashboard/icon/alarm/white/noaction.png';
+		            }
+				}
+	         },
+        	// 로우 별 스타일
+            onRowStyle : function(data,param) {
+            	var styles = { 
+                      "color" :(this.colorTone == "black")?"#FFF":"#000"
+                    , "borderLeft" : "#fff,0px", "borderRight" : "#fff,0px"
+                    , "borderTop" : "#314E7B,0px", "borderBottom" : "#314E7B,0px"
+                    , "textWrap" : "ellipsis"
+                };
+                
+            	 if(param.rowIndex%2==0 ){
+                	styles.background = (this.colorTone == "black")?"#1E3155":"#FFF";
+                }else{
+                	styles.background = (this.colorTone == "black")?"#223860":"#FFF";
+                }
+                return styles;
+            },
+            /**
+             * 현재 시간 표시
+             */
+            setTimeText: function(){
+            	var me = this;
+            	
+            	var d = new Date();
+            	var hours = d.getHours();
+            	var minutes = d.getMinutes();
+            	
+            	if(hours < 10){
+            		hours = "0" + hours;
+            	}
+            	if(minutes < 10){
+            		minutes = "0" + minutes;
+            	}
+            	
+            	var currentTime = hours + ":" + minutes;
+            	me.set("currentTime", currentTime);
+            	
+            	// refresh 초
+				var refreshSecond = me.get("refreshSecond") || 0;
+            	
+            	if(refreshSecond <= 0){
+            		me.set("refreshSecond", 60);
+            		me.searchData();
+            	}else{
+            		me.set("refreshSecond", --refreshSecond);
+            	}
+            },
+            
+            // 대시보드 데이터 조회
+            searchData: function(){
+            	var me = this;
+            	UT.requestNotUseLoading(me.$.getAlarmDashboard);
+            },
+            
+            // 조회 완료
+            completeGetAlarmDashboard: function(e, res){
+            	var me = this;
+            	
+            	// 대시보드 데이터 세팅 : 알람 목록
+            	var alarmList = res.response.data.body || {};
+            	
+				// 메시지 영역 초기화
+				me.initMessage();
+
+				if(!me.isInitialized) return;
+            	var markerSource = me.map.get('markerSource');
+				markerSource.clear(); // 마커 초기화
+
+            	if(alarmList){
+            		me.setAreaName(alarmList);
+            		var features = me.getFeatureList(alarmList);
+            		markerSource.addFeatures(features);
+            		
+				}else{
+					alarmList = [];
+				} 
+
+            	me.set("alarmList", alarmList );
+            },
+            setAreaName : function(list){
+				for(var i in list){
+					if(list[i].geoJson){
+						if(!list[i].areaName){
+							//var lonLat = list[i].geoJson.coordinates[0].toString().substring(0,8)+", "+list[i].geoJson.coordinates[1].toString().substring(0,7);
+							//list[i].areaName = lonLat;
+							list[i].areaName = "영역외";
+						}
+					}else{
+						list[i].areaName = "위치정보 없음";
+					}
+				}
+			},
+			getFeatureList : function(list){
+				var me = this;
+				var features = [];
+
+				list.forEach(function (object) {
+					if(object.geoJson){
+						object.geoJson.type = "Point";
+				    	var feature = geoJson.readFeature(object.geoJson);
+				    	feature.setStyle(new ol.style.Style({
+		    	      		image: new ol.style.Icon({
+		    	      		    crossOrigin: 'anonymous',
+		    	      		    size: [40, 60],
+		    	      		    scale : 0.5,
+		    	      		    src: './ui/lib/openlayers/img/marker_red.png',
+		    	      		  }),
+			    	    }));
+			    	    feature.setId(object.seq);
+				    	feature.set('type', 'targetMarker');
+				    	feature.set('targetInfo', object);
+		    	      	features.push(feature);
+					}
+				});
+
+				return features;
+			},
+
+            connectSocketServer: function(){
+            	var me = this;
+            	
+                var support = "MozWebSocket" in window ? 'MozWebSocket' : ("WebSocket" in window ? 'WebSocket' : null);
+
+                if (support == null) {
+                    alert(noSupportMessage);
+                    return;
+                }
+                    
+                console.log("* Connecting to server...")
+                    
+                if(me.ws){
+                	me.ws.close();
+                }
+                
+                me.onClearMessage();
+                
+                me.ws = new window[support](conf.ws + SCMdiManager.searchParam.site_id );
+                
+              	// when data is comming from the server, this metod is called
+               	me.ws.onmessage = function (evt) {
+               		if(evt && evt.data){
+//                			console.log("onmessage : " + evt.data);
+               			
+               			try{
+               				/* 알람 메시지 */
+                           	var item = JSON.parse(evt.data);
+                           	
+                         	if(item.eventType == "Alarm"){
+                         		// type: emergency(긴급신호), gatewayNoSignal(게이트 웨이 이상), ptwRequest(작업 허가 신청)
+                         		var type = item.body.type;
+                         		
+                         		var messageDiv = $('#_alarmTicker')[0];
+                         		
+                         		/* 메시지 내용 */
+                         		var liEle = document.createElement("li");
+                         		
+                         		var content = item.body.body;
+                         		if(type == "emergency" || type == "gatewayNoSignal"){
+									content = content+"<a href='#' onclick='showPopup("+JSON.stringify(item.body)+")'> [위치보기]</a>";
+                             	}
+                             	
+                         		liEle.innerHTML = content;
+                         		
+                         		Polymer.dom(messageDiv).appendChild(liEle);
+
+ 								me.searchData();
+                         	}
+            				
+               			}catch(e){
+                				
+               			}
+               		}
+            	};
+
+// 	        	// when the connection is established, this method is called
+            	me.ws.onopen = function () {
+	        		var param = {
+						"eventType" : "UserCommand",
+						"body" : {
+							"command" : "login",
+							"parameter" : SCSessionManager.currentUser.usr_id
+						}
+					}
+	        		
+					me.ws.send(JSON.stringify(param));
+	        		
+	        		console.log('* Connection open...');
+				};
+
+				//             	// when the connection is closed, this method is called
+				me.ws.onclose = function() {
+					console.log('* Connection closed...');
+				}
+			},
+            
+			initMessage: function(){
+            	var me = this;
+            	
+                me.setMessageInterval();
+            },
+            
+            setMessageInterval: function(){
+            	var me = this;
+            	
+            	clearInterval(me.messageInterval);
+            	
+            	me.messageInterval = setInterval(function() {
+                	// .animate( properties, options )
+                	$('#_alarmTicker li:first').animate( 
+                			{marginTop: '-60px'}
+                			,{
+                				duration: 400
+                				,complete: function(){
+                					$(this).detach().appendTo('ul#_alarmTicker').removeAttr('style');
+                				}
+                			}
+                	);
+                	
+                }, 10000); // 10초
+            },
+            
+            onPrevMessage: function(){
+            	var me = this;
+            	
+            	$('#_alarmTicker li:last').hide().prependTo($('#_alarmTicker')).slideDown();
+            	me.setMessageInterval();
+            },
+            
+            onNextMessage: function(){
+            	var me = this;
+            	
+            	$('#_alarmTicker li:first').animate( 
+            			{marginTop: '-60px'}
+            			,{
+            				duration: 400
+            				,complete: function(){
+            					$(this).detach().appendTo('ul#_alarmTicker').removeAttr('style');
+            				}
+            			}
+            	);
+            	me.setMessageInterval();
+            },
+            
+            onClearMessage: function(){
+            	var me = this;
+            	
+            	$('#_alarmTicker').empty();
+            },
+            
+            onWindowMax: function(){
+            	var me = this;
+            	
+            	// 확대 축소 버튼
+            	var windowMax = me.$.windowmax;
+            	
+            	// 탑메뉴
+            	var topmenu = $('#headWrap');
+            	// 탭바
+            	var mdiTabbar = $('#mdiTabbar');
+            	// 메뉴경로
+            	var mdiBreadCrumb = $('#mdiBreadCrumb');
+            	// 왼쪽 메뉴
+            	var mdiLeftMenu = $('#mdiLeftMenu');
+            	
+                // 원래 사이즈 상태
+            	if( windowMax.classList.contains('window-max') ){
+            		windowMax.classList.remove('window-max');
+            		windowMax.classList.add('window-return');
+            		
+            		// 탑메뉴 숨김
+                	topmenu.css("display", "none");
+                	// 탭바 숨김
+                	mdiTabbar.css("display", "none");
+                	// 메뉴경로 숨김
+                	mdiBreadCrumb.css("display", "none");
+                	// 왼쪽 사이드 바 숨김
+                	mdiLeftMenu.css("display", "none");
+                	
+                	$('.mdiTabsDiv')[0].style.display='none';
+                	
+                	// sc-mdi-window (padding 제거)
+                	var domList = document.querySelectorAll('sc-mdi-window');
+                	
+                	for(var i=0; i<domList.length; i++){
+                		var domElem = domList[i];
+                		domElem.classList.add("padding-none");
+                	}
+                	
+                	// 전체화면 실행
+                	me.openFullscreen();
+                	
+                	setTimeout(function(){
+                		var domList = document.querySelectorAll('sc-mdi-window');
+                    	
+                    	for(var i=0; i<domList.length; i++){
+                    		var domElem = domList[i];
+                    		domElem.style.width = "100%";
+                    		domElem.style.height = "100%";
+                    	}
+                	}, 700);
+                	
+                // 확대 사이즈 상태
+            	}else{
+            		windowMax.classList.remove('window-return');
+            		windowMax.classList.add('window-max');
+            		
+            		// 탑메뉴 보임
+					topmenu.css("display", "");
+					// 탭바 보임
+                	mdiTabbar.css("display", "");
+                	// 메뉴경로 보임
+                	mdiBreadCrumb.css("display", "");
+                	// 왼쪽 사이드 바 보임
+                	mdiLeftMenu.css("display", "");
+                	
+                	$('.mdiTabsDiv')[0].style.display='block';
+                	
+                	// 전체화면 취소
+                	me.closeFullscreen();
+                	
+                	// sc-mdi-window (padding 제거)
+					var domList = document.querySelectorAll('sc-mdi-window');
+                	
+                	for(var i=0; i<domList.length; i++){
+                		var domElem = domList[i];
+                		domElem.classList.remove("padding-none");
+                	}
+            	}
+                
+                // SC-MDI : RESIZE FUNCTION
+               	$('sc-mdi')[0]._onUtilAreaResize();
+            },
+            
+            /* View in fullscreen */
+            openFullscreen: function() {
+            	var elem = document.documentElement;
+            	
+            	if (elem.mozRequestFullScreen) { /* Firefox */
+            		elem.mozRequestFullScreen();
+            	} else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+            		elem.webkitRequestFullscreen();
+            	} else if (elem.msRequestFullscreen) { /* IE/Edge */
+            		elem.msRequestFullscreen();
+            	}
+            },
+            
+            closeFullscreen: function() {
+            	if (document.mozCancelFullScreen) { /* Firefox */
+            		document.mozCancelFullScreen();
+            	} else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+            		document.webkitExitFullscreen();
+            	} else if (document.msExitFullscreen) { /* IE/Edge */
+            		document.msExitFullscreen();
+            	}
+            },
+            changeTone: function(e){
+            	var me = this;
+            	
+            	var args = e.target.dataset.args;
+            	me.set("colorTone", args);
+            	
+            	me.searchData();
+            	
+            	var elements = this.getElementsByTagName('link');
+
+            	// black
+            	if(args == 'black'){
+            		if(elements.length > 0 ){
+            			var ele = elements.item(0);
+            			ele.parentNode.removeChild(ele);
+            		}
+            		me.$.gridAlarmPanel.loadStyles(this.blackStyles);
+            	// white
+            	}else{
+            		if(elements.length == 0 ){
+                		var link = document.createElement('link');
+                    	link.rel = 'stylesheet';
+                        link.type = 'text/css';
+                        link.href = './ui/iot/dashboard/css/alarm-dashboard-white.css';
+                        this.appendChild(link);
+                	}
+            		me.$.gridAlarmPanel.loadStyles(this.whiteStyles);
+            	}
+            	
+            },
+         	// grid item click 이벤트
+			onItemClick : function(e) {
+				var me = this,
+				data = e.detail.data,
+				item = e.detail.item
+				provider = e.detail.provider;
+
+				me.currentRowIndex = item.rowIndex;
+
+				if(item.dataField === "image") {
+					var detailPopup = UT.popup("ep-alarm-details", me, 900, 800, {
+		                   "show-list": function(popup, e) {
+								var result=e.detail;
+		                   		popup.close();
+		                   },
+		                   "save-property" : function(popup,saveData){
+	                	   		//provider.setItemAt(me.currentRowIndex,{ property: data.detail});
+	                	   		data.property = saveData.detail;
+	                	   		data.state = saveData.detail.state;
+		                	   	//popup.close();
+		                	   	me.onSaveAlarm(data);
+		                   }
+		               },{titleText: "알림 조치"});
+					detailPopup.show();
+					detailPopup.getWindowContent().load(data);
+				}
+
+				var name = (data.targetName)?data.targetName:'';
+
+				var text = '<div id="arrow"></div><div id="text">'+data.alarmTypeName+'<br/>'+name+'</div>';
+
+    	      	var popup = document.createElement("div");
+				popup.classList.add('targetPopup');
+				popup.innerHTML=text;
+
+				var center = ol.proj.fromLonLat(data.geoJson.coordinates);
+				me.map.removeOverlay(me.map.getOverlayById('targetClickPopup'));
+				
+				var overlay = new ol.Overlay({
+					id : 'targetClickPopup',
+					element : popup,
+					positioning : 'bottom-center',
+					offset : [0,-20],
+					position : center
+				});
+				
+				me.map.addOverlay(overlay);
+				//me.map.getView().setZoom(18);
+				me.map.getView().setCenter(center);
+			},
+
+         // 알림 저장
+            onSaveAlarm : function(data){
+                var me = this;
+
+                if(typeof(data.recipient) == "string"){
+	            	var recipientArr;
+	            	recipientArr= data.recipient.split(",");
+	            	data.recipient = recipientArr;
+                }
+            	if(!data.property) data.property = {};
+
+                delete data.popup;
+
+            	 var array = [data];
+	            
+	            UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+	                me.$.saveListAlarm.body = {
+	                    updateList: array
+	                };
+	                UT.request(me.$.saveListAlarm);
+	            });
+            },
+        //  저장 완료
+            completeSaveListAlarm: function(e, res){
+                var me = this,
+                    message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                        me.searchData();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+
+            },
+
+            destroyed : function(popup, e) {
+				var me = this;
+				clearInterval(me.timeInterval);
+				clearInterval(me.messageInterval);
+			},
+			changeSafeDate : function(){
+		        var me = this;
+	        	var safePopup = UT.popup('ep-safedate-setting', me, 300, 200, {
+				}, {titleText : "", resizable:false});
+	        	safePopup.show();
+	        	safePopup.getWindowContent().load(me.safeDay, me.safeDate);
+		    }
+        });
+
+        var popup;
+        
+        function showPopup(data){
+    		var targetInfo = data.targetInfo;
+    		if(popup){
+    			popup.close();
+    		}
+    		if(data.type == 'emergency'){
+	    		var title = "작업자";
+	    		targetInfo.targetType = "worker";
+	    		targetInfo.targetId = targetInfo.workerId;
+	    		if(UT.isEmpty(targetInfo.workerId)){
+	    			title = "이동장비";
+	    			targetInfo.targetType = "vehicle";
+	    			targetInfo.targetId = targetInfo.vehicleId;
+	    		}
+	    		targetInfo.imagePath = "./ui/lib/openlayers/img/"+targetInfo.targetType+".png";
+	    		popup = UT.popup('ep-target-history', this, 1100, 700, {}, {titleText : title+" 당일 이력조회"});
+	    		popup.show();
+	    		popup.getWindowContent().load(title, targetInfo);
+    		}else{
+    			var lon = targetInfo.geoJson.coordinates[0];
+    	       	var lat = targetInfo.geoJson.coordinates[1];
+    	       	popup = UT.popup('ep-postion-popup-map', this, 1000, 800, {}, {titleText : "위치확인"});
+    			popup.show();
+    			popup.getWindowContent().load(lat, lon);
+        	}
+        }
+	</script>
+
+</dom-module>

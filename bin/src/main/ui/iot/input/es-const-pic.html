@@ -1,0 +1,465 @@
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 시공 사진 관리
+    ** @Description     : 
+    ** @Author          : jh.Park
+    ** @Create Date     : 2021-09-08
+    ** @History         : 2021-09-08 jh.Park 최초작성
+    ******************************************************************************************
+-->
+<dom-module id="es-const-pic">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		<!-- 코드 조회-->
+		<sc-request-group init>
+				<sc-code-group></sc-code-group>
+		</sc-request-group>
+
+		<!-- 접근 가능 현장 조회 -->
+		<sc-ajax id="findSiteList"		url="findSiteList.do"		on-response="completeFindSiteList" body="{{searchParam}}"></sc-ajax>
+		<!-- 시공 목록 or 공종 목록 조회 -->
+		<sc-ajax id="findConstList"	url="findConstList.do"	on-response="completeFindConstList" body="{{searchParam}}"></sc-ajax>
+		<!-- 시공 사진 리스트 조회 -->
+		<sc-ajax id="findConstPicDtlList"	url="findConstPicDtlList.do"	on-response="completeFindConstPicDtlList"></sc-ajax>
+		<!-- 시공 사진 수정 -->
+		<sc-ajax id="saveConstPicDtl"	url="saveConstPicDtl.do"	on-response="completeSaveConstPicDtl"></sc-ajax>			
+		<!-- 공종 타입 리스트 조회 -->
+		<sc-ajax id="findConstTypeList"	url="findConstTypeList.do"	on-response="completeFindConstTypeList"></sc-ajax>
+		<!-- 영역 리스트 조회 -->
+		<sc-ajax id="findAreaList"	url="findListArea.do"	on-response="completeFindAreaList"></sc-ajax>
+		
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+
+		<div class="vbox flex">
+			<!-- 검색 영역 Start -->
+			<cc-search-container on-search="onSearch" auth-r>
+				<table>
+					<colgroup>
+						<col style="width:80px">
+						<col>
+						<col style="width:80px">
+						<col>
+						<col style="width:80px">
+						<col>
+						<col style="width:80px">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="분야" ></sc-label></th>
+						<td>
+							<sc-combobox-field items="{{typeList}}" display-field="label" value-field="data"value="{{searchParam.siteType}}"
+									validation-group="search" placeholder="전체" on-enter="onSearch"></sc-combobox-field>
+						</td>
+   						<th><sc-label text="현장"></sc-label></th>
+						<td>
+							<sc-multi-combobox-field items="{{siteList}}" value="{{searchParam.siteIds}}"
+									display-field="name" value-field="id"  on-enter="onSearch"></sc-multi-combobox-field>
+						</td>
+						<th><sc-label text="날짜"></sc-label></th>
+						<td>
+<!-- 							<sc-date-field value="{{searchParam.date}}" default-value="-7d" style="width: 130px;"></sc-date-field> -->
+<!-- 							~ -->
+<!-- 							<sc-date-field value="{{searchParam.date}}" default-value="1d" style="width: 130px;"></sc-date-field> -->
+							<sc-date-field value="{{searchParam.startDt}}" display-format="yyyy-MM-dd" default-value="-7d" style="width : 130px;"></sc-date-field>
+							~
+							<sc-date-field value="{{searchParam.endDt}}" display-format="yyyy-MM-dd" default-value="0d" style="width : 130px;"></sc-date-field>
+						</td>
+						<th><sc-label text="유형"></sc-label></th>
+						<td>
+							<sc-radio-group-field value={{searchParam.searchType}}>
+								<sc-radio-field label="제목" input-value="title"></sc-radio-field>
+								<sc-radio-field label="공종" input-value="const"></sc-radio-field>
+							</sc-radio-group-field>
+						</td>
+					</tr>
+				</table>
+			</cc-search-container>
+			<!-- 검색 영역 End -->
+            
+            <div class="hbox flex">
+				<!-- 시공 사진 목록 Start -->
+            	<div class="vbox flex-5">
+            		<sc-grid id="constPicGrid" data-provider="{{constList}}"  class="flex" 
+            			use-selection="true" use-state="false" on-item-click="onItemClick">
+						<cc-grid-toolbar title-text="시공 목록"></cc-grid-toolbar>
+						<sc-grid-columns>
+							<sc-combobox-column	display-field="label"	value-field="data"	items="[[typeList]]"
+											data-field="siteType"		header-text="분야"	width="100"></sc-combobox-column>
+							<sc-combobox-column display-field="name"	value-field="id"	items="{{siteList}}"
+											data-field="siteId"			header-text="현장"	width="150"></sc-combobox-column>
+							<sc-data-column data-field="constPicTitle" 	header-text="{{searchType}}"
+																							width="150" text-align="center" style-name="link"></sc-data-column>
+							<sc-data-column data-field="createdId"		header-text="등록자" 	width="100" text-align="center"></sc-data-column>
+							<sc-date-column data-field="createdDt" header-text="작업일" width="200" text-align="center" string-date="true"></sc-date-column>
+						 </sc-grid-columns>
+						 <sc-grid-fields>
+							<sc-grid-field data-field="constPicId"></sc-grid-field>
+							<sc-grid-field data-field="siteId"></sc-grid-field>
+							<sc-grid-field data-field="constPicIds" data-type="object"></sc-grid-field>
+						 </sc-grid-fields>
+					</sc-grid>
+				</div>
+				<!-- 시공 사진 목록 End -->
+				<div class="hspace-10"></div>
+				<div class="vbox flex-5">
+					<!-- 시공 사진 Start -->
+					<div class="hbox" style="height: 250px">
+	            		<sc-grid id="constPicDtlGrid" data-provider="{{constPicDtlList}}"  class="flex" 
+	            			use-selection="true" on-item-click="onItemClick" editable="true">
+							<cc-grid-toolbar title-text="시공 사진">
+								<sc-button text="수정"		on-click="onSaveConstPicDtl"></sc-button>
+								<sc-button text="레포트 출력"	on-click="onOpenReport" ></sc-button>
+							</cc-grid-toolbar>
+							<sc-grid-columns>
+								<sc-data-column data-field="result"			header-text="{{resultType}}"	width="250"	style-name="link"></sc-data-column>
+								<sc-data-column data-field="location"		header-text="위치"				width="150" editable="true"></sc-data-column>
+								<sc-data-column data-field="description"	header-text="상세내용"				width="150" editable="true"></sc-data-column>
+								<sc-data-column data-field="orgnFileNm"		header-text="파일명"				width="150"></sc-data-column>
+							 </sc-grid-columns>
+							 <sc-grid-fields>
+								<sc-grid-field data-field="siteId"></sc-grid-field>
+								<sc-grid-field data-field="imgGrpCd"></sc-grid-field>
+								<sc-grid-field data-field="equiId"></sc-grid-field>
+								<sc-grid-field data-field="attFileNm"></sc-grid-field>
+								<sc-grid-field data-field="attFilePath"></sc-grid-field>
+							 </sc-grid-fields>
+						</sc-grid>
+					</div>
+					<!-- 시공 사진 End -->
+					<div class="vspace-10"></div>
+					<!-- 시공 사진 상세정보 Start -->
+					<div style="height:68%; position: relative;">
+						<template is="dom-if" if="{{constPicDtl.attFilePath}}">
+							<img src="repository/{{constPicDtl.attFilePath}}" style="width:100%; height:100%;">
+							<table class="tb-form" style="width: 350px; position: absolute; right: 0; bottom: 0; background-color: white">
+								<colgroup>
+									<col style="width:80px">
+									<col>
+								</colgroup>
+								<tr>
+									<th><sc-label text="제목"></sc-label></th>
+									<td><sc-text-field value="{{constPicDtl.constPicTitle}}" readonly="true"></sc-text-field></td>
+								</tr>
+								<tr>
+									<th><sc-label text="공종"></sc-label></th>
+									<td>
+										<sc-combobox-field items="{{constTypeList}}" display-field="description" value-field="constCd"
+											value="{{constPicDtl.constCd}}" placeholder="전체" readonly="true"></sc-combobox-field>
+									</td>
+								</tr>
+								<tr>
+									<th><sc-label text="위치"></sc-label></th>
+									<td>
+										<sc-text-field value="{{constPicDtl.location}}" readonly="true"></sc-text-field>
+<!-- 										<sc-combobox-field items="{{areaList}}" display-field="name" value-field="id" value="{{constPicDtl.areaId}}" placeholder="전체"></sc-combobox-field> -->
+									</td>
+								</tr>
+								<tr>
+									<th><sc-label text="내용"></sc-label></th>
+									<td>
+										<sc-text-field value="{{constPicDtl.description}}" readonly="true"></sc-text-field>
+									</td>
+								</tr>
+								<tr>
+									<th>
+										<sc-label text="일자"></sc-label>
+									</th>
+									<td>
+										<sc-date-field style="width: 100px;" string-date="true" string-format="YYYY/MM/DD" value="{{constPicDtl.constDate}}" default-value="0d" readonly="true"></sc-date-field>
+									</td>
+								</tr>
+							</table>
+						</template>
+					</div>
+					<!-- 시공 사진 상세정보 End -->
+				</div>
+            </div>
+		</div>
+
+		<input type="hidden" id = "const_rd_report" />
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: 'es-const-pic',
+            properties : {
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+	            typeList : {
+	            	type: Object,
+	            	value: function(){
+	            		return [
+	            			{
+	            				label: "인프라",
+	            				data: "C"
+	            			},
+	            			{
+	            				label: "건설",
+	            				data: "A"
+	            			}
+	            		];
+	            	}
+	            },
+                reportInfo: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                // 정보 조회 결과
+                constPicDtlList : {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+            },
+            
+            /** 초기화 Start **/
+            initialized : function() {
+                var me = this;
+                UT.request(me.$.findSiteList);
+            },
+            // 검색
+            onSearch : function() {
+                var me = this;
+                me.set("constPicDtl", null);
+                me.constPicDtlList = [];
+                
+                if(me.searchParam.searchType == "const") {
+                	me.set("searchType", "공종명");
+                	me.set("resultType", "제목");
+                }
+                else {
+                	me.set("searchType", "제목");
+                	
+                	me.set("resultType", "공종명");
+                }
+                UT.request(me.$.findConstList);
+            },
+            /** 초기화 End **/
+            
+            /** 이벤트 Start **/
+            //시공 목록 or 사진 그리드 선택
+            onItemClick : function(event){
+            	var me = this;
+				var data = event.detail.data;
+				var item = event.detail.item;
+				var provider = event.detail.provider;
+				me.set("constPicDtl", null);
+				
+				if(item.dataField == "constPicTitle"){
+					me.constPicDtlList = [];
+					me.$.findConstPicDtlList.body = {
+							searchType : me.searchParam.searchType,
+							constPicId : data.constPicId,
+							constPicIds : data.constPicIds,
+							constCd : data.constCd,
+							siteId : data.siteId
+					}
+					UT.request(me.$.findConstPicDtlList);
+				}
+				if(item.dataField == "result"){
+					me.$.findConstTypeList.body = {
+							siteId : data.siteId
+					}
+	            	UT.request(me.$.findConstTypeList);
+					me.$.findAreaList.body = {
+							siteId : data.siteId
+					}
+	            	UT.request(me.$.findAreaList);
+					var siteList = me.siteList
+					me.set("constPicDtl", data);
+				}
+            },
+            // 시공 사진 저장
+            onSaveConstPicDtl : function(){
+            	var me = this;
+
+				var provider = me.$.constPicDtlGrid.getDataProvider();
+				var updated = provider.getUpdateItems();
+				
+				var constPicIds = new Set();
+				
+				for(var i in updated) {
+					constPicIds.add(updated[i].constPicId);
+				}
+				
+				var constPicArray = [];
+				for(var i of constPicIds) {
+					var constPicDtlArray = [];
+					var siteId;
+					var constPicTitle;
+					for(var j in updated) {
+						if(updated[j].constPicId == i){
+							siteId = updated[j].siteId;
+							constPicTitle = updated[j].constPicTitle;
+							constPicDtlArray.push(updated[j]);
+						}
+					}
+					var constPic = {
+							constPicId : i,
+							constPicTitle : constPicTitle,
+							siteId : siteId,
+							constPicDtlArray : constPicDtlArray
+					}
+					constPicArray.push(constPic);
+				}
+				
+                if(updated.length === 0) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+				
+            	me.$.saveConstPicDtl.body = {
+           			data : constPicArray
+            	}
+            	UT.request(me.$.saveConstPicDtl);
+            },
+            /** 이벤트 End **/
+			
+            /** Api 관련 Start **/
+			// 접근 가능 현장 조회
+			completeFindSiteList: function(e, res){
+				var me = this;
+				var result = res.response;
+				
+				me.set("siteList", result);
+				
+				var siteIds = [];
+				for(var i in result){
+					siteIds.push(result[i].id);
+				}
+				
+				me.set("searchParam.siteIds", siteIds);
+				me.onSearch();
+			},
+            // 시공 사진 목록 조회
+            completeFindConstList: function(e, res){
+            	var me = this;
+            	var result = res.response;
+            	me.set("constList", result);
+            },
+            // 시공 사진 목록 조회
+            completeFindConstPicDtlList: function(e, res){
+            	var me = this;
+            	var result = res.response || {};
+            	for(var i in result){
+		           	var date = result[i].createdDt;
+		           	var mm = date.getMonth() + 1
+		           	var dd = date.getDate();
+		           	if(dd<10){dd='0'+dd};
+		           	if(mm<10){mm='0'+mm};
+		           	result[i].constDate = date.getFullYear() + "/" + mm + "/" + dd;       		
+            	}
+            	me.set("constPicDtlList", result);        	
+            },
+            //공종 코드 조회
+            completeFindConstTypeList: function(e, res){
+            	var me = this;
+            	var result = res.response;
+            	result = result.filter(function(e, index){
+            		for(var i in result){
+            			if(result[i].upperConstCd == e.constCd){
+            				return false;
+            			}
+            		}
+            		return true;
+            	})
+            	.filter(c => c.level == 2);
+            	me.set("constTypeList", result);
+            },
+            // 고종 코드 저장 완료
+            completeSaveConstPicDtl: function(e, res) {
+                var me = this;
+                var result = res.response;
+
+                if(result.result_status === 'S'){
+                    UT.alert("STD.N2400", function(){ // 저장하였습니다.
+                    	sessionStorage.selected_menu_id =SCMdiManager.activatedWindow().id;
+                        me.onSearch();
+                    });
+                } else {
+                    UT.alert(result.result_message);
+                }
+            },
+            completeFindAreaList: function(e, res){
+            	var me = this;
+            	var result = res.response;
+            	me.set("areaList", result);
+            },
+            /** Api 관련 End **/
+            
+            /** 기타 function Start **/
+			//리포트 출력 버튼
+            onOpenReport : function(){
+				var me = this;
+				
+				if(!me.constPicDtl) {
+					UT.alert("시공 사진을 선택해주세요");
+				}
+             	
+				var Imgpath = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/repository/";
+				me.reportInfo.constPic = Imgpath + me.constPicDtl.attFilePath;
+				me.reportInfo.constPicTitle = me.constPicDtl.constPicTitle;
+				me.reportInfo.constTypeName = me.constPicDtl.result;
+				me.reportInfo.constLocation = me.constPicDtl.location;
+				me.reportInfo.description = me.constPicDtl.description;
+				me.reportInfo.constDate = me.constPicDtl.constDate;
+				
+ 	   			var agent = navigator.userAgent.toLowerCase();
+
+ 				if ( (navigator.appName == 'Netscape' && navigator.userAgent.search('Trident') != -1) || (agent.indexOf("msie") != -1) ) {
+ 					$("#const_rd_report").val(JSON.stringify(me.reportInfo));
+ 		   			var popupWidth = 850;
+ 		   			var popupHeight = 1000;
+
+ 		   			var left= (window.screen.width / 2) - (popupWidth / 2);
+ 		   			var top= (window.screen.height / 2) - (popupHeight / 2);
+ 		   			
+ 		   			var workerReportPopup = UT.popupWindow("/report/jsp/constPicRD.jsp",me,"width=850 , height=1000 , top="+top+",left="+left + ",toolbar=no,location=no,menubar=no,status=no");
+ 			
+ 				}else {
+ 					$("#const_rd_report").val(JSON.stringify(me.reportInfo));
+ 		   			var popupWidth = 850;
+ 		   			var popupHeight = 1000;
+
+ 		   			var left= (window.screen.width / 2) - (popupWidth / 2);
+ 		   			var top= (window.screen.height / 2) - (popupHeight / 2);
+ 		   			
+ 		   			var workerReportPopup = UT.popupWindow("/report/jsp/constPicRDChrome.jsp",me,"width=850 , height=1000 , top="+top+",left="+left + ",toolbar=no,location=no,menubar=no,status=no");
+				}
+
+	   		
+			},
+            /** 기타 function End **/
+        });
+	</script>
+</dom-module>

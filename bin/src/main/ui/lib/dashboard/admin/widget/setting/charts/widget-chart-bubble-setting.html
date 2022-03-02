@@ -1,0 +1,414 @@
+<link rel="import" href="../../../../data/widget-data-provider.html">
+<dom-module id="widget-chart-bubble-setting">
+    <style>
+	    :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    	<sc-ajax id="widgetDataProvider"  on-response="onDataChanged" on-error="onDataError" last-response="{{widgetData}}">
+		</sc-ajax>
+    	
+            	<section class="option" style="border-top: 0px;margin-top:0px;">
+                	<div class="p_innerbox">
+	                    <table>
+		                    <colgroup>
+		                        <col style="width:25%" />
+		                        <col style="width:75%" />
+		                    </colgroup>
+		                    <tr>
+			                    <th><sc-label text="데이터제공자" style="width:36px;"></sc-label></th>
+			                    <td>
+			                    	<sc-textarea-field value="{{dataUrl}}" style="height:80px;" required></sc-textarea-field>
+				                    <div class="inner_button">
+					                    <sc-button text="검색조건" on-click="onShowCondition"></sc-button>
+					                	<sc-button text="데이터확인" on-click="onDataConfirm"></sc-button>
+					                	<sc-button text="적용" on-click="onDataApply"></sc-button>
+				                    </div>
+			                    </td>
+		                    </tr>
+		                    <tr>
+				                <th><sc-label text="차트 제목"></sc-label></th>
+				                <td>
+				                	<sc-textarea-field   value="{{fields.title}}"></sc-textarea-field>
+			                    </td>
+				            </tr>
+	                    </table>
+                    </div>
+                     <sc-panel title-text="필드명 설정" collapsible="true" ">
+                    	<div class="p_innerbox">
+	                    	<table>
+	                    	<colgroup>
+	                        <col style="width:25%" />
+	                        <col style="width:75%" />
+	                    	</colgroup>
+		                    <tr>
+		                    <th><sc-label text="X축"></sc-label></th>
+		                    <td>
+		                    	<sc-text-field value="{{fields.xFieldName}}"></sc-text-field>
+		                    </td>
+		                    </tr>
+		                    <tr>
+		                    <th><sc-label text="Y축 "></sc-label></th>
+		                    <td>
+		                    	<sc-text-field  value="{{fields.yFieldName}}"></sc-text-field>
+		                    </td>
+		                    </tr>
+		                    <tr>
+		                    <th><sc-label text="Point Size"></sc-label></th>
+		                    <td>
+		                    	<sc-text-field value="{{fields.pointsizeFieldName}}"></sc-text-field>
+		                    </td>
+		                    </tr>
+		                    <tr>
+		                    <th><sc-label text="범례 "></sc-label></th>
+		                    <td>
+		                    	<sc-text-field value="{{fields.labelFieldName}}"></sc-text-field>
+		                    </td>
+		                    </tr>
+		                    </table>
+	                    </div>
+                    </sc-panel>
+                    <sc-panel title-text="Point 설정" collapsible="true" ">
+                    	<div class="p_innerbox">
+                    		<sc-checkbox-field label="라벨 사용여부" value="{{fields.plotOptions.series.dataLabels.enabled}}">
+		                    </sc-checkbox-field>
+	                    	<table>
+		                    	<colgroup>
+			                        <col style="width:25%" />
+			                        <col style="width:75%" />
+		                    	</colgroup>
+			                    <tr>
+				                    <th><sc-label text="Point Color"></sc-label></th>
+				                    <td>
+				                    	<div id="pointColor" class="input-group colorpicker-component">
+						 					<input type="text" class="form-control" value$="{{fields.plotOptions.series.color}}"/>
+										    <span class="input-group-addon"><i></i></span>
+										</div>
+				                    </td>
+			                    </tr>
+		                    </table>
+	                    </div>
+                    </sc-panel>
+                    <sc-panel title-text="X축" collapsible="true" ">
+                    	<div class="p_innerbox">
+	                    	<table>
+		                    	<colgroup>
+			                        <col style="width:25%" />
+			                        <col style="width:25%" />
+			                        <col style="width:25%" />
+			                        <col style="width:25%" />
+		                    	</colgroup>
+			                    <tr>
+				                    <th><sc-label text="제목"></sc-label></th>
+				                    <td colspan="3">
+				                    	<sc-text-field value="{{fields.xAxis.title.text}}"></sc-text-field>
+				                    </td>
+			                    </tr>
+			                    <tr>
+				                    <th><sc-label text="라인굵기"></sc-label></th>
+				                    <td>
+				                    	<sc-number-field value="{{fields.xAxis.gridLineWidth}}">
+				                    	</sc-number-field>
+				                    </td>
+				                    <th><sc-label text="Format"></sc-label></th>
+				                    <td>
+				                    	<sc-text-field value="{{fields.xAxis.labels.format}}"></sc-text-field>
+				                    </td>
+			                    </tr>
+		                    </table>
+	                    </div>
+                	</sc-panel>
+                	<sc-panel title-text="Y축" collapsible="true" ">
+                    	<div class="p_innerbox">
+	                    	<table>
+	                    	<colgroup>
+	                        <col style="width:25%" />
+	                        <col style="width:25%" />
+	                        <col style="width:25%" />
+	                        <col style="width:25%" />
+	                    	</colgroup>
+		                    <tr>
+		                    <th><sc-label text="제목"></sc-label></th>
+		                    <td colspan="3">
+		                    	<sc-text-field value="{{fields.yAxis.title.text}}"></sc-text-field>
+		                    </td>
+		                    </tr>
+		                    <tr>
+		                    <th><sc-label text="라인굵기"></sc-label></th>
+		                    <td>
+		                    	<sc-number-field value="{{fields.yAxis.gridLineWidth}}">
+		                    	</sc-number-field>
+		                    </td>
+		                    <th><sc-label text="Format"></sc-label></th>
+		                    <td>
+		                    	<sc-text-field value="{{fields.yAxis.labels.format}}"></sc-text-field>
+		                    </td>
+		                    </tr>
+		                    </table>
+	                    </div>
+                	</sc-panel>
+                    
+                    
+                </section>
+    	
+    </template>
+    <script>
+        Polymer({
+            is: "widget-chart-bubble-setting",
+            behaviors  : [ WidgetDataProvider ],
+            properties : {
+            	widgetData :{
+            		type : Array,
+            		value : []
+            	},
+            	dataUrl: {
+            		type: String,
+            		value: 'ui/lib/dashboard/resources/defaultData/chartBubble.json' 
+            	},
+            	fixedFormatStr:{
+            		type: String,
+            		value :'{value} '
+            	},
+            	fixedLabelFormatStr:{
+            		type: String,
+            		value :'{point.{0}} '
+            	},
+            	fields :{
+            		type: Object,
+            		value :function(){
+            			return {
+            				    title : 'default title',
+            				    type : 'bubble',
+            				    xAxis: {
+            				        gridLineWidth: 1,
+            				        title: {
+            				            text: 'default xAxis title'
+            				        },
+            				        labels: {
+            				            format: 'kg'
+            				        }
+            				      
+            				    },
+            				    yAxis: {
+            				    	startOnTick: false,
+                			        endOnTick: false,
+            				        gridLineWidth: 1,
+            				        title: {
+            				            text: 'default yAxis title'
+            				        },
+            				        labels: {
+            				            format: 'kg'
+            				        },
+            				        maxPadding: 0.2
+            				      
+            				    },
+            				    plotOptions: {
+            				        series: {
+            				        	color:'#7cb5ec',
+            				            dataLabels: {
+            				                enabled: true,
+            				                format: '{point.{0}}'
+            				            }
+            				        }
+            				       
+            				    },
+            				    xFieldName: 'x',
+            				    yFieldName: 'y',
+            				    pointsizeFieldName: 'z',
+            				    labelFieldName: 'name'
+            				    
+            			}
+            		}
+            	},
+            	chartDatas :{
+            		type: Array,
+            		value :[]
+            	}
+            },
+            observers : [ 'onFieldsChanged(fields.*)' ],
+            
+    		attached : function(){
+    			var me = this;
+    			me.initialized = true;
+    			$('#pointColor').on('hidePicker',me.onChangeColor.bind(me));
+    		},
+    		onChangeColor: function(event){
+    			var me = this,target = event.target;
+    			var value = $(target).colorpicker('getValue')
+    			me.set('fields.plotOptions.series.color', value);
+    			me.fire('re-draw', me.getTemplateData());
+    		},
+    		onFieldsChanged : function(){
+    			var me = this;
+    			if(me.dataLoadComplete && me.state != 'closed'){
+    				me.fire('re-draw', me.getTemplateData());
+    			}
+            },
+            onDataConfirm : function(){
+    			var me = this;
+    			me.dataMode = 'confirm';
+    			me.dataLoad();
+    		},
+    		onDataApply : function(){
+    			var me = this;
+    			me.initSetting();
+    		},
+    		onShowCondition: function(){
+    			this.showConditions();
+    		},
+    		initSetting : function(){
+    			var me = this;
+    			$('#pointColor').colorpicker('setValue', me.fields.plotOptions.series.color);
+    			me.dataMode = 'apply';
+    			me.settingMode = 'init';
+    			me.state = 'open';
+    			me.dataLoad();
+    		},
+    		setting : function(contents){
+    			var me = this, contents = contents.contents;
+    			me.dataUrl = contents.dataUrl;
+    			me.state = 'open';
+    			me.settingMode = 'edit';
+    			contents.xAxis.labels.format =  contents.xAxis.labels.format.replace(me.fixedFormatStr,'');
+    			contents.yAxis.labels.format =  contents.yAxis.labels.format.replace(me.fixedFormatStr,'');
+    			me.contents = contents;
+    			me.fields = contents;
+    			me.dataLoad(); 
+    		},
+    		setWidgetData : function(){
+    			var me = this;
+    			if(me.loadState == 'success'){
+    				me.dataLoadComplete = true;
+    			}
+   				me.widgetDraw();
+    			
+    		},
+    		widgetDraw : function(){
+    			this.fire('re-draw', this.getTemplateData());
+    		},
+    		
+    		onItemClick: function(event){
+	   			var me = this,
+	   			    data = event.detail.data,
+	   			    item = event.detail.item;
+	   			    provider = event.detail.provider;
+	   			 if(item.dataField ==  'color'){
+	   				me._popWindow = SCPopupManager.create(me.columnPopup, this, 180,210, true,true,false,true);
+					var content = this._popWindow.getWindowContent();
+					this._popWindow._contentElement.style.padding = '5px'
+					me._popWindow.titleText = me.translate("색상변경");
+					me._popWindow.addEventListener("color-selected", function(event,param){
+						provider.setItemAt(item.rowIndex,{'color': event.detail.color});
+						me._popWindow.close();
+						me.fire('re-draw', me.getTemplateData());
+					});
+					me._popWindow.addEventListener("sc-window-hided", function(e) {
+			            if(content.reset)
+			                content.reset();
+			        });
+					me._popWindow.addEventListener("sc-window-showed", function(e) {
+						content.setColorData({color:data[item.dataField],rowIndex: item.rowIndex,pickerId:'column'});
+			        });
+					
+					me._popWindow.show();
+	   			}   
+   			},
+   			
+   			get columnPopup(){
+				if(!this._columnPopup){
+					this._columnPopup = document.createElement('dashboard-tools-colorpicker');
+				}
+				return this._columnPopup;
+			},
+			
+    		getTemplateData: function(){
+    			var me = this;
+    			var templateData = {};
+    			Polymer.$Object.assign(templateData,me.fields);
+    			templateData.xAxis.labels.format = me.fixedFormatStr + templateData.xAxis.labels.format;
+    			templateData.yAxis.labels.format = me.fixedFormatStr + templateData.yAxis.labels.format;
+    			templateData.plotOptions.series.dataLabels.format = SCUtil.String.simpleFormat(me.fixedLabelFormatStr,me.fields.labelFieldName); 
+    			templateData.series = [{data:me.getSeriesData()}];
+    			templateData.dataUrl = me.dataUrl;
+    			templateData.conditions = me.conditions;
+    			var chartTemplate = {widget_type:'chart', contents: templateData};
+    			return chartTemplate; 
+    		},
+    		
+    		getSeriesData: function(){
+    			var me = this, list = [],temp;
+    			for(var i  = 0,len= me.widgetData.length; i < len; i++){
+    				temp = {};
+					var data = me.widgetData[i];
+					temp.x = data[me.fields.xFieldName];
+					temp.y = data[me.fields.yFieldName];
+					temp.z = data[me.fields.pointsizeFieldName];
+					temp[me.fields.labelFieldName] = data[me.fields.labelFieldName];
+					list[i] = temp;
+    			}
+    			return list;
+    		},
+    		//최초 생성시 차트의 색상은 자동으로 생성되기 때문에 차트가 그려진후에 차트에서 색상정보를 가져온다.
+    		widgetContentDrew: function(param){
+    			/* var me = this,
+			   		provider = me.$.chartLegendGrid.getDataProvider(),
+				    chart = param.info,
+			        series = chart &&  chart.series;
+				if(series){
+					 series.forEach(function(data,index){
+						provider.setCellValue(index,'color',data.color);
+					}) 
+				} */
+    		},
+    		resetData: function(){
+    			var me = this;
+    			me.dataUrl =  'ui/lib/dashboard/resources/defaultData/chartBubble.json';
+    			me.fields = {
+    					title : 'default title',
+    				    type : 'bubble',
+    				    xAxis: {
+    				        gridLineWidth: 1,
+    				        title: {
+    				            text: 'default xAxis title'
+    				        },
+    				        labels: {
+    				            format: 'kg'
+    				        }
+    				      
+    				    },
+    				    yAxis: {
+    				    	startOnTick: false,
+        			        endOnTick: false,
+    				        gridLineWidth: 1,
+    				        title: {
+    				            text: 'default yAxis title'
+    				        },
+    				        labels: {
+    				            format: 'kg'
+    				        },
+    				        maxPadding: 0.2
+    				      
+    				    },
+    				    plotOptions: {
+    				        series: {
+    				        	color:'#7cb5ec',
+    				            dataLabels: {
+    				                enabled: true,
+    				                format: '{point.{0}}'
+    				            }
+    				        }
+    				       
+    				    },
+    				    xFieldName: 'x',
+    				    yFieldName: 'y',
+    				    pointsizeFieldName: 'z',
+    				    labelFieldName: 'name'
+         		}
+            	me.chartDatas = [];
+    		}
+    		
+    	});
+    </script>
+</dom-module>

@@ -1,0 +1,155 @@
+<link href="../resources/js/bootstrap-colorpicker/css/bootstrap.css" rel="stylesheet">
+<link href="../resources/js/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css" rel="stylesheet">
+<script src="../resources/js/bootstrap-colorpicker/js/bootstrap.min.js"></script>
+<script	src="../resources/js/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
+
+<dom-module id="sc-dashboard-settings">
+
+<style>
+
+</style>
+
+<template>
+<div class="wrap_wm">
+	<div class="container_lt dashboard_lt">
+		<section class="db_basic">
+			<h5>Dashboard Style</h5>
+			<sc-label text="Header Title"></sc-label>
+			<sc-textarea-field value="{{dashboardInfo.dashboard_title}}"> </sc-textarea-field>
+			<sc-label text="Header Background Color"></sc-label>
+			<div id="headerBackgroundColor" class="input-group colorpicker-component">
+				<input type="text" class="form-control" />
+			    <span class="input-group-addon"><i></i></span>
+			</div>
+			<sc-label text="Header Font Color"></sc-label>
+			<div id="headerFontColor" class="input-group colorpicker-component">
+			    <input type="text"  class="form-control" />
+			    <span class="input-group-addon"><i></i></span>
+			</div>
+		</section>
+		<section class="db_basic line">
+			<h5>Widget Style</h5>
+			<sc-label text="Header Background Color"></sc-label>
+			<div id="widgetBackgroundColor" class="input-group colorpicker-component">
+			    <input type="text"   class="form-control" />
+			    <span class="input-group-addon"><i></i></span>
+			</div>
+			<sc-label text="Header Font Color"></sc-label>
+			<div id="widgetFontColor" class="input-group colorpicker-component">
+			    <input type="text" value$="{{dashboardStyle.widgetFontColor}}"  class="form-control" />
+			    <span class="input-group-addon"><i></i></span>
+			</div>
+		</section>
+	</div>
+</div>
+</template>
+
+ <script>
+	DashboardSetting = Polymer({
+		is : 'sc-dashboard-settings',
+		properties : {
+			dashboardInfo : {
+				type : Object,
+				value: function(){
+					return {
+						dashboard_title:''
+					}
+				}
+			},
+			dashboardStyle: {
+				type: Object,
+				value: function(){
+					return {
+						headerBackgroundColor: '',
+						headerFontColor: '',
+						widgetBackgroundColor: '',
+						widgetFontColor: ''
+					}
+				}
+			}
+		},
+		observers : [
+			'onInfoChanged(dashboardInfo.*)'
+			//'onStyleChanged(dashboardStyle.*)' 
+		],
+		attached: function(){
+			var me = this;
+			me.isAttached = true;
+			me.colorPickerAddListeners();
+		},
+		//생성모드일경우 초기값을 셋팅해준다.
+		initSetting: function(){
+			var me = this;
+			me.dashboardStyle= {
+				headerBackgroundColor: '#2e3a46',
+				headerFontColor: '#ffffff',
+				widgetBackgroundColor: '#f7f7f7',
+				widgetFontColor: '#000'
+			};
+			me.applyColorpicker(me.dashboardStyle);
+			
+		},
+		colorPickerAddListeners: function(){
+			var me = this;
+			me.userColorChange = false;
+			//color-picker에 이벤트 등록
+			for(var key in me.dashboardStyle){
+				var pickerEle = $('#'+key);
+				pickerEle.on('changeColor',me.onChangeColor.bind(me));
+				pickerEle.on('showPicker',me.onShowPicker.bind(me));
+				pickerEle.on('hidePicker',me.onHidePicker.bind(me));
+			};
+		},
+		setDashboardInfo : function(param){
+			var me = this;
+			me.dashboardInfo = param.dashboardInfo || {};
+			if(SCUtil.Object.isEmpty(param.dashboardStyle)){
+				me.initSetting();
+			}else{
+				me.dashboardStyle = param.dashboardStyle;
+				me.applyColorpicker(me.dashboardStyle);
+			}
+			
+		},
+		applyColorpicker: function(newValues){
+			var me = this;
+			if(me.isAttached){
+				for(var key in newValues){
+					var colorValue = newValues[key];
+					 if(colorValue){
+						 $('#'+key).colorpicker('setValue', colorValue);	
+					 } 
+				}
+			}
+		},
+		onChangeColor: function(event){
+			var me = this,target = event.target, targetId = target.id;
+			if(targetId){
+				var value = event.value;
+				if(value){
+					me.set('dashboardStyle.'+targetId, value);
+					me.fire('dashboard-style-changed',{dashboardStyle: me.dashboardStyle});
+				}
+			}
+		},
+		onShowPicker: function(){
+			this.userColorChange = true;
+		},
+		onHidePicker: function(){
+			this.userColorChange = false;
+		},
+		onInfoChanged: function(dashboardInfo){
+			var me = this;
+			if(me.isAttached && dashboardInfo != null){
+				me.fire('dashboard-info-changed',{dashboardInfo: me.dashboardInfo})
+			}
+		},
+		get isShow(){
+		    return !(this.style.display === 'none');
+		},
+		resetData: function(){
+			 this.dashboardInfo = {}; 
+			 this.dashboardStyle = {};
+		}
+	});
+</script> </dom-module>

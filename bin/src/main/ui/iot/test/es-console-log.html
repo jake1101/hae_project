@@ -1,0 +1,149 @@
+<link rel="import" href="ep-image-view.html">
+
+<dom-module id="es-console-log">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+         -->
+		<!-- 조회 -->
+		<sc-ajax id="findConsoleLog"
+			url="findConsoleLog.do"
+			body="{{searchParam}}"
+			on-response="completeFindConsoleLog">
+		</sc-ajax>
+
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+		
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+        <cc-page-title-bar></cc-page-title-bar>
+        
+		<div class="vbox flex">
+			<cc-search-container on-search="onSearch" on-enter="onSearch" auth-r>
+				<table validation-group="search">
+					<colgroup>
+						<col style="width:120px"></col>
+						<col></col>
+					</colgroup>
+					
+					<tr>
+						<th><sc-label text="Display Line"></sc-label></th>
+						<td>
+							<sc-number-field class="w-100" value="{{searchParam.displayLine}}" default-value="500"></sc-number-field>
+						</td>
+					</tr>
+				</table>
+			</cc-search-container>
+			
+			<cc-sub-title-bar title-text="로그"></cc-sub-title-bar>
+			
+			<sc-button text="업로드" on-click="onUpload"></sc-button>
+			
+			<sc-upload id="upload" class="h-200"
+				double-click-download="false"
+				downloadable="true"
+				on-item-select="onItemSelect"
+				view-type="thumbnail"
+				value="d882d150-cf88-479b-952c-8f219ba8d7e8">
+				
+			</sc-upload>
+			
+			<sc-textarea-field style="height:100%; width:100%;" value="{{resultInfo.text}}"></sc-textarea-field>
+		</div>
+
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-console-log",
+            properties : {
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                
+                resultInfo: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                }
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            // 초기화 완료 후 호출 함수
+            initialized : function() {
+                var me = this;
+                
+            },
+            
+            // 조회
+            onSearch : function() {
+                var me = this;
+                
+                UT.request(me.$.findConsoleLog);
+            },
+            
+            // 조회 완료
+            completeFindConsoleLog: function(e, res){
+            	var me = this;
+            	
+            	var resultInfo = res.response || {};
+            	
+            	me.set("resultInfo", resultInfo);
+            },
+            
+            onUpload: function() {
+				var me = this;
+				me.$.upload.upload();
+			},
+			
+         	onItemSelect: function(event, detail) {
+				var me = this;
+				
+				if(detail.item) {
+					if(detail.item.id.indexOf('-file') !== -1) {
+						var imageReader = new FileReader();
+						imageReader.onload = (function(aFile) {
+							return function(e) {
+								var popup = UT.popup('ep-image-view', me, 600, 500, {}, {});
+								popup.show();
+								var popupContent = popup.getWindowContent();
+								popupContent.load(e.target.result, true);
+							};
+						})(detail.item.orgFile);
+						imageReader.readAsDataURL(detail.item.orgFile);
+					} else {
+						var popup = UT.popup('ep-image-view', me, 600, 500, {}, {});
+						popup.show();
+						var popupContent = popup.getWindowContent();
+						popupContent.load(detail.item.id);		
+					}
+				}
+			},
+            
+        });
+	</script>
+
+</dom-module>

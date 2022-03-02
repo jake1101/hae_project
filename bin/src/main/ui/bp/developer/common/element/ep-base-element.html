@@ -1,0 +1,32 @@
+<!-- 
+
+이 엘리먼트는 attached 시점에  this.fire('attached') 이벤트를  발생시킵니다. 이벤트의 이벤트명은 상황에 맞게 
+이벤트를  발생시킵니다. Dev 예제용 Element입니다.
+
+ -->
+<dom-module id="ep-base-element">
+    <style>
+
+	</style>
+    
+    <template>
+		<sc-label text="팝업 예제를 위한 가상 엘리먼트입니다." i18n-disabled></sc-label>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'ep-base-element',
+            properties:{
+				
+            },
+
+            load: function() {
+            	alert("load 함수 실행 ");
+            },
+            
+            initialized: function() {
+            	console.log('initialized 호출');
+            }
+		});
+	</script>
+</dom-module>

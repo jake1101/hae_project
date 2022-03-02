@@ -1,0 +1,222 @@
+<!-- 
+/**
+ * 사용자검색 자동완성 text field 커스텀 태그
+ *
+ *     <cc-user-search value="{{value값}}" search-result="{{결과Object}}" result-field="fieldName" result-value="{{결과단건ValueBind}}"></cc-user-search>
+ *
+ * @element cc-user-search
+ *
+ *
+ * @attribute value 해당 텍스트 필드 input value binding <br>
+ * [string] [optional] 
+ *
+ *
+ * @attribute search-result  검색 결과 object값 <br>
+ * [string] [optional]
+ *
+ *
+ * @attribute result-field  단건으로 검색결과가 필요할 경우 검색 결과 object에 field <br>
+ * [string] [optional]
+ *
+ *
+ * @attribute result-value search-field에서 지정한 결과 object의 field의 value <br>
+ * [boolean] [optional]
+ *
+ *
+ * @attribute label-disabled label text가 보이지않도록 처리 <br>
+ * [boolean] [optional]
+ *
+ *
+ */
+-->
+<!-- 
+ author : Yeon-u Kim
+ Since 2016. 4. 14.
+ 변경이력 : [2016. 4. 14.] Yeon-u Kim 최초작성
+-->
+<sc-link rel="import" href="../../../bp/shared/ep-user-list.html" lazy></sc-link>
+<dom-module id="cc-user-search">
+    <style>
+        :host {
+            display: inline-flex;
+            width : 100%;
+        }
+        :host > * {
+            vertical-align : middle;
+            display: table-cell;
+        }
+    </style>
+    <template>
+       <sc-text-field class$="[[class]]" maxLength="200" value="{{value}}" placeholder$="[[placeholder]]" on-enter="onFindUser" on-keydown="onKeyDown" trigger-cls="search" on-trigger-click="onShowPopupFindUser" disabled="[[disabled]]" required="[[required]]" readonly="[[readonly]]"></sc-text-field>
+    </template>
+    <script>
+        Polymer({
+            is : 'cc-user-search',
+            properties : {
+                value : {
+                    type : Object,
+                    notify: true,
+                    observer : 'valueChanged'
+                },
+                label: {
+                	type: Object,
+                	value : function() {
+                		return {}
+                	},
+                	notify: true
+                },
+                autoComFlage : {
+                    type : Boolean,
+                    value : false
+                },
+                searchResult : {
+                    type : Object,
+                    value : function(){
+                        return {
+                            usr_id : ''
+                        };
+                    },
+                    observer : 'searchResultChanged',
+                    notify: true
+                },
+                resultField : {
+                    type : String,
+                    value : 'usr_id'
+                },
+                resultValue : {
+                    type : Object,
+                    notify: true
+                },
+                valueField: {
+                	type : String,
+                    value : 'usr_nm'
+                },
+                labelDisabled : {
+                    type : Object,
+                    value : function(){
+                        return false;    
+                    },
+                    observer : 'labelDisabledChanged'
+                },
+                disabled: {
+                    type: Object,
+                    value : function(){
+                        return false;
+                    }
+                },
+                required: {
+                    type: Object,
+                    value : function(){
+                        return false;
+                    }
+                },
+                readonly: {
+                    type: Object,
+                    value : function(){
+                        return false;
+                    }
+                },
+                noClose: {
+                	type: Boolean,
+                	value: false
+                },
+                popupUrl: {
+                	type: Object,
+                	value : function() {
+                		return "ep-user-list";
+                	}
+                }
+            },
+            //최초 호출
+            attached : function(){
+            },
+            
+          	//label 표시 처리
+            labelDisabledChanged : function(newValue, oldValue){
+                var me = this;
+                if(!newValue){
+                    var module = document.createElement('sc-label');
+                    module.i18nDisabled = true;
+                    Polymer.dom(this.root).appendChild(module);
+                }
+            },
+            
+            //결과  변경시 label표시 처리
+            searchResultChanged: function(newValue, oldValue) {
+                var me = this;
+                if(this.children[1]){
+                    this.children[1].text= newValue.usr_id || "";
+                }
+            },
+            
+            //값 변경시 result값 clear처리
+            valueChanged : function(newValue, oldValue) {
+                if(!this.autoComFlage){
+                    this.set("searchResult",{});
+                    this.set("resultValue",'');
+                }
+                this.set("autoComFlage",false);
+            },
+           	onShowPopupFindUser : function(){
+                var me = this;
+                //사용자검색 팝업을 호출한다.
+               	var userPopup = UT.popup(me.popupUrl, me, 650, 500, {
+					'selected-items' : function(popup, e) {
+						var result = e.detail[0];
+						
+						me.set("autoComFlage", true);
+	                    if(me.resultField) {
+	                        me.set("resultValue", result[me.resultField]);
+	                    }
+	                    me.set("searchResult", result);
+	                    me.set("value", result[me.valueField]);
+	                    me.fire("result", result);
+	                    me.set("autoComFlage", false);
+	                    if(!me.get("noClose")){
+	                    	popup.close();
+	                    }
+					}
+				}, {titleText : "사용자검색"});
+                
+                var param = {};
+                param[me.valueField] = me.value;
+                
+                userPopup.show();
+                userPopup.getWindowContent().load({singleSelect:true, defaultParam:param, autoComplete:false});
+            },
+            onFindUser : function(){
+                var me = this;
+                //사용자검색 팝업을 호출한다.
+                var userPopup = UT.popup(me.popupUrl, me, 650, 500, {
+                    'selected-items' : function(popup, e) {
+                        var result = e.detail[0];
+
+                        me.set("autoComFlage", true);
+                        if(me.resultField) {
+                            me.set("resultValue", result[me.resultField]);
+                        }
+                        me.set("searchResult", result);
+                        me.set("value", result[me.valueField]);
+                        me.fire("result", result);
+                        me.set("autoComFlage", false);
+                        popup.close();
+                    }
+                }, {titleText : "사용자검색"});
+                
+                var param = {};
+                param[me.valueField] = me.value;
+                
+                userPopup.show();
+                userPopup.getWindowContent().load({singleSelect:true, defaultParam:param, autoComplete:true});
+            },
+            
+         	// 사용자의 keydown
+            onKeyDown: function(e) {
+                var me = this;
+                if(this.children[1] && !UT.isSpecialKeyDown(e)){
+                    this.children[1].text="";
+                }
+            }
+        });
+    </script>
+</dom-module>

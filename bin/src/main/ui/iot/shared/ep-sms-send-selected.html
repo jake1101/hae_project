@@ -1,0 +1,204 @@
+<dom-module id="ep-sms-send-selected">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: SMS 전송 팝업 (선택된 것 전체 보낼 수 있도록)
+        ** @Description		: SMS 전송 팝업 (선택된 것 전체 보낼 수 있도록)
+        ** @Author 			: yshong
+        ** @Create Date 	: 2020.07.10
+        ** @History 		: 2020.07.10 jhkim 최초작성 이후 파일 복사하여 일부 변경
+        					: 2021.05.31 yshong 선택된 배열 넘겨주어 처리하도록 변경.
+        ******************************************************************************************
+    -->
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+		sc-checkbox-field {
+			margin-left : -8px;
+		}
+		
+	</style>
+	<template>
+		<sc-ajax id="sendSms"
+			url="sendSms.do"
+			body="{{smsInfo}}"
+			on-response="completeSendSms">
+		</sc-ajax>
+		<sc-ajax id="sendSmsAll"
+			url="sendSmsAll.do"
+			body="{{smsInfo}}"
+			on-response="completeSendSms">
+		</sc-ajax>
+		
+        <table class="tb-form">
+        	<colgroup>
+        		<col style="width:100px;"/>
+        		<col/>
+        	</colgroup>
+        	<tr>
+        		<th>
+        			<sc-label text="수신자"></sc-label>
+        		</th>
+        		<td>
+        			<sc-text-field value={{smsInfo.name}}{{smsInfo.sendAllName}} readonly ="true"></sc-text-field>
+        		</td>
+        	</tr>
+        	<tr>
+        		<th>
+        			<sc-label text="수신번호"></sc-label>
+        		</th>
+        		<td>
+        			<sc-text-field value={{smsInfo.phoneNumber}}{{smsInfo.sendAllName}} readonly ="true"></sc-text-field>
+        		</td>
+        	</tr>
+        	<tr>
+        		<th>
+        			<sc-label text="구분"></sc-label>
+        		</th>
+        		<td>
+        			<sc-combobox-field 
+                                 items="{{smsTypes}}" display-field="name" value-field="id" selected-index=0
+                                 on-change="onSmsTypeChange"> </sc-combobox-field>
+        		</td>
+        	</tr>
+        	<tr>
+        		<th>
+        			<sc-label text="SMS 내용"></sc-label>
+        		</th>
+        		<td>
+        			<sc-textarea-field class="h-100" max-length="70" placeholder="센터에서 연락을 요청하였습니다." value="{{smsInfo.body}}"  ></sc-textarea-field>
+        		</td>
+        	</tr>
+        </table>
+         <div  style= "text-align:center; margin-top: 1%;">
+        	 <sc-button  text="전송" on-click="onOk" ></sc-button>
+        	 <sc-button style="margin-left: 10px;" text="취소" on-click="onCancel"></sc-button>
+        </div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : "ep-sms-send-selected",
+			properties : {
+				titleText:{
+	                type: String,
+					value: "SMS 전송"
+				},
+				searchParam: {
+					type : Object,
+					value : function(){
+						return {
+							siteId : SCMdiManager.searchParam.site_id
+						};
+					}
+				},
+				smsInfo: {
+	            	type: Object,
+	                value : function() {
+	                	return{};
+	                }
+	            },
+	            provider : {
+	            	type : Object,
+	            	value : function() {
+	            		return {};
+	            	}
+	            },
+	            smsTypes : {
+	            	type : Array,
+	            	value : function() {
+	            		return [
+	            			{
+	            				"id": "nothing", 
+	            				"name" : "직접 입력",
+	            				"text" : ""
+	            			},
+	            			{
+	            				"id": "mobileOn", 
+	            				"name" : "위치관제 유도 문구 (초기 시작)",
+	            				"text" : "위치정보가 확인되지 않습니다. 안전교육장에서 스마트태그를 지급받거나, 하이스마트 모바일앱을 설치 후 작업시작 해주시기 바랍니다."
+	            			},
+	            			{
+	            				"id": "mobileRestart", 
+	            				"name" : "모바일앱 사용자 재시작 유도 문구",
+	            				"text" : "위치정보 수집이 중지되었음이 확인됩니다. 하이스마트앱에서 <작업 시작> 버튼을 다시 눌러주시기 바랍니다."
+	            			},
+	            			{
+	            				"id": "tagReturn", 
+	            				"name" : "스마트태그 반납 유도 문구",
+	            				"text" : "스마트태그 반납 대상입니다. 퇴근할 때 잊지말고 반납함에 넣어주시길 바랍니다."
+	            			},
+	            		]
+	            	}
+	            }
+			},
+			load:function(dataArray){
+ 				var me = this;
+ 				var data = null;
+ 				if(dataArray instanceof Array){
+ 					data = dataArray[0];
+					me.set("dataArray", dataArray);
+					me.changeMultiSend();
+ 				}else{
+ 					data = dataArray;
+ 				}
+ 				
+ 				me.set("smsInfo.name", data.targetName);
+ 				me.set("smsInfo.phoneNumber", data.phoneNumber);
+ 				
+			},
+			onOk : function(){
+				var me = this;
+				if(UT.isEmpty(me.smsInfo.body)){
+					me.set("smsInfo.body", "센터에서 연락을 요청하였습니다.");
+				}
+				
+				if( me.dataArray && ((me.dataArray) instanceof Array)  && me.dataArray.length > 1 ){
+					// 작업자 여럿에게 보내는 상황이다.
+					var workers = [];
+					for(var i=0; i<me.dataArray.length; i++){
+						workers.push({"phoneNumber" : me.dataArray[i].phoneNumber});
+					}
+					me.smsInfo.workers = workers;
+					me.smsInfo.smsType = "input";
+					console.log(me.smsInfo);
+					UT.request(me.$.sendSmsAll);
+				}else{
+					// 한명에게 보낸다.
+					UT.request(me.$.sendSms);
+				}
+				
+			},
+			onCancel : function(){
+				var me = this;
+				me.fire("close");
+			},
+			completeSendSms : function(e,res){
+				var me = this,
+					result = res.response;
+				
+				if(result.result_status === 'S'){
+	                UT.alert("전송에 성공하였습니다", function(){ // 저장하였습니다.
+	                	me.fire("close");
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+			},
+			changeMultiSend : function(e){
+				var me = this;
+				
+				if(me.dataArray && ((me.dataArray) instanceof Array)  && me.dataArray.length > 1 ){
+					me.set("smsInfo.sendAllName", " 외 "+(me.dataArray.length -1 ) + "명");
+				}else{
+					me.set("smsInfo.sendAllName", "");
+				}
+			},
+			onSmsTypeChange : function(e){
+				var me = this;
+				me.set("smsInfo.body", e.detail.selectedItem.text);
+				
+			},
+		})
+	</script>
+</dom-module>

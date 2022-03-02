@@ -1,0 +1,122 @@
+<dom-module id="es-dialog-description">
+	<style>
+ 	table, th, td {
+ 		border:1px solid black;
+ 		border-collapse:collapse;
+ 		box-sizing: border-box;
+ 		padding: 3px;
+ 	}
+ 	th {
+ 		background-color:lightgray
+ 	}
+	</style>
+	<template>
+		<p>
+			<b>sc-dialog 주요 함수</b><br/>
+			<table>
+				<tr>
+					<th>함수</th>
+					<th>파라미터</th>
+					<th>설명</th>
+				</tr>
+				<tr>
+					<td>show</td>
+					<td>config Object</td>
+					<td>다이얼로그를 화면에 보여지게 한다.</td>
+				</tr>
+				<tr>
+					<td>hide</td>
+					<td>none</td>
+					<td>다이얼로그를 화면에서 숨김처리 한다.</td>
+				</tr>
+			</table><br/>
+		</p>
+		<p>
+			<b>sc-dialog 주요 properties</b>
+			<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>TYPE</th>
+					<th>설명</th>
+				</tr>
+				<tr>
+					<td>buttons</td>
+					<td>String</td>
+					<td>버튼 컨테이너에 추가할 버튼들의 설정<br/>
+					ex: 'ok', 'yes', 'no', 'cancel', 'ok,cancel', 'yes,no', 'yes,no,cancel'
+					</td>
+				</tr>
+				<tr>
+					<td>buttonTexts</td>
+					<td>Object</td>
+					<td>버튼 컨테이너에 사용되는 버튼들의 기본 text 명<br/>Default: {ok:'확인', yes:'예', no:'아니오', cancel:'취소'}</td>
+				</tr>
+				<tr>
+					<td>maximizable</td>
+					<td>Boolean</td>
+					<td>true 값이면 다이얼로그 최대/최소화 토글 버튼이 헤더영역에 추가된다.<br/>
+					false 값이면 다이얼로그의 최대/최소화 처리는 명시적인 maximized 프로퍼티를 통해서만 처리된다.<br/>
+					Default: false
+					</td>
+				</tr>
+				<tr>
+					<td>maximized</td>
+					<td>Boolean</td>
+					<td>true 값이면 다이얼로그의 최대화 상태를 보여지도록 한다.<br/>
+					Default: false
+					</td>
+				</tr>
+				<tr>
+					<td>modal</td>
+					<td>Boolean</td>
+					<td>true 값이면 오버레이 엘리먼트를 제외한 모든 엘리먼트를 접근할 수 없도록 제한하며,<br/>
+					false 값이면 다른 엘리먼트 접근을 제한할 수 없다.<br/>
+					Default: false
+					</td>
+				</tr>
+				<tr>
+					<td>closable</td>
+					<td>Boolean</td>
+					<td>true 값이면 다이얼로그 숨김처리 토글 버튼이 헤더영역에 추가된다.<br/>
+					false 값이면 다이얼로그의 숨김처리는 명시적인 hide() 함수 호출 또는<br/>
+					hideOnEscKey, hideOnOutsideClick 프로퍼티 설정에 따른 사용자 행위에 의해서만 숨김처리 된다.<br/>
+					Default: true
+					</td>
+				</tr>
+				<tr>
+					<td>collapsed</td>
+					<td>Boolean</td>
+					<td>true 값이면 다이얼로그의 컨텐츠 영영이 접혀진 상태로 보여지도록 한다.<br/>
+					Default: false
+					</td>
+				</tr>
+				<tr>
+					<td>collapsible</td>
+					<td>Boolean</td>
+					<td>true 값이면 다이얼로그를 접을 수 있도록 만들고 접기/펼치기 토글 버튼이 헤더영역에 추가된다.<br/>
+					false 값이면 다이얼로그의 컨텐츠 영역의 사이즈는 기본크기를 유지 또는 css 나 inline style 을 통하여 조절이 된다.<br/>
+					Default: false
+					</td>
+				</tr>
+				<tr>
+					<td>draggable</td>
+					<td>Boolean</td>
+					<td>HTML Global draggable 속성으로 interact 라이브러리의 drag and drop 기능을 활성화/비활성화 하는 delegate 역할의 프로퍼티<br/>
+					Default: false
+					</td>
+				</tr>
+				<tr>
+					<td>handler</td>
+					<td>String/Function</td>
+					<td>다이얼로그의 액션영역에 구성된 버튼의 클릭 핸들러</td>
+				</tr>
+			</table>
+			<br/>
+		</p>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-dialog-description'
+	})
+	</script>
+</dom-module>

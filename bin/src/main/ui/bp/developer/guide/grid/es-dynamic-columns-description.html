@@ -1,0 +1,37 @@
+<dom-module id="es-dynamic-columns-description">
+	<style>
+		table, th, td {
+	 		border:1px solid black;
+	 		border-collapse:collapse;
+	 		box-sizing: border-box;
+	 		padding: 3px;
+	 	}
+	 	th {
+	 		background-color:lightgray
+	 	}
+	</style>
+	<template>
+		그리드의 컬럼을 생성할 때는 반드시 Polymer.Templatizer Behavior를 추가해야 한다.
+		그 후 UT.templateColumns(데이터호스트, 템플릿 Selector, 템플릿 내 Columns 셀럭터) 와 같이 호출하여 사용한다
+		<br>
+
+		<b>그리드 method</b><br/>
+		<table>
+			<tr>
+				<th>method</th>
+				<th>parameters</th>
+				<th>설명</th>
+			</tr>
+			<tr>
+				<td>setColumns</td>
+				<td>1. columns (sc-data-column array)</td>
+				<td>그리드의 컬럼을 설정한다.</td>
+			</tr>
+		</table>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-dynamic-columns-description'
+	});
+	</script>
+</dom-module>

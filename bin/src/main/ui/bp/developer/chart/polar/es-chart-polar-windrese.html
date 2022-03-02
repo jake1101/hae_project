@@ -1,0 +1,162 @@
+<dom-module id="es-chart-polar-windrese">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-polar-windrese',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "name": "rMateCharts:WindRose",
+			    "width": 400,
+			    "height": 500,
+			    "type": "polarcolumn",
+			    "title": {
+			        "text": "Rainfall",
+			        "styles": {
+			        }
+			    },
+			    "titlePane": {
+			        "styles": {
+			        }
+			    },
+			    "plotArea": {
+			        "circular": true
+			    },
+			    "xAxes": {
+			        "startOffset": -0.5,
+			        "tick": {
+			            "offset": 7
+			        },
+			        "styles": {
+			        }
+			    },
+			    "yAxes": {
+			        "tick": {
+			            "intervalWidth": 60,
+			            "styles": {
+			                "numberScale": 3,
+			                "prefix": "$"
+			            }
+			        },
+			        "grid": {
+			            "styles": {
+			                "fills": "#80eeeeee, #80ffffff"
+			            }
+			        }
+			    },
+			    "series": [{
+			        "name": "Vancouver",
+			        "itemWidth": 0.9,
+			        "items": [
+			            {
+			                "Month" : "Jan",
+			                "Vancouver" : 70
+			            },{
+			                "Month" : "Feb",
+			                "Vancouver" : 50
+			            },{
+			                "Month" : "Mar",
+			                "Vancouver" : 70
+			            },{
+			                "Month" : "Apr",
+			                "Vancouver" : 50
+			            },{
+			                "Month" : "May",
+			                "Vancouver" : 70
+			            },{
+			                "Month" : "Jun",
+			                "Vancouver" : 90
+			            },{
+			                "Month" : "Jul",
+			                "Vancouver" : 70
+			            },{
+			                "Month" : "Aug",
+			                "Vancouver" : 92
+			            },{
+			                "Month" : "Sep",
+			                "Vancouver" : 88
+			            },{
+			                "Month" : "Oct",
+			                "Vancouver" : 70
+			            },{
+			                "Month" : "Nov",
+			                "Vancouver" : 50
+			            },{
+			                "Month" : "Dec",
+			                "Vancouver" : 70
+			            }
+			        ],
+			        "labelField": "Month",
+			        "valueField": "Vancouver",
+			        "label": {
+			            "styles": {
+			                "fontSize": 12
+			            }
+			        },
+			        "styles": {
+			            "fill": "#41b2e6",
+			            "shapeName": null,
+			            "hover": {
+			                "fillBrightness": 1.5
+			            }
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }],
+			        "tooltip": {
+			            "text": "${series}<br>Category: ${label}<br>Value: ${value}",
+			            "styles": {
+			                "fill": "#fff",
+			                "color": "#333",
+			                "fontSize": 10,
+			                "shadow": null,
+			                "borderRadius": 0,
+			                "paddingTop": 2,
+			                "paddingBottom": 2,
+			                "paddingLeft": 5,
+			                "paddingRight": 5
+			            }
+			        }
+			    }],
+			    "legend": {
+			        "visible": true,
+			        "position": "bottom",
+			        "styles": {
+			            "border": "#333",
+			            "shadow": "#333",
+			            "paddingLeft": 11,
+			            "paddingRight": 11,
+			            "paddingTop": 5,
+			            "paddingBottom": 5,
+			            "background": null
+			        },
+			        "itemStyles": {
+			            "fontBold": true
+			        }
+			    }
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

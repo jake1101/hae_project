@@ -1,0 +1,45 @@
+<link rel="import" href="./shared/es-source-viewer.html">
+<link rel="import" href="./es-map-search.html">
+
+<dom-module id="em-map-search">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+	<template>
+		<sc-panel class="vbox flex-5" collapsible="false" title-text="SC-MAP-MARKER">
+           <es-map-search id="map"></es-map-search>
+        </sc-panel>
+        <sc-panel class="vbox flex-5" collapsible="false" title-text="Source Viewer">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/map/es-map-search.html"></es-source-viewer>
+        </sc-panel>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-map-search',
+			
+			properties : {
+				source : {
+					type : String,
+					value : null
+				},
+				data : {
+                    type: Array,
+                    value: [
+                            {loc: [129.577, 37], options: { detailInfo: { name: '임시2', markerType: 'business' } }},
+                            {loc: [129.577, 39], options: { detailInfo: { name: '임시3', markerType: 'business' } }}
+                           ]
+				}
+			},
+			
+			initialized: function() {
+				var me = this;
+                me.$.viewer.setData(JSON.stringify(me.data, null, "\t"));
+                me.$.map.setMarker(me.data);
+            },
+		});
+	</script>
+</dom-module>

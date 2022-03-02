@@ -1,0 +1,44 @@
+<sc-link rel="import" href="es-popup-description.html"></sc-link>
+<sc-link rel="import" href="es-popup-sample.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-popup-guide">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-panel class="hbox flex" title-text="sc-popup-manager">
+			<es-popup-description class="fit flex"></es-popup-description>
+			<es-popup-sample class="box flex"></es-popup-sample>
+		</sc-panel>
+		<es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-popup-guide',
+		properties : {
+			srcList : {
+				type : Array,
+				value : function() {
+					return [{
+						title        : "es-popup-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/popup/es-popup-sample.html"
+					}, {
+						title        : "ep-custom-popup.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/popup/ep-custom-popup.html"
+					}]
+				}
+			}
+		},
+		initialized : function() {
+			
+		}
+	});
+	</script>
+</dom-module>

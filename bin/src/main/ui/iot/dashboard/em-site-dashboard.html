@@ -1,0 +1,21 @@
+<sc-link rel="import" href="es-site-dashboard.html"></sc-link>
+
+<dom-module id="em-site-dashboard">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<es-site-dashboard id="black" class="flex" on-move-white="onShowWhite"></es-site-dashboard>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-site-dashboard'
+		});
+	</script>
+
+
+</dom-module>

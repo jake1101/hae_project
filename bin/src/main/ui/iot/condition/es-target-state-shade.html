@@ -1,0 +1,243 @@
+<dom-module id="es-target-state-shade">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		
+        <sc-ajax id="findWorkerStateShade"
+                 url="findWorkerStateShade.do"
+                 body="{{searchParam}}"
+                 on-response="completeFindWorkerStateShade"
+                 >
+        </sc-ajax>
+
+        <cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+        <div class="vbox flex">
+            <table class="tb-form" style="width:auto;">
+                <colgroup>
+	                <col style = "width: 150px"></col>
+	                <col></col>
+                </colgroup>
+	            <tr>
+	                <th>
+		                <sc-label text= "{{gridText}}"></sc-label>
+		            </th>
+		            <td>
+		                <sc-combobox-field value="{{searchParam.timeMinute}}" 
+						                   required="true" 
+						                   items="{{codes.timeList}}" 
+						                   display-field="label" value-field="data" 
+							               input-clear ="false"
+							               style = "width: 100px"
+							               on-select = "changeMinute"
+							               >
+	                   	</sc-combobox-field>
+		            </td>
+	            </tr>
+	        </table>
+            <sc-grid id="gridPanel" 
+                     data-provider="{{resultList}}" 
+                     class="flex"
+                     on-item-click="onItemClick"
+                     use-selection = "false"
+                     use-state = "false"
+                     use-dummy = "false"
+                     column-fit-style = "evenFill"
+                     >
+                <cc-grid-toolbar title-text="{{gridText}}">
+                </cc-grid-toolbar>
+                <sc-grid-columns>
+                    <sc-data-column width="60"  text-align="center" header-text="lockTerm"   data-field="lockTerm"     ></sc-data-column>
+                    <sc-data-column width="120" text-align="left"   header-text="협력사"     data-field="vendorName"   item-style-function="onStyleFontColor"></sc-data-column>
+                    <sc-data-column width="100" text-align="center" header-text="직종"       data-field="targetJobName"      item-style-function="onStyleFontColor"></sc-data-column>
+                    <sc-data-column width="100" text-align="left"   header-text="작업자이름" data-field="targetName"   style-name = "link"  item-style-function="onStyleFontColor"></sc-data-column>
+                    <sc-data-column width="100" text-align="center" header-text="수신시간"   data-field="updatedDt"format-type = "datetime"></sc-data-column>
+                    <sc-data-column width="100" text-align="center" header-text="위치"     data-field="areaName"     ></sc-data-column>
+                    <sc-data-column width="100" text-align="center" header-text="배터리"     data-field="battery"            renderer-options="{{rendererOptions}}" item-style-function="onItemStyleFunction"           ></sc-data-column>
+                </sc-grid-columns>
+                <sc-grid-fields>
+ 					<sc-grid-field data-field = "labelColor"></sc-grid-field>
+                </sc-grid-fields>
+            </sc-grid>
+            
+            
+            <sc-grid id="gridPanelVehicle" 
+                     data-provider="{{resultList}}" 
+                     class="flex"
+                     on-item-click="onItemClick"
+                     use-selection = "false"
+                     use-state = "false"
+                     use-dummy = "false"
+                     column-fit-style = "evenFill"
+                     >
+                <cc-grid-toolbar title-text="{{gridText}}">
+                </cc-grid-toolbar>
+                <sc-grid-columns>
+                    <sc-data-column width="60"  text-align="center" header-text="lockTerm"   data-field="lockTerm"     ></sc-data-column>
+                    <sc-data-column width="120" text-align="left"   header-text="협력사"     data-field="vendorName"   item-style-function="onStyleFontColor"></sc-data-column>
+                    <sc-data-column width="100" text-align="center" header-text="유형"       data-field="targetJobName"      item-style-function="onStyleFontColor"></sc-data-column>
+                    <sc-data-column width="100" text-align="left"   header-text="이동장비명" data-field="targetName"   style-name = "link"  item-style-function="onStyleFontColor"></sc-data-column>
+                    <sc-data-column width="100" text-align="left"   header-text="운전자명" data-field="driverName"   ></sc-data-column>
+                    <sc-data-column width="100" text-align="center" header-text="위치"     data-field="areaName"     ></sc-data-column>
+                    <sc-data-column width="100" text-align="center" header-text="배터리"     data-field="battery"            renderer-options="{{rendererOptions}}" item-style-function="onItemStyleFunction"           ></sc-data-column>
+                </sc-grid-columns>
+                 <sc-grid-fields>
+ 					<sc-grid-field data-field = "labelColor"></sc-grid-field>
+                </sc-grid-fields>
+            </sc-grid>
+        </div>
+
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'es-target-state-shade',
+			properties : {
+				searchParam : {
+					type : Object,
+					value : function(){
+						return {
+							timeMinute : "30"
+						};
+					}
+				},
+				gridText : {
+					type : Object,
+					value : function(){
+						return "음영지역";
+					}
+				},
+				codes : {
+					type : Object,
+					value : function(){
+						return {
+							timeList : [  {data : "10", label : "10 "+this.translate("분")}
+							            , {data : "20", label : "20 "+this.translate("분")}
+							            , {data : "30", label : "30 "+this.translate("분")}
+							            , {data : "40", label : "40 "+this.translate("분")}
+							            , {data : "50", label : "50 "+this.translate("분")}
+							            , {data : "60", label : "60 "+this.translate("분")} ]
+						};
+					}
+				},
+                rendererOptions: {
+                    type:Object,
+                    value: function(){
+                        return {
+                            type: "signal",
+                            maximum: 100,
+                            barCount: 8,
+                            detailed: true,
+                            startRate: 0.5,
+                            endRate: 1
+                        }
+                    }
+                },
+			},
+			initialized : function(){
+			},
+			load : function(param){
+				var me = this;
+				if(UT.isNotEmpty(param))
+					me.onSearch(param);
+			},
+
+			onStyleFontColor: function(data, item){
+                var me = this;
+				var color = data.labelColor;		
+				if(UT.isEmpty(color)){
+					color : "black";
+				}
+                return {
+                    fontColor: color
+                };
+            },
+            
+			onSearch : function(param){
+				var me = this;
+				if(UT.isNotEmpty(param))
+					me.set("searchParam.siteId", param.siteId);   // 현장식별번호
+				
+					
+				if(UT.isEmpty(param.targetType)){
+					param.targetType="worker";
+				}
+				me.set("searchParam.targetType", param.targetType);
+				
+				if(param.targetType == "worker"){
+					me.$.gridPanel.hidden= false;
+					me.$.gridPanelVehicle.hidden= true;
+					
+				}else if(param.targetType == "vehicle"){
+					me.$.gridPanel.hidden= true;
+					me.$.gridPanelVehicle.hidden= false;
+				}else{
+					me.$.gridPanel.hidden= false;
+					me.$.gridPanelVehicle.hidden= true;
+				}
+				UT.request(me.$.findWorkerStateShade);
+			},
+			completeFindWorkerStateShade : function(e, res){
+				var me = this;
+				
+				var result = res.response;
+				if(result){
+					for(var i = 0 ; i< res.response.length; i ++){
+						if(!result[i].areaName){
+							if(res.response[i].geoJson){
+// 								result[i].areaName = "lat :" +res.response[i].geoJson.coordinates[1] + ", lon :"+ res.response[i].geoJson.coordinates[0];
+								result[i].areaName = "영역외";
+							}else{
+								result[i].areaName = "위치정보가 없습니다";
+							}
+						}
+					}
+				}
+				me.set("resultList", result);
+				 
+				
+				if(res.response == null) {
+					me.$.gridPanel.getDataProvider().removeAll();
+				}
+				
+				me.$.gridPanel.getDataProvider().setItemAtBatch(true,function(index, data){
+					if(UT.isEmpty(data.battery))
+						return { battery : 0 };
+				});
+				me.$.gridPanel.refresh();
+			},
+			onItemClick : function(event){
+				var me = this;
+				var data = event.detail.data;
+				var dataField = event.detail.item.dataField;
+				switch(dataField){
+				case "targetName" :
+						me.fire("open-history-pop", data);
+					break;
+				default :
+					break;
+				}
+			},
+			changeMinute : function(){
+				var me = this;
+				me.onSearch(me.searchParam);
+			},
+			onItemStyleFunction : function(data, item){
+				if(data["battery"] < 31){
+			        return {
+			                 shapeColor : "#ff1111",
+			                };
+			    }else{
+			    	return {
+			             shapeColor : "#00BB00"
+			        };
+			    }
+			},
+		});
+	</script>
+
+</dom-module>

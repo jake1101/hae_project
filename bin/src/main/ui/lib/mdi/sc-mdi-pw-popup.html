@@ -1,0 +1,260 @@
+<dom-module id="sc-mdi-pw-popup">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+    <template>        
+        <!-- 사용자 기본정보 저장 -->
+        <sc-ajax id="updatePassword"
+            url="/updatePassword.do"           
+            on-response="completeUpdatePassword">
+        </sc-ajax>
+        
+        <!-- 사용자 정보 log 저장 -->
+        <sc-ajax id="saveUserLog"
+                 url="saveUserLog.do"
+                 on-response="completeSaveUserLog">
+        </sc-ajax>        
+                    
+		<sc-toolbar>
+		    <sc-spacer></sc-spacer>
+		    <sc-button text="저장" on-click="onSaveUser"></sc-button>
+		</sc-toolbar>
+		
+	    <table class="tb-form">
+	        <colgroup>
+	            <col style="width:150px;">
+	        </colgroup>
+	        <tr>
+	            <th><sc-label text="현재 비밀번호"></sc-label></th>
+	            <td><sc-text-field current value="{{pwInfo.currentPassword}}" type="password" required="true"></sc-text-field></td>
+	        </tr>
+	        <tr>
+	            <th><sc-label text="새 비밀번호"></sc-label></th>
+	            <td><sc-text-field new value="{{pwInfo.password}}" type="password" required="true"></sc-text-field></td>
+	        </tr>
+	        <tr>
+	            <th><sc-label text="새 비밀번호 확인"></sc-label></th>
+	            <td><sc-text-field new-check value="{{pwInfo.passwordCheck}}" type="password" required="true"></sc-text-field></td>
+	        </tr>
+	        <!--<tr>
+	    		<td colspan="2">
+					<cc-captcha id="captcha" value="{{pwInfo.captcha}}"></cc-captcha>
+	    		</td>
+	    	</tr>-->
+	    </table>
+	    
+	    <sc-container>
+	    	<div class="desc-title">비밀번호 복잡도 조건</div>
+	    	<div class="desc-list">
+			    <div><sc-label text="[[translate('{0}자리 이상 {1}자리 이하', '', passwordRules.minLengthRule, passwordRules.maxLengthRule)]]" bullet-cls="icon bullet-close" hidden="[[lengthCheck]]" i18n-disabled></sc-label></div>
+			    <div><sc-label text="[[translate('{0}자리 이상 {1}자리 이하', '', passwordRules.minLengthRule, passwordRules.maxLengthRule)]]" bullet-cls="icon bullet-check" hidden="[[!lengthCheck]]" i18n-disabled></sc-label></div>
+			    <div><sc-label text="[[letterText(passwordRules)]]" bullet-cls="icon bullet-close" hidden="[[letterCheck]]" i18n-disabled></sc-label></div>
+			    <div><sc-label text="[[letterText(passwordRules)]]" bullet-cls="icon bullet-check" hidden="[[!letterCheck]]" i18n-disabled></sc-label></div>
+			    <div><sc-label text="[[translate('aaa\,bbb 같은 반복적인 문자 {0}자 이상 사용금지', '', passwordRules.repeatCharacterRule)]]" bullet-cls="icon bullet-close" hidden="[[repeatCheck]]" i18n-disabled></sc-label></div>
+			    <div><sc-label text="[[translate('aaa\,bbb 같은 반복적인 문자 {0}자 이상 사용금지', '', passwordRules.repeatCharacterRule)]]" bullet-cls="icon bullet-check" hidden="[[!repeatCheck]]" i18n-disabled></sc-label></div>
+			    <div><sc-label text="[[translate('123 같은 순차적인 문자 {0}자 이상 사용금지', '', passwordRules.sequenceCharacterRule)]]" bullet-cls="icon bullet-close" hidden="[[sequenceCheck]]" i18n-disabled></sc-label></div>
+			    <div><sc-label text="[[translate('123 같은 순차적인 문자 {0}자 이상 사용금지', '', passwordRules.sequenceCharacterRule)]]" bullet-cls="icon bullet-check" hidden="[[!sequenceCheck]]" i18n-disabled></sc-label></div>
+		    </div>	    
+	    </sc-container>
+
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'sc-mdi-pw-popup',
+            properties : {
+                /* 사용자 정보 binding 객체 */
+                pwInfo : {
+                    type : Object,
+                    value : function(){
+                        return {
+                        	password: "",
+                        	passwordCheck: ""
+                        };
+                    }
+                },
+                /* 길이 체크 */
+                lengthCheck: {
+                	type: Boolean,
+                	value: false
+                },
+                /* 문자열 체크 */
+                letterCheck: {
+                	type: Boolean,
+                	value: false
+                },
+                /* 반복문자 체크 */
+                repeatCheck: {
+                	type: Boolean,
+                	value: false
+                },
+                /* 순차적인 체크 */
+                sequenceCheck: {
+                	type: Boolean,
+                	value: false
+                },
+                /* 정규표현식, 초기화 후 계속 사용 */
+                regExp: {
+                	type: Object,
+                	value: function() {
+                		var rules = SCSessionManager.getPasswordRules();
+                		var alphabetRegExp = '(?=.*?[a-z])';
+                		var digitRegExp = '(?=.*?[0-9])';
+                		var specialRegExp = '(?=.*[ !"#$%&\'()*+,-./:;<=>?@\[\\\]^_`{|}~])';
+                		var letterRegExp = '';
+                		if(rules.alphabetCharacterRule > 0) {
+                			letterRegExp += alphabetRegExp;
+                		}
+                		if(rules.digitCharacterRule > 0) {
+                			letterRegExp += digitRegExp;
+                		}
+                		if(rules.specialCharacterRule > 0) {
+                			letterRegExp += specialRegExp
+                		}
+                		return {
+                            lengthRe : new RegExp("^.{" + rules.minLengthRule + "," + rules.maxLengthRule + "}$"),	//길이 8~20자
+							letterRe : new RegExp("^" + letterRegExp, "i"), //영문, 특수문자, 숫자 포함 여부
+							repeatRe : new RegExp("(.)\\1{" + (rules.repeatCharacterRule-1) + ",}")	// 4번 이상연속된 문자
+						};
+                	}
+                },
+                passwordRules : {
+                	type : Object,
+                	value : function() {
+                		return SCSessionManager.getPasswordRules();
+                	}
+                }
+            },
+
+            formulas : {
+                // 비밀번호 변경 가능 상태 (비밀번호 변경 여부Y 일경우)
+                isPwChangeable: function() {
+                    return (this.userInfo.pw_change_yn === "Y");
+                }
+            },
+            
+            observers:['onChangePassword(pwInfo.password)'],
+            
+            get currentPasswordElement() {
+            	return this.querySelector('sc-text-field[current]');
+            },
+            
+            get newPasswordElement() {
+            	return this.querySelector('sc-text-field[new]');
+            },
+            
+            get newPasswordCheckElement() {
+            	return this.querySelector('sc-text-field[new-check]');
+            },
+            
+            /* 비밀번호 변경시 실시간 검사 */
+            onChangePassword: function() {
+                var pw = this.pwInfo.password || '';
+                var regExp = this.regExp; //validator.js, UT.passwordRegExp() 참고
+                this.letterCheck = SCUtil.isEmpty(pw) ? false :  regExp.letterRe.test(pw); //영문,숫자,특수문자 포함 여부
+                this.lengthCheck = SCUtil.isEmpty(pw) ? false : regExp.lengthRe.test(pw); //길이 8~20 여부
+                this.repeatCheck = SCUtil.isEmpty(pw) ? false : !regExp.repeatRe.test(pw);  //동일 문자열 미포함 여부
+                var characters = pw.split(''), sequence = 0;
+
+                if(characters.length) {
+                    characters.reduce(function(v1, v2) {
+                        if (Math.abs(v1.charCodeAt() - v2.charCodeAt()) === 1) {
+                            sequence++;
+                        } else {
+                            sequence = 0;
+                        }
+                        return v2;
+                    });
+                }
+                this.sequenceCheck = SCUtil.isEmpty(pw) ? false : ((sequence+1) < SCSessionManager.getPasswordRules().sequenceCharacterRule);
+            },
+            
+            /* 비밀번호 저장 */
+            onSaveUser : function() {
+                var me = this;
+                var pwInfo = me.get('pwInfo');
+                
+                if(!this.currentPasswordElement.validate() || !this.newPasswordElement.validate() || !this.newPasswordCheckElement.validate()) {
+                	UT.alert("STD.E9000");
+                	return;
+                }
+                if(!this.letterCheck || !this.lengthCheck || !this.repeatCheck) {
+                	UT.alert("STD.E0000");
+                	return;
+                }
+                if(me.get("pwInfo.password") !== me.get("pwInfo.passwordCheck")){
+                	UT.alert("STD.ADM1002");
+                    me.set("pwInfo.passwordCheck", "");
+                	return;
+                }
+                //비밀번호암호화 2중화 처리(1차 SHA, 2차 AES)
+                this.$.updatePassword.body = {
+                	currentPassword : CipherUtil.encrypt(PasswordEncryptor._encryptpwByCryptoJs(pwInfo.currentPassword)),
+                	password : CipherUtil.encrypt(PasswordEncryptor._encryptpwByCryptoJs(pwInfo.password))
+                };
+                this.$.updatePassword.request();
+            },
+             
+            /* 비밀번호 업데이트 완료시 로직 */
+            completeUpdatePassword : function(e, res) {
+                var me = this,
+                    message = "STD.N2400", // 저장하였습니다.
+                    resultStatus = res.response.result_status,
+                    resultMessage = res.response.result_message;
+
+                if(resultStatus === 'S'){
+                	me.$.saveUserLog.body = {
+                		operation: "update"
+                		,usr_id: SCSessionManager.currentUser.usr_id
+                	};
+                	
+                	// RAYCOM 수정 : log insert 로직 추가
+                	UT.request(me.$.saveUserLog);
+                    
+                } else {
+	                if(resultMessage == 'INVALID_CURRENT_PASSWORD') {
+	                	UT.alert("STD.ADM1031");
+	                } else if(resultMessage == 'DUPLICATE_PASSWORD') {
+	                	UT.alert("STD.ADM1032");
+	                } else {
+	                    UT.alert("STD.ADM1033");
+	                }
+                } 
+            },
+            
+            completeSaveUserLog: function(e, res){
+            	var me = this
+            	,result = res.response;
+            	
+            	UT.alert("STD.MDI1000", function(){
+                    me.fire("logout"); //비밀번호 재변경시 재로그인
+                });
+            },
+            
+            letterText : function(passwordRules) {
+            	var text = [];
+            	if(passwordRules.alphabetCharacterRule > 0) {
+        			text.push(this.translate("영문자"));
+        		}
+        		if(passwordRules.digitCharacterRule > 0) {
+        			text.push(this.translate("숫자"));
+        		}
+        		if(passwordRules.specialCharacterRule > 0) {
+        			text.push(this.translate("특수문자"));
+        		}
+        		if(!text.length) {
+        			return this.translate("문자조합 제한 없음");
+        		}
+        		return text.join(', ') + this.translate(" 조합");
+            },
+
+			reset: function(){
+                this.resetProperties();
+			}
+            
+        });
+    </script>
+</dom-module>

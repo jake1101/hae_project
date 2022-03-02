@@ -1,0 +1,98 @@
+<dom-module id="es-sp-tree-dynamic">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    	<sc-ajax id="findSourceFolder" url="findSourceFolder.do" body="{{searchParam}}" ></sc-ajax>
+    	
+     	<sc-toolbar>
+            <sc-label text="트리 그리드 조회 샘플" ></sc-label>
+            <sc-spacer></sc-spacer>
+            <sc-button text="조회" on-click="onTreeSearch"></sc-button>
+                      
+        </sc-toolbar>
+		 <sc-grid id="gridSourcePanel" is-tree="true" use-selection="false" show-total-count="false" class="flex" on-tree-item-expanding="onTreeItemExpanding" on-item-click="onSourceItemClick">
+		    <sc-grid-columns>
+		        <sc-data-column data-field="display_name"    header-text="폴더명"   width="250" text-align="left" ></sc-data-column>
+		    </sc-grid-columns>                        
+		    <sc-grid-fields>
+		        <sc-grid-field  data-field="up_path"></sc-grid-field>
+		        <sc-grid-field  data-field="path"></sc-grid-field>
+		        <sc-grid-field  data-field="hasChild" data-type="boolean" ></sc-grid-field>
+		    </sc-grid-fields>
+</sc-grid>
+    </template>
+          
+    <script>
+        Polymer({
+            is: 'es-sp-tree-dynamic',
+            
+            properties : {
+            	findList: {
+                    type: Object,
+                    value: function() {
+                        return {
+                            info: {},
+                            param: {}
+                        };
+                    }
+                },
+                searchParam: {
+                    type: Object,
+                    value: function() {
+                        return {
+                            root_path : ''
+                        };
+                    }
+                },
+                data : {
+                	type: Object
+                },
+                dyData : {
+                	type: Object
+                }
+                
+                
+            },
+            		
+			initialized : function() {
+			    this.count = 0;
+			},
+			
+			onTreeSearch: function(){
+                var me = this;
+                
+                
+                var hier = new CCHierachicalData();
+                var hierachiDatas = hier.HierachyTransformByKey(this.data, "path", "up_path", "children", "ROOT", null, true);
+                me.$.gridSourcePanel.setHierachyDataProvider(hierachiDatas, "children", "hasChild");
+            },
+            
+            
+            onTreeItemExpanding: function(e){
+                var me = this;
+                
+                var data = e.detail.data,
+                    provider = me.$.gridSourcePanel.getDataProvider(),
+                    nodeIndex = e.detail.nodeIndex;
+
+                var dydata = UT.copy(this.dyData);
+                
+                for(var i=0; i<dydata.length; ++i){
+                	dydata[i].up_path = data.path;
+                }
+                
+                var hier = new CCHierachicalData();
+                var hierachiDatas = hier.HierachyTransformByKey(dydata, "path", "up_path", "children", data.path, null, true);
+                provider.appendChild(hierachiDatas, nodeIndex, "children", "hasChild");
+
+
+            }
+            
+        });
+    </script>
+
+</dom-module>

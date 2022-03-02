@@ -1,0 +1,1110 @@
+<!--
+ * @Desc grid behavior
+ * @Author kirious
+ * @Created 2016-04-07
+ -->
+<script>
+    Polymer.GPGridBehavior = {
+        properties: {
+            /**
+             * private
+             */
+            _gridProvider: {type : Object, value : function(){return null;}},
+            _gridView: {type : Object, value : function(){return null;}},
+            _gridOption: {type : Object, value : function(){return null;}},
+            _rowCount : {
+                type: Number,
+                value: 0
+            },
+            _containerId: {
+                type: String,
+                value: ""
+            },
+            _container : {
+                type : Object,
+                value : function(){return null;}
+            },
+            _containerStyle: {
+                type: String,
+                value: "height:100%;"
+            },
+            _columnList: {
+                type: Array,
+                value: function(){return [];}
+            },
+            _fieldList: {
+                type: Array,
+                value: function(){return [];}
+            },
+            _dataFieldList : {
+                type: Array,
+                value: function(){return [];}
+            },
+            _hideExportList : {
+                type: Array,
+                value: function(){return [];}
+            },
+            _focusYn: {
+                type: Boolean,
+                value: false
+            },
+            _isInitData : {type : Boolean, value : false},
+            _validator : {type : Array, value : function(){return [];}},
+            /**
+             * public
+             */
+            dataProvider: { type: Object, observer: "_dataProviderChanged", value : function(){return null;}},
+            height: { type: String, value: "", observer: "_heightChanged" }, // 높이
+            stateBar: { type: Boolean, value: false},     // 상태바 여부
+            checkBar: { type: Boolean, value: false},     // 체크바 여부
+            checkBarRadio: { type: Boolean, value: false },     // 체크바 라디오 버튼 여부
+            indicator: { type: Boolean, value: false },    // 인디케이터 여부
+            footer: { type: Boolean, value: false },       // 푸터 여부
+            panel: { type: Boolean, value: false },        // 패널 여부
+            softDeleting: { type: Boolean, value: false }, // 삭제시 그리드에서 행 삭제할지 여부(false이면 행삭제, true이면 상태값으로 표시)
+            insertable: { type: Boolean, value: false },   // 추가 여부
+            updatable: { type: Boolean, value: false },    // 변경 여부
+            deletable: { type: Boolean, value: false },     // 삭제 여부
+            hideContextMenu : {type : Boolean, value : false},   //컨텍스트 메뉴 숨김  여부
+            checkableExpression : {type : String},
+            sortable : {type : Boolean, value : false},
+            imagePath : {type : String},
+            images : {type : Array},
+            fitStyle: { type: String, value: function() { return "none"; } },
+            rowHeight: { type: String, value: "" },
+            hideFocus : {type :Boolean, value : false}
+        },
+        observers : [
+            "_changeGridOption(stateBar, checkBar, indicator, panel, footer)"
+        ],
+        listeners: {
+            'sc-resize': '_onIronResize'
+        },
+        ready : function()
+        {
+        	 this.listen(document, 'tap', '_onTap');
+        },
+        _onTap : function(e)
+        {
+        	 var gridNode = this;
+
+             if (event.target instanceof HTMLCanvasElement) {
+                 if (event.target == gridNode.querySelector("div > canvas")) {
+                     gridNode.setFocusIn();
+                 }
+             } else {
+                 gridNode.setFocusOut();
+             }
+        },
+        attached: function () {
+
+        },
+        detached : function() {
+        	this.unlisten(document, 'tap', '_onTap');
+        },
+        __geneateUUID : function()
+        {
+            var uuid = (function() {
+                var pattern = 'xxxxxxxx-xxxx-4xxx-Rxxx-xMxxxxxxxxxx'.split(''),
+                hex = '0123456789abcdef'.split(''),
+                length = pattern.length,
+                parts = [];
+
+                return function () {
+                    for(var r, c, i = 0; i < length; ++i) {
+                        c = pattern[i];
+                        if(c !== '-' && c !== '4') {
+                            r = Math.random() * 16;
+                            r = (c === 'R') ? (r & 3 | 8) : (r | ((c === 'M') ? 1 : 0));
+                            c = hex[r]; // above floors r so always 0-15
+                        }
+                        parts[i] = c;
+                    }
+                    return parts.join('');
+                }();
+            }());
+            return uuid;
+        },
+        _generateTag : function()
+        {
+            return "T" + this.__geneateUUID().replace(/-/g,'');
+        },
+        _generateUUID: function() {
+            this._containerId = "c" + this.__geneateUUID().replace(/-/g,'');
+            return this._containerId;
+        },
+        _heightChanged: function() {
+            this._checkStyle();
+        },
+        _checkStyle : function()
+        {
+            var me = this;
+            if (me._gridView) {
+                this._container = Polymer.dom(this.root).querySelector("#" + this._containerId);
+
+                // 그리드 높이 설정
+                if (WebUtil.isNull(this.height)) {
+                    if (this.clientHeight != 0) {
+                        this.style.height = this.clientHeight + "px";
+                    }
+                    this._container.style.height = "100%";
+                } else {
+                    this._container.style.height = this.height + "px";
+                    this.style.height = this.height + "px";
+                }
+
+                // 그리드 리사이즈
+                this.async(function() {
+                    var bound = this.parentNode.clientWidth;
+                    var padding = parseInt(window.getComputedStyle(this.parentNode, null).getPropertyValue('padding-left')) + parseInt(window.getComputedStyle(this.parentNode, null).getPropertyValue('padding-right'));
+                    this._container.style.width = (bound - padding) + 'px';
+                    this.style.width = (bound - padding) + 'px';
+                    this._container.querySelector('div.content').style.width = (bound - padding) + 'px';
+                    this._gridView.resetSize();
+
+                    bound = this.parentNode.clientWidth;
+                    padding = parseInt(window.getComputedStyle(this.parentNode, null).getPropertyValue('padding-left')) + parseInt(window.getComputedStyle(this.parentNode, null).getPropertyValue('padding-right'));
+                    this._container.style.width = (bound - padding) + 'px';
+                    this.style.width = (bound - padding) + 'px';
+                    this._container.querySelector('div.content').style.width = (bound - padding) + 'px';
+                    this._gridView.resetSize();
+                }, 10);
+            }
+        },
+        _onIronResize : function()
+        {
+            if(this._gridView)
+            {
+            }
+        },
+        containerResize : function()
+        {
+            if(this._container){
+                this._container.fire("sc-resize");
+            }
+
+            if(this._gridView)
+            {
+//                this._gridView.resetSize();
+            }
+        },
+        _resizeGrid: function() {
+
+        },
+        _initGridColumns : function()
+        {
+            var me = this;
+            var setColumnInfo = function(column, me, _fieldList, _columnList, _validator)
+            {
+                if(column.hideExport == true)
+                {
+                    me._hideExportList.push(column);
+                }
+                column.tag = me._generateTag();
+                column.addEventListener("column-changed", function(e){me._updateColumn(e,me);});
+                if (column.nodeName == "GP-DATAGRID-COLUMN" || column.nodeName == "GP-TREE-GRID-COLUMN") {
+                    me._dataFieldList.push(column.dataField);
+                    // 필드
+                    _fieldList.push(column.getFieldObject());
+                    // 컬럼 - hidden 제외
+                    if (column.type != "hidden") {
+                        _columnList.push(column.getColumnObject());
+                    }
+
+                    valid = column.getValidObject();
+                    if(valid)
+                    {
+                        _validator.push(valid);
+                    }
+
+                } else if (column.nodeName == "GP-DATAGRID-GROUP" || column.nodeName == "GP-TREE-GRID-GROUP") {
+                    // 그룹정보
+                    var groupInfo = column.getGroupInfo();
+                    var childColumnList = new Array();
+                    var childList = column.getChildColumns();
+                    for(var i = 0; i < childList.length; i++)
+                    {
+                        setColumnInfo(childList[i], me, _fieldList, childColumnList, _validator);
+                    }
+
+                    groupInfo.columns = childColumnList;
+                    // 컬럼
+                    _columnList.push(groupInfo);
+                }
+            };
+
+            var childList = this.getContentChildren("content");
+            var childCount = childList.length;
+            var m = 0;
+            var column;
+            var valid;
+            for (m = 0; m < childCount; m++) {
+                column = childList[m];
+                setColumnInfo(column, this, this._fieldList, this._columnList, this._validator);
+            }
+            this._gridProvider.setFields(this._fieldList);
+            this._gridView.setColumns(this._columnList);
+        },
+        _changeGridOption : function(stateBar, checkBar, indicator, panel, footer)
+        {
+            if(this._gridView)
+            {
+                var options = this._gridView.getOptions();
+                options.stateBar = { visible : stateBar};
+                options.checkBar = { visible : checkBar};
+                options.indicator = { visible : indicator};
+                options.panel = { visible : panel};
+                options.footer = { visible : footer};
+                options.stateBar = { visible : stateBar};
+                this._gridView.setOptions(options);
+            }
+        },
+        _initGridOptions : function()
+        {
+            // 그리드 에디트
+            var optEditInfo = {
+                insertable: this.insertable,
+                appendable: false,
+                updatable: this.updatable,
+                editable: this.updatable,
+                deletable: this.deletable
+            };
+
+            // 체크바 라디오일 경우 체크바 적용
+            if (this.checkBarRadio == true) {
+                this.checkBar = true;
+            }
+
+            // 그리드 옵션
+            this._gridOption = {
+                hideDeletedRows : true,
+                stateBar: { visible: this.stateBar },
+                checkBar: { visible: this.checkBar },
+                indicator: { visible: this.indicator },
+                footer: { visible: this.footer },
+                panel: { visible: this.panel },
+                edit: optEditInfo
+            };
+            this._gridView.setOptions(this._gridOption);
+
+            /*
+            this._gridView.displayOptions = {
+                fitStyle: "fill", // fillWidth 사용하기 위함.
+                focusVisible: true, // cell 선택된 것 보이게.
+                columnMovable  : true
+            };
+
+            this._gridView.sortingOptions = {
+                enabled: this.sortable
+            };
+            */
+
+            // display 옵션
+            var displayOptions = { fitStyle: this.fitStyle, showInnerFocus : false };
+            if(this.hideFocus == true)
+            {
+                displayOptions.focusVisible = false;
+            }
+            var disRowHeight = WebUtil.strToInt(this.rowHeight);
+            if (disRowHeight > 0) {
+                displayOptions.rowHeight = disRowHeight;
+            }
+            this._gridView.setDisplayOptions(displayOptions);
+
+            // 체크 표현식
+            if (this.checkableExpression) {
+                this._gridView.setCheckableExpression(this.checkableExpression, true);
+            }
+            this._gridProvider.setOptions({ restoreMode: "auto",softDeleting: true }); // Cell 편집 중 원복 했을 경우 수정상태 취소 기능
+
+            // 그리드 스타일
+            this._gridView.setStyles(gpGateSkin);
+
+            // 기본 옵션 설정
+            this._gridView.addCellStyle(DEF.styles.editable.id, DEF.styles.editable, true);
+            this._gridView.addCellStyle(DEF.styles.readonly.id, DEF.styles.readonly, true);
+            this._gridView.addCellStyle(DEF.styles.actionable.id, DEF.styles.actionable, true);
+            this._gridView.addCellRenderers([DEF.renderer.checkboxYn, DEF.renderer.disabledCheckboxYn]);
+            var images = new RealGridJS.ImageList(DEF.icons.id, DEF.icons.path);
+            images.addUrls(DEF.icons.images);
+            this._gridView.registerImageList(images);
+
+            if (this.imagePath) {
+                images = new RealGridJS.ImageList("_userImages", this.imagePath);
+                images.addUrls(this.images);
+                this._gridView.registerImageList(images);
+            }
+
+            if (this.hideContextMenu == false) {
+                this._initContextMenu();
+            }
+
+            // 체크바 라디오 버튼 설정
+            if (this.checkBarRadio == true) {
+                this._gridView.setCheckBar({ exclusive: true });
+            }
+        },
+
+        _initListeners : function()
+        {
+            // 셀 클릭 이벤트
+            var $this = this;
+            this._gridView.onDataCellClicked = function(grid, index) {
+                // dataProvider 에 접근하여 index 에 해당하는 값을 가져옴
+                var data = $this._gridProvider.getJsonRow(index.dataRow);
+                index.rowState = $this._gridProvider.getRowState(index.dataRow);
+
+                $this.fire("cell-click", { gridView: grid, index: index, rowData: data });
+            };
+
+            this._gridView.onItemChecked = function (grid, itemIndex, checked) {
+                $this.fire("item-checked", { gridView: grid, index: itemIndex, checked: checked });
+            };
+
+            this._gridView.onCellEdited =  function (grid, itemIndex, dataRow, field) {
+                if (grid.isItemEditing()) {
+                    grid.commit();
+                }
+                $this.fire("cell-edited", { gridView: grid, index: {itemIndex : itemIndex, dataRow : dataRow, field : field, fieldName : $this._gridProvider.getFieldName(field)}});
+            };
+            this._gridView.onColumnCheckedChanged = function (grid, column, checked) {
+                $this.fire("head-checked", { gridView: grid, column: column, checked: checked });
+            };
+
+            // 그리드 초기화 콜백
+            $this.fire("init-callback", { gridView: this._gridView, gridProvider: this._gridProvider });
+
+        },
+        _dataProviderChanged: function(_data) {
+
+        },
+        _initContextMenu : function() {
+            var me = this;
+            // context menu 설정
+            this._gridView.setContextMenu([
+                {label : MSG.G_FILTER, tag : "filter",enabled : true}, // 필터
+                {label : MSG.G_FILTER_CLEAR, tag : "filter-clear", enabled : true}, // 필터 해제
+                {label : "-"},
+                {label : MSG.G_FIXCOL, tag : "fixcol"}, // 세로 틀고정
+                {label : MSG.G_FIXCOL_CLEAR, tag : "fixcol-clear"}, // 세로 틀고정 해제
+                {label : "-"},
+                {label : MSG.G_FIXROW,tag : "fixrow",enabled : true}, // 가로 틀고정
+                {label : MSG.G_FIXROW_CLEAR, tag : "fixrow-clear",enabled : true}, // 가로 틀고정 해제
+                {label : "-"},
+                {label : MSG.G_EXCEL_DOWNLOAD, tag : "excel"} // 엑셀 다운로드
+            ]);
+
+            // context menu item 클릭 이벤트
+            this._gridView.onContextMenuItemClicked = function(grid, label,
+                    index) {
+                switch (label.tag) {
+                case "filter":
+                    var column = grid.columnByField(index.fieldName);
+                    if (column === null) {
+                        return;
+                    }
+                    var filters = grid.getColumnFilters(index.fieldName) || [];
+                    if (filters.length === 0) {
+                        if (column.lookupDisplay
+                                && column.labels.length > 0
+                                && column.values.length > 0
+                                && column.labels.length === column.values.length) {
+                            for (var i = 0, len = column.values.length; i < len; i++) {
+                                filters.push({
+                                    name : column.labels[i],
+                                    criteria : "value='" + column.values[i]
+                                            + "'"
+                                });
+                            }
+                        } else {
+                            var values = grid.getDataProvider()
+                                    .getDistinctValues(index.fieldName);
+                            for (var i = 0, len = values.length; i < len; i++) {
+                                filters.push({
+                                    name : values[i],
+                                    criteria : "value='" + values[i] + "'"
+                                });
+                            }
+                        }
+                        if (column.parent == null) {
+                            grid.setColumnFilters(index.fieldName, filters);
+                        } else {
+                            column.filters = filters;
+                            grid.setColumn(column);
+                        }
+                    }
+                    break;
+                case "filter-clear":
+                    var column = grid.columnByField(index.fieldName);
+                    if (column === null) {
+                        return;
+                    }
+                    if (column.parent == null) {
+                        grid.setColumnFilters(index.fieldName, []);
+                    } else {
+                        column.filters = [];
+                        grid.setColumn(column);
+                    }
+                    break;
+                case "fixcol":
+                    var displayIndex = grid.getColumnProperty(index.fieldName,
+                            "displayIndex");
+                    if (typeof displayIndex === "number") {
+                        grid.setFixedOptions({
+                            colCount : displayIndex + 1
+                        });
+                    }
+                    break;
+                case "fixcol-clear":
+                    grid.setFixedOptions({
+                        colCount : 0
+                    });
+                    break;
+                case "fixrow":
+                    if (index.itemIndex < 0) {
+                        return;
+                    }
+                    grid.setFixedOptions({
+                        rowCount : index.itemIndex + 1
+                    });
+                    break;
+                case "fixrow-clear":
+                    grid.setFixedOptions({
+                        rowCount : 0
+                    });
+                    break;
+                case "excel":
+
+                    for(var idx in me._hideExportList)
+                    {
+                        me.setColumnPropertyByTag(me._hideExportList[idx].tag, "visible",false);
+                    }
+
+                    grid.exportGrid({
+                        type : "excel",
+                        target : "local",
+                        showConfirm : false,
+                        linear : false
+                    // Expand all columns and Export
+                    });
+
+                    for(var idx in me._hideExportList)
+                    {
+                        me.setColumnPropertyByTag(me._hideExportList[idx].tag, "visible",true);
+                    }
+                    break;
+                }
+            };
+        },
+        /**
+         * 그리드 객체 구하기
+         */
+        getGridView: function() {
+            return this._gridView;
+        },
+
+        /**
+         * 그리드 provider 객체 구하기
+         */
+        getGridProvider: function() {
+            return this._gridProvider;
+        },
+
+        /**
+        * 현재 선택된 정보 객체
+        * dataRow : row index
+        * fieldIndex : 선택된 field index
+        * column : column명
+        * fieldName : field 명
+        * itemIndex : row index
+        */
+        getCurrent : function()
+        {
+            return this._gridView.getCurrent();
+        },
+
+        /**
+         * 행 데이터 구하기
+         */
+        getRowData: function() {
+            var itemIndex = this._gridView.getCurrent().itemIndex;
+
+            return this._gridView.getValues(itemIndex);
+        },
+        getEmptyRowData : function()
+        {
+            var obj = {};
+            if(this._dataFieldList)
+            {
+                for(var i = 0; i < this._dataFieldList.length; i++)
+                {
+                    obj[this._dataFieldList[i]] = null;
+                }
+            }
+            return obj;
+        },
+        insertRow : function()
+        {
+
+        },
+        deleteRow: function(rowIndex) {
+
+        },
+        /**
+         * private 상태별 행 반환
+         */
+        _getStateRow : function(state){
+            if (this._gridView.isItemEditing()) {
+                this._gridView.commit();
+            }
+
+            outputFormat = {datetimeFormat: "yyyyMMdd"};
+            var rows = [];
+            var _list = this._gridProvider.getStateRows(state);
+            var m = 0;
+            var count = _list.length;
+
+            for (m = 0; m < count; m++) {
+                rows.push(this._gridProvider.getOutputRow(outputFormat, _list[m]));
+            }
+
+            return rows;
+        },
+        /**
+         * 생성된 행 반환
+         */
+        createdStateRows : function(){
+            return this._getStateRow("created");
+        },
+        /**
+         * 수정된 행 반환
+         */
+        updatedStateRows : function()
+        {
+            return this._getStateRow("updated");
+        },
+        /**
+         * 삭제된 행 반환
+         */
+        deletedStateRows : function()
+        {
+            return this._getStateRow("deleted");
+        },
+        /**
+         * 수정되지 않은 행 반환
+         */
+        noneStateRows : function()
+        {
+            return this._getStateRow("none");
+        },
+        /**
+         * 체크된 행 반환
+         */
+        checkedStateRows : function()
+        {
+            if (this._gridView.isItemEditing()) {
+                this._gridView.commit();
+            }
+
+            outputFormat = {datetimeFormat: "yyyyMMdd"};
+            var rows = [];
+            var _list = this._gridView.getCheckedRows();
+            var m = 0;
+            var count = _list.length;
+
+            for (m = 0; m < count; m++) {
+                var rowInfo = this._gridProvider.getOutputRow(outputFormat, _list[m]);
+                rowInfo.rowIndex = _list[m];
+                rows.push(rowInfo);
+            }
+
+            return rows;
+        },
+        /**
+         * 수정된(생성,수정,삭제,체크) 행 반환
+         */
+        modifiedRows : function()
+        {
+            var _created = this.createdStateRows();
+            var _updated = this.updatedStateRows();
+            var _deleted = this.deletedStateRows();
+            var _checked = this.checkedStateRows();
+            var modified = false;
+
+            if (_created.length > 0 || _updated.length > 0 || _deleted.length > 0) {
+                modified = true;
+            }
+
+            return {
+                 created : _created,
+                 updated : _updated,
+                 deleted : _deleted,
+                 checked : _checked,
+                 modified: modified
+            };
+        },
+        /**
+         * 전체 행 삭제
+         */
+        clearRows : function()
+        {
+            if(this._gridProvider)
+            {
+                this._gridProvider.clearRows();
+                this.initRowCount();
+            }
+        },
+        /**
+        * row 상태 반환
+        */
+        getRowState : function(rowIndex)
+        {
+            return this._gridProvider.getRowState(rowIndex);
+        },
+        /**
+        * row 상태 변경
+        */
+        setRowState : function(rowIndex, state, force)
+        {
+            this._gridProvider.setRowState(rowIndex, state, force);
+        },
+        /**
+         * rows 상태 변경
+         */
+         setRowStates: function(rows, state, force, rowEvents)
+         {
+             this._gridProvider.setRowStates(rows, state, force, rowEvents);
+         },
+        /**
+        * column 변경 (컬럼 속성을 변경하면 반영)
+        */
+        setColumn : function(fieldName, columnValue)
+        {
+            this._gridView.setColumn(columnValue);
+        },
+        _updateColumn : function(e, me)
+        {
+            var target = e.target;
+            var column = me._gridView.columnByTag(target.tag);
+            if(typeof e.detail["func"] !== "undefined")
+            {
+                e.detail.func(column,e);
+                me._gridView.setColumn(column);
+            }
+        },
+
+        setColumnPropertyByTag : function(tag, propertyName, propertyValue)
+        {
+            if(this._gridView)
+            {
+                var column = this._gridView.columnByTag(tag);
+                if (column == null) {
+                    alert("column is null");
+                    return;
+                }
+                this._gridView.setColumnProperty(column, propertyName, propertyValue);
+            }
+            else
+            {
+                alert("grid is null");
+                return;
+            }
+        },
+        /**
+         * column 속성 변경
+         */
+        setColumnProperty : function(fieldName, propertyName, propertyValue)
+        {
+            if(this._gridView)
+            {
+                var column = this._gridView.columnByField(fieldName);
+                if (column == null) {
+                    alert("column is null");
+                    return;
+                }
+                this._gridView.setColumnProperty(column, propertyName, propertyValue);
+            }
+            else
+            {
+                alert("grid is null");
+                return;
+            }
+        },
+        /**
+         * 특정 행의 필드 데이터 수정
+         */
+        setValue : function(rowIndex, fieldName, value)
+        {
+            this._gridView.setValue(rowIndex, fieldName, value);
+        },
+        /*
+        * 특정 행의 여러 필드의 값을 수정
+        */
+        setValues : function(itemIndex, values, strict)
+        {
+            this._gridView.setValues(itemIndex, values, strict);
+        },
+        /**
+         * 특정 행의 필드 데이터 반환
+         */
+        getValue : function(rowIndex, fieldName)
+        {
+            var row = this.getRow(rowIndex);
+            return row[fieldName];
+        },
+        /**
+         * 특정 행의 Json row 반환 
+         */
+        getRow : function(itemIndex)
+        {
+        	var rowId = this._gridView.getDataRow(itemIndex);
+        	return this._gridProvider.getJsonRow(rowId);
+        },
+        /**
+         * 특정 행의 Json row 반환
+         */
+        getJsonRow: function(rowId) {
+			return this._gridProvider.getJsonRow(rowId);
+        },
+        /**
+         * 지정한 범위의 json row 반환
+         */
+        getJsonRows : function(startIndex, endIndex)
+        {
+            if(startIndex && endIndex)
+            {
+                return this._gridProvider.getJsonRows(startIndex, endIndex);
+            }
+            else
+            {
+                return this._gridProvider.getJsonRows(0, -1);
+            }
+        },
+
+        /**
+         * 리사이즈 설정
+         */
+        onResize: function() {
+            this._checkStyle();
+        },
+		
+        /**
+         * 전체행 반환
+         */
+        getRows : function(exceptDeleted)
+        {
+            var provider = this._gridProvider;
+            var filter = function(all) {
+                var filtered = [];
+                for (var i = 0, len = all.length; i < len; i++) {
+                    if (provider.getRowState(i) !== "deleted" && provider.getRowState(i) !== "createAndDeleted") {
+                        filtered.push(all[i]);
+                    }
+                }
+                return filtered;
+            };
+            var rows = this._gridProvider.getRows(0, -1);
+            return exceptDeleted ? filter(rows) : rows;
+        },
+
+        /**
+         * 체크된 데이터 구하기
+         */
+        getCheckedData: function() {
+            if (this._gridView.isItemEditing()) {
+                this._gridView.commit();
+            }
+
+            var checkList = this._gridView.getCheckedRows();
+            var checkCount = checkList.length;
+            var actionList = []; // 액션 - none, updated
+            var insertList = []; // 신규 - created
+            var editList = [];   // 편집중 - updated
+            var m = 0;
+
+            if (checkCount > 0) {
+                for (m = 0; m < checkCount; m++) {
+                    var state = this._gridProvider.getRowState(checkList[m]);
+
+                    if (state === "none" || state === "updated") {
+                        actionList.push(this._gridProvider.getJsonRow(checkList[m]));
+                    } else if (state === "created") {
+                        insertList.push(checkList[m]);
+                    }
+
+                    if (state === "updated") {
+                        editList.push(checkList[m]);
+                    }
+                }
+            }
+
+            var result = {
+                checkList: checkList,
+                checkCount: checkCount,
+                actionList: actionList,
+                actionCount: actionList.length,
+                insertList: insertList,
+                insertCount: insertList.length,
+                editList: editList,
+                editCount: editList.length
+            };
+
+            return result;
+        },
+
+        /**
+         * 포커스 설정
+         */
+        setFocus: function(rowIndex, colName) {
+            this._gridView.setCurrent({ dataRow: rowIndex, fieldName: colName });
+            this._gridView.showEditor();
+        },
+
+        /**
+         * 포커스 아이템 설정 - itemIndex 기준으로 포커스 이동
+         */
+        setFocusItem: function(itemIndex, colName) {
+            this._gridView.setCurrent({ itemIndex: itemIndex, fieldName: colName });
+            this._gridView.showEditor();
+        },
+
+        /**
+         * 포커스 인 설정
+         */
+        setFocusIn: function() {
+            this._focusYn = true;
+        },
+
+        /**
+         * 포커스 아웃 설정
+         */
+        setFocusOut: function() {
+            if (this._focusYn == true) {
+                this.commit();
+                this._focusYn = false;
+            }
+        },
+
+        /**
+         * 전체행 수 반환
+         */
+        getRowCount: function() {
+            return this._gridProvider.getRowCount();
+        },
+
+        /**
+         * 그리드에 현재 표시된 Grid Item 개수를 반환한다.
+         */
+         getItemCount: function() {
+            return this._gridView.getItemCount();
+        },
+
+        /**
+         * 그리드 행의 Row Id 값을 가져온다.
+         */
+         getDataRow: function(itemIndex) {
+            return this._gridView.getDataRow(itemIndex);
+        },
+
+        /**
+         * 에디트 커밋
+         */
+        commit: function() {
+            // 그리드 커밋
+            if (this._gridView.isItemEditing()) {
+                this._gridView.commit();
+            }
+
+            // 에디터 모드 취소
+            this._gridView.cancelEditor();
+        },
+
+        /**
+         * 커밋 설정
+         */
+        setCommit: function() {
+            // 그리드 커밋
+            this._gridView.commit();
+        },
+
+        /**
+         * 지정한 데이터 행들을 삭제한다.
+         */
+        removeRows: function(rows) {
+            this._gridProvider.removeRows(rows);
+        },
+        /**
+        * 그리드의 체크된 row를 위로 이동시킨다
+        */
+        moveUp : function(callback)
+        {
+            var checked = this.checkedStateRows();
+            if (checked.length > 0) {
+                for (var i = 0, len = checked.length; i < len; i++) {
+                    if (checked[i] > 1) {
+                        if (_gridView.isCheckedItem(checked[i] - 1) === false) {
+                            _gridProvider.moveRow(checked[i], checked[i] - 1);
+                            _gridView.checkItem(checked[i], false);
+                            _gridView.checkItem(checked[i] - 1, true);
+                        }
+                    }
+                }
+            }
+            if (UT.isFunction(callback)) {
+                callback.call(this);
+            }
+        },
+        /**
+         * 그리드의 체크된 row를 아래로 이동시킨다
+         */
+        moveDown : function(callback)
+        {
+            var checked = this.checkedStateRows();
+            if (checked.length > 0) {
+                var rowCount = _gridProvider.getRowCount();
+                for (var len = checked.length, i = len - 1; i >= 0; i--) { // 아래부터 이동
+                    if (checked[i] < rowCount - 1) {
+                        if (_gridView.isCheckedItem(checked[i] + 1) === false) {
+                            _gridProvider.moveRow(checked[i], checked[i] + 1);
+                            _gridView.checkItem(checked[i], false);
+                            _gridView.checkItem(checked[i] + 1, true);
+                        }
+                    }
+                }
+            }
+            if (UT.isFunction(callback)) {
+                callback.call(this);
+            }
+        },
+
+        /**
+         * 콤보 목록 설정
+         * 파라미터 : 컬럼명, 목록, 라벨컬럼, 값컬럼
+         */
+        setComboList: function(colName, itemList, label, value) {
+            var itemCount = itemList.length;
+            var m = 0;
+            var labelList = [];
+            var valueList = [];
+
+            for (m = 0; m < itemCount; m++) {
+                labelList.push(itemList[m][label]);
+                valueList.push(itemList[m][value]);
+            }
+
+            var column = this._gridView.columnByField(colName);
+            column.values = valueList;
+            column.labels = labelList;
+            this._gridView.setColumn(column);
+        },
+
+        /**
+         * 데이터행을 모두 체크 또는 해제한다.
+         */
+        checkAll: function(checked) {
+            this._gridView.checkAll(checked);
+        },
+
+        /**
+         * checkBar.head 영역에 v표시 활성화 여부를 지정한다.
+         */
+        setAllCheck: function(checked) {
+            this._gridView.setAllCheck(checked);
+        },
+        /**
+        * 데이터 validation 수행
+        */
+        validate : function()
+        {
+            VALID.isValidGridData(this._gridView, this._validator);
+        },
+
+        /**
+         * Check된 데이터 행들의(dataRow) 목록을 반환한다.
+         */
+        getCheckedRows: function() {
+            return this._gridView.getCheckedRows();
+        },
+
+        /**
+         * 지정된 rowIndex의 데이터행을 체크하거나 해제한다.
+         * rowIndex는 dataProvider의 dataRow입니다.
+         */
+        checkRow: function(rowIndex, checkYn) {
+            if (rowIndex > -1) {
+                this._gridView.checkRow(rowIndex, checkYn, false);
+            }
+        },
+
+        /**
+         * cell style을 수정한다
+         */
+        setCellStyles : function(dataRows, fields, styleId)
+        {
+            this._gridView.setCellStyles(dataRows, fields, styleId);
+        },
+
+        /**
+         * 체크박스 설정
+         */
+        setCheckBar: function() {
+            var options = this._gridView.getOptions();
+            options.checkBar = { visible: true };
+            this._gridView.setOptions(options);
+            this._gridView.setCheckBar({ exclusive: false });
+        },
+
+        /**
+         * 라디오 버튼 설정
+         */
+        setRadioBar: function() {
+            var options = this._gridView.getOptions();
+            options.checkBar = { visible: true };
+            this._gridView.setOptions(options);
+            this._gridView.setCheckBar({ exclusive: true });
+        },
+        /**
+         * 체크박스삭제
+         */
+        fireCheckBar: function() {
+            var options = this._gridView.getOptions();
+            options.checkBar = { visible: false };
+            this._gridView.setOptions(options);
+            this._gridView.setCheckBar({ exclusive: false });
+        },
+
+        /**
+         * 라디오 버튼삭제
+         */
+        fireRadioBar: function() {
+            var options = this._gridView.getOptions();
+            options.checkBar = { visible: false };
+            this._gridView.setOptions(options);
+            this._gridView.setCheckBar({ exclusive: true });
+        },
+
+        /**
+         * 컬럼 editable 설정
+         */
+        setColumnEditabled: function(colName, editYn) {
+            var column = this._gridView.columnByField(colName);
+            this._gridView.setColumnProperty(column, "editable", editYn);
+        },
+
+        /**
+         * 컬럼 넓이 설정
+         */
+        setColumnWidth: function(colName, width) {
+            var column = this._gridView.columnByField(colName);
+            this._gridView.setColumnProperty(column, "width", width);
+        },
+        /**
+        * 화면 하단에 표시될 row count수 변경
+        */
+        setDisplayRowCount : function(value)
+        {
+        	this._rowCount = value;
+        }
+        
+    }
+</script>

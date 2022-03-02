@@ -1,0 +1,425 @@
+<dom-module id="ep-sensor-setting">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<!-- 코드조회 -->
+        <sc-request-group init>
+			<sc-code-group>
+				<sc-code id="findListServerReqPeriod" code="SERVERREQPRD" value="{{codes.serverReqPeriod}}" ></sc-code> <!-- YN -->
+				<sc-code id="findListServerCmdPfmPrd" code="SERVERCMDPRMPRD" value="{{codes.serverCmdPfmPrd}}" ></sc-code> <!-- YN -->
+				<sc-code id="findListOnOff" code="onoff" value="{{codes.onOff}}" ></sc-code> <!-- YN -->
+				<sc-code id="gpsLevel" code="IOT022" value="{{codes.gpsLevel}}" ></sc-code> <!-- YN -->
+				<sc-code id="buzzerStep" code="IOT023" value="{{codes.buzzerStep}}" ></sc-code> <!-- YN -->
+				<sc-code id="beaconCount" code="RCVBEACONCNT" value="{{codes.rcvBeaconCnt}}" ></sc-code> <!-- YN -->
+			</sc-code-group>
+		</sc-request-group>
+		<sc-ajax
+				id="saveSensorCommand"
+				url="saveSensorCommand.do"
+				on-response="completeSaveSensorCommand">
+		</sc-ajax>
+		<sc-ajax
+				id="findSensorEnvironment"
+				url="findSensorEnvironment.do"
+				on-response="completeFindSensorEnvironment">
+		</sc-ajax>
+		<sc-ajax
+				id="saveSensorEnvironment"
+				url="saveSensorEnvironment.do"
+				body = "{{datas}}"
+				on-response="completeSaveSensorEnvironment">
+		</sc-ajax>
+		<cc-page-title-bar>
+			<sc-button text="스마트태그 설정 정보 저장"     on-click="onSaveSensorEnvClick" hidden ="[[formula('isStandard')]]"></sc-button>
+			<sc-button text="스마트태그 설정 기준정보 조회" on-click="onFindSensorEnvClick" hidden ="[[!formula('isOne')]]"></sc-button>
+			<sc-button text="체크된 설정정보 요청"        on-click="reqSettingInfo"       ></sc-button>
+		</cc-page-title-bar>
+		<table class="tb-form" validation-group = "info">
+			<colgroup>
+				<col style="width:30%;">
+				<col style="width:60%;">
+				<!-- <col style="width:10%;"> -->
+			</colgroup>
+			<tr>
+			<th><sc-checkbox-field id="checkAll" label="전체선택" input-value="checkAll" checked-value="Y" un-checked-value="N" on-checkchange="onCheckchange"></sc-checkbox-field></th>
+			
+			</tr>
+			<tr>
+				<th><sc-checkbox-field class="checkCl" id="transTerm" label="서버 전송 주기 (분)" input-value="transTerm" checked-value="Y" un-checked-value="N"  on-checkchange="onCheckchange"></sc-checkbox-field></th>
+<!-- 				<th><sc-label text="서버 전송 주기"></sc-label></th> -->
+				<td><sc-combobox-field value="{{datas.transTerm}}" selected-index="-1" required="true" 
+								       items="{{codes.serverReqPeriod}}" display-field="label" value-field="data" 
+								       placeholder="선택">
+                    </sc-combobox-field>
+				</td>
+				<td hidden ="[[formula('isSettingInfo')]]">
+					<sc-button text="저장" on-click="onCommandSave" data-args="transTerm"  ></sc-button>
+				</td>
+			</tr>
+<!-- 			<tr> -->
+<!-- 			 	<th><sc-checkbox-field class="checkCl" id="cmdReceiveTerm" label="서버명령 수행주기" input-value="cmdReceiveTerm" checked-value="Y" un-checked-value="N" on-checkchange="onCheckchange"></sc-checkbox-field></th> -->
+<!-- 				<td><sc-combobox-field value="{{datas.cmdReceiveTerm}}" selected-index="-1" required="true"  -->
+<!-- 								       items="{{codes.serverCmdPfmPrd}}" display-field="label" value-field="data"  -->
+<!-- 								       placeholder="선택"> -->
+<!--                     </sc-combobox-field> -->
+<!-- 				</td> -->
+<!-- 				<td hidden ="[[formula('isSettingInfo')]]"> -->
+<!-- 					<sc-button text="저장" on-click="onCommandSave" data-args="cmdReceiveTerm"></sc-button> -->
+<!-- 				</td> -->
+<!-- 			</tr> -->
+			<tr>
+				<th><sc-checkbox-field class="checkCl" id="gyroOnOff" label="자이로" input-value="gyroOnOff" checked-value="Y" un-checked-value="N" on-checkchange="onCheckchange"></sc-checkbox-field></th>
+				<td><sc-combobox-field value="{{datas.gyroOnOff}}" selected-index="-1" required="true" 
+								       items="{{codes.onOff}}" display-field="label" value-field="data" 
+								       placeholder="선택">
+                    </sc-combobox-field>
+				</td>
+				<td hidden ="[[formula('isSettingInfo')]]">
+					<sc-button text="저장" on-click="onCommandSave" data-args="gyroOnOff"></sc-button>
+				</td>
+			</tr>
+			<tr>
+				<th><sc-checkbox-field class="checkCl" id="gpsLevel" label="GPS Level" input-value="gpsLevel" on-checkchange="onCheckchange"></sc-checkbox-field></th>
+				<td><sc-combobox-field value="{{datas.gpsLevel}}"  required="true" 
+								       items="{{codes.gpsLevel}}" display-field="label" value-field="data" 
+								       placeholder="선택">
+                    </sc-combobox-field>
+				</td>
+				<td hidden ="[[formula('isSettingInfo')]]">
+					<sc-button text="저장" on-click="onCommandSave" data-args="gpsLevel"></sc-button>
+				</td>
+			</tr>
+<!-- 			<tr> -->
+<!-- 				<th><sc-checkbox-field class="checkCl" id="buzzerStep" label="Buzzer Step" input-value="buzzerStep" on-checkchange="onCheckchange"></sc-checkbox-field></th> -->
+<!-- 				<td><sc-combobox-field value="{{datas.buzzerStep}}" selected-index="-1" required="true"  -->
+<!-- 								       items="{{codes.buzzerStep}}" display-field="label" value-field="data"  -->
+<!-- 								       placeholder="선택"> -->
+<!--                     </sc-combobox-field> -->
+<!-- 				</td> -->
+<!-- 				<td hidden ="[[formula('isSettingInfo')]]"> -->
+<!-- 					<sc-button text="저장" on-click="onCommandSave" data-args="buzzerStep"></sc-button> -->
+<!-- 				</td> -->
+<!-- 			</tr> -->
+			<tr>
+				<th><sc-checkbox-field class="checkCl" id="receiveBeaconCount" label="비콘 수신개수" input-value="receiveBeaconCount" on-checkchange="onCheckchange"></sc-checkbox-field></th>
+				<td><sc-combobox-field value="{{datas.receiveBeaconCount}}" selected-index="-1" required="true" 
+								       items="{{codes.rcvBeaconCnt}}" display-field="label" value-field="data" 
+								       placeholder="선택">
+                    </sc-combobox-field>
+				</td>
+				<td hidden ="[[formula('isSettingInfo')]]">
+					<sc-button text="저장" on-click="onCommandSave" data-args="receiveBeaconCount"></sc-button>
+				</td>
+			</tr>
+			<tr>
+				<th><sc-checkbox-field class="checkCl" id="beaconUUID" label="비콘 UUID" input-value="beaconUUID"on-checkchange="onCheckchange"></sc-checkbox-field></th>
+				<td>
+					<sc-text-field id="beaconUUID" value="{{datas.beaconUUID}}" required="true" ></sc-text-field>
+				</td>
+				<td hidden ="[[formula('isSettingInfo')]]">
+					<sc-button text="저장" on-click="onCommandSave" data-args="beaconUUID"></sc-button>
+				</td>
+			</tr>
+<!-- 			<tr> -->
+<!-- 				<th><sc-checkbox-field class="checkCl" id="dangerZoneBeaconUUID" label="위험지역 UUID" input-value="dangerZoneBeaconUUID" on-checkchange="onCheckchange"></sc-checkbox-field></th> -->
+<!-- 				<td> -->
+<!-- 					<sc-text-field id="dangerZoneBeaconUUID" value="{{datas.dangerZoneBeaconUUID}}" required="true" ></sc-text-field> -->
+<!-- 				</td> -->
+<!-- 				<td hidden ="[[formula('isSettingInfo')]]"> -->
+<!-- 					<sc-button text="저장" on-click="onCommandSave" data-args="dangerZoneBeaconUUID"></sc-button> -->
+<!-- 				</td> -->
+<!-- 			</tr> -->
+<!-- 			<tr> -->
+<!-- 				<th><sc-checkbox-field class="checkCl" id="dangerZoneBeaconRSSI" label="위험지역 RSSI" input-value="dangerZoneBeaconRSSI" on-checkchange="onCheckchange"></sc-checkbox-field></th> -->
+<!-- 				<td> -->
+<!-- 					<sc-text-field id="dangerZoneBeaconRSSI" value="{{datas.dangerZoneBeaconRSSI}}" required="true" ></sc-text-field> -->
+<!-- 				</td> -->
+<!-- 				<td hidden ="[[formula('isSettingInfo')]]"> -->
+<!-- 					<sc-button text="저장" on-click="onCommandSave" data-args="dangerZoneBeaconRSSI"></sc-button> -->
+<!-- 				</td> -->
+<!-- 			</tr> -->
+			<tr>
+				<th><sc-checkbox-field class="checkCl" id="beaconRSSI" label="비콘 최소 RSSI" input-value="beaconRSSI"  on-checkchange="onCheckchange"></sc-checkbox-field></th>
+				<td>
+					<sc-text-field id="beaconRSSI" value="{{datas.beaconRSSI}}" required="true" ></sc-text-field>
+				</td>
+				<td hidden ="[[formula('isSettingInfo')]]">
+					<sc-button text="저장" on-click="onCommandSave" data-args="beaconRSSI"></sc-button>
+				</td>
+			</tr>
+<!-- 			<tr> -->
+<!-- 				<th><sc-label text="단말기 설정정보 요청"></sc-label></th> -->
+<!-- 				<td><sc-label text="[설정]클릭시 단말기의 설정정보들을 요청합니다."></sc-label> -->
+<!-- 				</td> -->
+<!-- 				<td hidden ="[[formula('isSettingInfo')]]"> -->
+<!-- 					<sc-button text="설정" on-click="onCommandSave" data-args="settingReq"></sc-button> -->
+<!-- 				</td> -->
+<!-- 			</tr> -->
+		</table>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'ep-sensor-setting',
+			
+			properties:{
+				//팝업 타이틀 지정
+				titleText: {
+					type: String,
+					value: function () {
+						return "스마트태그 설정 화면";
+					}
+				},
+				sensorId:String,
+				siteId:String,
+				codes : {
+	               	type : Object,
+	               	value : function(){
+		               	return	{
+	               		};
+	               	},
+	               	reset: false
+	            },
+				datas : {
+					type : Object,
+					value : function(){
+						return {
+						};
+					}
+				},
+				commandInfo1 : {
+					type : Array,
+					value : function(){
+						return [];
+					}
+				},
+				setupType : {
+					type : Object,
+					value : function(){
+						return 'one';
+					}
+				}
+			},
+			formulas : {
+				isBundle :function(){
+					return  (this.get("setupType") == "bundle")
+				},
+				isStandard : function(){
+					return !(this.get("setupType") == "standard")
+				},
+				isOne : function(){
+					return 	(this.get("setupType") == "one")
+				},
+				isSettingInfo :function(){
+					return 	(this.get("setupType") == "standard")
+				}
+				
+			},
+			
+			load: function(setupType,siteId, sensorId,setupInfo){
+				var me = this;
+				me.set('siteId', siteId);
+				function isNumber(s) {
+				  s += ''; // 문자열로 변환
+				  s = s.replace(/^\s*|\s*$/g, ''); // 좌우 공백 제거
+				  if (s == '' || isNaN(s)) return false;
+				  return true;
+				}
+				
+				me.set('sensorId', sensorId);
+				if(UT.isNotEmpty(setupType)){
+					me.set('setupType', setupType);
+				}
+				me.applyFormula();
+			
+				if(me.formula('isBundle'))
+					me.set("titleText", "스마트태그 정보 - 일괄 현장 설정" );
+				else if(me.formula('isStandard'))
+					me.set("titleText", " 스마트태그 설정정보" );
+				
+				if(setupType != "one"){
+					me.onFindSensorEnvClick();
+				}else{
+					for(key in setupInfo){
+						if(setupInfo[key]==null) continue;
+						if(isNumber(setupInfo[key])){
+							setupInfo[key] = setupInfo[key].toString(); 
+						}
+// 						else if(typeof setupInfo[key] == "string"){
+// 							setupInfo[key] = setupInfo[key].toLowerCase();
+// 						}
+						
+					}
+					
+					// datas가 null일떄 빈 객체 넣어줌
+					if(setupInfo == null){
+						me.set("datas",{});
+					}else{
+						me.set("datas",setupInfo);
+					}
+					
+				}
+			},
+			
+			/* 현장 단말기 공통 설정 정보 조회 */
+			onFindSensorEnvClick: function(){
+            	var me = this;
+            	me.$.findSensorEnvironment.body = {
+                        siteId : me.get('siteId')
+                };
+                UT.request(me.$.findSensorEnvironment);
+            },
+			/* 현장 단말기 공통 설정 정보 조회 */
+			completeFindSensorEnvironment: function(e, res){
+            	var me = this;
+            	var result = res.response;
+            	
+            	console.log(result);
+            	if(UT.isEmpty(result)){
+            		me.set('datas',{});
+            	}else{
+            		me.set('datas',result.resultData);
+            	}
+            },
+			/* 현장 단말기 공통 설정 정보 저장 */
+			onSaveSensorEnvClick: function(){
+            	var me = this;
+            	if(!me.validate('info')){
+            		UT.alert("STD.E0000"); //유효하지 않은 입력값이 있습니다. 오류 정보를 확인해 주세요.
+            		return;
+            	}
+                UT.request(me.$.saveSensorEnvironment);
+            },
+            reqSettingInfo: function(){
+            	var me = this;
+            	var datas = me.get("datas");
+            	me.set("datas.dangerZoneBeaconRSSI", me.datas.dangerZoneBeaconRSSI + "");
+            	me.set("datas.beaconRSSI", me.datas.beaconRSSI + "");
+            	
+            	var commandInfo = me.commandInfo1;
+//            	var commandInfo = ['transTerm' , 'cmdReceiveTerm' ,'gyroOnOff' ,'gpsLevel' ,'buzzerStep' ,'receiveBeaconCount' ,'beaconUUID' , 'dangerZoneBeaconUUID' ,'dangerZoneBeaconRSSI', 'beaconRSSI'];
+            	//console.log(commandInfo);
+            	
+            	
+            	console.log($(".checkCl").is("[checked]"));
+            	
+            	if($(".checkCl").is("[checked]") == false){
+            		UT.alert("STD.N1600"); // 선택된 항목이 없습니다.
+            	}else{
+	            	UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+	            		for (var r = commandInfo.length -1; r > -1 ; r--) {
+	            			if(UT.isEmpty(me.datas[commandInfo[r]]))
+	            				continue;
+	                        me.$.saveSensorCommand.body = {
+	                            siteId : me.get('siteId'),
+	                            sensorId : me.get('sensorId'),
+	                    		command : commandInfo[r],
+	                    		datas: me.get('datas')
+	                        };
+	                        UT.request(me.$.saveSensorCommand);
+	                	}
+	            	});
+            	}
+            },
+            
+            onCheckchange : function(event) {
+        		var me = this,
+        		checked = event.detail;
+            	if(event.target.id == "checkAll"){
+            		
+            		if( $(".checkCl").attr('checked') ){
+            	    	 $(".checkCl").removeAttr("checked");
+            	      }else{
+            			$(".checkCl").prop("checked", true);
+            	      }
+            	}
+				if(checked == true){
+        			//console.log(event.target.id);
+        			if(event.target.id != "checkAll"){
+        			me.commandInfo1.push(event.target.id);
+ 
+        			}
+				}
+				if(me.commandInfo1 && checked == false){
+					me.commandInfo1.splice(me.commandInfo1.indexOf(event.target.id),1);
+				}
+            	//var commandInfo = ['transTerm' , 'cmdReceiveTerm' ,'gyroOnOff' ,'gpsLevel' ,'buzzerStep' ,'receiveBeaconCount' ,'beaconUUID' , 'dangerZoneBeaconUUID' ,'dangerZoneBeaconRSSI', 'beaconRSSI'];
+            	
+            	
+            	//console.log(me.commandInfo1);
+        		
+        	},
+            
+            
+            
+			/* 현장 단말기 공통 설정 정보 저장 */
+			completeSaveSensorEnvironment: function(e, res){
+                var me = this,
+                message = "STD.N2400"; // 저장하였습니다.
+
+	            if(res.response.result_status === 'S'){
+	                UT.alert(message, function(){
+	                    //me.onSearch();
+	                });
+	            } else {
+	                message = res.response.result_message;
+	                UT.alert(message);
+	            }
+            },
+            /* 센서원격명령 저장 */
+            onCommandSave: function(e){
+            	var me = this;
+            	var type = e.target.dataset.args;
+            	if(UT.isEmpty(me.datas[type])) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+            	
+            	me.set("datas.dangerZoneBeaconRSSI", me.datas.dangerZoneBeaconRSSI + "");
+            	me.set("datas.beaconRSSI", me.datas.beaconRSSI + "");
+
+                UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+                    me.$.saveSensorCommand.body = {
+                        siteId : me.get('siteId'),
+                        sensorId : me.get('sensorId'),
+                		command : type,
+                		datas: me.get('datas')
+                    };
+                    UT.request(me.$.saveSensorCommand);
+                });
+            },
+            
+            
+            
+            // 센서 원격명령 저장 완료
+            completeSaveSensorCommand: function(e, res){
+                var me = this,
+                    message = "STD.N2400"; // 저장하였습니다.
+				console.log(JSON.stringify(res.response));
+                var cnt=0;
+                for(var i = 0 ;i < res.response.length ; i++){
+                	if(res.response[i].result_status === 'S'){
+                		cnt=0;
+                	}else{
+                		cnt++;
+                	}
+                }  
+                    
+                if(cnt == 0){
+                    UT.alert(message, function(){
+                        //me.onSearch();
+                    });
+                } else {
+                    message = cnt+"만큼 실패하였습니다.";
+                    UT.alert(message);
+                }
+
+            }
+		});
+	</script>
+
+
+</dom-module>

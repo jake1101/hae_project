@@ -1,0 +1,6460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>GRID - API</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="icon" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+                <h1><img src="../assets/css/logo.png" title="API" width="117" height="52"></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.0.1</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+                    <h2 class="off-left">APIs</h2>
+                    <div id="api-tabview" class="tabview">
+                        <ul class="tabs">
+                            <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-elements">Elements</a></li>
+                            <li><a href="#api-modules">Modules</a></li>
+                        </ul>
+                
+                        <div id="api-tabview-filter">
+                            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+                        </div>
+                
+                        <div id="api-tabview-panel">
+                            <ul id="api-classes" class="apis classes">
+                                <li><a href="../classes/DEF.html">DEF</a></li>
+                                <li><a href="../classes/EDITOR.html">EDITOR</a></li>
+                                <li><a href="../classes/GRID.html">GRID</a></li>
+                                <li><a href="../classes/I18N.html">I18N</a></li>
+                                <li><a href="../classes/MSG.html">MSG</a></li>
+                                <li><a href="../classes/UPLOAD.html">UPLOAD</a></li>
+                                <li><a href="../classes/UT.html">UT</a></li>
+                                <li><a href="../classes/VALID.html">VALID</a></li>
+                            </ul>
+                
+                                <ul id="api-elements" class="apis elements">
+                                    <li><a href="../elements/cc-approval-summary.html">&lt;cc-approval-summary&gt;</a></li>
+                                    <li><a href="../elements/cc-dept-search.html">&lt;cc-dept-search&gt;</a></li>
+                                    <li><a href="../elements/cc-editor.html">&lt;cc-editor&gt;</a></li>
+                                    <li><a href="../elements/cc-from-to-date.html">&lt;cc-from-to-date&gt;</a></li>
+                                    <li><a href="../elements/cc-linked-vender.html">&lt;cc-linked-vender&gt;</a></li>
+                                    <li><a href="../elements/cc-multi-text-field.html">&lt;cc-multi-text-field&gt;</a></li>
+                                    <li><a href="../elements/cc-operorg-combobox-field.html">&lt;cc-operorg-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-operorg-multi-combobox-field.html">&lt;cc-operorg-multi-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-purc-grp.html">&lt;cc-purc-grp&gt;</a></li>
+                                    <li><a href="../elements/cc-sg-search.html">&lt;cc-sg-search&gt;</a></li>
+                                    <li><a href="../elements/cc-sp-operorg-combobox-field.html">&lt;cc-sp-operorg-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-sp-operorg-multi-combobox-field.html">&lt;cc-sp-operorg-multi-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-upload.html">&lt;cc-upload&gt;</a></li>
+                                    <li><a href="../elements/cc-user-search.html">&lt;cc-user-search&gt;</a></li>
+                                </ul>
+                
+                            <ul id="api-modules" class="apis modules">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+                    Show:
+                    <label for="api-show-inherited">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </div>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<h1>GRID Class</h1>
+<div class="box meta">
+
+
+        <div class="foundat">
+            Defined in: <a href="../files/js_grid.js.html#l1"><code>js\grid.js:1</code></a>
+        </div>
+
+
+</div>
+
+
+<div class="box intro">
+    <p>그리드에서 자주 사용하는 method를 정의한다</p>
+
+</div>
+
+
+<div id="classdocs" class="tabview">
+    <ul class="api-class-tabs">
+        <li class="api-class-tab index"><a href="#index">Index</a></li>
+
+            <li class="api-class-tab methods"><a href="#methods">Methods</a></li>
+    </ul>
+
+    <div>
+        <div id="index" class="api-class-tabpanel index">
+            <h2 class="off-left">Item Index</h2>
+
+                <div class="index-section methods">
+                    <h3>Methods</h3>
+
+                    <ul class="index-list methods">
+                            <li class="index-item method">
+                                <a href="#method_addChildRow">addChildRow</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_addCurrentRow">addCurrentRow</a>
+
+                            </li>
+                            <li class="index-item method private">
+                                <a href="#method_addResizeEvent">addResizeEvent</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_addRow">addRow</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_allRows">allRows</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_allStateRows">allStateRows</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_checkedStateRows">checkedStateRows</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_clearRows">clearRows</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_completeDeleteList">completeDeleteList</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_completeFindList">completeFindList</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_completeSaveList">completeSaveList</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_completeTreeFindList">completeTreeFindList</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_createdStateRows">createdStateRows</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_createGridView">createGridView</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_createTreeView">createTreeView</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_deletedStateRows">deletedStateRows</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_deleteList">deleteList</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_findList">findList</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_getTreeLeafRowIds">getTreeLeafRowIds</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_invalidData">invalidData</a>
+
+                            </li>
+                            <li class="index-item method private">
+                                <a href="#method_itemCountPropertyBinding">itemCountPropertyBinding</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_moveDown">moveDown</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_moveUp">moveUp</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_onCheckCellClicked">onCheckCellClicked</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_readOnly">readOnly</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_saveList">saveList</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_selectedList">selectedList</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setActionButtonColumn">setActionButtonColumn</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setActionColumn">setActionColumn</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setCheckboxColumn">setCheckboxColumn</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setCodeColumn">setCodeColumn</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setColumnDynamicStyle">setColumnDynamicStyle</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setColumnProperty">setColumnProperty</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setColumnRowGroupBy">setColumnRowGroupBy</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setColumnRowMerge">setColumnRowMerge</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setColumns">setColumns</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setColumnStyle">setColumnStyle</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setComboColumn">setComboColumn</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setConfig">setConfig</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setDatePickerColumn">setDatePickerColumn</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setDecimalColumn">setDecimalColumn</a>
+
+                            </li>
+                            <li class="index-item method private">
+                                <a href="#method_setDefaultOptions">setDefaultOptions</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setEditableColumn">setEditableColumn</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setFields">setFields</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setFlexibleColumn">setFlexibleColumn</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setIconColumn">setIconColumn</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setIntegerColumn">setIntegerColumn</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setOptions">setOptions</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setRows">setRows</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setSubComboColumn">setSubComboColumn</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setTreeRows">setTreeRows</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setValidator">setValidator</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_setVisibleColumn">setVisibleColumn</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_sortable">sortable</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_updatedStateRows">updatedStateRows</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_visibleCheckBarHeader">visibleCheckBarHeader</a>
+
+                            </li>
+                    </ul>
+                </div>
+
+
+
+        </div>
+
+            <div id="methods" class="api-class-tabpanel">
+                <h2 class="off-left">Methods</h2>
+
+<div id="method_addChildRow" class="method item">
+    <h3 class="name"><code>addChildRow</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>addedCallback()</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1601"><code>js\grid.js:1601</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>트리 그리드의 하위 노드 추가</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">addedCallback()</code>
+                        <span class="type">Function</span>
+
+
+                    <div class="param-description">
+                        <p>row가 추가된 후에 호출될 콜백 함수</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">parentRow</code>
+                                    <span class="type">Object</span>
+
+                                <div class="param-description">
+                                    <p>상위 row의 값</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">setValue(value)</code>
+                                    <span class="type">Function</span>
+
+                                <div class="param-description">
+                                    <p>추가된 row에 저장할 value를 할당하는 함수.</p>
+
+                                </div>
+
+                                    <ul class="params-list">
+                                        <li class="param">
+                                                <code class="param-name">value</code>
+                                                <span class="type">Array | Object</span>
+
+                                            <div class="param-description">
+                                                추가된 row에 저장할 value. value가 배열이면 복수의 행, object이면 단일행 추가.
+                                            </div>
+                                        </li>
+                                    </ul>
+                            </li>
+                        </ul>
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[addableMode=&quot;strict&quot;]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>추가 옵션</p>
+<pre>
+"strict" - 신규행의 하위 노드는 추가하지 못한다. "신규 노드에는 하위노드를 추가할 수 없습니다" 메시지 출력됨.
+"always" - 제한 없이 항상 추가 가능
+</pre>
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    GRID.addChildRow(me.gridView, function(parentRow, setValue) {
+        setValue({
+            field1: parentRow.field1,
+            field2: &quot;value2&quot;
+        });
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_addCurrentRow" class="method item">
+    <h3 class="name"><code>addCurrentRow</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>addedCallback()</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1556"><code>js\grid.js:1556</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>트리 그리드의 현재 노드 추가</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">addedCallback()</code>
+                        <span class="type">Function</span>
+
+
+                    <div class="param-description">
+                        <p>row가 추가된 후에 호출될 콜백 함수</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">parentRow</code>
+                                    <span class="type">Object</span>
+
+                                <div class="param-description">
+                                    <p>상위 row의 값. null 이면 root를 뜻함.</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">setValue(value)</code>
+                                    <span class="type">Function</span>
+
+                                <div class="param-description">
+                                    <p>추가된 row에 저장할 value를 할당하는 함수</p>
+
+                                </div>
+
+                                    <ul class="params-list">
+                                        <li class="param">
+                                                <code class="param-name">value</code>
+                                                <span class="type">Array | Object</span>
+
+                                            <div class="param-description">
+                                                추가된 row에 저장할 value. value가 배열이면 복수의 행, object이면 단일행 추가.
+                                            </div>
+                                        </li>
+                                    </ul>
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    GRID.addCurrentRow(me.gridView, function(parentRow, setValue) {
+        setValue({
+            field1: parentRow.field1,
+            field2: &quot;value2&quot;
+        });
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_addResizeEvent" class="method item private">
+    <h3 class="name"><code>addResizeEvent</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>container</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l101"><code>js\grid.js:101</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 리사이즈 event 리스너 추가</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">container</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>createGridView: function(container, fields, columns, configOptions) {
+    ...
+    GRID.addResizeEvent(gridView, container);
+    ...
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_addRow" class="method item">
+    <h3 class="name"><code>addRow</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>rowData</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[position=&quot;top&quot;]</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[addedCallback]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1477"><code>js\grid.js:1477</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 row 추가</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">rowData</code>
+                        <span class="type">Array | Object</span>
+
+
+                    <div class="param-description">
+                        <p>행 데이터 - rowData가 배열이이면 복수의 행, object이면 단일행 추가.</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[position=&quot;top&quot;]</code>
+                        <span class="type">String</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>추가할 위치(top, bottom, before(현재row기준), after(현재row기준))</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[addedCallback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>row가 추가된 후에 호출될 콜백 함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    GRID.addRow(me.gridView, {
+        field1: &quot;value1&quot;,
+        field2: &quot;value2&quot;
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_allRows" class="method item">
+    <h3 class="name"><code>allRows</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1411"><code>js\grid.js:1411</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 모든 데이터행을 리턴한다.
+<br>
+트리 그리드일 경우에는 트리구조가 없는 구조로 리턴한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[exceptDeleted=false]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>삭제된 row 제외.</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[datetimeFormat]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    var all = GRID.allRows(me.gridView);
+    for (var i = 0, len = all.length; i &lt; len; i++) {
+        ...
+    }
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_allStateRows" class="method item">
+    <h3 class="name"><code>allStateRows</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[outputFormat=DEF.styles.outputFormat]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1180"><code>js\grid.js:1180</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 목록에서 신규/수정/삭제/체크 row의 목록을 반환한다</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[outputFormat=DEF.styles.outputFormat]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>서버로 전송할 포맷 지정</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Object</span>:
+                    <pre>
+{
+    created: [], // 신규
+    updated: [], // 수정
+    deleted: [], // 삭제
+    checked: []  // 체크
+}
+</pre>
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    var rows = GRID.allStateRows(me.gridView);
+    me.$.saveInfo.body = {
+        insertData: rows.created,
+        updateData: rows.updated,
+        deleteData: rows.deleted
+    };
+    UT.save(me.$.saveInfo);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_checkedStateRows" class="method item">
+    <h3 class="name"><code>checkedStateRows</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[outputFormat=DEF.styles.outputFormat]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Array</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1316"><code>js\grid.js:1316</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 목록의 checkbox에서 체크된 row의 목록을 반환한다</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[outputFormat=DEF.styles.outputFormat]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>서버로 전송할 포맷 지정</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Array</span>:
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    var checked = GRID.checkedStateRows(me.treeGridView);
+    for(var i=0, len = created.length; i &lt; len; i++) {
+        ...
+    }
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_clearRows" class="method item">
+    <h3 class="name"><code>clearRows</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1664"><code>js\grid.js:1664</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 목록데이터 지우기</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    GRID.clearRows(me.gridView);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_completeDeleteList" class="method item">
+    <h3 class="name"><code>completeDeleteList</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>result</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[successCallback]</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[failureCallback]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1932"><code>js\grid.js:1932</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 목록 데이터 삭제 완료
+<br>
+&quot;요청을 완료 하였습니다&quot; 또는 &quot;오류가 발생하였습니다.\n관리자에게 문의하세요&quot; 메시지 출력</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">result</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>서버에서의 처리 결과</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[successCallback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>성공시 호출될 콜백 함수</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[failureCallback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>실패시 호출될 콜백 함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    GRID.completeDeleteList(me.gridView, res.response, function() {
+        ...
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_completeFindList" class="method item">
+    <h3 class="name"><code>completeFindList</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>rows</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[callback]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1860"><code>js\grid.js:1860</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 목록 로드 완료 - 그리드에 목록데이터 셋팅</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">rows</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>목록데이터</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[callback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>데이터 셋팅 완료 후 호출될 콜백 함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function(e, res) {
+    var me = this;
+    GRID.completeFindList(me.gridView, res.response);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_completeSaveList" class="method item">
+    <h3 class="name"><code>completeSaveList</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>result</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[successCallback]</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[failureCallback]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1899"><code>js\grid.js:1899</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 목록 데이터 저장 완료
+<br>
+&quot;요청을 완료 하였습니다&quot; 또는 &quot;오류가 발생하였습니다.\n관리자에게 문의하세요&quot; 메시지 출력</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">result</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>서버에서의 처리 결과</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[successCallback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>성공시 호출될 콜백 함수</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[failureCallback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>실패시 호출될 콜백 함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function(e, res) {
+    var me = this;
+    GRID.completeSaveList(me.gridView, res.response, function() {
+        ...
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_completeTreeFindList" class="method item">
+    <h3 class="name"><code>completeTreeFindList</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>rows</code>
+                </li>
+                <li class="arg">
+                        <code>treeFieldName</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[callback]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1878"><code>js\grid.js:1878</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>트리 그리드의 목록 로드 완료 - 그리드에 목록데이터 셋팅</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">rows</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>목록데이터</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">treeFieldName</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>트리가 적용될 필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[callback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>데이터 셋팅 완료 후 호출될 콜백 함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function(e, res) {
+    var me = this;
+    GRID.completeTreeFindList(me.gridView, res.response, &quot;tree&quot;, function() {
+        ...
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_createdStateRows" class="method item">
+    <h3 class="name"><code>createdStateRows</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[outputFormat=DEF.styles.outputFormat]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Array</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1217"><code>js\grid.js:1217</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 목록에서 신규로 추가된 row의 목록을 반환한다</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[outputFormat=DEF.styles.outputFormat]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>서버로 전송할 포맷 지정</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Array</span>:
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    var created = GRID.createdStateRows(me.gridView);
+    me.$.saveInfo.body = {
+        insertData: created
+    };
+    UT.save(me.$.saveInfo);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_createGridView" class="method item">
+    <h3 class="name"><code>createGridView</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>container</code>
+                </li>
+                <li class="arg">
+                        <code>fields</code>
+                </li>
+                <li class="arg">
+                        <code>columns</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[configOptions]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l8"><code>js\grid.js:8</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 생성</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">container</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>container</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fields</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>그리드 fields 정보</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">columns</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>그리드 columns 정보</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[configOptions]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <ul>
+<li>GRID.setConfig 참조</li>
+</ul>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Object</span>:
+                    <p>grid</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>initGrid: function() {
+    var me = this;
+    var fields = [
+        &quot;field1&quot;,
+        &quot;field2 | datetime&quot;,
+        &quot;field3 | number&quot;
+    ];
+    var columns = [
+        &quot;field1 | 필드1 | 150 | near&quot;,
+        &quot;field2 | 필드2 | 150&quot;,
+        &quot;field3 | 필드3 | 150&quot;
+    ];
+    var validator = [];
+    validator.push({
+        fieldName: &quot;field1&quot;,
+        check: [&quot;required&quot;, &quot;!space&quot;, &quot;unique&quot;],
+        maxLength: 18
+    });
+
+    me.gridView = GRID.createGridView(me.$.gridPanel, fields, columns, {
+        actionFields: [&quot;field1&quot;],
+        editableFields: [&quot;field2&quot;],
+        editableCheckFields: [&quot;field3&quot;],
+        insertedAfterEditableFields: [&quot;field1&quot;],
+        checkableExpression: &quot;value['field3'] = 0&quot;,
+        itemCountPropertyBinding: function(itemCount) {
+            me.set(&quot;gridItemCount&quot;, itemCount);
+        },
+        validator: validator
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_createTreeView" class="method item">
+    <h3 class="name"><code>createTreeView</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>container</code>
+                </li>
+                <li class="arg">
+                        <code>fields</code>
+                </li>
+                <li class="arg">
+                        <code>columns</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[configOptions]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l60"><code>js\grid.js:60</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>트리 그리드 생성</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">container</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>container</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fields</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>그리드 fields 정보</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">columns</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>그리드 columns 정보</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[configOptions]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <ul>
+<li>GRID.setConfig 참조</li>
+</ul>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Object</span>:
+                    <p>grid</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>initGrid: function() {
+    var me = this;
+    var fields = [
+        &quot;field1&quot;,
+        &quot;field2 | datetime&quot;,
+        &quot;field3 | number&quot;
+    ];
+    var columns = [
+        &quot;field1 | 필드1 | 150 | near&quot;,
+        &quot;field2 | 필드2 | 150&quot;,
+        &quot;field3 | 필드3 | 150&quot;
+    ];
+    me.gridView = GRID.createTreeView(me.$.gridPanel, fields, columns, {
+        editableCheckFields: [&quot;field1&quot;],
+        treeItemCheckedMode: &quot;children&quot;,
+        itemCountPropertyBinding: function(itemCount) {
+            me.set(&quot;gridItemCount&quot;, itemCount);
+        }
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_deletedStateRows" class="method item">
+    <h3 class="name"><code>deletedStateRows</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[outputFormat=DEF.styles.outputFormat]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Array</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1283"><code>js\grid.js:1283</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 목록에서 삭제된 row의 목록을 반환한다</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[outputFormat=DEF.styles.outputFormat]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>서버로 전송할 포맷 지정</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Array</span>:
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    var deleted = GRID.deletedStateRows(me.gridView);
+    me.$.saveInfo.body = {
+        deleteData: deleted
+    };
+    UT.save(me.$.saveInfo);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_deleteList" class="method item">
+    <h3 class="name"><code>deleteList</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>callback()</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[optons]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1791"><code>js\grid.js:1791</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 row 삭제
+<br>
+&quot;삭제 하시겠습니까?&quot; 또는 &quot;수정중인 데이터가 있습니다. 삭제 하시겠습니까?&quot; 또는 &quot;선택된 항목이 없습니다&quot; 메시지 출력</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">callback()</code>
+                        <span class="type">Function</span>
+
+
+                    <div class="param-description">
+                        <p>&quot;삭제 하시겠습니까?&quot; confirm 에서 ok 가 클릭된 후 호출될 콜백 함수</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">deleted</code>
+                                    <span class="type">Array</span>
+
+                                <div class="param-description">
+                                    <p>삭제된 데이터</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">request(ajax)</code>
+                                    <span class="type">Function</span>
+
+                                <div class="param-description">
+                                    <p>서버로 삭제를 요청할 콜백 함수</p>
+
+                                </div>
+
+                                    <ul class="params-list">
+                                        <li class="param">
+                                                <code class="param-name">ajax</code>
+                                                <span class="type">Object</span>
+
+                                            <div class="param-description">
+                                                sc-ajax 객체
+                                            </div>
+                                        </li>
+                                    </ul>
+                            </li>
+                        </ul>
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[optons]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[message]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>&quot;삭제 하시겠습니까?&quot; 와 다른 메시지를 출력할 경우 지정</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    GRID.deleteList(me.gridView, function(deleted, request) {
+        if (deleted.length &gt; 0) {
+            me.$.deleteList.body = {
+               deleteMenus: deleted
+            }
+            request(me.$.deleteList);
+        }
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_findList" class="method item">
+    <h3 class="name"><code>findList</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>ajax</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1731"><code>js\grid.js:1731</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 목록 조회 요청</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">ajax</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>sc-ajax 객체</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    GRID.findList(me.gridView, me.$.findList);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_getTreeLeafRowIds" class="method item">
+    <h3 class="name"><code>getTreeLeafRowIds</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>rowId</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l2048"><code>js\grid.js:2048</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 주어진 row의 하위 모든 leaf 노드의 rowId 만 리턴한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">rowId</code>
+                        <span class="type">Number</span>
+
+
+                    <div class="param-description">
+                        <p>데이터행 index</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    var leafs = GRID.getTreeLeafRowIds(me.gridView, -1); // -1 이면 전체
+    me.gridView.setCellStyles(leafs, &quot;field1&quot;, DEF.styles.actionable.id); // leaf 노드만 actionable
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_invalidData" class="method item">
+    <h3 class="name"><code>invalidData</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Boolean</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1156"><code>js\grid.js:1156</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 데이터 유효성 검사</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Boolean</span>:
+                    <p>true is invalid</p>
+
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>onSaveList: function() {
+    var me = this;
+    if (GRID.invalidData(me.gridView)) {
+        return;
+    }
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_itemCountPropertyBinding" class="method item private">
+    <h3 class="name"><code>itemCountPropertyBinding</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l449"><code>js\grid.js:449</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 아이템수 바인딩</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>gridView.onFilteringChanged = function(grid) {
+    GRID.itemCountPropertyBinding(grid);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_moveDown" class="method item">
+    <h3 class="name"><code>moveDown</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[callback]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l2107"><code>js\grid.js:2107</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 체크된 row를 아래로 이동시킨다</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[callback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>이동 후 호출될 콜백함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    GRID.moveDown(me.gridView, function() {
+        ...
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_moveUp" class="method item">
+    <h3 class="name"><code>moveUp</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[callback]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l2073"><code>js\grid.js:2073</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 체크된 row를 위로 이동시킨다</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[callback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>이동 후 호출될 콜백함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    GRID.moveUp(me.gridView, function() {
+        ...
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_onCheckCellClicked" class="method item">
+    <h3 class="name"><code>onCheckCellClicked</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>cell</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1965"><code>js\grid.js:1965</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>트리 그리드의 체크 cell 이 클릭 되었을때 이벤트</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">cell</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>셀 정보</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[children=true]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>true: 자식 노드들도 동일한 check 값을 적용</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[ancestor=true]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>true: 조상 노드들도 동일한 check 값을 적용. uncheck시에는 클릭된 cell 과 동일한 레벨에 check 된 것이 없어야 부모 노드가 uncheck 된다</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[values]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>true 값, false 값 정의</p>
+
+                                </div>
+
+                                    <ul class="params-list">
+                                        <li class="param">
+                                                <code class="param-name optional">[trueValue=&quot;Y&quot;]</code>
+                                                <span class="type">String</span>
+                                                <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                            <div class="param-description">
+                                                true 값
+                                            </div>
+                                        </li>
+                                        <li class="param">
+                                                <code class="param-name optional">[falseValue=&quot;N&quot;]</code>
+                                                <span class="type">String</span>
+                                                <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                            <div class="param-description">
+                                                false 값
+                                            </div>
+                                        </li>
+                                    </ul>
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    me.gridView.onDataCellClicked = function(grid, cell) {
+        if(cell.fieldName == &quot;field1&quot;) {
+            GRID.onCheckCellClicked(grid, cell, {children: true, ancestor: true});
+        }
+    }
+
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_readOnly" class="method item">
+    <h3 class="name"><code>readOnly</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>readonly</code>
+                </li>
+                <li class="arg">
+                        <code>exFieldName</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l2178"><code>js\grid.js:2178</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 읽기 전용 설정</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">readonly</code>
+                        <span class="type">Boolean</span>
+
+
+                    <div class="param-description">
+                        <p>true is readonly</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">exFieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>제외 필드명</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    if (...) {
+        GRID.readOnly(me.gridView, true);
+    } else {
+        GRID.readOnly(me.gridView, false);
+    }
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_saveList" class="method item">
+    <h3 class="name"><code>saveList</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>callback()</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[optons]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1747"><code>js\grid.js:1747</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 목록 데이터 저장
+<br>
+&quot;저장 하시겠습니까?&quot; 또는 &quot;변경된 내용이 없습니다&quot; 메시지 출력</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">callback()</code>
+                        <span class="type">Function</span>
+
+
+                    <div class="param-description">
+                        <p>&quot;저장 하시겠습니까?&quot; confirm 에서 ok 가 클릭된 후 호출될 콜백 함수</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">created</code>
+                                    <span class="type">Array</span>
+
+                                <div class="param-description">
+                                    <p>신규 추가된 데이터</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">updated</code>
+                                    <span class="type">Array</span>
+
+                                <div class="param-description">
+                                    <p>수정된 데이터</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">request(ajax)</code>
+                                    <span class="type">Function</span>
+
+                                <div class="param-description">
+                                    <p>서버로 저장을 요청할 콜백 함수</p>
+
+                                </div>
+
+                                    <ul class="params-list">
+                                        <li class="param">
+                                                <code class="param-name">ajax</code>
+                                                <span class="type">Object</span>
+
+                                            <div class="param-description">
+                                                sc-ajax 객체
+                                            </div>
+                                        </li>
+                                    </ul>
+                            </li>
+                        </ul>
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[optons]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[force=false]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>true 이면 변경된 내용이 없어도 confirm 으로 수행된다.</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[outputFormat=DEF.styles.outputFormat]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>서버로 전송할 포맷 지정</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    GRID.saveList(me.gridView, function(created, updated, request) {
+        me.$.saveList.body = {
+            insertData: created,
+            updateData: updated
+        };
+        request(me.$.saveList);
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_selectedList" class="method item">
+    <h3 class="name"><code>selectedList</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>selectedCallback(selected,</code>
+                </li>
+                <li class="arg">
+                        <code>selectedCallback(selected,</code>
+                </li>
+                <li class="arg">
+                        <code>selectedCallback(selected,</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1364"><code>js\grid.js:1364</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>팝업에서 선택된 목록 반환
+<br>
+선택된 데이터가 없을 시 &quot;선택된 항목이 없습니다&quot; 메시지 출력됨</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">selectedCallback(selected,</code>
+                        <span class="type">Function</span>
+
+
+                    <div class="param-description">
+                        <p>itemIndex)          체크박스에에 의해 선택된 정보를 반환할 콜백 함수</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">selectedCallback(selected,</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>itemIndex).selected 선택된 정보</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">selectedCallback(selected,</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>itemIndex).index    선택된 dataRow와 연결된 itemIndex</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[checkable=true]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>선택된 정보를 반환한 후에 해당 데이터의 check 가능 여부 설정</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[clearChecked=false]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>선택된 정보를 반환한 후에 해당 데이터의 check를 해제할 지 여부 설정</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    GRID.selectedList(me.gridView, function(selected, itemIndex) {
+        me.fire(&quot;addto-operorg&quot;, selected);
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setActionButtonColumn" class="method item">
+    <h3 class="name"><code>setActionButtonColumn</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[clickedCallback()]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1026"><code>js\grid.js:1026</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 action button 컬럼으로 설정한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[clickedCallback()]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>버튼 클릭 후 콜백함수</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">grid</code>
+                                    <span class="type">Object</span>
+
+                                <div class="param-description">
+                                    <p>grid</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">itemIndex</code>
+                                    <span class="type">Object</span>
+
+                                <div class="param-description">
+                                    <p>itemIndex</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">column</code>
+                                    <span class="type">Object</span>
+
+                                <div class="param-description">
+                                    <p>column</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setActionButtonColumn(me.gridView, &quot;field1&quot;, function(grid, itemIndex, column) {
+        ...
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setActionColumn" class="method item">
+    <h3 class="name"><code>setActionColumn</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l574"><code>js\grid.js:574</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 액션 컬럼으로 설정한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function(gridView) {
+    GRID.setActionColumn(gridView, [&quot;field1&quot;]);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setCheckboxColumn" class="method item">
+    <h3 class="name"><code>setCheckboxColumn</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l791"><code>js\grid.js:791</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 체크박스 컬럼으로 설정한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[styles=DEF.styles.formatYn]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Y/N으로 구분되는 컬럼의 format 스타일</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[renderer=DEF.renderer.checkboxYn]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Y/N으로 구분되는 컬럼의 checkbox renderer</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setCheckboxColumn(me.gridView, [&quot;field1&quot;]);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setCodeColumn" class="method item">
+    <h3 class="name"><code>setCodeColumn</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+                <li class="arg">
+                        <code>codes</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l663"><code>js\grid.js:663</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 코드 컬럼으로 설정한다</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">codes</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>코드 목록</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[valueKey=&quot;data&quot;]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>코드 목록에서 value를 가르키는 key값</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[labelKey=&quot;label&quot;]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>코드 목록에서 label을 가르키는 key값</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[defaultLabel]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>코드 목록에서 defaultLabel 설정</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setCodeColumn(me.gridView, &quot;field1&quot;, me.codes.code1);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setColumnDynamicStyle" class="method item">
+    <h3 class="name"><code>setColumnDynamicStyle</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+                <li class="arg">
+                        <code>criteria</code>
+                </li>
+                <li class="arg">
+                        <code>styles</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l955"><code>js\grid.js:955</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 dynamic style을 지정한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">criteria</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>조건식 (예)&quot;values['field2'] &lt;&gt; 'Y'&quot;</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">styles</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>적용할 스타일</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setColumnDynamicStyle(me.gridView, [&quot;field1&quot;], &quot;values['field2'] &lt;&gt; 'Y'&quot;, {background: &quot;#fafafa&quot;});
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setColumnProperty" class="method item">
+    <h3 class="name"><code>setColumnProperty</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+                <li class="arg">
+                        <code>propertyName</code>
+                </li>
+                <li class="arg">
+                        <code>propertyValue</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1004"><code>js\grid.js:1004</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 컬럼 프로퍼티 값 지정</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">propertyName</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>프로퍼티 명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">propertyValue</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>프로퍼티 값</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setColumnProperty(me.gridView, &quot;field1&quot;, &quot;textInputCase&quot;, &quot;upper&quot;);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setColumnRowGroupBy" class="method item">
+    <h3 class="name"><code>setColumnRowGroupBy</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1061"><code>js\grid.js:1061</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 row를 그룹화 한다</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>옵션</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setColumnRowGroupBy(me.gridView, &quot;field1&quot;, {mergeMode: false});
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setColumnRowMerge" class="method item">
+    <h3 class="name"><code>setColumnRowMerge</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options.criteria]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1082"><code>js\grid.js:1082</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 row를 merge 한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options.criteria]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>옵션
+criteria 옵션은 해당 사이트 참고
+참조 사이트
+column cell merge
+<a href="http://demo.realgrid.com/Demo/ColumnCellMerging">http://demo.realgrid.com/Demo/ColumnCellMerging</a>
+criteria 조건들
+<a href="http://demo.realgrid.com/Demo/ExpressionConcept">http://demo.realgrid.com/Demo/ExpressionConcept</a>
+merge시 데이타내용상단으로
+<a href="http://demo.realgrid.com/Demo/ColumnBlanking#">http://demo.realgrid.com/Demo/ColumnBlanking#</a></p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setColumnRowMerge(me.gridView, &quot;field1&quot;, {criteria: &quot;value&quot;});
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setColumns" class="method item">
+    <h3 class="name"><code>setColumns</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>columns</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l514"><code>js\grid.js:514</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 컬럼 정보를 설정한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">columns</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>그리드의 컬럼 정보</p>
+<pre>
+columns : array (object or string)
+        : string 형식 - fieldName|text|width|align(center, near, far) - align이 center 인 경우는 생략가능
+        : object - string 형식의 fieldName, text, width, align 이외에 추가 설정이 필요한 경우는 object 형태를 이용한다.
+</pre>
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function(gridView) {
+    var columns = [
+        &quot;field1 | 필드1 | 150 | near&quot;,
+        &quot;field2 | 필드2 | 150&quot;,
+        &quot;field3 | 필드3 | 150&quot;
+    ];
+    GRID.setColumns(gridView, columns);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setColumnStyle" class="method item">
+    <h3 class="name"><code>setColumnStyle</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+                <li class="arg">
+                        <code>styles</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l982"><code>js\grid.js:982</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 컬럼 스타일 지정</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">styles</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>적용할 스타일</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setColumnStyle(me.gridView, [&quot;field1&quot;], {background: &quot;#fafafa&quot;});
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setComboColumn" class="method item">
+    <h3 class="name"><code>setComboColumn</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+                <li class="arg">
+                        <code>codes</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l712"><code>js\grid.js:712</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 콤보 컬럼으로 설정한다</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">codes</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>코드 목록</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[valueKey=&quot;data&quot;]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>코드 목록에서 value를 가르키는 key값</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[labelKey=&quot;label&quot;]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>코드 목록에서 label을 가르키는 key값</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[defaultLabel]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>코드 목록에서 defaultLabel 설정</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setComboColumn(me.gridView, &quot;field1&quot;, me.codes.code1);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setConfig" class="method item">
+    <h3 class="name"><code>setConfig</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fields</code>
+                </li>
+                <li class="arg">
+                        <code>columns</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l123"><code>js\grid.js:123</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 설정</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fields</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>그리드 fields 정보</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">columns</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>그리드 columns 정보</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[actionFields]</code>
+                                    <span class="type">Array</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>action 컬럼</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[editableFields]</code>
+                                    <span class="type">Array</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>편집가능 컬럼</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[editableCheckFields]</code>
+                                    <span class="type">Array</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>checkbox 컬럼</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[insertedAfterEditableFields]</code>
+                                    <span class="type">Array</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>신규 row 추가 후 편집 가능 컬럼</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[validator]</code>
+                                    <span class="type">Array</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>유효성 검사 설정</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[checkableExpression]         checkBar의 체크 가능 설정. (예)&quot;value[&#x27;use_count_org&#x27;]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>= 0&quot;</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[treeItemCheckedMode]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>leaf: 하위 노드가 없는 것만 체크 가능, children: 하위 노드 모두 체크, ancestor: 상위 노드 모두 체크</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[enableContextMenu=true]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>context menu 활성 여부</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[itemCountPropertyBinding]</code>
+                                    <span class="type">Function</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>grid item count property bind  - 그리드의 데이터 수 표시값 바인드 함수</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[onRowInsertedHandler]</code>
+                                    <span class="type">Function</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>onRowInserted handler</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[onRowAddedHandler]</code>
+                                    <span class="type">Function</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>onRowAdded handler</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[onItemCheckedHandler]</code>
+                                    <span class="type">Function</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>onItemChecked handler</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[onCellEditedHandler]</code>
+                                    <span class="type">Function</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>onCellEdited handler</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[onFilteringChangedHandler]</code>
+                                    <span class="type">Function</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>onFilteringChanged handler</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>createGridView: function(container, fields, columns, configOptions) {
+    ...
+    GRID.setConfig(gridView, fields, columns, configOptions);
+    ...
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setDatePickerColumn" class="method item">
+    <h3 class="name"><code>setDatePickerColumn</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l893"><code>js\grid.js:893</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 DatePicker 컬럼으로 설정한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[editor=DEF.editor.datePicker]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>DateCellEditor</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[styles=DEF.styles.formatDate]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>날짜 format 스타일</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setDatePickerColumn(me.gridView, [&quot;field1&quot;]);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setDecimalColumn" class="method item">
+    <h3 class="name"><code>setDecimalColumn</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l857"><code>js\grid.js:857</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 소수점 숫자 컬럼으로 설정한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[maxLength=DEF.editor.decimal.maxLength]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>입력할 수 있는 문자의 최대 개수. 0 이면 제한이 없다</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[positiveOnly=DEF.editor.decimal.positiveOnly]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>true: 양수값만 입력할수 있다</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[numberFormat=DEF.styles.formatDecimal.numberFormat]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>&quot;#,000.00&quot; : comma, 소수점 2자리</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[textAlignment=DEF.styles.formatDecimal.textAlignment]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>&quot;far&quot;: 오른쪽 정렬</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setDecimalColumn(me.gridView, [&quot;field1&quot;]);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setDefaultOptions" class="method item private">
+    <h3 class="name"><code>setDefaultOptions</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l350"><code>js\grid.js:350</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 디폴트 옵션 설정</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>createGridView: function(container, fields, columns, configOptions) {
+    ...
+    GRID.setDefaultOptions(gridView);
+    ...
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setEditableColumn" class="method item">
+    <h3 class="name"><code>setEditableColumn</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l614"><code>js\grid.js:614</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 편집가능 컬럼으로 설정한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function(gridView) {
+    GRID.setEditableColumn(gridView, [&quot;field1&quot;]);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setFields" class="method item">
+    <h3 class="name"><code>setFields</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fields</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l467"><code>js\grid.js:467</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 필드 정보를 설정한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fields</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>그리드의 필드 정보</p>
+<pre>
+fields : array (object or string)
+       : string 형식 - fieldName:dataType(text, bool, number, datetime) - dataType이 text 인 경우는 생략가능
+       : object - string 형식의 fieldName, dataType 이외에 추가 설정이 필요한 경우는 object 형태를 이용한다.
+</pre>
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function(gridView) {
+    var fields = [
+        &quot;field1&quot;,
+        &quot;field2 | datetime&quot;,
+        &quot;field3 | number&quot;
+    ];
+    GRID.setFields(gridView, fields);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setFlexibleColumn" class="method item">
+    <h3 class="name"><code>setFlexibleColumn</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l639"><code>js\grid.js:639</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 flexible 컬럼으로 설정한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setFlexibleColumn(me.gridView, [&quot;field1&quot;]);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setIconColumn" class="method item">
+    <h3 class="name"><code>setIconColumn</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l920"><code>js\grid.js:920</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 icon 컬럼으로 설정한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[styles=DEF.styles.icons.search]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>검색 icon 스타일 // DEF.styles.icons 참조.</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setIconColumn(me.gridView, [&quot;field1&quot;]);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setIntegerColumn" class="method item">
+    <h3 class="name"><code>setIntegerColumn</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l821"><code>js\grid.js:821</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 정수 숫자 컬럼으로 설정한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[maxLength=DEF.editor.integer.maxLength]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>입력할 수 있는 문자의 최대 개수. 0 이면 제한이 없다</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[positiveOnly=DEF.editor.integer.positiveOnly]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>true: 양수값만 입력할수 있다</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[numberFormat=DEF.styles.formatInteger.numberFormat]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>&quot;#,000&quot; : comma</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[textAlignment=DEF.styles.formatInteger.textAlignment]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>&quot;far&quot;: 오른쪽 정렬</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setIntegerColumn(me.gridView, [&quot;field1&quot;]);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setOptions" class="method item">
+    <h3 class="name"><code>setOptions</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>options</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l422"><code>js\grid.js:422</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 옵션 설정</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">options</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>그리드의 옵션</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setOptions(me.gridView, {
+        stateBar: {
+            visible: false
+        },
+        checkBar: {
+            visible: false
+        }
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setRows" class="method item">
+    <h3 class="name"><code>setRows</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>rows</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[callback]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1680"><code>js\grid.js:1680</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 목록 로드 - 그리드에 목록데이터 셋팅</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">rows</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>목록데이터</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[callback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>데이터 셋팅 완료 후 호출될 콜백 함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    GRID.setRows(me.gridView, rows);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setSubComboColumn" class="method item">
+    <h3 class="name"><code>setSubComboColumn</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>masterFieldName</code>
+                </li>
+                <li class="arg">
+                        <code>subFieldName</code>
+                </li>
+                <li class="arg">
+                        <code>codes</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[options]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l740"><code>js\grid.js:740</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 주콤보 컬럼에 대한 부콤보 컬럼으로 설정한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">masterFieldName</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>주콤보 필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">subFieldName</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>부콤보 필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">codes</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>코드 목록</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[options]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name optional">[valueKey=&quot;data&quot;]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>코드 목록에서 value를 가르키는 key값</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[labelKey=&quot;label&quot;]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>코드 목록에서 label을 가르키는 key값</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[relationKey=&quot;relation&quot;]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>코드 목록에서 주콤보 컬럼의 값을 가르키는 key값</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    GRID.setComboColumn(me.gridView, &quot;field1&quot;, me.codes.code1);
+    GRID.setSubComboColumn(me.gridView, &quot;field1&quot;, &quot;field2&quot;, me.codes.code2);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setTreeRows" class="method item">
+    <h3 class="name"><code>setTreeRows</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>rows</code>
+                </li>
+                <li class="arg">
+                        <code>treeFieldName</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[callback]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag async">async</span>
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1704"><code>js\grid.js:1704</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>트리 그리드의 목록 로드 - 그리드에 목록데이터 셋팅</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">rows</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>목록데이터</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">treeFieldName</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>트리가 적용될 필드명</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[callback]</code>
+                        <span class="type">Function</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>데이터 셋팅 완료 후 호출될 콜백 함수</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function(e, res) {
+    var me = this;
+    ...
+    GRID.setTreeRows(me.gridView, rows, &quot;tree&quot;, function() {
+        ...
+    });
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setValidator" class="method item">
+    <h3 class="name"><code>setValidator</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>validator</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1117"><code>js\grid.js:1117</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 validator를 설정한다.
+<br>
+설정 한 후에 필요한 곳에서 GRID.invalidData()를 호출하여 유효성 검사를 할 수 있다</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">validator</code>
+                        <span class="type">Array</span>
+
+
+                    <div class="param-description">
+                        <p>유효성 검사 설정</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function() {
+    var me = this;
+    var validator = [];
+    validator.push({
+        fieldName: &quot;field1&quot;,
+        check: [&quot;required&quot;, &quot;!space&quot;, &quot;unique&quot;],
+        maxLength: 18
+    });
+    GRID.setValidator(me.gridView, validator);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_setVisibleColumn" class="method item">
+    <h3 class="name"><code>setVisibleColumn</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>fieldName</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l589"><code>js\grid.js:589</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 컬럼 visible 를 설정한다.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">fieldName</code>
+                        <span class="type">Array | String</span>
+
+
+                    <div class="param-description">
+                        <p>필드명</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>setupGrid: function(gridView) {
+    GRID.setVisibleColumn(gridView, [&quot;field1&quot;], false);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_sortable" class="method item">
+    <h3 class="name"><code>sortable</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>sortable</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l2160"><code>js\grid.js:2160</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 소팅 기능 여부 설정</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">sortable</code>
+                        <span class="type">Boolean</span>
+
+
+                    <div class="param-description">
+                        <p>true is sortable</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    GRID.sortable(me.gridView, false); // 소팅기능 없음
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_updatedStateRows" class="method item">
+    <h3 class="name"><code>updatedStateRows</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[outputFormat=DEF.styles.outputFormat]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Array</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l1250"><code>js\grid.js:1250</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드 목록에서 수정된 row의 목록을 반환한다</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[outputFormat=DEF.styles.outputFormat]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>서버로 전송할 포맷 지정</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Array</span>:
+            </div>
+        </div>
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    ...
+    var updated = GRID.updatedStateRows(me.gridView);
+    me.$.saveInfo.body = {
+        updateData: updated
+    };
+    UT.save(me.$.saveInfo);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+<div id="method_visibleCheckBarHeader" class="method item">
+    <h3 class="name"><code>visibleCheckBarHeader</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>gridView</code>
+                </li>
+                <li class="arg">
+                        <code>visible</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/js_grid.js.html#l2142"><code>js\grid.js:2142</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>그리드의 checkBar 헤더 visible 설정</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">gridView</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>grid</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">visible</code>
+                        <span class="type">Boolean</span>
+
+
+                    <div class="param-description">
+                        <p>true is visible</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="example">
+            <h4>Example:</h4>
+
+            <div class="example-content">
+                <pre class="code prettyprint"><code>someFunction: function() {
+    var me = this;
+    GRID.visibleCheckBarHeader(me.gridView, false);
+}</code></pre>
+
+            </div>
+        </div>
+</div>
+            </div>
+
+
+
+    </div>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

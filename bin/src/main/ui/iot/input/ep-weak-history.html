@@ -1,0 +1,225 @@
+<dom-module id="ep-weak-history">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 작업자 보건이력 팝업
+        ** @Description		: 작업자 보건이력 팝업
+        ** @Author 			: jhbaek
+        ** @Create Date 	: 2020.09.03
+        ** @History 		: 2020.09.03 jhbaek 최초작성
+        ******************************************************************************************
+    -->
+
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+	</style>
+	
+	<template>
+	
+	<sc-request-group init>
+			<sc-code-group>
+				<sc-code code="IOT005" value="{{medicalList}}"></sc-code>
+			</sc-code-group>
+	</sc-request-group>
+ 		<sc-ajax id="findMedicalLog"
+				 url="findMedicalLog.do"
+				 body="{{searchParam}}"
+				 on-response="completeFindMedicalLog">
+		</sc-ajax>
+		
+		<sc-ajax
+				id="saveListMedical"
+				url="saveListMedical.do"
+				on-response="completeSaveListMedical">
+		</sc-ajax>
+		<sc-ajax
+				id="deleteMedical"
+				url="deleteMedical.do"
+				on-response="completeDeleteMedical">
+		</sc-ajax>
+		
+		<sc-grid id="gridPanel" data-provider="{{resultList}}" class="flex" on-item-click="onItemClick" editable="true">
+               <cc-grid-toolbar>
+                <sc-button text="추가" on-click="onAddMedical" auth-s></sc-button>
+                   <sc-button text="저장" on-click="onSaveMedical" auth-s></sc-button>
+                   <sc-button text="삭제" on-click="onDeleteMedical" auth-s></sc-button>
+               </cc-grid-toolbar>
+               <sc-grid-columns>
+                  <sc-combobox-column	data-field="medicalCode"	header-text="구분"	width="150"		
+					display-field="label"	value-field="data"	items="[[medicalList]]"  editable="true"></sc-combobox-column>
+                   <sc-data-column data-field="description" header-text="상세내용" width="250" editable="true" text-align="left"></sc-data-column>
+               	<sc-date-column data-field="createdDt" 	  header-text="등록일"   width="200" text-align="center"   display-format="yyyy/MM/dd HH:mm:ss" editable="false"></sc-date-column>
+               </sc-grid-columns>
+          	</sc-grid>
+          	<sc-grid-fields>
+			<sc-grid-field data-field="id"></sc-grid-field>
+			<sc-grid-field data-field="siteId" data-type="number"></sc-grid-field>
+			<sc-grid-field data-field="workerId"></sc-grid-field>
+			<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+		</sc-grid-fields>
+			
+	</template>
+	
+	<script>
+		Polymer({
+			is : "ep-weak-history",
+			properties : {
+				searchParam: {
+					type : Object,
+					value : function(){
+						return {
+							siteId : SCMdiManager.searchParam.site_id
+						};
+					}
+				},
+			},
+			load:function(workerId){
+ 				var me = this;
+				me.searchParam.workerId = workerId;
+				UT.request(me.$.findMedicalLog);	
+			},
+			
+			completeFindMedicalLog : function(e,res){
+            	var me = this;
+            	var resultList = res.response || [];
+            	
+            	me.set("resultList", resultList);
+            },
+			onAddMedical : function(){
+                var me = this,
+                    searchParam = this.get("searchParam"),
+                    provider = me.$.gridPanel.getDataProvider(),
+                    currCell = me.$.gridPanel.getCurrentCell();
+
+                if(!me.validate('search')){
+                    UT.alert("STD.E0000");
+                    return false;
+                }
+
+                // 그리드 신규행 추가
+                var row = {
+                		workerId : me.searchParam.workerId
+                };
+                if(currCell == null){
+                 	 provider.addItemAt(0,row);
+                 }else{
+             	    provider.addItemAt(currCell.rowIndex+1, row);
+                 }
+            },
+            
+            
+         // 보건이력 저장
+            onSaveMedical : function(){
+                var me = this;
+
+                // 저장 유효성 체크
+                if(!me.validation()) {
+                    return;
+                }
+
+                var provider = me.$.gridPanel.getDataProvider(),
+                    created = provider.getNewItems(),
+                    updated = provider.getUpdateItems();
+
+                if(created.length + updated.length === 0) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+                
+                for(var i = 0 ; i <created.length ; i++){
+                	created[i].workerId = me.searchParam.workerId;
+                }
+                
+                UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+                    me.$.saveListMedical.body = {
+                        insertList: created,
+                        updateList: updated
+                    };
+                    UT.request(me.$.saveListMedical);
+                });
+            },
+           
+
+            // 보건이력 저장 완료
+            completeSaveListMedical: function(e, res){
+                var me = this,
+                    message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                    	UT.request(me.$.findMedicalLog);
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+
+            },
+            
+            
+            onDeleteMedical : function(){		
+				var me =this;
+				
+				var provider = me.$.gridPanel.getDataProvider();
+				var selectionItems = provider.selectionCheckedItems();
+				
+				
+			  if (selectionItems.length === 0) {
+                    UT.alert("STD.N1600");
+                    return;
+                }
+
+              UT.confirm("STD.N1300", function() {
+                  var deleted = provider.removeItems();
+                  if(deleted.length > 0){
+                      me.$.deleteMedical.body = {
+                    		  deleteList : selectionItems
+                      };
+                     UT.request(me.$.deleteMedical);
+                  }
+              });
+				
+				
+			},
+			
+			completeDeleteMedical: function(e,res){
+				var me = this,
+                result = res.response;
+
+	            if (result.result_status === 'S') {
+	                UT.alert("STD.N2500", function () { // 삭제하였습니다.
+	                	UT.request(me.$.findMedicalLog);
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+			},
+			 // 저장 유효성 체크
+            validation: function() {
+                var me = this;
+
+                // 기본 validate
+                if(!me.validate('save')) {
+                    UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return false;
+                }
+
+                // 중복 체크
+                var provider = me.$.gridPanel.getDataProvider(),
+                    rows = provider.getItems();
+                var unique_check = {};
+                for (var i=0, len = rows.length; i<len; i++) {
+                    if(typeof unique_check[rows[i].serialNumber] == "undefined"){
+                        unique_check[rows[i].serialNumber] = 0;
+                    } else {
+                        //UT.alert(me.translate("STD.E1000",null, me.translate('사업자번호')),null,true); // "'{0}'에 동일한 값이 존재합니다"
+                        //return false;
+                    }
+                }
+
+                return true;
+            },
+		});
+	</script>
+</dom-module>

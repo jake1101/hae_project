@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>js\message.js - API</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="icon" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+                <h1><img src="../assets/css/logo.png" title="API" width="117" height="52"></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.0.1</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+                    <h2 class="off-left">APIs</h2>
+                    <div id="api-tabview" class="tabview">
+                        <ul class="tabs">
+                            <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-elements">Elements</a></li>
+                            <li><a href="#api-modules">Modules</a></li>
+                        </ul>
+                
+                        <div id="api-tabview-filter">
+                            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+                        </div>
+                
+                        <div id="api-tabview-panel">
+                            <ul id="api-classes" class="apis classes">
+                                <li><a href="../classes/DEF.html">DEF</a></li>
+                                <li><a href="../classes/EDITOR.html">EDITOR</a></li>
+                                <li><a href="../classes/GRID.html">GRID</a></li>
+                                <li><a href="../classes/I18N.html">I18N</a></li>
+                                <li><a href="../classes/MSG.html">MSG</a></li>
+                                <li><a href="../classes/UPLOAD.html">UPLOAD</a></li>
+                                <li><a href="../classes/UT.html">UT</a></li>
+                                <li><a href="../classes/VALID.html">VALID</a></li>
+                            </ul>
+                
+                                <ul id="api-elements" class="apis elements">
+                                    <li><a href="../elements/cc-approval-summary.html">&lt;cc-approval-summary&gt;</a></li>
+                                    <li><a href="../elements/cc-dept-search.html">&lt;cc-dept-search&gt;</a></li>
+                                    <li><a href="../elements/cc-editor.html">&lt;cc-editor&gt;</a></li>
+                                    <li><a href="../elements/cc-from-to-date.html">&lt;cc-from-to-date&gt;</a></li>
+                                    <li><a href="../elements/cc-linked-vender.html">&lt;cc-linked-vender&gt;</a></li>
+                                    <li><a href="../elements/cc-multi-text-field.html">&lt;cc-multi-text-field&gt;</a></li>
+                                    <li><a href="../elements/cc-operorg-combobox-field.html">&lt;cc-operorg-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-operorg-multi-combobox-field.html">&lt;cc-operorg-multi-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-purc-grp.html">&lt;cc-purc-grp&gt;</a></li>
+                                    <li><a href="../elements/cc-sg-search.html">&lt;cc-sg-search&gt;</a></li>
+                                    <li><a href="../elements/cc-sp-operorg-combobox-field.html">&lt;cc-sp-operorg-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-sp-operorg-multi-combobox-field.html">&lt;cc-sp-operorg-multi-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-upload.html">&lt;cc-upload&gt;</a></li>
+                                    <li><a href="../elements/cc-user-search.html">&lt;cc-user-search&gt;</a></li>
+                                </ul>
+                
+                            <ul id="api-modules" class="apis modules">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+                    Show:
+                    <label for="api-show-inherited">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </div>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<h1 class="file-heading">File: js\message.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * 공통 메시지를 정의한다
+ *
+ *     N ~ : 알림 메시지 정의
+ *     E ~ : 오류 메시지 정의
+ *     G ~ : 그리드 정의
+ *
+ * @class MSG
+ */
+var MSG = {
+    &quot;N1000&quot; : &quot;알림&quot;, // alert header title
+    &quot;N1100&quot; : &quot;확인&quot;, // confirm header title
+    &quot;N1200&quot; : &quot;저장 하시겠습니까?&quot;,
+    &quot;N1300&quot; : &quot;삭제 하시겠습니까?&quot;,
+    &quot;N1400&quot; : &quot;수정중인 데이터가 있습니다.\n삭제 하시겠습니까?&quot;,
+    &quot;N1500&quot; : &quot;요청을 완료 하였습니다&quot;,
+    &quot;N1600&quot; : &quot;선택된 항목이 없습니다&quot;,
+    &quot;N1700&quot; : &quot;변경된 내용이 없습니다&quot;,
+    &quot;N1800&quot; : &quot;신규 노드에는 하위노드를 추가할 수 없습니다.\n저장 후 하위노드를 추가하세요&quot;,
+    &quot;N1900&quot; : &quot;중복 데이터가 있습니다&quot;,
+    &quot;N2000&quot; : &quot;중복 데이터를 제외 후 추가하였습니다&quot;,
+    &quot;N2010&quot; : &quot;중복 데이터 {0}건 제외 후 추가하였습니다&quot;,
+    &quot;N2100&quot; : &quot;복사 하시겠습니까?&quot;,
+    &quot;N2200&quot; : &quot;검색 결과가 없습니다&quot;,
+    &quot;N2300&quot; : &quot;결재요청을 하시겠습니까?&quot;,
+
+    &quot;E1000&quot; : &quot;&#x27;{0}&#x27;에 동일한 값이 존재합니다&quot;,
+    &quot;E1001&quot; : &quot;&#x27;{0}&#x27;은(는) 필수값입니다&quot;,
+    &quot;E1002&quot; : &quot;&#x27;{0}&#x27;은(는) 공백문자를 허용하지 않습니다&quot;,
+    &quot;E1003&quot; : &quot;&#x27;{0}&#x27;은(는) 영문자만 입력할 수 있습니다&quot;,
+    &quot;E1004&quot; : &quot;&#x27;{0}&#x27;은(는) 숫자형식만 입력할 수 있습니다&quot;,
+    &quot;E1005&quot; : &quot;&#x27;{0}&#x27;은(는) &#x27;{1}&#x27;자 이상 입력하십시오&quot;,
+    &quot;E1006&quot; : &quot;&#x27;{0}&#x27;은(는) &#x27;{1}&#x27;자 이하로 입력하십시오&quot;,
+    &quot;E1007&quot; : &quot;&#x27;{0}&#x27;은(는) &#x27;{1}&#x27;자로 입력하십시오&quot;,
+    &quot;E1008&quot; : &quot;&#x27;{0}&#x27;은(는) &#x27;{1}&#x27;보다 큰값으로 입력하십시오&quot;,
+    &quot;E1009&quot; : &quot;&#x27;{0}&#x27;은(는) &#x27;{1}&#x27;이상 값으로 입력하십시오&quot;,
+    &quot;E1010&quot; : &quot;&#x27;{0}&#x27;은(는) &#x27;{1}&#x27;보다 작은값으로 입력하십시오&quot;,
+    &quot;E1011&quot; : &quot;&#x27;{0}&#x27;은(는) &#x27;{1}&#x27;이하 값으로 입력하십시오&quot;,
+    &quot;E1012&quot; : &quot;&#x27;{0}&#x27;을(를) 선택하십시오&quot;,
+    &quot;E1013&quot; : &quot;&#x27;{0}&#x27;은(는) &#x27;{1}&#x27;이후 날짜로 입력하십시오&quot;,
+    &quot;E1014&quot; : &quot;&#x27;{0}&#x27;은(는) &#x27;{1}&#x27;이전 날짜로 입력하십시오&quot;,
+    &quot;E1015&quot; : &quot;&#x27;{0}&#x27;은(는) 영문자, 숫자형식만 입력할 수 있습니다&quot;,
+    &quot;E1016&quot; : &quot;&#x27;{0}&#x27;의 값이 정확하지 않습니다&quot;,
+
+    &quot;E9100&quot; : &quot;중복 데이터 &quot;,
+    &quot;E9200&quot; : &quot;사용중 데이터&quot;,
+    &quot;E9999&quot; : &quot;오류가 발생하였습니다.\n관리자에게 문의하세요&quot;,
+
+    // grid context menu 명
+    &quot;G_FILTER&quot; : &quot;필터&quot;,
+    &quot;G_FILTER_CLEAR&quot; : &quot;필터 해제&quot;,
+    &quot;G_FIXCOL&quot; : &quot;세로 틀고정&quot;,
+    &quot;G_FIXCOL_CLEAR&quot; : &quot;세로 틀고정 해제&quot;,
+    &quot;G_FIXROW&quot; : &quot;가로 틀고정&quot;,
+    &quot;G_FIXROW_CLEAR&quot; : &quot;가로 틀고정 해제&quot;,
+    &quot;G_EXCEL_DOWNLOAD&quot; : &quot;엑셀 다운로드&quot;,
+
+    //TODO : 모듈별 message 처리 분리작업 필요
+    &quot;PR1000&quot; : &quot;임시저장, 결재반려인 경우이거나 품목이 모두 반송된 경우에만 삭제가 가능합니다.&quot;,
+    &quot;PR1001&quot; : &quot;운영단위를 선택하세요.&quot;,
+    &quot;PR1002&quot; : &quot;품목 정보가 없습니다.&quot;,
+    &quot;PR1003&quot; : &quot;구매요청 명을 입력하세요.&quot;,
+    &quot;PR1004&quot; : &quot;구매운영 단위를 선택하세요.&quot;,
+    &quot;PR1005&quot; : &quot;먼저 공사/용역 정보를 선택하세요. &quot;,
+    &quot;PR1006&quot; : &quot;구매유형을 선택하세요.&quot;,
+    &quot;PR1007&quot; : &quot;결재요청 하시겠습니까?&quot;,
+    &quot;PR1008&quot; : &quot;구매요청 하시겠습니까?&quot;,
+    &quot;PR1009&quot; : &quot;승인,결재 승인 처리 인 경우에만 구매요청 변경이 가능합니다.&quot;,
+    &quot;PR1010&quot; : &quot;한건만 변경이 가능합니다.&quot;,
+    &quot;PR1011&quot; : &quot;구매요청상태가 접수대기(RW),접수(RV),구매요청변경(RQ)인 상태만 삭제가 가능합니다.&quot;,
+    &quot;PR1012&quot; : &quot;해당 구매요청 번호에 최종 차수만 변경이 가능합니다.&quot;,
+    &quot;PR1013&quot; : &quot;선택하신 구매요청 번호가 같지 않습니다.&quot;,
+    &quot;PR1014&quot; : &quot;이미 접수된 구매요청 건이 포함되어있습니다.&quot;,
+    &quot;PR1015&quot; : &quot;반송하시겠습니까?&quot;,
+    &quot;PR1016&quot; : &quot;접수하시겠습니까?&quot;,
+    &quot;PR1017&quot; : &quot;&#x27;{0}&#x27;번은 동일한 구매유형일 경우에만 &#x27;{1}&#x27;를 진행하실 수 있습니다.&quot;,
+    &quot;PR1018&quot; : &quot;&#x27;{0}&#x27;번은 동일한 구매요청유형일 경우에만 &#x27;{1}&#x27;를 진행하실 수 있습니다.&quot;,
+
+    &quot;RFX1000&quot; : &quot;선택된 RFX가 없습니다.&quot;,
+    &quot;RFX1001&quot; : &quot;가중치 값은 100보다 작아야 합니다.&quot;,
+    &quot;RFX1002&quot; : &quot;해당 평가유형을 저장하세요.&quot;,
+    &quot;RFX1003&quot; : &quot;수행방법이 평가시트인 경우, 평가시트를 선택해주십시오.&quot;,
+    &quot;RFX1004&quot; : &quot;가중치의 합은 100이여야 합니다.&quot;,
+    &quot;RFX1005&quot; : &quot;선정수량은 품목의 수량보다 작아야합니다.&quot;,
+    &quot;RFX1006&quot; : &quot;유찰 처리 하시겠습니까?&quot;,
+    &quot;RFX1007&quot; : &quot;낙찰자 선정 완료하시겠습니까?&quot;,
+    &quot;RFX1008&quot; : &quot;낙찰자 품의 하시겠습니까?&quot;,
+    &quot;RFX1009&quot; :&quot;경쟁 방식이 수의계약일 경우 하나의 협력사만 지정이 가능합니다. 협력사수를 확인하여주세요.&quot;,
+    &quot;RFX1010&quot; : &quot;협력사 전송 하시겠습니까?&quot;,
+    &quot;RFX1011&quot; : &quot;비가격 평가 항목 설정 하시겠습니까?&quot;,
+    &quot;RFX1012&quot; : &quot;수의계약은 하나의 협력사만 지정이 가능합니다.&quot;,
+    &quot;RFX1013&quot; : &quot;현재는 단일 건만 마감일시 변경이 가능합니다,&quot;,
+    &quot;RFX1014&quot; : &#x27;승인 , 결재승인된 경우에만 마감이가능합니다.&#x27;,
+    &quot;RFX1015&quot; : &quot;강제마감 하시겠습니까?&quot;,
+    &quot;RFX1016&quot; : &quot;마감일시를 변경하시겠습니까?&quot;,
+    &quot;RFX1017&quot; : &quot;임시저장 하시겠습니까?&quot;,
+    &quot;RFX1018&quot; : &quot;가중치의 총합은 100 이어야합니다.&quot;,
+    &quot;RFX1019&quot; : &quot;업체를 한개이상 선택하세요.&quot;,
+    &quot;RFX1020&quot; : &#x27;승인 , 결재승인된 경우에만 마감일시 변경이가능합니다.&#x27;,
+    &quot;RFX1021&quot; : &quot; 번은 본인에게 요청된 PR이 아닙니다.&quot;,
+    &quot;RFX1022&quot; : &quot;마감되었습니다.  마감이후에는 제출하실수 없습니다.&quot;,
+    &quot;RFX1023&quot; : &quot;견적을 포기하였습니다.&quot;,
+
+    &quot;RA1000&quot; : &quot;임시저장인 경우만 삭제가 가능합니다.&quot;,
+    &quot;RA1001&quot; : &quot;진행중인 건만 마감이 가능합니다.&quot;,
+    &quot;RA1002&quot; : &quot;단일 건만 마감일시 변경이 가능합니다.&quot;,
+    &quot;RA1003&quot; : &quot;선택된 견적이 없습니다.&quot;,
+    &quot;RA1004&quot; : &quot;하나의 업체만 선정이 가능합니다.&quot;,
+    &quot;RA1005&quot; : &quot;[역경매 품목항번 : {0}] 의 선정수량을 입력하세요.&quot;,
+
+    &quot;QTA1000&quot; : &quot;임시저장 하시겠습니까?&quot;,
+    &quot;QTA1001&quot; : &quot;제출하시겠습니까?&quot;,
+    &quot;QTA1002&quot; : &quot;입찰 금액을 입력하세요.&quot;,
+    &quot;QTA1003&quot; : &quot;현재 최저가보다 낮은 금액으로 입찰해야 합니다.&quot;,
+    &quot;QTA1004&quot; : &quot;이전 제출한 입찰가보다 낮은 금액으로 입찰해야 합니다.&quot;,
+    &quot;QTA1005&quot; : &quot;최소 입찰단위 가격에 맞추어 입찰해야 합니다.&quot;,
+    &quot;QTA1006&quot; : &quot;[견적 품목항번 : {0}] 의 견적단가를 입력하세요.&quot;,
+    &quot;QTA1007&quot; : &quot;[견적 품목항번 : {0}] 의 견적금액은 현재 최저금액보다 낮은 금액으로 입찰해야 합니다.&quot;,
+    &quot;QTA1008&quot; : &quot;[견적 품목항번 : {0}] 의 견적금액은 이전 입찰금액보다 낮은 금액으로 입찰해야 합니다.&quot;,
+    &quot;QTA1009&quot; : &quot;[견적 품목항번 : {0}] 의 견적금액은 최소 입찰단위 가격에 맞추어 입찰해야 합니다.&quot;,
+    &quot;QTA1010&quot; : &quot;변경된 견적금액이 없습니다.&quot;,
+    &quot;QTA1011&quot; : &quot;견적을 포기하시겠습니까?&quot;,
+    &quot;QTA1012&quot; : &quot;견적 작성할 RFx를 선택하세요.&quot;,
+    &quot;QTA1013&quot; : &quot;한 건의 RFx를 선택하세요.&quot;,
+    &quot;QTA1014&quot; : &quot;진행중인 RFx만 견적 작성이 가능합니다.&quot;,
+    &quot;QTA1015&quot; : &quot;견적 포기를 하여 견적 작성할 수 없습니다.&quot;,
+    &quot;QTA1016&quot; : &quot;견적 포기할 RFx를 선택하세요.&quot;,
+    &quot;QTA1017&quot; : &quot;진행중인 RFx만 견적 포기가 가능합니다.&quot;,
+    &quot;QTA1018&quot; : &quot;이미 견적 포기한 RFx가 존재합니다.&quot;
+};
+
+
+
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

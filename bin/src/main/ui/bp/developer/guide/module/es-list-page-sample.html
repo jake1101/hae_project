@@ -1,0 +1,114 @@
+<dom-module id="es-list-page-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+    	<!-- 조회 -->
+    	<sc-ajax id="findList"
+				 url="json/list-page.json"
+				 last-response="{{resultList}}">
+	    </sc-ajax>
+	    
+	    <cc-page-title-bar title-text="리스트 화면">
+	    </cc-page-title-bar>
+	    
+	    <div class="vbox flex">
+		    
+	    	<!-- 조회조건 -->
+        	<cc-search-container on-search="onSearch">
+		        <table>
+		        	<colgroup>
+		        		<col style="width:150px"/>
+		        		<col/>
+		        		<col style="width:150px"/>
+		        		<col/>
+		        	</colgroup>
+		        	<tr>
+		        		<th>
+		        			<sc-label text="운영조직" ></sc-label>
+		        		</th>
+		        		<td>
+		        			<cc-operorg-multi-combobox-field id="operorgcombobox"
+								oper-unit-cd="PO" class="w-150" value="{{param.oper_org_cd}}">
+							</cc-operorg-multi-combobox-field>
+						</td>
+		        		<th>
+		        			<sc-label text="입찰시작일" ></sc-label>
+		        		</th>
+		        		<td>
+		        			<sc-period-date-field from-value="{{param.from_date}}" to-value="{{param.to_date}}"
+			    				default-from-value="-1M" default-to-value="0d" string-date="false">
+			    			</sc-period-date-field>
+		        		</td>
+		        	</tr>
+		        </table>
+		    </cc-search-container>
+		    
+		    <!-- 그리드 -->
+	        <sc-grid id="gridPanel" class="h-200" use-dummy="false" use-state="false" editable="false"
+	        		 data-provider="{{resultList}}"
+	        		 on-item-click="onItemClick">
+	        	<!--  그리드 toolbar -->
+				<cc-grid-toolbar>
+					<sc-button text="신규작성" on-click="onCreateRfx"></sc-button>
+				</cc-grid-toolbar>
+				<!-- 그리드 column -->
+	        	<sc-grid-columns>
+	        		<sc-data-column data-field="rfx_prog_sts"	header-text="진행상태"		width="80"	text-align="center"></sc-data-column>
+	        		<sc-data-column data-field="rfx_no"			header-text="입찰번호"		width="120"	text-align="center"	style-name="link"></sc-data-column>
+	        		<sc-data-column data-field="rev"			header-text="차수"			width="50"	text-align="center"></sc-data-column>
+	        		<sc-data-column data-field="rfx_tit"		header-text="입찰명"		width="250"	text-align="left"></sc-data-column>
+	        		<sc-data-column data-field="reg_nm"			header-text="구매담당자"	width="80"	text-align="center"></sc-data-column>
+	        	</sc-grid-columns>
+			</sc-grid>
+	    </div>
+    </template>
+    <script>
+    Polymer({
+    	is : "es-list-page-sample",
+    	properties : {
+    		param : {
+    			type : Object,
+    			value : function() {
+    				return {}
+    			}
+    		},
+    		resultList : {
+    			type : Array,
+    			value : function() {
+    				return []
+    			}
+    		}
+    	},
+    	initialized : function() {
+    		var me = this;
+    		
+    		me.onSearch();
+    	},
+    	// 조회 버튼 클릭
+    	onSearch : function() {
+    		var me = this;
+    		
+    		UT.request(me.$.findList);
+    	},
+    	// 그리드 아이템 클릭 이벤트
+    	onItemClick : function(event) {
+    		var me = this,
+    			data = event.detail.data,
+    			item = event.detail.item;
+    		
+    		// 입찰 번호
+    		if(item.dataField === "rfx_no") {
+    			// show-detail 이벤트 발생
+    			me.fire("show-detail", data);
+    		}
+    	},
+    	onCreateRfx : function() {
+    		var me = this;
+    		me.fire("show-detail", {})
+    	}
+    });
+    </script>
+</dom-module>

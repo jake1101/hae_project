@@ -1,0 +1,127 @@
+<dom-module id="es-chart-column-rotatelabel">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-column-rotatelabel',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer, {
+				"name": "Highcharts:Basic column",
+			    "type": "column",
+				"palettes":[{
+					"name": "color1",
+			        "alpha": 1.0,
+					"fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+						'#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+				}],
+				"styles": {
+					//"fill": "#10ffff00",
+					//"border": "#888800"
+				},
+			    "title": {
+			        "text": "World's largest cities per 2014",
+			        "styles" : {
+					},
+			    },
+				"subtitle": {
+					"visible": true,
+					"anchor": "title",
+					"anchorAlign": "bottom",
+					"text": "Source: Wikipedia",
+					"styles": {
+					}
+				},
+				"titlePane": {
+					"styles": {
+						"padding": 4
+					}
+				},
+			    "xAxes": {
+			        "title": "",
+			        "tick": {
+			            "styles": {
+			                "fontSize": 13,
+			                "textRotation": -70,
+			                "paddingTop": 0,
+			                "paddingBottom": 0
+			            }
+			        }
+			    },
+			    "yAxes": {
+			        "title": "Rainfall (mm)"
+			    },
+			    "series": [{
+			        "name": "Tokyo",
+					"itemWidth": 0.5,
+			        "items": [
+			            ['Shanghai', 23.7],
+			            ['Lagos', 16.1],
+			            ['Istanbul', 14.2],
+			            ['Karachi', 14.0],
+			            ['Mumbai', 12.5],
+			            ['Moscow', 12.1],
+			            ['São Paulo', 11.8],
+			            ['Beijing', 11.7],
+			            ['Guangzhou', 11.1],
+			            ['Delhi', 11.1],
+			            ['Shenzhen', 10.5],
+			            ['Seoul', 10.4],
+			            ['Jakarta', 10.0],
+			            ['Kinshasa', 9.3],
+			            ['Tianjin', 9.3],
+			            ['Tokyo', 9.0],
+			            ['Cairo', 8.9],
+			            ['Dhaka', 8.9],
+			            ['Mexico City', 8.9],
+			            ['Lima', 8.9]
+			        ],
+			        "label": {
+			            "position": "far",
+			            "verticalAlign": "bottom",
+			            "offsetY": -10,
+			            "styles": {
+			                "fontSize": "12",
+			                "fontBold": true,
+			                "color": "#fff",
+			                "textShadow": "#000",
+			                "textRotation": -90
+			            }
+			        },
+			        "styles": {
+			            "fill": "p(color1:0)",
+						"border":"",
+						"hovered": {
+							fillBrightness: 1.5
+						}
+			       	},
+					"animations": [{
+					}],
+					"itemAnimations": [{
+						"property": "value"
+					}]
+				}],
+			    "legend": false
+			} );
+			me.chartMain = me.chartContainer.chartView();
+		}
+	})
+	</script>
+</dom-module>

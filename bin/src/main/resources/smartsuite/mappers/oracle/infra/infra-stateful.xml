@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="infra-stateful">
+
+	<select id="getCacheBust" resultType="String">
+		SELECT VALUE
+		  FROM ESCSTFL
+		WHERE ID = 'cacheBust'
+	</select>
+	
+	<insert id="insertCacheBust" parameterType="String">
+	    INSERT INTO ESCSTFL(
+	    	ID,
+	    	VALUE
+	    )VALUES(
+	    	'cacheBust',
+	    	#{p.value}
+	    )
+    </insert>
+	
+	<update id="updateCacheBust" parameterType="String">
+		UPDATE ESCSTFL
+			SET VALUE = #{p.value}
+		WHERE ID = 'cacheBust'
+	</update>
+	
+	<resultMap type="map" id="resultMap-clientStates">
+        <result property="value" column="VALUE" jdbcType="CLOB" javaType="string" />
+    </resultMap>
+	<select id="getClientState" resultMap="resultMap-clientStates">
+		SELECT ID
+			 , VALUE
+			 , OWNER
+			 , LASTUPDATED
+		FROM   ESCCLST
+		WHERE  SYS_ID = #{g.tenant}
+		AND    OWNER = #{g.username}
+		<if test="p != null">
+			AND    ID = #{p}
+		</if>
+	</select>
+	
+	<insert id="createClientState">
+		INSERT INTO ESCCLST
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			SYS_ID, ID, VALUE, OWNER, LASTUPDATED
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{g.tenant},
+			#{p.id},
+			#{p.value},
+			#{g.username},
+			#{g.now}
+		</trim>
+	</insert>
+	
+	<update id="updateClientState">
+		UPDATE ESCCLST SET 
+			  VALUE = #{p.value}
+			, LASTUPDATED = #{g.now}  
+		WHERE SYS_ID = #{g.tenant}
+		AND    OWNER = #{g.username}
+		AND   ID = #{p.id}
+	</update>
+	
+	<delete id="deleteClientState">
+		DELETE FROM ESCCLST
+		WHERE  SYS_ID = #{g.tenant}
+		AND    OWNER = #{g.username}
+		AND    ID = #{p.id}
+	</delete>
+	
+	<delete id="clearClientState">
+		DELETE FROM ESCCLST
+		WHERE  SYS_ID = #{g.tenant}
+		AND    OWNER = #{g.username}
+	</delete>
+	
+</mapper>

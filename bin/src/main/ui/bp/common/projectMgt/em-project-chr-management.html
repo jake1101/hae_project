@@ -1,0 +1,212 @@
+<sc-link rel="import" href="../../shared/ep-user-list.html"></sc-link>
+
+<dom-module id="em-project-chr-management">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    	<cc-page-title-bar></cc-page-title-bar>
+
+        <!-- 프로젝트 담당자 현황 조회 -->
+        <sc-ajax id="findChrList"
+                 url="findChrList.do"
+                 body="{{searchParam}}"
+                 last-response="{{resultList}}">
+        </sc-ajax>
+        
+        <!-- 프로젝트 저장 from 그리드 -->
+        <sc-ajax id="saveChrList"
+                 url="saveChrList.do"
+                 on-response="onResponse">
+        </sc-ajax>
+
+        <!-- 프로젝트 삭제 from 그리드 -->
+        <sc-ajax id="deleteChrList"
+                 url="deleteChrList.do"
+                 on-response="onResponse">
+        </sc-ajax>
+
+        <cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+       	<cc-search-container on-search="onFindChrList" auth-r>
+            <table>
+                <colgroup>
+                    <col style="width:120px">
+                    <col>
+                    <col style="width:120px">
+                    <col>
+                    <col style="width:120px">
+                    <col>
+                </colgroup>
+                <tr>
+                    <th><sc-label text="담당자명"></sc-label></th>
+                    <td>
+                        <sc-text-field  value="{{searchParam.chr_nm}}"></sc-text-field>
+                    </td>
+                    <th><sc-label text="담당자이메일(엠로)"></sc-label></th>
+                    <td>
+                        <sc-text-field  value="{{searchParam.chr_itn_email}}"></sc-text-field>
+                    </td>
+                    <th><sc-label text="담당자이메일(프로젝트)"></sc-label></th>
+                    <td>
+                        <sc-text-field  value="{{searchParam.chr_ext_email}}"></sc-text-field>
+                    </td>
+                </tr>
+            </table>
+       	</cc-search-container>
+       	<div style="color:red;font-weight:bold;">[[translate('※ 담당자는직접추가하거나검색하여추가할수있습니다.')]]</div>
+        <sc-grid id="gridPanel" data-provider="{{resultList}}" class="flex" on-item-click="onGridItemClick"  editable="true"
+                 >
+            <cc-grid-toolbar>
+            	<sc-button text="추가" on-click="onAddChr" auth-s></sc-button>
+            	<sc-button text="저장" on-click="onSaveChr" auth-s></sc-button>
+                <sc-button text="삭제" on-click="onDeleteChr" auth-s></sc-button>
+            </cc-grid-toolbar>
+            <sc-grid-columns>
+				<sc-data-column data-field="chr_nm" width="100" header-text="담당자명" text-align="center" required="true" editable="true"></sc-data-column>
+				<sc-data-column data-field="chr_itn_mail" header-text="담당자이메일(엠로)" width="200" text-align="left" required="true" item-editable-function="onInsertEditable" 
+								validator-type="email"></sc-data-column>
+				<sc-image-column	image-cls="search" data-field="button_chr" width="30"	text-align="center" editable="false"
+								></sc-image-column>
+            	<sc-data-column data-field="chr_ext_mail" header-text="담당자이메일(프로젝트)" width="200" text-align="left"  editable="true"></sc-data-column>
+            </sc-grid-columns>
+            <sc-grid-fields>
+			</sc-grid-fields>
+        </sc-grid>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'em-project-chr-management',
+            
+            properties : {
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+
+                // 조회결과
+                resultList: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                }
+            },
+            
+         	// 신규 컬럼 editable 제어
+            onInsertEditable: function(data, item) {
+                var me = this,
+                    provider = me.$.gridPanel.getDataProvider();
+                return (provider.getItemState(item.rowIndex) == "created");
+            },
+            
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+            // 사용자 현황 조회
+            onFindChrList : function() {
+                var me = this;
+                UT.request(me.$.findChrList);
+            },
+            
+            /************************************************** 
+			 * 그리드 이벤트
+			 **************************************************/
+			// grid item click 이벤트
+			onGridItemClick : function(event) {
+				var me = this;
+				var data = event.detail.data,
+					item = event.detail.item,
+                	provider = event.detail.provider;
+				
+				data.rowIndex = item.rowIndex;
+				
+				if(provider.getItemState(item.rowIndex) == "created" && item.dataField === 'button_chr') {
+					me.showUserPopup(data);
+				}
+            },
+            
+            onAddChr: function(){
+            	var me = this,
+            		provider = me.$.gridPanel.getDataProvider();
+            	provider.addItem({});
+            },
+            
+            onSaveChr: function(){
+            	var me = this,
+					provider = me.$.gridPanel.getDataProvider();
+				
+				//그리드 유효성검사
+				var isValid = me.$.gridPanel.validate();
+                if(!isValid){	//실패
+                	UT.alert("STD.E9000");
+                	return;
+                }
+				UT.confirm("STD.N1200", function() {
+					me.$.saveChrList.body = {
+	                    	insertChrs : provider.getNewItems(),
+	                    	updateChrs : provider.getUpdateItems()
+	                };
+		            UT.request(me.$.saveChrList);
+				});
+            },
+            
+			onDeleteChr : function() {
+				var me = this;
+				var provider = me.$.gridPanel.getDataProvider();
+				var checked = provider.selectionCheckedItems();
+				
+				if(checked.length === 0) {
+					UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+				} else {
+					UT.confirm("STD.N1300", function() {	// "삭제 하시겠습니까?"
+						var deleted = provider.removeItems(true);	// 그리드에서 체크된 데이터를 지워주고, db에서 삭제해야 할 데이터 목록울 리턴한다.
+						
+						if(deleted.length > 0) {
+							me.$.deleteChrList.body = {
+								deleteChrs : deleted
+	                        };
+	                        UT.request(me.$.deleteChrList);
+						}
+					});
+		        }
+			},
+            
+         	// 사용자 팝업 호출
+            showUserPopup : function(data) {
+            	var me = this;
+            	
+            	var userPopup = UT.popup('ep-user-list', me, 650, 500, {
+    				'selected-items' : function(popup, e) {
+    					var result   = e.detail,
+    						selected = result[0];
+    					
+    					var provider = me.$.gridPanel.getDataProvider();
+    					provider.setItemAt(data.rowIndex, {'chr_itn_mail' : selected.email, 'chr_nm' :selected.usr_nm });
+    					popup.close();
+    				}
+    			}, {titleText : "담당자검색"});
+				
+				userPopup.show();
+				userPopup.getWindowContent().load({singleSelect : true, defaultParam : data, autoComplete : true});
+            },
+            
+            onResponse : function(e,res) {
+                var me = this,
+                    message = "STD.N1500"; 
+
+                UT.alert(message, function(){
+                	me.onFindChrList();
+                });
+            },
+        });
+    </script>
+</dom-module>

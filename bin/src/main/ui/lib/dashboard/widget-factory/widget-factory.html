@@ -1,0 +1,45 @@
+<link rel="import" href="../widgets/widget-grid.html"></link>
+<link rel="import" href="../widgets/widget-chart.html"></link> 
+<link rel="import" href="../widgets/widget-iframe.html"></link>
+<link rel="import" href="../widgets/widget-component.html"></link>
+
+<script>
+	WidgetFactory = Polymer({
+		is : 'widget-factory',	
+		properties : {
+			widgetContent :{
+				type: Object
+			},
+			widgetPrefix :{
+				type : String,
+				value : 'widget-'
+			}
+			
+		},
+		ready : function(){
+		},
+		factoryImpl : function(widgetType){
+			var me = this,
+			    viewName = me.widgetPrefix + widgetType;
+			me.widgetContent =  document.createElement(viewName);
+		},
+		getContent : function(template){
+			var me = this;
+			me.contentReSize(template);
+			me.widgetContent.createContent(template);
+			return me.widgetContent; 
+		},
+		contentReSize : function(template){
+			var me = this;
+			var content = me.widgetContent.getContent();
+			if(template.type == 'grid'){
+				content.style.width = template.widget_width + "px";
+				content.style.height = template.widget_height-35 + "px";
+			}else if(template.type == 'component' || template.type == 'chart'){
+				content.style.width = '100%';
+				content.style.height = template.widget_height-34 + "px";
+			}
+			
+		},
+	});
+</script>

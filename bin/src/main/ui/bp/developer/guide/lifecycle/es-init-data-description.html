@@ -1,0 +1,130 @@
+<dom-module id="es-init-data-description">
+	<style>
+ 	table, th, td {
+ 		border:1px solid black;
+ 		border-collapse:collapse;
+ 		box-sizing: border-box;
+ 		padding: 3px;
+ 	}
+ 	th {
+ 		background-color:lightgray
+ 	}
+	</style>
+	
+	<template>
+		<p>
+			local DOM이 초기화되면(ready 시점) cc-module-behavior에서 sc-code-group과 init 속성을 가진 태그들의<br/>
+			초기화 및 request 요청 완료를 카운트하고, 모두 완료시 initialized를 실행한다.<br/><br/>
+		</p>
+		
+		<p>
+			<b>sc-request-group</b><br/>
+			여러 개의 Ajax 요청을 하나의 트랜잭션으로 호출하는 경우에 사용<br/>
+			<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>auto</td>
+					<td>자동조회여부</td>
+					<td>false</td>
+				</tr>
+			</table>
+			<br/>
+			<table>
+				<tr>
+					<th>이벤트</th>
+					<th>설명</th>
+				</tr>
+				<tr>
+					<td>response</td>
+					<td>그룹 내 모든 비동기 데이터 요청이 완료되는 시점에 발생한다.</td>
+				</tr>
+			</table>
+			<br/>
+		</p>
+		
+		<p>
+			<b>sc-code</b><br/>
+			SCCodeManager를 이용하여 코드 데이터를 요청하는 기능을 제공<br/>
+			<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>auto</td>
+					<td>자동조회여부</td>
+					<td>false</td>
+				</tr>
+				<tr>
+					<td>code</td>
+					<td>그룹코드</td>
+					<td>undefined</td>
+				</tr>
+				<tr>
+					<td>value</td>
+					<td>응답받은 공통코드 데이터</td>
+					<td>undefined</td>
+				</tr>
+			</table>
+			<br/>
+			<table>
+				<tr>
+					<th>이벤트</th>
+					<th>설명</th>
+				</tr>
+				<tr>
+					<td>response</td>
+					<td>코드의 응답이 완료되는 시점에 발생한다.</td>
+				</tr>
+				<tr>
+					<td>error</td>
+					<td>코드 요청 오류 시점에 발생한다.</td>
+				</tr>
+			</table>
+			<br/>
+		</p>
+		
+		<p>
+			<b>sc-code-group</b><br/>
+			코드 데이터를 그룹으로 묶어 요청하고 모든 코드 데이터의 응답이 완료되었을 때 이벤트를 발생시키는 기능을 제공<br/>
+			<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+					<th>기본값</th>
+				</tr>
+				<tr>
+					<td>auto</td>
+					<td>자동조회여부</td>
+					<td>false</td>
+				</tr>
+			</table>
+			<br/>
+			<table>
+				<tr>
+					<th>이벤트</th>
+					<th>설명</th>
+				</tr>
+				<tr>
+					<td>response</td>
+					<td>코드 그룹 내 모든 코드의 응답이 완료되는 시점에 발생한다.</td>
+				</tr>
+				<tr>
+					<td>error</td>
+					<td>코드 요청 오류 시점에 발생한다.</td>
+				</tr>
+			</table>
+			<br/>
+		</p>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-init-data-description'
+	})
+	</script>
+</dom-module>

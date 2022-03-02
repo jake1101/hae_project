@@ -1,0 +1,403 @@
+<!-- 어플리케이션을 사용하기 위한 필수 라이브러리 -->
+<script src="../../../bower_components/jquery/dist/jquery.min.js"></script>
+
+<script src="../timeShift/timeShift.js"></script>
+<script src="../custom/js/util.js"></script>
+<script src="../custom/js/smartsuite-memo-util.js"></script>
+<script src="../custom/js/serverConfig.js"></script>
+<script src="../custom/js/notify.min.js"></script>
+
+<!-- scenejs 라이브러리 및 preloading 준비 -->
+<script src="../scene/sceneWrapper.js"></script>
+<script src = "/plugins/lib/k3d.js"></script>
+
+<!-- thresjs 라이브러리 준비 -->
+<sc-link rel="stylesheet" type="text/css" href="../threejs/css/three.css" ></sc-link>
+<script src="../threejs/js/three.min.js"></script>
+<script src="../threejs/js/zip-loader.js"></script>
+<script src="../threejs/js/OrbitControls.js"></script>
+<script src="../threejs/js/CSS2DRenderer.js"></script>
+<!-- <script src="../threejs/js/RGBELoader.js"></script> -->
+<!-- <script src="../threejs/js/Water.js"></script> -->
+<script src="../threejs/js/app.js"></script>
+<script src="../threejs/js/OBJLoader.js"></script>
+<script src="../threejs/js/three_preloader.js"></script>
+<script src="../threejs/js/CommonFunc.js"></script>
+
+<!-- 추가된 thresjs 라이브러리 -->
+<script src="../threejs/js/GLTFLoader.js"></script>
+<script src="../threejs/js/DRACOLoader.js"></script>
+<script src="../threejs/js/Preloader.js"></script>
+<script src="../threejs/js/RayTHREE.js"></script>
+<script src="../threejs/js/Sky.js"></script>
+
+<!-- XEIcon -->
+<sc-link rel="stylesheet" type="text/css" href="../XEIcon-2.2.0/xeicon.min.css"></sc-link>
+
+<!-- e-chart -->
+<script src="../echart/echarts.min.js"></script>
+<script src="../echart/echarts-gl.min.js"></script>
+<script src="../echart/chartTheme.js"></script>
+<script src="../echart/pieTheme.js"></script>
+
+<!-- openlayers -->
+<script src="../openlayers/OpenLayers.js"></script>
+<script src="../openlayers/OlOverviewMarker.js"></script>
+<script src="../openlayers/proj4js.js"></script>
+<script src="../openlayers/SVGPattern.js"></script>
+<script src="../openlayers/heatmap.min.js"></script>
+<script src="../openlayers/mapController.js"></script>
+
+<!-- openlayers v6.3.1 -->
+<sc-link rel="stylesheet" type="text/css" href="../openlayers/v6.3.1/ol.css" ></sc-link> 
+<sc-link rel="stylesheet" type="text/css" href="../openlayers/css/style.css" ></sc-link> 
+<script src="../openlayers/v6.3.1/ol.js"></script>
+<script src="../openlayers/v6.3.1/controller.js"></script>
+
+<!-- openlayers v6.9 -->
+<!-- <sc-link rel="stylesheet" type="text/css" href="../openlayers/v6.9/ol.css" ></sc-link>  -->
+<!-- <sc-link rel="stylesheet" type="text/css" href="../openlayers/css/style.css" ></sc-link>  -->
+<!-- <script src="../openlayers/v6.9/ol.js"></script> -->
+<!-- <script src="../openlayers/v6.9/controller.js"></script> -->
+
+<!-- colorPicker -->
+<sc-link rel="stylesheet" type="text/css" href="../colorPicker/css/light.min.css" ></sc-link> 
+<script type="text/javascript" src="../colorPicker/default-picker.min.js"></script>
+<script type="text/javascript" src="../colorPicker/colorPicker.js"></script>
+
+<!-- jquery-ui -->
+<!-- <script src="../jquery-ui/jquery-ui.min.js"></script> -->
+<script src="../../../bower_components/jquery-ui/jquery-ui.min.js"></script>
+<sc-link rel="stylesheet" type="text/css" href="../../../bower_components/jquery-ui/jquery-ui.min.css"></sc-link>
+<script src="../../../bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+
+<!-- <script src="../../bp/common/calendar/resources/lib/fullcalendar-3.0.1/fullcalendar.min.js"></script> -->
+
+<!-- 어플리케이션을 사용하기 위한 필수 라이브러리 -->
+<script>
+	
+	(function(window, document) {
+		var PRELOADER = Object.create(HTMLElement.prototype),
+			thisDoc = document._currentScript.ownerDocument,
+			thatDoc = document,
+			convert = function(value){
+				var type = typeof value;
+				switch(type){
+					case 'object':
+	 				for(var key in value){
+						value[key] = convert(value[key]);
+					}
+					break;
+	 			case 'string':
+					if(value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}(Z|[+-](\d{2}:?\d{2}))?$/)){
+						value = value.replace(/([+-])(\d{2})(\d{2})/, function(m,p1,p2,p3){
+						 	return p1+p2+":"+p3;
+						});
+						value = new Date(Date.parse(value));   	  				
+					}
+					break;
+				}
+				return value;
+			},
+			csrf = (function() {
+				var doc = document,
+					meta = doc.querySelector('meta[name=_csrf]'), _csrf;
+				
+				if(meta) {
+					_csrf = {
+						csrf : meta.content,
+						csrfHeader : doc.querySelector('meta[name=_csrf_header]').content,
+						csrfParameter : doc.querySelector('meta[name=_csrf_parameter]').content
+					}
+				}
+				return _csrf;
+			}()),
+			ajaxSettings = (function() {
+				var settings = {
+					method : 'POST',
+					dataType : 'json',
+					contentType: "application/json",
+					headers : {}
+				};
+				if(csrf) {
+					settings.headers[csrf.csrfHeader] = csrf.csrf;
+				}
+				return settings;
+			}());
+
+		PRELOADER._callbacks = [];
+		PRELOADER._moduleCallbacks = [];
+
+		//csrf 토큰정보 반환
+		PRELOADER.csrf = function() {
+			return csrf;
+		};
+		
+		//jquery ajax 설정정보 반환
+		PRELOADER.ajaxSettings = function() {
+			return ajaxSettings;
+		};
+		
+		PRELOADER.convert = function() {
+			return convert;
+		};
+		
+		PRELOADER.createdCallback = function() {
+			this.link = thatDoc.querySelector('link[href*="sc-preloader.html"]');
+			SCI18nManager.setLocale(this.link.getAttribute('locale'));
+			$.when(this.i18n()/*기타*/).then(function() {
+				return this.ready();
+			}.bind(this)).then(function() {
+				console.log("preloader-completed");
+				this.dispatchEvent(new Event('preloader-completed'));
+			}.bind(this)).fail(function() {
+				alert("There is an error on login. Contact to administrator.");
+				Polymer.Base.reload();
+			});
+		};
+		
+		PRELOADER.i18n = function() {
+			var win = window,
+				locale = SCI18nManager.getLocale();
+
+			return $.ajax('i18n/getByLastUpdated.do', $.extend(false, ajaxSettings, {
+				data : JSON.stringify({
+					locale : locale,
+					lastUpdated : new Date(Number(localStorage.getItem('i18n-' + locale + '.lastUpdated') || '-2209107600000')) 
+				})	
+			})).then(function(response) {
+				return convert(response);	
+			}).then(function(i18n) {
+				if(win.Polymer.Settings) {
+					win.Polymer.Settings.i18nResponse = i18n;
+				}
+				else {
+					win.Polymer.i18nResponse = i18n;
+				}
+				//i18nmanager
+				if(csrf) {
+            		var i18nHeader = SCI18nProvider.prototype.properties.requestHeaders.value();
+             		SCI18nProvider.prototype.properties.requestHeaders.value = function() {
+             			i18nHeader[csrf.csrfHeader] = csrf.csrf;
+             			return i18nHeader;
+             		};
+            	}
+				SCI18nManager.setProvider(new SCI18nProvider({ byKeysUrl : 'i18n/getByKeys.do', byLastUpdatedUrl : 'i18n/getByLastUpdated.do' }));
+			}.bind(this)).fail(function() {
+				console.error("다국어 메세지 조회중 오류가 발생하였습니다.");
+			});
+		};
+		
+		PRELOADER.ready = function() {
+			var callbacks = this._callbacks,
+				fn;
+			
+			//SCHierachicalData 클래스를 CCHierachicalData 로 사요할 수 있도록 전역클래스로 대입
+			CCHierachicalData = SCHierachicalData;
+			this._readied = true;
+			this.delayLoad();
+			//callback run
+			while((fn = callbacks.shift(0))) {
+				fn()
+			}
+		};
+		
+		PRELOADER.onReady = function(callback) {
+			if(this._readied) {
+				return callback();	
+			}
+			this._callbacks.push(callback);
+		};
+		
+		PRELOADER.onModuleReady = function(callback) {
+			if(this._moduleReadied) {
+				return callback();
+			}
+			this._moduleCallbacks.push(callback);
+		};
+		
+		PRELOADER.delayLoad = function() {
+			var mdi = document.querySelector('#mdiMain'),
+				load = (function(mdi) {
+					var progress = document.querySelector('div.top_progress'),
+						progressHandler = function() {
+							count++;
+							this.style.transform = this.style.webkitTrans = 'scaleX(' + (count / total) + ')';
+						}.bind(progress),
+						taskList = (function() {
+							var portalType = this.link.getAttribute('portal-type'),
+								links = thisDoc.querySelectorAll('sc-link:not([lazy])'),
+								scripts = Polymer.dom(thisDoc.body).queryDistributedElements('sc-script');
+								tasks = [];
+								for(var i=0,len=scripts.length; i<len; i++) {
+									if(scripts[i].hasAttribute('vue') && portalType !== 'vueGrid') {
+										continue;
+									}
+									tasks.push(function(script) {
+										return function() {
+											script.load().then(progressHandler);
+										}
+									}(scripts[i]));
+								}
+								for(var i=0,len=links.length; i<len; i++) {
+									tasks.push(function(link) {
+										return function() {
+											link.load().then(progressHandler);
+										}
+									}(links[i]));
+								}
+							return tasks;
+						}.bind(this)()),
+						total = taskList.length,
+						count = 0;
+					
+					function processTaskList() {
+						var taskStartTime = window.performance.now();
+						var taskFinishTime;
+						do {
+							var nextTask = taskList.shift();
+							if(nextTask) {
+								nextTask();
+							}
+							taskFinishTime = window.performance.now();
+						}
+						while(taskFinishTime - taskStartTime < 3);
+						if(taskList.length > 0) {
+							requestAnimationFrame(processTaskList.bind(this));
+						}
+						else {
+							var callbacks = this._moduleCallbacks;
+							this._moduleReadied = true;
+							while((fn = callbacks.shift(0))) {
+								fn()
+							}
+							requestAnimationFrame(function() {
+								this.style.opacity = '0';
+							}.bind(progress));
+						}
+					};
+					requestAnimationFrame(processTaskList.bind(this));
+				}.bind(this, mdi));
+				
+			if(!mdi || (mdi && mdi.mdiInitialized)) {
+				load();
+			}
+			else {
+				var mdiInitializedHandler = function(event) {
+					event.target.removeEventListener('mdi-initialized', mdiInitializedHandler);
+					load();
+					mdiInitializedHandler = null;
+				};
+				mdi.addEventListener('mdi-initialized', mdiInitializedHandler);
+			}
+// 				var obj = localStorage.getItem('test');
+// 				if(obj) {
+// 					obj = JSON.parse(obj);
+// 				}
+// 				else {
+// 					obj = {};
+// 				}
+// 				var loaded = [];
+// 				Polymer.Base.getLinkEventDom().addEventListener('prepare', function(event) {
+// 					var tagName = event.detail.resolveTagName();
+// 					if(tagName.indexOf('em-') > -1) {
+// 						event.detail.addEventListener('load', function() {
+// 							localStorage.setItem('test', JSON.stringify(obj));
+// 						});
+// 						loaded = obj[tagName] || [];
+// 						obj[tagName] = loaded;
+// 					}
+// 					loaded.push(tagName);
+// 				});
+// 				SCMdiManager.onReady(function() {
+// 					if(SCPreloader.first) {
+// 						return;
+// 					}
+// 					var menus = SCMdiManager.mdi.getStorageMenus();
+// 					var openmenu = menus[menus.length-1];
+// 					if(openmenu) {
+// 						var test = localStorage.getItem('test');
+// 						if(test) {
+// 							test = JSON.parse(test);
+// 						}
+// 						var tagName = openmenu.menu_url.substring(openmenu.menu_url.lastIndexOf('/')+1, openmenu.menu_url.lastIndexOf('.'));
+// 						var names = test[tagName];
+// 						for(var i=0,len=names.length,name; i<len; i++) {
+// 							name = names[i];
+// 							if(name.indexOf('cc-') > -1) {
+// 								tasks.push(function(name) {
+// 									var loader = function() {
+// 										var link = SCLinkManager.get(name);
+// 										if(link) {
+// 											link.load();
+// 										}
+// 										else {
+// 											requestAnimationFrame(loader.bind(this, name));
+// 										}
+// 									};
+// 									return loader;
+// 								}(name));
+// 							}
+// 						}
+// 						setTimeout(processTaskList, 100);
+// 					}
+// 				});
+		};
+		
+		window.SCPreloader = new(document.registerElement('sc-preloader', {
+			prototype : PRELOADER
+		}));
+		
+	}(window, document));
+	
+
+</script>
+<!-- 업무모듈을 사용하기 위한 라이브러리 -->
+<sc-script src="../custom/js/def.js"></sc-script>
+<sc-script src="../custom/js/formatters.js"></sc-script>
+<sc-script src="../custom/js/validators.js"></sc-script>
+<sc-script src="../big-number/lib/bignumber.min.js"></sc-script>
+<sc-script src="../../../bower_components/cipher-util/cipher-util.min.js"></sc-script>
+<sc-script src="../../../bower_components/password-encryptor/password-encryptor.min.js"></sc-script>
+<sc-script src="../chart/highcharts.js">
+	<sc-script src="../chart/highcharts-more.js"></sc-script>
+	<sc-script src="../chart/highcharts-3d.js"></sc-script>    
+	<sc-script src="../chart/plugins/draggable-points.js"></sc-script>
+</sc-script>
+<sc-script src="../smartchart/smartchart-lic.js">
+	<sc-script src="../smartchart/smart-charting.min.js"></sc-script>
+</sc-script>
+<sc-script src="../../../bower_components/smartsuite/excel/smartsuite-excel-export.min.js">
+	<sc-script src="../excelexport/export-override.js"></sc-script>
+</sc-script>
+<sc-link rel="import" href="../custom/html/cc-elements.html"></sc-link>
+<sc-script src="/ui/lib/portal/lib/vue-grid/vue.min.js" vue></sc-script>
+<sc-script src="/ui/lib/portal/lib/vue-grid/vue-grid-layout.min.js" vue></sc-script>
+
+<!-- 업무모듈을 사용하기 위한 라이브러리 -->
+<!-- smartsuite package -->
+<!-- sc-grid -->
+<sc-link rel="stylesheet" type="text/css" href="../../../bower_components/sc-grid/resources/css/sc-grid.css" lazy></sc-link>
+<sc-link rel="import" href="../../../bower_components/sc-grid/sc-grid.build.html" lazy>
+	<sc-link rel="import" href="../../../ui/grid-override.html" lazy></sc-link>
+</sc-link>
+
+<sc-link rel="import" href="../../../bower_components/sc-editor/sc-editor.build.html" lazy></sc-link>
+
+<!-- sc-upload -->
+<sc-link rel="stylesheet" type="text/css" href="../../../bower_components/sc-upload/sc-upload.build.css" lazy></sc-link>
+<sc-link rel="import" href="../../../bower_components/sc-upload/sc-upload.build.html" lazy></sc-link>
+<!-- smartsuite-myapp -->
+<sc-link rel="stylesheet" type="text/css" href="../../../bower_components/smartsuite/myapp/resources/css/smartsuite-myapp.css" lazy></sc-link>
+<sc-link rel="import" href="../../../bower_components/smartsuite/myapp/smartsuite-myapp.html" lazy></sc-link>
+<!-- smartsuite-memo -->
+<sc-link rel="stylesheet" type="text/css" href="../../assets/css/smartsuite-memo-common.css"></sc-link>
+<sc-link rel="import" href="../../bp/common/memo/smartsuite-memo-list.html" lazy></sc-link>
+<!-- smartsuite-sceduler -->
+<sc-link rel="stylesheet" type="text/css" href="../../../bower_components/smartsuite/scheduler/resources/css/smartsuite-scheduler-common.css" tag-name="smartsuite-scheduler-mgt-list" lazy></sc-link>
+<sc-link rel="import" href="../../../bower_components/smartsuite/scheduler/smartsuite-scheduler-mgt-list.html" lazy></sc-link>
+<!-- smartsuite-hint -->
+<sc-link rel="stylesheet" type="text/css" href="../../../bower_components/smartsuite/hint/resources/css/smartsuite-hint-common.css" tag-name="smartsuite-hint-view,smartsuite-hint-setting" lazy></sc-link>
+<sc-link rel="import" href="../../../bower_components/smartsuite/hint/smartsuite-hint-setting.html" lazy></sc-link>
+<sc-link rel="import" href="../../../bower_components/smartsuite/hint/smartsuite-hint-view.html" lazy></sc-link>
+<!-- smartsuite package -->

@@ -1,0 +1,91 @@
+<dom-module id="es-grid-aggregate-description">
+	<style>
+		table, th, td {
+	 		border:1px solid black;
+	 		border-collapse:collapse;
+	 		box-sizing: border-box;
+	 		padding: 3px;
+	 	}
+	 	th {
+	 		background-color:lightgray
+	 	}
+	</style>
+	<template>
+		<b>그리드 property</b><br/>
+		<table>
+			<tr>
+				<th>property</th>
+				<th>type</th>
+				<th>설명</th>
+			</tr>
+			<tr>
+				<td>aggregate</td>
+				<td>Boolean<br/>default : false</td>
+				<td>그리드 footer에 합계 사용 여부를 지정</td>
+			</tr>
+			<tr>
+				<td>aggregateGroup</td>
+				<td>Boolean<br/>default : false</td>
+				<td>aggregateGroupColumns로 지정된 컬럼들을 그룹핑하고 각 그룹 별 합계 사용 여부를 지정</td>
+			</tr>
+			<tr>
+				<td>aggregateGroupColumns</td>
+				<td>Array<br/>default : none</td>
+				<td>aggregateGroup이 true인 경우, 그룹핑 할 컬럼들을 지정</td>
+			</tr>
+			<tr>
+				<td>aggregateMerge</td>
+				<td>Boolean<br/>default : true</td>
+				<td>그룹핑된 컬럼의 셀들을 병합하여 표시할지 여부</td>
+			</tr>
+			<tr>
+				<td>aggregateMode</td>
+				<td>String<br/>default 'footer'<br/>header, footer, both</td>
+				<td>aggregateGroup의 위치를 지정</td>
+			</tr>
+		</table>
+		<br/>
+		<b>그리드 컬럼 property</b><br/>
+		<table>
+			<tr>
+				<th>property</th>
+				<th>type</th>
+				<th>설명</th>
+			</tr>
+			<tr>
+				<td>aggregateKind</td>
+				<td>String<br/>default : none, sum, count, max, min, avg</td>
+				<td>summary 종류</td>
+			</tr>
+			<tr>
+				<td>aggregateTitle</td>
+				<td>String<br/>default : none</td>
+				<td>aggregateKind 대신 footer에 표시될 text</td>
+			</tr>
+			<tr>
+				<td>aggregateFormat</td>
+				<td>String<br/>default : none</td>
+				<td>
+				renderer로 인해 데이터가 표현되는방식<br/>
+				sc-formatter를 사용하므로 등록된 format을 사용해야한다.
+				</td>
+			</tr>
+			<tr>
+				<td>aggregateFunction</td>
+				<td>Function<br/>default : none</td>
+				<td>footer에 표시될 value를 리턴하는 function 지정</td>
+			</tr>
+			<tr>
+				<td>aggregateTextAlign</td>
+				<td>String<br/>default : 해당 column의 textAlign<br/>left, center, right</td>
+				<td>summary footer에 표시될 데이터의 정렬조건</td>
+			</tr>
+		</table>
+		<br/>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-grid-aggregate-description'
+	});
+	</script>
+</dom-module>

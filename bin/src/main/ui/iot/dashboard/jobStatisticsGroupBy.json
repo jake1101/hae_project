@@ -1,0 +1,771 @@
+{
+  "wholeList": [
+    {
+      "col1": "test",
+      "col2": "해상 1-1",
+      "col3": "기타",
+      "workerId": 235
+    },
+    {
+      "col1": "목공",
+      "col2": "FD선 내부",
+      "col3": "casen1-1",
+      "workerId": 34
+    },
+    {
+      "col1": "목공",
+      "col2": "FD선 내부",
+      "col3": "오른쪽벽",
+      "workerId": 48
+    },
+    {
+      "col1": "목공",
+      "col2": "FD선 내부",
+      "col3": "오른쪽벽",
+      "workerId": 1740
+    },
+    {
+      "col1": "목공",
+      "col2": "FD선 내부",
+      "col3": "오른쪽벽",
+      "workerId": 73
+    },
+    {
+      "col1": "목공",
+      "col2": "FD선 내부",
+      "col3": "오른쪽상단데크",
+      "workerId": 61
+    },
+    {
+      "col1": "목공",
+      "col2": "FD선 내부",
+      "col3": "왼쪽벽",
+      "workerId": 57
+    },
+    {
+      "col1": "목공",
+      "col2": "FD선 내부",
+      "col3": "왼쪽상단데크",
+      "workerId": 72
+    },
+    {
+      "col1": "목공",
+      "col2": "구역1",
+      "col3": "기타",
+      "workerId": 2
+    },
+    {
+      "col1": "목공",
+      "col2": "영역외",
+      "col3": "기타",
+      "workerId": 182
+    },
+    {
+      "col1": "목공",
+      "col2": "육상",
+      "col3": "기타",
+      "workerId": 225
+    },
+    {
+      "col1": "목공",
+      "col2": "육상",
+      "col3": "기타",
+      "workerId": 67
+    },
+    {
+      "col1": "목공",
+      "col2": "해상",
+      "col3": "기타",
+      "workerId": 162
+    },
+    {
+      "col1": "목공",
+      "col2": "현장 사무소1",
+      "col3": "기타",
+      "workerId": 160
+    },
+    {
+      "col1": "백호운전자",
+      "col2": "FD선 내부",
+      "col3": "casen1-1",
+      "workerId": 170
+    },
+    {
+      "col1": "백호운전자",
+      "col2": "영역외",
+      "col3": "기타",
+      "workerId": 1750
+    },
+    {
+      "col1": "안전지킴이1",
+      "col2": "FD선 내부",
+      "col3": "casen2-2",
+      "workerId": 47
+    },
+    {
+      "col1": "안전지킴이1",
+      "col2": "FD선 내부",
+      "col3": "casen2-2",
+      "workerId": 62
+    },
+    {
+      "col1": "안전지킴이1",
+      "col2": "FD선 내부",
+      "col3": "casen2-2",
+      "workerId": 28
+    },
+    {
+      "col1": "안전지킴이1",
+      "col2": "FD선 내부",
+      "col3": "오른쪽벽",
+      "workerId": 52
+    },
+    {
+      "col1": "안전지킴이1",
+      "col2": "FD선 내부",
+      "col3": "오른쪽벽",
+      "workerId": 33
+    },
+    {
+      "col1": "안전지킴이1",
+      "col2": "FD선 내부",
+      "col3": "왼쪽벽",
+      "workerId": 63
+    },
+    {
+      "col1": "안전지킴이1",
+      "col2": "구역1",
+      "col3": "기타",
+      "workerId": 68
+    },
+    {
+      "col1": "안전지킴이1",
+      "col2": "육상",
+      "col3": "기타",
+      "workerId": 38
+    },
+    {
+      "col1": "지게차운전자",
+      "col2": "FD선 내부",
+      "col3": "오른쪽벽",
+      "workerId": 37
+    },
+    {
+      "col1": "지게차운전자",
+      "col2": "FD선 내부",
+      "col3": "오른쪽벽",
+      "workerId": 60
+    },
+    {
+      "col1": "지게차운전자",
+      "col2": "FD선 내부",
+      "col3": "오른쪽상단데크",
+      "workerId": 54
+    },
+    {
+      "col1": "지게차운전자",
+      "col2": "FD선 내부",
+      "col3": "왼쪽벽",
+      "workerId": 69
+    },
+    {
+      "col1": "지게차운전자",
+      "col2": "FD선 내부",
+      "col3": "왼쪽상단데크",
+      "workerId": 46
+    },
+    {
+      "col1": "지게차운전자",
+      "col2": "구역1",
+      "col3": "기타",
+      "workerId": 27
+    },
+    {
+      "col1": "지게차운전자",
+      "col2": "구역2",
+      "col3": "기타",
+      "workerId": 32
+    },
+    {
+      "col1": "지게차운전자",
+      "col2": "육상",
+      "col3": "기타",
+      "workerId": 64
+    },
+    {
+      "col1": "지게차운전자",
+      "col2": "육상",
+      "col3": "기타",
+      "workerId": 179
+    },
+    {
+      "col1": "철근공",
+      "col2": "FD선 내부",
+      "col3": "casen1-1",
+      "workerId": 66
+    },
+    {
+      "col1": "철근공",
+      "col2": "FD선 내부",
+      "col3": "casen1-1",
+      "workerId": 44
+    },
+    {
+      "col1": "철근공",
+      "col2": "FD선 내부",
+      "col3": "casen2-2",
+      "workerId": 59
+    },
+    {
+      "col1": "철근공",
+      "col2": "FD선 내부",
+      "col3": "오른쪽벽",
+      "workerId": 35
+    },
+    {
+      "col1": "철근공",
+      "col2": "FD선 내부",
+      "col3": "오른쪽벽",
+      "workerId": 25
+    },
+    {
+      "col1": "철근공",
+      "col2": "FD선 내부",
+      "col3": "오른쪽벽",
+      "workerId": 58
+    },
+    {
+      "col1": "철근공",
+      "col2": "FD선 내부",
+      "col3": "왼쪽벽",
+      "workerId": 56
+    },
+    {
+      "col1": "철근공",
+      "col2": "구역1",
+      "col3": "기타",
+      "workerId": 71
+    },
+    {
+      "col1": "철근공",
+      "col2": "영역외",
+      "col3": "기타",
+      "workerId": 238
+    },
+    {
+      "col1": "철근공",
+      "col2": "육상",
+      "col3": "기타",
+      "workerId": 198
+    },
+    {
+      "col1": "타일공",
+      "col2": "FD선 내부",
+      "col3": "casen1-1",
+      "workerId": 70
+    },
+    {
+      "col1": "타일공",
+      "col2": "FD선 내부",
+      "col3": "casen2-2",
+      "workerId": 53
+    },
+    {
+      "col1": "타일공",
+      "col2": "FD선 내부",
+      "col3": "오른쪽벽",
+      "workerId": 26
+    },
+    {
+      "col1": "타일공",
+      "col2": "FD선 내부",
+      "col3": "오른쪽상단데크",
+      "workerId": 31
+    },
+    {
+      "col1": "타일공",
+      "col2": "FD선 내부",
+      "col3": "왼쪽벽",
+      "workerId": 36
+    },
+    {
+      "col1": "타일공",
+      "col2": "FD선 내부",
+      "col3": "왼쪽상단데크",
+      "workerId": 55
+    },
+    {
+      "col1": "타일공",
+      "col2": "육상",
+      "col3": "기타",
+      "workerId": 65
+    },
+    {
+      "col1": "타일공",
+      "col2": "육상",
+      "col3": "기타",
+      "workerId": 45
+    }
+  ],
+  "groupingList": [
+    {
+      "value": "test",
+      "count": 1,
+      "children": [
+        {
+          "value": "해상 1-1",
+          "count": 1,
+          "children": [
+            {
+              "value": "기타",
+              "count": 1,
+              "workerList": [
+                235
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "value": "지게차운전자",
+      "count": 9,
+      "children": [
+        {
+          "value": "FD선 내부",
+          "count": 5,
+          "children": [
+            {
+              "value": "오른쪽벽",
+              "count": 2,
+              "workerList": [
+                37,
+                60
+              ]
+            },
+            {
+              "value": "오른쪽상단데크",
+              "count": 1,
+              "workerList": [
+                54
+              ]
+            },
+            {
+              "value": "왼쪽벽",
+              "count": 1,
+              "workerList": [
+                69
+              ]
+            },
+            {
+              "value": "왼쪽상단데크",
+              "count": 1,
+              "workerList": [
+                46
+              ]
+            }
+          ]
+        },
+        {
+          "value": "구역1",
+          "count": 1,
+          "children": [
+            {
+              "value": "기타",
+              "count": 1,
+              "workerList": [
+                27
+              ]
+            }
+          ]
+        },
+        {
+          "value": "구역2",
+          "count": 1,
+          "children": [
+            {
+              "value": "기타",
+              "count": 1,
+              "workerList": [
+                32
+              ]
+            }
+          ]
+        },
+        {
+          "value": "육상",
+          "count": 2,
+          "children": [
+            {
+              "value": "기타",
+              "count": 2,
+              "workerList": [
+                64,
+                179
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "value": "안전지킴이1",
+      "count": 8,
+      "children": [
+        {
+          "value": "FD선 내부",
+          "count": 6,
+          "children": [
+            {
+              "value": "casen2-2",
+              "count": 3,
+              "workerList": [
+                47,
+                62,
+                28
+              ]
+            },
+            {
+              "value": "오른쪽벽",
+              "count": 2,
+              "workerList": [
+                52,
+                33
+              ]
+            },
+            {
+              "value": "왼쪽벽",
+              "count": 1,
+              "workerList": [
+                63
+              ]
+            }
+          ]
+        },
+        {
+          "value": "구역1",
+          "count": 1,
+          "children": [
+            {
+              "value": "기타",
+              "count": 1,
+              "workerList": [
+                68
+              ]
+            }
+          ]
+        },
+        {
+          "value": "육상",
+          "count": 1,
+          "children": [
+            {
+              "value": "기타",
+              "count": 1,
+              "workerList": [
+                38
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "value": "철근공",
+      "count": 10,
+      "children": [
+        {
+          "value": "FD선 내부",
+          "count": 7,
+          "children": [
+            {
+              "value": "casen1-1",
+              "count": 2,
+              "workerList": [
+                66,
+                44
+              ]
+            },
+            {
+              "value": "casen2-2",
+              "count": 1,
+              "workerList": [
+                59
+              ]
+            },
+            {
+              "value": "오른쪽벽",
+              "count": 3,
+              "workerList": [
+                35,
+                25,
+                58
+              ]
+            },
+            {
+              "value": "왼쪽벽",
+              "count": 1,
+              "workerList": [
+                56
+              ]
+            }
+          ]
+        },
+        {
+          "value": "구역1",
+          "count": 1,
+          "children": [
+            {
+              "value": "기타",
+              "count": 1,
+              "workerList": [
+                71
+              ]
+            }
+          ]
+        },
+        {
+          "value": "영역외",
+          "count": 1,
+          "children": [
+            {
+              "value": "기타",
+              "count": 1,
+              "workerList": [
+                238
+              ]
+            }
+          ]
+        },
+        {
+          "value": "육상",
+          "count": 1,
+          "children": [
+            {
+              "value": "기타",
+              "count": 1,
+              "workerList": [
+                198
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "value": "백호운전자",
+      "count": 2,
+      "children": [
+        {
+          "value": "FD선 내부",
+          "count": 1,
+          "children": [
+            {
+              "value": "casen1-1",
+              "count": 1,
+              "workerList": [
+                170
+              ]
+            }
+          ]
+        },
+        {
+          "value": "영역외",
+          "count": 1,
+          "children": [
+            {
+              "value": "기타",
+              "count": 1,
+              "workerList": [
+                1750
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "value": "목공",
+      "count": 13,
+      "children": [
+        {
+          "value": "FD선 내부",
+          "count": 7,
+          "children": [
+            {
+              "value": "casen1-1",
+              "count": 1,
+              "workerList": [
+                34
+              ]
+            },
+            {
+              "value": "오른쪽벽",
+              "count": 3,
+              "workerList": [
+                48,
+                1740,
+                73
+              ]
+            },
+            {
+              "value": "오른쪽상단데크",
+              "count": 1,
+              "workerList": [
+                61
+              ]
+            },
+            {
+              "value": "왼쪽벽",
+              "count": 1,
+              "workerList": [
+                57
+              ]
+            },
+            {
+              "value": "왼쪽상단데크",
+              "count": 1,
+              "workerList": [
+                72
+              ]
+            }
+          ]
+        },
+        {
+          "value": "구역1",
+          "count": 1,
+          "children": [
+            {
+              "value": "기타",
+              "count": 1,
+              "workerList": [
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "value": "영역외",
+          "count": 1,
+          "children": [
+            {
+              "value": "기타",
+              "count": 1,
+              "workerList": [
+                182
+              ]
+            }
+          ]
+        },
+        {
+          "value": "육상",
+          "count": 2,
+          "children": [
+            {
+              "value": "기타",
+              "count": 2,
+              "workerList": [
+                225,
+                67
+              ]
+            }
+          ]
+        },
+        {
+          "value": "해상",
+          "count": 1,
+          "children": [
+            {
+              "value": "기타",
+              "count": 1,
+              "workerList": [
+                162
+              ]
+            }
+          ]
+        },
+        {
+          "value": "현장 사무소1",
+          "count": 1,
+          "children": [
+            {
+              "value": "기타",
+              "count": 1,
+              "workerList": [
+                160
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "value": "타일공",
+      "count": 8,
+      "children": [
+        {
+          "value": "FD선 내부",
+          "count": 6,
+          "children": [
+            {
+              "value": "casen1-1",
+              "count": 1,
+              "workerList": [
+                70
+              ]
+            },
+            {
+              "value": "casen2-2",
+              "count": 1,
+              "workerList": [
+                53
+              ]
+            },
+            {
+              "value": "오른쪽벽",
+              "count": 1,
+              "workerList": [
+                26
+              ]
+            },
+            {
+              "value": "오른쪽상단데크",
+              "count": 1,
+              "workerList": [
+                31
+              ]
+            },
+            {
+              "value": "왼쪽벽",
+              "count": 1,
+              "workerList": [
+                36
+              ]
+            },
+            {
+              "value": "왼쪽상단데크",
+              "count": 1,
+              "workerList": [
+                55
+              ]
+            }
+          ]
+        },
+        {
+          "value": "육상",
+          "count": 2,
+          "children": [
+            {
+              "value": "기타",
+              "count": 2,
+              "workerList": [
+                65,
+                45
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

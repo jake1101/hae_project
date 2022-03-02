@@ -1,0 +1,46 @@
+<sc-link rel="import" href="es-dev-dynamic-group-col-grid.html"></sc-link>
+<sc-link rel="import" href="../shared/es-source-viewer.html"></sc-link>
+<dom-module id="em-dev-dynamic-group-col-grid">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <!--  화면 구성 시작-->
+    <template>
+
+		<sc-panel class="vbox flex-5" collapsible="false" title-text="sc-grid 동적 그룹 컬럼 추가">
+              
+           <es-dev-dynamic-group-col-grid></es-dev-dynamic-group-col-grid>
+        </sc-panel>	
+        <div class="vbox flex-5">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/grid/grid/es-dev-dynamic-group-col-grid.html"></es-source-viewer>
+        </div>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'em-dev-dynamic-group-col-grid',
+            
+            properties : {
+                htmlTarget:{
+                    type:String
+                }
+            },
+            
+           // 화면 생성 완료
+            initialized: function() {
+                var me = this;
+            }
+          
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

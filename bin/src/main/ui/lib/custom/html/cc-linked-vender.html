@@ -1,0 +1,159 @@
+<!-- 
+/**
+ * 협력사 커스텀 태그
+ *
+ *     <cc-linked-vender vd-cd="{{vdCd}}" erp-vd-cd="{{erpVdCd}}" vd-nm="{{vdNm}}" oper-org-cd="{{operOrgCd}}" link-typ="POEO"></cc-linked-vender>
+ *
+ * @element cc-linked-vender
+ *
+ *
+ * @attribute vd-cd vd-cd값 binding value <br>
+ * [string]
+ *
+ * @attribute erp-vd-cd erp-vd-cd값 binding value <br>
+ * [string]
+ *
+ * @attribute vd-nm vd-nm값 binding value <br>
+ * [string]
+ *
+ * @attribute oper-org-cd 운영조직코드<br>
+ * [string]
+ *
+ * @attribute link-typ 연결유형<br>
+ * [string]
+ *
+ */
+-->
+<sc-link rel="import" href="../../../bp/shared/ep-linked-vendor-list.html" lazy></sc-link>
+<dom-module id="cc-linked-vender">
+    <template>
+        <div class="field-box">
+            <sc-text-field value="{{vdNm}}" 
+                trigger-cls="search" on-trigger-click="onShowPopupFind" on-enter="onFind" on-keydown="onKeyDown"
+                readonly="[[readonly]]" required$="[[required]]" class$="[[class]]" placeholder="협력사명">
+            </sc-text-field>
+            <sc-text-field value="{{erpVdCd}}" 
+                readonly="true" required$="[[required]]" placeholder="코드" style="margin-left:5px; width:100px !important;">
+            </sc-text-field>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: "cc-linked-vender",
+            properties: {
+            	readonly : {
+            		type : Object,
+            		value : function(){
+            			return false;
+            		}
+            	},
+                vdCd: {
+                    type: String,
+                    value: "",
+                    notify: true
+                },
+                vdNm: {
+                    type: String,
+                    value: "",
+                    notify: true,
+                    observer: "changedValue"
+                },
+                erpVdCd: {
+                    type: String,
+                    value: "",
+                    notify: true
+                },
+                linkTyp: {
+                    type: String,
+                    value: ""
+                },
+                operOrgCd: {
+                    type: String,
+                    value: ""
+                }
+            },
+
+            changedValue: function(value){
+            	var me = this;
+            	if(UT.isEmpty(value)){
+            		me.set("erpVdCd", "");
+                    me.set("vdCd", "");
+            	}
+            	
+            },
+            // 사용자의 keydown
+            onKeyDown: function(e) {
+                var me = this;
+                if (me.readonly === true || UT.isSpecialKeyDown(e)) {
+                    return;
+                }
+                me.set("vdCd", "");
+                me.set("erpVdCd", "");
+            },
+            onShowPopupFind: function(){
+                var me = this;
+                if (me.readonly === true) {
+                    return;
+                }
+                if(!me.linkTyp){
+                    UT.alert("STD.N3401");
+                    return;
+                }
+                if(!me.operOrgCd){
+                    UT.alert("STD.N3400");
+                    return;
+                }
+                var param = {
+                    link_typ: me.get("linkTyp"), // 연결유형
+                    src_oper_org_cd: me.get("operOrgCd"), // 운영조직
+                    erp_vd_cd: me.get("erpVdCd"), // 협력사코드
+                    vd_nm: me.get("vdNm") // 협력사명
+                };
+                
+	            var linkedVendorPopup = me.createPopup();
+                linkedVendorPopup.show();
+                linkedVendorPopup.getWindowContent().load({defaultParam : param,singleSelect : true,autoComplete : false});
+            },
+            //팝업생성함수
+           	createPopup : function(){
+           		var me = this;
+           		var createPopup = UT.popup('ep-linked-vendor-list', me, 650, 500, {
+	                  "selected-items": function(popup, e) {
+	                	  var result = e.detail[0];
+	     				  //결과값 처리하는 callback
+	                      me.set("erpVdCd", result.erp_vd_cd);
+	                      me.set("vdCd", result.vd_cd);
+	                      me.set("vdNm", result.vd_nm);
+	                      popup.close();
+	                  }
+            	},{singleSelect : true});
+           		return createPopup;
+           	},
+            // 협력사 찾기
+            onFind: function(){
+                var me = this;
+                if (me.readonly === true) {
+                    return;
+                }
+                if(!me.linkTyp){
+                    UT.alert("STD.N3401");	//"연결유형을 선택하십시오"
+                    return;
+                }
+                if(!me.operOrgCd){
+                    UT.alert("STD.N3400");
+                    return;
+                }
+                var param = {
+                    link_typ: me.get("linkTyp"), // 연결유형
+                    src_oper_org_cd: me.get("operOrgCd"), // 운영조직
+                    erp_vd_cd: me.get("erpVdCd"), // 협력사코드
+                    vd_nm: me.get("vdNm") // 협력사명
+                };
+                
+	            var linkedVendorPopup = me.createPopup();
+                linkedVendorPopup.show();
+                linkedVendorPopup.getWindowContent().load({defaultParam : param,singleSelect : true,autoComplete : true});
+            }
+        });
+    </script>
+</dom-module>

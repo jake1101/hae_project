@@ -1,0 +1,181 @@
+<!-- 
+/**
+ * 부서검색 자동완성 text-field 커스텀 태그
+ *
+ *     <cc-dept-search class="w-150" value="{{value값}}" search-result="{{결과Object}}" result-field="fieldName" result-value="{{결과단건ValueBind}}"></cc-dept-search>
+ *
+ * @element cc-dept-search
+ *
+ *
+ * @attribute value 해당 텍스트 필드 input value binding <br>
+ * [string] [optional] 
+ *
+ *
+ * @attribute search-result  검색 결과 object값 <br>
+ * [string] [optional]
+ *
+ *
+ * @attribute result-field  단건으로 검색결과가 필요할 경우 검색 결과 object에 field <br>
+ * [string] [optional]
+ *
+ *
+ * @attribute result-value search-field에서 지정한 결과 object의 field의 value <br>
+ * [boolean] [optional]
+ *
+ *
+ * @attribute label-disabled label text가 보이지않도록 처리 <br>
+ * [boolean] [optional]
+ *
+ *
+ */
+-->
+<!-- 
+ author : Yeon-u Kim
+ Since 2016. 4. 14.
+ 변경이력 : [2016. 4. 14.] Yeon-u Kim 최초작성
+-->
+<sc-link rel="import" href="../../../bp/shared/ep-dept-list.html" lazy></sc-link>
+<dom-module id="cc-dept-multi-search">
+    <style>
+        :host {
+            display : table;
+            width : 100%;
+        }
+        :host > * {
+            vertical-align : middle;        
+            display: table-cell;
+        }    
+    </style>
+    <template>
+       <sc-text-field class$="[[class]]" value="{{value}}" placeholder$="[[placeholder]]" on-keydown="onKeyDown" trigger-cls="multi-search" on-trigger-click="onShowPopupFindDept" maxLength="200" disabled="[[disabled]]"></sc-text-field>
+    </template>
+    <script>
+        Polymer({
+            is : 'cc-dept-multi-search',
+            properties : {
+                value : {
+                    type : Object,
+                    notify: true,
+                    observer : 'valueChanged'
+                },
+                autoComFlage : {
+                    type : Boolean,
+                    value : false
+                },
+                searchResult : {
+                    type : Object,
+                    value : function(){
+                        return {
+                            dept_cd : ''
+                        };
+                    },
+                    observer : 'searchResultChanged',
+                    notify: true
+                },
+                resultField : {
+                    type : String,
+                    value : 'value'
+                },
+                resultValue : {
+                    type : Object,
+                    notify: true
+                },
+                multiValue: {
+                	type: Array,
+                    value: function() {
+                        return [];
+                    },
+                    notify: true,
+                    observer: "searchResultChanged"
+                },
+                labelDisabled : {
+                    type : Object,
+                    value : function(){
+                        return false;    
+                    },
+                    observer : 'labelDisabledChanged'
+                }
+            },
+            //최초 호출
+            attached : function(){
+            },
+    
+            //label 표시 처리
+            labelDisabledChanged : function(newValue, oldValue){
+                var me = this;
+                if(!newValue){
+                    var module = document.createElement('sc-label');
+                    module.i18nDisabled = true;
+                    Polymer.dom(this.root).appendChild(module);
+                }
+            },
+            
+            //결과  변경시 label표시 처리
+            searchResultChanged: function(newValue, oldValue) {
+            	var me = this;
+                if(this.children[1]){
+                	if(UT.isEmpty(me.get("multiValue"))){
+                		this.children[1].text=newValue.dept_cd || "";
+                	}else{
+                		var results = me.get("multiValue");
+                		this.children[1].text=me.translate("STD.N3100",null,results[0].dept_cd, results.length - 1) || "";
+                	}
+                }
+            },
+            
+            //값 변경시 result값 clear처리
+            valueChanged : function(newValue, oldValue) {
+            	var me = this;
+                if(!me.autoComFlage){
+                	me.set("searchResult",{});
+                	me.set("resultValue",'');
+                	me.set("multiValue",[]);
+                }
+                me.set("autoComFlage",false);
+            },
+            //팝업 호출
+            onShowPopupFindDept : function(){
+                var me = this;
+                var deptPopup = me.createPopup();
+                deptPopup.show();
+                deptPopup.getWindowContent().load({
+                	singleSelect: false,
+                	defaultParam: {org_cd:SCSessionManager.currentUser.comp_cd},
+                	dataRows: me.get("multiValue")
+                });
+            },
+            createPopup: function(){
+            	var me = this;
+            	return UT.popup('ep-dept-list', me, 650, 500, {
+                	'selected-items' : function(popup, e) {
+                		var result = e.detail[0];
+                		var results = e.detail;
+                        if(me.resultField) {
+                            me.set("resultValue", result[me.resultField]);
+                        }
+                        if (results.length > 1) {
+                            displayValue = me.translate("STD.N3100",null,results[0].dept_nm, results.length - 1);	// "{0}외 {1}건"
+                            me.set("value",displayValue);
+                            me.set("resultValue",me.translate("STD.N3100",null,results[0][me.resultField], results.length - 1));
+                        }else{
+                       	    me.set("value", result.dept_nm);
+                        }
+                        me.set("multiValue",results)
+                        me.set("searchResult", result);
+                        me.fire("result", results);
+                        popup.close();
+                	}
+                }, {titleText : "부서검색"});
+            },
+            
+         	// 사용자의 keydown
+            onKeyDown: function(e) {
+                var me = this;
+                
+                if(this.children[1] && !UT.isSpecialKeyDown(e)){
+                    this.children[1].text="";
+                }
+            }
+        });
+    </script>
+</dom-module>

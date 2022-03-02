@@ -1,0 +1,440 @@
+<dom-module id="es-vendor-user">
+    <!--
+        ******************************************************************************************
+        ** @Program-name 	: 협력사 사용자 정보
+        ** @Description		:
+        ** @Author 			: jeKim
+        ** @Create Date 	: 2016.11.02
+        ** @History 		: 2016.11.02 jeKim 최초작성
+        ******************************************************************************************
+    -->
+    <style>
+        :host {
+            @apply(--hbox-layout);
+        }
+    </style>
+
+    <template>
+        <!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+        <sc-request-group init>
+            <sc-code-group>
+                <!-- 타임존 -->
+                <sc-code code="C025" value="{{codes.C025}}" ></sc-code>
+            </sc-code-group>
+        </sc-request-group>
+
+        <!-- 협력사 사용자 목록 조회 -->
+        <sc-ajax id="findListVendorUser"
+                 url="findListVendorUser.do"
+                 body="{{searchParam}}"
+                 last-response="{{resultList}}">
+        </sc-ajax>
+
+        <!-- 사용자 정보 조회 -->
+        <sc-ajax id="findInfoVendorUser"
+                 url="findInfoVendorUser.do"
+                 body="{{searchDetailParam}}"
+                 last-response="{{vendorUserInfo}}">
+        </sc-ajax>
+
+        <!-- 잠김해제 -->
+        <sc-ajax id="saveInfoAccLockYn"
+                 url="saveInfoAccLockYn.do"
+                 on-response="completeSaveInfoAccLockYn">
+        </sc-ajax>
+
+        <!-- 비밀번호 초기화 -->
+        <sc-ajax id="saveInfoPwReset"
+                 url="saveInfoPwReset.do"
+                 on-response="completeSaveInfoPwReset">
+        </sc-ajax>
+
+        <cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+        <!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+        <div class="vbox flex">
+
+			<cc-sub-title-bar title-text="협력사사용자">
+			</cc-sub-title-bar>
+			<cc-search-container on-search="onSearch" auth-r>
+	            <table>
+	                <colgroup>
+	                    <col style="width:120px">
+	                    <col>
+	                    <col style="width:120px">
+	                    <col>
+	                </colgroup>
+	                <tr>
+	                    <th><sc-label text="협력사코드"></sc-label></th>
+	                    <td>
+	                        <sc-text-field placeholder="코드" value="{{searchParam.vd_cd}}" on-enter="onSearch"></sc-text-field>
+	                    </td>
+	                    <th><sc-label text="아이디"></sc-label></th>
+	                    <td>
+	                        <sc-text-field value="{{searchParam.usr_id}}" on-enter="onSearch"></sc-text-field>
+	                    </td>
+	                </tr>
+	
+	                <tr>
+	                    <th><sc-label text="협력사명"></sc-label></th>
+	                    <td>
+	                        <sc-text-field placeholder="협력사명" value="{{searchParam.vd_nm}}" on-enter="onSearch"></sc-text-field>
+	                    </td>
+	
+	                    <th><sc-label text="이름"></sc-label></th>
+	                    <td>
+	                        <sc-text-field value="{{searchParam.usr_nm}}" on-enter="onSearch"></sc-text-field>
+	                    </td>
+	                </tr>
+	            </table>
+			</cc-search-container>
+
+            <sc-grid id="gridPanel" data-provider="{{resultList}}" editable="true" class="flex" use-selection="false" use-state="false"
+                     on-item-click="onItemClick">
+                <cc-grid-toolbar></cc-grid-toolbar>
+                <sc-grid-columns>
+                    <sc-data-column data-field="usr_id" header-text="ID" width="90" text-align="center" style-name="link" auth-s></sc-data-column>
+                    <sc-data-column data-field="usr_nm" header-text="이름" width="180" text-align="left" auth-s></sc-data-column>
+                    <sc-data-column data-field="vd_cd" header-text="협력사코드" width="90" text-align="center" auth-s></sc-data-column>
+                    <sc-data-column data-field="vd_nm" header-text="협력사명" width="180" text-align="left" auth-s></sc-data-column>
+                </sc-grid-columns>
+            </sc-grid>
+
+        </div>
+
+        <div class="hspace-10"></div>
+
+        <div class="vbox flex">
+            <cc-sub-title-bar title-text="사용자정보">
+            </cc-sub-title-bar>
+            <table class="tb-form">
+                <colgroup>
+                    <col style="width:150px">
+                    <col>
+                </colgroup>
+
+                <tr>
+                    <th><sc-label text="협력사코드"></sc-label></th>
+                    <td>
+                        <sc-text-field readonly="true" value="{{vendorUserInfo.vd_cd}}"></sc-text-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="협력사명"></sc-label></th>
+                    <td>
+                        <sc-text-field readonly="true" value="{{vendorUserInfo.vd_nm}}"></sc-text-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="아이디"></sc-label></th>
+                    <td>
+                        <sc-text-field readonly="true" value="{{vendorUserInfo.usr_id}}"></sc-text-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="사용여부"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field readonly="true" input-value="{{vendorUserInfo.use_yn}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="이름"></sc-label></th>
+                    <td>
+                        <sc-text-field readonly="true" value="{{vendorUserInfo.usr_nm}}"></sc-text-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="이름(영문)"></sc-label></th>
+                    <td>
+                        <sc-text-field readonly="true" value="{{vendorUserInfo.usr_en_nm}}"></sc-text-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="이메일"></sc-label></th>
+                    <td>
+                        <sc-text-field readonly="true" value="{{vendorUserInfo.email}}"></sc-text-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="전화번호"></sc-label></th>
+                    <td>
+                        <sc-text-field readonly="true" value="{{vendorUserInfo.phone_no}}"></sc-text-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="H.P번호"></sc-label></th>
+                    <td>
+                        <sc-text-field readonly="true" value="{{vendorUserInfo.mobile_no}}"></sc-text-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="Fax번호"></sc-label></th>
+                    <td>
+                        <sc-text-field readonly="true" value="{{vendorUserInfo.fax_no}}"></sc-text-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="이메일수신"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field readonly="true" input-value="{{vendorUserInfo.mail_received_yn}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="SMS수신"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field readonly="true" input-value="{{vendorUserInfo.sms_received_yn}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+                    </td>
+                </tr>
+                <tr>
+                    <th><sc-label text="타임존"></sc-label></th>
+                    <td>
+                        <sc-combobox-field value="{{vendorUserInfo.timezone_cd}}" items="{{codes.C025}}" readonly="true" display-field="label" value-field="data"></sc-combobox-field>
+                    </td>
+                </tr>
+            </table>
+
+            <cc-sub-title-bar>
+                <sc-button text="잠김해제" on-click="onSaveAccLockYn" auth-s></sc-button>
+                <sc-button text="비밀번호초기화" on-click="onSavePwReset" auth-s></sc-button>
+            </cc-sub-title-bar>
+
+            <table class="tb-form">
+                <colgroup>
+                    <col style="width:150px">
+                    <col>
+                </colgroup>
+
+                <tr>
+                    <th><sc-label text="계정잠김"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field readonly="true" input-value="{{vendorUserInfo.acc_lock_yn}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="비밀번호만료"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field readonly="true" input-value="{{vendorUserInfo.pw_expired_yn}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="비밀번호변경시간"></sc-label></th>
+                    <td>
+                        <sc-date-field readonly="true" value="{{vendorUserInfo.pw_mod_dt}}"></sc-date-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="마지막인증시간"></sc-label></th>
+                    <td>
+                        <sc-date-field readonly="true" value="{{vendorUserInfo.last_login_dt}}"></sc-date-field>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </template>
+
+    <!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+    <script>
+        Polymer({
+            is: "es-vendor-user",
+
+            properties : {
+                // 협력사 사용자 목록 : 조회조건
+                searchParam: {
+                    type : Object,
+                    value : function(){
+                        return {};
+                    }
+                },
+
+                // 사용자 정보 : 조회조건
+                searchDetailParam: {
+                    type: Object,
+                    value : function(){
+                        return {};
+                    }
+                },
+
+                // 협력사 사용자 목록 : 조회 결과
+                resultList: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                },
+
+                // 사용자 정보
+                vendorUserInfo : {
+                    type: Object,
+                    value : function(){
+                        return {};
+                    }
+                },
+
+                codes: {
+                    type: Object,
+                    value: function () {
+                        return {};
+                    }
+                }
+            },
+
+            formulas : {
+                // 수정 가능 상태
+                isEditable : function() {
+                    // 사용자 아이디가 존재 할 경우 true
+                    return this.vendorUserInfo.usr_id;
+                }
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            // 초기화 완료 후 호출 함수
+            initialized : function() {
+                var me = this;
+                // 사용자 조회
+                me.onSearch();
+            },
+
+            /******************************
+             * 그리드 이벤트
+             ******************************/
+            // 그리드 cell click 이벤트
+            onItemClick: function(event){
+                var me = this,
+                    data = event.detail.data,
+                    item = event.detail.item;
+
+                if(item.dataField === "usr_id"){
+                    me.set("searchDetailParam", data);
+                    me.onSearchDetail();
+                }
+
+            },
+
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+            // 협력사 사용자 목록 조회
+            onSearch : function() {
+                var me = this;
+
+                // 사용자 정보 초기화
+                me.onClear();
+                UT.request(me.$.findListVendorUser);
+            },
+
+            // 사용자 정보 초기화
+            onClear: function(){
+                var me = this;
+                me.set("vendorUserInfo", {});
+            },
+
+            // 사용자 정보 조회
+            onSearchDetail: function(){
+                var me = this;
+                me.onClear();
+                UT.request(me.$.findInfoVendorUser);
+            },
+
+            // 잠김 해제
+            onSaveAccLockYn : function(){
+                var me = this,
+                    vendorUserInfo = me.get("vendorUserInfo"),
+                    message = "STD.ADM1003";
+
+                if(vendorUserInfo.acc_lock_yn == "N"){
+                    UT.alert("STD.ADM1004");
+                    return;
+                }
+
+                UT.confirm(message, function() {
+                    me.$.saveInfoAccLockYn.body = vendorUserInfo;
+                    UT.request(me.$.saveInfoAccLockYn);
+                });
+            },
+
+            // 잠김 해제 완료
+            completeSaveInfoAccLockYn :function(e, res){
+                var me = this,
+                    message = "STD.N1500";	
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                        me.onSearchDetail();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+
+            },
+
+            // 비밀번호 초기화
+            onSavePwReset: function(){
+                var me = this,
+                    vendorUserInfo = me.get("vendorUserInfo"),
+                    message = "STD.ADM1005";
+
+                if(!me.formula('isEditable')){
+                    UT.alert(me.translate("STD.E1012",null,me.translate('아이디')),null,true); //"'{0}'을(를) 선택하십시오"
+                    return;
+                }
+
+                if(!vendorUserInfo.email){
+                    UT.alert("STD.ADM1006");
+                    return;
+                }
+
+                UT.confirm(message, function() {
+                    // request body에 데이타 셋팅
+                    me.$.saveInfoPwReset.body = vendorUserInfo;
+                    UT.request(me.$.saveInfoPwReset);
+                });
+            },
+
+            completeSaveInfoPwReset: function(e, res){
+                var me = this,
+                    message = "STD.N1500";
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                        me.onSearchDetail();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+            }
+
+        });
+    </script>
+
+</dom-module>

@@ -1,0 +1,193 @@
+<dom-module id="ep-popup">
+
+    <style>
+       :host {
+            @apply(--vbox-layout);      
+        }
+    </style>
+    
+    <template>
+
+<!-- 사용가능한 직무 목록 조회 -->
+        <sc-ajax 
+            id="findListUsedJob" 
+            url="/bp/findListUsedJob.do"
+            body="{{findListUsedJob.param}}"
+            last-response="{{findListUsedJob.result}}" >
+        </sc-ajax>
+        	
+        <!-- 공통코드 조회( C007 : 수량단위 ) -->
+		<sc-code-group init>
+		    <sc-code code="C007" value="{{codes.comboUnitCode}}" ></sc-code>
+		</sc-code-group>
+		
+        
+        <div class="vbox flex">
+	        <sc-toolbar>
+	            <sc-label text="일괄 적용"></sc-label>
+	            <sc-spacer></sc-spacer>
+	            <sc-button text="일괄 적용" on-click="onAllApply"></sc-button>
+	            <sc-button text="닫기" on-click="onClose"></sc-button>
+	        </sc-toolbar>
+	        <table class="tb-form">
+	        	<colgroup>
+	        		<col style="width:120px"></col>
+	        		<col></col>
+	        	</colgroup>
+	        	<tr>
+	                <th><sc-label text="no"></sc-label></th>
+	                <td>
+	                <div  class="hbox">
+	                	<cc-multi-text-field value="{{applyData.pr_no}}" class="w-150" multi-value="{{applyData.pr_nos}}"></cc--multi-text-field>
+	                    </div>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="단위"></sc-label></th>
+	                <td>
+	                <div  class="hbox">
+	                	<sc-checkbox-field value="{{disabled.unitCd}}"></sc-checkbox-field>&nbsp;
+	                    <sc-combobox-field 
+	                        class="w-150"  display-field="label" value-field="data"
+	                        items="{{codes.comboUnitCode}}" value="{{applyData.unit_cd}}" placeholder="선택" disabled="{{!disabled.unitCd}}">
+	                    </sc-combobox-field>
+	                    </div>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="요청 수량"></sc-label></th>
+	                <td>
+	                	<div  class="hbox">
+	               		 	<sc-checkbox-field value="{{disabled.itemQty}}"></sc-checkbox-field>&nbsp;
+	                		<sc-text-field class="w-150" value="{{applyData.item_qty}}" readOnly="{{!disabled.itemQty}}"></sc-text-field>
+	                	</div>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="요청 단가"></sc-label></th>
+	                <td>
+	                	<div  class="hbox">
+			                <sc-checkbox-field value="{{disabled.prPrice}}"></sc-checkbox-field>&nbsp;
+			                	<sc-text-field class="w-150" value="{{applyData.pr_price}}" readOnly="{{!disabled.prPrice}}"></sc-text-field>
+	                	</div>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="구매그룹"></sc-label></th>
+	                <td>
+	                <div  class="hbox">
+			                <sc-checkbox-field value="{{disabled.purcGrpCd}}"></sc-checkbox-field>&nbsp;
+			                	<sc-combobox-field id="purcGrpCdCombo"
+			                        class="w-150" display-field="purc_grp_nm" value-field="purc_grp_cd" 
+			                        items="{{findListUsedJob.result}}" value="{{applyData.purc_grp_cd}}" placeholder="선택" disabled="{{!disabled.purcGrpCd}}">
+			                    </sc-combobox-field>
+	                    </div>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="납기일자"></sc-label></th>
+	                <td>
+	                <div  class="hbox">
+		                <sc-checkbox-field value="{{disabled.rdDate}}"></sc-checkbox-field>&nbsp;
+		                	<sc-date-field class="w-150" value="{{applyData.rd_date}}" disabled="{{!disabled.rdDate}}"></sc-date-field>
+	                	</div>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="납품요청장소"></sc-label></th>
+	                <td>
+	                	<div  class="hbox">
+			                <sc-checkbox-field value="{{disabled.rdLocat}}"></sc-checkbox-field>&nbsp;
+			                <sc-text-field class="w-150" value="{{applyData.rd_locat}}" disabled="{{!disabled.rdLocat}}"></sc-text-field>
+		                </div>
+	               	</td>
+	            </tr>
+	        </table>
+	    </div>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'ep-popup',
+            properties: {
+            	disabled : {
+            		type : Object,
+            		value : function(){
+            			return {
+            				unitCd : true,
+                			itemQty : true,
+                			prPrice : true,
+                			purcGrpCd : true,
+                			rdDate : true,
+                			rdLocat : true
+            			};
+            		}
+            	},
+            	applyData  : {
+            		type : Object,
+            		value : function(){
+            			return {};
+            		}
+            	},
+            	findListUsedJob: {
+                    type: Object,
+                    value: function(){
+                    	return {
+                    		 param: {},
+                             result: {}
+                    	};
+                    }
+                },
+                codes : {
+                	type : Object,
+                	value : function(){
+                		return {
+                			comboUnitCode : []
+                		};
+                	}
+                }
+            },
+            //화면 로드 함수
+            load : function(condition){
+            	var me = this;
+            	var currentUser = SCSessionManager.currentUser;
+            	if(condition){
+                	me.set('findListUsedJob.param',{
+                		purc_grp_typ : condition.purc_grp_typ,
+                		comp_cd : currentUser.comp_cd,
+                		use_yn : 'Y'
+                	});
+            	}
+            	//구매그룹 조회
+            	me.findListPurcGrp();
+            },
+            
+            initialized: function() {
+            	var me = this;
+            },
+            // 선택 값 일괄 적용
+            onAllApply: function() {
+                var me = this;
+                
+                var purcGrps = me.findListUsedJob.result;
+                for(var i =0 ; i < purcGrps.length ; i++){
+                	if(purcGrps[i].purc_grp_cd ==me.applyData.purc_grp_cd){
+                		me.applyData.purc_grp_nm = purcGrps[i].purc_grp_nm
+                		break;
+                	}
+                }
+                me.fire('selected-items', me.applyData);
+            },
+            //닫기
+            onClose : function(e){
+            	this.reset();
+            	this.fire('close');
+            },
+            // 콤보 - 구매그룹 목록 로드
+            findListPurcGrp: function() {
+            	UT.request(this.$.findListUsedJob);
+            }
+        });
+    </script>
+
+</dom-module>

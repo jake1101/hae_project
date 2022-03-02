@@ -1,0 +1,25 @@
+<dom-module id="es-menu-control-description">
+	<style>
+		
+	</style>
+	<template>
+		<p>
+			<b>UT.createWindow 사용법</b><br/>
+			UT.createWindow(메뉴 ID, 메뉴 이름, 메뉴 URL, 초기화 콜백)과 같은 방법으로 메뉴를 동적으로 생성할 수 있다.<br>
+			4번 째 인자인 초기화 콜백에서 호출된 함수는 모듈의 initialized 시점을 보장한다.
+
+			<br><br>
+
+			<b>UT.createWindowByMenuId 사용법</b><br/>
+			UT.createWindow(메뉴 ID, 초기화 콜백)과 같은 방법으로 등록된 메뉴의 ID만으로 메뉴를 동적으로 생성할 수 있다.<br>
+			2번 째 인자인 '초기화 콜백'에서 호출된 함수는 모듈의 initialized 시점을 보장한다.
+
+			만약, 메뉴가 기존에 생성되어 있다면 메뉴를 삭제 후 재생성한다. (initialized 를 다시 호출하기 위해 삭제)
+		</p>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-menu-control-description'
+	});
+	</script>
+</dom-module>

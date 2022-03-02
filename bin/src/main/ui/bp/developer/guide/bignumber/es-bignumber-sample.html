@@ -1,0 +1,38 @@
+<dom-module id="es-bignumber-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-ajax url="json/sample.json"
+				 last-response="{{sampleData}}" auto>
+		</sc-ajax>
+
+		<sc-grid id="gridPanel" data-provider="{{sampleData}}" aggregate="true">
+			<cc-grid-toolbar result-hidden="true" btn-group-hidden="true" title-text="큰숫자 정렬"></cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-data-column header-text="(정렬X) 큰숫자" data-field="col_1" width="250"	editable="false"	text-align="center"></sc-data-column>
+				<sc-data-column header-text="(정렬) 큰숫자"	data-field="col_2" width="250"	editable="false"	text-align="center" sort-compare-function="onSortCompareFunction"></sc-data-column>
+			</sc-grid-columns>
+		</sc-grid>
+
+		<sc-grid id="gridPanel2" data-provider="{{sampleData}}" aggregate="true">
+			<cc-grid-toolbar result-hidden="true" btn-group-hidden="true" title-text="큰숫자 합계"></cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-data-column header-text="aggregate-kind 사용한 합계" data-field="col_1" width="250"	editable="false"	text-align="center" aggregate-kind="sum" ></sc-data-column>
+				<sc-data-column header-text="큰숫자 합계" data-field="col_2" width="250"	editable="false"	text-align="center" aggregate-function="onAmtAggregate" ></sc-data-column>
+			</sc-grid-columns>
+		</sc-grid>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-bignumber-sample',
+
+        //합계 구하기
+        onAmtAggregate: UT.plusBigNumber,
+        //정렬하기
+        onSortCompareFunction: UT.sortBigNumber
+	});
+	</script>
+</dom-module>

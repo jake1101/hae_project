@@ -1,0 +1,57 @@
+<sc-link rel="import" href="ep-item-detail-cart.html"></sc-link>
+<sc-link rel="import" href="ep-item-detail-catalog.html"></sc-link>
+<dom-module id="em-tab-item-detail">
+<!-- 
+/**
+ *
+ *	@description : tab-navigation 팝업예제파일
+ *  <pre>
+ * </pre>
+ * @FileName : 
+ * @Since 2018. 10. 26.
+ */
+-->
+	<style>
+		:host {
+            @apply(--fit-layout);
+        }
+	</style>
+	
+	<template>
+		<!-- ajax 선언 부 -->
+       <cc-page-title-bar>
+       	<sc-button text="cart팝업" on-click="onShowItemDetailCart"></sc-button>
+       	<sc-button text="catalog팝업" on-click="onShowItemDetailCatalog"></sc-button>
+       </cc-page-title-bar>
+	</template>
+	
+	<script>
+	Polymer({
+			is : 'em-tab-item-detail',
+			properties : {
+			},
+			/************************************************** 
+			 * 초기화 설정
+			 **************************************************/
+			// 1. 화면 로딩시 최초 호출
+			initialized : function(){
+			},
+			onShowItemDetailCart: function(){
+				var me = this;
+				var cartPopup = UT.popup("ep-item-detail-cart",me,'50%','50%');
+				cartPopup.show();
+			},
+			onShowItemDetailCatalog: function(){
+				var me = this;
+				var catalogPopup = UT.popup("ep-item-detail-catalog",me,'50%','50%');
+				catalogPopup.show();
+			}
+			/************************************************** 
+			 * 그리드 이벤트
+			 **************************************************/
+			/************************************************** 
+			 * 버튼 이벤트
+			 **************************************************/
+		});
+	</script>
+</dom-module>

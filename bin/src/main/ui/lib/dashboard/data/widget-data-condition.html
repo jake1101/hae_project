@@ -1,0 +1,59 @@
+<link rel="stylesheet" type="text/css" href="../resources/js/jsoneditor/jsoneditor.css"></link>
+<dom-module id="widget-data-condition">
+    <style>
+    
+    </style>
+    
+   <template>
+   		<div style="width:100%;height:100%">
+	   		<sc-toolbar>
+	   			<sc-spacer></sc-spacer>
+	   			<sc-button text="적용" on-click="onClose"></sc-button>
+	   		</sc-toolbar>
+	   		<div id="conditionView" style="height:220px;"></div>
+   		</div>
+    </template>
+    
+    <script>
+        Polymer({
+            is : 'widget-data-condition',
+            properties : {
+            	conditions: {
+            		type: Object,
+            		value: {}
+            	},
+            	
+            },
+            attached : function(){
+            	var me = this;
+            	if(window.jsoneditor && window.jsoneditor.JSONEditor){
+                    jsonEditor = window.jsoneditor.JSONEditor;
+                }else if(window.JSONEditor){
+                    if(window.JSONEditor.JSONEditor){
+                        jsonEditor = window.JSONEditor.JSONEditor;
+                    }else{
+                        jsonEditor = window.JSONEditor;
+                    }
+                }
+               	me.conditionEditor = new jsonEditor(me.$.conditionView);
+            },
+            onClose: function(){
+            	var me = this;
+            	me.conditions = me.conditionEditor.get();
+            	me.fire('condition-close',{conditions:me.conditions})
+            },
+            setData: function(param){
+            	var me = this;
+            	if(param){
+            		me.conditions = param;
+            		me.conditionEditor.set(me.conditions);
+            	}
+            },
+            resetData: function(){
+            	var me = this;
+            	me.condition = {};
+            }
+           
+        });
+    </script>
+</dom-module>

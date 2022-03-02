@@ -1,0 +1,245 @@
+<dom-module id="es-org-list">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+
+        <!-- 코드 조회 -->
+        <sc-request-group init>
+            <!-- 공통 코드 조회-->
+            <sc-code-group>
+                <sc-code code="C009" value="{{codes.useYn}}" ></sc-code> <!-- 사용여부 -->
+            </sc-code-group>
+            <sc-ajax url="getAllCompanyList.do" last-response="{{codes.company}}"></sc-ajax> <!-- 회사목록 -->
+        </sc-request-group>
+
+        <!-- 조직목록 조회 -->
+        <sc-ajax id="findListOrg"
+                 url="findListOrg.do"
+                 body="{{searchParam}}"
+                 last-response="{{resultList}}">
+        </sc-ajax>
+
+        <!-- 조직목록 삭제 -->
+        <sc-ajax id="deleteListOrg"
+                 url="deleteListOrg.do"
+                 on-response="completeDeleteList">
+        </sc-ajax>
+
+        <cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+        
+        <cc-search-container search-button-hidden="true" auth-r>
+            <table>
+                <colgroup>
+                    <col style="width:120px"/>
+                    <col />
+                    <col style="width:120px"/>
+                    <col />
+                </colgroup>
+                <tr>
+                    <th>
+                        <sc-label text="조직유형코드"></sc-label>
+                    </th>
+                    <td>
+                        <sc-label text="[[searchParam.org_typ_cd]]" i18n-disabled></sc-label>
+                    </td>
+                    <th>
+                        <sc-label text="회사"></sc-label>
+                    </th>
+                    <td>
+                        <sc-combobox-field value="{{searchParam.comp_cd}}" items="{{codes.company}}" display-field="comp_nm" value-field="comp_cd"
+                                           readonly="{{!formula('isEditableCompCd')}}" on-change="onChangeCompCd" placeholder="전체">
+                        </sc-combobox-field>
+                    </td>
+                </tr>
+            </table>
+        </cc-search-container>
+
+        <sc-grid id="gridPanel" data-provider="{{resultList}}" class="flex" use-state="false"
+                 on-item-click="onItemClick" selection-able-function="onSelectionOption">
+            <cc-grid-toolbar title-text="조직목록">
+                <sc-button text="추가" on-click="onAddRow" auth-s></sc-button>
+                <sc-button text="삭제" on-click="onDeleteList" auth-s></sc-button>
+            </cc-grid-toolbar>
+            <sc-grid-columns>
+                <sc-data-column data-field="org_typ_nm" header-text="조직유형명" width="100" text-align="center"></sc-data-column>
+                <sc-data-column data-field="org_cd" header-text="조직코드" width="100" text-align="center" style-name="link"></sc-data-column>
+                <sc-data-column data-field="org_nm" header-text="조직명" width="200" text-align="left"></sc-data-column>
+                <sc-data-column data-field="use_count_oper_org" header-text="운영조직사용수" width="100" text-align="center" data-type="number"></sc-data-column>
+                <sc-combobox-column data-field="use_yn" header-text="사용"  width="60" text-align="center" items="{{codes.useYn}}" display-field="label" value-field="data"></sc-combobox-column>
+            </sc-grid-columns>
+        </sc-grid>
+
+
+    </template>
+
+    <script>
+        Polymer({
+            is: "es-org-list",
+            properties: {
+
+                // 코드 데이터
+                codes: {
+                    type: Object,
+                    reset: false,
+                    value: function() {
+                        return {
+                            company: [],
+                            useYn: []
+                        };
+                    }
+
+                },
+
+                // 조회 조건
+                searchParam: {
+                    type: Object,
+                    value: function() {
+                        return {};
+                    }
+                },
+
+                // 조회 결과
+                resultList: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                }
+
+            },
+
+            formulas : {
+                // 수정 가능 상태
+                isEditable : function() {
+                    // 조직 유형이 존재 할 경우 true
+                    return this.searchParam.org_typ_cd;
+                },
+
+                // 회사 수정 가능 상태
+                isEditableCompCd : function() {
+                    // 조직 유형코드가 COMPANY 가 아닌 경우 true
+                    return this.formula('isEditable') && this.searchParam.org_typ_cd !== "COMPANY";
+                }
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+
+            load: function(data) {
+                var me = this;
+
+                me.set("searchParam", {
+                    org_typ_cd : data.org_typ_cd
+                });
+                me.onFindList();
+                me.applyFormula();
+            },
+
+            // 초기화
+            clear: function() {
+                var me = this;
+                me.reset();
+                me.applyFormula();
+            },
+
+            /******************************
+             * 그리드 이벤트
+             ******************************/
+
+            // 그리드 cell click 이벤트
+            onItemClick: function(event) {
+                var me = this,
+                    data = event.detail.data,
+                    item = event.detail.item;
+
+                if(item.dataField === "org_cd"){
+                    me.fire("selected-org", data);
+                }
+            },
+
+            // checkBar editable 제어
+            onSelectionOption: function(item){
+                return (item.use_count_oper_org === 0);
+            },
+
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+
+            // 회사 선택 변경
+            onChangeCompCd: function(compCd) {
+                var me = this;
+                if (compCd) {
+                    me.onFindList();
+                }
+            },
+
+            // 조회 : 조직목록
+            onFindList: function() {
+                var me = this;
+                UT.request(me.$.findListOrg);
+            },
+
+            // 추가 : 조직목록 -> 조직정보에 조직 유형코드 및 회사코드 전달
+            onAddRow: function() {
+                var me = this;
+
+                if(!me.formula('isEditable')){
+                    UT.alert(me.translate("STD.E1012",null,me.translate('조직유형코드')),null,true); //"'{0}'을(를) 선택하십시오"
+                    return;
+                }
+
+                me.fire("selected-org", {
+                    org_typ_cd : me.searchParam.org_typ_cd,
+                    comp_cd : me.searchParam.comp_cd,
+                    is_new : true
+                });
+            },
+
+            // 삭제 : 조직목록
+            onDeleteList: function() {
+                var me = this,
+                    provider = me.$.gridPanel.getDataProvider(),
+                    checked = provider.selectionCheckedIndexes();
+
+                if (checked.length === 0) {
+                    UT.alert("STD.N1600"); // "선택된 항목이 없습니다",
+                    return;
+                }
+
+                UT.confirm("STD.N1300", function() { // "삭제 하시겠습니까?"
+                    var deleted = provider.removeItems();
+                    if(deleted.length > 0) {
+                        me.$.deleteListOrg.body = {
+                            deleteOrgs: deleted
+                        };
+                    }
+                    UT.request(me.$.deleteListOrg);
+                });
+            },
+
+            // 삭제 완료 : 조직목록
+            completeDeleteList: function(e, res) {
+                var me = this,
+                    result = res.response;
+
+                if(res.response.result_status === 'S'){
+                    UT.alert("STD.N2500", function(){ // 삭제하였습니다.
+                        me.onFindList();
+                        me.fire('deleted-org');
+                    });
+                } else {
+                    UT.alert(result.result_message);
+                }
+            }
+
+        });
+    </script>
+
+</dom-module>

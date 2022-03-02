@@ -1,0 +1,643 @@
+<sc-link rel="import" href="ep-alarm-details.html"></sc-link>
+
+<dom-module id="es-alarm-list">
+	<!--
+        ******************************************************************************************
+        ** @Program-name    : 알림발생이력조회
+        ** @Description     :
+        ** @Author          : jhbaek
+        ** @Create Date     : 2020.03.02
+        ** @History         : 2020.03.02 jhbaek 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+         -->
+		<!-- 코드 조회-->
+		<sc-request-group init>
+				<sc-code-group>
+					<sc-code code="SUCCESSFLAG" value="{{successList}}"></sc-code>
+					<sc-code code="IOT005" value="{{medicalList}}"></sc-code>
+					<sc-code code="IOT008W" value="{{smsList}}"></sc-code>
+				</sc-code-group>
+				
+		</sc-request-group>
+
+		<!--완료 -->
+		<sc-ajax
+				id="findListAlarmByTerm"
+				url="findListAlarmByTerm.do"
+				body="{{searchParam}}"
+				on-response="completeFindListAlarmByTerm">
+		</sc-ajax>
+		
+		<sc-ajax
+				id="findAlarmTabInfo"
+				url="findAlarmTabInfo.do"
+				body="{{searchParam}}"
+				on-response="completeFindAlarmTabInfo">
+		</sc-ajax>
+		
+		<sc-ajax
+				id="saveListAlarm"
+				url="saveListAlarm.do"
+				on-response="completeSaveListAlarm">
+		</sc-ajax>
+		<sc-ajax
+				id="openAlarm"
+				url="openAlarm.do"
+				on-response="completeOpenAlarm">
+		</sc-ajax>
+		<sc-ajax
+				id="hiddenAlarm"
+				url="hiddenAlarm.do"
+				on-response="completeHiddenAlarm">
+		</sc-ajax>
+		<sc-ajax
+				id="deleteAlarm"
+				url="deleteAlarm.do"
+				on-response="completeDeleteAlarm">
+		</sc-ajax>
+
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+
+		<div class="vbox flex">
+			<cc-search-container on-search="onSearch" auth-r>
+				<table >
+					<colgroup>
+						<col style="width:60px">
+						<col style="width:350px">
+						<col style="width:120px">
+						<col style="width:150px">
+						<col >
+					</colgroup>
+					<tr>
+						<th><sc-label text="기간"></sc-label></th>
+						<td style="text-align:center">
+								<sc-date-field value="{{searchParam.startDt}}" display-format="yyyy-MM-dd" required="true" default-value="-1d" style="width : 140px;"></sc-date-field>
+							~
+								<sc-date-field value="{{searchParam.endDt}}" display-format="yyyy-MM-dd" required="true" default-value="0d" style="width : 140px;"></sc-date-field>
+						</td>
+						<th><sc-label text="숨김 포함"></sc-label></th>
+						<td>
+							<sc-checkbox-field input-value="{{searchParam.includeHiddenYn}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+						</td>
+						<td></td>
+					</tr>
+				</table>
+			</cc-search-container>
+			<sc-grid id="gridPanel" data-provider="{{resultList}}" editable="true" class="flex-3" on-item-click="onItemClick" use-selection ="true"
+					 validation-group="save" selection-drag-check="true"  row-style-function="onRowStyle">
+				<cc-grid-toolbar>
+					<sc-button text="삭제" on-click="onDeleteAlarm" auth-s></sc-button>
+					<sc-button text="저장" on-click="onSaveAlarm" auth-s></sc-button>
+					<sc-button text="일괄 열람" on-click="onOpen" auth-s></sc-button>
+					<sc-button text="일괄 숨김" on-click="onHidden" auth-s></sc-button>
+					<sc-button text="일괄 조치완료" on-click="onComplete" auth-s></sc-button>
+				</cc-grid-toolbar>
+				<sc-grid-columns>
+					<sc-data-column data-field="seq" style-name="link" header-text="No" width="80" text-align="center" editable="false"  style-name="link"></sc-data-column>  
+					<sc-date-column data-field="sendDt" 	  header-text="발생시간"   width="200" text-align="center"   display-format="yyyy/MM/dd HH:mm:ss" editable="false"></sc-date-column>
+					<sc-data-column data-field="sensorType"      header-text="구분"     width="100" text-align="center" editable="false"  max-length="60"   ></sc-data-column>
+					<sc-data-column data-field="alarmType"      header-text="유형"     width="200" text-align="center" editable="false"  max-length="60"   ></sc-data-column>
+					<sc-data-column data-field="targetName"   header-text="대상" width="0" text-align="center" style-name="link" editable="false" max-length="60"></sc-data-column>
+					<sc-data-column data-field="content"  header-text="내용" width="500" text-align="left"  editable="false" max-length="300"></sc-data-column>
+					
+					<sc-data-column data-field="recipientCount"      header-text="알림대상"     width="80" text-align="center" editable="false"  max-length="60"   ></sc-data-column>
+					<sc-date-column data-field="readDt" 	  header-text="읽음확인"   width="200" text-align="center"   display-format="yyyy/MM/dd HH:mm:ss" editable="false" placeholder="미열람"></sc-date-column>
+					<!-- <sc-data-column data-field="state"      header-text="조치현황"     width="150" text-align="center"   editable="false"  max-length="60"   ></sc-data-column> -->
+					<sc-combobox-column items="{{stateList}}" header-text="조치상태" value-field="value" display-field="text" data-field="state" width="150" editable="true"></sc-combobox-column>
+					<sc-data-column data-field="details"      header-text="조치내용"     width="150" text-align="center"  style-name="link" editable="false"  max-length="60"   ></sc-data-column>
+					<sc-data-column data-field="hiddenYn"      header-text="숨김"     width="0" text-align="center"   editable="false"  max-length="60"   ></sc-data-column>
+
+				</sc-grid-columns>
+				<sc-grid-fields>
+					<sc-grid-field data-field="id"></sc-grid-field>
+					<sc-grid-field data-field="recipient"></sc-grid-field>
+					<sc-grid-field data-field="siteId" data-type="number"></sc-grid-field>
+					<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="targetInfo" data-type="object"></sc-grid-field>
+				</sc-grid-fields>
+			</sc-grid>
+			
+			<sc-splitter split-type="horizontal"></sc-splitter>
+			
+			<sc-tab-navigation id="tabNavi"  class="flex-3 vbox">
+		            <div title-text="앱 알림" class="vbox flex">
+		            	<sc-grid id="gridPanel2" data-provider="{{tabList2}}" class="fit"  editable="true" use-selection="false">
+			                <cc-grid-toolbar title-text="[[alarmName]]">
+			                </cc-grid-toolbar>
+			                <sc-grid-columns>
+			                	<sc-data-column data-field="receiveId" header-text="수신자 ID" width="130" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="receiveName" header-text="수신자" width="130" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="content" header-text="내용" width="500" text-align="center"></sc-data-column>
+			                    <sc-combobox-column	data-field="successFlag"	header-text="발신성공여부"	width="100"		
+									display-field="label"	value-field="data"	items="[[successList]]" editable="false"></sc-combobox-column>
+			                	<sc-date-column data-field="sendDt" 	  header-text="발송시간"   width="200" text-align="center"   display-format="yyyy/MM/dd HH:mm:ss" editable="false"></sc-date-column>
+			               </sc-grid-columns>
+		            	</sc-grid>
+		            	<sc-grid-fields>
+							<sc-grid-field data-field="id"></sc-grid-field>
+							<sc-grid-field data-field="siteId" data-type="number"></sc-grid-field>
+							<sc-grid-field data-field="vendorId"></sc-grid-field>
+						</sc-grid-fields>
+		            </div>
+		            <div title-text="웹 알림" class="vbox flex">
+		            	<sc-grid id="gridPanel4" data-provider="{{tabList4}}" class="fit"  editable="true" use-selection="false">
+			                <cc-grid-toolbar title-text="[[alarmName]]">
+			                </cc-grid-toolbar>
+			                <sc-grid-columns>
+			                	<sc-data-column data-field="receiveId" header-text="수신자 ID" width="130" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="receiveName" header-text="수신자 이름" width="130" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="content" header-text="내용" width="500" text-align="center"></sc-data-column>
+			                    <sc-combobox-column	data-field="successFlag"	header-text="발신성공여부"	width="100"		
+									display-field="label"	value-field="data"	items="[[successList]]" editable="false"></sc-combobox-column>
+			                	<sc-date-column data-field="sendDt" 	  header-text="발송시간"   width="200" text-align="center"   display-format="yyyy/MM/dd HH:mm:ss" editable="false"></sc-date-column>
+			               </sc-grid-columns>
+		            	</sc-grid>
+		            	<sc-grid-fields>
+							<sc-grid-field data-field="id"></sc-grid-field>
+							<sc-grid-field data-field="siteId" data-type="number"></sc-grid-field>
+							<sc-grid-field data-field="vendorId"></sc-grid-field>
+						</sc-grid-fields>
+		            </div>
+		            <div title-text="SMS"  class="vbox flex">
+		            	<sc-grid id="gridPanel1" data-provider="{{tabList1}}" class="fit"  editable="true" use-selection="false" >
+			                <cc-grid-toolbar title-text="[[alarmName]]">
+			                </cc-grid-toolbar>
+			                <sc-grid-columns>
+			                <sc-data-column data-field="receiveId" header-text="수신자 ID" width="130" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="receiveName" header-text="수신자 이름" width="130" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="receiveNumber" header-text="수신자 전화번호" width="150" text-align="center" input-mask="900-0000-0000"></sc-data-column>
+			                    <sc-data-column data-field="content" header-text="내용" width="500" text-align="center"></sc-data-column>
+			                    <sc-combobox-column	data-field="successFlag"	header-text="발신성공여부"	width="100"		
+									display-field="label"	value-field="data"	items="[[successList]]" editable="false"></sc-combobox-column>
+			                	<sc-date-column data-field="sendDt" 	  header-text="발송시간"   width="200" text-align="center"   display-format="yyyy/MM/dd HH:mm:ss" editable="false"></sc-date-column>
+			               </sc-grid-columns>
+		            	</sc-grid>
+		            	<sc-grid-fields>
+							<sc-grid-field data-field="id"></sc-grid-field>
+							<sc-grid-field data-field="siteId" data-type="number"></sc-grid-field>
+							<sc-grid-field data-field="vendorId"></sc-grid-field>
+						</sc-grid-fields>
+		            </div>
+		            
+		            <div title-text="Mail" class="vbox flex">
+		            	<sc-grid id="gridPanel3" data-provider="{{tabList3}}" class="fit"  editable="true" use-selection="false">
+			                <cc-grid-toolbar title-text="[[alarmName]]">
+			                </cc-grid-toolbar>
+			                <sc-grid-columns>
+			                    <sc-data-column data-field="receiveId" header-text="수신자 ID" width="130" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="receiveName" header-text="수신자 이름" width="130" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="receiveAddr" header-text="Mail" width="250" text-align="center"></sc-data-column>
+			                    <sc-data-column data-field="content" header-text="내용" width="500" text-align="center"></sc-data-column>
+			                    <sc-combobox-column	data-field="successFlag"	header-text="발신성공여부"	width="100"		
+									display-field="label"	value-field="data"	items="[[successList]]" editable="false"></sc-combobox-column>
+			                	<sc-date-column data-field="sendDt" 	  header-text="발송시간"   width="200" text-align="center"   display-format="yyyy/MM/dd HH:mm:ss" editable="false"></sc-date-column>
+			               </sc-grid-columns>
+		            	</sc-grid>
+		            	<sc-grid-fields>
+							<sc-grid-field data-field="id"></sc-grid-field>
+							<sc-grid-field data-field="siteId" data-type="number"></sc-grid-field>
+							<sc-grid-field data-field="vendorId"></sc-grid-field>
+							<sc-grid-field data-field="targetInfo" data-type="object"></sc-grid-field>
+						</sc-grid-fields>
+		            </div>
+	        </sc-tab-navigation>
+		</div>
+
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-alarm-list",
+            properties : {
+                currentRowIndex:Number,
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                alarmName: {
+                    type: String,
+                },
+                stateList : {
+					type : Array,
+					value : function(){
+						return[{text:"조치전", value:1},{text:"조치중", value:3},{text:"조치완료", value:5}];
+					}
+				}
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            // 초기화 완료 후 호출 함수
+            initialized : function() {
+                var me = this;
+                
+                me.onSearch();
+            },
+            
+            formulas : {
+				isInput :function(){
+					return  (this.get("smsInfo.smsType") == "input")
+				}
+			},
+
+			// grid item click 이벤트
+			onItemClick : function(event) {
+				var me = this,
+					data = event.detail.data,
+					item = event.detail.item,
+                	provider = event.detail.provider,
+                	searchParam = me.get('searchParam');
+				
+				me.currentRowIndex = item.rowIndex;
+				
+				if(item.dataField == "details"){
+					var detailPopup = UT.popup("ep-alarm-details", me, 900, 800, {
+		                   "show-list": function(popup, e) {
+							var result=e.detail;
+		                   	popup.close();
+		                   	
+		                   },
+		                   "save-property" : function(popup,data){
+	                	   	 	provider.setItemAt(me.currentRowIndex,{ property: data.detail});
+	                	   	 	provider.setItemAt(me.currentRowIndex,{ state: data.detail.state});
+		                	   	//popup.close();
+		                	  	me.onSaveAlarm();
+		                   }
+		               },{titleText: "상세내용"});
+					detailPopup.show();
+					detailPopup.getWindowContent().load(data);
+				}else if( item.dataField == "seq"){
+					me.set("searchParam.alarmSeq",data.seq);
+					me.set("alarmName","["+data.seq+"]");
+					
+					 UT.request(me.$.findAlarmTabInfo);
+				}
+             },
+             
+             completeFindAlarmTabInfo : function(e,res){
+            	 var me = this,
+            	 	 result= res.response;
+            	 if(result){
+	            	 me.set("tabList1",result.smsLog);
+	            	 me.set("tabList2",result.pushLog);
+	            	 me.set("tabList3",result.mailLog);
+	            	 me.set("tabList4",result.websocketLog);
+            	 }
+            	 
+             },
+            
+            
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+
+            // 조회
+            onSearch : function(param) {
+                var me = this;
+                
+                if(!me.validate('search')){
+                    UT.alert("STD.E0000");
+                    return false;
+                }
+
+                UT.request(me.$.findListAlarmByTerm);
+            },
+
+            completeFindListAlarmByTerm: function(e, res){
+            	var me = this;
+            	var resultList = res.response || [];
+            	console.log(resultList);
+            	if(UT.isNotEmpty(resultList)){
+					for(var i = 0 ; i < resultList.length; i++){
+						resultList[i].details = "[상세정보]";
+						if(resultList[i].property){
+							resultList[i].answerer = resultList[i].property.answerer;
+						}
+						
+						/* if(resultList[i].state == null ||  resultList[i].state == 1){
+							resultList[i].state = "조치 전";
+						}else if( resultList[i].state == 3){
+							resultList[i].state = "조치 중";
+						}else if( resultList[i].state == 5){
+							resultList[i].state = "조치 완료";
+						} */
+					}
+            	}
+            	me.set("resultList", resultList);
+            },
+            
+
+            // 저장 유효성 체크
+            validation: function() {
+                var me = this;
+
+                // 기본 validate
+                if(!me.validate('save')) {
+                    UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return false;
+                }
+
+                // 중복 체크
+                var provider = me.$.gridPanel.getDataProvider(),
+                    rows = provider.getItems();
+                var unique_check = {};
+                for (var i=0, len = rows.length; i<len; i++) {
+                    if(typeof unique_check[rows[i].serialNumber] == "undefined"){
+                        unique_check[rows[i].serialNumber] = 0;
+                    } else {
+                        //UT.alert(me.translate("STD.E1000",null, me.translate('사업자번호')),null,true); // "'{0}'에 동일한 값이 존재합니다"
+                        //return false;
+                    }
+                }
+
+                return true;
+            },
+            
+            date_to_str :function(format)
+
+            {
+
+                var year = format.getFullYear();
+
+                var month = format.getMonth() + 1;
+
+                if(month<10) month = '0' + month;
+
+                var date = format.getDate();
+
+                if(date<10) date = '0' + date;
+
+                var hour = format.getHours();
+
+                if(hour<10) hour = '0' + hour;
+
+                var min = format.getMinutes();
+
+                if(min<10) min = '0' + min;
+
+                var sec = format.getSeconds();
+
+                if(sec<10) sec = '0' + sec;
+
+                
+
+                return year + "-" + month + "-" + date + " " + hour + ":" + min + ":" + sec;
+
+            },
+
+            
+            // 일괄 조치 완료
+            onComplete : function(){
+                var me = this;
+
+                // 저장 유효성 체크
+                if(!me.validation()) {
+                    return;
+                }
+
+                var provider = me.$.gridPanel.getDataProvider(),
+                    selectionItems = provider.selectionCheckedItems();
+
+                
+                for(var i = 0 ; i<selectionItems.length ; i++ ){
+                	var recipientArr;
+                	recipientArr= selectionItems[i].recipient.split(",");
+                	selectionItems[i].recipient = recipientArr;
+                	if(!selectionItems[i].property) selectionItems[i].property = {};
+               		selectionItems[i].property.answerDt= me.date_to_str(new Date());
+               		selectionItems[i].state = 5;
+                }
+                
+                UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+                    me.$.saveListAlarm.body = {
+                        updateList: selectionItems
+                    };
+                    UT.request(me.$.saveListAlarm);
+                });
+            },
+            // 알림 저장
+            onSaveAlarm : function(){
+                var me = this;
+
+                // 저장 유효성 체크
+                if(!me.validation()) {
+                    return;
+                }
+
+                var provider = me.$.gridPanel.getDataProvider(),
+                    created = provider.getNewItems(),
+                    updated = provider.getUpdateItems();
+
+                
+                if(created.length + updated.length === 0) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+                for(var i = 0 ; i<updated.length ; i++ ){
+                	var recipientArr;
+                	recipientArr= updated[i].recipient.split(",");
+                	updated[i].recipient = recipientArr;
+                	if(!updated[i].property) updated[i].property = {};
+                	if(updated[i].state != "1"){
+	                	updated[i].property.answerDt= me.date_to_str(new Date());
+                	}
+                }
+                
+                UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+                    me.$.saveListAlarm.body = {
+                        insertList: created,
+                        updateList: updated
+                    };
+                    UT.request(me.$.saveListAlarm);
+                });
+            },
+
+            //  저장 완료
+            completeSaveListAlarm: function(e, res){
+                var me = this,
+                    message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                        me.onSearch();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+
+            },
+            // 알림 열람
+            onOpen : function(){
+            	  var me =this;
+       			
+	 			  var provider = me.$.gridPanel.getDataProvider();
+	 			  var selectionItems = provider.selectionCheckedItems();
+	 				
+	 				
+	 			  if (selectionItems.length === 0) {
+	                   UT.alert("STD.N1600");
+	                   return;
+	               }
+	
+	 			  for(var i = 0 ; i<selectionItems.length ; i++ ){
+	               	var recipientArr;
+	               	recipientArr= selectionItems[i].recipient.split(",");
+	               	selectionItems[i].recipient = recipientArr;
+	               	selectionItems[i].readDt = me.date_to_str(new Date());
+	               }
+	 			  
+	 			  UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+	                me.$.openAlarm.body = {
+	                    openList: selectionItems,
+	                };
+	                UT.request(me.$.openAlarm);
+	              });
+            },
+
+            // 열람완료
+            completeOpenAlarm: function(e, res){
+                var me = this,
+                    message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                        me.onSearch();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+
+            },
+            // 알림 열람
+            onHidden : function(){
+            	  var me =this;
+       			
+	 			  var provider = me.$.gridPanel.getDataProvider();
+	 			  var selectionItems = provider.selectionCheckedItems();
+	 				
+	 				
+	 			  if (selectionItems.length === 0) {
+	                   UT.alert("STD.N1600");
+	                   return;
+	               }
+	
+	 			  for(var i = 0 ; i<selectionItems.length ; i++ ){
+	               	var recipientArr;
+	               	recipientArr= selectionItems[i].recipient.split(",");
+	               	selectionItems[i].recipient = recipientArr;
+	               	selectionItems[i].readDt = me.date_to_str(new Date());
+	               	selectionItems[i].hiddenYn = "Y";
+	               }
+	 			  
+	 			  UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+	                me.$.hiddenAlarm.body = {
+	                    hiddenList: selectionItems,
+	                };
+	                UT.request(me.$.hiddenAlarm);
+	              });
+            },
+
+            // 열람완료
+            completeHiddenAlarm: function(e, res){
+                var me = this,
+                    message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                        me.onSearch();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+
+            },
+            
+            
+            onDeleteAlarm : function(){		
+   			  var me =this;
+   			
+   			  var provider = me.$.gridPanel.getDataProvider();
+   			  var selectionItems = provider.selectionCheckedItems();
+   				
+   				
+   			  if (selectionItems.length === 0) {
+                     UT.alert("STD.N1600");
+                     return;
+                 }
+
+   			  for(var i = 0 ; i<selectionItems.length ; i++ ){
+                 	var recipientArr;
+                 	recipientArr= selectionItems[i].recipient.split(",");
+                 	selectionItems[i].recipient = recipientArr;
+                 	
+                 }
+   			  
+                 UT.confirm("STD.N1300", function() {
+                     var deleted = provider.removeItems();
+                     if(deleted.length > 0){
+                         me.$.deleteAlarm.body = {
+                       		  deleteList : selectionItems
+                         };
+                        UT.request(me.$.deleteAlarm);
+                     }
+                 });
+   				
+   			},
+   			
+   			completeDeleteAlarm : function(e,res){
+   				var me = this,
+                   result = res.response;
+
+   	            if (result.result_status === 'S') {
+   	                UT.alert("STD.N2500", function () { // 삭제하였습니다.
+   	                    me.onSearch();
+   	                });
+   	            } else {
+   	                UT.alert(result.result_message);
+   	            }
+   			},
+    			
+   			onRowStyle: function(data){
+				if(data["hiddenYn"] == "Y"){
+					return{
+						background:"#808080",
+						fontColor :"#ffffff"
+					}
+				}
+			},	
+            
+        });
+	</script>
+
+</dom-module>

@@ -1,0 +1,51 @@
+<dom-module id="es-map-search">
+	<style>
+        :host {
+            @apply(--hbox-layout);
+        }
+    </style>
+
+	<template>
+		<div class="flex hbox-8">
+			<sc-map id="map1" type="Google" longitude="129.577" latitude="38" zoom-level="6" search-result="{{searchResult}}">
+				<sc-map-marker longitude="129.577" latitude="38" on-click-marker="onClickMarker"></sc-map-marker>
+			</sc-map>
+		</div>
+		
+		<div class="flex hbox-2">
+			<sc-panel title-text="검색 결과">
+				<sc-map-search search-result="{{searchResult}}">
+					<template>
+						<div>
+							<div>이름 : {{item.detailInfo.name}}</div>
+							<div>항목 : {{item.detailInfo.info}}</div>
+						</div>
+					</template>
+				</sc-map-search>
+			</sc-panel>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'es-map-search',
+			
+			properties : {
+				searchResult: {
+					type: Object
+				}
+			},
+			
+			setMarker : function(markerList) {
+				var me = this;
+				me.$.map1.addMarkers(markerList);
+			},
+			
+			onClickMarker : function(event, data) {
+				var me = this;
+				data.element.showCircleEffect(30);
+				me.$.map1.searchCircleArea(data.location, 200);
+			}
+		});
+	</script>
+</dom-module>

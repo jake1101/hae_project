@@ -1,0 +1,70 @@
+<dom-module id="es-dev-item-group">
+    <template>
+	    <style>
+	        :host {
+	        }
+	        
+	        .table {
+	        	display: table;
+	        }
+
+            .value-btn{
+                display:none;
+            }
+	        
+	        :host([value-toolbar]) .value-btn{
+	        	display: inherit;
+	        }
+	    </style>
+
+        <sc-panel title-text="[[title]]">
+            <sc-toolbar>
+                <sc-spacer></sc-spacer>
+                <sc-button class="value-btn" text="입력" on-click="onSetValue"></sc-button>
+                <sc-button class="value-btn" text="제거" on-click="onRemoveValue"></sc-button>
+            </sc-toolbar>
+
+        	<div class="table">
+        		<content id="content" select="*"></content>
+        	</div>
+        </sc-panel>
+
+        <div class="vspace-10"></div>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-dev-item-group',
+            properties:{
+				title: String
+            },
+            
+    		/**
+    		 * 데모 값을 입력
+    		 */	
+            onSetValue: function() {
+            	var contentChilds = Polymer.dom(this.$.content).getDistributedNodes();
+            	
+            	contentChilds.forEach(function(ele){
+            		if(Polymer.dom(ele).node.setValue) {
+            			Polymer.dom(ele).node.setValue();
+            		}
+            	});
+            	
+            },
+            
+            /**
+    		 * 데모 값을 제거
+    		 */	
+            onRemoveValue: function(hi) {
+				var contentChilds = Polymer.dom(this.$.content).getDistributedNodes();
+            	
+            	contentChilds.forEach(function(ele){
+            		if(Polymer.dom(ele).node.removeValue) {
+            			Polymer.dom(ele).node.removeValue();
+            		}
+            	});
+            }
+		});
+	</script>
+</dom-module>

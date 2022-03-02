@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="commonCode">
+
+<!-- 
+	그룹코드(ESACDGP) 
+	@author : JuEung Kim
+	@Date 	: 2016. 2. 2
+-->
+	<!-- 그룹코드 목록의 값을 반환한다. -->
+	<select id="findListGrpCode" resultType="map">
+	/* commonCode.findListGrpCode */
+           SELECT SYS_ID        /*시스템 아이디*/
+                 ,GRP_CD        /*그룹 코드*/
+                 ,CD_TYP        /*코드 유형*/
+                 ,GRP_CD_NM     /*그룹 코드 명*/
+                 ,GRP_CD_EN_NM  /*그룹 코드 영문 명*/
+                 ,USE_YN        /*사용 여부*/ 
+                 ,REM           /*비고*/
+                 ,STS           /*상태*/ 
+                 ,REG_ID        /*등록자 아이디*/ 
+                 ,REG_DT        /*등록 일시*/ 
+                 ,MOD_ID        /*수정자 아이디*/ 
+                 ,MOD_DT        /*수정 일시*/ 
+             FROM ESACDGP
+		<trim prefix="WHERE" prefixOverrides="AND">
+		      AND SYS_ID = #{g.tenant}
+			<if test="p.grp_cd != null and p.grp_cd != ''">
+			<bind name="grpCdPattern" value="'%' + p.grp_cd + '%'" />
+			  AND UPPER(GRP_CD) LIKE UPPER(#{grpCdPattern})
+			</if>
+			<if test="p.cd_typ != null and p.cd_typ != ''">
+              AND CD_TYP = #{p.cd_typ}
+			</if>
+			<if test="p.grp_cd_nm != null and p.grp_cd_nm != ''">
+			<bind name="grpCdNmPattern" value="'%' + p.grp_cd_nm + '%'" />
+			  AND UPPER(GRP_CD_NM) LIKE UPPER(#{grpCdNmPattern})
+			</if>
+		</trim>
+         ORDER BY CD_TYP
+                 ,GRP_CD
+	</select>
+
+	<!-- 그룹 코드(ESACDGP) INSERT -->
+	<insert id="insertEsacdgp">
+	/* commonCode.insertEsacdgp */
+       INSERT INTO ESACDGP
+		<trim prefix="(" suffix=")" prefixOverrides=",">
+	            STS            /*상태*/
+	           ,SYS_ID         /*시스템 아이디*/
+	           ,REG_ID         /*등록자 아이디*/
+	           ,REG_DT         /*등록 일시*/
+	           ,GRP_CD         /*그룹 코드*/
+	           ,CD_TYP         /*코드 유형*/
+	           ,GRP_CD_NM      /*그룹 코드 명*/
+	           ,GRP_CD_EN_NM   /*그룹 코드 영문 명*/
+	           ,USE_YN         /*사용 여부*/
+	           ,REM            /*비고*/
+    	</trim>
+    	<trim prefix="VALUES (" suffix=")" prefixOverrides=",">
+				'C'
+				,#{g.tenant}
+				,#{g.username}
+				,#{g.now}
+				,#{p.grp_cd}
+				,#{p.cd_typ}
+	        	,#{p.grp_cd_nm}
+	        	,#{p.grp_cd_en_nm}
+		        ,#{p.use_yn}
+		        ,#{p.rem}
+    	</trim>
+  	</insert>
+	
+	<!-- 그룹 코드(ESACDGP) UPDATE -->
+	<update id="updateEsacdgp">
+	/* commonCode.updateEsacdgp */
+		  UPDATE ESACDGP
+		<trim prefix="set" prefixOverrides=",">
+				 MOD_ID 		= #{g.username}		/*수정자 아이디*/ 
+				,MOD_DT 		= #{g.now}			/*수정 일시*/
+		   		,GRP_CD_NM 		= #{p.grp_cd_nm} 	/*그룹 코드 명*/
+		 		,GRP_CD_EN_NM 	= #{p.grp_cd_en_nm}	/*그룹 코드 영문 명*/
+		 		,USE_YN 		= #{p.use_yn}		/*사용 여부*/
+		</trim>
+		   WHERE SYS_ID = #{g.tenant}
+		     AND GRP_CD = #{p.grp_cd}
+	</update>
+	
+	<!-- 그룹 코드(ESACDGP) DELETE -->
+	<delete id="deleteEsacdgp">
+	/* commonCode.deleteEsacdgp */
+		DELETE 
+		  FROM ESACDGP
+		 WHERE SYS_ID 	= #{g.tenant}
+		   AND GRP_CD	= #{p.grp_cd}
+	</delete>
+	
+	
+	
+<!--
+	그룹 코드 속성(ESACDAT)
+	@author : JuEung Kim
+	@Date 	: 2016. 2. 2 
+-->	
+	<!-- 그룹코드 속성(ESACDAT) 목록 조회 -->
+	<select id="findListGrpAttrCode" resultType="map">
+	/* commonCode.findListGrpAttrCode */
+           SELECT SYS_ID         /*시스템 아이디*/
+                 ,GRP_CD         /*그룹 코드*/
+                 ,ATTR_CD        /*속성 코드*/ 
+                 ,ATTR_CD_NM     /*속성 코드 명*/ 
+                 ,ATTR_CD_EN_NM  /*속성 코드 영문 명*/ 
+                 ,SORT_ORD       /*정렬 순서*/ 
+                 ,USE_YN         /*사용 여부*/ 
+                 ,REM            /*비고*/ 
+                 ,STS            /*상태*/ 
+                 ,REG_ID         /*등록자 아이디*/ 
+                 ,REG_DT         /*등록 일시*/ 
+                 ,MOD_ID         /*수정자 아이디*/ 
+                 ,MOD_DT         /*수정 일시*/ 
+             FROM ESACDAT
+		<trim prefix="WHERE" prefixOverrides="AND">
+              AND SYS_ID 	= #{g.tenant}
+			<if test="p.grp_cd != null">
+              AND GRP_CD	= #{p.grp_cd}
+			</if>
+			<if test="p.attr_cd != null">
+              AND ATTR_CD	= #{p.attr_cd}
+          	</if>
+       </trim>
+         ORDER BY SORT_ORD
+                 ,ATTR_CD
+	</select>
+	
+	<!-- 그룹코드 속성(ESACDAT&ESADTAT) 목록 조회  -->
+	<select id="findListGrpAttrCodeAndAttrVal" resultType="map">
+	/* commonCode.findListGrpAttrCodeAndAttrVal */
+           SELECT a.SYS_ID           /*시스템 아이디*/
+                 ,a.GRP_CD           /*그룹 코드*/
+                 ,a.ATTR_CD          /*속성 코드*/ 
+                 ,a.ATTR_CD_NM       /*속성 코드 명*/ 
+                 ,a.ATTR_CD_EN_NM    /*속성 코드 영문 명*/ 
+                 ,a.SORT_ORD         /*정렬 순서*/ 
+                 ,a.USE_YN           /*사용 여부*/ 
+                 ,a.REM              /*비고*/ 
+                 ,a.STS              /*상태*/ 
+                 ,a.REG_ID           /*등록자 아이디*/ 
+                 ,a.REG_DT           /*등록 일시*/ 
+                 ,a.MOD_ID           /*수정자 아이디*/ 
+                 ,a.MOD_DT           /*수정 일시*/ 
+                 ,b.DTL_CD_ATTR_VAL  /*상세 코드 속성 값 */
+             FROM ESACDAT a
+        LEFT JOIN ESADTAT b
+               ON b.SYS_ID  = a.SYS_ID
+              AND b.GRP_CD  = a.GRP_CD
+              AND b.ATTR_CD = a.ATTR_CD
+              AND b.DTL_CD  = #{p.dtl_cd} 
+            WHERE a.SYS_ID 	= #{g.tenant}
+              AND a.GRP_CD 	= #{p.grp_cd}
+         ORDER BY a.SORT_ORD
+                 ,a.ATTR_CD
+	</select>
+	
+	<!-- 그룹 코드 속성(ESACDAT) INSERT -->
+	<insert id="insertEsacdat">
+	/* commonCode.insertEsacdat */
+		INSERT INTO ESACDAT
+		<trim prefix="(" suffix=")" prefixOverrides=",">
+				 STS			/*상태*/
+        		,SYS_ID			/*시스템 아이디*/
+        		,REG_ID			/*등록자 아이디*/
+        		,REG_DT			/*등록 일시*/
+        		,GRP_CD			/*그룹 코드*/
+        		,ATTR_CD		/*속성 코드*/
+        		,ATTR_CD_NM		/*속성 코드 명*/
+        		,ATTR_CD_EN_NM	/*속성 코드 영문 명*/
+        		,SORT_ORD		/*정렬 순서*/
+        		,USE_YN			/*사용 여부*/
+        		,REM			/*비고*/
+		</trim>
+		<trim prefix="values (" suffix=")" prefixOverrides=",">
+				 'C'
+        		,#{g.tenant}
+        		,#{g.username}
+        		,#{g.now}
+        		,#{p.grp_cd}
+        		,#{p.attr_cd}
+        		,#{p.attr_cd_nm}
+        		,#{p.attr_cd_en_nm}
+        		,#{p.sort_ord,jdbcType=INTEGER}
+        		,#{p.use_yn}
+        		,#{p.rem}
+      	</trim> 		
+	</insert>
+	
+	<!-- 그룹 코드 속성(ESACDAT) UPDATE -->
+	<update id="updateEsacdat">
+	/* commonCode.updateEsacdat */
+		  UPDATE ESACDAT
+		<trim prefix="set" prefixOverrides=",">
+				 STS			= 'U'
+				,MOD_ID 		= #{g.username}			/*수정자 아이디*/ 
+				,MOD_DT 		= #{g.now}				/*수정 일시*/
+				,ATTR_CD_NM 	= #{p.attr_cd_nm}		/*속성 코드 명*/
+				,ATTR_CD_EN_NM 	= #{p.attr_cd_en_nm}	/*속성 코드 영문 명*/
+				,SORT_ORD 		= #{p.sort_ord,jdbcType=INTEGER}		/*정렬 순서*/
+				,USE_YN			= #{p.use_yn}			/*사용 여부*/
+				,REM 			= #{p.rem}				/*비고*/
+		</trim>
+		   WHERE SYS_ID 	= #{g.tenant}
+		     AND GRP_CD 	= #{p.grp_cd}
+		     AND ATTR_CD 	= #{p.attr_cd} 
+	</update>
+	
+	<!-- 그룹 코드 속성(ESACDAT) DELETE -->
+	<delete id="deleteEsacdat">
+	/* commonCode.deleteEsacdat */
+		DELETE 
+		  FROM ESACDAT
+		 WHERE SYS_ID 	= #{g.tenant}
+		   AND GRP_CD	= #{p.grp_cd}
+		   AND ATTR_CD	= #{p.attr_cd}
+	</delete>
+
+	<!-- 그룹 코드 속성(ESACDAT) DELETE by GRP_CD -->
+	<delete id="deleteEsacdatByGrpCd">
+	/* commonCode.deleteEsacdatByGrpCd */
+		DELETE 
+		  FROM ESACDAT
+		 WHERE SYS_ID 	= #{g.tenant}
+		   AND GRP_CD	= #{p.grp_cd}
+	</delete>
+
+<!--
+	상세 코드(ESACDDT)
+	@author : JuEung Kim
+	@Date 	: 2016. 2. 2
+-->
+	<!-- 상세코드 목록(ESACDDT) 조회 -->
+	<select id="findListDtlCode" resultType="map">
+	/* commonCode.findListDtlCode */
+           SELECT a.SYS_ID      /*시스템 아이디*/ 
+                 ,a.GRP_CD      /*그룹 코드*/ 
+                 ,a.DTL_CD      /*상세 코드*/ 
+                 ,a.SORT_ORD    /*정렬 순서*/ 
+                 ,a.USE_YN      /*사용 여부*/ 
+                 ,a.REM         /*비고*/ 
+                 ,a.STS         /*상태*/ 
+                 ,a.REG_ID      /*등록자 아이디*/ 
+                 ,a.REG_DT      /*등록 일시*/ 
+                 ,a.MOD_ID      /*수정자 아이디*/ 
+                 ,a.MOD_DT      /*수정 일시*/ 
+                 ,#{p.lang_cd}  AS LANG_CD     /*언어 코드*/
+                 ,b.DTL_CD_NM   /*상세 코드 명*/
+                 ,CASE WHEN b.DTL_CD IS NULL THEN 'N'
+                       ELSE 'Y'
+                  END           AS CDDL_SAVE_YN
+             FROM ESACDDT a
+         LEFT OUTER JOIN ESACDDL b 
+               ON a.SYS_ID 	= b.SYS_ID 
+              AND a.GRP_CD 	= b.GRP_CD 
+              AND a.DTL_CD 	= b.DTL_CD 
+              AND b.LANG_CD = #{p.lang_cd}
+            WHERE a.SYS_ID 	= #{g.tenant}
+              AND a.GRP_CD	= #{p.grp_cd}
+              AND a.STS != 'D'
+         ORDER BY a.SORT_ORD
+                 ,a.DTL_CD
+	</select>
+	
+	<!-- 상세 코드 테이블(ESACDDT) INSERT -->
+	<insert id="insertEsacddt">
+	/* commonCode.insertEsacddt */
+		INSERT INTO ESACDDT
+		<trim prefix="(" suffix=")" prefixOverrides=",">
+				 STS		/*상태*/ 
+        		,SYS_ID		/*시스템 아이디*/
+        		,REG_ID		/*등록자 아이디*/ 
+        		,REG_DT		/*등록 일시*/
+      			,GRP_CD		/*그룹 코드*/
+      			,DTL_CD		/*상세 코드*/
+      			,SORT_ORD	/*정렬 순서*/ 
+      			,USE_YN		/*사용 여부*/ 
+      			,REM		/*비고*/ 
+      	</trim>	
+      	<trim prefix="values (" suffix=")" prefixOverrides=",">
+      			 'C'
+      			,#{g.tenant}
+      			,#{g.username}
+      			,#{g.now} 
+      			,#{p.grp_cd} 
+      			,#{p.dtl_cd} 
+      			,#{p.sort_ord,jdbcType=INTEGER} 
+      			,#{p.use_yn} 
+      			,#{p.rem} 
+      	</trim>
+	</insert>
+	
+	<!-- 상세 코드 테이블(ESACDDT) UPDATE -->
+	<update id="updateEsacddt">
+	/* commonCode.updateEsacddt */
+		UPDATE ESACDDT
+		<trim prefix="set" prefixOverrides=",">
+				 MOD_ID 	= #{g.username}		/*수정자 아이디*/ 
+			  	,MOD_DT 	= #{g.now}			/*수정 일시*/
+				,SORT_ORD	= #{p.sort_ord,jdbcType=INTEGER}		/*정렬 순서*/
+				,USE_YN		= #{p.use_yn}		/*사용 여부*/
+				,REM		= #{p.rem}			/*비고*/
+		</trim>
+		 WHERE SYS_ID = #{g.tenant}
+		   AND GRP_CD = #{p.grp_cd}
+		   AND DTL_CD = #{p.dtl_cd}
+	</update>
+	
+	<update id="mergeEsacddt">
+	/* commonCode.updateEsacddt */
+	       WITH UPD AS (
+	           UPDATE ESACDDT A
+	              SET MOD_ID   = #{g.username}
+		            , MOD_DT   = #{g.now}
+		            , SORT_ORD = #{p.sort_ord,jdbcType=INTEGER}
+		            , USE_YN   = #{p.use_yn}
+		        WHERE A.SYS_ID = #{g.tenant}
+		          AND A.GRP_CD = #{p.grp_cd}
+		          AND A.DTL_CD = #{p.dtl_cd}
+		    RETURNING *
+	       ),
+	       INS AS (
+	          SELECT *
+		        FROM ESMBLNK
+		       WHERE NOT EXISTS (SELECT * FROM UPD)
+	       )
+           INSERT INTO ESACDDT
+           (
+                SYS_ID		/*시스템 아이디*/
+              , STS			/*상태*/
+              , REG_ID		/*등록자 아이디*/
+              , REG_DT		/*등록 일시*/
+              , GRP_CD		/*그룹 코드*/
+              , DTL_CD		/*상세 코드*/
+              , SORT_ORD	/*정렬 순서*/
+              , USE_YN		/*사용 여부*/
+              , REM			/*비고*/
+          )
+          SELECT #{g.tenant}                     AS SYS_ID
+	            , 'C'                            AS STS
+	            , #{g.username}                  AS REG_ID
+	            , #{g.now}                       AS REG_DT
+		        , #{p.grp_cd}                    AS GRP_CD
+		        , #{p.dtl_cd}                    AS DTL_CD
+		        , #{p.sort_ord,jdbcType=INTEGER} AS SORT_ORD
+		        , #{p.use_yn}                    AS USE_YN
+		        , #{p.rem}                       AS REM 
+            FROM INS
+	</update>
+	
+	<!-- 상세 코드 테이블(ESACDDT) DELETE -->
+	<delete id="deleteEsacddt">
+	/* commonCode.deleteEsacddt */
+		DELETE 
+		  FROM ESACDDT
+		 WHERE SYS_ID 	= #{g.tenant}
+		   AND GRP_CD	= #{p.grp_cd}
+		   AND DTL_CD	= #{p.dtl_cd}
+	</delete>
+	
+	<!-- 상세 코드 테이블(ESACDDT) DELETE by GRP_CD -->
+	<delete id="deleteEsacddtByGrpCd">
+	/* commonCode.deleteEsacddtByGrpCd */
+		DELETE 
+		  FROM ESACDDT
+		 WHERE SYS_ID 	= #{g.tenant}
+		   AND GRP_CD	= #{p.grp_cd}
+	</delete>
+	
+
+<!-- 
+	상세 코드 명(ESACDDL)
+	@author : JuEung Kim
+	@Date 	: 2016. 2. 2
+-->	
+	<!-- 상세 코드 명(ESACDDL) INSERT -->
+	<insert id="insertEsacddl">
+	/* commonCode.insertEsacddl */
+		INSERT INTO ESACDDL
+		<trim prefix="(" suffix=")" prefixOverrides=",">
+				 STS		/*상태 */
+        		,SYS_ID		/*시스템 아이디*/
+        		,LANG_CD	/*언어 코드 */
+        		,REG_ID		/*등록자 아이디 */
+        		,REG_DT		/*등록 일시 */
+        		,GRP_CD		/*그룹 코드 */
+        		,DTL_CD		/*상세 코드 */
+        		,DTL_CD_NM	/*상세 코드 명 */
+        		,REM		/*비고 */
+      	</trim>
+      	<trim prefix="values (" suffix=")" prefixOverrides=",">
+      			 'C'
+      			,#{g.tenant}
+        		,#{p.lang_cd}
+        		,#{g.username}
+        		,#{g.now}
+        		,#{p.grp_cd}
+        		,#{p.dtl_cd}
+        		,#{p.dtl_cd_nm}
+        		,#{p.rem}
+      	</trim>
+	</insert>
+	
+	<!-- 상세 코드 명(ESACDDL) UPDATE -->
+	<update id="updateEsacddl">
+	/* commonCode.updateEsacddl */
+		UPDATE ESACDDL
+		<trim prefix="set" prefixOverrides=",">
+				 STS 		= 'U'
+				,MOD_ID 	= #{g.username}		/*수정자 아이디*/ 
+			  	,MOD_DT 	= #{g.now}			/*수정 일시*/
+				,DTL_CD_NM 	= #{p.dtl_cd_nm} 	/*상세 코드 명 */
+				,REM		= #{p.rem}			/*비고*/
+		</trim>
+		 WHERE SYS_ID		= #{g.tenant}
+		   AND LANG_CD		= #{p.lang_cd}
+		   AND GRP_CD		= #{p.grp_cd}
+		   AND DTL_CD		= #{p.dtl_cd}
+	</update>
+	
+	<!-- 상세 코드 명(ESACDDL) DELETE -->
+	<delete id="deleteEsacddl">
+	/* commonCode.deleteEsacddl */
+		DELETE 
+		  FROM ESACDDL
+		 WHERE SYS_ID 	= #{g.tenant}
+		   AND GRP_CD	= #{p.grp_cd}
+		   AND DTL_CD	= #{p.dtl_cd}
+	</delete>
+	
+	<!-- 상세 코드 명(ESACDDL) DELETE by GRP_CD -->
+	<delete id="deleteEsacddlByGrpCd">
+	/* commonCode.deleteEsacddlByGrpCd */
+		DELETE 
+		  FROM ESACDDL
+		 WHERE SYS_ID 	= #{g.tenant}
+		   AND GRP_CD	= #{p.grp_cd}
+	</delete>
+
+
+<!-- 
+	상세 코드 속성 값(ESADTAT)
+	@author : JuEung Kim
+	@Date 	: 2016. 2. 2
+-->		
+	<!-- 상세 코드 속성 값(ESADATA) SELECT -->
+	<select id="findDtlCodeAttrVal" resultType="map">
+	/* commonCode.findDtlCodeAttrVal */
+		   SELECT SYS_ID				/*시스템 아이디 */
+				 ,GRP_CD				/*그룹 코드 */
+				 ,DTL_CD				/*상세 코드 */
+				 ,ATTR_CD			/*속성 코드 */
+				 ,DTL_CD_ATTR_VAL	/*상세 코드 속성 값 */
+				 ,REG_ID				/*등록자 아이디 */
+				 ,REG_DT				/*등록 일시 */
+				 ,MOD_ID				/*수정자 아이디 */
+				 ,MOD_DT				/*수정 일시 */ 
+			 FROM ESADTAT
+		    WHERE SYS_ID 	= #{g.tenant}
+		      AND GRP_CD 	= #{p.grp_cd}
+		      AND DTL_CD 	= #{p.dtl_cd}
+		      AND ATTR_CD	= #{p.attr_cd}
+	</select>
+	
+	<!-- 상세 코드 속성 값(ESADTAT) INSERT -->
+	<insert id="insertEsadtat">
+	/* commonCode.insertEsadtat */
+		INSERT INTO ESADTAT
+		<trim prefix="(" suffix=")" prefixOverrides=",">
+        		 SYS_ID				/*시스템 아이디*/
+        		,REG_ID				/*등록자 아이디 */
+        		,REG_DT				/*등록 일시 */
+      			,GRP_CD				/*그룹 코드 */
+      			,DTL_CD				/*상세 코드 */
+      			,ATTR_CD			/*속성 코드 */
+      			,DTL_CD_ATTR_VAL	/*상세 코드 속성 값 */
+      	</trim>
+      	<trim prefix="values (" suffix=")" prefixOverrides=",">
+      			 #{g.tenant}
+      			,#{g.username}
+      			,#{g.now}
+      			,#{p.grp_cd}
+      			,#{p.dtl_cd}
+      			,#{p.attr_cd}
+      			,#{p.dtl_cd_attr_val}
+      	</trim>
+	</insert>
+	
+	<!-- 상세 코드 속성 값(ESADTAT) UPDATE -->
+	<update id="updateEsadtat">
+	/* commonCode.updateEsadtat */
+		UPDATE ESADTAT
+		   SET MOD_ID 			= #{g.username} 		/*수정자 아이디*/ 
+			  ,MOD_DT 			= #{g.now} 				/*수정 일시*/
+			  ,DTL_CD_ATTR_VAL 	= #{p.dtl_cd_attr_val}	/*상세 코드 속성 값 */
+		 WHERE SYS_ID	= #{g.tenant}
+		   AND GRP_CD	= #{p.grp_cd}
+		   AND DTL_CD	= #{p.dtl_cd}
+		   AND ATTR_CD	= #{p.attr_cd}
+	</update>
+	
+	<!-- 상세 코드 속성 값(ESADTAT) DELETE -->
+	<delete id="deleteEsadtat">
+	/* commonCode.deleteEsadtat */
+		DELETE 
+		  FROM ESADTAT
+		 WHERE SYS_ID 	= #{g.tenant}
+		   AND GRP_CD 	= #{p.grp_cd}
+		   AND DTL_CD 	= #{p.dtl_cd}
+		   AND ATTR_CD	= #{p.attr_cd}
+	</delete>
+	
+	<!-- 상세 코드 속성 값(ESADTAT) DELETE by GRP_CD -->
+	<delete id="deleteEsadtatByGrpCd">
+	/* commonCode.deleteEsadtatByGrpCd */
+		DELETE 
+		  FROM ESADTAT
+		 WHERE SYS_ID 	= #{g.tenant}
+		   AND GRP_CD 	= #{p.grp_cd}
+	</delete>
+	
+	<!-- 상세 코드 속성 값(ESADTAT) DELETE by ATTR_CD -->
+	<delete id="deleteEsadtatByAttrCd">
+	/* commonCode.deleteEsadtatByAttrCd */
+		DELETE 
+		  FROM ESADTAT
+		 WHERE SYS_ID 	= #{g.tenant}
+		   AND GRP_CD 	= #{p.grp_cd}
+		   AND ATTR_CD	= #{p.attr_cd}
+	</delete>
+	
+	<!-- 상세 코드 속성 값(ESADTAT) DELETE by DTL_CD -->
+	<delete id="deleteEsadtatByDtlCd">
+	/* commonCode.deleteEsadtatByDtlCd */
+		DELETE 
+		  FROM ESADTAT
+		 WHERE SYS_ID 	= #{g.tenant}
+		   AND GRP_CD 	= #{p.grp_cd}
+		   AND DTL_CD 	= #{p.dtl_cd}
+	</delete>
+	
+	<insert id="insertDefaultEsacddl">
+	/* commonCode.insertDefaultEsacddl */
+		INSERT INTO ESACDDL
+			(
+			SYS_ID
+			,LANG_CD
+			,GRP_CD
+			,DTL_CD
+			,DTL_CD_NM
+			,REM
+			,STS
+			,REG_ID
+			,REG_DT
+			,DTL_CD_USE1
+			)
+			SELECT
+				   SYS_ID
+				  ,#{p.locale}
+				  ,GRP_CD
+				  ,DTL_CD
+				  ,DTL_CD_NM
+				  ,REM
+				  ,STS
+				  ,'SYSTEM'
+				  ,#{g.now}
+				  ,DTL_CD_USE1 
+			 FROM ESACDDL
+			WHERE SYS_ID =  #{g.tenant}
+			  AND LANG_CD = #{p.defaultLocale} 
+			  AND GRP_CD = #{p.grp_cd}
+			  AND DTL_CD = #{p.dtl_cd}
+			  AND STS != 'D'
+			  AND NOT EXISTS ( SELECT 1 
+                                 FROM ESACDDL 
+                                WHERE SYS_ID = #{g.tenant}
+                                  AND LANG_CD = #{p.locale} 
+                                  AND GRP_CD = #{p.grp_cd} 
+                                  AND DTL_CD = #{p.dtl_cd} 
+                                  AND STS != 'D'
+                             )
+	</insert>
+</mapper>

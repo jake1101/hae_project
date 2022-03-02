@@ -1,0 +1,71 @@
+<dom-module id="widget-component">
+    <style>
+    </style>
+
+    <template>
+    	<div class="widgetComponentContainer" style="width:100%;height:100%;position:absolute">
+    	</div>
+    </template>
+    <script>
+        Polymer({
+            is: "widget-component",
+            properties: {
+            	iframeUrl:{
+     				type:String
+     			}
+            }, 
+        	listeners : {
+			},
+    		getContent : function(){
+    		    if(!this._container){
+    		    	this._container = this.querySelector('.widgetComponentContainer');
+    		    }
+    		    return this._container;
+    		},
+    		createContent : function(template){
+    			var me = this, content = template.contents;
+    			me.template = template;
+    			me.contentData = content;
+            	var url  = content.componentUrl ,
+            		callback2 = function(message){
+            		
+            		},
+            		success2 = function(moduleName){
+            			view = document.createElement(moduleName);
+                		me.getContent().appendChild(view);
+                		Polymer.dom().flush();
+            		},
+            		failure2 = function(event){
+            			
+            		},
+            		progress2 = function(value){
+            			
+            		};
+            	if(url != null && url.length > 0){
+            		this.importLink(url,success2,failure2,progress2);	
+            	}else{
+            		console.warn('Register normal url!')
+            	}
+            	
+    		},
+    		getWidgetTempalte : function(){
+    			var me = this;
+    			return me.template;
+    		},
+    		resize : function(widget_content){
+    			var container = this.getContent(),
+    			 widgetHeaderHeight = widget_content.headerHeight;
+    			if(container){
+    				container.style.height = (widget_content.widget_height - widgetHeaderHeight)+'px';
+    			}
+    		},
+    		refresh: function(){
+    			
+    		}
+    		
+    		
+    
+    		
+    	});
+    </script>
+</dom-module>

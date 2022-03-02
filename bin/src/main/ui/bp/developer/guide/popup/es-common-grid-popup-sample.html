@@ -1,0 +1,302 @@
+<sc-link rel="import" href="../../../shared/ep-job-list.html"></sc-link>
+<sc-link rel="import" href="../../../shared/ep-user-list.html"></sc-link>
+<sc-link rel="import" href="../../../shared/ep-vendor-list.html"></sc-link>
+
+<dom-module id="es-common-grid-popup-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+        <div class="flex">
+			<sc-grid id="itemGridPanel" class="h-150" collapsible="true" editable="true"
+					 on-item-click="onItemClick"
+					 on-item-edit-end="onItemEditEnd">
+				<cc-grid-toolbar title-text="품목정보">
+					<sc-button text="품목검색"	on-click="onShowItemPopup"></sc-button>
+				</cc-grid-toolbar>
+				<sc-grid-columns>
+					<sc-data-column		data-field="item_cd"		header-text="품목코드"			width="100"	text-align="center"	editable="false"></sc-data-column>
+					<sc-data-column		data-field="item_nm"		header-text="품목명"			width="250"	text-align="left"	editable="false"></sc-data-column>
+					<sc-group-column	column-name="purcGrp"		header-text="구매그룹"			width="180"	text-align="center"	editable="false"	hide-child-headers="true">
+						<sc-data-column	data-field="purc_grp_cd"									width="50"	text-align="center"	editable="false"></sc-data-column>
+						<sc-data-column	data-field="purc_grp_nm"									width="100"	text-align="center"	editable="true"		max-length="18"></sc-data-column>
+						<sc-image-column	image-cls="search"		data-field="button_purc_grp"	width="30"	text-align="center" editable="false"></sc-image-column>
+					</sc-group-column>
+					<sc-group-column	column-name="prSug"			header-text="구매요청의뢰자"	width="180"	text-align="center"	editable="false"	hide-child-headers="true">
+						<sc-data-column	data-field="pr_sug_id"										width="60"	text-align="center"	editable="false"></sc-data-column>
+						<sc-data-column	data-field="pr_sug_nm"										width="100"	text-align="center"	editable="true"		max-length="18"></sc-data-column>
+						<sc-image-column	image-cls="search"		data-field="button_pr_sug"		width="30"	text-align="center" editable="false"></sc-image-column>
+					</sc-group-column>
+					<sc-group-column	column-name="grChr"			header-text="검수담당자"		width="180"	text-align="center"	editable="false"	hide-child-headers="true"	>
+						<sc-data-column	data-field="gr_chr_id"										width="60"	text-align="center"	editable="false"></sc-data-column>
+						<sc-data-column	data-field="gr_chr_nm"										width="100"	text-align="center"	editable="true" 	max-length="18"></sc-data-column>
+						<sc-image-column	image-cls="search"		data-field="button_gr_chr"		width="30"	text-align="center" editable="false"></sc-image-column>
+					</sc-group-column>
+				</sc-grid-columns>
+			</sc-grid>
+			
+			<sc-grid id="vdGridPanel" class="h-150" collapsible="true">
+				<cc-grid-toolbar title-text="협력사정보">
+					<sc-button text="협력사검색"	on-click="onShowVendorPopup"></sc-button>
+				</cc-grid-toolbar>
+				<sc-grid-columns>
+					<sc-data-column		data-field="disp_vd_cd"			header-text="협력사코드"			width="100"	text-align="center"	editable="false"></sc-data-column>
+					<sc-data-column		data-field="vd_nm"				header-text="협력사명"				width="200"	text-align="left"	editable="false"></sc-data-column>
+					<sc-data-column		data-field="vd_chr_nm"			header-text="협력사담당자"			width="100"	text-align="center"	editable="false"></sc-data-column>
+					<sc-data-column		data-field="vd_chr_phone_no"	header-text="협력사담당자전화번호"	width="150"	text-align="left"	editable="true"></sc-data-column>
+					<sc-data-column		data-field="vd_chr_email"		header-text="협력사담당자Email"		width="150"	text-align="left"	editable="true"></sc-data-column>
+				</sc-grid-columns>
+			</sc-grid>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'es-common-grid-popup-sample',
+			properties : {
+				param : {
+					type : Object,
+					value : function() {
+						var currentUser = SCSessionManager.currentUser;
+						
+						return {
+							comp_cd      : currentUser.comp_cd,
+							oper_unit_cd : "PO",	// 운영단위 유형 (PO : 구매)
+							link_typ     : "POEO",	// 운영단위 연결 유형 (POEO : 구매-협력사)
+							purc_grp_typ : "PU",	// 구매그룹 유형 (PU : 구매)
+							job_cls_cd   : "RX"		// 직무유형 (RX : RFX 담당자)
+						}
+					}
+				},
+				operOrgCd : {
+					type : Object,
+					value : function() {
+						return {}
+					}
+				},
+				data : {
+					type : Object,
+					value : function() {
+						return {}
+					}
+				}
+			},
+			/****************************************
+             * Grid Event
+             ****************************************/
+            // grid on-item-click
+            onItemClick : function(event) {
+ 				var me = this, e = event.detail,
+ 					data = e.data,
+ 					item = e.item,
+                 	provider = e.provider;
+                 
+				// 현재 rowIndex
+				me.rowIndex = item.rowIndex;
+				
+ 				if(item.dataField === "button_purc_grp") {		// 구매그룹 버튼
+					me.onShowJobPopup();
+ 				} else if(item.dataField === "button_pr_sug") {	// 구매요청 의뢰자 버튼
+ 					me.onShowUserPopup("pr_sug");
+ 				} else if(item.dataField === "button_gr_chr") {	// 검수 담당자 버튼
+ 					me.onShowUserPopup("gr_chr");
+ 				}
+            },
+            // grid on-item-edit-end
+            onItemEditEnd : function(event) {
+				var me = this, e = event.detail,
+					data = e.data,
+					item = e.item,
+					newValue = e.newValue,
+					oldValue = e.oldValue,
+					provider = e.provider;
+				
+				// 현재 rowIndex
+            	me.rowIndex = item.rowIndex;
+				
+            	if(item.dataField === 'purc_grp_nm') {		// 구매그룹
+            		provider.setItemAt(item.rowIndex, {purc_grp_cd : ''});
+            		
+            		me.onShowJobPopup({'purc_grp_nm' : newValue}, true);
+            		
+            	} else if(item.dataField === "pr_sug_nm") {	// 구매요청 의뢰자
+					provider.setItemAt(item.rowIndex, {pr_sug_id : ''});
+            		
+            		me.onShowUserPopup('pr_sug', {'usr_nm' : newValue}, true);
+            		
+            	} else if(item.dataField === "gr_chr_nm") {	// 검수 담당자
+            		provider.setItemAt(item.rowIndex, {gr_chr_id : ''});
+            		
+            		me.onShowUserPopup('gr_chr', {'usr_nm' : newValue}, true);
+            	}
+			},
+			// 구매그룹 팝업 호출
+			onShowJobPopup : function(param, isAutoComplete) {
+				var me = this;
+				
+				var defaultParam = {
+                    comp_cd      : me.get("param.comp_cd"),
+                    purc_grp_typ : me.get("param.purc_grp_typ")
+                };
+            	if(UT.isObject(param)) {
+            		for(var keys in param) {
+            			defaultParam[keys] = param[keys];
+            		}
+            	}
+            	
+           		var jobPopup = UT.popup('ep-job-list', me, 650, 500, {
+           			'selected-items' : function(popup,e){
+           				var selected = e.detail[0];
+           				
+           				var provider = me.$.itemGridPanel.getDataProvider();
+   	   					provider.setItemAt(me.rowIndex, {
+   	   						'purc_grp_cd' : selected.purc_grp_cd,
+   	   						'purc_grp_nm' : selected.purc_grp_nm
+   	   					});
+   	   					
+                        popup.close();
+           			}
+           		},{titleText : "구매그룹검색"});
+				jobPopup.show();
+				jobPopup.getWindowContent().load({singleSelect : true, defaultParam : param, autoComplete : isAutoComplete});
+			},
+			// 사용자 팝업 호출
+			onShowUserPopup : function(usrTyp, param, isAutoComplete) {
+				var me = this;
+				me.usrTyp = usrTyp;
+				
+				var titleText = null;
+            	if(usrTyp === 'pr_sug') {
+            		titleText = "구매요청의뢰자검색";
+            	} else if(usrTyp === 'gr_chr') {
+            		titleText = "검수담당자검색";
+            	}
+            	
+               	var userPopup = UT.popup('ep-user-list', me, 650, 500, {
+					'selected-items' : function(popup, e) {
+						var selected = e.detail[0], item = {};
+						item[me.usrTyp+'_id'] = selected.usr_id;
+						item[me.usrTyp+'_nm'] = selected.usr_nm;
+						
+						var provider = me.$.itemGridPanel.getDataProvider();
+						provider.setItemAt(me.rowIndex, item);
+						
+                        popup.close();
+					}
+               	}, {titleText : titleText});
+                userPopup.show();
+                userPopup.getWindowContent().load({singleSelect : true, defaultParam : param, autoComplete : isAutoComplete});
+            },
+            // 품목 팝업 호출
+            onShowItemPopup : function() {
+				var me = this;
+				
+            	var param = {
+           			oper_org_cd  : me.get("operOrgCd"),
+   					purc_grp_typ : me.get("param.purc_grp_typ")
+            	};
+            	
+            	UT.popupItemSearch(me, param, function(selectedItems) {
+					// 품목정보 리스트 추가
+					me.addItemList(selectedItems);
+				});
+            },
+            // 품목정보 리스트 추가
+			addItemList : function(selectedList) {
+				var me = this;
+				var provider = me.$.itemGridPanel.getDataProvider();
+
+				var dupCnt = 0;
+				if(selectedList.length > 0) {
+					for(var i=0; i<selectedList.length; i++) {
+						var selected = selectedList[i];
+						
+						// 동일 item_cd 미존재 시 추가
+						if(provider.filterItem({item_cd:selected.item_cd}) === null) {
+							var addRow = {
+								item_cd      : selected.item_cd, //품목코드
+								item_nm      : selected.item_nm, //품목코드
+								spec         : selected.spec, //규격
+								unit_cd      : selected.bas_unit_cd, //단위 (기본단위)
+								purc_grp_cd  : selected.purc_grp_cd, //구매그룹코드
+								purc_grp_nm  : selected.purc_grp_nm //구매그룹명
+							};
+							provider.addItem(addRow);
+						} else {
+							dupCnt++;
+						}
+					}
+					if(dupCnt > 0) {
+						UT.alert(me.translate("STD.N2010",null,dupCnt),null,true); // 중복 데이터 {0}건 제외 후 추가하였습니다
+					}
+				} else {
+					UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+				}
+			},
+            // 협력사 팝업 호출
+            onShowVendorPopup : function() {
+				var me = this;
+            	
+				var itemProvider = me.$.itemGridPanel.getDataProvider();
+				var itemCds = [], itemRows = itemProvider.getItems();
+				for(var i in itemRows) {
+					var item = itemRows[i];
+					itemCds.push(item.item_cd);
+				}
+				
+            	var param = {
+                		comp_cd      : me.get("param.comp_cd"),
+            			link_typ     : me.get("param.link_typ"),		// 운영단위 연결유형
+            			job_cls_cd   : me.get("param.job_cls_cd"),		// 직무유형
+            			oper_unit_cd : me.get("param.oper_unit_cd"),
+            			oper_org_cd  : me.get("operOrgCd"),
+            			item_cds     : itemCds,
+        		};
+				var vendorPopup = UT.popup("ep-vendor-list", me, 1000, 500,{
+		            "selected-items": function(popup, e) {
+		            	me.addVdList(e.detail);
+		            }
+				},{titleText : "협력사 검색", maximizable : true});
+				vendorPopup.show();
+				vendorPopup.getWindowContent().load({singleSelect : false, defaultParam : param});
+            },
+            // 협력사 리스트 추가
+			addVdList : function(selectedList) {
+				var me = this;
+				var provider = me.$.vdGridPanel.getDataProvider();
+				
+				var dupCnt = 0;
+				if(selectedList.length > 0) {
+					for(var i=0; i<selectedList.length; i++) {
+						var selected = selectedList[i];
+						
+						if(provider.filterItem({vd_cd:selected.vd_cd}) === null) {
+							var addRow = {
+								vd_cd           : selected.vd_cd,
+								erp_vd_cd       : selected.erp_vd_cd,
+								disp_vd_cd      : selected.disp_vd_cd,
+								vd_nm           : selected.vd_nm,
+								vd_chr_id       : selected.chr_id,
+								vd_chr_nm       : selected.chr_nm,
+								vd_chr_mobile   : selected.chr_mobile,
+								vd_chr_email    : selected.chr_email,
+								vd_chr_phone_no : selected.chr_phone_no,
+							};
+							provider.addItem(addRow);
+						} else {
+							dupCnt++;
+						}
+					}
+					if(dupCnt > 0) {
+						UT.alert(me.translate("STD.N2010", null, dupCnt), null, true); // 중복 데이터 {0}건 제외 후 추가하였습니다
+					}
+				} else {
+					UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+				}
+			},
+		});
+	</script>
+</dom-module>

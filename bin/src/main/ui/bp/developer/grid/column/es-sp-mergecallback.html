@@ -1,0 +1,54 @@
+<dom-module id="es-sp-mergecallback">
+	<!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<sc-grid  id="gridPanel" data-provider="{{resultList}}" editable="true">
+			<sc-toolbar>
+				<sc-spacer></sc-spacer>
+				<sc-button text="조회" on-click="onSearch"></sc-button>
+			</sc-toolbar>
+        	<sc-grid-columns>
+        		<sc-data-column data-field="column_1"   header-text="업체코드"  width="150" mergeable="true" merge-callback="onMerge"></sc-data-column>
+	            <sc-data-column data-field="column_2"   header-text="업체명"  width="150" mergeable="true" merge-callback="onMerge"></sc-data-column>
+            	<sc-data-column data-field="column_3"   header-text="담당자"  width="150" mergeable="true" merge-callback="onMerge"></sc-data-column>
+            	<sc-data-column data-field="column_4"   header-text="통화"  width="150" mergeable="true" merge-callback="onMerge"></sc-data-column>
+        	</sc-grid-columns>
+    	</sc-grid>
+    	
+	</template>
+	
+	<script>
+		Polymer({
+			is: 'es-sp-mergecallback',
+			
+			properties : {
+                resultList: {
+                    type:Array
+                },
+                ctr: {
+                	type: Object,
+                	value: function() {
+                		return 0;
+                	}
+                }
+            },
+            
+            onMerge: function(data, item){
+            	var me = this;
+                if(data["column_1"] === 'C') {
+                	return data[item.dataField];
+                };
+                return me.ctr++;
+            },
+            
+            onSearch : function(){
+            	this.fire('search');
+            }
+		})
+	</script>
+</dom-module>

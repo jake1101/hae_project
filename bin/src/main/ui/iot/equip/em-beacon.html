@@ -1,0 +1,22 @@
+<sc-link rel="import" href="es-beacon-list.html"></sc-link>
+
+<dom-module id="em-beacon">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<es-beacon-list class="flex"></es-beacon-list>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-beacon'
+		});
+	</script>
+
+
+</dom-module>

@@ -1,0 +1,123 @@
+<dom-module id="es-multi-lang-client-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<div class="hbox">
+			<sc-panel title-text="STD.N1000" i18n-disabled>
+				<sc-button text="STD.N1100" on-click="onClick1" i18n-disabled></sc-button>
+				<table class="tb-form">
+					<colgroup>
+		        		<col style="width:120px"/>
+		        		<col/>
+		        	</colgroup>
+					<tr>
+		        		<th>
+		        			<sc-label text="STD.N1100" i18n-disabled></sc-label>
+		        		</th>
+		        		<td>
+		        			<sc-label text="{{data.ex_1}}" i18n-disabled></sc-label>
+		        		</td>
+		        	</tr>
+				</table>
+				<div>translate('STD.E0000')</div>
+				<div>translate(data.ex_0)</div>
+			</sc-panel>
+			
+			<sc-panel title-text="STD.N1000">
+				<sc-button text="STD.N1100" on-click="onClick2"></sc-button>
+				<table class="tb-form">
+					<colgroup>
+		        		<col style="width:120px"/>
+		        		<col/>
+		        	</colgroup>
+					<tr>
+		        		<th>
+		        			<sc-label text="STD.N1100"></sc-label>
+		        		</th>
+		        		<td>
+		        			<sc-label text="{{data.ex_1}}"></sc-label>
+		        		</td>
+		        	</tr>
+				</table>
+				<div>[[translate("STD.E0000")]]</div>
+				<div>[[translate(data.ex_0)]]</div>
+			</sc-panel>
+		</div>
+		
+		<sc-panel title-text="다국어 문자열 formatting">
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+	        	</colgroup>
+				<tr>
+					<th rowspan="2">
+						<sc-label text="STD.PO1047" i18n-disabled></sc-label>
+					</th>
+	        		<td>
+	        			<sc-label text="{{data.ex_2}}"></sc-label>
+	        		</td>
+	        	</tr>
+				<tr>
+	        		<td>
+	        			<sc-text-field value="{{data.ex_4}}" readonly></sc-text-field>
+	        		</td>
+	        	</tr>
+				<tr>
+					<th rowspan="2">
+						<sc-label text="STD.PO1048" i18n-disabled></sc-label>
+					</th>
+	        		<td>
+	        			<sc-label text="{{data.ex_3}}"></sc-label>
+	        		</td>
+	        	</tr>
+				<tr>
+	        		<td>
+	        			<sc-text-field value="{{data.ex_5}}" readonly></sc-text-field>
+	        		</td>
+	        	</tr>
+			</table>
+		</sc-panel>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-multi-lang-client-sample',
+		properties : {
+			data : {
+				type : Object,
+				value : function() {
+					var me = this;
+					return {
+						ex_0 : 'STD.N4000',
+						ex_1 : 'STD.N1700',
+						ex_2 : 'STD.PO1047',
+						ex_3 : 'STD.PO1048',
+						ex_4 : me.translate('STD.PO1047', null, 'PO17091400012'),
+						ex_5 : me.translate('STD.PO1048', null, 'PO17091400012', '10')
+					}
+				}
+			}
+		},
+		initialized : function() {
+			console.log("[[Polymer]] STD.N1500 ==> ", this.translate("STD.N1500"));
+		},
+		onClick1 : function() {
+			var me = this;
+			
+			UT.alert("STD.N2500", null, true);
+		},
+		onClick2 : function() {
+			var me = this;
+			
+			UT.alert("STD.N2400");
+		},
+	});
+	
+	var i18n = new SCI18n();
+	console.log("[[script 1]] STD.N1500 ==> ", i18n.translate("STD.N1500"));
+	console.log("[[script 2]] STD.N1500 ==> ", Polymer.Base.translate("STD.N1500"));
+	</script>
+</dom-module>

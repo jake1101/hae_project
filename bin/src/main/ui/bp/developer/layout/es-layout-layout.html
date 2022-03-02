@@ -1,0 +1,63 @@
+<dom-module id="es-layout-layout">
+    <template>
+	    <style>
+	        :host {
+	        	/* @apply(--vbox-layout); */
+	        }
+	        
+	        .table {
+	        	display: table;
+	        }
+	    </style>
+        <div class="vbox">
+            <sc-toolbar>
+            	<sc-label></sc-label>
+                <sc-spacer></sc-spacer>
+                <sc-button class="value-btn" text="입력" on-click="onSetValue"></sc-button>
+                <sc-button class="value-btn" text="제거" on-click="onRemoveValue"></sc-button>
+            </sc-toolbar>
+           
+            <div id="wrapper">
+            	<div class="table">
+            		<content id="content" select="*"></content>
+            	</div>
+            </div>
+        </div>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-layout-layout',
+            properties:{
+				title: String
+            },
+            
+    		/**
+    		 * 데모 값을 입력
+    		 */	
+            onSetValue: function() {
+            	var contentChilds = Polymer.dom(this.$.content).getDistributedNodes();
+            	
+            	contentChilds.forEach(function(ele){
+            		if(Polymer.dom(ele).node.setValue) {
+            			Polymer.dom(ele).node.setValue();
+            		}
+            	});
+            	
+            },
+            
+            /**
+    		 * 데모 값을 제거
+    		 */	
+            onRemoveValue: function(hi) {
+				var contentChilds = Polymer.dom(this.$.content).getDistributedNodes();
+            	
+            	contentChilds.forEach(function(ele){
+            		if(Polymer.dom(ele).node.removeValue) {
+            			Polymer.dom(ele).node.removeValue();
+            		}
+            	});
+            }
+		});
+	</script>
+</dom-module>

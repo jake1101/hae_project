@@ -1,0 +1,33 @@
+<sc-link rel="import" href="../../../shared/es-source-viewer.html"></sc-link>
+<sc-link rel="import" href="es-dev-chart-linear-gauge-renderer.html"></sc-link>
+<sc-link rel="import" href="es-dev-chart-linear-gauge-renderer-tag.html"></sc-link>
+<dom-module id="em-dev-chart-linear-gauge-renderer">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-panel class="vbox flex-5" collapsible="false" title-text="Linear Gauge Renderer">
+   			<es-dev-chart-linear-gauge-renderer-tag title="Linear Gauge Renderer 태그화"></es-dev-chart-linear-gauge-renderer-tag>
+<!--    			<es-dev-chart-linear-gauge-renderer title="Linear Gauge Renderer"></es-dev-chart-linear-gauge-renderer> -->
+        </sc-panel>	
+        <sc-panel class="vbox flex-5" collapsible="false" title-text="Source Viewer">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/grid/chart/linear-gauge-renderer/es-dev-chart-linear-gauge-renderer-tag.html"></es-source-viewer>
+        </sc-panel>
+    </template>
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'em-dev-chart-linear-gauge-renderer'
+            
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

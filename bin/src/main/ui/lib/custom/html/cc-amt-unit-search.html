@@ -1,0 +1,126 @@
+<sc-link rel="import" href="../../../bp/shared/ep-amt-unit.html"></sc-link>
+
+<dom-module id="cc-amt-unit-search">
+<!--
+	******************************************************************************************
+	** @Program-name 	: 수량단위 검색 자동완성 컴포넌트
+	** @Description		: 
+	** @Author 			: jeKim
+	** @Create Date 	: 2016.05.04
+	** @History 		: 2016.05.04 jeKim 최초작성
+	******************************************************************************************
+-->
+    <style>
+        :host {
+            display : table;
+        }
+        
+        :host > * {
+            vertical-align : middle;        
+            display: table-cell;
+        }
+    </style>
+    
+    <template>
+<!--  
+	************************************************************************************************************
+	* UI Area
+	************************************************************************************************************
+-->
+		<sc-text-field class="w-80" placeholder$="[[placeholder]]" disabled="[[disabled]]" value="{{value}}"  
+			on-enter="onFindAmtUnit" trigger-cls="search" on-trigger-click="onPopAmtUnit" required="[[required]]" readonly="[[readonly]]"></sc-text-field>
+		<div class="hspace-10"></div>
+		<sc-label text="{{resultNm}}" disabled="[[disabled]]" i18n-disabled></sc-label>
+    </template>
+<!--  
+	************************************************************************************************************
+	* Script Area
+	************************************************************************************************************
+--> 
+    <script>
+        Polymer({
+            is : 'cc-amt-unit-search',
+            properties: {
+                disabled: {
+                    type: Object,
+                    value : function(){
+                        return false;
+                    }
+                },
+                required: {
+                    type: Object,
+                    value : function(){
+                        return false;
+                    }
+                },
+                readonly: {
+                    type: Object,
+                    value : function(){
+                        return false;
+                    }
+                },
+                value: {
+                    type: Object,
+                    notify: true,
+                    observer: 'valueChanged'
+                },
+                
+                resultNm: {
+                    type: Object,
+                    notify: true
+                }
+                
+            },
+            
+            // 최초 호출
+            attached: function(){
+            	
+            },
+            
+            // 값 변경시 result값 clear처리
+            valueChanged: function(newValue, oldValue) {
+            	if(oldValue){
+            		this.set("resultNm", "");
+            	}
+            },
+            
+            // text-field에서 검색
+            onFindAmtUnit: function(){
+                var me = this;
+                
+                // 검색 조건
+                var searchParam = {
+                	dtl_cd: me.value	
+                };
+                
+                // 자동완성 함수 시작
+                var amtUnitPopup = me.createPopup();
+            	amtUnitPopup.show();
+            	amtUnitPopup.getWindowContent().load({defaultParam : searchParam, autoComplete : true});
+            },
+            //popup생성
+            createPopup: function(){
+            	var me = this;
+            	return UT.popup("ep-amt-unit", me, 450,500,{
+            		"selected-item" : function(popup,e){
+            			var result = e.detail;
+            			// 선택 완료 후 callback
+                       	if(result){
+                       		me.set("value", result.dtl_cd);			// 코드
+                           	me.set("resultNm", result.dtl_cd_nm);	// 코드명
+                       	}
+            			popup.close();
+            		}
+            	});
+            },
+            // 검색버튼 클릭
+            onPopAmtUnit: function(){
+            	var me = this;
+            	
+            	var amtUnitPopup = me.createPopup();
+            	amtUnitPopup.show();
+            	amtUnitPopup.getWindowContent().load();
+            }
+        });
+    </script>
+</dom-module>

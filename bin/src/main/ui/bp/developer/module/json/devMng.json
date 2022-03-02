@@ -1,0 +1,17 @@
+[
+		{
+			"cd" : "TEST",
+			"cd_nm" : "테스트",
+			"cd_typ" : "C"
+		},
+		{
+			"cd" : "TEST1",
+			"cd_nm" : "테스트1",
+			"cd_typ" : "D"
+		},
+		{
+			"cd" : "TEST2",
+			"cd_nm" : "테스트2",
+			"cd_typ" : "A"
+		}
+]

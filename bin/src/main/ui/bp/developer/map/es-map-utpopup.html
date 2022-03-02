@@ -1,0 +1,22 @@
+<link rel="import" href="es-map-circleeffect.html">
+
+<dom-module id="es-map-utpopup">
+	<template>
+		<button on-click="onClickPopup">팝업 띄우기</button>
+	</template>
+	
+	<script>
+		Polymer({
+			is: 'es-map-utpopup',
+			
+			onClickPopup: function() {
+				var me = this;
+			    var mapPopup = UT.popup('es-map-circleeffect', me, 1000, 600, {}, {modal : true});
+			    mapPopup.addEventListener('sc-window-showed', function(popup) {
+			 		popup.getWindowContent().load(true);
+			    });
+				mapPopup.show();
+			}
+		});
+	</script>
+</dom-module>

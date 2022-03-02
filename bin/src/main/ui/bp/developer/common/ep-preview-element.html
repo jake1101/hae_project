@@ -1,0 +1,532 @@
+<sc-link rel="import" href="../lib/prettify-element/prettify-element.html"></sc-link>
+<sc-link rel="import" href="../lib/marked-element/marked-element.html"></sc-link>
+<link rel="import" href="style/markdown-style.html">
+<sc-link rel="import" href="es-attribute-changer.html"></sc-link>
+
+<dom-module id="ep-preview-element">
+    
+    <template>
+	    <style include="markdown-style">
+	        :host {
+	            @apply(--fit-layout); 
+	        }
+	        
+	        prettify-element {
+	        	tab-size: 3;
+	        	-moz-tab-size: 3;
+				-o-tab-size: 3;
+				-webkit-tab-size: 3;
+	        	width: 100%;
+	        }
+	        
+	        .table td {
+	        	background-color: #fafafa;
+	        	overflow-x: auto;
+	        }
+	        
+	        .pointer {
+	        	cursor: pointer;
+			    color: #b9b9b9;
+			    font-weight: 100;
+			}
+			
+			#changer-wrapper {
+				vertical-align: top;
+				overflow-y: auto;
+			}
+			
+			.result-wrapper {
+					
+			}
+			
+			.source-wrapper {
+				vertical-align: top;
+			}
+			
+			#css, #html, #js {
+				display: inline-flex;
+				/* min-height: 120px; */
+				max-height: 250px;
+				overflow: auto;
+			}
+			
+			#source {
+				min-height: 430px;
+				display: inline-flex;
+				overflow: auto;
+			}
+			
+			#result {
+				padding: 10px;
+				margin: 20px 0; 
+				overflow: auto;
+				max-height: 400px;
+			}
+				
+			/* 가상으로 생성된 엘리먼트를 flex로 변경, 정렬 */
+			#result > * {
+				display: flex;
+				flex-wrap: nowrap;
+			}
+			
+			marked-element > .markdown-html {
+				margin-left: 30px;
+			}
+			
+	    </style>
+		    	<sc-toolbar>
+	                <sc-spacer></sc-spacer>
+	                <sc-button text="소스Toggle" on-click="toggleSource"></sc-button>
+	                <sc-button text="초기화" on-click="initElement"></sc-button>
+	            </sc-toolbar>
+	            <!-- Attribute Changer, Result, Source Code -->
+		    	<table class="table">
+	                <colgroup>
+	                	<col style="width:250px">
+	                </colgroup>
+	                <tr>
+	                	<!--<th rowspan$="[[rowspan]]" id="changer-wrapper">
+							<es-attribute-changer id="changer" type="" value=""></es-attribute-changer>
+						</th>-->
+	                    <td class="result-wrapper">
+	                    	<sc-toolbar>
+								<sc-label text="Result"></sc-label>
+							</sc-toolbar>
+	                    	<div id="dom"></div>
+	                    	<div id="result"></div>
+	                    </td>
+	                </tr>
+	                 <tr hidden="[[!allSource]]">
+	                    <td class="source-wrapper">
+							<sc-label class="pointer" text="Copy" bullet-cls="icon bullet-copy" on-click="_copyAll" i18n-disabled></sc-label>
+	                    	<prettify-element id="source" class="theme-dark" text="{{source}}" ></prettify-element>
+		    			</td>
+	                </tr>
+	                <tr hidden="[[allSource]]">
+	                    <td>
+	                    	<sc-label class="pointer" text="HTML Copy" bullet-cls="icon bullet-copy" on-click="_copyHTML" i18n-disabled></sc-label>
+	                    	<prettify-element id="html" text="{{html}}"></prettify-element>
+		    			</td>
+	                </tr>
+	                <tr hidden="[[allSource]]">
+	                    <td>
+	                    	<sc-label class="pointer" text="CSS Copy" bullet-cls="icon bullet-copy" on-click="_copyCSS" i18n-disabled></sc-label>
+	                    	<prettify-element id="css" text="{{css}}"></prettify-element>
+		    			</td>
+	                </tr>
+	                <tr hidden="[[allSource]]">
+	                    <td>
+	                    	<sc-label class="pointer" text="JS Copy" bullet-cls="icon bullet-copy" on-click="_copyJS" i18n-disabled></sc-label>
+	                    	<prettify-element id="js" text="{{js}}"></prettify-element>
+		    			</td>
+	                </tr>
+                </table>
+                
+                <!-- 비고 테이블 -->
+                <table class="table">
+	                <tr>
+	                    <td>
+							<sc-toolbar>
+								<sc-label text="비고"></sc-label>
+							</sc-toolbar>
+							<marked-element markdown="{{note}}">
+						        <div class="markdown-html custom"></div>
+						    </marked-element>
+		    			</td>
+	                </tr>
+                </table>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'ep-preview-element',
+            properties:{
+            	//테스트 엘리먼트 ID
+            	target: String,
+            	//원본 소스
+            	source: {
+            		type: Object
+            	},
+            	//<Template> 소스
+            	html: {
+            		type: String
+            	},
+            	//<Script> 소스
+            	js: {
+            		type: String
+            	},
+            	//<Style> 소스
+            	css: {
+            		type: String
+            	},
+            	//주석 : comment
+            	note: {
+            		type: String
+            	},
+            	//소스 Toggle용
+            	allSource: {
+            		type: Boolean,
+            		value: true
+            	},
+            	
+            	//test-virtual element (가상으로 생성된 엘리먼트)
+            	element: Object,
+            	//소스 Toggle용
+            	rowspan: {
+            		type: Number,
+            		value: 2
+            	},
+            	//원본 소스 백업
+            	sourceBackUp: Object,
+            	//<template> 백업
+            	htmlBackUp: Object,
+            	
+            	//해당 엘리먼트의 Type (element,grid, etc..)
+            	elementType: String
+            },
+            
+            /**
+    		 * 소스 View 테이블 꾸미기용 
+    		 */
+            toggleSource: function() {
+            	//Source Toggle
+            	this.allSource = !this.allSource;
+            	
+            	//Table Rowspan
+            	if(this.allSource) {
+            		this.rowspan = 2;
+            	} else {
+            		this.rowspan = 4;
+            	}
+            	
+            },
+            
+            /**
+    		 * 엘리먼트 초기 생성 
+    		 */
+            initElement: function() {
+            	var me = this;
+            	var virtualId = this.virtualId;
+            	var element = document.createElement(virtualId);
+            	
+            	//등록된 엘리먼트가 있을 경우 재등록X & 기존 인스턴스 삭제 후 생성
+            	if(Polymer.isInstance(element)) {
+            		//기존 엘리먼트 삭제
+            		var elementTag = Polymer.dom(this.$.result).querySelector(virtualId);
+            		if(elementTag) {
+	            		Polymer.dom(this.$.result).removeChild(elementTag);
+            		}
+            		
+            		//기존 소스 삭제
+            		if(this.htmlBackUp) {
+	   	            	this.$.html.innerHTML = this.htmlBackUp;
+            		}
+            		
+                	//생성한 엘리먼트 추가
+            		Polymer.dom(this.$.result).appendChild(element);
+            		
+            		//this.$.changer.eleSelected = false; //Attribute Changer 비활성화
+            	}
+            	//등록되지 않은 엘리먼트 일 경우 생성
+            	else {
+	            	var devPreviewCount = 0;
+	            	var template = document.createElement('template');
+
+	            	//HTML 추출, dev-preview 속성 추가
+	            	template.innerHTML = 
+	            		this._generateHTML(this.source)
+	            		//<tag-name Capture, end tag / br / hr 태그 등 제외
+	            		// /<([^/][^(br)][^(hr)][\S][^>]+[\b]?)/gm
+	           			.replace(/<([^\/][^>]*[\b]?[/]?>)/gm, function(a) {
+	           				
+	           				if(a[a.length-2] === "/") {
+	           					return a.slice(0, a.length-2) + " dev-preview-" + devPreviewCount++ + " />"; //Add Custom Attribute	
+	           				} else {
+	           					return a.slice(0, a.length-1) + " dev-preview-" + devPreviewCount++ + " >"; //Add Custom Attribute	
+	           				}
+						});
+
+                    //Style 추출
+                    var style = document.createElement('style');
+                    style.innerHTML = this._generateCSS(this.source);
+
+                    //JS -> Script Id(is) 가상 ID로 변경
+                    var script = document.createElement('script');
+                    script.innerHTML = this._generateJS(this.source).replace(RegExp(this.target, "g"), virtualId);
+                    var domModule = "<dom-module id='" + virtualId + "'></dom-module>";
+                    this.$.dom.innerHTML = domModule;
+
+                    //Dom Searching & Append Template,Script and Style
+                    domModule = document.querySelector('#' + virtualId);
+                    template.appendChild(style);
+                    domModule.appendChild(template);
+                    domModule.appendChild(script);
+                    this.$.dom.appendChild(domModule);
+
+                    //Instantiate & Append
+                    element = document.createElement(virtualId);
+                    Polymer.dom(this.$.result).appendChild(element);
+
+                }
+
+            	this.element = element;
+            	this.parsingSource(); //소스 파싱
+            	this.registerEvent(); //Event 등록
+            	this.setConfig(); //기타 설정
+            },
+
+			get virtualId() {
+              	return this.target + "-virtual";
+			},
+            
+            setConfig: function() {
+            	//세션 Time 초기화 : 팝업 작업만 할 경우에도 Session이 끊기지 않도록. Develpoer는 빠지는 개발시에만 사용하는 모듈
+            	var scMdi = document.querySelector('sc-mdi');
+            	
+            	if(scMdi && scMdi.setSessionTimer) {
+            		scMdi.setSessionTimer();
+            	}
+            	
+            	//IE일 경우 Attribute Changer Hidden
+            	if(SCUtil.BrowserInfo.browser !== "Chrome" && SCUtil.BrowserInfo.browser !== "Firefox") {
+	            	this.$$("#changer-wrapper").setAttribute("hidden", "");
+            	}
+            	
+            	if(this.elementType === "layout") {
+            		this.$.result.childNodes[0].style.height = "400px";
+            	}
+            },
+            
+            /**
+    		 * Event 등록, Document에 해당 엘리먼트가 등록된 이후 호출해야 함
+    		 */
+            registerEvent: function() {
+            	
+            	var me = this;
+            	var devSourceCount = 0;
+            	var voidElements = ['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
+            	var voidElementsRe = new RegExp("(&gt;)?(&lt;)(" + voidElements.toString().replace(/,/g,")?(") + ")?[/]?(&gt;)","i");     	
+            	
+            	//제어를 위한 제어 태그 추가
+            	this.$.html.innerHTML = this.$.html.innerHTML
+            		//Exception 처리 : <th><td>의 경우 하나의 태그로 형성됨. 분리작업
+            		.replace(/((<span[\s]?class="tag style-scope prettify-element">)(((&gt;)?)&lt;\/?([\S]+)&gt;&lt;\/?([\S]+))(<\/span>))/g, function(a,b,c) {
+	            		//outerTag 변환
+            			return a.replace(/(?:<span[\s]?class="tag style-scope prettify-element">)(((&gt;)?)&lt;\/?([\S]+)&gt;&lt;\/?([\S]+))(<\/span>)/g, function(c,d,e) {
+            				var splitStr = "&gt;&lt;";
+            				var ds = d.split(splitStr);
+            				
+            				var rtnVal = "";
+            				for(var i=0; i < ds.length; i++ ) {
+            					if(ds[i]) {
+	            					rtnVal += "<span class='tag style-scope prettify-element'>";
+	            					if(i != 0) { rtnVal += "&lt;" }
+	            					rtnVal += ds[i];
+            						if(i != length-1 && ds[i].slice(ds[i].length-4) !== "&gt;") { rtnVal += "&gt;" }
+	            					rtnVal += "</span>"; 
+            					}
+            				}
+            				
+	            			//innerTag 변환
+            				return rtnVal;
+                		});
+             	});
+            	//Start Tag
+           		this.$.html.innerHTML = this.$.html.innerHTML
+           			.replace(/(?:<span[\s]?class="tag style-scope prettify-element">)((&gt;)?(&lt;)[^/]+([/](&gt;))?)(<\/span>)/g, function(a,b,c) {
+            			
+            			//Void Elements(img, br, col, etc...)
+             			if(voidElementsRe.test(b)) {
+            				return "<dev-source class='dev-source-" + (devSourceCount++) +"'>" + a + "</dev-source>";
+            			} 
+            			//Non-void Elements
+            			else {
+	            			return "<dev-source class='dev-source-" + (devSourceCount++) +"'>" + a;
+            			}
+           			})
+           			//End Tag(Case1 : ></tag-name> </tag-name>)
+            		.replace(/(<span[\s]?class="tag style-scope prettify-element">)(&gt;)?(&lt;)[/]\S*(&gt;)?(<\/span>)/g, function(a) {
+						return a + "</dev-source>";
+            		})
+            		//End Tag(Case2 : />로 끝나는 문자, 띄어쓰기로 인해 별도의 끝태그로 분리된 경우)
+            		.replace(/(<span[\s]?class="tag style-scope prettify-element">)[\s]*[/](&gt;)(<\/span>)/g, function(a) {
+						return a + "</dev-source>";
+            		});
+            	
+            	var srcTags = [];
+
+            	//innerHTML을 통해 생성된 태그를 검색
+            	srcTags = document.querySelectorAll("#html dev-source");
+            	
+          		/* Event 등록 및 제어 */
+            	for(var i=0; i < srcTags.length ; i++) {
+            		(function(i) {
+            			//'mouseover' Event
+	            		srcTags[i].addEventListener('mouseover', function (e) {
+	            			e.preventDefault();
+	            			e.stopPropagation();
+	            			this.classList.add("highlightBg");
+	            			document.querySelector('['+'dev-preview-' + i +']').classList.add("highlight");
+	                    });
+	            		//'mouseout' Event
+	            		srcTags[i].addEventListener('mouseout', function (e) {
+	            			e.preventDefault();
+	            			e.stopPropagation();
+	            			this.classList.remove("highlightBg");
+	            			document.querySelector('['+'dev-preview-' + i +']').classList.remove("highlight");
+	                    });
+	            		//'click' Event
+	            		srcTags[i].addEventListener('click', function (e) {
+	            			e.preventDefault();
+	            			e.stopPropagation();
+	            			/*me._attributeChange(document.querySelector('['+'dev-preview-' + i +']'), this);*/
+	                    });
+            		})(i);
+            	}
+            },
+            
+            /**
+    		 * 전체소스를 HTML,CSS,JS 등으로 파싱한다.
+    		 */
+            parsingSource: function() {
+            	this.note = this._generateNote(this.sourceBackUp);  
+            	this.source = this.sourceBackUp.replace(/<!-{2,}([\s\S]*?)-{2,}>/m, "");
+        		this.html = this._generateHTML(this.source);
+            	this.js = this._generateJS(this.source);
+            	this.css = this._generateCSS(this.source);
+            	this.htmlBackUp = this.$.html.innerHTML;
+            },
+            
+            /**
+    		 * 해당 Element Click 시 Attribute Changer에 Element 넘겨주기
+    		 */
+            /*_attributeChange: function(devPreview, devSource) {
+           		this.$.changer.setElement(devPreview, devSource, this.element, this.elementType);
+            },*/
+            
+            /**
+    		 * 초기
+    		 */
+            _createElement: function() {
+            	this.initElement();
+            },
+            
+            /**
+    		 * Source에서 HTML 부분 추출
+    		 */
+            _generateHTML: function(source) {
+            	//source에서 첫 <template> 마지막 </template>를 추출
+            	var tagName = "template";
+            	source = source.slice(source.indexOf("<" + tagName + ">") + tagName.length + 2, source.indexOf("</" + tagName + ">"));
+
+            	//Void Elements 끝에 / 붙이기
+            	var voidElements = ['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
+            	var voidElementsRe = new RegExp("<(:?" + voidElements.toString().replace(/,/g,"|") + ")[^>]*(>)","igm");
+            	
+            	//Style 제거
+            	var cssPattern = /<style\b[^>]*>([\s\S]*?)(<\/style\b[^>]*>)/gm;
+            	
+            	return source.replace(/^[\t]{1}/g, "")
+            		.replace(cssPattern, "")
+            		.replace(/<!-{2,}([\s\S]*?)-{2,}>/gm, "") //주석 제거
+            		.replace(voidElementsRe, function(a){ //void Elements 인 경우 뒤에 /를 붙여준다. 
+            			if(a[a.length-2] === "/") {
+            				return a;
+            			}
+	        			return a.slice(0, a.length-1) + "/>"; //<img src=""> 의 경우 <img src=""/>로 끝 태그를 붙여준다
+	        		});
+            },
+            
+            /**
+    		 * Source에서 JS 부분 추출
+    		 */
+            _generateJS: function(source) {
+            	var htmlPattern = /<script\b[^>]*>([\s\S]*?)(<\/script\b[^>]*>)/gm;
+            	var match = htmlPattern.exec(source);
+            	
+            	return match ? match[1].replace(/^[\t]{1}/g, "") : null;
+            },
+            
+            /**
+    		 * Source에서 CSS 부분 추출
+    		 */
+            _generateCSS: function(source) {
+            	var htmlPattern = /<style\b[^>]*>([\s\S]*?)(<\/style\b[^>]*>)/gm;
+            	var match = htmlPattern.exec(source);
+            	
+            	return match ? match[1].replace(/^[\t]{1}/g, "") : null;
+            },
+            
+            /**
+    		 * Source에서 주석 부분 추출
+    		 */
+            _generateNote: function(source) {
+            	var htmlPattern = /<!-{2,}([\s\S]*?)-{2,}>/gm;
+            	var match = htmlPattern.exec(source);
+            	
+            	return match ? match[1] : null;
+            },
+            
+            /**
+    		 * clipboard 복사
+    		 */
+			_copyHTML: function() {
+				this._copyToClipboard(this.$.html);            	
+            },
+            
+            /**
+    		 * clipboard 복사
+    		 */
+			_copyCSS: function() {
+				this._copyToClipboard(this.$.css);
+            },
+            
+            /**
+    		 * clipboard 복사
+    		 */
+            _copyJS: function() {
+            	this._copyToClipboard(this.$.js);
+            },
+            
+            /**
+    		 * clipboard 복사
+    		 */
+            _copyAll: function() {
+            	this._copyToClipboard(this.$.source);
+            },    
+            
+            /**
+    		 * popup 파라미터 설정
+    		 */
+            load: function(result) {
+            	this.source = result.source;
+            	this.sourceBackUp = result.source;
+            	this.elementType = result.elementType;
+            	this.target = result.target;
+            	
+            	this._createElement();
+            },
+            
+            /**
+    		 * 복사 함수
+    		 */
+            _copyToClipboard: function(sourceTarget) {
+                // From https://github.com/google/material-design-lite/blob/master/docs/_assets/snippets.js
+                var snipRange = document.createRange();
+                snipRange.selectNodeContents(sourceTarget);
+                var selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(snipRange);
+                var result = false;
+                try {
+                  result = document.execCommand('copy');
+                } catch (err) {
+                  Polymer.Base._error(err);
+                }
+
+                selection.removeAllRanges();
+                return result;
+			}
+		});
+	</script>
+</dom-module>

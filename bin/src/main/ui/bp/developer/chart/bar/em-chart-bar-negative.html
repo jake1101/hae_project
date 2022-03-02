@@ -1,0 +1,38 @@
+<sc-link rel="import" href="es-chart-bar-negative.html"></sc-link>
+<sc-link rel="import" href="../es-chart-source-viewer.html"></sc-link>
+
+<dom-module id="em-chart-bar-negative">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-panel class="vbox flex" title-text="bar chart negative">
+			<es-chart-bar-negative class="fit flex" on-chart-load="onChartLoad"></es-chart-bar-negative>
+			<es-chart-source-viewer id="viewer" url="/ui/bp/developer/chart/bar/es-chart-bar-negative.html" class="flex"></es-chart-source-viewer>
+		</sc-panel>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-chart-bar-negative',
+		properties : {
+			data : {
+				type : Object,
+				value : function() {
+					return {}
+				}
+			}
+		},
+		initialized : function() {
+		},
+		setViewerData : function() {
+			var me = this;
+			me.$.viewer.setData(JSON.stringify(me.get("data"), null, "\t"));
+		},
+		onChartLoad : function(){
+			//this.setViewerData();
+		}
+	});
+	</script>
+</dom-module>

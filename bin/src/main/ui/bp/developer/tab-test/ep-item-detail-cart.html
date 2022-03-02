@@ -1,0 +1,63 @@
+<sc-link rel="import" href="es-item-search-detail-bottom-tab1.html"></sc-link>
+<sc-link rel="import" href="es-item-search-detail-bottom-tab2.html"></sc-link>
+
+<dom-module id="ep-item-detail-cart">
+<!-- 
+/**
+ *
+ *	@description : tab-navigation 팝업예제파일
+ *  <pre>
+ * </pre>
+ * @FileName : 
+ * @Since 2018. 10. 26.
+ */
+-->
+	<style>
+		:host {
+            @apply(--vbox-layout);
+        }
+	</style>
+	
+		<template>
+	
+	<sc-ajax id="findItemDetail"
+			 url="findItemDetail.do"
+			 body="{{searchParam}}"
+			 on-response="compeleteFindItemDetail">
+	</sc-ajax>
+	
+<!--  
+	************************************************************************************************************
+	* UI Area
+	************************************************************************************************************
+-->		
+		<div id="wrap_content" class="vbox flex">
+			<sc-tab-navigation id="tabNavi"   class="flex">
+				<es-item-search-detail-bottom-tab1 id="tab1" title-text="상품설명"></es-item-search-detail-bottom-tab1>
+				<template>
+					<es-item-search-detail-bottom-tab2 id="tab2"  title-text="교환/반품규정" ></es-item-search-detail-bottom-tab2>
+				</template>
+			</sc-tab-navigation>
+		</div>
+	</template>
+	
+	<script>
+	Polymer({
+			is : 'ep-item-detail-cart',
+			properties : {
+			},
+			/************************************************** 
+			 * 초기화 설정
+			 **************************************************/
+			// 1. 화면 로딩시 최초 호출
+			initialized : function(){
+			}
+			/************************************************** 
+			 * 그리드 이벤트
+			 **************************************************/
+			/************************************************** 
+			 * 버튼 이벤트
+			 **************************************************/
+		});
+	</script>
+</dom-module>

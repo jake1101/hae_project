@@ -1,0 +1,172 @@
+<sc-link rel="import" href="charts/widget-chart-column-setting.html"></sc-link>
+<sc-link rel="import" href="charts/widget-chart-column-stack-setting.html"></sc-link>
+<sc-link rel="import" href="charts/widget-chart-bar-setting.html"></sc-link>
+<sc-link rel="import" href="charts/widget-chart-bar-stack-setting.html"></sc-link>
+<sc-link rel="import" href="charts/widget-chart-pie-setting.html"></sc-link>
+<sc-link rel="import" href="charts/widget-chart-area-setting.html"></sc-link>
+<sc-link rel="import" href="charts/widget-chart-line-setting.html"></sc-link>
+<sc-link rel="import" href="charts/widget-chart-polar-setting.html"></sc-link>
+<sc-link rel="import" href="charts/widget-chart-bubble-setting.html"></sc-link>
+<!-- 설정에서 사용 하는 팝업 -->
+<link rel="import" href="popup/widget-chart-series-setting-popup.html"></link>
+<link rel="import" href="popup/widget-chart-axis-setting-popup.html"></link>
+<dom-module id="widget-chart-setting">
+    <style>
+	    
+    </style>
+
+    <template>
+        <!-- 설정 -->
+            	<section class="option" style="border-bottom: 0px;margin-bottom:0px;">
+                	<h5>Charts</h5>
+                	<div class="p_innerbox" style="border-bottom: 0px;">
+	                    <table>
+	                    <colgroup>
+	                        <col style="width:25%" />
+	                        <col style="width:75%" />
+	                    </colgroup>
+	                    <tr>
+		                    <th><sc-label text="차트종류" ></sc-label></th>
+		                    <td>
+			                    <sc-combobox-field  placeholder="선택" items="[[chartTypeCodes]]" 
+			                                        value="{{fields.type}}" on-change="onTypeChanged"  readonly="[[formula('isWidgetDisabled')]]" >
+			            		</sc-combobox-field>
+		                    </td>
+	                    </tr>
+	                    
+	                    </table>
+                    </div>
+                </section>
+                <sc-pages id="chartSettingView">
+				     <widget-chart-column-setting id="column" on-re-draw="onChartReDraw"></widget-chart-column-setting>
+				     <template>
+					     <widget-chart-column-stack-setting id="columnStack" on-re-draw="onChartReDraw"></widget-chart-column-stack-setting>
+				     </template>
+				     <template>
+					     <widget-chart-bar-setting id="bar" on-re-draw="onChartReDraw"></widget-chart-bar-setting>
+				     </template>
+				     <template>
+					     <widget-chart-bar-stack-setting id="barStack" on-re-draw="onChartReDraw"></widget-chart-bar-stack-setting>
+				     </template>
+				     <template>
+				   	 	 <widget-chart-pie-setting id="pie" on-re-draw="onChartReDraw"></widget-chart-pie-setting>
+				     </template>
+			   	 	 <template>
+				   	 	 <widget-chart-area-setting id="area" on-re-draw="onChartReDraw"></widget-chart-area-setting>
+				     </template>
+			   	 	 <template>
+				   	 	 <widget-chart-line-setting id="line" on-re-draw="onChartReDraw"></widget-chart-line-setting>
+				     </template>
+			   	 	 <template>
+				   	 	 <widget-chart-polar-setting id="polar" on-re-draw="onChartReDraw"></widget-chart-polar-setting>
+				     </template>
+			   	 	 <template>
+				   	 	 <widget-chart-bubble-setting id="bubble" on-re-draw="onChartReDraw"></widget-chart-bubble-setting>
+				     </template>
+			   </sc-pages>
+    </template>
+    <script>
+        Polymer({
+            is: "widget-chart-setting",
+
+            properties: {
+            	chartTypeCodes :{
+            		type: Array,
+            		value :function(){
+            			return [
+            			        {text:'column-basic', value:'column'},
+            			        {text:'column-stack', value:'columnStack'},
+            			        {text:'bar-basic',    value:'bar'},
+            			        {text:'bar-stack',    value:'barStack'},
+            			        {text:'pie-basic',    value:'pie'},
+            			        {text:'area-basic',   value:'area'},
+            			        {text:'line-basic',   value:'line'},
+            			        {text:'polar',  value:'polar'},
+            			        {text:'bubble', value:'bubble'}
+            			 ]
+            		}
+            	},
+            	fields :{
+            		type: Object,
+            		value :function(){
+            			return {
+            					type:'',
+            					options3d:{
+            						isUse : false,
+            						alpha : 10,
+            						beta  : 10
+            					}
+            			};
+            		}
+            	},
+            	chartDatas :{
+            		type: Array,
+            		value :[]
+            	}
+            }, 
+            listeners : {
+            	
+    		},
+    		formulas:{
+    			isWidgetDisabled : function(){
+    				return this.viewMode == 'U';
+    			}
+    		},
+    		attached: function(){
+    			var me = this;
+    			me.chartSettingInitialized= true;
+    		},
+    		
+    		initialized: function(){
+    			var me = this;
+    		},
+    		
+    		onTypeChanged: function(e,item){
+    			var me = this;
+    			if(me.chartSettingInitialized && item.value != null){
+    				me.$.chartSettingView.selectItem(me.$[item.value],function(selectedView){
+	           			me.currentView = selectedView;
+	           			if(me.viewMode == 'C'){
+		           			me.currentView.initSetting();	
+	           			}else if(me.viewMode == 'U'){
+	           				me.currentView.setting(me.contents);
+	           			}
+	           			me.applyFormula();
+    				});
+    			}
+    		},
+    		
+    		getTemplateData : function(){
+    			var me = this;
+    			return me.currentView.getTemplateData(); 
+    		},
+    		initSetting : function(param){
+    			var me = this;
+    			me.viewMode = param.viewMode;
+    			me.set('fields.type','column');
+    		},
+    		
+    		onChartReDraw : function(){
+    			this.fire('re-draw', this.getTemplateData());
+    		},
+    		
+    		setting : function(contents){
+    			var me = this,
+    			    content = contents.contents;
+    		    me.contents = contents;
+    			me.viewMode = 'U';
+    			me.set('fields.type',content.type);
+    		},
+    		
+    		widgetContentDrew: function(param){
+    			this.currentView.widgetContentDrew && this.currentView.widgetContentDrew(param);
+    		},
+    		
+    		resetData: function(){
+    			var me = this;
+    			me.set('fields.type','');
+    			me.currentView.resetData();
+    		}
+    	});
+    </script>
+</dom-module>

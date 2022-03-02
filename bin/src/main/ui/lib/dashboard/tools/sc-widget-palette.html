@@ -1,0 +1,201 @@
+<dom-module id="sc-widget-palette">
+    <template>
+        <style>
+
+            .scrollable {
+                position: relative;
+            }
+
+            .overflowLimit {
+                overflow-y: hidden;
+            } 
+	        sc-panel.widgetTools sc-toolbar.header .title{
+	        	background-color: #0eb6e8l
+	        }
+	        .widgetTools{
+	           border-bottom: 1px solid #eee;
+			   height: 36px;
+			   padding-bottom:0;   	
+		       margin-bottom: 10px;		   
+	        }
+        </style>
+        
+        <sc-ajax id="findWidgetList"
+				 url="widget/findWidgetList.do"
+				 body="{{searchParam}}"
+				 on-response="onWidgetResponse">
+		</sc-ajax>
+        
+		<sc-toolbar class="widgetTools">
+			<sc-label text="Widget List" style="margin-left: 10px;"></sc-label>
+		</sc-toolbar>
+       	<sc-listbox id="widgetListbox" items="[[widgetList]]" style="border:0px;" class="widgetListBox">
+			<template>
+				<div class="listbox-item" style="overflow: hidden;">
+                       <div style="text-align: center; width:100%;height:100%">
+						<img  draggable="true"  on-dragstart="onImgDraStart" class="draggable" width="154" height="140" src$="{{item.captured}}">
+<!-- 						<div>{{item.widget_title}}</div> -->
+						<sc-label class="widgetListboxLabel" text="{{item.widget_title}}"></sc-label>
+						
+					</div>
+				</div>
+			</template>
+		</sc-listbox>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'sc-widget-palette',
+
+            properties: {
+                _zIndexIncrement: {
+                    type: Number,
+                    value: 0
+                },
+                
+                _ghostWidget: {
+                	type :  Object
+                },
+                
+                interactDraggableSelector : {
+               		type : String,
+               		value : '.listbox-item'
+               	},
+               	widgetList:{
+               		type: Array
+               	},
+               	searchParam:{
+               		type:Object,
+               		value: function(){
+               			return {};
+               		}
+               	
+               	}
+            },
+            behaviors: [
+                   	Polymer.SCInteractDraggableBehavior
+        	],
+   			listeners : {
+       			'interact-drag-start' : '_onSpriteInteractDragStart',
+       			'interact-drag-end' : '_onSpriteInteractDragEnd',
+       		},
+       		setOuterView: function(param){
+       			var me = this;
+       			me.outerView = param;
+       		},
+       		drop:  function(event){
+       			event.preventDefault();
+       		},
+       		onImgDraStart :  function(event){
+       			var me = this;
+       			event.preventDefault();
+       		},
+       		attached: function() {
+            	var me = this;
+            	me.interactDraggable = true;
+            },
+            widgetSearch: function(){
+            	var me = this;
+            	UT.request(me.$.findWidgetList);
+            },
+            onWidgetResponse: function(e, res){
+            	var me = this;
+            	var list = res.response;
+            	me.widgetList = list.map(function(widget){
+            		widget.widget_content = JSON.parse(widget.widget_content);
+            		return widget; 
+            	});
+            },
+    		_onSpriteInteractDragStart : function(event) {
+    			var me = this,
+    			    target = event.detail.target,
+    				info = me._getElementToItem(target);
+    			if(info){
+    				info.UUID = Polymer.SCAutoGenIdBehavior.generateId(true);
+    				info.draggable ='true';
+        			info.editable = 'true';
+        			info.resizable = 'true';
+        			info.closeable = 'true';
+        			info.widget_content.mode = 'drag';
+       				me._ghostWidget = this.dashboard.createWidget(info,true);
+       				me.addWidget(me._ghostWidget);
+       				me._ghostWidget.dashboardSettled = false;
+        			var widgetRec = target.getBoundingClientRect();
+        			me._ghostWidget.classList.add('widget-drag');
+        			me._ghostWidget.style.left = widgetRec.left+"px";
+        			me._ghostWidget.style.top =  (widgetRec.top-100)+"px";
+        			me._ghostWidget.style.position="absoulte";
+        			me._ghostWidget.style['z-index'] = 99;
+    			}
+    		},
+    		_onInteractDrag : function(event) {
+    		 	var target = this._ghostWidget;
+    		 	var left = target.style.getPropertyValue('left')
+   				var x = (parseFloat(left.replace('px', '')) || 0) + event.dx;
+   				var top = target.style.getPropertyValue('top')
+	    		var	y = (parseFloat(top.replace('px', '')) || 0) + event.dy;
+    			if(this._preventedInteractDragging === true || target == this) {
+    				return;	
+    			}
+    			if(target.dashboardSettled && (x < 0 || y < 0)){
+    				return
+    			}
+    			var dashboardRec = this.dashboard.getBoundingClientRect();
+    			var widgetRec =  target.getBoundingClientRect();
+    			if(!target.dashboardSettled && (widgetRec.left > dashboardRec.left )){
+    				target.dashboardSettled = true;
+    				this.dashboard.widgetLayout(target,true);
+    				x = x - 200;
+    				y = y - 56;
+    			}
+    			    				
+    			target.style.setProperty('left',x + 'px')
+  				target.style.setProperty('top',y + 'px')
+    			target.x = x;
+    			target.y = y;
+    		},
+    		
+    		_onSpriteInteractDragEnd : function(event){
+    			var target = this._ghostWidget;
+    			if(!target.dashboardSettled){
+    				this.removeWidget(target);
+    			}
+    			target.classList.remove('widget-drag');
+    			//iframe을 드래그 할때 생성하면 드래그가 되지 않기 때문에 드래그가 끝날때 생성해 준다.
+    			if(target.info.widget_type == 'iframe'){
+    				target.refresh();
+    			}
+    			target.contentResize();
+    			//target.dragAreaID = 'titleBar';
+    			target.dragAreaID = target.id;
+    			this.dashboard.selectWidget(target);
+    		},
+    		_getElementToItem: function(ele){
+    			var me = this;
+    			var itemIndex = this.$.widgetListbox._elements.indexOf(ele);
+    			if(itemIndex > -1){
+    				return me.widgetList[itemIndex]
+    			}
+    			return null;
+    		},
+    		addWidget: function(widget){
+    			var me = this;
+    			me.outerView.appendChild(widget);
+    		},
+    		removeWidget: function(widget){
+    			var me = this;
+    			me.outerView.removeChild(widget);
+    		},
+    		setOuterView: function(view){
+       			var me = this;
+       			me.outerView = view;
+       		},
+       		setDashboard : function(view){
+       			this._dashboard = view;
+       		},
+			get dashboard(){
+				return this._dashboard;
+			}
+        })
+    </script>
+</dom-module>

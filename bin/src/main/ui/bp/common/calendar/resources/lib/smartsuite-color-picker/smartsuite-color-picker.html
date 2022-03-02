@@ -1,0 +1,115 @@
+<link rel="import" href="smartsuite-color-picker-box.html">
+
+<!--
+	컬러 선택기
+	참고) sc-checkbox-group-field, sc-radio-group-field 
+ -->
+<dom-module id="smartsuite-color-picker">
+	<style>
+		.blockMouse {
+        	pointer-events: none;
+        }
+	</style>
+	
+	<template>
+		<div id="colorBoxWrapper"></div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'smartsuite-color-picker',
+			
+			properties : {
+				// 기본적으로 설정되어있는 컬러 프리셋
+				colorPresetData : {
+					type : Array,
+					value : function() {
+						return [];
+					}
+				},
+				
+				// 선택 박스 하나의 width
+				boxSize : {
+					type : Object,
+					value : function() {
+						return { width : 24, height : 24 };
+					}
+				},
+				
+				// 선택한 color box element
+				selectedBoxEl : {
+					type : Element
+				},
+				
+				// 선택한 컬러
+				selectedColor : {
+					type : String
+				}
+			},
+			
+			listeners : {
+				'click-box' : 'onClickBox'
+			},
+			
+			// 반복을 사용하여 아이템을 생성
+			attached : function() {
+				var me = this;
+				
+				// 
+				for(var i = 0; i < me.colorPresetData.length; i++) {
+					var colorBox = document.createElement('smartsuite-color-picker-box');
+					colorBox.style.width = me.boxSize.width + 'px';
+					colorBox.style.height = me.boxSize.height + 'px';
+					colorBox.style.padding = '2px';
+					colorBox.style.display = 'inline-block';
+					colorBox.addEventListener('click', function(event) {
+						var targetEl = event.currentTarget;
+						me.selectColor(targetEl.colorInfo.eventColor);
+					});
+					me.$.colorBoxWrapper.appendChild(colorBox);
+					colorBox.initBox(me.colorPresetData[i]);
+				}
+				
+				// 현재 선택한 컬러가 없을 경우에 인덱스 0에 있는 값을 기본으로 가져와 컬러 설정
+				if(!me.selectedColor) {
+					me.selectedColor = me.colorPresetData[0].eventColor; 
+				}
+				me.selectColor(me.selectedColor);
+			},
+			
+			// 컬러 코드를 사용하여 선택항목을 설정 
+			selectColor : function(colorCode) {
+				var me = this;
+				me.selectedColor = colorCode;
+				
+				// 기존에 선택한 박스가 있다면 지움
+				if(me.selectedBoxEl) {
+					me.selectedBoxEl.children[0].style.boxShadow =  '';
+				}
+				
+				// 
+				if(me.$.colorBoxWrapper.children.length === me.colorPresetData.length) {
+					for(var i = 0; i < me.$.colorBoxWrapper.children.length; i++) {
+						if(colorCode === me.$.colorBoxWrapper.children[i].colorInfo.eventColor) {
+							me.selectedBoxEl = me.$.colorBoxWrapper.children[i];
+							me.selectedBoxEl.children[0].style.boxShadow =  '0 0 0 2px rgb( 155, 201, 199 )';
+							break;
+						}
+					}
+				}
+			},
+			
+			// 선택된 컬러 값을 가져옴
+			getColor : function() {
+				var me = this;
+				return me.selectedBoxEl.colorInfo;
+			},
+			
+			// 클릭을 막음
+			disable : function() {
+				var me = this;
+				me.$.colorPickerWrapper.classList.add('blockMouse');
+			}
+		});
+	</script>
+</dom-module>

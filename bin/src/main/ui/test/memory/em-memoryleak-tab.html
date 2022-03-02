@@ -1,0 +1,30 @@
+<link rel="import" href="es-memoryleak-tab-fields.html">
+<link rel="import" href="es-memoryleak-tab-fields2.html">
+
+<dom-module id="em-memoryleak-tab">
+
+	<style>
+        :host {
+            @apply(--layout-vertical);
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    
+	<template>
+		<div class="page-flex">
+			<sc-tab-navi id="tabNavi" class="vbox" selected="0">
+				<es-memoryleak-tab-fields id="fields1" title="#{필드들1}" class="vbox"></es-memoryleak-tab-fields>
+				<es-memoryleak-tab-fields2 id="fields2" title="#{필드들2}" class="vbox"></es-memoryleak-tab-fields2>
+			</sc-tab-navi>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-memoryleak-tab'
+		});
+	</script>
+
+
+</dom-module>

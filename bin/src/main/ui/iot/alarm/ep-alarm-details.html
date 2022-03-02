@@ -1,0 +1,290 @@
+<sc-link rel="import" href="ep-image-view.html"></sc-link>
+
+<dom-module id="ep-alarm-details">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 작업자 상세팝업
+        ** @Description		: 작업자 상세팝업업
+        ** @Author 			: JongHoon Baek
+        ** @Create Date 	: 2020.02.25
+        ** @History 		: 2020.02.25 JongHoon Baek 최초작성
+        ******************************************************************************************
+    -->
+
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+	</style>
+	
+	<template>
+	
+	
+		<sc-request-group init>
+				<sc-code-group>
+					<sc-code code="IOT017" value="{{protectList}}"></sc-code>
+					<sc-code code="IOT019" value="{{nationList}}"></sc-code>
+					<sc-code code="IOT020" value="{{bloodTypeList}}"></sc-code>
+				</sc-code-group>
+		</sc-request-group>
+		
+	
+		<sc-ajax id="findAlarmDetails"
+				url="findAlarmDetails.do"
+				body="{{searchParam}}"
+				on-response="completeFindAlarmDetails">
+		</sc-ajax>
+		
+		<sc-ajax
+				id="findImgFile"
+				url="findImgFile.do"
+				on-response="completeFindImgFile">
+		</sc-ajax>
+		
+		<cc-sub-title-bar style="margin-top: 1%;margin-bottom: 1%;">
+        	<sc-button  text="저장" on-click="onSave" hidden="{{saveFlag}}" auth-s></sc-button>
+		</cc-sub-title-bar>
+		<div style="overflow:scroll">
+	        <table class="tb-form">
+	            <colgroup>
+	                <col style="width:120px">
+	                <col>
+	                <col style="width:120px">
+	                <col>
+	                <col style="width:120px">
+	                <col>
+	            </colgroup>
+	            <tr>
+	                <th><sc-label text="조치자"></sc-label></th>
+	                <td>
+	                	<sc-text-field value="{{alarmInfo.answerer}}"  max-length="100"></sc-text-field>
+	                </td>								
+	                <th><sc-label text="조치시간"></sc-label></th>
+	                <td>
+	                	<sc-text-field value="{{alarmInfo.answerDt}}" readonly="true" placeholder="저장시 자동으로 입력됩니다."  max-length="100" ></sc-text-field>
+	                </td>	
+	                <th><sc-label text="조치상태"></sc-label></th>
+	                <td> 
+	                	<sc-combobox-field items="{{stateList}}" value-field="value" display-field="text" value="{{alarmInfo.state}}" input-clear="false" ></sc-combobox-field>
+	                </td>								
+	            </tr>
+	            <tr>
+	                <th><sc-label text="조치 내용"></sc-label></th>
+	                <td colspan='5'>
+	               	<sc-textarea-field  style="height:250px" value="{{alarmInfo.answer}}"  placeholder="입력하세요" max-length="1000"></sc-textarea-field><br>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="조치 전"></sc-label></th>
+	                <td colspan='5'>
+	                  <sc-upload id="uploadPanel1" style="height:200px" 
+							value="{{alarmInfo.beforeImageGrpCode}}"
+							on-upload-completed="uploadCompleted"
+							on-delete-completed="deleteCompleted"
+							on-item-select="onItemSelect"
+							view-type="thumbnail"
+							downloadable="true"
+							>
+						</sc-upload>
+	                </td>	
+	            </tr>
+	            <tr>
+	                <th><sc-label text="조치 중"></sc-label></th>
+	                <td colspan='5'>
+	                  <sc-upload id="uploadPanel2" style="height:200px" 
+							value="{{alarmInfo.nowImageGrpCode}}"
+							on-upload-completed="uploadCompleted"
+							on-delete-completed="deleteCompleted"
+							on-item-select="onItemSelect"
+							view-type="thumbnail"
+							downloadable="true"
+							>
+						</sc-upload>
+	                </td>	
+	            </tr>
+	            <tr>
+	                <th><sc-label text="조치 후"></sc-label></th>
+	                <td colspan='5'>
+	                  <sc-upload id="uploadPanel3" style="height:200px" 
+							value="{{alarmInfo.afterImageGrpCode}}"
+							on-upload-completed="uploadCompleted"
+							on-delete-completed="deleteCompleted"
+							on-item-select="onItemSelect"
+							view-type="thumbnail"
+							downloadable="true"
+							>
+						</sc-upload>
+	                </td>	
+	            </tr>
+	        </table>
+        </div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : "ep-alarm-details",
+			
+			properties : {
+				searchParam: {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				},
+				protectList: {
+					type : Array,
+					value : function(){
+						return [];
+					}
+				},
+				alarmInfo: {
+					type : Object,
+					value : function(){
+						return {
+							
+						};
+					}
+				},
+				editableFlag:{
+					type : Boolean,
+					value : function(){
+						return true;
+					}
+					
+				},
+				saveFlag:{
+					type : Boolean,
+					value : function(){
+						return false;
+					}
+					
+				},
+				photoInfo : {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				},
+				stateList : {
+					type : Array,
+					value : function(){
+						return[{text:"조치전", value:"1"},{text:"조치중", value:"3"},{text:"조치완료", value:"5"}];
+					}
+				}
+			},
+			
+			 initialized : function() {
+                var me = this;
+            },
+			load:function(data){
+ 				var me = this;
+				me.set("searchParam.alarmSeq",data.seq);
+				
+				UT.request(me.$.findAlarmDetails);
+			},
+			completeFindAlarmDetails : function(e,res){
+				var me = this,
+					result = res.response;
+				
+				me.set("alarmInfo" , result);
+				if(result.property){
+					me.set("alarmInfo.beforeImageGrpCode" , result.property.beforeImageGrpCode);
+					me.set("alarmInfo.nowImageGrpCode" , result.property.nowImageGrpCode);
+					me.set("alarmInfo.afterImageGrpCode" , result.property.afterImageGrpCode);
+					me.set("alarmInfo.answerDt" , result.property.answerDt);
+					me.set("alarmInfo.answerer" , result.property.answerer);
+				}
+			},
+			onSave : function(){
+                var me = this;
+                Promise.all([me.$.uploadPanel1.upload(), me.$.uploadPanel2.upload(),me.$.uploadPanel3.upload()]).then(function() {
+                	me.alarmInfo.answerDt= me.date_to_str(new Date());
+                    me.fire("save-property",me.alarmInfo);
+                	
+                })
+            },
+            
+            date_to_str :function(format)
+
+            {
+
+                var year = format.getFullYear();
+
+                var month = format.getMonth() + 1;
+
+                if(month<10) month = '0' + month;
+
+                var date = format.getDate();
+
+                if(date<10) date = '0' + date;
+
+                var hour = format.getHours();
+
+                if(hour<10) hour = '0' + hour;
+
+                var min = format.getMinutes();
+
+                if(min<10) min = '0' + min;
+
+                var sec = format.getSeconds();
+
+                if(sec<10) sec = '0' + sec;
+
+                
+
+                return year + "-" + month + "-" + date + " " + hour + ":" + min + ":" + sec;
+
+            },
+
+            
+            onUpload : function(e){
+            	 var me = this;
+            	 
+	             UT.popupAttach(me, me.photoInfo.workerFaceGrpCode, function(result) {
+					// 1. 메인 화면의 property 에 담아질 예정 추후에 저장 누르면 저장됨.
+					me.alarmInfo.workerFaceGrpCode = result.grp_cd;
+					
+					// 2. API호출 
+				 	me.$.findImgFile.body = {
+                    	grpCd : result.grp_cd
+                    };
+// 					UT.request(me.$.findImgFile);
+	             });
+            },
+            //API complete
+            // src 를 변경을 해줘라.
+            completeFindImgFile : function(e,res){
+            	var me = this,
+            		result= res.response;
+            	
+            	$("#workerFaceImg").attr("src","/repository/"+result[0].attFilePath);
+            },
+            
+            onItemSelect: function(event, detail) {
+				var me = this;
+				if(detail.item) {
+					if(detail.item.id.indexOf('-file') !== -1) {
+						var imageReader = new FileReader();
+						imageReader.onload = (function(aFile) {
+							return function(e) {
+								var popup = UT.popup('ep-image-view', me, 600, 500, {}, {});
+								popup.show();
+								var popupContent = popup.getWindowContent();
+								popupContent.load(e.target.result, true);
+							};
+						})(detail.item.orgFile);
+						imageReader.readAsDataURL(detail.item.orgFile);
+					} else {
+						var popup = UT.popup('ep-image-view', me, 600, 500, {}, {});
+						popup.show();
+						var popupContent = popup.getWindowContent();
+						popupContent.load(detail.item.id);		
+					}
+				}
+			}
+	
+		})
+	
+	</script>
+	
+</dom-module>

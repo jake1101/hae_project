@@ -1,0 +1,292 @@
+﻿<!--
+	캘린더 뷰 부분
+ -->
+<dom-module id="smartsuite-calendar-view">
+	<style>
+		:host {
+            @apply(--calendar-vbox-layout);
+        }
+	</style>
+
+	<template>
+		<!--
+			AJAX 요청 
+		 -->
+		<!-- 스케줄 업데이트 -->
+		<sc-ajax id="updateSchedule" url="updateSchedule.do" on-response="onResponseSaveSchedule"></sc-ajax>
+	
+		<!--
+			화면 
+		 -->
+		<div class="calendar-flex calendar-vbox">
+			<div class="calendarview-header">
+				<i class="fa fa-calendar" style="color:gray;font-size:17px;" aria-hidden="true"></i>
+				<span class="main">[[currentMonth]]</span>
+				
+				<sc-button class="side-btn" icon-cls="calendarNavLeft" on-click="onClickPrev"></sc-button>
+				<sc-button class="side-btn" icon-cls="calendarNavRight" on-click="onClickNext"></sc-button>
+					
+				<div id="testDiv" style="display:inline-block;float:right;padding-top:11px;">
+					<sc-button class="calendarNaviIcon" on-click="onClickToday" text="Today"></sc-button>
+					<sc-button class="calendarNaviIcon" on-click="onClickChangeView" view="month" text="Month"></sc-button>
+					<sc-button class="calendarNaviIcon" on-click="onClickChangeView" view="agendaWeek" text="Week"></sc-button>
+					<sc-button class="calendarNaviIcon" on-click="onClickChangeView" view="agendaDay" text="Day"></sc-button>
+					<sc-button class="calendarNaviIcon" on-click="onClickChangeView" view="listWeek" text="List"></sc-button>
+					<sc-button class="side-btn" on-click="onClickRefresh" icon-cls="calendarRefresh"></sc-button>
+					<sc-button class="side-btn" on-click="onClickSearch" icon-cls="calendarSearch"></sc-button>
+				</div>
+			</div>
+		
+			<div class="calendarview-content calendar-flex">
+				<!-- 일정 캘린더 -->
+				<full-calendar id="calendar" 
+					style="height:100%;overflow: hidden;padding-right: 2px;display:flex"
+					on-full-calendar-dayclick="_onClickDay"
+					on-full-calendar-scheduleclick="_onClickSchedule"
+					on-full-calendar-scheduledrop="_onDropSchedule"
+					on-full-calendar-viewrender="_onRenderView">
+				</full-calendar>
+			</div>
+			
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is: 'smartsuite-calendar-view',
+			
+			properties: {
+				// 현재 뷰 상태
+				currentView: {
+					type: String,
+					value: function() {
+						return 'month';
+					}
+				},
+				
+				// 현재 달
+				currentMonth: {
+					type: String
+				}
+			},
+			
+			/**
+			 * 기본 설정
+			 */
+			attached: function(){
+				// 스타일 조정
+				var me = this,
+					testDiv = me.$.testDiv
+					divEls = testDiv.querySelectorAll('div.button-container');
+				for(var i=0; i<divEls.length; i++){
+					divEls[i].style.display = 'inline-block';
+					divEls[i].style.width = 'auto';
+				}
+				var selectedItem = this.querySelector('sc-button[view="' + me.currentView + '"]');
+				selectedItem.classList.add('selectedNav');
+			},
+			
+			/**
+			 * 이전 버튼 클릭시 - 설정된 이전 일자(또는 달, 주)로 이동
+			 */
+			onClickPrev: function() {
+				var me = this;
+				me.$.calendar.prev();
+			},
+			
+			/**
+			 * 다음 버튼 클릭시 - 설정된 다음 일자(또는 달, 주)로 이동
+			 */
+			onClickNext: function() {
+				var me = this;
+				me.$.calendar.next();
+			},
+			
+			/**
+			 * 뷰 타입을 변경함
+			 */
+			onClickChangeView: function(event) {
+				var me = this;
+				var viewType = event.target.getAttribute('view');
+				
+				// 기존 선택 버튼과 다를 경우만 동작
+				if(me.currentView !== viewType) {
+					me.$.calendar.clearSchedule(true);
+					me.currentView = viewType;
+					me.$.calendar.changeView(viewType);
+					
+					var prevSelectViewBtn = me.querySelector('sc-button.selectedNav');
+					prevSelectViewBtn.classList.remove('selectedNav');
+					event.target.classList.add('selectedNav');
+				}
+			},
+			
+			/**
+			 * 출력할 일자 영역을 나타냄
+			 */
+			displayDateRange: function(date) {
+				var me = this;
+				var year = date.year();
+				var month = date.month() + 1;
+				if(month / 10 < 1) {
+					month = '0' + month;
+				}
+				this.currentMonth = year + me.translate('년') + month + me.translate('월');
+			},
+			
+			/**
+			 * 빈 날짜를 클릭할 때
+			 */
+			_onClickDay: function(event, data) {
+				var me = this;
+				me.fire('open-calendar-schedule-popup', data);
+			},
+			
+			/**
+			 * 일정을 클릭할 경우
+			 */
+			_onClickSchedule: function(event, data) {
+				var me = this;
+				me.fire('open-calendar-schedule-popup', data);
+			},
+			
+			/**
+			 * 캘린더의 일자를 설정한다.
+			 */
+			setDate: function(date) {
+				var me = this;
+				me.$.calendar.setDate(date);
+				
+				var dateRange = me.$.calendar.getDateRange();
+				me.fire('change-date', {
+					start: dateRange.start,
+					end: dateRange.end
+				});
+			},
+			
+			/**
+			 * 이전, 다음, 뷰 변경 클릭시 호출됨
+			 */
+			_onRenderView: function(event, data) {
+				var me = this;
+
+				// 
+				var dateRange = me.$.calendar.getDateRange();
+				me.displayDateRange(dateRange.currentDate);
+				me.fire('change-date', {
+					start: dateRange.start,
+					end: dateRange.end
+				});
+			},
+
+			/**
+			 * 스케줄을 드랍했을 때 이벤트 - 공유, 반복을 drop 차단
+			 */
+			_onDropSchedule: function(event, data) {
+				var me = this;
+				var originInfo = data.eventInfo.origin;
+				
+				// 공유의 경우
+				if(data.eventInfo.isShared || originInfo.repeat) {
+					UT.alert('공유 또는 반복 데이터는 변경이 불가능합니다.');
+					me.fire('refresh');
+					return;
+				}
+				
+				// 일반 일정의 경우
+				else {
+					me._updateSchedule(originInfo, data);
+				}
+			},
+			
+			/**
+			 * 스케줄 업데이트를 요청
+			 */
+			_updateSchedule: function(scheduleInfo, data) {
+				var me = this;
+				me._addDate(scheduleInfo.start_date, data.delta);
+				me._addDate(scheduleInfo.end_date, data.delta);
+				
+				me.$.updateSchedule.body = scheduleInfo;
+				me.$.updateSchedule.generateRequest();
+			},
+			
+			/**
+			 * 날짜 변경 - targetDate는 date 객체
+			 */
+			_addDate: function(targetDate, delta) {
+				targetDate.setDate(targetDate.getDate() + delta._days);
+				targetDate.setTime(targetDate.getTime() + delta._milliseconds);
+			},
+
+			/**
+			 * 오늘로 이동
+			 */
+			onClickToday: function() {
+				var me = this;
+				me.setDate(new Date());
+			},
+			
+			/**
+			 * 현재 일자에서 캘린더를 리프레시 한다
+			 */
+			onClickRefresh: function() {
+				var me = this;
+				
+				var dateRange = me.$.calendar.getDateRange();
+				me.fire('change-date', {
+					start: dateRange.start,
+					end: dateRange.end
+				});
+			},
+			
+			/**
+			 * 일정 저장 결과
+			 */
+			onResponseSaveSchedule: function(response) {
+				var me = this;
+				var result = response.detail.response;
+				if(result.result_status !== 'S') {
+					UT.alert('문제가 발생하였습니다. 다시 시도해 주십시오');
+				}
+				me.fire('result');
+			},
+			
+			/**
+			 * 스케줄을 설정함
+			 */
+			setSchedule: function(scheduleList) {
+				var me = this;
+				
+				me.$.calendar.clearSchedule();
+				
+				for(var i = 0; i < scheduleList.length; i++) {
+					var groupInfo = scheduleList[i];
+					for(var j = 0; j < groupInfo.scheduleList.length; j++) {
+						var scheduleInfo = groupInfo.scheduleList[j];
+						var insertSchedule = {
+							title		: scheduleInfo.sched_nm,
+							textColor	: groupInfo.grp_font_color,
+							color		: groupInfo.grp_color,
+							start		: scheduleInfo.start_date,
+							end			: scheduleInfo.end_date,
+							origin		: scheduleInfo,	
+							isShared	: groupInfo.usr_id !== SCSessionManager.currentUser.usr_id,
+							durationEditable: false
+						};
+						me.$.calendar.addSchedule(insertSchedule, false);		
+					}
+				}
+				me.$.calendar.refetch();
+			},
+			
+			/**
+			 * 검색버튼 클릭
+			 */
+			onClickSearch: function() {
+				var me = this;
+				me.fire('open-search-popup');
+			}
+		});
+	</script>
+</dom-module>

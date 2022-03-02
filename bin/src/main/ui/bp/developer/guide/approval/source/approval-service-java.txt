@@ -1,0 +1,78 @@
+package smartsuite.app.bp.approval;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+
+/**
+ * 결재마스터 관련 처리하는 서비스 Class입니다.
+ *
+ * @author JongKyu Kim
+ * @see
+ * @FileName ApprovalService.java
+ * @package smartsuite.app.bp.admin.approval
+ * @Since 2016. 2. 2
+ * @변경이력 : [2016. 2. 2] JongKyu Kim 최초작성
+ */
+@Service
+@Transactional
+@SuppressWarnings ({ "rawtypes", "unchecked" })
+public class ApprovalService {
+	
+	/** The sql session. */
+	@Inject
+	private SqlSession sqlSession;
+
+	@Inject
+	private ApprovalFactory factory;
+	
+	
+	/**
+	 * 결재마스터 상태정보를 수정한다.
+	 *
+	 * @author : JongKyu Kim
+	 * @param aprvId - 결재 아이디
+	 * @param aprvTypCd - 결재 유형 코드
+	 * @param stsCd - 결재 상태 코드
+	 * @param appId - 모듈 appId
+	 * @throws Exception
+	 * @Date : 2016. 2. 2
+	 * @Method Name : updateApprovalMasterStatus
+	 */
+	public void updateApprovalMasterStatus(String aprvId, String aprvTypCd, String stsCd, String appId) throws Exception {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("aprv_id", aprvId);
+
+		if ("C".equals(stsCd) || "B".equals(stsCd)) {	// 승인 또는 반려
+			param.put("aprv_stscd", stsCd);
+			sqlSession.update("approvalMaster.updateApprovalMasterStatus", param);
+
+		} else if ("D".equals(stsCd)) {					// 취소- 임시저장 상태로 돌린다.
+			param.put("aprv_stscd", "T");
+			sqlSession.update("approvalMaster.updateApprovalMasterStatus", param);
+
+		}
+		
+		ApprovalStrategy strategy = factory.getApprovalStrategy(aprvTypCd);
+		if (strategy != null) {
+			if ("C".equals(stsCd)) { 		// 승인
+				strategy.doApprove(aprvTypCd, appId);
+			} else if ("B".equals(stsCd)) { // 반려
+				strategy.doReject(aprvTypCd, appId);
+			} else if ("D".equals(stsCd)) { // 취소
+				strategy.doCancel(aprvTypCd, appId);
+			} else if ("P".equals(stsCd)) { // 상신
+				strategy.doSubmit(aprvTypCd, appId);
+			} else if ("T".equals(stsCd)) { // 임시저장
+				strategy.doTemporary(aprvTypCd, appId);
+			}
+		}
+	}
+}

@@ -1,0 +1,78 @@
+<!-- 
+
+## 이메일 계정
+
+*userinfo@domain* 의 형태라고 할 때
+
+*userinfo*는 대소문자를 구별할 가능성이 적지만 존재합니다. (sensitive)
+
+*domain*의 경우에는 DNS System에서 대소문자를 구별하지 않습니다. (insensitive)
+
+참고 : [https://www.lifewire.com/are-email-addresses-case-sensitive-1171111](https://www.lifewire.com/are-email-addresses-case-sensitive-1171111)
+
+
+## Validation
+
+- maxlength : 60 
+- regexType : email 
+
+*email의 길이*는 일반적으로 254길이이지만 smartsuit 9.0 Scheme에서는 60자로 제한하고 있습니다.
+ 
+참고 : [http://7php.com/the-maximum-length-limit-of-an-email-address-is-254-not-320/](http://7php.com/the-maximum-length-limit-of-an-email-address-is-254-not-320/)
+
+참고 : [http://rumkin.com/software/email/rules.php](http://rumkin.com/software/email/rules.php)
+ -->
+
+<dom-module id="es-email-ex-1">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+    <template>
+        <table class="tb-form">
+            <tr>
+                <td>
+                    <sc-text-field value="{{baseInfo.email}}" class="w-200" max-length="60" validator-type="email"></sc-text-field>
+                    <sc-button on-click='isValid' text="Valid"></sc-button>
+                </td>
+            </tr>
+        </table>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-email-ex-1',
+            properties:{
+            	//검증을 위한 객체
+            	baseInfo: {
+            		type: Object,
+            		value: function() {
+            			return {};
+            		}
+            	}
+            },
+            
+            setValue: function() {
+            	var me = this;
+            	
+            	me.set("baseInfo.email", "okeydokey@emro.com");
+            },
+            
+            isValid: function() {
+            	var me = this;
+
+                //Validation
+                if(!me.validate()) {
+                    UT.alert("검증실패", null, true);
+                    return;
+                }
+
+                UT.alert("검증통과", null, true);
+            }
+		});
+	</script>
+
+</dom-module>

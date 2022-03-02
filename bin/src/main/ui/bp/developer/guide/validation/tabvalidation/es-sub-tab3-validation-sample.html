@@ -1,0 +1,70 @@
+<dom-module id="es-sub-tab3-validation-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<!-- 코드 조회 -->
+		<sc-request-group init>
+			<sc-code-group>
+				<!-- 구매유형 -->
+				<sc-code code="P045" value="{{codes.purcTypCd}}"></sc-code>
+			</sc-code-group>
+		</sc-request-group>
+
+		<!-- 가격선정방식 -->
+		<sc-ajax id="findCommonCodeAttrCdList" url="findCommonCodeAttrCdList.do" body="{{codes.param}}" last-response="{{codes.prcStlTypCd}}" on-response="onResponse"></sc-ajax>
+
+		<sc-label text="서브탭3" i18n-disabled></sc-label>
+	</template>
+
+	<script>
+        Polymer({
+            is: 'es-sub-tab3-validation-sample',
+            properties: {
+                codes: {
+                    type: Object,
+                    value: function () {
+                        return {
+                            prcStlTypCd: [],
+                            prcStlTypFilterCd: [],
+                            purcTypCd: [],
+                            param: {
+                                attr_cd: "RFX_TYPE",
+                                comp_cd: SCSessionManager.currentUser.comp_cd,
+                                grp_cd: "P007",
+                                purc_grp_typ: "PU"
+                            }
+                        };
+                    },
+                    reset: false
+                }
+            },
+
+            load: function (param) {
+                var me = this;
+                setTimeout(function () {
+                    UT.request(me.$.findCommonCodeAttrCdList);
+                }, 4000);
+            },
+
+            onResponse: function () {
+                this.isLoaded = true;
+            },
+
+            isValidFn: function (validParam) {
+                var me = this;
+                if(me.codes.prcStlTypCd == null || me.codes.prcStlTypCd.length == 0) {
+                    return false;
+                }
+                else {
+                    return "Validation 실패";
+                }
+                return true;
+            }
+
+        });
+	</script>
+</dom-module>

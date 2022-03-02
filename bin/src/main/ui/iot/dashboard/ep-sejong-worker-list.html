@@ -1,0 +1,286 @@
+<!--
+    ******************************************************************************************
+	** @Program-name 	: 세종 작업자 그리드 팝업
+    ** @Description		: 
+	** @Author          : jhPark
+    ** @Create Date     : 2021.07.13
+    ** @History         : 2021.07.13 jhPark 최초작성
+    ******************************************************************************************
+-->
+<sc-link rel="import" href="../shared/ep-sms-send-selected.html"></sc-link>
+
+<dom-module id="ep-sejong-worker-list">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+         -->
+         <!-- 코드 조회-->
+		 <sc-request-group init></sc-request-group>
+		 
+		<sc-ajax id="findPhoneNumber" url="findPhoneNumber.do" body="{{smsInfo}}" on-response="completeFindPhoneNumber"></sc-ajax>
+		
+		<sc-ajax id="sendSms" url="sendSms.do" body="{{smsInfo}}" on-response="completeSendSms"></sc-ajax>
+		 
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+
+		<div class="vbox flex">
+			<sc-grid id="gridWorkerPanel" visible-count = true data-provider="{{workerList}}" title-text="작업자"
+				use-state ="false" selection-style="singleRow" on-item-click="onItemClick"
+				use-dummy="false" column-fit-style="evenFill" show-tooltip="true" tooltip-delay=50 on-item-click="onItemClick">
+<!-- 				on-creation-complete="creationComplete" -->
+<!-- 				on-item-state-changed="itemStateChanged" -->
+				<cc-grid-toolbar title-text="{{toolText}}" >
+					<sc-button text="SMS 선택일괄전송" on-click="onSendSMSAll" auth-s></sc-button>
+				</cc-grid-toolbar>
+				<sc-grid-columns>
+					<sc-data-column 	width="100" 	text-align="center" 	header-text="유형"  data-field="workStatus"></sc-data-column>
+					<sc-image-column 	width="30" 	text-align="center" 	header-text=""  data-field="isMobile" image-change-function="mobileImageChangeFunction" item-label-function="mobileImageLabelFunction" content-tooltip-callback="mobileTooltipCallback"></sc-image-column>
+				    <sc-data-column 	width="100" 	text-align="center" 	header-text="협력사"   data-field="vendorName" item-style-function="onStyleFontColor"></sc-data-column>
+				    <sc-data-column 	width="90" 	text-align="center" 	header-text="직종"   data-field="jobTypeName" item-style-function="onStyleFontColor"></sc-data-column>
+				    <sc-data-column 	width="100" 	text-align="center" 	header-text="작업자명"   data-field="targetName" item-style-function="onStyleFontColor"></sc-data-column>
+				    <sc-data-column 	width="280" 	text-align="center" 	header-text="위치"   data-field="locationName" style-name="link" item-style-function="onItemStyleFunction"></sc-data-column>
+				    <sc-date-column 	width="100" 	text-align="center" 	header-text="수신시간" data-field="signalDt" display-format = "HH:mm:ss"></sc-date-column>
+				    <sc-data-column 	width="100" 	text-align="left" 		header-text="특이사항"   data-field="weakType" ></sc-data-column>
+				    <sc-data-column 	width="80" 	text-align="center" 		header-text="위험지수"   data-field="riskIdx" ></sc-data-column>
+				</sc-grid-columns>
+				<sc-grid-fields>
+<!-- 					<sc-grid-field data-field="iconImage"></sc-grid-field> -->
+<!-- 			        <sc-grid-field data-field="sensorId"></sc-grid-field> -->
+			        <sc-grid-field data-field="workerId"></sc-grid-field>
+					<sc-grid-field data-field="isMobileYn"></sc-grid-field>
+					<sc-grid-field data-field="condition"></sc-grid-field>
+<!-- 			        <sc-grid-field data-field="popup" data-type="object"></sc-grid-field> -->
+<!-- 			        <sc-grid-field data-field="geoJson" data-type="object"></sc-grid-field> -->
+				</sc-grid-fields>
+			</sc-grid>
+		</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "ep-sejong-worker-list",
+            properties:{
+            	titleText:{
+	                type: String,
+					value: "작업자 목록"
+				},
+				showIsMapping : {
+					type :Boolean,
+					value : function(){
+						return false;
+					}
+				},
+				workerList : {
+					type : Array,
+					value : function(){
+						return[];
+					}
+				},
+				smsInfo: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+    	        conditions : {
+                	type : Object,
+                	value : function(){
+                		return {
+                			"active" : "앱 작업중", 
+                			"inactive" : "작업종료",
+                			"unknown" : "알수없음"
+                		}
+                	}
+                }
+			},
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+			initialized : function(){
+				var me = this;
+			},
+			
+			load : function(workerList, value, target){
+				console.log(workerList);
+				
+				var me = this;
+				
+				workerList.forEach(function(el){
+					el.targetName = el.workerName;					
+				});
+				me.set('workerList', workerList);
+				if(value == null){
+					value = "전체 인원";
+				}
+				me.set('toolText', value);
+				me.set('target', target);
+				
+				if(target){
+					var index = me.$.gridWorkerPanel.searchItem("workerId", target.workerId);					
+					setTimeout(function(){
+						me.$.gridWorkerPanel.setCurrentCell({rowIndex:index.itemIndex});
+					}, 300);
+				}
+			},
+			
+			onImageChange: function(data, item){
+	            return '/ui/assets/img/marker/' +data.iconImage;
+			},
+			onStyleFontColor: function(data, item){
+				return (data.labelColor)?{fontColor: data.labelColor}:null;
+			},
+           	onItemClick : function(e){
+            	var me = this,
+           	    data = event.detail.data,
+           	    item = event.detail.item,
+           	    provider = event.detail.provider;
+            	
+				if (item.dataField == "sms") {
+					var smsPopup = UT.popup('ep-sms-send-selected', me, 400, 300, {}, {});
+					smsPopup.show();
+					smsPopup.getWindowContent().load(data);
+				}
+				
+				if (item.dataField == "locationName") {
+					if(data.positionId && data.isVehicle != "Y"){
+						UT.messageBox("작업자의 위치로 이동합니다.", function(id, text, type){
+							switch (id) {
+								case "지도" :   // id:'yes', text:'예', type:'yes'
+									me.getWindow().parent.searchWorker(data);
+									me.getWindow().close();
+									break;
+								case "3D" :   // id:'no', text:'아니오', type:'no'
+									me.getWindow().parent.searchWorker3D(data);
+									me.getWindow().close();
+									break;
+								default : 
+									break;
+							}
+			            }, false, {buttons:'지도,3D,cancel', titleText:"검색 유형", autoGrowMessageBox:true});
+						$("sc-messageBox").find(".content").css("text-align", "center").css("line-height", "59px");
+					}
+					else {
+						me.getWindow().parent.searchWorker(data);											
+						me.getWindow().close();
+					}
+				}
+           	},
+           	
+           	completeFindPhoneNumber : function(e,res){
+				var me =this;
+				
+				var smsDialog = me.$.smsDialog;
+				me.set("smsInfo.phoneNumber", res.response.phoneNumber);
+				smsDialog.show();
+				me.set("smsInfo.title", "");
+				me.set("smsInfo.body", "");
+			},
+			
+			onOk : function(){
+				var me = this;
+				UT.request(me.$.sendSms);
+				me.$.smsDialog.hide();
+				
+			},
+			onCancle : function(){
+				var me = this;
+				me.$.smsDialog.hide();
+			},
+			completeSendSms : function(e,res){
+				var me = this,
+					result = res.response;
+				
+				if(result.result_status === 'S'){
+	                UT.alert("전송에 성공하였습니다.", function(){ // 저장하였습니다.
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+			},
+            onSendSMSAll: function(event){
+            	var me = this;
+           	    var provider = me.$.gridWorkerPanel.getDataProvider();
+            	var data = provider.selectionCheckedItems();
+            	// sms 보내기 팝업 호출
+				var smsPopup = UT.popup('ep-sms-send-selected', me, 400, 300, {}, {});
+				smsPopup.show();
+				smsPopup.getWindowContent().load(data);
+            },
+            creationComplete : function(event){
+				var me = this;
+				var target = me.get("target");
+            },
+            
+            itemStateChanged : function(event){
+            	var me = this;
+            	var target = me.get("target");
+            },
+           	mobileImageChangeFunction : function (data, item){
+				if(data.isMobileYn == "Y"){
+					if (data.condition == 'active'){
+						return "/ui/lib/openlayers/img/mobile.png";
+					}
+					else if (data.condition == 'inactive'){
+						return "/ui/lib/openlayers/img/mobile_off.png";
+					}
+					else if (data.condition == 'unknown') {
+						return "/ui/lib/openlayers/img/mobile_unknown.png";
+					}
+				}else if(data.isMobileYn == "N"){
+					return "/ui/lib/openlayers/img/tag.png";
+				}
+			}, 
+			mobileImageLabelFunction : function(data,item){
+				if(data.isMobileYn == "Y"){
+					if (data.condition == 'active'){
+						return "앱 작업중";
+					}
+					else if (data.condition == 'inactive'){
+						return "앱 작업종료";
+					}
+					else if (data.condition == 'unknown'){
+						return "앱 상태 알 수 없음";
+					}
+				}
+				else if(data.isMobileYn == "N"){
+					return "스마트태그";
+				} else{
+					return "비관제인원";
+				}
+			},
+			mobileTooltipCallback : function(rowIndex, value, dataFieldName, rowData, displayValue){
+				var me = this;
+	        	if(rowData) {
+	                return '<span>' + me.mobileImageLabelFunction(rowData)+ '</span>';  
+	            }
+	        },
+	        onItemStyleFunction : function(data, item){
+	        	if(data.positionId && data.isVehicle != "Y"){
+	        		return {
+	                    fontColor : "#800080"
+	                   };
+	        	}
+	        }
+        });
+	</script>
+
+</dom-module>

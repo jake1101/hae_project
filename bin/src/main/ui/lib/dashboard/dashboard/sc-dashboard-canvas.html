@@ -1,0 +1,769 @@
+<link rel="import" href="../util/sc-behavior-coordinates.html"/>
+<link rel="import" href="../widget-container/widget-container.html"/>
+<link rel="import" href="../widget-factory/widget-factory.html"/>
+
+<dom-module id="sc-dashboard-canvas">
+    <template>
+        <style>
+            :host {
+                --grid-line-color: #e5e5e5;
+                --grid-size: 0px;
+                background-size: var(--grid-size-width) var(--grid-size-height);
+                background-image: repeating-linear-gradient(0deg, var(--grid-line-color), var(--grid-line-color) 1px, transparent 1px, transparent var(--grid-size-height)), repeating-linear-gradient(-90deg, var(--grid-line-color), var(--grid-line-color) 1px, transparent 1px, transparent var(--grid-size-width));
+            }
+
+        </style>
+        <sc-ajax id="saveDashboard" url="dashboard/saveDashboard.do" body="{{_widgetLayout}}"></sc-ajax>
+
+        <sc-ajax id="findDashboard"
+                 url="dashboard/findDashboardDetail.do"
+                 on-response="onFindDashboardComplete">
+        </sc-ajax>
+
+        <sc-toolbar id="dashboardTitleContainer" class="dashboardTitleContainer" style="width: 100%">
+            <sc-label id="dashboardTitle" text="{{dashboardInfo.dashboard_title}}"
+                      class="dashboardTitleLabel"></sc-label>
+        </sc-toolbar>
+        <div id="dashboardCanvas" style="position:relative">
+            <content></content>
+        </div>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'sc-dashboard-canvas',
+
+            behaviors: [
+                BehaviorCoordinates,
+                Polymer.SCResizableBehavior
+            ],
+
+            properties: {
+                dashboardInfo: {
+                    type: Object,
+                    value: function () {
+                        return {
+                            dashboard_title: 'Untitled Dashboard'
+                        }
+                    }
+                },
+                dashboardStyle: {
+                    type: Object,
+                    value: function () {
+                        return {};
+                    }
+                },
+                width: {
+                    type: String,
+                    value: '1000',
+                    observer: '_widthChanged'
+                },
+                height: {
+                    type: String,
+                    value: '600',
+                    observer: '_heightChanged'
+                },
+                gridSize: {
+                    type: Number,
+                    value: 20,
+                    observer: '_gridSizeChanged'
+                },
+                _gridWidth: {
+                    type: Number,
+                },
+                _gridHeight: {
+                    type: Number,
+                },
+                doScaleWidth: {
+                    type: Boolean,
+                    value: false
+                },
+                doScaleHeight: {
+                    type: Boolean,
+                    value: false
+                },
+                noSnappingPosition: {
+                    type: Boolean,
+                    value: false
+                },
+                noSnappingSize: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                },
+                auto: {
+                    type: Boolean,
+                    value: false
+                },
+                standardWidth: {
+                    type: Number,
+                    value: 1280
+                },
+                standardHeight: {
+                    type: Number,
+                    value: 800
+                },
+                pageId: Number,
+                _editMode: {
+                    type: Boolean,
+                    value: false
+                },
+                _maxZindex: {
+                    type: Number,
+                    value: 0,
+                },
+                _widgets: {
+                    type: Array,
+                    value: function () {
+                        return [];
+                    },
+                },
+                _userIdx: Number,
+                _widgetLayout: Object,
+                _importList: {
+                    type: Array,
+                    value: function () {
+                        return [];
+                    }
+                },
+                _selectedWidget: {
+                    type: Object,
+                    observer: '_onSelectedWidgetChanged'
+                },
+                widgetSettingMode: {
+                    type: Boolean,
+                    value: false
+                },
+                layout: {
+                    type: Object,
+                    value: {}
+                },
+                _previousOffsetWidth: Number,
+                _previousOffsetHeight: Number,
+                _gridMultipleOfWidth: Number,
+                _gridMultipleOfHeight: Number,
+                _toLayoutId: Number
+            },
+            ready: function () {
+                this.applyEvents();
+                this.loaded = false;
+            },
+
+            attached: function () {
+                var me = this;
+                if (me.doScaleWidth || me.doScaleHeight) {
+                    me.listen(me, 'sc-resize', '_onResize');
+                }
+                console.log(':aaaaa', me.doScaleWidth, me.doScaleHeight);
+                this.setScaleStandards();
+                this.fire("gp-potal-attached");
+                this.listen(me, 'scroll', '_onScrollHandler');
+            },
+            _onScrollHandler: function (event) {
+                var scrollLeft = event.target.scrollLeft;
+                var toolbar = this.$.dashboardTitleContainer;
+                if (scrollLeft > 0) {
+
+                    var width = this.getBoundingClientRect().width;
+                    var toolbarWidth = toolbar.getBoundingClientRect().width;
+
+                    if (toolbarWidth < width + scrollLeft) {
+                        toolbar.style.width = this.$.dashboardCanvas.scrollWidth + 'px'
+                    }
+                }
+            },
+            load: function (param) {
+                var me = this;
+                me._closeLayout();
+                me.resetData();
+                me.param = param;
+                if (param.sts == 'U') {
+                    me.$.findDashboard.body = param;
+                    UT.request(me.$.findDashboard);
+                } else {
+                    this.fire('dashboard-settings', {
+                        dashboardInfo: me.dashboardInfo,
+                        dashboardStyle: me.dashboardStyle
+                    });
+                    me.toggleEditMode();
+                }
+                me.loaded = true;
+
+            },
+            setScaleStandards: function () {
+                if (this.doScaleWidth) {
+                    this._gridMultipleOfWidth = this.gridSize / this.standardWidth;
+                    this._gridWidth = Math.round(this.parent.offsetWidth * this._gridMultipleOfWidth)
+                }
+
+                if (this.doScaleHeight) {
+                    this._gridMultipleOfHeight = this.gridSize / this.standardHeight;
+                    this._gridHeight = Math.round(this.parent.offsetHeight * this._gridMultipleOfHeight);
+                }
+            },
+
+            onFindDashboardComplete: function (e, res) {
+                var me = this;
+                var result = res.response;
+                var content = JSON.parse(result.dashboard_content);
+
+                me.layout = content.widgetList;
+                //me.dashboardInfo = result;
+                me.set('dashboardInfo.dashboard_id', result.dashboard_id);
+                me.set('dashboardInfo.dashboard_title', result.dashboard_title);
+                me.dashboardStyle = content.dashboardStyle;
+                for (var i = 0; i < me.layout.length; i++) {
+                    me.addWidget(me.layout[i], false);
+                }
+                //위젯에 스타일을 변경해줘야 하기떄문에 위젯을 생성한후에 스타일을 적용함.
+                me.setDashboardStyle(me.dashboardStyle);
+                me.auto = false;
+                this.fire('dashboard-settings', {
+                    dashboardInfo: me.dashboardInfo,
+                    dashboardStyle: me.dashboardStyle
+                });
+                me.toggleEditMode();
+            },
+
+            createColumn: function (colList) {
+                var parent = this.$.contentContainerCell;
+                var widths = [];
+
+                for (var i = 0; i < colList.length; i++) {
+                    var columnOuter = document.createElement('div');
+                    columnOuter.setAttribute('class', 'column');
+                    columnOuter.style.width = colList[i];
+
+                    var column = document.createElement('div');
+                    column.setAttribute('class', 'portlet');
+                    columnOuter.appendChild(column);
+                    Polymer.dom(parent).appendChild(columnOuter);
+                    widths.push(columnOuter.offsetLeft + columnOuter.getBoundingClientRect().width);
+                }
+            },
+
+            applyEvents: function () {
+                for (var i = 0; i < this.getContentChildren('content').length; i++) {
+                    var widget = this.getContentChildren('content')[i];
+                    this.applyEvent(widget);
+                }
+            },
+
+            applyEvent: function (widget) {
+                this.listen(widget, 'selected', 'onSelectedWidget');
+                this.listen(widget, 'drag', 'onDrag');
+                this.listen(widget, 'resize', 'onDrag');
+                this.listen(widget, 'widget-setting', 'onWidgetSetting');
+                this.listen(widget, 'widget-remove', 'onRemoveWidget');
+            },
+
+            onSelectedWidget: function (e) {
+                var me = this, widget = e.target;
+                me.set('_onSelectedWidget', widget);
+                me.selectWidget(widget);
+                widget.setZindex(++this._maxZindex);
+            },
+            _onSelectedWidgetChanged: function (widget, oldWidget) {
+                var me = this;
+                if (me._editMode === true) {
+                    if (oldWidget) {
+                        oldWidget.classList.remove('widget-selected');
+                    }
+                    widget.classList.add('widget-selected');
+                    me.fire('canvas-widget-selected', {
+                        widget: widget,
+                        widgetSettingMode: me.widgetSettingMode
+                    });
+                }
+            },
+
+            onDrag: function (e) {
+                var me = this, widgetInfo = {};
+                if (!e.target.disableMovement) {
+                    widget = e.target;
+                    if (e.detail.state == 'started') {
+                        me.selectWidget(widget);
+                    } else {
+                        widget.info.widget_content.widget_title = widget.getAttribute('widget_title');
+                        widget.info.widget_content.widget_width = Number(widget.getAttribute('width'));
+                        widget.info.widget_content.widget_height = Number(widget.getAttribute('height'));
+                        me.fire('widget-drag-end', {widgetInfo: widget.info.widget_content})
+                    }
+                }
+            },
+            onWidgetSetting: function (e, widget) {
+                this.fire('widget-setting', widget);
+                this.set('widgetSettingMode', true);
+            },
+            toggleGrid: function (show) {
+                this.customStyle['--grid-size-width'] = !show ? '0px' : this._gridWidth + 'px';
+                this.customStyle['--grid-size-height'] = !show ? '0px' : this._gridHeight + 'px';
+                this.updateStyles();
+            },
+
+            updateGrid: function () {
+                if (this._editMode) {
+                    this.customStyle['--grid-size-width'] = this._gridWidth + 'px';
+                    this.customStyle['--grid-size-height'] = this._gridHeight + 'px';
+                    this.updateStyles();
+                }
+            },
+            setOuterView: function (view) {
+                var me = this;
+                me.outerView = view;
+            },
+
+            addWidget: function (info, isNew) {
+                this.widgetApply(info, isNew)
+            },
+
+            widgetLayout: function (widget, isNew) {
+                var info = widget.info;
+                Polymer.dom(this).appendChild(widget);
+                widget.setZindex(info.zIndex ? info.zIndex : ++this._maxZindex);
+                Polymer.dom.flush();
+
+                this._maxZindex = this._maxZindex < Number(info.zIndex) ? info.zIndex : this._maxZindex;
+                if (!isNew) {
+                    info.x = info.x == null ? 0 : info.x;
+                    info.y = info.y == null ? 0 : info.y;
+                    var position = this.auto ? info : this.globalToLocal({
+                        x: info.x + this.scrollLeft,
+                        y: info.y + this.scrollTop
+                    });
+
+                    widget.x = position.x;
+                    widget.y = position.y;
+                }
+
+                if (this.doScaleWidth || this.doScaleHeight) {
+                    this.setWidgetScaleStandards(widget);
+                }
+
+                widget.snapWidget();
+                widget.snapSizeToGrid();
+
+                this.applyEvent(widget);
+                this.appendToWidgets(widget);
+                info.widget_content.headerHeight = widget.getHeaderHeight();
+                if (!isNew) {
+                    widget.contentResize();
+                }
+                if (this._editMode)
+                    widget.editMode = true;
+            },
+            widgetApply: function (info, isNew) {
+                var me = this;
+                var widget = me.createWidget(info);
+                me.widgetLayout(widget, isNew);
+                if (!isNew) {
+                    widget.contentResize();
+                }
+                return widget;
+            },
+            createWidget: function (info, isNew) {
+                var me = this,
+                    widget = document.createElement('widget-container'),
+                    widgetContent = info.widget_content;
+                widget.setDashboard(me);
+                uuid = info.UUID;
+                isNew = isNew || false;
+                widget.info = info;
+                if (isNew) {
+                    widgetContent.headable = 'Y';
+                    me.setWidgetStyle(widget)
+                } else {
+                    widget.dragAreaID = uuid;
+                }
+                widget.setHeaderVisible(widgetContent.headable == 'Y');
+                widget.setAttribute('id', uuid);
+                widget.setAttribute('widget_title', info.widget_title);
+                widget.setAttribute('width', widgetContent.widget_width);
+                widget.setAttribute('height', widgetContent.widget_height);
+                if (info.resizable.toString() != 'true')
+                    widget.setAttribute('disable-resizing', '');
+
+                if (info.draggable.toString() != 'true')
+                    widget.setAttribute('disable-movement', '');
+
+                if (info.closeable.toString() != 'true')
+                    widget.setAttribute('disable-close', '');
+
+                if (info.editable.toString() != 'true') {
+                    widget.setAttribute('disable-settings', '');
+                }
+
+                var content = me.createWidgetContent(widget, uuid, info, isNew);
+
+                return widget;
+
+            },
+            createWidgetContent: function (widget, uuid, info, isNew) {
+                var widgetContent = info.widget_content;
+                var widgetFactory = new WidgetFactory(widgetContent.widget_type);
+                var content = widgetFactory.getContent(widgetContent);
+                if (!isNew && info.widget_content.type === 'iframe') {
+                    content.refresh();
+                }
+                content.setAttribute('widget-id', uuid);
+                content.widgetID = uuid;
+                content.widgetType = info.widget_content.type;
+                content.isNew = isNew;
+                content.style.display = 'inline';
+                Polymer.dom(widget).appendChild(content);
+
+                widget.contentWidget = content;
+                return content;
+            },
+
+            appendToWidgets: function (widget) {
+                this.push('_widgets', widget);
+            },
+
+            setWidgetScaleStandards: function (widget) {
+                if (this.doScaleWidth) {
+                    widget._snapValueWidth = Math.round(this.parent.offsetWidth * this._gridMultipleOfWidth);
+                }
+
+                if (this.doScaleHeight) {
+                    widget._snapValueHeight = Math.round(this.parent.offsetHeight * this._gridMultipleOfHeight);
+                }
+            },
+
+            _widthChanged: function (value) {
+                this.style.width = value.indexOf('%') !== -1 ? value : value + 'px';
+            },
+
+            _heightChanged: function (value) {
+                this.style.height = value.indexOf('%') !== -1 ? value : value + 'px';
+            },
+
+            saveLayout: function () {
+                var me = this, widgetWidth, widgetHeight;
+                UT.confirm("STD.N1200", function () {
+                    if (me.doScaleWidth) {
+                        var gridWidth = Math.round(me.standardWidth * me._gridMultipleOfWidth);
+                        var prevGridWidth = me._gridWidth;
+                    }
+
+                    if (me.doScaleHeight) {
+                        var gridHeight = Math.round(me.standardHeight * me._gridMultipleOfHeight);
+                        var prevGridHeight = me._gridHeight;
+                    }
+
+                    var widgetList = [];
+                    for (var i = 0; i < me._widgets.length; i++) {
+                        var widget = me._widgets[i];
+                        var widgetData = {};
+                        widgetWidth = (widget.getAttribute('width') == 'NaN') ? widget.style.width.replace('px', '') : widget.getAttribute('width');
+                        widgetHeight = (widget.getAttribute('height') == 'NaN') ? widget.style.height.replace('px', '') : widget.getAttribute('height');
+                        if (me.doScaleWidth) {
+                            var cellX = widget.getAttribute('x') / prevGridWidth;
+                            var cellWidth = widgetWidth / prevGridWidth;
+
+                            widgetData['x'] = cellX * gridWidth;
+                            widgetData['width'] = cellWidth * gridWidth;
+                        } else {
+                            widgetData['x'] = widget.getAttribute('x');
+                            widgetData['width'] = widgetWidth;
+                        }
+
+                        if (me.doScaleHeight) {
+                            var cellY = widget.getAttribute('y') / prevGridHeight;
+                            var cellHeight = widgetHeight / prevGridHeight;
+
+                            widgetData['y'] = cellY * gridHeight;
+                            widgetData['height'] = cellHeight * gridHeight;
+                        } else {
+                            widgetData['y'] = widget.getAttribute('y');
+                            widgetData['height'] = widgetHeight;
+                        }
+
+                        widgetData['widget_title'] = widget.getAttribute('widget_title');
+                        widgetData['zIndex'] = widget.style.zIndex;
+                        widgetData['resizable'] = widget.getAttribute('disable-resizing') == '' ? false : true;
+                        widgetData['draggable'] = widget.getAttribute('disable-movement') == '' ? false : true;
+                        widgetData['closeable'] = widget.getAttribute('disable-close') == '' ? false : true;
+                        widgetData['editable'] = widget.getAttribute('disable-settings') == '' ? false : true;
+                        var tempData = widget.contentWidget.getWidgetTempalte();
+                        tempData.widget_width = widgetData['width'];
+                        tempData.widget_height = widgetData['height'];
+                        tempData.headable = widget.info.widget_content.headable;
+                        widgetData['widget_content'] = tempData;
+                        widgetList.push(widgetData);
+                    }
+
+                    var contents = {
+                        dashboardInfo: me.dashboardInfo,
+                        dashboardStyle: me.dashboardStyle,
+                        widgetList: widgetList
+
+                    }
+
+                    me._widgetLayout = {
+                        dashboard_title: me.dashboardInfo.dashboard_title,
+                        dashboard_content: JSON.stringify(contents),
+                    };
+                    if (me.param && me.param.dashboard_id != null) {
+                        me._widgetLayout.sts = 'U';
+                        me._widgetLayout.dashboard_id = me.param.dashboard_id;
+                    } else {
+                        me._widgetLayout.sts = 'C';
+                    }
+
+                    UT.request(me.$.saveDashboard, function () {
+                        UT.alert("STD.N2400");
+                        me.fire('dashboard-canvas-close');
+                    });
+
+                });
+
+            },
+
+            proportionWidget: function (widget) {
+                if (this.doScaleWidth) {
+                    this.scaleHorizontalAxis(widget, undefined, this.gridSize);
+                    this._previousOffsetWidth = this.standardWidth;
+                }
+
+                if (this.doScaleHeight) {
+                    this.scaleVerticalAxis(widget, undefined, this.gridSize);
+                    this._previousOffsetHeight = this.standardHeight;
+                }
+            },
+
+            _onResize: function (e) {
+                this.updateGrid();
+                this._previousOffsetWidth = this.parent.offsetWidth;
+                this._previousOffsetHeight = this.parent.offsetHeight;
+                this.$.dashboardTitleContainer.style.width = '100%';
+                /*  if (this.offsetChanged()) {
+
+                   var gridWidth;
+                   var gridHeight;
+                   var prevGridWidth;
+                   var prevGridHeight;
+                   var widget;
+
+                   if (this.doScaleWidth) {
+                       gridWidth = Math.round(this.parent.offsetWidth * this._gridMultipleOfWidth);
+                       gridWidth = gridWidth < 1 ? 1 : gridWidth;
+                       prevGridWidth = this._gridWidth;
+                   }
+
+                   if (this.doScaleHeight) {
+                       gridHeight = Math.round(this.parent.offsetHeight * this._gridMultipleOfHeight);
+                       gridHeight = gridHeight < 1 ? 1 : gridHeight;
+                       prevGridHeight = this._gridHeight;
+                   }
+
+                   for (var i = 0; i < this._widgets.length; i++) {
+                       widget = this._widgets[i];
+
+                       if (this.doScaleWidth) {
+                           this.scaleHorizontalAxis(widget, gridWidth, prevGridWidth);
+                       }
+
+                       if (this.doScaleHeight) {
+                           this.scaleVerticalAxis(widget, gridHeight, prevGridHeight);
+                       }
+                       widget.snapWidget();
+                       widget.snapSizeToGrid();
+                   }
+
+                   this.updateGrid();
+                   this._previousOffsetWidth = this.parent.offsetWidth;
+                   this._previousOffsetHeight = this.parent.offsetHeight;
+               }   */
+            },
+
+            offsetChanged: function () {
+                return this.parent.offsetWidth != this._previousOffsetWidth || this.parent.offsetHeight != this._previousOffsetHeight;
+            },
+
+            scaleHorizontalAxis: function (widget, gridWidth, prevGridWidth) {
+                gridWidth = gridWidth == undefined || !gridWidth ? Math.round(this.parent.offsetWidth * this._gridMultipleOfWidth) : gridWidth;
+                prevGridWidth = prevGridWidth == undefined || !prevGridWidth ? this._gridWidth : prevGridWidth;
+
+                var cellX = widget.x / prevGridWidth;
+                var cellWidth = widget.width / prevGridWidth;
+
+                widget._snapValueWidth = this._gridWidth = gridWidth;
+
+                widget.x = cellX * this._gridWidth;
+                widget.width = cellWidth * this._gridWidth;
+            },
+
+            scaleVerticalAxis: function (widget, gridHeight, prevGridHeight) {
+                gridHeight = gridHeight == undefined || !gridHeight ? Math.round(this.parent.offsetHeight * this._gridMultipleOfHeight) : gridHeight;
+                prevGridHeight = prevGridHeight == undefined || !prevGridHeight ? this._gridHeight : prevGridHeight;
+
+                var cellY = widget.y / prevGridHeight;
+                var cellHeight = widget.height / prevGridHeight;
+
+                widget._snapValueHeight = this._gridHeight = gridHeight;
+
+                widget.y = cellY * this._gridHeight;
+                widget.height = cellHeight * this._gridHeight;
+            },
+
+            _gridSizeChanged: function (value) {
+                this._gridWidth = this._gridHeight = value;
+            },
+
+            toggleEditMode: function () {
+                var me = this, widget;
+                me.toggleGrid(me._editMode);
+
+                for (var i = 0; i < me._widgets.length; i++) {
+                    widget = me._widgets[i];
+                    widget.editMode = me._editMode;
+                }
+
+                if (me._editMode == false) {
+                    //선택된 위젯의 스타일 초기화
+                    if (me._selectedWidget) {
+                        me._selectedWidget.classList.remove('widget-selected');
+                    }
+                }
+            },
+            onRemoveWidget: function (e, param) {
+                var me = this, widgetIndex;
+                var widget = e.target;
+                if ((widgetIndex = me._widgets.indexOf(widget)) > -1) {
+                    me._widgets.splice(widgetIndex, 1);
+                }
+                me.removeWidget(widget);
+            },
+
+
+            removeWidget: function (widget) {
+                var me = this;
+
+                me.unlisten(widget, 'selected', 'onSelectedWidget');
+                me.unlisten(widget, 'drag', 'onDrag');
+                me.unlisten(widget, 'resize', 'onDrag');
+                me.unlisten(widget, 'widget-setting', 'onWidgetSetting');
+                me.unlisten(widget, 'widget-remove', 'onRemoveWidget');
+
+                Polymer.dom(me).removeChild(widget);
+                Polymer.dom.flush();
+            },
+
+            _closeLayout: function () {
+                var widget;
+
+                for (var i = 0; i < this._widgets.length; i++) {
+                    widget = this._widgets[i];
+                    this.removeWidget(widget);
+                }
+                this._widgets = [];
+                Polymer.dom.flush();
+            },
+
+            refreshWidgets: function () {
+                var i;
+                var widget;
+
+                for (i = 0; i < this._widgets.length; i++) {
+                    widget = this._widgets[i];
+                    widget.refresh();
+                }
+            },
+
+            detached: function () {
+                var widget;
+
+                for (var i = 0; i < this._widgets.length; i++) {
+                    widget = this._widgets[i];
+                    this.unlisten(widget, 'selected', 'selecteWidget');
+                    this.unlisten(widget, 'drag', 'onDrag');
+                    this.unlisten(widget, 'resize', 'onDrag');
+                }
+
+                if (this.doScaleWidth || this.doScaleHeight) {
+                    this.unlisten(this, 'sc-resize', '_onResize');
+                }
+                this.unlisten(this, 'scroll', '_onScrollHandler');
+            },
+            onDashboardSettingClick: function () {
+                var me = this;
+                this.fire('dashboard-settings', {
+                    dashboardInfo: me.dashboardInfo,
+                    dashboardStyle: me.dashboardStyle
+                });
+            },
+            setDashboardInfo: function (dashboardInfo) {
+                for (var key in dashboardInfo) {
+                    this.set('dashboardInfo.' + key, dashboardInfo[key]);
+                }
+
+            },
+            setDashboardStyle: function (dashboardStyle) {
+                var me = this, widget;
+                for (var key in dashboardStyle) {
+                    me.dashboardStyle[key] = dashboardStyle[key];
+                }
+                me.$.dashboardTitleContainer.style.backgroundColor = dashboardStyle.headerBackgroundColor;
+                me.$.dashboardTitle.style.color = dashboardStyle.headerFontColor;
+                if (dashboardStyle.widgetBackgroundColor || dashboardStyle.widgetFontColor) {
+                    var widgets = me._widgets,
+                        len = widgets.length;
+                    for (var i = 0; i < len; i++) {
+                        widget = widgets[i];
+                        me.setWidgetStyle(widget);
+                    }
+                }
+            },
+
+            setWidgetStyle: function (widget) {
+                var dashboardStyle = this.dashboardStyle;
+                widget.querySelector('#titleBar').style.backgroundColor = dashboardStyle.widgetBackgroundColor || widget.defaultStyle.headerBackgroundColor;
+                widget.querySelector('#widgetTitleText').style.color = dashboardStyle.widgetFontColor || widget.defaultStyle.headerFontColor;
+            },
+            selectWidget: function (widget) {
+                this._selectedWidget = widget;
+            },
+            widgetRedraw: function (widgetInfo) {
+                var me = this, widget = me._selectedWidget;
+                widget.info.widget_content = widgetInfo;
+                widget.setAttribute('widget_title', widgetInfo.widget_title);
+                widget.setAttribute('width', widgetInfo.widget_width);
+                widget.setAttribute('height', widgetInfo.widget_height);
+                widget.setHeaderVisible((widgetInfo.headable === 'Y'));
+                widget.info.widget_content.headerHeight = widget.getHeaderHeight();
+                widget.contentResize();
+                if (widgetInfo.isRefresh) {
+                    widget.refresh();
+                }
+            },
+            resetData: function () {
+                var me = this;
+                me._closeLayout();
+                me._maxZindex = 0;
+                me.layout = [];
+                me._gridWidth = 9;
+                me.auto = true;
+                me.param = {};
+                me.dashboardStyle = {
+                    headerBackgroundColor: '#2e3a46',
+                    headerFontColor: '#ffffff',
+                    widgetBackgroundColor: '#f7f7f7',
+                    widgetFontColor: '#000'
+                };
+                me.setDashboardStyle(me.dashboardStyle);
+                me.set('dashboardInfo', {});
+                me.set('dashboardInfo.dashboard_title', 'Untitled Dashboard');
+                me.set('dashboardStyle', {});
+            },
+
+            get parent() {
+                if (this.parentNode.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+                    return this.parentNode.host;
+                }
+                return this.parentNode;
+            }
+        })
+    </script>
+</dom-module>

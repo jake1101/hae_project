@@ -1,0 +1,32 @@
+<!--
+ * @Desc 달력 위젯
+ * @Author jhkim
+ * @Created 2021-02-25
+ -->
+<sc-link rel="stylesheet" type="text/css" href="../css/style_portlet.css"/>
+
+<dom-module id="sc-calendar-widget">
+    <template>
+        <style>
+            :host {
+                @apply(--vbox-layout);
+                overflow: hidden !important;
+            }
+        </style>
+        <div>
+        	<sc-date-chooser today-hidden=true first-day-of-week="1" class="widgetCal flex"></sc-date-chooser>
+        </div>
+    </template>
+    
+    <script>
+        Polymer({
+            is: "sc-calendar-widget",
+            listeners: {
+                'refresh-widget': 'onClickRefresh'
+            },
+            onClickRefresh : function() {
+            	this.querySelector('sc-date-chooser')._doCalendarTap(new Date());
+            }
+        });
+    </script>
+</dom-module>

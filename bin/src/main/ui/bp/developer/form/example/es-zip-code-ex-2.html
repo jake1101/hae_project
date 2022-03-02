@@ -1,0 +1,49 @@
+<!-- 
+
+## 영문 주소 입력
+
+폼의 제한 없이 주소를 입력받을  수 있는 예제입니다. 
+
+자세한 사항은 [sc-component docs](/bower_components/starter-kit/index.html#!/docs/sc-component&sc-text-field)를 참고하시기 바랍니다.
+
+ -->
+
+<dom-module id="es-zip-code-ex-2">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+    <template>
+        <table class="tb-form">
+            <tr>
+                <td>
+                    <sc-text-field value="{{baseInfo.dtl_addr_en}}" max-length="128"></sc-text-field>
+                </td>
+            </tr>
+        </table>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-zip-code-ex-2',
+            properties:{
+                baseInfo: {
+                    type: Object,
+                    value : function(){
+                        return {};
+                    }
+                }
+            },
+            
+            setValue: function() {
+            	var me = this;
+            	
+            	me.set("baseInfo.dtl_addr_en", "주소입력");
+            }
+		});
+	</script>
+
+</dom-module>

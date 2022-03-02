@@ -1,0 +1,173 @@
+<link rel="import" href="../common/ep-preview-element.html">
+
+<dom-module id="es-layout-item">
+    <template>
+	    <style>
+	    	:host {
+	            display:table-row;
+	        }
+	        
+	        .th, .td {
+				display: table-cell;        
+				border:1px solid #C2C2C2;
+				vertical-align:middle; 
+				text-align:left;
+	        	height: 28px;
+			}
+			
+			.td > * {
+				vertical-align:middle; 
+			}
+			
+			.th {
+				background:#fafbfc; 
+				padding:0 10px;	
+				word-break: break-all;	
+			}
+			
+			.td {
+				padding:3px;
+				overflow: auto;
+			}
+	        
+	        .th {
+	        	width: 200px;
+	        }
+	        
+	        .td {
+				padding: 0 5px;
+	        }
+			
+			#element {
+				cursor: pointer;
+			}
+			
+			#element:hover {
+				color: #ea6363;
+			}
+			
+			#title-wrapper {
+				float: left;
+			}
+			
+			#docs-wrapper {
+				float: right;
+			}
+			
+			#docs {
+				text-align: right;
+			}
+		</style>
+	
+	    <sc-ajax
+	    	id="getSourceText"
+	        url="{{htmlTarget}}"
+	        method = "GET"
+	        handle-as = "text"
+	        on-response="_onPopupElement"></sc-ajax>
+	        <!-- context-type = "application/json" -->
+	        
+            <div class="th">
+				<div id="title">
+			    	<div id="title-wrapper"><sc-label id="element" text="[[title]]" on-click="_popupReady"></sc-label></div>
+					<div id="docs-wrapper"><sc-label id="docs" on-click="_onLoadDocs" bullet-cls="icon bullet-docs" hidden="true"></sc-label></div>
+				</div>
+			</div>
+            <div class="td">
+                <div id="content" class=""></div>
+            </div>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-layout-item',
+            properties:{
+				title: String,
+				docs: String,
+				target: String,
+				htmlTarget: {
+					type: String,
+					computed: '_changeRequestUrl(target)'
+				}
+            },
+            
+            _changeRequestUrl: function(target) {
+            	return 'ui/bp/developer/form/example/' + target + '.html';
+            },
+            
+    		/**
+    		 * docs 존재한다면 icon 활성화
+    		 */	
+            ready: function() {
+            	if(this.docs) {
+            		this.toggleAttribute('hidden', false, this.$.docs);	
+            	}
+            	if(this.target) {
+            		var target = document.createElement(this.target);
+            		target.id = "target";
+            		
+            		Polymer.dom(this.$.content).appendChild(target);
+            	}
+            },
+            
+            /**
+    		 * Target의 setValue 함수 호출
+    		 */	
+            setValue: function() {
+            	var target = this.$$('#target');
+            	
+            	if(target && target.setValue) {
+            		target.setValue();
+            	}
+            },
+            
+            /**
+    		 * Target의 removeValue 함수 호출
+    		 */	
+            removeValue: function() {
+            	var target = this.$$('#target');
+            	
+            	if(target && target.removeValue) {
+            		target.removeValue();
+            	}
+            },
+            
+            /**
+    		 * 해당 sc-component의 docs로 이동
+    		 */	
+            _onLoadDocs: function() {
+            	var me = this;
+            	var url = window.location.origin + "/bower_components/starter-kit/index.html#!/docs/sc-component&" + me.docs;
+            	
+            	UT.popupJsp(url, null, 900, 800, {},{maximizable: true, titleText: "[sc-component docs] " + me.docs});
+            },
+            
+            /**
+    		 * 소스 가져오기
+    		 */	
+            _popupReady: function() {
+            	var me = this;
+            	UT.promise([me.$.getSourceText]);
+            },
+            
+            /**
+    		 * 상세 팝업, 소스 가져오고 Callback
+    		 */
+            _onPopupElement: function(e, res) {
+            	var me = this;
+            	
+            	UT.popup("ep-preview-element", me, 900, 800, {
+            		"get-element": function(popup, e) {
+                        popup.getContent().setParam({
+                        	
+                        	source: res.response.replace(/[ ]{4}/g,"	"), //change 4 spaces to tabs in Response HTML
+                        	target: me.target
+                        });
+                    }    
+                },
+                {maximizable: true, titleText: me.title});
+            }
+		});
+	</script>
+
+</dom-module>

@@ -1,0 +1,113 @@
+<sc-link rel="import" href="es-sliding-listbox.html"></sc-link>
+<sc-link rel="import" href="es-sliding-listbox2.html"></sc-link>
+<sc-link rel="import" href="es-sliding-listbox-sample.html"></sc-link>
+<sc-link rel="import" href="es-sliding-listbox-with-attachment.html"></sc-link>
+<sc-link rel="import" href="../shared/es-source-viewer.html"></sc-link>
+
+<dom-module id="em-sliding-listbox">
+	<style>
+		:host {
+			@apply(--hbox-layout);
+			width: 100%;
+			height: 100%;
+		}
+	</style>
+	<template>
+		<sc-tab-navigation id="tabNavi"  class="flex">
+			<es-sliding-listbox title="가로 슬라이드" style="display:flex" data="{{data}}"></es-sliding-listbox>
+			<es-sliding-listbox2 title="세로 슬라이드" style="display:flex" data="{{data}}"></es-sliding-listbox2>
+			<es-sliding-listbox-sample title="기타 예제" data="{{data}}"></es-sliding-listbox-sample>
+			<es-sliding-listbox-with-attachment title="첨부파일을 가져와 표시"></es-sliding-listbox-with-attachment>
+		</sc-tab-navigation>
+	</template>
+	<script>
+		Polymer({
+			is: 'em-sliding-listbox',
+			
+			properties : {
+				/**
+				 * 입력할 데이터
+				 */
+				data: {
+					type: Object,
+					value: function() {
+						return [
+							{
+								name: '레드불 이미지',
+								data: 'ui/bp/developer/imagelist/images/1.jpg',
+								desc: '레드불 고해상도 이미지.',
+								hashTag: '#레드불#음료'
+							},
+							{
+								name: '자연풍경',
+								data: 'ui/bp/developer/imagelist/images/2.jpg',
+								desc: '자연풍경 고해상도 이미지.',
+								hashTag: '#호수'
+							},
+							{
+								name: '밤풍경',
+								data: 'ui/bp/developer/imagelist/images/3.jpg',
+								desc: '밤풍경 이미지',
+								hashTag: '#밤풍경'
+							},
+							{
+								name: '트럭',
+								data: 'ui/bp/developer/imagelist/images/4.jpg',
+								desc: '메르세데스 벤츠 트럭',
+								hashTag: '#고가#트럭'
+							},
+							{
+								name: '카탈로그',
+								data: 'ui/bp/developer/imagelist/images/5.png',
+								desc: '카탈로그 이미지',
+								hashTag: '#카탈로그'
+							},
+							{
+								name: '카탈로그2',
+								data: 'ui/bp/developer/imagelist/images/6.jpg',
+								desc: '카탈로그 두번째',
+								hashTag: '#카탈로그'
+							},
+							{
+								name: '안내',
+								data: 'ui/bp/developer/imagelist/images/7.jpg',
+								desc: '안내 이미지',
+								hashTag: '#안내'
+							},
+							{
+								name: '안내서',
+								data: 'ui/bp/developer/imagelist/images/8.jpg',
+								desc: '안내서 이미지',
+								hashTag: '#안내서'
+							},
+							{
+								name: '과정도',
+								data: 'ui/bp/developer/imagelist/images/9.png',
+								desc: '과정에 대한 이미지',
+								hashTag: '#과정'
+							},
+							{
+								name: '책자',
+								data: 'ui/bp/developer/imagelist/images/10.jpg',
+								desc: '책자 이미지',
+								hashTag: '#책자'
+							},
+							{
+								name: '카탈로그 3',
+								data: 'ui/bp/developer/imagelist/images/11.jpg',
+								desc: '세번째 카탈로그 이미지',
+								hashTag: '#카탈로그'
+							},
+							{
+								name: '팜플렛',
+								data: 'ui/bp/developer/imagelist/images/12.jpg',
+								desc: '팜플렛 이미지',
+								hashTag: '#팜플렛'
+							}
+						];
+					}
+				}
+			}
+		});
+	</script>
+</dom-module>

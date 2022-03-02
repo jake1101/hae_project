@@ -1,0 +1,395 @@
+<dom-module id="es-board-list">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 게시판 목록
+        ** @Description		:
+        ** @Author 			: jeKim
+        ** @Create Date 	: 2016.03.18
+        ** @History 		: 2016.03.18 jeKim 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		<!-- 게시판 정보 조회 -->
+		<sc-ajax id="findBoardInfo"
+				 url="findBoardInfo.do"
+				 body="{{infoSearchParam}}"
+				 last-response="{{boardAdminDatas}}"
+				 on-response="completeFindBoardInfo">
+		</sc-ajax>
+
+		<!-- 삭제 -->
+		<sc-ajax id="deleteListBoard"
+				 url="deleteListBoard.do"
+				 on-response="completeDeleteListBoard">
+		</sc-ajax>
+
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<cc-page-title-bar title-text="{{boardAdminDatas.boardAdminInfo.board_disp_nm}}"></cc-page-title-bar>
+
+		<cc-search-container on-search="onSearch" auth-r>
+			<table>
+				<colgroup>
+					<col style="width:120px">
+					<col>
+					<col style="width:120px">
+					<col>
+				</colgroup>
+				<tr>
+					<th>
+						<sc-label text="제목"></sc-label>
+					</th>
+					<td>
+						<sc-text-field value="{{searchParam.post_tit}}" on-enter="onSearch" max-length="100"></sc-text-field>
+					</td>
+					<th>
+						<sc-label text="내용"></sc-label>
+					</th>
+					<td>
+						<sc-text-field value="{{searchParam.post_cont}}" on-enter="onSearch" max-length="100"></sc-text-field>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<sc-label text="제목+내용"></sc-label>
+					</th>
+					<td>
+						<sc-text-field value="{{searchParam.post_tit_cont}}" on-enter="onSearch" max-length="100"></sc-text-field>
+					</td>
+					<th>
+						<sc-label text="작성자"></sc-label>
+					</th>
+					<td>
+						<sc-text-field value="{{searchParam.reg_nm}}" on-enter="onSearch" max-length="100"></sc-text-field>
+					</td>
+				</tr>
+			</table>
+		</cc-search-container>
+
+		<sc-grid id="gridPanel" class="flex" data-provider="{{resultList}}"
+				 on-item-click="onItemClick" row-style-function="onRowStyle" use-selection="[[formula('isAdmin')]]" use-state="false">
+			<cc-grid-toolbar>
+				<sc-button text="작성" hidden="[[!formula('isWritable')]]" on-click="onAddBoard" auth-s></sc-button>
+				<sc-button text="삭제" hidden="[[!formula('isAdmin')]]" on-click="onDeleteBoard" auth-s></sc-button>
+			</cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-data-column data-field="post_tit" header-text="게시물제목" width="450" text-align="left" style-name="link" item-label-function="onLabel" item-style-function="onStyle"></sc-data-column>
+				<sc-data-column data-field="reg_nm" header-text="등록자명" width="150" text-align="center" visible="[[formula('isRegNmDisp')]]"></sc-data-column>
+				<sc-date-column data-field="reg_dt" header-text="등록일시" width="180" text-align="center" visible="[[formula('isRegDtDisp')]]" display-format="yyyy/MM/dd HH:mm:ss"></sc-date-column>
+				<sc-data-column data-field="view_cnt" header-text="조회수" width="100" text-align="right" visible="[[formula('isCntDisp')]]" data-type="number" format-type="number"></sc-data-column>
+				<sc-attachment-column data-field="attfile_cnt" header-text="첨부" width="90" text-align="center" visible="[[formula('isAttDisp')]]" shared-group-field="attfile_no"></sc-attachment-column>
+			</sc-grid-columns>
+			<sc-grid-paging id="findBoardList"
+							url="findBoardList.do"
+							body="{{searchParam}}"
+							on-response="completeFindBoardList"
+							page-size-items="30, 50, 100, 200, 300"
+							default-page-index="0">
+			</sc-grid-paging>
+
+		</sc-grid>
+
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-board-list",
+            properties : {
+                // 게시판 정보 조회조건
+                infoSearchParam: {
+                    type : Object,
+                    value : function(){
+                        return {};
+                    }
+                },
+
+                // 게시판 정보 조회결과
+                boardAdminDatas : {
+                    type: Object,
+                    value : function(){
+                        return {
+                            // 게시판 list
+                            boardAdminList : {},
+
+                            // 게시판 정보
+                            boardAdminInfo : {},
+
+                            // 관리자 여부
+                            boardAdminYn : {},
+
+                            // 게시판 롤
+                            boardAdminRole : {}
+                        };
+                    }
+                },
+
+                // 게시글 목록 조회조건
+                searchParam : {
+                    type : Object,
+                    value : function() {
+                        return {};
+                    }
+                },
+
+                // 게시글 목록 조회결과
+                resultList: {
+                    type : Array,
+                    value : function() {
+                        return [];
+                    }
+                }
+
+            },
+
+            formulas : {
+                // 관리자 상태
+                isAdmin: function() {
+                    return	this.boardAdminDatas.boardAdminYn.admin_yn === "Y";
+                },
+                // 쓰기권한 상태
+                isWritable: function() {
+                    return (this.formula('isAdmin') || this.boardAdminDatas.boardAdminInfo.role_apply_yn === "N" || this.boardAdminDatas.boardAdminRole.wrt_yn === "Y");
+                },
+                // 조회권한 상태
+                isViewable: function() {
+                    return (this.formula('isAdmin') || this.boardAdminDatas.boardAdminInfo.role_apply_yn === "N" || this.boardAdminDatas.boardAdminRole.view_yn === "Y");
+                },
+                // 등록자명 보이기 여부
+                isRegNmDisp: function() {
+                    return this.boardAdminDatas.boardAdminInfo.reg_nm_disp_yn === "Y"
+                },
+                // 등록일시 보이기 여부
+                isRegDtDisp: function() {
+                    return this.boardAdminDatas.boardAdminInfo.reg_dt_disp_yn === "Y"
+                },
+                // 조회수 보이기 여부
+                isCntDisp: function() {
+                    return this.boardAdminDatas.boardAdminInfo.view_cnt_disp_yn === "Y"
+                },
+                // 첨부 보이기 여부
+                isAttDisp: function() {
+                    return this.boardAdminDatas.boardAdminInfo.att_disp_yn === "Y"
+                }
+
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            load:function(data) {
+                var me = this;
+                me.onSearch(data);
+            },
+
+            /******************************
+             * 그리드 이벤트
+             ******************************/
+            // 그리드 cell click 이벤트
+            onItemClick: function(event) {
+                var me = this,
+                    data = event.detail.data,
+                    item = event.detail.item;
+
+                if(item.dataField === "post_tit"){
+                    if(!me.formula("isViewable")) {
+                        UT.alert("STD.BRD1001");	//조회 권한이 없습니다.
+                        return;
+                    }
+
+                    if(data.secrt_yn === "Y" && (SCSessionManager.currentUser.usr_id !== data.org_reg_id) && !me.formula('isAdmin')) {
+                        UT.alert("STD.BRD1002");	//비밀글인 경우 작성자 또는 관리자만 조회 가능합니다.
+                        return;
+                    } else {
+                        var param = {
+                            boardAdminInfo: me.get("boardAdminDatas.boardAdminInfo"),
+                            boardAdminYn: me.get("boardAdminDatas.boardAdminYn"),
+                            boardAdminRole: me.get("boardAdminDatas.boardAdminRole"),
+                            searchParam: data
+                        };
+                        me.fire("show-board-detail", param);
+                    }
+                }
+            },
+
+            // 공지 label 추가
+            onLabel : function(data, item) {
+                var me = this;
+                if(data.noti_yn === "Y") {
+                    var val = me.translate("[공지]");
+                    val += data.post_tit;
+                    return val;
+                }
+                return data.post_tit;
+            },
+
+            // 로우 별 스타일
+            onRowStyle : function(data) {
+                if(data.noti_yn === "Y") {
+                    return {
+                        "background": "#E0E0E0" // 공지 글 로우 색상 변경
+                    }
+                } else {
+                    return {
+                        "background": '#ffffff' // 기본 색상
+                    }
+                }
+
+            },
+
+            // 스타일
+            onStyle : function(data, item) {
+                var styleObj = {};
+
+                var postLvl = parseInt(data.post_lvl);
+                if(postLvl > 1) {
+                    styleObj.iconUrl = "img/icon_re.gif";
+                    styleObj.paddingLeft = (postLvl - 1) * 10;
+                } else if(data.secrt_yn === "Y") {
+                    styleObj.iconUrl = "img/icon_lock.png";
+                }
+                return  styleObj;
+            },
+
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+            // 게시판 정보 조회
+            onSearch : function(data){
+                var me = this;
+                // 다음의 값이 아닐 경우 true(null, undefined, NaN, empty string (""), 0, false)
+                if(data && data.board_id){
+                    me.set("infoSearchParam.board_id", data.board_id);
+                }
+                if(data && data.post_no){
+                    me.set("infoSearchParam.post_no",data.post_no);
+                }
+                UT.request(me.$.findBoardInfo);
+            },
+
+            // 게시판 정보 조회 완료
+            completeFindBoardInfo: function(e, res){
+                var me = this,
+                    boardAdminInfo = me.get("boardAdminDatas.boardAdminInfo");
+
+                if(res.response.result_status === 'E') {
+                    UT.alert(res.response.result_message);
+                    return;
+				}
+
+                // 그리드 컬럼 보이기/숨김 처리 & 게시판 롤 체크
+                me.applyFormula();
+
+                me.set("searchParam.board_id", me.infoSearchParam.board_id);
+                // 게시글 목록 페이징 조회
+                me.$.findBoardList.request();
+
+            },
+
+            // 게시글 목록 페이징 조회 완료
+            completeFindBoardList: function(e, res) {
+                var me = this;
+                me.resultList = res;
+
+                //post_no가 있는경우 상세조회 바로
+                if(UT.isNotEmpty(me.get("infoSearchParam.post_no"))){
+                    var param = {
+                        boardAdminInfo: me.get("boardAdminDatas.boardAdminInfo"),
+                        boardAdminYn: me.get("boardAdminDatas.boardAdminYn"),
+                        boardAdminRole: me.get("boardAdminDatas.boardAdminRole"),
+                        searchParam: {post_no: me.get("infoSearchParam.post_no")}
+                    };
+                    var copyParam = UT.copy(param);
+                    me.reset();
+                    me.fire("show-board-detail", copyParam);
+                }
+            },
+
+            // 글쓰기
+            onAddBoard : function(){
+                var me = this,
+                    boardAdminDatas = me.get("boardAdminDatas");
+
+                var param = {
+                    // 게시판 정보
+                    boardAdminInfo : boardAdminDatas.boardAdminInfo,
+                    // 관리자 여부
+                    boardAdminYn : boardAdminDatas.boardAdminYn,
+                    // 게시판 롤
+                    boardAdminRole : boardAdminDatas.boardAdminRole
+                };
+
+                me.fire("show-board-detail", param);
+            },
+
+            // 삭제
+            onDeleteBoard : function(){
+                var me = this,
+                    provider = me.$.gridPanel.getDataProvider(),
+                    checked = provider.selectionCheckedIndexes(),
+                    message = "STD.N1300"; // "삭제 하시겠습니까?"
+
+                if (checked.length === 0) {
+                    UT.alert("STD.N1600");
+                    return;
+                }
+
+                UT.confirm(message, function() {
+                    var deleted = provider.removeItems();
+                    if(deleted.length > 0){
+                        me.$.deleteListBoard.body = {
+                            deleteList: deleted
+                        };
+                        UT.request(me.$.deleteListBoard);
+                    }
+                });
+
+
+            },
+
+            // 삭제 후 callBack
+            completeDeleteListBoard :function(e, res){
+                var me = this,
+                    message = "STD.N2500"; // 삭제하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                        me.onSearch();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+
+            },
+
+            // 닫기
+            onClose: function(){
+                var me = this;
+                me.fire('show-boardadmin');
+            }
+
+        });
+	</script>
+
+</dom-module>

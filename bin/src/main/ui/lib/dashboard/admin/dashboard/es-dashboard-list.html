@@ -1,0 +1,165 @@
+<dom-module id="es-dashboard-list">
+    <style>
+	    :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    
+    <sc-ajax id="findDashboardList"
+			 url="dashboard/findDashboardList.do"
+			 body="{{searchParam}}"
+			 last-response="{{dashboardList}}">
+	</sc-ajax>
+	
+	<sc-ajax id="deleteDashboards"
+			 url="dashboard/deleteDashboards.do">
+	</sc-ajax>
+	
+	<sc-ajax id="updateDashboardCode"
+			 url="updateDashboardCode.do">
+	</sc-ajax>
+    
+    <cc-page-title-bar></cc-page-title-bar>
+    	<cc-search-container on-search="onDashboardSearch" auth-r>
+			<table>
+				<colgroup>
+					<col style="width:120px"/>
+					<col></col>
+					<col style="width:120px"/>
+					<col></col>
+					<col style="width:120px"/>
+					<col></col>
+				</colgroup>
+				<tr>
+					<th>
+						<sc-label text="Dashboard제목" ></sc-label>
+					</th>
+					<td>
+						<sc-text-field  value="{{searchParam.dashboard_title}}" on-enter="onDashboardSearch"></sc-text-field>
+					</td>
+				</tr>
+			</table>
+		</cc-search-container>
+    
+   		<sc-grid id="dashboardGridPanel" data-provider="{{dashboardList}}" class="flex"
+				 on-item-click="onItemClick" editable="true">
+			<cc-grid-toolbar>
+				<sc-button text="대시보드 생성"  on-click="onShowDashboardCreate"></sc-button>
+				<sc-button text="대시보드 코드저장"  on-click="onSaveDashboard"></sc-button>
+				<sc-button text="삭제"            on-click="onDeleteDashboard"></sc-button>
+			</cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-data-column data-field="dashboard_title" header-text="타이틀" width="250" text-align="left" style-name="link"></sc-data-column>
+				<sc-data-column data-field="dashboard_code" header-text="대시보드 코드" width="120" text-align="center" editable="true" max-length="18"></sc-data-column>
+			</sc-grid-columns>
+		</sc-grid>
+    </template>
+    <script>
+        Polymer({
+            is: "es-dashboard-list",
+
+            properties: {
+            	dashboardList : {
+            		type: Array
+            	},
+            	searchParam :{
+            		type: Object,
+            		value: function(){
+                        return {};
+                    }
+            	}
+            },  
+            listeners : {
+            	
+    		},
+    		load: function(){
+    			var me = this;
+    			me.onDashboardSearch();
+    		},
+    		onDashboardSearch: function(){
+    			var me = this;
+    			UT.request(me.$.findDashboardList);
+    		},
+    		
+    		onShowDashboardCreate: function(){
+    			var me = this,
+    			    param = {sts : 'C'};
+    			me.fire('show-dashboard-detail',param);
+    		},
+    		
+    		onDeleteDashboard: function(){
+    			var me = this,
+    			    provider = me.$.dashboardGridPanel.getDataProvider();
+    			
+    			var removeItems = provider.removeItems();
+    			if(removeItems.length > 0){
+    				UT.confirm("STD.N1300", function() {
+	    				var ids = removeItems.map(function(data){
+	        				return data.dashboard_id
+	        			});
+	        			me.$.deleteDashboards.body = {dashboard_ids :ids};
+	        			UT.request(me.$.deleteDashboards, function(){
+	        				UT.alert("STD.N2500");
+	        				me.onDashboardSearch();
+	        			});	
+    				});
+    			}else{
+    				UT.alert("N1600");
+    			}
+    		},
+    		
+    		onItemClick : function(e){
+    			var me = this,
+    			    detail = event.detail,
+	  				data = detail.data,
+	  				item = detail.item;
+    			if(item.dataField == 'dashboard_title'){
+    				data.sts = 'U';
+        			me.fire('show-dashboard-detail',data);	
+    			}
+    			
+    		},
+    		
+    		onSaveDashboard: function(){
+    			var me =  this,
+    			provider = me.$.dashboardGridPanel.getDataProvider();
+    			if(!me.validation()){
+    				return;
+    			}
+    			var updateList = provider.getUpdateItems();
+    			if(updateList.length == 0){
+    				 UT.alert("STD.N1700");
+    				return;
+    			}
+    			me.$.updateDashboardCode.body = {
+    					updateList : updateList
+    			};
+    			UT.request(me.$.updateDashboardCode,function(){
+    				UT.alert("STD.N2400", function(){ // 저장하였습니다.
+    	                me.onDashboardSearch();
+    	            });
+    			});
+    		},
+    		validation: function() {
+                var me = this;
+
+                // 중복 체크
+                var provider = me.$.dashboardGridPanel.getDataProvider(),
+                    rows = provider.getItems();
+                var unique_check = {};
+                for (var i=0, len = rows.length; i<len; i++) {
+                    if(typeof unique_check[rows[i].dashboard_code] == "undefined"){
+                        unique_check[rows[i].dashboard_code] = 0;
+                    } else {
+                        UT.alert(me.translate("STD.E1000",null, me.translate('대시보드코드')),null,true); // "'{0}'에 동일한 값이 존재합니다"
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        });
+    </script>
+</dom-module>

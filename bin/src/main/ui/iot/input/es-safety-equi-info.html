@@ -1,0 +1,323 @@
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 안전장비 관리
+    ** @Description     : 이동장비 관리 차용
+    ** @Author          : jhPark
+    ** @Create Date     : 2021.08.02
+    ** @History         : 2021.08.02 jhPark 최초작성
+    ******************************************************************************************
+-->
+
+<sc-link rel="import" href="ep-driver-list.html"></sc-link>
+<sc-link rel="import" href="ep-image-view.html"></sc-link>
+
+<dom-module id="es-safety-equi-info">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+<!--
+   ************************************************************************************************************
+   * Service Area
+   ************************************************************************************************************
+-->
+		<sc-request-group init>
+			<sc-code-group>
+				<sc-code code="USEFLAG" value="{{useList}}"></sc-code>
+				<sc-code code="IOT037" value="{{TypList}}"></sc-code>
+				<sc-code code="MI001" value="{{mapIcon}}"></sc-code>
+			</sc-code-group>
+			
+		</sc-request-group>
+		
+		<!-- 협력사 조회 -->
+		<sc-ajax id="findListVendor" url="findListVendor.do" body="{{searchParam}}" last-response="{{vendorList}}"></sc-ajax>
+		<!-- 단일 안전 장비 조회 -->
+		<sc-ajax id="findSafetyInfo" url="findListIdSafetyEqui.do" on-response="completeFindSafetyInfo"></sc-ajax>
+		<!-- 부착 가능 비콘 조회 -->		
+		<sc-ajax id="findListIdBeacon" url="findListIdBeacon.do" body="{{searchParam}}" on-response="completeFindListIdBeacon"></sc-ajax>
+		<!-- 안전 장비 정보 저장 -->
+		<sc-ajax id="saveInfoSafetyEqui" url="saveInfoSafetyEqui.do" on-response="completeSaveInfoSafetyEqui"></sc-ajax>
+
+        <cc-auth-checker check-list="auth-s"></cc-auth-checker>
+		<div class="vspace-5"></div>
+		<cc-sub-title-bar >
+            <sc-button text="저장" on-click="onSave" auth-s></sc-button>
+		</cc-sub-title-bar>	
+<!--
+    ************************************************************************************************************
+    * UI Area
+    ************************************************************************************************************
+-->		
+
+		<div class="vspace-5"></div>
+
+		<div class="vbox page">
+	        <table class="tb-form">
+	            <colgroup>
+	                <col style="width:150px">
+	                <col>
+	                <col style="width:150px">
+	                <col>
+	            </colgroup>
+	            <tr>
+	                <th><sc-label text="id"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{safetyEuqiInfo.equiId}}" max-length="30"  readonly="true"  placeholder="자동으로 입력됩니다."></sc-text-field></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="유형"></sc-label></th>
+					<td id="colspanTd">
+	                	<sc-combobox-field items="{{TypList}}" required="true" display-field="label" value-field="data" value="{{safetyEuqiInfo.equiType}}" placeholder="전체"></sc-combobox-field>
+	                </td>	                  
+	            </tr>
+	            <tr>
+	                <th><sc-label text="장비명"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{safetyEuqiInfo.equiName}}" required="true" max-length="100" ></sc-text-field></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="협력사명"></sc-label></th>
+	                <td colspan ="3">
+<!-- 	                	<sc-text-field value="{{safetyEuqiInfo.vendorId}}" required="true" max-length="100" ></sc-text-field> -->
+	                	<sc-combobox-field items="{{vendorList}}" required="true" display-field="name" value-field="id" value="{{safetyEuqiInfo.vendorId}}" placeholder="전체"></sc-combobox-field>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="비콘"></sc-label></th>
+	                <td colspan ="3">
+		                <sc-multi-combobox-field items="{{safetyEuqiInfo.attachBeaconArray}}" display-field="displayName" value-field="id"
+		                	value="{{beaconIds}}" placeholder="선택없음"></sc-multi-combobox-field>
+	                </td>
+	            </tr>
+	            <tr>
+	                <th ><sc-label text="센서"></sc-label></th>
+	                <td colspan ="3"><sc-text-field value="{{safetyEuqiInfo.sensorIds}}" max-length="100" ></sc-text-field></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="안전장비 사진"></sc-label></th>
+	                <td colspan = "3">
+						<sc-upload id="safetyUploadPanel" style="height:200px" 
+							value="{{safetyEuqiInfo.imggeGrpCd}}"
+							on-upload-completed="uploadCompleted"
+							on-delete-completed="deleteCompleted"
+							on-item-select="onItemSelect"
+							view-type="thumbnail"
+							downloadable="true">
+						</sc-upload>
+					</td>
+	            </tr>
+	            <tr>
+	                <th ><sc-label text="비고"></sc-label></th>
+	                <td colspan ="3"><sc-textarea-field value="{{safetyEuqiInfo.description}}" max-length="500" style="height:100px;"></sc-textarea-field></td>
+	            </tr>
+            	<tr>
+	                <th><sc-label text="사용여부"></sc-label></th>
+	                <td colspan = "3"><sc-checkbox-field input-value="{{safetyEuqiInfo.useFlag}}" checked-value="Y" un-checked-value="N" ></sc-checkbox-field></td>
+	            </tr>
+	        </table>
+	        
+		</div>	        
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'es-safety-equi-info',
+            formulas : {
+                // 신규 상태
+                isSystem: function() {
+                    return (SCSessionManager.userDetails.userInfo.access_level == "system");
+                },
+        		isSystemColspan : function(){
+                    return (SCSessionManager.userDetails.userInfo.access_level == "system")?"1":"3";
+            	}
+            },
+            properties : {
+                // 코드 데이터
+                codes: {
+                    type: Object,
+                    reset: false,
+                    value: function() {
+                        return {
+                            company: {}
+                        };
+                    }
+                },
+    			searchParam : {
+    				type : Object,
+    				value : function() {
+    					return {
+    						siteId : SCMdiManager.searchParam.site_id
+    					};
+    				}
+    			},
+                // 안전 장비 정보
+                safetyEuqiInfo : {
+                    type : Object,
+                    value : function(){
+                        return {};
+                    }
+                }
+            },
+			/** 초기화 **/
+            
+            //패널 시작
+			initialized : function() {
+                 var me = this;
+                 UT.request(me.$.findListVendor);
+                 var colspan = (SCSessionManager.userDetails.userInfo.access_level == "system")?1:3;
+                 $("#colspanTd").attr("colspan", colspan);
+			},
+			//안전장비 정보 상세 조회
+            load : function(equiId) {
+                var me = this;
+                me.$.safetyUploadPanel.reset();
+				me.$.findSafetyInfo.body = {
+					equiId : equiId,
+					includeNotUse : 'Y',
+					siteId : SCMdiManager.searchParam.site_id
+				};
+				UT.request(me.$.findSafetyInfo);					
+				setTimeout(function(){
+				},100)
+            },
+            //안전 장비 신규 추가
+            initSafetyEqui : function() {
+                var me = this;
+                me.set("safetyEuqiInfo", []);
+				me.$.findListIdBeacon.body = {
+						equiId : 0,
+						siteId : SCMdiManager.searchParam.site_id
+				};
+				UT.request(me.$.findListIdBeacon);	
+                me.set("safetyEuqiInfo.isNew", true);
+                me.set("safetyEuqiInfo.useFlag","Y");// 사용여부
+            },
+
+			/** API **/
+            //안전 장비 정보 저장후 초기화
+            completeSaveInfoSafetyEqui : function(e,res){
+            	var me = this,
+                result = res.response;
+            	
+	            if (result.result_status === 'S') {
+	                UT.alert("STD.N2400", function () { // 저장하였습니다.
+						me.clear();
+						me.fire('find-list');
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+            	
+            },
+			//단일 안전장비 조회
+			completeFindSafetyInfo: function(e, res){
+				var me = this;
+				var safetyEuqiInfo = res.response[0];
+				if(safetyEuqiInfo.attachBeaconArray){
+					safetyEuqiInfo.attachBeaconArray.forEach(function(r){
+						r.displayName = r.displayName1
+						if(r.displayName2){
+							r.displayName = r.displayName + "[" + r.displayName2 + "]"
+						}
+						if(r.displayName3){
+							r.displayName = r.displayName + "(" + r.displayName3 + ")"
+						}
+					});					
+				}
+				else {
+					safetyEuqiInfo.attachBeaconArray = [];
+				}
+				me.set("safetyEuqiInfo", safetyEuqiInfo);
+				//시간차 때문인지 한번에 보내면 콤보박스에 체크 되지 않기때문에 분리
+				me.set("beaconIds", safetyEuqiInfo.beaconIds);
+			},
+			// 부착 가능 비콘 조회
+			completeFindListIdBeacon: function(e, res){
+				var me = this;
+				var result = res.response;
+				if(result){
+					result.forEach(function(r){
+						r.displayName = r.displayName1
+						if(r.displayName2){
+							r.displayName = r.displayName + "[" + r.displayName2 + "]"
+						}
+						if(r.displayName3){
+							r.displayName = r.displayName + "(" + r.displayName3 + ")"
+						}
+					});
+					me.set("safetyEuqiInfo.attachBeaconArray", result);										
+				}
+				else {
+					me.set("safetyEuqiInfo.attachBeaconArray", []);															
+				}
+			},
+			
+			/** 이벤트 **/
+            //안전 장비 정보 저장
+            onSave : function(){
+            	var me = this;
+            	var safetyEuqiInfo = me.get("safetyEuqiInfo");
+            	safetyEuqiInfo.siteId = SCMdiManager.searchParam.site_id;
+            	safetyEuqiInfo.beaconIds = me.beaconIds;
+
+                if(!me.validate()){
+                    UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return;
+                }
+
+				//신규 추가를 위해 일일이 지정
+                UT.confirm("STD.N1200", function() { //저장 하시겠습니까?
+ 					me.$.safetyUploadPanel.upload().then(function(){
+						me.$.saveInfoSafetyEqui.body = {
+							safetyEuqiInfo : {
+								siteId : SCMdiManager.searchParam.site_id,
+								beaconIds : me.beaconIds,
+								equiName : safetyEuqiInfo.equiName,
+								equiType : safetyEuqiInfo.equiType,
+								equiId : safetyEuqiInfo.equiId,
+								vendorId : safetyEuqiInfo.vendorId,
+								useFlag : safetyEuqiInfo.useFlag,
+								imggeGrpCd : safetyEuqiInfo.imggeGrpCd
+							}
+						};
+                        UT.request(me.$.saveInfoSafetyEqui); 						
+ 					});
+                });
+            },
+			
+            //안전 장비 사진 팝업
+            onItemSelect: function(event, detail) {
+				var me = this;
+				if(detail.item) {
+					if(detail.item.id.indexOf('-file') !== -1) {
+						var imageReader = new FileReader();
+						imageReader.onload = (function(aFile) {
+							return function(e) {
+								var popup = UT.popup('ep-image-view', me, 600, 500, {}, {});
+								popup.show();
+								var popupContent = popup.getWindowContent();
+								popupContent.load(e.target.result, true);
+							};
+						})(detail.item.orgFile);
+						imageReader.readAsDataURL(detail.item.orgFile);
+					} else {
+						var popup = UT.popup('ep-image-view', me, 600, 500, {}, {});
+						popup.show();
+						var popupContent = popup.getWindowContent();
+						popupContent.load(detail.item.id);		
+					}
+				}
+			},
+			/** 기타 **/
+            // 초기화
+            clear: function() {
+                var me = this;
+                me.reset();
+            },
+        });
+    </script>
+</dom-module>

@@ -1,0 +1,32 @@
+<link rel="import" href="./shared/es-source-viewer.html">
+<link rel="import" href="./es-map-circleeffect.html">
+
+<dom-module id="em-map-circleeffect">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+	<template>
+		<sc-panel class="vbox flex-5" collapsible="false" title-text="원형 효과">
+           <es-map-circleeffect id="map"></es-map-circleeffect>
+        </sc-panel>
+        <sc-panel class="vbox flex-5" collapsible="false" title-text="Source Viewer">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/map/es-map-circleeffect.html"></es-source-viewer>
+        </sc-panel>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-map-circleeffect',
+			
+			properties : {
+				source : {
+					type : String,
+					value : null
+				}
+			}
+		});
+	</script>
+</dom-module>

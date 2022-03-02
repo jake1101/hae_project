@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>kakao maps demo</title>
+    
+    <style>
+        /* Set the size of the div element that contains the map */
+        #map {
+            height: 800px; /* The height is 400 pixels */
+            width: 80%; /* The width is the width of the web page */
+            float : left;
+        }
+    </style>
+    
+</head>
+<body>
+    <h3>Kakao Maps Demo</h3>
+    
+    <div id="map"></div>
+    
+    <div id = "dialog" style="margin-left :2%; float : left;width : 18%; height : 200px;">
+    	<div>
+    		좌표 입력 (위도,경도)   </br>
+    		ex) 37.3123,127.1114
+	    	<input id="additional" type='text' style="width : 300px;"onkeydown="JavaScript:Enter_Check();"/>
+	    	<button onclick ='showAdditional();'> 마커 생성</button>
+	    	<button onclick ='removeAdditional();'> 초기화</button>
+    	</div>
+    </div>
+    
+    <div id = "dialog" style="margin-left :2%; float : left;width : 18%; height : 600px;">
+    	<div>
+    		마커 이력
+    	</div>
+    	<textarea rows="20" cols="45"  id="textarea" readonly>
+    	</textarea>
+    </div>
+
+	<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=8e7d2b2712006ef25d3e21c07152ad22"></script>
+	<script src = "https://code.jquery.com/jquery-3.3.1.js"></script>
+	<script>
+		$("#textarea").html('');
+		var markers = [];
+		
+		var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+		    mapOption = {
+		        center: new kakao.maps.LatLng(37.53095,126.8982), // 지도의 중심좌표
+		        level: 3 // 지도의 확대 레벨
+		    };
+		
+		var map = new kakao.maps.Map(mapContainer, mapOption); // 지도 생성
+          
+        function showAdditional(){
+        	$("#textarea").html($("#textarea").val() + $("#additional").val() + '\n');
+        	var LatLng = $("#additional").val().split(',');
+			// 마커가 표시될 위치
+			var markerPosition  = new kakao.maps.LatLng(Number(LatLng[0]), Number(LatLng[1])); 
+			
+			// 마커 생성
+			var marker = new kakao.maps.Marker({
+			    position: markerPosition,
+			    clickable: true
+			});
+			
+			// 마커가 지도 위에 표시되도록 설정
+			marker.setMap(map);
+			
+            // 지도 중심 이동
+            map.setCenter(markerPosition);
+			markers.push(marker);
+			
+			// 마커를 클릭했을 때 마커 위에 표시할 인포윈도우를 생성
+			var iwContent = '<div style="margin-right:25px; padding:5px;">' + LatLng[0] + ', ' + LatLng[1] + '</div>', // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능
+			    iwRemoveable = true; // removeable 속성을 ture 로 설정하면 인포윈도우를 닫을 수 있는 x버튼이 표시
+
+			// 인포윈도우를 생성
+			var infowindow = new kakao.maps.InfoWindow({
+			    content : iwContent,
+			    removable : iwRemoveable
+			});
+
+			// 마커에 클릭이벤트를 등록
+			kakao.maps.event.addListener(marker, 'click', function() {
+			      // 마커 위에 인포윈도우를 표시
+			      infowindow.open(map, marker);  
+			});
+        }
+        
+        // 마커 제거
+        function removeAdditional(){			
+        	$("#textarea").html('');
+        	for(i=0; i<markers.length; i++){
+                markers[i].setMap(null);
+            }
+        }
+        
+        function Enter_Check(){
+            // 엔터키 코드 13
+	        if(event.keyCode == 13){
+	        	showAdditional();
+	        }
+	    }
+	</script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<dom-module id="ep-sensor-setting-history">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<!-- 코드조회 -->
+        <sc-request-group init>
+		</sc-request-group>
+		<sc-ajax
+				id="findListSensorSettingHistory"
+				url="findListSensorSettingHistory.do"
+				last-response="{{resultList}}">
+		</sc-ajax>
+		<cc-page-title-bar>
+		</cc-page-title-bar>
+		<div class="vbox flex">
+			<sc-grid id="gridPanel" data-provider="{{resultList}}" editable="false" class="flex" use-state= "false" use-selection="false" >
+				<sc-grid-columns>
+					<sc-data-column data-field="gatewayName"      header-text="Lora식별번호" width="150" text-align="center" editable="false"></sc-data-column>
+					<sc-data-column data-field="nodeId"        header-text="스마트태그ID" width="150" text-align="center" editable="false" ></sc-data-column>
+					<sc-data-column data-field="cmdType"       header-text="구분" width="150" text-align="left" editable="false" ></sc-data-column>
+					<sc-data-column data-field="cmdValue"      header-text="값" width="200" text-align="right" editable="false" ></sc-data-column>
+					<sc-data-column data-field="status"        header-text="상태" width="70" text-align="left" editable="false" ></sc-data-column>
+					<sc-date-column data-field="updatedDt" header-text="수정일자" width="150" display-format="yyyy/MM/dd HH:mm:ss"></sc-date-column>
+				</sc-grid-columns>
+			</sc-grid>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'ep-sensor-setting-history',
+			
+			properties:{
+				//팝업 타이틀 지정
+				titleText: {
+					type: String,
+					value: function () {
+						return "스마트태그 원격명령 History";
+					}
+				},
+	         // 조회 결과 리스트
+                resultList: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                }
+			},
+			
+			load: function(nodeId){
+				var me = this;
+				me.$.findListSensorSettingHistory.body = {
+                        nodeId : nodeId,
+                        limitCount : 20
+                };
+				UT.request(me.$.findListSensorSettingHistory);
+			},
+		});
+	</script>
+
+
+</dom-module>

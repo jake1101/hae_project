@@ -1,0 +1,115 @@
+<!-- 
+	각 컬럼에 tooltip을 설정하는 코드
+	다음과 같이 컬럼은 총
+-->
+
+<dom-module id="es-sp-tooltip">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" editable="true" selection-style="rows" show-tooltip="true" aggregate="true">
+        	<cc-grid-toolbar>
+        		<sc-button text="조회" on-click="onSearch"></sc-button>
+        		<sc-button text="검증" on-click="onValidate"></sc-button>
+        	</cc-grid-toolbar> 
+                <sc-grid-columns>
+                	<!-- default tooltip config -->
+                	<sc-data-column
+						show-default-header-tooltip="true" 
+						data-field="column_1"  editable="true" required="true" header-text="Default header tooltip only" ></sc-data-column>
+					<sc-data-column
+						show-default-content-tooltip="true" 
+						data-field="column_2"  editable="true" required="true" header-text="Default content tooltip only" ></sc-data-column>
+					<sc-data-column
+						show-default-footer-tooltip="true" 
+						aggregate-kind="sum" 
+						data-type="number"
+						data-field="column_3"  editable="true" required="true" header-text="Default footer tooltip only"></sc-data-column>
+						
+					<!-- tooltip callback -->
+					<sc-data-column 
+						data-field="column_4"  aggregate-title="합계" 
+						header-text="Header tooltip callback" header-tooltip-callback="customheadertooltip"></sc-data-column>
+					<sc-data-column 
+						data-field="column_5"  aggregate-kind="sum" 
+						footer-tooltip-callback="footercallback" aggregate-text-align="right" width="200" 
+						content-tooltip-callback="contentcallBack" header-text="Content tooltip callback" 
+						editable="true" required="true" text-align="right" data-type="number" ></sc-data-column>
+					<sc-data-column 
+						data-field="column_6"  aggregate-kind="sum" 
+						footer-tooltip-callback="footercallback" aggregate-text-align="right" width="200" 
+						header-text="Footer tooltip callback" 
+						editable="true" required="true" text-align="right" data-type="number"></sc-data-column>
+					
+					
+					<!-- 다양한 컬럼의 경우 -->
+					<sc-data-column 
+						data-field="column_7" width="200" header-text="multiLine 입력 컬럼" editable="true" text-align="left" use-multi-line="true"
+						show-default-content-tooltip="true"></sc-data-column>
+					<sc-date-column 
+						data-field="column_8" width="200" header-text="데이트 컬럼"
+						display-format="yyyy-MM-dd"   value-format="yyyy/MM/dd"
+						show-default-content-tooltip="true"></sc-date-column>
+					<sc-combobox-column
+						data-field="column_9" width="100" header-text="콤보박스"
+						show-default-content-tooltip="true"
+						display-field="label" value-field="data" items="{{comboboxData}}" editable="true" placeholder="선택" text-readonly="false"></sc-combobox-column>
+					<sc-image-column 
+						data-field="column_10"   
+						show-default-content-tooltip="true"
+						header-text="이미지 컬럼"  width="150" text-align="left"   editable="false" singular-source="ui/assets/img/icon_chat.png"></sc-image-column>
+                </sc-grid-columns>
+        </sc-grid>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+<script>
+    
+    Polymer({
+        is: 'es-sp-tooltip',
+        
+        properties : {
+        	resultList : {
+                type : Array,
+            },
+            comboboxData: {
+            	type: Array,
+            	value: function() {
+            		return [
+            			{label: '첫번째', data: 1},
+            			{label: '두번째', data: 2}
+            		]
+            	}
+            }
+        },
+        onSearch : function(){
+        	this.fire('search');
+        },
+        onValidate: function() {
+        	this.$.gridPanel.validate();
+        },
+        customheadertooltip: function(value) {
+        	return '<span style="color:red;">!헤더! ' + value + '</span>';
+        },
+        contentcallBack: function(rowIndex, value, dataFieldName, rowData) {
+        	if(value) {
+        		return '<span style="color:red;">숫자: ' + value + '</span>';	
+        	}
+        },
+        headercallback: function(value) {
+        	return '<span style="color:blue;">중요 데이터</span>' + value;
+        },
+        footercallback: function(value) {
+        	return '<span>합계값은 ' + value + ' 입니다.</span>';
+        }
+    });
+</script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

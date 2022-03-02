@@ -1,0 +1,58 @@
+<sc-link rel="import" href="es-init-data-description.html"></sc-link>
+<sc-link rel="import" href="es-init-data-sample.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-source-viewer.html"></sc-link>
+
+<dom-module id="em-init-data-guide">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-panel class="hbox flex" title-text="공통코드 및 초기 데이터 설정">
+			<es-init-data-description class="fit flex"></es-init-data-description>
+			<es-init-data-sample class="box flex" on-complete-find="onCompleteFind"></es-init-data-sample>
+		</sc-panel>
+		<es-source-viewer id="viewer" url="/ui/bp/developer/guide/lifecycle/es-init-data-sample.html" class="flex" on-initialized="onInitViewer"></es-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-init-data-guide',
+		properties : {
+			isInitializedViewer : false,
+			data : {
+				type : Object,
+				value : function() {
+					return {}
+				}
+			}
+		},
+		initialized : function() {
+			console.log(this.tagName.toLowerCase() + ' initialized');
+		},
+		onInitViewer : function() {
+			var me = this;
+			
+			me.set("isInitializedViewer", true);
+			
+			if(UT.isNotEmpty(me.get("data"))) {
+				me.setViewerData();
+			}
+		},
+		onCompleteFind : function(e) {
+			var me = this;
+			
+			me.set("data", e.detail);
+			
+			if(me.get("isInitializedViewer")) {
+				me.setViewerData();
+			}
+		},
+		setViewerData : function() {
+			var me = this;
+			
+			me.$.viewer.setData(JSON.stringify(me.get("data"), null, "\t"));
+		}
+	});
+	</script>
+</dom-module>

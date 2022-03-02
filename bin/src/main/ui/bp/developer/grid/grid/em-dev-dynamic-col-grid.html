@@ -1,0 +1,130 @@
+<sc-link rel="import" href="es-dev-dynamic-col-grid.html"></sc-link>
+<sc-link rel="import" href="../shared/es-source-viewer.html"></sc-link>
+<dom-module id="em-dev-dynamic-col-grid">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <!--  화면 구성 시작-->
+    <template>
+
+		<sc-panel class="vbox flex-5" collapsible="false" title-text="sc-grid 동적 컬럼 추가">
+              
+           <es-dev-dynamic-col-grid></es-dev-dynamic-col-grid>
+        </sc-panel>	
+        <div class="vbox flex-5">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/grid/grid/es-dev-dynamic-col-grid.html"></es-source-viewer>
+        </div>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'em-dev-dynamic-col-grid',
+            
+            properties : {
+                htmlTarget:{
+                    type:String
+                },
+                data : {
+                    type: Array,
+                    value:  [
+                              {
+                                    "col5": "cell(0,4)",
+                                    "col4": "cell(0,3)",
+                                    "col1": "cell(0,0)",
+                                    "col3": "cell(0,2)",
+                                    "col2": "cell(0,1)"
+                                },
+                                {
+                                    "col5": "cell(1,4)",
+                                    "col4": "cell(1,3)",
+                                    "col1": "cell(1,0)",
+                                    "col3": "cell(1,2)",
+                                    "col2": "cell(1,1)"
+                                },
+                                {
+                                    "col5": "cell(2,4)",
+                                    "col4": "cell(2,3)",
+                                    "col1": "cell(2,0)",
+                                    "col3": "cell(2,2)",
+                                    "col2": "cell(2,1)"
+                                },
+                                {
+                                    "col5": "cell(3,4)",
+                                    "col4": "cell(3,3)",
+                                    "col1": "cell(3,0)",
+                                    "col3": "cell(3,2)",
+                                    "col2": "cell(3,1)"
+                                },
+                                {
+                                    "col5": "cell(4,4)",
+                                    "col4": "cell(4,3)",
+                                    "col1": "cell(4,0)",
+                                    "col3": "cell(4,2)",
+                                    "col2": "cell(4,1)"
+                                },
+                                {
+                                    "col5": "cell(5,4)",
+                                    "col4": "cell(5,3)",
+                                    "col1": "cell(5,0)",
+                                    "col3": "cell(5,2)",
+                                    "col2": "cell(5,1)"
+                                },
+                                {
+                                    "col5": "cell(6,4)",
+                                    "col4": "cell(6,3)",
+                                    "col1": "cell(6,0)",
+                                    "col3": "cell(6,2)",
+                                    "col2": "cell(6,1)"
+                                },
+                                {
+                                    "col5": "cell(7,4)",
+                                    "col4": "cell(7,3)",
+                                    "col1": "cell(7,0)",
+                                    "col3": "cell(7,2)",
+                                    "col2": "cell(7,1)"
+                                },
+                                {
+                                    "col5": "cell(8,4)",
+                                    "col4": "cell(8,3)",
+                                    "col1": "cell(8,0)",
+                                    "col3": "cell(8,2)",
+                                    "col2": "cell(8,1)"
+                                },
+                                {
+                                    "col5": "cell(9,4)",
+                                    "col4": "cell(9,3)",
+                                    "col1": "cell(9,0)",
+                                    "col3": "cell(9,2)",
+                                    "col2": "cell(9,1)"
+                                },
+                                {
+                                    "col5": "cell(10,4)",
+                                    "col4": "cell(10,3)",
+                                    "col1": "cell(10,0)",
+                                    "col3": "cell(10,2)",
+                                    "col2": "cell(10,1)"
+                                }
+
+                            ]
+                }
+            },
+            
+           // 화면 생성 완료
+            initialized: function() {
+                var me = this;
+                this.$.viewer.setData(JSON.stringify(me.data, null, "\t"));
+            }
+          
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

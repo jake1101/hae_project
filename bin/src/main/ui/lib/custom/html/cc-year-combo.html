@@ -1,0 +1,69 @@
+<!--
+    ******************************************************************************************
+    ** Description     : cc-year-combo
+    ** Author          : choijh
+    ** Create Date     : 2016.10.27
+    ** History         : 2016.10.27 choijh 최초작성
+    ******************************************************************************************
+-->
+<dom-module id="cc-year-combo">
+    <style>
+        :host {
+            display : table;
+        }
+        :host > * {
+            display: table-cell;
+            vertical-align : middle;
+        }
+        
+        sc-combobox-field {
+        	min-width: 80px;
+        }    
+
+    </style>
+    <template>
+		<sc-combobox-field items="[[years]]" value="{{value}}" display-field="value" placeholder="년도" required="[[required]]" disabled="[[disabled]]" readonly$="[[readonly]]"></sc-combobox-field>
+    </template>
+    <script>
+        Polymer({
+            is: "cc-year-combo",
+			properties : {
+				years : {
+					type : Array
+				},
+				value : {
+					type : Number,
+					notify: true
+				},
+				
+				currentYear: {
+					type: Number,
+					value: new Date().getFullYear()
+				},
+				
+				max: {
+					type: Number,
+					value: 20
+				},
+				min: {
+					type: Number,
+					value: 20
+				}
+			},
+			
+			attached: function() {
+				var items = [];
+				var me = this;
+				
+				var maxYear = this.currentYear + this.max;
+				for (var i = this.currentYear - this.min; i <= maxYear; i++) {
+					items.push({
+						value : i
+					});
+				}
+				
+				me.set("years", items);
+			}
+		});
+	</script>
+</dom-module>

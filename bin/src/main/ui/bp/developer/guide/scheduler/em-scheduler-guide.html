@@ -1,0 +1,42 @@
+<sc-link rel="import" href="es-scheduler-description.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-scheduler-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="flex" title-text="스케쥴러 등록">
+			<es-scheduler-description class="fit"></es-scheduler-description>
+		</sc-panel>
+		<es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-scheduler-guide',
+		properties : {
+			srcList : {
+				type : Array,
+				value : function() {
+					return [{
+						title        : "RfxService.java",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/scheduler/source/rfx-service-java.txt"
+					}, {
+						title        : "RfxSchedulerService.java",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/scheduler/source/rfx-scheduler-service-java.txt"
+					}]
+				}
+			}
+		},
+		initialized : function() {
+			
+		}
+	});
+	</script>
+</dom-module>

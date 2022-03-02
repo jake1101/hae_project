@@ -1,0 +1,217 @@
+<dom-module id="es-error-list">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+        <sc-ajax id="findListServerError"
+                 url="findListServerError.do"
+                 body="{{searchParam}}"
+                 last-response="{{resultListServer}}">
+        </sc-ajax>
+
+        <sc-ajax id="findListBrowserError"
+                 url="findListBrowserError.do"
+                 body="{{searchParam}}"
+                 last-response="{{resultListBrowser}}">
+        </sc-ajax>
+
+        <sc-ajax id="deleteListError"
+                 url="deleteListError.do"
+                 body="{{searchParam}}"
+                 on-response="completeDeleteList">
+        </sc-ajax>
+
+        <sc-ajax id="occurError"
+                 url="occurError.do"
+                 body="{}">
+        </sc-ajax>
+
+        <cc-page-title-bar></cc-page-title-bar>
+
+        <cc-search-container on-search="onSearch">
+            <table>
+                <tr>
+                    <th><sc-label text="에러ID"></sc-label></th>
+                    <td><sc-text-field value="{{searchParam.err_id}}" on-enter="onSearch"></sc-text-field></td>
+                    <th><sc-label text="Error발생시간"></sc-label></th>
+                    <td><sc-period-date-field from-value="{{searchParam.from_err_occur_dt}}" to-value="{{searchParam.to_err_occur_dt}}" on-enter="onSearch"></sc-period-date-field></td>
+                </tr>
+                <tr>
+                    <th><sc-label text="Error메시지"></sc-label></th>
+                    <td><sc-text-field value="{{searchParam.err_msg}}" on-enter="onSearch"></sc-text-field></td>
+                    <th><sc-label text="메뉴ID"></sc-label></th>
+                    <td><sc-text-field value="{{searchParam.menu_cd}}" on-enter="onSearch"></sc-text-field></td>
+                </tr>
+                <tr>
+                    <th><sc-label text="Server IP"></sc-label></th>
+                    <td><sc-text-field value="{{searchParam.server_ip}}" on-enter="onSearch"></sc-text-field></td>
+                    <th><sc-label text="UserAgent"></sc-label></th>
+                    <td><sc-text-field value="{{searchParam.usr_agent}}" on-enter="onSearch"></sc-text-field></td>
+                </tr>
+                <tr>
+                    <th><sc-label text="세션ID"></sc-label></th>
+                    <td><sc-text-field value="{{searchParam.sess_id}}" on-enter="onSearch"></sc-text-field></td>
+                    <th><sc-label text="사용자ID"></sc-label></th>
+                    <td><sc-text-field value="{{searchParam.usr_id}}" on-enter="onSearch"></sc-text-field></td>
+                </tr>
+            </table>
+        </cc-search-container>
+        <div class="vbox flex-5">
+            <sc-grid id="serverGrid" data-provider="{{resultListServer}}" on-item-click="onItemClick" use-state="false" class="flex">
+                <cc-grid-toolbar title-text="Server Error">
+                    <!-- 05.15 기능제거 
+                    <sc-button text="강제에러발생테스트" on-click="onServerError"></sc-button> -->
+                    <sc-button text="삭제" on-click="onDeleteServerGrid"></sc-button>
+                </cc-grid-toolbar>
+                <sc-grid-columns>
+                    <sc-data-column data-field="err_id" header-text="에러ID" width="80" text-align="left" style-name="link"></sc-data-column>
+                    <sc-data-column data-field="sess_id" header-text="세션ID" width="80"></sc-data-column>
+                    <sc-data-column data-field="err_msg" header-text="Error메시지" width="300" text-align="left"></sc-data-column>
+                    <sc-date-column data-field="err_occur_dt" header-text="Error발생시간" width="160" display-format="yyyy/MM/dd HH:mm:ss"></sc-date-column>
+                    <sc-data-column data-field="usr_id" header-text="사용자아이디"></sc-data-column>
+                    <sc-data-column data-field="server_ip" header-text="Server IP"></sc-data-column>
+                </sc-grid-columns>
+                <sc-grid-fields>
+                    <sc-grid-field data-field="col_no"></sc-grid-field>
+                    <sc-grid-field data-field="row_no"></sc-grid-field>
+                    <sc-grid-field data-field="reg_dt"></sc-grid-field>
+                    <sc-grid-field data-field="stactrace"></sc-grid-field>
+                    <sc-data-column data-field="usr_exec_his"></sc-data-column>
+                    <sc-data-column data-field="img_att_file_id"></sc-data-column>
+                </sc-grid-fields>
+            </sc-grid>
+        </div>
+        <div class="vbox flex-5">
+            <sc-grid id="browserGrid" data-provider="{{resultListBrowser}}" on-item-click="onItemClick" class="flex">
+                <cc-grid-toolbar title-text="Browser Error">
+                	<!-- 05.15 기능제거 
+                    <sc-button text="강제에러발생테스트" on-click="onBrowserError"></sc-button>
+                    -->
+                    <sc-button text="삭제" on-click="onDeleteBrowserGrid"></sc-button>
+                </cc-grid-toolbar>
+                <sc-grid-columns>
+                    <sc-data-column data-field="err_id" header-text="에러ID" width="80" text-align="left" style-name="link"></sc-data-column>
+                    <sc-data-column data-field="menu_cd" header-text="메뉴ID" width="80"></sc-data-column>
+                    <sc-data-column data-field="src_path" header-text="소스경로" text-align="left"></sc-data-column>
+                    <sc-data-column data-field="err_msg" header-text="Error메시지" width="300" text-align="left"></sc-data-column>
+                    <sc-date-column data-field="err_occur_dt" header-text="Error발생시간" width="160" display-format="yyyy/MM/dd HH:mm:ss"></sc-date-column>
+                    <sc-data-column data-field="usr_agent" header-text="User Agent"></sc-data-column>
+                    <sc-data-column data-field="usr_id" header-text="사용자아이디"></sc-data-column>
+                    <sc-data-column data-field="server_ip" header-text="Server IP"></sc-data-column>
+                </sc-grid-columns>
+                <sc-grid-fields>
+                    <sc-grid-field data-field="col_no"></sc-grid-field>
+                    <sc-grid-field data-field="row_no"></sc-grid-field>
+                    <sc-grid-field data-field="reg_dt"></sc-grid-field>
+                    <sc-grid-field data-field="stactrace"></sc-grid-field>
+                    <sc-data-column data-field="usr_exec_his"></sc-data-column>
+                    <sc-data-column data-field="img_att_file_id"></sc-data-column>
+                </sc-grid-fields>
+            </sc-grid>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: "es-error-list",
+            properties: {
+                err_cls: {
+                    type: Object,
+                    value: function () {
+                        return [
+                            {label: "Browser", data: "B"},
+                            {label: "Server", data: "S"}
+                        ]
+                    }
+                },
+                searchParam: {
+                    type: Object,
+                    value: function() {
+                        return {
+                            err_cls: ""
+                        };
+                    }
+                }
+            },
+
+            //Error 조회
+            onSearch: function() {
+                var me = this;
+                UT.request(me.$.findListServerError);
+                UT.request(me.$.findListBrowserError);
+
+                me.fire("search-list");
+            },
+
+            //Browser Grid Log 삭제
+            onDeleteBrowserGrid: function () {
+                var me = this;
+                me.onDelete(me.$.browserGrid);
+            },
+
+            //Server Grid Log 삭제
+            onDeleteServerGrid: function () {
+                var me = this;
+                me.onDelete(me.$.serverGrid);
+            },
+
+            //Error 삭제
+            onDelete: function (grid) {
+                var me = this;
+                var provider = grid.getDataProvider();
+                var checked = provider.selectionCheckedItems();
+
+                if (checked && checked.length > 0) {
+                    UT.confirm("STD.N1300", function() { //삭제하시겠습니까 ?
+                        var deleted = provider.removeItems();
+                        if(UT.isNotEmpty(deleted)){
+                            me.$.deleteListError.body = {
+                                deleteErrors: deleted
+                            };
+                            UT.request(me.$.deleteListError);
+                        }
+                    });
+                }
+                else{
+                    UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+                }
+            },
+
+            //Error 삭제 후
+            completeDeleteList:function (e, res) {
+                var me = this;
+                var result = res.response;
+                if(result && result.result_status === "S") {
+                    UT.alert("STD.N2500");
+                    me.onSearch();
+                }
+            },
+
+            //item click event
+            onItemClick: function (event) {
+                var me = this,
+                    data = event.detail.data,
+                    item = event.detail.item,
+                    provider  = event.detail.provider;
+
+                if(item.dataField === "err_id") {
+                    me.fire("selected-error", {
+                        err_id: data.err_id
+                    });
+                }
+            },
+
+            //Server Error 강제 발생
+            onServerError: function () {
+                var me = this;
+                UT.request(me.$.occurError);
+            },
+
+            //Browser Error 강제 발생
+            onBrowserError: function () {
+                asdasd = asd;
+            },
+        });
+    </script>
+</dom-module>

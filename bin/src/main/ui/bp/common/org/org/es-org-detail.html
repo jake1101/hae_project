@@ -1,0 +1,344 @@
+<dom-module id="es-org-detail">
+
+	<style>
+		:host {
+			@apply(--fit-layout);
+		}
+	</style>
+
+	<template>
+		<!-- 코드 조회 -->
+		<sc-request-group init>
+			<!-- 공통 코드 조회-->
+			<sc-code-group>
+				<sc-code code="C001" value="{{codes.natCd}}" ></sc-code> <!-- 국가코드 -->
+				<sc-code code="C002" value="{{codes.lang}}" ></sc-code> <!-- 언어코드 -->
+				<sc-code code="C004" value="{{codes.cur}}" ></sc-code> <!-- 통화코드 -->
+			</sc-code-group>
+			<sc-ajax url="getAllCompanyList.do" last-response="{{codes.company}}"></sc-ajax> <!-- 회사목록 -->
+			<sc-ajax id="getAllListOrgType" url="getAllListOrgType.do" body="{{codes.orgType.param}}" last-response="{{codes.orgType.result}}"></sc-ajax> <!-- 조직유형 -->
+		</sc-request-group>
+
+		<!-- 상세정보 조회 -->
+		<sc-ajax id="findInfo"
+				 url="findOrg.do"
+				 body="{{searchParam}}"
+				 last-response="{{resultInfo}}"
+				 on-response="completeFindInfo">
+		</sc-ajax>
+
+		<!-- 상세정보 저장 -->
+		<sc-ajax id="saveInfo"
+				 url="saveOrg.do"
+				 on-response="completeSaveInfo">
+		</sc-ajax>
+
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<div class="vbox fit">
+
+			<cc-sub-title-bar title-text="조직정보">
+				<sc-button text="저장" on-click="onSaveInfo" auth-s></sc-button>
+			</cc-sub-title-bar>
+
+			<div class="flex page">
+				<table class="tb-form" validation-group="save">
+					<colgroup>
+						<col style="width:180px;">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="회사"></sc-label></th>
+						<td>
+							<sc-combobox-field value="{{resultInfo.comp_cd}}" items="{{codes.company}}" display-field="comp_nm" value-field="comp_cd"
+											   required="{{formula('isEditableCompCd')}}" readonly="{{!formula('isEditableCompCd')}}" placeholder="선택">
+							</sc-combobox-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="조직유형"></sc-label></th>
+						<td>
+							<sc-combobox-field value="{{resultInfo.org_typ_cd}}" items="{{codes.orgType.result}}" display-field="org_typ_nm" value-field="org_typ_cd"
+											   readonly="true" placeholder="선택">
+							</sc-combobox-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="조직코드"></sc-label></th>
+						<td>
+							<sc-text-field value="{{resultInfo.org_cd}}" required="{{formula('isNew')}}" readonly="{{!formula('isNew')}}" max-length="18"></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="조직명"></sc-label></th>
+						<td>
+							<sc-text-field value="{{resultInfo.org_nm}}" required="{{formula('isEditable')}}" readonly="{{!formula('isEditable')}}" max-length="60"></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="조직명(EN)"></sc-label></th>
+						<td>
+							<sc-text-field value="{{resultInfo.org_en_nm}}" readonly="{{!formula('isEditable')}}" max-length="60"></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="법인번호"></sc-label></th>
+						<td>
+							<sc-text-field value="{{resultInfo.corp_reg_no}}" readonly="{{!formula('isEditable')}}" max-length="18"></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="사업자등록번호"></sc-label></th>
+						<td>
+							<sc-text-field value="{{resultInfo.biz_reg_no}}" readonly="{{!formula('isEditable')}}" max-length="12"></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="대표자명"></sc-label></th>
+						<td>
+							<sc-text-field value="{{resultInfo.rep_nm}}" readonly="{{!formula('isEditable')}}" max-length="60"></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="대표자명(EN)"></sc-label></th>
+						<td>
+							<sc-text-field value="{{resultInfo.rep_en_nm}}" readonly="{{!formula('isEditable')}}" max-length="60"></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="국가"></sc-label></th>
+						<td>
+							<sc-combobox-field value="{{resultInfo.nat_cd}}" items="{{codes.natCd}}" display-field="label" value-field="data"
+											   readonly="{{!formula('isEditable')}}" placeholder="선택">
+							</sc-combobox-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="도시"></sc-label></th>
+						<td>
+							<sc-text-field value="{{resultInfo.city_cd}}" readonly="{{!formula('isEditable')}}" max-length="18"></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="언어"></sc-label></th>
+						<td>
+							<sc-combobox-field value="{{resultInfo.lang}}" items="{{codes.lang}}" display-field="label" value-field="data"
+											   readonly="{{!formula('isEditable')}}" placeholder="선택">
+							</sc-combobox-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="통화"></sc-label></th>
+						<td>
+							<sc-combobox-field value="{{resultInfo.cur}}" items="{{codes.cur}}" display-field="label" value-field="data"
+											   readonly="{{!formula('isEditable')}}" placeholder="선택">
+							</sc-combobox-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="주소"></sc-label></th>
+						<td>
+							<sc-text-field value="{{resultInfo.addr}}" readonly="{{!formula('isEditable')}}" max-length="256"></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="주소(EN)"></sc-label></th>
+						<td>
+							<sc-text-field value="{{resultInfo.addr_en}}" readonly="{{!formula('isEditable')}}" max-length="256"></sc-text-field>
+						</td>
+					</tr>
+<!-- 					<tr> -->
+<!-- 						<th><sc-label text="우편번호"></sc-label></th> -->
+<!-- 						<td> -->
+<!-- 							<sc-text-field value="{{resultInfo.post_no}}" readonly="{{!formula('isEditable')}}" max-length="6"></sc-text-field> -->
+<!-- 						</td> -->
+<!-- 					</tr> -->
+					<tr>
+						<th><sc-label text="전화번호"></sc-label></th>
+						<td>
+							<sc-text-field value="{{resultInfo.phone_no}}" readonly="{{!formula('isEditable')}}" max-length="60"></sc-text-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="사용여부"></sc-label></th>
+						<td>
+							<sc-checkbox-field input-value="{{resultInfo.use_yn}}" checked-value="Y" un-checked-value="N" readonly="{{!formula('isEditable')}}"></sc-checkbox-field>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="비고"></sc-label></th>
+						<td>
+							<sc-textarea-field value="{{resultInfo.rem}}" class="h-50" readonly="{{!formula('isEditable')}}" max-length="128"></sc-textarea-field>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</template>
+
+	<script>
+        Polymer({
+            is: 'es-org-detail',
+            properties: {
+
+                // 코드 데이터
+                codes: {
+                    type: Object,
+                    reset: false,
+                    value: function() {
+                        return {
+                            company: [],
+                            orgType: {
+                                param : {
+                                    use_yn: "Y"
+                                },
+                                result: []
+                            },
+                            natCd: [],
+                            lang: [],
+                            cur: []
+                        };
+                    }
+                },
+
+                // 조회 조건
+                searchParam: {
+                    type: Object,
+                    value: function() {
+                        return {};
+                    }
+                },
+
+                // 조회 결과 : 조직 정보
+                resultInfo: {
+                    type: Object,
+                    value: function(){
+                        return {
+                        }
+                    }
+                }
+
+            },
+
+            formulas : {
+                // 신규 상태
+                isNew : function() {
+                    return this.resultInfo.is_new === true;
+                },
+                // 수정 가능 상태
+                isEditable : function() {
+                    return this.formula('isNew') || !UT.isEmpty(this.resultInfo.org_cd);
+                },
+                // 회사 수정 가능 상태
+                isEditableCompCd : function() {
+                    return this.formula('isEditable') && this.resultInfo.org_typ_cd !== "COMPANY";
+                }
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+
+            load: function(data) {
+                var me = this;
+
+                // 신규 추가 시
+                if(data.is_new === true){
+
+                    me.set("resultInfo", {
+                        org_typ_cd : data.org_typ_cd,
+                        comp_cd : data.comp_cd,
+                        use_yn : "Y",
+                        is_new : true
+                    });
+
+                    me.applyFormula();
+
+                } else {
+
+                    // 조직코드 선택 시
+                    me.set("searchParam", {
+                        org_typ_cd : data.org_typ_cd,
+                        org_cd : data.org_cd
+                    });
+                    me.onFindInfo();
+
+                }
+
+            },
+
+            // 초기화
+            clear: function() {
+                var me = this;
+                me.reset();
+                UT.request(me.$.getAllListOrgType);
+                me.applyFormula();
+            },
+
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+
+            // 조회
+            onFindInfo: function() {
+                var me = this;
+                UT.request(me.$.findInfo);
+            },
+
+            // 조회 완료
+            completeFindInfo: function() {
+                var me = this;
+                me.applyFormula();
+            },
+
+            // 저장
+            onSaveInfo: function() {
+                var me = this;
+
+                if(!me.formula('isEditable')) {
+                    UT.alert(me.translate("STD.E1012",null,me.translate('조직코드')),null,true); //"'{0}'을(를) 선택하십시오"
+                    return;
+                }
+
+                // 조직유형이 회사일 경우 : 화사코드는 조직코드로 저장 (comp_cd = org_cd)
+                if (me.resultInfo.org_typ_cd === "COMPANY") {
+                    me.resultInfo.comp_cd = me.resultInfo.org_cd;
+                }
+
+                // 저장 유효성 체크
+                if(!me.validate('save')) {
+                    UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return;
+                }
+
+                me.$.saveInfo.body = {
+                    orgInfo: me.resultInfo
+                };
+
+                UT.confirm("STD.N1200", function(){ // 저장 하시겠습니까?
+                    UT.request(me.$.saveInfo);
+                });
+            },
+
+            // 저장 완료
+            completeSaveInfo: function(e, res) {
+                var me = this,
+                    result = res.response;
+
+                if(result.result_status === 'S'){ // 성공
+                    UT.alert("STD.N2400", function(){  // 저장하였습니다.
+                        me.set("resultInfo.is_new", false);
+                        me.fire("saved-org");
+                        me.applyFormula();
+                    });
+                } else if (result.result_status === 'D') { // 중복
+                    UT.alert("STD.N1900"); // 중복 데이터가 있습니다.
+                } else {
+                    UT.alert(result.result_message);
+                }
+            }
+
+        });
+	</script>
+
+</dom-module>
