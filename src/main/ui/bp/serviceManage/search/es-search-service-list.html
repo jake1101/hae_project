@@ -58,11 +58,11 @@
 				</tr>
 			</table>
 		</cc-search-container>
-		<sc-grid data-provider="{{serviceList}}" on-item-click="onItemClick" editable="true">
+		<sc-grid id="gridPanel" data-provider="{{serviceList}}" on-item-click="onItemClick">
 			<sc-grid-columns >
 				<sc-data-column data-field="svc_grp_nm" header-text="서비스 그룹" width="500" text-align="center"></sc-data-column>
 				<sc-data-column data-field="svc_ctl_nm" header-text="서비스 명" width="800" text-align="center"></sc-data-column>
-				<sc-checkbox-column data-field="svc_use_yn" header-text="사용상태" width="70" text-align="center" editable="true"></sc-checkbox-column>
+				<sc-checkbox-column data-field="svc_use_yn" header-text="사용상태" width="70" text-align="center"></sc-checkbox-column>
 			</sc-grid-columns>
 		</sc-grid>
 	</template>
@@ -110,24 +110,28 @@
                 
                 const list = me.get("groupList") || [];
                 list.unshift({svc_grp_id: "", svc_grp_nm: "전체"})
+                
+    			me.onFindRegSafetyServiceList();
             },
-    		onFindRegSafetyServiceList: function() {
+    		onFindRegSafetyServiceList: function(a, b) {
     			UT.request(this.$.findRegSafetyServiceList);
     		},
     		onItemClick : function() {
     			const me = this,
+    			provider = me.$.gridPanel,
                 data = event.detail.data,
-                item = event.detail.item;
+                item = event.detail.item,
+                yn = data[item.columnName] == "Y" ? "N" : "Y";
     			
     			if(item.columnName == "svc_use_yn"){
-    				const me = this;
+    				provider.getDataProvider().setCellValue(item.rowIndex, item.columnIndex, yn)
     				me.set("useYnObj", {
     					"svc_ctl_id": data["svc_ctl_id"],
-    					"svc_use_yn": data[item.columnName] == "Y" ? "N" : "Y"
+    					"svc_use_yn": yn
    					})
-    				UT.request(this.$.updateServiceUseYn)	
+    				UT.request(this.$.updateServiceUseYn);	
     			}
-    		},
+    		}
     	})
     </script>
 </dom-module>
