@@ -65,4 +65,20 @@ public class ServiceManageController {
 		return ServiceManageService.findRegSafetyServiceList(param);
 	}
 	
+	/**
+	 * 사용여부(SVC_CTL.SVC_USE_YN)을 수정한다
+	 *
+	 * @author : hjh
+	 * @param SVC_CTL_ID String
+	 * @param SVC_USE_YN String
+	 * @return the map<string, object>: result_status String
+	 * @Date : 2022. 02. 24
+	 * @Method Name : updateServerUseYn
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "updateServerUseYn.do")
+	public @ResponseBody Map<String,Object> updateServerUseYn(@RequestBody Map param) {
+		return ServiceManageService.updateServerUseYn(param);
+	}	
+	
 }

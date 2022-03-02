@@ -126,6 +126,26 @@ public class ServiceManageService {
 		return sqlSession.selectList("serviceManageApi.findRegSafetyServiceList", searchParam);
 		
 	}
+	
+	/**
+	 * 사용여부(SVC_CTL.SVC_USE_YN)을 수정한다
+	 *
+	 * @author : 
+	 * @param SVC_CTL_ID String, SVC_USE_YN String
+	 * @return the map<string, object>: result_status String
+	 * @Date : 2022. 2. 24
+	 * @Method Name : updateServerUseYn
+	 */
+	public Map<String,Object> updateServerUseYn(Map param) {
+		
+		sqlSession.update("serviceManageApi.updateServerUseYn", param);
+		
+		// 결과물 리턴
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
+		return resultMap;
+		
+	}
 
 	/**
 	 * 메일을 전송한다. 
