@@ -73,12 +73,12 @@ public class ServiceManageController {
 	 * @param SVC_USE_YN String
 	 * @return the map<string, object>: result_status String
 	 * @Date : 2022. 02. 24
-	 * @Method Name : updateServerUseYn
+	 * @Method Name : updateServiceUseYn
 	 */
 	@AuthCheck (authCode = Const.READ)
-	@RequestMapping (value = "updateServerUseYn.do")
-	public @ResponseBody Map<String,Object> updateServerUseYn(@RequestBody Map param) {
-		return ServiceManageService.updateServerUseYn(param);
+	@RequestMapping (value = "updateServiceUseYn.do")
+	public @ResponseBody Map<String,Object> updateServiceUseYn(@RequestBody Map param) {
+		return ServiceManageService.updateServiceUseYn(param);
 	}	
 	
 }

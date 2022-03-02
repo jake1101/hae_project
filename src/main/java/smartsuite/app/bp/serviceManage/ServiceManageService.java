@@ -134,11 +134,11 @@ public class ServiceManageService {
 	 * @param SVC_CTL_ID String, SVC_USE_YN String
 	 * @return the map<string, object>: result_status String
 	 * @Date : 2022. 2. 24
-	 * @Method Name : updateServerUseYn
+	 * @Method Name : updateServiceUseYn
 	 */
-	public Map<String,Object> updateServerUseYn(Map param) {
+	public Map<String,Object> updateServiceUseYn(Map param) {
 		
-		sqlSession.update("serviceManageApi.updateServerUseYn", param);
+		sqlSession.update("serviceManageApi.updateServiceUseYn", param);
 		
 		// 결과물 리턴
 		Map<String, Object> resultMap = new HashMap<String, Object>();
