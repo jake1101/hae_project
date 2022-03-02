@@ -1,0 +1,69 @@
+<script src="/ui/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<sc-link rel="import" href="es-sp-check.html"></sc-link>
+<sc-link rel="import" href="../shared/es-source-viewer.html"></sc-link>
+<dom-module id="em-sp-check">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <!--  화면 구성 시작-->
+    <template>
+		<cc-page-title-bar></cc-page-title-bar>		                
+        <es-sp-check class="vbox flex-5" id="grid" on-search="onSearch"></es-sp-check>
+        </sc-panel>	
+        <sc-panel class="vbox flex-5" collapsible="false" title-text="Source Viewer">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/grid/column/es-sp-check.html"></es-source-viewer>
+        </sc-panel>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'em-sp-check',
+            
+            properties : {
+                source : {
+                    type : String,
+                    value : null
+                },
+                data : {
+                    type: Array,
+                    value:  [
+                                {check_1:'Y', check_2:'NO', check_3:"false"},
+                                {check_1:'Y', check_2:'YES', check_3:"true"},
+                                {check_1:'Y', check_2:'NO', check_3:"false"}
+                            ]
+                }
+            },
+            
+            
+           // 화면 생성 완료
+            initialized: function() {
+                var me = this;
+                this.$.viewer.setData(JSON.stringify(me.data, null, "\t"));
+            },
+            _onResponse: function(e, res){
+            	var me = this;
+            	var result = res.response;
+            	me.$.viewer.setSource(result);
+
+            },
+            onSearch: function(){
+                var me = this;
+                me.$.grid.resultList = me.data;
+            },
+            _onResponse: function(e, res){
+            	
+            }
+        
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

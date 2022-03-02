@@ -1,0 +1,67 @@
+<link rel="stylesheet" type="text/css" href="/ui/lib/dashboard/resources/css/dashboard.css"></link>
+<link rel="import" href="../dashboard/sc-dashboard-canvas.html"/>
+<dom-module id="dashboard-manager">
+    <style>
+	    sc-dashboard-canvas {
+	        background-color: #f3f3f3;
+	        float:left;
+	        border-top:0;
+	    }
+    </style>
+
+    <template>
+    	<sc-ajax id="findDashboard"
+					 url="dashboard/findDashboardDetail.do"
+					 on-response="onFindDashboardComplete">
+		</sc-ajax>
+	    	<sc-dashboard-canvas id="dashboard" width="100%" height="100%" class="flex"
+	   		 					 grid-size="10" do-scale-width auto>
+	        </sc-dashboard-canvas>
+	        <sc-grid hidden="true"><sc-grid-columns></sc-grid-columns></sc-grid>
+    </template>
+    <script>
+        DashboardManager = Polymer({
+            is: "dashboard-manager",
+
+            properties: {
+            	code:{
+    				type:Object
+    			},
+    			containerId:{
+    				type:Object,
+            		value:function(){
+            			var uuid = UT.generateUUID();
+            			return uuid.replace(/-/gi,'');
+            		}
+    			}
+    			
+            }, 
+            listeners : {
+            	
+    		},
+    		/***
+    		*  1. 리사이즈 처리
+    		*  2. 화면 크기 처리
+    		***/
+    		attached : function(){
+    			var me = this;
+    			if(me.code){
+    				var param = {};
+    				param.sts = "U";
+    				param.dashboard_code = me.code;
+    				me.$.dashboard._editMode = false;
+    				me.$.dashboard.toggleEditMode();
+  					me.$.dashboard.load(param);
+  					me.$.dashboard._onResize();
+    			}else{
+    				console.warn('Code value not registered');
+    			}
+    			
+    		},
+    		onFindDashboardComplete : function(e,res){
+    			var me = this;
+    		}
+    		
+    	});
+    </script>
+</dom-module>

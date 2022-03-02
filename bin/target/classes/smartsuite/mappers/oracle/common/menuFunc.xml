@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+ESAAUMF: 메뉴기능
+ESAAURF: 롤기능
+ -->
+
+<mapper namespace="menuFunc">
+
+    <insert id="insertMenuFunc">
+    /* menuFunc.insertMenuFunc: 메뉴기능 등록 */
+    INSERT 
+      INTO ESAAUMF (
+           SYS_ID
+         , MENU_CD
+         , FUNC_CD
+         , FUNC_NM
+         , REG_ID
+         , REG_DT
+         , MOD_ID
+         , MOD_DT
+    ) VALUES (
+           #{g.tenant}
+         , #{p.menu_cd}
+         , #{p.func_cd}
+         , #{p.func_nm}
+         , #{g.username}
+         , #{g.now}
+         , #{g.username}
+         , #{g.now}
+    )
+    </insert>
+    
+    <update id="updateMenuFunc">
+    /* menuFunc.updateMenuFunc: 메뉴기능 수정 */
+    UPDATE ESAAUMF
+       SET MOD_DT = #{g.now}
+         , MOD_ID = #{g.username}
+         <if test='p.func_nm != null'>
+         , FUNC_NM = #{p.func_nm}
+         </if>
+     WHERE SYS_ID = #{g.tenant}
+       AND MENU_CD = #{p.menu_cd}
+       AND FUNC_CD = #{p.func_cd}
+    </update>
+    
+    <delete id="deleteMenuFunc">
+    /* menuFunc.deleteMenuFunc: 메뉴기능 삭제 */
+    DELETE 
+      FROM ESAAUMF
+     WHERE SYS_ID = #{g.tenant}
+       AND MENU_CD = #{p.menu_cd}
+       AND FUNC_CD = #{p.func_cd}
+    </delete>
+
+    <select id="findListMenuFunc" resultType="map">
+    /* menuFunc.findListMenuFunc: 메뉴기능 목록 */
+    SELECT A.SYS_ID
+         , A.MENU_CD
+         , A.FUNC_CD
+         , A.FUNC_NM
+         , A.REG_ID
+         , A.REG_DT
+         , A.MOD_ID
+         , A.MOD_DT
+         , (SELECT COUNT(*)
+              FROM ESAAURF B
+             INNER JOIN ESAAURH C
+                ON B.SYS_ID = C.SYS_ID
+               AND B.ROLE_CD = C.ROLE_CD
+               AND C.STS != 'D'
+             WHERE B.SYS_ID = A.SYS_ID
+               AND B.MENU_CD = A.MENU_CD
+               AND B.FUNC_CD = A.FUNC_CD
+           ) AS USE_COUNT_ROLE_FUNC
+      FROM ESAAUMF A
+     WHERE A.SYS_ID = #{g.tenant}
+       AND A.MENU_CD = #{p.menu_cd}
+    </select>
+
+	<select id="findListMenuPtrn" resultType="map">
+	/* menuFunc.findListMenuPtrn: 메뉴 URL 목록 */
+		SELECT A.MENU_CD
+		 , B.FUNC_CD
+         , A.CALL_PTRN
+       FROM ESAAUMS A LEFT OUTER JOIN ESAAURS B
+         ON A.SYS_ID = B.SYS_ID
+	     	AND A.MENU_CD = B.MENU_CD
+	     	AND A.CALL_PTRN = B.CALL_PTRN
+	    WHERE A.SYS_ID = #{g.tenant}
+	      AND A.MENU_CD = #{p.menu_cd}
+	</select>
+	
+    <select id="getCountMenuFunc" resultType="int">
+    /* menuFunc.getCountMenuFunc: 메뉴기능 카운트 */
+    SELECT COUNT(*)
+      FROM ESAAUMF
+     WHERE SYS_ID = #{g.tenant}
+       AND MENU_CD = #{p.menu_cd}
+       AND FUNC_CD = #{p.func_cd}
+    </select>
+    
+</mapper>

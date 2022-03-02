@@ -1,0 +1,72 @@
+<dom-module id="es-driver">
+
+    <style>
+        :host {
+            @apply(--fit-layout);
+        }
+    </style>
+
+    <template>
+    
+	<sc-ajax id="findDriverLog"
+		url="findDriverLog.do"
+		body="{{searchParam}}"
+		last-response="{{resultList}}">
+	</sc-ajax>
+
+	<sc-grid id="gridPanel" data-provider="{{resultList}}" class="fit" use-selection="false" >
+        <sc-grid-columns>
+            <sc-date-column data-field="createdDt" header-text="일시" required="true"  width="200" text-align="center" display-format="yyyy/MM/dd hh:mm:ss"></sc-date-column>
+            <sc-data-column data-field="vendorName" header-text="협력사"  width="200" text-align="center" ></sc-data-column>
+            <sc-data-column data-field="jobTypeName" header-text="직종" width="200" text-align="center" ></sc-data-column>
+            <sc-data-column data-field="workerName" header-text="이름" width="200" text-align="center" ></sc-data-column>
+        </sc-grid-columns>
+   	</sc-grid>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'es-driver',
+
+            properties : {
+                // 조회 조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                // 조회 결과
+                resultList: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                }
+            },
+
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            // 사용자 현황에서 사용자 아이디 선택 시 롤 현황 조회
+            load: function(data) {
+                var me = this;
+                me.set('searchParam', data);
+               	me.set('searchParam.vehicleId',data.id);
+                UT.request(me.$.findDriverLog);
+            },
+
+            // 초기화
+            clear: function() {
+                var me = this;
+                me.reset();
+                me.applyFormula();
+            },
+
+
+
+        });
+    </script>
+
+</dom-module>

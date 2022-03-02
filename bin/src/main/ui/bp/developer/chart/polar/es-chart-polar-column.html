@@ -1,0 +1,90 @@
+<dom-module id="es-chart-polar-column">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-polar-column',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "name": "Highcharts:Polar column chart",
+			    "width": 500,
+			    "type": "polarcolumn",
+			    "title": "Highcharts Polar Chart - Column",
+			    "palettes":[{
+			        "name": "color1",
+			        "alpha": 1.0,
+			        "fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }, {
+			        "name": "lines1",
+			        "alpha": 1.0,
+			        "strokes": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }],
+			    "xAxes": {
+			    },
+			    "yAxes": {
+			    },
+			    "series": [{
+			        "name": "Line",
+			        "items": [
+			            0, 8, 7, 6, 5, 4, 3, 2, 1
+			        ],
+			        "label": {
+			            "styles": {
+			                "fontSize": 12
+			            }
+			        },
+			        "styles": {
+			            //"line": "p(lines1:index)"
+			            "line": "#f00",
+			            "fill": "p(color1:index)"
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }],
+			    "legend": {
+			        "visible": false,
+			        "position": "floating",
+			        "left": 70,
+			        "top": 70,
+			        "layout": "vertical",
+			        "styles": {
+			            "border": "#999",
+			            "paddingLeft": 11,
+			            "paddingRight": 11,
+			            "paddingTop": 5,
+			            "paddingBottom": 5,
+			            "background": null
+			        },
+			        "itemStyles": {
+			            "fontBold": true
+			        }
+			    }
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

@@ -1,0 +1,50 @@
+<script src="/ui/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<sc-link rel="import" href="../shared/es-source-viewer.html"></sc-link>
+
+<sc-link rel="import" href="es-viewer-test-list.html"></sc-link>
+<sc-link rel="import" href="es-viewer-test-detail.html"></sc-link>
+<!-- 
+/**
+ *
+ *	@description : 화면 이동 샘플
+ *  <pre>
+ * </pre>
+ */
+-->
+<dom-module id="em-viewer-test">
+
+	<style>
+        :host {
+            @apply(--fit-layout);
+        }
+    </style>
+    
+	<template>
+		<sc-pages id="pages" selected="0"	class="fit">
+			<es-viewer-test-list id="list" on-show-detail="onShowDetail"></es-viewer-test-list>
+			<template>
+				<es-viewer-test-detail id="detail"	on-close="onShowList"></es-viewer-test-detail>
+			</template>
+		</sc-pages>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-viewer-test',
+			onShowDetail : function(e, data) {
+				var me = this;
+				// 상세 모듈로 페이지 전환
+				me.$.pages.selectItem(me.$.detail);
+				//상세 모듈 로드(데이터 조회시 사용)
+				me.$.detail.load(data);
+			},
+			onShowList : function(e, data) {
+				var me = this;
+				//리스트 화면으로 변경
+				me.$.pages.selectItem(me.$.list);
+				//리스트 재조회시 호출
+				//me.$.list.load();
+			}
+		});
+	</script>
+</dom-module>

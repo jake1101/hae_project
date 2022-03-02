@@ -1,0 +1,38 @@
+<sc-link rel="import" href="es-chart-bar-basic.html"></sc-link>
+<sc-link rel="import" href="../es-chart-source-viewer.html"></sc-link>
+
+<dom-module id="em-chart-bar-basic">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-panel class="vbox flex" title-text="bar chart basic">
+			<es-chart-bar-basic class="fit flex" on-chart-load="onChartLoad"></es-chart-bar-basic>
+			<es-chart-source-viewer id="viewer" url="/ui/bp/developer/chart/bar/es-chart-bar-basic.html" class="flex"></es-chart-source-viewer>
+		</sc-panel>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-chart-bar-basic',
+		properties : {
+			data : {
+				type : Object,
+				value : function() {
+					return {}
+				}
+			}
+		},
+		initialized : function() {
+		},
+		setViewerData : function() {
+			var me = this;
+			me.$.viewer.setData(JSON.stringify(me.get("data"), null, "\t"));
+		},
+		onChartLoad : function(){
+			//this.setViewerData();
+		}
+	});
+	</script>
+</dom-module>

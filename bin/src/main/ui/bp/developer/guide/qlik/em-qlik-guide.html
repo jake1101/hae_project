@@ -1,0 +1,40 @@
+<sc-link rel="import" href="es-qlik-description.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-qlik-guide">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+    	<sc-panel class="hbox flex" title-text="em-qlik-dashboard" i18n-disabled>
+			<es-qlik-description class="fit flex"></es-qlik-description>
+			<div class="fit flex">
+				예제는 <p>
+				메뉴 URL에 추가 OR 메뉴 참고: QlikDashboard sing config-Role test  &lt;  QlikDashboard  &lt;  Home<p>
+				/ui/bp/dashboard/qlik-dashboard/em-qlik-dashboard.html?dashboardId=QLIK-DASHBOARD01
+			</div>
+		</sc-panel>
+		<es-dynamic-source-viewer class="flex" src-list="{{srcList}}" params="{{params}}"></es-dynamic-source-viewer>
+    </template>
+    <script>
+    Polymer({
+    	is : "em-qlik-guide",
+    	properties : {
+    		//임시로 만든데이타 실제로 메뉴 URL에파라미터로 들어가야함!
+    		srcList : {
+				type : Array,
+				value : function() {
+					return [{
+						title        : "em-qlik-dashboard.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/dashboard/qlik-dashboard/em-qlik-dashboard.html"
+					}]
+				}
+			}
+    	}
+    });
+    </script>
+</dom-module>

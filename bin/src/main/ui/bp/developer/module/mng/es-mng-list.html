@@ -1,0 +1,190 @@
+<dom-module id="es-mng-list">
+<!-- 
+/**
+ *
+ *	@description : 관리자 개발 화면 예제 - 메인리스트
+ *  <pre>
+ * </pre>
+ * @author : Yeon-u Kim
+ * @FileName : 
+ * @Since 2017. 2. 21.
+ * @변경이력 : [2017. 2. 21.] Yeon-u Kim 최초작성
+ */
+-->
+	<style>
+		:host {
+            @apply(--vbox-layout);
+        }
+	</style>
+	
+	<template>
+		<!-- ajax 선언 부 -->
+		<sc-ajax id="findList"
+            url="/ui/bp/developer/module/json/devMng.json"
+            body="{{searchParam}}"
+            last-response="{{resultList}}">
+        </sc-ajax>
+       
+       <div	class="vbox flex">
+       		<cc-sub-title-bar title-text="메인리스트" i18n-disabled></cc-sub-title-bar>
+			<cc-search-container on-search="onFindList">
+				<table>
+					<colgroup>
+						<col style="width:150px"/>
+						<col/>
+					</colgroup>		
+					<tr>
+						<th>
+							<sc-label text="구분"></sc-label>
+						</th>
+						<td>
+							<sc-text-field value="{{searchParam.cd_typ}}" on-enter="onFindList"></sc-text-field>
+						</td>
+					</tr>
+				</table>
+			</cc-search-container>
+			
+			<sc-grid id="gridPanel" class="flex" editable="true"	data-provider="{{resultList}}"	on-item-click="onDataCellClicked">
+				<cc-grid-toolbar>
+					<sc-button text="추가" on-click="onAdd"></sc-button>
+					<sc-button text="저장" on-click="onSave"></sc-button>
+					<sc-button text="삭제" on-click="onDelete"></sc-button>
+				</cc-grid-toolbar>
+				<sc-grid-columns>
+					<sc-data-column	data-field="cd"	header-text="코드" width="100"	style-name="link"	required="true"	item-editable-function="onAddAfterEditable"></sc-data-column>
+					<sc-data-column	data-field="cd_nm"	header-text="코드명"	width="250"	required="true"	editable="true"></sc-data-column>
+				</sc-grid-columns>
+				<sc-grid-fields>
+					<sc-grid-field data-field="cd_typ"></sc-grid-field>
+				</sc-grid-fields>
+			</sc-grid>
+		</sc-panel>
+	</template>
+	
+	<script>
+	Polymer({
+			is : 'es-mng-list',
+			properties : {
+				searchParam: {
+					type:Object,
+					value: function(){
+						return{};
+					}
+				},
+				resultList: {
+					type:Object,
+					value: function(){
+						return{};
+					}
+				}
+			},
+			//최초 호출
+			initialized : function(){
+				var me = this;
+			},
+			onFindList: function(){
+				var me = this;
+				UT.request(me.$.findList);
+			},
+			/*****************************************
+				그리드 이벤트
+			 *****************************************
+			*/
+			//그리드 셀 클릭이벤트
+            onDataCellClicked: function(event){
+            	var me = this,
+            	provider = me.$.gridPanel.getDataProvider(),
+            	data = event.detail.data,
+  				item = event.detail.item,
+  				rowIndex = item.rowIndex;
+            	
+            	// 신규 컬럼 제외
+                if(provider.getItemState(item.rowIndex) == "created"){
+                    return;
+                }
+            	
+            	if(item.dataField === "cd"){
+            		me.fire("find-detail")
+            	}
+				
+			},
+			//신규일때 수정가능
+			onAddAfterEditable: function(data, item) {
+                var me = this,
+                	provider = me.$.gridPanel.getDataProvider();
+                return (provider.getItemState(item.rowIndex) == "created");
+			},
+			//****************************************
+			//* 그리드 버튼 이벤트
+			//****************************************
+			//추가 이벤트
+			onAdd: function(){
+				var me = this,
+					provider = me.$.gridPanel.getDataProvider();
+				
+				// 그리드 신규행 추가
+                var row = {
+                    cd_typ: me.searchParam.cd_typ,        // 코드유형
+                    cd: "",                        // 그룹코드
+                    cd_nm: ""                    // 그룹코드명
+                };
+                provider.addItem(row);
+				me.fire("reset");
+			},
+			//저장 이벤트
+			onSave: function(){
+				var me = this,
+					provider = me.$.gridPanel.getDataProvider();
+				
+				UT.confirm("STD.N1200",function(){
+					me.$.save.body = {
+							inserts: provider.getNewItems,
+							updates: provider.getUpdateItems
+					};
+					//개발 샘플 화면용
+					me.onSaveResultHandler(null,{response : {result_status : "S"}});
+					//실제 ajax요청
+					//UT.request(me.$.save);
+				});
+			},
+			//저장요청후 callback
+			onSaveResultHandler: function(e,res){
+				var me = this;
+				var result = res.response;
+				if(UT.isObject(result) && result.result_status === "S"){
+					UT.alert("STD.N1500");	//요청을 완료하였습니다.
+				}else{
+					UT.alert("STD.E9999");
+				}
+			},
+			//삭제 이벤트
+			onDelete: function(){
+				var me = this,
+					provider = me.$.gridPanel.getDataProvider();
+				var checked = provider.selectionCheckedItems();
+				
+				if(checked.length === 0) {
+					UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+				} else {
+					UT.confirm("STD.N1300", function() {	// "삭제 하시겠습니까?"
+						var deleted = provider.removeItems(true);	// 그리드에서 체크된 데이터를 지워주고, db에서 삭제해야 할 데이터 목록울 리턴한다.
+						
+						if(deleted.length > 0) {
+							var oldDeleted = me.prData.deletedPrItems;
+			              	if(typeof oldDeleted === "undefined") {
+			              		oldDeleted = new Array();
+			              	}
+			               	//기존 deleted 리스트와 합친다.
+			               	var deletedPrItems = oldDeleted.concat(deleted);
+			               	me.set('prData.deletedPrItems', deletedPrItems);
+			               	
+			               	//합계 재계산
+							me.set('prData.pr_tot_amt', provider.getSummary('pr_amt', 'sum'));
+						}
+					});
+				}
+				me.fire("reset");
+			}
+		});
+	</script>
+</dom-module>

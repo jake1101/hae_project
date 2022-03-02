@@ -1,0 +1,58 @@
+<sc-link rel="import" href="es-operorg-list.html"></sc-link>
+<sc-link rel="import" href="es-operorg-org-list.html"></sc-link>
+<sc-link rel="import" href="es-operorg-user-list.html"></sc-link>
+
+<dom-module id="em-operorg">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <cc-page-title-bar></cc-page-title-bar>
+        <div class="hbox flex">
+            <es-operorg-list id="operorgList" on-found-operorg="onFoundOperOrg"  on-selected-operorg="onSelectedOperOrg" class="flex-5"></es-operorg-list>
+            <div class="hspace-5"></div>
+            <sc-tab-navigation id="tabNavi" class="flex-5">
+                <es-operorg-org-list id="orgList" title-text="조직현황" on-addto-operorg="onAddToOperOrg"></es-operorg-org-list>
+                <es-operorg-user-list id="operuserList" title-text="사용자현황" on-saved-user="onSavedUser"></es-operorg-user-list>
+            </sc-tab-navigation>
+        </div>
+    </template>
+
+    <script>
+        Polymer({
+            is: "em-operorg",
+
+            // 운영조직 검색
+            onFoundOperOrg: function(e, data) {
+                var me = this;
+                me.$.orgList.load(data); // 운영단위/회사코드 전달
+                me.$.operuserList.clear(); // 사용자 현황 초기화
+                //me.$.tabNavi.selectItem(me.$.orgList);
+            },
+
+            // 운영조직 선택
+            onSelectedOperOrg: function(e, data) {
+                var me = this;
+                me.$.orgList.load(data); // 운영단위/회사코드 전달
+                me.$.operuserList.load(data); // 운영조직 정보 전달
+            },
+
+            // 조직 탭에서 선택된 조직을 운영조직으로 추가
+            onAddToOperOrg: function(e, data) {
+                var me = this;
+                me.$.operorgList.onAddList(data); // 운영조직으로 추가
+            },
+
+            // 사용자 추가 저장
+            onSavedUser: function() {
+                var me = this;
+                me.$.operorgList.onFindList();
+            }
+        });
+    </script>
+
+</dom-module>

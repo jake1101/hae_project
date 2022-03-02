@@ -1,0 +1,12 @@
+{
+  "name": "Yantramanav",
+  "homepage": "https://github.com/erinmclaughlin/Yantramanav",
+  "_release": "501d8d6172",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "501d8d6172380fb08443fd27cc2cdbd04d73caad"
+  },
+  "_source": "https://github.com/erinmclaughlin/Yantramanav.git",
+  "_target": "*"
+}

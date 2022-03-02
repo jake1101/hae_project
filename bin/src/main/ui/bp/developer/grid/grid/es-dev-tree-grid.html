@@ -1,0 +1,145 @@
+<dom-module id="es-dev-tree-grid">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+     <sc-toolbar>
+            <sc-label text="트리 그리드 조회 샘플" ></sc-label>
+            <sc-spacer></sc-spacer>
+            <sc-button text="조회" on-click="onTreeSearch"></sc-button>
+                      
+        </sc-toolbar>
+     	<sc-grid  id="gridPanel" is-tree="true" editable="true" use-tree-checkbox="{{useTreeCheckBox}}"
+     	>
+  			<sc-toolbar>
+  				<sc-button text="트리체크박스 show/hide" on-click="onVisibleTreeCheckBox"></sc-button>
+                <sc-button text="전체 펼치기" on-click="onExpand"></sc-button>
+                <sc-button text="전체 접기" on-click="onCollapse"></sc-button>
+                <sc-button text="현재 노드추가" on-click="onAddCurrentRow"></sc-button>
+                <sc-button text="현재 하위노드추가" on-click="onAddChildRow"></sc-button>
+                <sc-button text="현재노드 삭제" on-click="onRemoveCurrentRow"></sc-button>
+                <sc-button text="체크노드 삭제" on-click="onRemoveCheckedRows"></sc-button>
+            </sc-toolbar>
+  			<sc-grid-columns>
+  				<sc-data-column data-field="menu_nm" header-text="메뉴명" 	width="250" text-align="left" editable="true"></sc-data-column>
+  				<sc-data-column data-field="menu_cd" header-text="메뉴코드" 	width="120" text-align="center" editable="true"></sc-data-column>
+  				<sc-data-column data-field="link_url" header-text="URL" 	width="250" text-align="left" editable="false"></sc-data-column>
+  				<sc-data-column data-field="sort_ord" header-text="정렬"  width="50" text-align="center" editable="true"  visible="false"></sc-data-column>
+  				<sc-checkbox-column data-field="use_yn" header-text="사용여부" 	width="80" text-align="center" editable="true"></sc-checkbox-column>
+  			</sc-grid-columns>
+     	</sc-grid>
+    </template>
+          
+    <script>
+        Polymer({
+            is: 'es-dev-tree-grid',
+            
+            properties : {
+            	findList: {
+                    type: Object,
+                    value: function() {
+                        return {
+                            info: {},
+                            param: {}
+                        };
+                    }
+                },
+            	searchParam : {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				},
+                
+                useTreeCheckBox : {
+                    type:Object,
+                    value : false
+                },
+                treeData  :{
+                    type:Array
+                }
+                
+                
+            },
+            		
+			initialized : function() {
+			    this.count = 0;
+			},
+			onSelectionAble :  function(data){
+				if(data.menu_nm === '평가결과'){
+					return true;
+				}else{
+					return false;
+				}
+			},
+            onTreeSearch : function(){
+               var me =this;
+               var hier = new CCHierachicalData();
+                //계층형 구조로 변경.(data tab에서 데이터 확인)
+                hier.cloneResult = true;
+                var hierachiDatas = hier.HierachyTransformByKey(this.treeData, "menu_cd", "up_menu_cd", "children", "ROOT", null, true);
+                me.$.gridPanel.setHierachyDataProvider(hierachiDatas, "children");
+               
+            },
+           
+            onVisibleTreeCheckBox: function(){
+                this.set('useTreeCheckBox',!this.useTreeCheckBox);
+            },
+
+            onExpand :  function(){
+                this.$.gridPanel.expandAll();
+            },
+
+            onCollapse : function(){
+                this.$.gridPanel.collapseAll();
+            },
+
+            onAddCurrentRow : function(){
+                var me = this, grid = me.$.gridPanel, provider = grid.getDataProvider();
+                var current = grid.getCurrentCell();
+                var parentNodeId = provider.getParentIndex(current.nodeIndex);
+                var newItem = {};
+                var newNodeIndex = provider.addChildItem(parentNodeId,newItem);
+                grid.setCurrentCell({nodeIndex: newNodeIndex});
+            },
+
+            onAddChildRow : function(){
+                var me = this, grid = me.$.gridPanel, provider = grid.getDataProvider();
+                var current  = grid.getCurrentCell();
+                var parentId = current.nodeIndex;
+                if(parentId < 0){
+                    return;
+                }
+
+                if(provider.getItemState(parentId) == "created"){
+                    SCAlert.show('알림','신규노드에 하위노드 추가 불가');
+                    return;
+                }
+
+                var newNodeIndex = provider.addChildItem(parentId, {});
+                grid.expand(current.nodeIndex);
+                grid.setCurrentCell({nodeIndex: newNodeIndex});
+            },
+            
+            onRemoveCurrentRow: function(){
+            	var me = this, grid = me.$.gridPanel, provider = grid.getDataProvider();
+                var current  = grid.getCurrentCell();
+                if(current && current.nodeIndex >= 0){
+                	provider.removeItemAt(current.nodeIndex);	
+                }
+            },
+            
+            onRemoveCheckedRows: function(){
+            	var me = this, grid = me.$.gridPanel, provider = grid.getDataProvider();
+            	
+            	provider.removeItems(true);
+            }
+                
+            
+        });
+    </script>
+
+</dom-module>

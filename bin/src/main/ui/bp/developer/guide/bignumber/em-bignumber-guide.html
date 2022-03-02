@@ -1,0 +1,48 @@
+<sc-link rel="import" href="es-bignumber-description.html"></sc-link>
+<sc-link rel="import" href="es-bignumber-sample.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-bignumber-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="hbox flex" title-text="큰 숫자 (BigNumber)">
+            <es-bignumber-description class="fit flex"></es-bignumber-description>
+            <es-bignumber-sample id="sample" class="box flex"></es-bignumber-sample>
+        </sc-panel>
+        <es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-bignumber-guide',
+		properties : {
+			srcList : {
+                type : Array,
+                value : function() {
+                    return [{
+                        title        : "es-bignumber-sample.html",
+                        i18nDisabled : true,
+                        extension    : "html",
+                        url          : "/ui/bp/developer/guide/bignumber/source/es-bignumber-sample.html.txt"
+                    },
+					{
+						title        : "ExtendedObjectMapperFactoryBean.java",
+						i18nDisabled : true,
+						extension    : "java",
+                        url          : "/ui/bp/developer/guide/bignumber/source/ExtendedObjectMapperFactoryBean.java.txt"
+					},
+					{
+						title        : "BigDecimalSerializer.java",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/bignumber/source/BigDecimalSerializer.java.txt"
+					}]
+                }
+            }
+		}
+	});
+	</script>
+</dom-module>

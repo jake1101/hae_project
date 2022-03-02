@@ -1,0 +1,196 @@
+<dom-module id="es-combobox-field-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+    	<sc-panel title-text="sc-combobox-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th>
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<sc-combobox-field id="combo" class="w-100" items="[[items]]" value="{{data.value_1}}" placeholder="선택"
+    									display-field="label" value-field="data" on-select="onSelectCombo">
+    					</sc-combobox-field>
+	    				[[data.value_1]]
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    	<sc-panel title-text="sc-tree-combobox-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th>
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<sc-tree-combobox-field class="w-100" items="[[treeItems]]" placeholder="선택" multi="{{multioptions}}"></sc-tree-combobox-field>
+    					<sc-checkbox-field label="멀티여부" input-value="{{multioptions}}"></sc-checkbox-field>
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    	<sc-panel title-text="sc-multi-combobox-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th>
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<sc-multi-combobox-field id="multicombo1" class="w-150" items="[[items]]" value="{{data.multicombo_value_1}}"
+    									display-field="label" value-field="data" placeholder="선택없음">
+    					</sc-multi-combobox-field>
+	    				[[data.multicombo_value_1]]
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="전체선택"></sc-label>
+    				</th>
+    				<td>
+    					<sc-multi-combobox-field id="multicombo2" class="w-150" items="[[items]]" value="{{data.multicombo_value_2}}"
+    									display-field="label" value-field="data"
+    									placeholder="선택없음" enable-check-all="true">
+    					</sc-multi-combobox-field>
+	    				[[data.multicombo_value_2]]
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    	<sc-panel title-text="cc-operorg-combobox-field / cc-sp-operorg-combobox-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th>
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<cc-operorg-combobox-field id="operorgcombo" class="w-150" operorg-typ-cd="PO" value="{{data.operorg_value}}"
+    									selected-index="0" placeholder="필수">
+    					</cc-operorg-combobox-field>
+    					[[data.operorg_value]]
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    	<sc-panel title-text="cc-operorg-multi-combobox-field / cc-sp-operorg-multi-combobox-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th>
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<cc-operorg-multi-combobox-field id="operorgmulticombo" class="w-150" operorg-typ-cd="PO" value="{{data.operorg_values}}"
+    									placeholder="선택없음" enable-check-all="true" selected-all="true">
+    					</cc-operorg-multi-combobox-field>
+    					[[data.operorg_values]]
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    	
+    </template>
+    <script>
+    Polymer({
+    	is : "es-combobox-field-sample",
+    	properties : {
+    		items : {
+    			type : Array,
+    			value : function() {
+    				return [{
+    					data  : "seoul",
+    					label : "서울"
+    				}, {
+    					data  : "daejeon",
+    					label : "대전"
+    				}, {
+    					data  : "daegu",
+    					label : "대구"
+    				}, {
+    					data  : "busan",
+    					label : "부산"
+    				}];
+    			}
+    		},
+    		data : {
+    			type : Object,
+    			value : function() {
+    				return {}
+    			}
+    		},
+    		multioptions: {
+    			type: Boolean,
+    			value: false
+    		},
+    		treeItems : {
+                type : Array,
+                value : function() {
+                  var items = [{
+                      value : "1",
+                      text : "test1",
+                      children : [{
+                          value : "2",
+                          text : "test2",
+                          children : [{
+                              value : "4",
+                              text : "4",
+                              superid : "2"
+
+                          }]
+                      },
+                      {
+                          value : "3",
+                          text : "test3",
+                          children : [{
+                              value : "5",
+                              text : "test5"
+                          }]
+                      }]
+                  },{
+                      value : "6",
+                      text : "test6",
+                      children : [{
+                        text : "test7",
+                          value : "7"
+                      },
+                      {
+                        text : "test8",
+                          value : "8"
+                      }]
+                  }];
+                  return items;
+            	}
+    		}
+    	},
+    	initialized : function() {
+    		var me = this;
+    		
+    	},
+    	onSelectCombo : function(e) {
+    		UT.alert("select!!", null, true);
+    	}
+    });
+    </script>
+</dom-module>

@@ -1,0 +1,37 @@
+import javax.inject.Inject;
+
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@Transactional
+public class ConvertMessageService {
+
+	@Inject
+	MessageSource messageSource;
+	
+	public String convert(String message, Locale locale) {
+		return messageSource.getMessage(message, null, locale);
+	}
+	
+	public String convertCurrentLocale(String message) {
+		//현재 사용자의 Locale 기준으로 다국어 처리를 하려면 LocaleContextHolder를 이용한다.
+		return messageSource.getMessage(message, null, LocaleContextHolder.getLocale());
+	}
+	
+	public String convertArgs(String message, String [] args) {
+		// 만약 다국어 메세지가 치환되는 문자를 포함하는 경우
+		// getMessage 메소드의 두번째 인자를 이용하여 치환할 수 있다.
+		// args 인자는 String 배열
+		// ex) String [] args = {"치환문자1", "치환문자2",...};
+		return messageSource.getMessage(message, args, LocaleContextHolder.getLocale());
+	}
+	
+	public String convertWithDefaultMessage(String message, String[] args) {
+		// 해당 다국어 메세지를 찾지 못한 경우 default message를 리턴할 수 있다.
+		String defaultMessage = "{0}님은 {1}개월동안 비밀번호를 변경하지 않았습니다.";
+		return messageSource.getMessage(message, args, defaultMessage, LocaleContextHolder.getLocale());
+	}
+}

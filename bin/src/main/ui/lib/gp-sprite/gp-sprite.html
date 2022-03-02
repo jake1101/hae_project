@@ -1,0 +1,32 @@
+<link rel="import" href="../gp-behaviors/gp-behavior-draggable.html"/>
+<link rel="import" href="../gp-behaviors/gp-behavior-coordinates.html"/>
+
+<dom-module id="gp-sprite">
+    <template>
+        <style>
+            :host {
+                display: block;
+                position: relative;
+            }
+        </style>
+
+        <content></content>
+
+    </template>
+
+    <script>
+        Polymer({
+            is: 'gp-sprite',
+
+            properties: {
+                info: {
+                    type: Object
+                }
+            },
+
+            behaviors: [BehaviorDraggable]
+
+
+        })
+    </script>
+</dom-module>

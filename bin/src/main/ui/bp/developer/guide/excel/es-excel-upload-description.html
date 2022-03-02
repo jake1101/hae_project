@@ -1,0 +1,83 @@
+<dom-module id="es-excel-upload-description">
+	<style>
+		table, th, td {
+	 		border:1px solid black;
+	 		border-collapse:collapse;
+	 		box-sizing: border-box;
+	 		padding: 3px;
+	 	}
+	 	th {
+	 		background-color:lightgray
+	 	}
+	</style>
+	<template>
+		<p>
+			<b>엑셀 업로드</b><br/>
+			cc-excel-import dom 엘리먼트를 팝업으로 생성(예제는 SCPopupManager 사용)하고, doImport를 호출한다.<br/>
+			callback 로직을 구현하여 팝업의 적용 버튼 클릭 시 업로드 된 데이터를 받을 수 있다.<br/>
+			<br/>
+		</p>
+		<p>
+			<b>엑셀 다운로드</b><br/>
+			그리드 API 참고<br/>
+			<table>
+				<tr>
+					<th>method</th>
+					<th>parameters</th>
+				</tr>
+				<tr>
+					<td>excelExport</td>
+					<td>1. fileName, 2. exportOptions</td>
+				</tr>
+			</table><br/>
+			<table>
+				<tr>
+					<th>config</th>
+					<th>type</th>
+					<th>description</th>
+				</tr>
+				<tr>
+					<td>exportOptions</td>
+					<td>Object</td>
+					<td>엑셀 다운로드 시 추가할 옵션들을 설정<br/>
+					<b>default</b><br/>
+					&nbsp;&nbsp;type : "excel",<br/>
+					&nbsp;&nbsp;target : "local", // 생성된 엑셀 문서를 내보내는 위치<br/>
+					&nbsp;&nbsp;showConfirm : true, <br/>
+					&nbsp;&nbsp;linear : true, // 컬럼그룹에 포함된 데이터컬럼들을 일렬로 배치해서 내보내기 한다.<br/>
+					&nbsp;&nbsp;applyDynamicStyle : true, // 엑셀 내보기 시 각 셀들에 적용된 동적 스타일들이 반영된다.<br/>
+					&nbsp;&nbsp;allItems : true, // 행그룹핑된 그리드나 트리에서 펼쳐지지 않은 행들도 모두 포함시킨다.<br/>
+					&nbsp;&nbsp;lookupDisplay : true,  // 이 속성이 true이고, 데이터셀의 컬럼의 labelField가 설정됐거나 컬럼의 lookupDisplay가 true면, 데이터셀의 값 대신 컬럼의 룩업 설정에 맞게 값을 찾아 표시한다.<br/>
+					&nbsp;&nbsp;fileName : null // 파일이름을 지정한다. 이 속성이 null이면 파일이름을 현재 시점 기준의 파일이름으로 다운로드한다.<br/>
+					&nbsp;&nbsp;rowIndicator : "default" // 그리드 Row Indicator 내보내기 설정. "default"인 경우 그리드의 설정을 따른다.<br/>
+					"hidden"인 경우 그리드 Row Indicator를 내보내지 않고, "visible"인 경우 그리드에 표시되지 않은 상태라도 그리드 Row Indicator를 내보내기 한다. 
+					</td>
+				</tr>
+				<tr>
+					<td>exportUiOptions</td>
+					<td>Object</td>
+					<td>엑셀 다운로드 버튼을 눌렀을 때 출력되는 엑셀 다운로드 팝업의 옵션 UI 요소를 제어 할 수 있는 속성<br/>
+					<b>default</b><br/>
+					&nbsp;&nbsp;applyDynamicStyle : true, // 동적 스타일 옵션 UI<br/>
+					&nbsp;&nbsp;allItems : true, // 숨겨진 행 옵션 UI<br/>
+					&nbsp;&nbsp;lookupDisplay : true, // 라벨 적용 옵션 UI<br/>
+					&nbsp;&nbsp;fileName : null, // 파일이름 옵션 UI<br/>
+					&nbsp;&nbsp;boxHeight: null, // 팝업창의 정적 높이 지정, 만약 지정하지 않는다면 컨텐츠 요소들의 크기에 따라 크기가 자동으로 조정된다.<br/>
+					&nbsp;&nbsp;boxWidth: null // 팝업창의 정적 너비 지정, 만약 지정하지 않는다면 sc-messagebox의 기본 너비로 지정된다.
+					</td>
+				</tr>
+			</table><br/>
+		</p>
+		<p>
+			<b>엑셀 지정형식 다운로드</b><br/>
+			Export_SimpleExportUtil 생성하여 doExport 함수에 헤더정보, row 정보, 파일명을 전달한다.<br/>
+			<a href="http://gcs.emro.co.kr:8090/pages/viewpage.action?pageId=5308639">[엑셀 지정형식 다운로드 사용 가이드]</a>를 참고한다.<br/>
+			<br/>
+		</p>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-excel-upload-description'
+	});
+	</script>
+</dom-module>

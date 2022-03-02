@@ -1,0 +1,111 @@
+<dom-module id="es-boardadmin-role">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+        <!-- 게시판 권한 : 조회 -->
+        <sc-ajax id="findListBoardAuth"
+                 url="findListBoardAuth.do"
+                 body="{{searchParam}}"
+                 last-response="{{resultList}}">
+        </sc-ajax>
+
+        <!-- 게시판 권한 : 저장 -->
+        <sc-ajax id="saveListBoardAuth"
+                 url="saveListBoardAuth.do"
+                 on-response="completeSaveListBoardAuth">
+        </sc-ajax>
+
+        <cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+        <sc-grid id="gridPanel" data-provider="{{resultList}}" class="vbox flex-4" editable="true" use-selection="false" use-state="false">
+            <cc-grid-toolbar title-text="게시판권한">
+                <sc-button text="저장" on-click="onSaveBoardAuth" auth-s></sc-button>
+            </cc-grid-toolbar>
+            <sc-grid-columns>
+                <sc-data-column data-field="role_nm" header-text="Role명" width="200" text-align="left"></sc-data-column>
+                <sc-checkbox-column data-field="wrt_yn" header-text="쓰기" width="100" text-align="center" editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+                <sc-checkbox-column data-field="view_yn" header-text="조회" width="100" text-align="left" editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+            </sc-grid-columns>
+        </sc-grid>
+
+    </template>
+    <script>
+        Polymer({
+            is : "es-boardadmin-role",
+            properties: {
+
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                // 조회 결과
+                resultList: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                }
+            },
+
+            load: function(data) {
+                var me = this;
+                me.set("searchParam", data);
+                me.onSearch();
+
+            },
+
+            onSearch: function(){
+                var me = this;
+                UT.request(me.$.findListBoardAuth);
+            },
+
+            // 초기화
+            onClear: function(){
+                var me = this;
+                me.reset();
+            },
+
+            // 게시판 권한 : 저장
+            onSaveBoardAuth: function() {
+                var me = this,
+                    provider = me.$.gridPanel.getDataProvider(),
+                    created = provider.getNewItems(),
+                    updated = provider.getUpdateItems();
+
+                if(created.length + updated.length === 0) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+
+                UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+                    var updated = provider.getUpdateItems();
+                    me.$.saveListBoardAuth.body = {
+                        insertList: updated
+                    };
+                    UT.request(me.$.saveListBoardAuth);
+                });
+
+            },
+
+            // 게시판 권한 : 저장 완료
+            completeSaveListBoardAuth: function(e, res) {
+                var me = this,
+                    result = res.response;
+
+                if(result.result_status === 'S'){
+                    UT.alert("STD.N2400", function(){ // 저장하였습니다.
+                        me.onSearch();
+                    });
+                } else {
+                    UT.alert(result.result_message);
+                }
+
+            }
+        })
+    </script>
+</dom-module>

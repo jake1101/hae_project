@@ -1,0 +1,116 @@
+<dom-module id="es-chart-etc-box-plot">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-etc-box-plot',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+				"name": "Highcharts:Box plot",
+			    "type": "boxplot",
+				"palettes":[{
+					"name": "color1",
+			        "alpha": 1.0,
+					"fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+						'#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+				}, {
+					"name": "lines1",
+					"alpha": 1.0,
+					"strokes": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+						'#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+				}],
+				"styles": {
+					//"fill": "#10ffff00",
+					//"border": "#888800"
+				},
+			    "title": {
+			        "text": "Highcharts Box Plot Example",
+			        "styles" : {
+					},
+			    },
+				"subtitle": {
+					"visible": true,
+					"anchor": "title",
+					"anchorAlign": "bottom",
+					"text": "Source: WorldClimate.com",
+					"styles": {
+					}
+				},
+				"titlePane": {
+					"styles": {
+						"padding": 4
+					}
+				},
+			    "xAxes": {
+			        "title": "Experiment No.",
+			        "categories":['1', '2', '3', '4', '5']
+			    },
+			    "yAxes": {
+			        "title": "Observations",
+					"baseValue": null,
+			        "indicators": [{
+			            "value": 932,
+			            "label": {
+			                "text": 'Theoretical mean: 932',
+			                "position": "center"
+			            },
+			            "styles": {
+			                "line": "#f00"
+			            }
+			        }]
+			    },
+			    "series": [{
+			        "name": "Observations",
+					"itemWidth": 0.4,
+			        "items": [
+						[760, 801, 848, 895, 965],
+						[733, 853, 939, 980, 1080],
+						[714, 762, 817, 870, 918],
+						[724, 802, 806, 871, 950],
+						[834, 836, 864, 882, 910]
+					],
+			        "label": {
+			            "visible": false,
+			            "styles": {
+			                "fontSize": "17",
+			            },
+			            "hovered": {
+			                "fill": null,
+			                "visible": true
+			            }
+			        },
+			        "styles": {
+			            "fill": "#fff",
+						"border":"p(lines1:0)"
+			       	},
+					"animations": [{
+					}],
+					"itemAnimations": [{
+						"property": "value"
+					}]
+				}],
+			    "legend": false
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

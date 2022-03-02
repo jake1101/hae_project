@@ -1,0 +1,2400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>js\grid.js - API</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="icon" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+                <h1><img src="../assets/css/logo.png" title="API" width="117" height="52"></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.0.1</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+                    <h2 class="off-left">APIs</h2>
+                    <div id="api-tabview" class="tabview">
+                        <ul class="tabs">
+                            <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-elements">Elements</a></li>
+                            <li><a href="#api-modules">Modules</a></li>
+                        </ul>
+                
+                        <div id="api-tabview-filter">
+                            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+                        </div>
+                
+                        <div id="api-tabview-panel">
+                            <ul id="api-classes" class="apis classes">
+                                <li><a href="../classes/DEF.html">DEF</a></li>
+                                <li><a href="../classes/EDITOR.html">EDITOR</a></li>
+                                <li><a href="../classes/GRID.html">GRID</a></li>
+                                <li><a href="../classes/I18N.html">I18N</a></li>
+                                <li><a href="../classes/MSG.html">MSG</a></li>
+                                <li><a href="../classes/UPLOAD.html">UPLOAD</a></li>
+                                <li><a href="../classes/UT.html">UT</a></li>
+                                <li><a href="../classes/VALID.html">VALID</a></li>
+                            </ul>
+                
+                                <ul id="api-elements" class="apis elements">
+                                    <li><a href="../elements/cc-approval-summary.html">&lt;cc-approval-summary&gt;</a></li>
+                                    <li><a href="../elements/cc-dept-search.html">&lt;cc-dept-search&gt;</a></li>
+                                    <li><a href="../elements/cc-editor.html">&lt;cc-editor&gt;</a></li>
+                                    <li><a href="../elements/cc-from-to-date.html">&lt;cc-from-to-date&gt;</a></li>
+                                    <li><a href="../elements/cc-linked-vender.html">&lt;cc-linked-vender&gt;</a></li>
+                                    <li><a href="../elements/cc-multi-text-field.html">&lt;cc-multi-text-field&gt;</a></li>
+                                    <li><a href="../elements/cc-operorg-combobox-field.html">&lt;cc-operorg-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-operorg-multi-combobox-field.html">&lt;cc-operorg-multi-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-purc-grp.html">&lt;cc-purc-grp&gt;</a></li>
+                                    <li><a href="../elements/cc-sg-search.html">&lt;cc-sg-search&gt;</a></li>
+                                    <li><a href="../elements/cc-sp-operorg-combobox-field.html">&lt;cc-sp-operorg-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-sp-operorg-multi-combobox-field.html">&lt;cc-sp-operorg-multi-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-upload.html">&lt;cc-upload&gt;</a></li>
+                                    <li><a href="../elements/cc-user-search.html">&lt;cc-user-search&gt;</a></li>
+                                </ul>
+                
+                            <ul id="api-modules" class="apis modules">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+                    Show:
+                    <label for="api-show-inherited">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </div>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<h1 class="file-heading">File: js\grid.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * 그리드에서 자주 사용하는 method를 정의한다
+ *
+ * @class GRID
+ */
+var GRID = {
+
+    /**
+     * 그리드 생성
+     *
+     * @method createGridView
+     * @param {object} container container
+     * @param {array}  fields    그리드 fields 정보
+     * @param {array}  columns   그리드 columns 정보
+     * @param {object} [configOptions] - GRID.setConfig 참조
+     * @return {object} grid
+     * @example
+     *     initGrid: function() {
+     *         var me = this;
+     *         var fields = [
+     *             &quot;field1&quot;,
+     *             &quot;field2 | datetime&quot;,
+     *             &quot;field3 | number&quot;
+     *         ];
+     *         var columns = [
+     *             &quot;field1 | 필드1 | 150 | near&quot;,
+     *             &quot;field2 | 필드2 | 150&quot;,
+     *             &quot;field3 | 필드3 | 150&quot;
+     *         ];
+     *         var validator = [];
+     *         validator.push({
+     *             fieldName: &quot;field1&quot;,
+     *             check: [&quot;required&quot;, &quot;!space&quot;, &quot;unique&quot;],
+     *             maxLength: 18
+     *         });
+     *
+     *         me.gridView = GRID.createGridView(me.$.gridPanel, fields, columns, {
+     *             actionFields: [&quot;field1&quot;],
+     *             editableFields: [&quot;field2&quot;],
+     *             editableCheckFields: [&quot;field3&quot;],
+     *             insertedAfterEditableFields: [&quot;field1&quot;],
+     *             checkableExpression: &quot;value[&#x27;field3&#x27;] = 0&quot;,
+     *             itemCountPropertyBinding: function(itemCount) {
+     *                 me.set(&quot;gridItemCount&quot;, itemCount);
+     *             },
+     *             validator: validator
+     *         });
+     *     }
+     */
+    createGridView: function(container, fields, columns, configOptions) {
+        var gridId = container.contentId;
+        var gridView = new RealGridJS.GridView(gridId);
+        gridView.setDataSource(new RealGridJS.LocalDataProvider());
+        GRID.setConfig(gridView, fields, columns, configOptions);
+        GRID.setDefaultOptions(gridView);
+        GRID.addResizeEvent(gridView, container);
+        return gridView;
+    },
+
+    /**
+     * 트리 그리드 생성
+     *
+     * @method createTreeView
+     * @param {object} container container
+     * @param {array}  fields    그리드 fields 정보
+     * @param {array}  columns   그리드 columns 정보
+     * @param {object} [configOptions] - GRID.setConfig 참조
+     * @return {object} grid
+     * @example
+     *     initGrid: function() {
+     *         var me = this;
+     *         var fields = [
+     *             &quot;field1&quot;,
+     *             &quot;field2 | datetime&quot;,
+     *             &quot;field3 | number&quot;
+     *         ];
+     *         var columns = [
+     *             &quot;field1 | 필드1 | 150 | near&quot;,
+     *             &quot;field2 | 필드2 | 150&quot;,
+     *             &quot;field3 | 필드3 | 150&quot;
+     *         ];
+     *         me.gridView = GRID.createTreeView(me.$.gridPanel, fields, columns, {
+     *             editableCheckFields: [&quot;field1&quot;],
+     *             treeItemCheckedMode: &quot;children&quot;,
+     *             itemCountPropertyBinding: function(itemCount) {
+     *                 me.set(&quot;gridItemCount&quot;, itemCount);
+     *             }
+     *         });
+     *     }
+     */
+    createTreeView: function(container, fields, columns, configOptions) {
+        var gridId = container.contentId;
+        var gridView = new RealGridJS.TreeView(gridId);
+        gridView.setDataSource(new RealGridJS.LocalTreeDataProvider());
+        GRID.setConfig(gridView, fields, columns, configOptions);
+        GRID.setDefaultOptions(gridView);
+        GRID.addResizeEvent(gridView, container);
+        return gridView;
+    },
+
+    /**
+     * 그리드 리사이즈 event 리스너 추가
+     *
+     * @private
+     * @method addResizeEvent
+     * @param {object} gridView  grid
+     * @param {object} container
+     * @example
+     *     createGridView: function(container, fields, columns, configOptions) {
+     *         ...
+     *         GRID.addResizeEvent(gridView, container);
+     *         ...
+     *     }
+     */
+    addResizeEvent: function(gridView, container){
+        if (container) {
+            container.addEventListener(&quot;content-resize&quot;, function() {
+                gridView.resetSize();
+            });
+        }
+    },
+
+    /**
+     * 그리드 설정
+     *
+     * @method setConfig
+     * @param {object}  gridView  grid
+     * @param {array}   fields    그리드 fields 정보
+     * @param {array}   columns   그리드 columns 정보
+     * @param {object}  [options]
+     * @param {array}   [options.actionFields]                action 컬럼
+     * @param {array}   [options.editableFields]              편집가능 컬럼
+     * @param {array}   [options.editableCheckFields]         checkbox 컬럼
+     * @param {array}   [options.insertedAfterEditableFields] 신규 row 추가 후 편집 가능 컬럼
+     * @param {array}   [options.validator]                   유효성 검사 설정
+     * @param {string}  [options.checkableExpression]         checkBar의 체크 가능 설정. (예)&quot;value[&#x27;use_count_org&#x27;] = 0&quot;
+     * @param {string}  [options.treeItemCheckedMode]         leaf: 하위 노드가 없는 것만 체크 가능, children: 하위 노드 모두 체크, ancestor: 상위 노드 모두 체크
+     * @param {boolean} [options.enableContextMenu=true]      context menu 활성 여부
+     * @param {function}[options.itemCountPropertyBinding]    grid item count property bind  - 그리드의 데이터 수 표시값 바인드 함수
+     * @param {function}[options.onRowInsertedHandler]        onRowInserted handler
+     * @param {function}[options.onRowAddedHandler]           onRowAdded handler
+     * @param {function}[options.onItemCheckedHandler]        onItemChecked handler
+     * @param {function}[options.onCellEditedHandler]         onCellEdited handler
+     * @param {function}[options.onFilteringChangedHandler]   onFilteringChanged handler
+     * @async
+     * @example
+     *     createGridView: function(container, fields, columns, configOptions) {
+     *         ...
+     *         GRID.setConfig(gridView, fields, columns, configOptions);
+     *         ...
+     *     }
+     */
+    setConfig: function(gridView, fields, columns, options) {
+        var isTreeView = UT.isFunction(gridView.setTreeOptions); // tree 인지.
+        var provider = gridView.getDataProvider();
+
+        gridView.$$Custom$$ = {}; // 커스텀 설정.
+
+        GRID.setFields(gridView, fields);
+        GRID.setColumns(gridView, columns);
+
+        options = options || {};
+        if (UT.isArray(options.actionFields)) { // 배열
+            GRID.setActionColumn(gridView, options.actionFields); // action 컬럼
+        }
+        if (UT.isArray(options.editableFields)) { // 배열
+            GRID.setEditableColumn(gridView, options.editableFields); // editable 컬럼
+        }
+        if (UT.isArray(options.editableCheckFields)) { // 배열
+            GRID.setCheckboxColumn(gridView, options.editableCheckFields); // 체크박스 컬럼
+        }
+        if (UT.isString(options.checkableExpression)) {
+            gridView.setCheckableExpression(options.checkableExpression, true); // checkBar의 checkable 조건식
+        }
+        if (UT.isFunction(options.itemCountPropertyBinding)) {
+            gridView.$$Custom$$.itemCountPropertyBinding = options.itemCountPropertyBinding; // 그리드의 커스텀 함수로 만듬.
+        }
+        if (UT.isArray(options.validator)) { // 배열
+            GRID.setValidator(gridView, options.validator); // validator 설정
+        }
+
+        if (isTreeView) { // 트리인 경우에만.
+            if (UT.isString(options.treeItemCheckedMode)) { // 트리의 check 모드 설정
+                if (options.treeItemCheckedMode === &quot;leaf&quot;) {
+                    gridView.setCheckableExpression(&quot;count = 0&quot;, true); // 하위 노드가 없는 것만 체크 가능
+                }
+            }
+            // checkBar의 체크박스 클릭 이벤트 함수
+            gridView.onItemChecked = function(grid, index, checked) {
+                if (UT.isString(options.treeItemCheckedMode)) { // 트리의 check 모드 설정
+                    if (options.treeItemCheckedMode.indexOf(&quot;children&quot;) &gt; -1) { // 하위 노드 모두 체크
+                        if (checked) {
+                            grid.checkChildren(index, checked, true, false);
+                            grid.expand(index, true);
+                        }
+                    }
+                    if (options.treeItemCheckedMode.indexOf(&quot;ancestor&quot;) &gt; -1) { // 상위 노드 모두 체크
+                        if (checked) {
+                            grid.checkItems(grid.getAncestors(index));
+                        }
+                    }
+                }
+                if (UT.isFunction(options.onItemCheckedHandler)) {
+                    options.onItemCheckedHandler.call(this, grid, index, checked);
+                }
+            };
+        }
+
+        // 데이터 행 추가 후 이벤트 함수
+        if (UT.isFunction(provider.insertRow)) { // grid 인 경우
+            provider.onRowInserted = function(prov, row) {
+                if (UT.isArray(options.insertedAfterEditableFields)) { // 배열
+                    gridView.setCellStyles(row, options.insertedAfterEditableFields, DEF.styles.editable.id);
+                }
+                if (UT.isFunction(options.onRowInsertedHandler)) {
+                    options.onRowInsertedHandler.call(this, prov, row);
+                }
+            };
+        }
+        if (UT.isFunction(provider.addChildRow)) { // tree 인 경우
+            provider.onRowAdded = function(prov, rowId) {
+                if (UT.isArray(options.insertedAfterEditableFields)) { // 배열
+                    setTimeout(function() {
+                        gridView.setCellStyles(prov.getStateRows(&quot;created&quot;), options.insertedAfterEditableFields, DEF.styles.editable.id);
+                    }, 10);
+                }
+                if (UT.isFunction(options.onRowAddedHandler)) {
+                    options.onRowAddedHandler.call(this, prov, rowId);
+                }
+            };
+        }
+
+        // 셀 수정 완료 후 이벤트 함수
+        gridView.onCellEdited = function(grid, itemIndex, dataRow, field) { // cell 의 편집이 완료 되었을 때 호출된다.
+            if (grid.isItemEditing()) {
+                grid.commit();
+            }
+            if (UT.isFunction(options.onCellEditedHandler)) {
+                options.onCellEditedHandler.call(this, grid, itemIndex, dataRow, field);
+            }
+        };
+
+        // 필터 상태 변경 이벤트 함수
+        gridView.onFilteringChanged = function(grid) {
+            GRID.itemCountPropertyBinding(grid);
+            if (UT.isFunction(options.onFilteringChangedHandler)) {
+                options.onFilteringChangedHandler.call(this, grid);
+            }
+        };
+
+        if (options.enableContextMenu !== false) {
+            // context menu 설정
+            gridView.setContextMenu([
+                {label: I18N.translate(MSG[&quot;G_FILTER&quot;]), tag: &quot;filter&quot;, enabled: !isTreeView}, // 필터
+                {label: I18N.translate(MSG[&quot;G_FILTER_CLEAR&quot;]), tag: &quot;filter-clear&quot;, enabled: !isTreeView}, // 필터 해제
+                {label: &quot;-&quot;},
+                {label: I18N.translate(MSG[&quot;G_FIXCOL&quot;]), tag: &quot;fixcol&quot;}, // 세로 틀고정
+                {label: I18N.translate(MSG[&quot;G_FIXCOL_CLEAR&quot;]), tag: &quot;fixcol-clear&quot;}, // 세로 틀고정 해제
+                {label: &quot;-&quot;},
+                {label: I18N.translate(MSG[&quot;G_FIXROW&quot;]), tag: &quot;fixrow&quot;, enabled: !isTreeView}, // 가로 틀고정
+                {label: I18N.translate(MSG[&quot;G_FIXROW_CLEAR&quot;]), tag: &quot;fixrow-clear&quot;, enabled: !isTreeView}, // 가로 틀고정 해제
+                {label: &quot;-&quot;},
+                {label: I18N.translate(MSG[&quot;G_EXCEL_DOWNLOAD&quot;]), tag: &quot;excel&quot;} // 엑셀 다운로드
+            ]);
+            // context menu item 클릭 이벤트
+            gridView.onContextMenuItemClicked = function(grid, label, index) {
+                switch (label.tag) {
+                case &quot;filter&quot;:
+                    var column = grid.columnByField(index.fieldName);
+                    if (column === null) {
+                        return;
+                    }
+                    var filters = grid.getColumnFilters(index.fieldName) || [];
+                    if (filters.length === 0) {
+                        if (column.lookupDisplay &amp;&amp; column.labels.length &gt; 0 &amp;&amp; column.values.length &gt; 0 &amp;&amp; column.labels.length === column.values.length) {
+                            for (var i = 0, len = column.values.length; i &lt; len; i++) {
+                                filters.push({
+                                    name: column.labels[i],
+                                    criteria: &quot;value=&#x27;&quot; + column.values[i] + &quot;&#x27;&quot;
+                                });
+                            }
+                        } else {
+                            var values = grid.getDataProvider().getDistinctValues(index.fieldName);
+                            for (var i = 0, len = values.length; i &lt; len; i++) {
+                                filters.push({
+                                    name: values[i],
+                                    criteria: &quot;value=&#x27;&quot; + values[i] + &quot;&#x27;&quot;
+                                });
+                            }
+                        }
+                        if (column.parent == null) {
+                            grid.setColumnFilters(index.fieldName, filters);
+                        } else {
+                            column.filters = filters;
+                            grid.setColumn(column);
+                        }
+                    }
+                    break;
+                case &quot;filter-clear&quot;:
+                    var column = grid.columnByField(index.fieldName);
+                    if (column === null) {
+                        return;
+                    }
+                    if (column.parent == null) {
+                        grid.setColumnFilters(index.fieldName, []);
+                    } else {
+                        column.filters = [];
+                        grid.setColumn(column);
+                    }
+                    break;
+                case &quot;fixcol&quot;:
+                    var displayIndex = grid.getColumnProperty(index.fieldName, &quot;displayIndex&quot;);
+                    if (UT.isNumber(displayIndex)) {
+                        grid.setFixedOptions({
+                            colCount: displayIndex + 1
+                        });
+                    }
+                    break;
+                case &quot;fixcol-clear&quot;:
+                    grid.setFixedOptions({
+                        colCount: 0
+                    });
+                    break;
+                case &quot;fixrow&quot;:
+                    if (index.itemIndex &lt; 0) {
+                        return;
+                    }
+                    grid.setFixedOptions({
+                        rowCount: index.itemIndex + 1
+                    });
+                    break;
+                case &quot;fixrow-clear&quot;:
+                    grid.setFixedOptions({
+                        rowCount: 0
+                    });
+                    break;
+                case &quot;excel&quot;:
+                    grid.exportGrid({
+                        type: &quot;excel&quot;,
+                        target: &quot;local&quot;,
+                        showConfirm: false,
+                        linear: true    // Expand all columns and Export
+                    });
+                    break;
+                }
+            };
+        }
+    },
+
+    /**
+     * 그리드의 디폴트 옵션 설정
+     *
+     * @private
+     * @method setDefaultOptions
+     * @param {object}  gridView  grid
+     * @example
+     *     createGridView: function(container, fields, columns, configOptions) {
+     *         ...
+     *         GRID.setDefaultOptions(gridView);
+     *         ...
+     *     }
+     */
+    setDefaultOptions: function(gridView) {
+        var provider = gridView.getDataProvider();
+
+        provider.setOptions({
+            restoreMode: &quot;auto&quot;, // Cell 편집 중 원복 했을 경우 수정상태 취소 기능,
+            softDeleting: true
+        });
+        gridView.setDisplayOptions({
+            fitStyle: &quot;none&quot;, // fillWidth 사용하기 위함.
+            showInnerFocus : false,
+            focusVisible: true, // cell 선택된 것 보이게.
+            showInnerFocus: false // merge된 셀안에 포커스 박스를 숨김.
+        });
+        gridView.setIndicator({
+            selectable: true
+        });
+        gridView.setSelectOptions({
+            style: &quot;block&quot;
+        });
+        gridView.setPasteOptions({
+            enabled: true,
+            singleMode: false,  // true면 클립보드의 내용과 상관없이 포커스된 셀 하나에만 값을 붙여 넣는다
+            noEditEvent: false, //
+            startEdit: false, // 붙여넣게 될 값이 복수 행이 아니고, 붙여넣을 행이 아직 편집 중이 아니면 편집을 시작한다. false면 이 행에 연결된 데이터행을 업데이트한다
+            checkReadOnly: true, // true이면 readOnly이거나 editable이 false인 Column은 paste대상에서 제외된다.
+            eventEachRow: true // 여러 행 붙여넣기시 그 행만큼 onEditRowPasted 이벤트의 발생 여부를 지정한다.
+        });
+        gridView.setEditOptions({
+            enterToNextRow: true,        // Enter키 입력 시 다음 행으로 이동합니다.
+            crossWhenExitLast: true      // tab/enter 키로 마지막 셀을 벗어날 때 다음 행으로 이동합니다
+        });
+        if (UT.isFunction(gridView.setTreeOptions)) { // tree 인 경우
+            GRID.setOptions(gridView, {
+                hideDeletedRows: true,
+                showCheckBox: false,
+                footer: { visible: false },
+                stateBar: { visible: true },
+                checkBar: { visible: true }
+            });
+        } else { // grid 인 경우
+            GRID.setOptions(gridView, {
+                hideDeletedRows: true,
+                footer: { visible: false },
+                panel: { visible: false },
+                checkBar: { visible: true },
+                stateBar: { visible: true }
+            });
+        }
+
+        gridView.setStyles(blueSkySkin);
+        gridView.addCellStyle(DEF.styles.editable.id, DEF.styles.editable, true);
+        gridView.addCellStyle(DEF.styles.readonly.id, DEF.styles.readonly, true);
+        gridView.addCellStyle(DEF.styles.actionable.id, DEF.styles.actionable, true);
+        gridView.addCellRenderers([DEF.renderer.checkboxYn, DEF.renderer.disabledCheckboxYn]);
+        var images = new RealGridJS.ImageList(DEF.icons.id, DEF.icons.path);
+        images.addUrls(DEF.icons.images);
+        gridView.registerImageList(images);
+    },
+
+    /**
+     * 그리드 옵션 설정
+     *
+     * @method setOptions
+     * @param {object} gridView grid
+     * @param {object} options  그리드의 옵션
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setOptions(me.gridView, {
+     *             stateBar: {
+     *                 visible: false
+     *             },
+     *             checkBar: {
+     *                 visible: false
+     *             }
+     *         });
+     *     }
+     */
+    setOptions: function(gridView, options) {
+        if (UT.isFunction(gridView.setTreeOptions)) { // tree 인 경우
+            gridView.setTreeOptions(options);
+        } else {
+            gridView.setOptions(options);
+        }
+    },
+
+    /**
+     * 그리드의 아이템수 바인딩
+     *
+     * @private
+     * @method itemCountPropertyBinding
+     * @param {object} gridView grid
+     * @example
+     *     gridView.onFilteringChanged = function(grid) {
+     *         GRID.itemCountPropertyBinding(grid);
+     *     }
+     */
+    itemCountPropertyBinding: function(gridView) {
+        if (UT.isFunction(gridView.$$Custom$$.itemCountPropertyBinding)) {
+            var count = UT.isFunction(gridView.setTreeOptions) ? gridView.getDataProvider().getRowCount() : gridView.getItemCount();
+            gridView.$$Custom$$.itemCountPropertyBinding(count);
+        }
+    },
+
+    /**
+     * 그리드의 필드 정보를 설정한다.
+     *
+     * @method setFields
+     * @param {object}  gridView grid
+     * @param {array}   fields   그리드의 필드 정보
+     * &lt;pre&gt;
+     * fields : array (object or string)
+     *        : string 형식 - fieldName:dataType(text, bool, number, datetime) - dataType이 text 인 경우는 생략가능
+     *        : object - string 형식의 fieldName, dataType 이외에 추가 설정이 필요한 경우는 object 형태를 이용한다.
+     * &lt;/pre&gt;
+     * @example
+     *     setupGrid: function(gridView) {
+     *         var fields = [
+     *             &quot;field1&quot;,
+     *             &quot;field2 | datetime&quot;,
+     *             &quot;field3 | number&quot;
+     *         ];
+     *         GRID.setFields(gridView, fields);
+     *     }
+     */
+    setFields: function(gridView, fields) {
+        var provider = gridView.getDataProvider();
+        var values = [];
+        for (var i = 0, len = fields.length; i &lt; len; i++) {
+            var field = fields[i];
+            var value = {};
+            if (UT.isString(field)) {
+                var token = field.split(&quot;|&quot;);
+                value = {
+                    fieldName: token[0].trim(),
+                    dataType: UT.isString(token[1]) ? token[1].trim() : &quot;text&quot;
+                };
+            } else if (UT.isObject(field)) {
+                value = field;
+            }
+            //if (value.dataType === &quot;datetime&quot; &amp;&amp; typeof value.datetimeFormat === &quot;undefined&quot;) {
+            //value.datetimeFormat = DEF.styles.formatDate.datetimeFormat;
+            //}
+            if (value.dataType === &quot;datetime&quot; &amp;&amp; typeof value.datetimeFormat === &quot;undefined&quot;) {
+                value.datetimeFormat = &quot;yyyy/MM/dd&quot;; // ie에서 인식하는 포맷 - yyyy/MM/dd, yyyy-MM-dd, yyyy.MM.dd
+            }
+            values.push(value);
+        }
+        provider.setFields(values);
+    },
+
+    /**
+     * 그리드의 컬럼 정보를 설정한다.
+     *
+     * @method setColumns
+     * @param {object}  gridView grid
+     * @param {array}   columns  그리드의 컬럼 정보
+     * &lt;pre&gt;
+     * columns : array (object or string)
+     *         : string 형식 - fieldName|text|width|align(center, near, far) - align이 center 인 경우는 생략가능
+     *         : object - string 형식의 fieldName, text, width, align 이외에 추가 설정이 필요한 경우는 object 형태를 이용한다.
+     * &lt;/pre&gt;
+     * @example
+     *     setupGrid: function(gridView) {
+     *         var columns = [
+     *             &quot;field1 | 필드1 | 150 | near&quot;,
+     *             &quot;field2 | 필드2 | 150&quot;,
+     *             &quot;field3 | 필드3 | 150&quot;
+     *         ];
+     *         GRID.setColumns(gridView, columns);
+     *     }
+     */
+    setColumns: function(gridView, columns) {
+        var fn = function(array) {
+            var values = [];
+            for (var i = 0, len = array.length; i &lt; len; i++) {
+                var column = array[i];
+                var value = {};
+                if (UT.isString(column)) {
+                    var token = column.split(&quot;|&quot;);
+                    value = {
+                        fieldName: token[0].trim(),
+                        header: {
+                            text: token[1].trim()
+                        },
+                        width: parseInt(token[2], 10),
+                        styles: {
+                            textAlignment: UT.isString(token[3]) ? token[3].trim() : &quot;center&quot;
+                        }
+                    };
+                } else if (UT.isObject(column)) {
+                    value = column;
+                }
+
+                if (UT.isObject(value.header) &amp;&amp; !UT.isEmpty(value.header.text)) {
+                    value.header.text = I18N.translate(value.header.text);
+                }
+                value.editable = false;
+                if (value.fieldName) {
+                    value.name = value.fieldName;
+                }
+                if (value.columns) {
+                    value.columns = fn(value.columns);
+                }
+                values.push(value);
+            }
+            return values;
+        };
+        gridView.setColumns(fn(columns));
+    },
+
+    /**
+     * 그리드 액션 컬럼으로 설정한다.
+     *
+     * @method setActionColumn
+     * @param {object}       gridView  grid
+     * @param {array|string} fieldName 필드명
+     * @example
+     *     setupGrid: function(gridView) {
+     *         GRID.setActionColumn(gridView, [&quot;field1&quot;]);
+     *     }
+     */
+    setActionColumn: function(gridView, fieldName) {
+        GRID.setColumnStyle(gridView, fieldName, DEF.styles.actionable);
+    },
+
+    /**
+     * 그리드 컬럼 visible 를 설정한다.
+     *
+     * @method setVisibleColumn
+     * @param {object}       gridView  grid
+     * @param {array|string} fieldName 필드명
+     * @example
+     *     setupGrid: function(gridView) {
+     *         GRID.setVisibleColumn(gridView, [&quot;field1&quot;], false);
+     *     }
+     */
+    setVisibleColumn: function(gridView, fieldName, visibleOption) {
+        gridView.setVisible({
+            visible: true
+        });
+        var fieldNames = [].concat(fieldName);
+        for (var i = 0, len = fieldNames.length; i &lt; len; i++) {
+            var column = gridView.columnByField(fieldNames[i]);
+            column.visible = visibleOption;
+            gridView.setColumn(column);
+        }
+        GRID.setColumnStyle(gridView, fieldName, DEF.styles.visible);
+    },
+
+
+    /**
+     * 그리드 편집가능 컬럼으로 설정한다.
+     *
+     * @method setEditableColumn
+     * @param {object}       gridView  grid
+     * @param {array|string} fieldName 필드명
+     * @example
+     *     setupGrid: function(gridView) {
+     *         GRID.setEditableColumn(gridView, [&quot;field1&quot;]);
+     *     }
+     */
+    setEditableColumn: function(gridView, fieldName) {
+        gridView.setEditOptions({
+            editable: true
+        });
+        var fieldNames = [].concat(fieldName);
+        for (var i = 0, len = fieldNames.length; i &lt; len; i++) {
+            var column = gridView.columnByField(fieldNames[i]);
+            column.editable = true;
+            column.tag = UT.isString(column.tag) ? column.tag + &quot;[editable]&quot; : &quot;[editable]&quot;;
+            gridView.setColumn(column);
+        }
+        GRID.setColumnStyle(gridView, fieldName, DEF.styles.editable);
+    },
+
+    /**
+     * 그리드 flexible 컬럼으로 설정한다.
+     *
+     * @method setFlexibleColumn
+     * @param {object}       gridView  grid
+     * @param {array|string} fieldName 필드명
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setFlexibleColumn(me.gridView, [&quot;field1&quot;]);
+     *     }
+     */
+    setFlexibleColumn: function(gridView, fieldName) {
+        gridView.setDisplayOptions({
+            fitStyle: &quot;fill&quot;
+        });
+        var fieldNames = [].concat(fieldName);
+        for (var i = 0, len = fieldNames.length; i &lt; len; i++) {
+            var column = gridView.columnByField(fieldNames[i]);
+            column.fillWidth = 1;
+            gridView.setColumn(column);
+        }
+    },
+
+    /**
+     * 그리드 코드 컬럼으로 설정한다
+     *
+     * @method setCodeColumn
+     * @param {object}       gridView  grid
+     * @param {array|string} fieldName 필드명
+     * @param {array}        codes     코드 목록
+     * @param {object}       [options]
+     * @param {string}       [options.valueKey=&quot;data&quot;]  코드 목록에서 value를 가르키는 key값
+     * @param {string}       [options.labelKey=&quot;label&quot;] 코드 목록에서 label을 가르키는 key값
+     * @param {string}       [options.defaultLabel]     코드 목록에서 defaultLabel 설정
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setCodeColumn(me.gridView, &quot;field1&quot;, me.codes.code1);
+     *     }
+     */
+    setCodeColumn: function(gridView, fieldName, codes, options) {
+        var values = [], labels = [];
+
+        options = options || {};
+        // default 값
+        var sValue = options.valueKey || &quot;data&quot;;
+        var sLabel = options.labelKey || &quot;label&quot;;
+
+        if (UT.isString(options.defaultLabel)) {
+            values.push(&quot;&quot;);
+            labels.push(options.defaultLabel);
+        }
+        // value, label 값을 추출한다.
+        for (var i in codes) {
+            values.push(codes[i][sValue]);
+            labels.push(codes[i][sLabel]);
+        }
+
+        var fieldNames = [].concat(fieldName);
+        for (var i = 0, len = fieldNames.length; i &lt; len; i++) {
+            var column = gridView.columnByField(fieldNames[i]);
+
+            // 컬럼에 values, labels 배열을 설정한다.
+            column.values = values;
+            column.labels = labels;
+            column.lookupDisplay = true; // 컬럼셀에 values 목록 중 셀의 값에 해당하는 위치에 있는 labels 항목의 값의 표시 여부를 지정한다.
+
+            // 그리드에 설정되어 있는 컬럼의 정보를 변경한다.
+            gridView.setColumn(column);
+        }
+    },
+
+    /**
+     * 그리드 콤보 컬럼으로 설정한다
+     *
+     * @method setComboColumn
+     * @param {object}       gridView  grid
+     * @param {array|string} fieldName 필드명
+     * @param {array}        codes     코드 목록
+     * @param {object}       [options]
+     * @param {string}       [options.valueKey=&quot;data&quot;]  코드 목록에서 value를 가르키는 key값
+     * @param {string}       [options.labelKey=&quot;label&quot;] 코드 목록에서 label을 가르키는 key값
+     * @param {string}       [options.defaultLabel]     코드 목록에서 defaultLabel 설정
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setComboColumn(me.gridView, &quot;field1&quot;, me.codes.code1);
+     *     }
+     */
+    setComboColumn: function(gridView, fieldName, codes, options) {
+        GRID.setCodeColumn(gridView, fieldName, codes, options);
+
+        var fieldNames = [].concat(fieldName);
+        for (var i = 0, len = fieldNames.length; i &lt; len; i++) {
+            var column = gridView.columnByField(fieldNames[i]);
+            column.editor = DEF.editor.combobox;
+            gridView.setColumn(column);
+        }
+    },
+
+    /**
+     * 그리드의 주콤보 컬럼에 대한 부콤보 컬럼으로 설정한다.
+     *
+     * @method setSubComboColumn
+     * @param {object} gridView  grid
+     * @param {string} masterFieldName                  주콤보 필드명
+     * @param {string} subFieldName                     부콤보 필드명
+     * @param {array}  codes                            코드 목록
+     * @param {object} [options]
+     * @param {string} [options.valueKey=&quot;data&quot;]        코드 목록에서 value를 가르키는 key값
+     * @param {string} [options.labelKey=&quot;label&quot;]       코드 목록에서 label을 가르키는 key값
+     * @param {string} [options.relationKey=&quot;relation&quot;] 코드 목록에서 주콤보 컬럼의 값을 가르키는 key값
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setComboColumn(me.gridView, &quot;field1&quot;, me.codes.code1);
+     *         GRID.setSubComboColumn(me.gridView, &quot;field1&quot;, &quot;field2&quot;, me.codes.code2);
+     *     }
+     */
+    setSubComboColumn: function(gridView, masterFieldName, subFieldName, codes, options) {
+        GRID.setComboColumn(gridView, subFieldName, codes, options);
+
+        options = options || {};
+        // default 값
+        var sValue = options.valueKey || &quot;data&quot;;
+        var sLabel = options.labelKey || &quot;label&quot;;
+        var sRelation = options.relationKey || &quot;relation&quot;;
+
+        var keys = [], values = [];
+        var masterColumn = gridView.columnByField(masterFieldName);
+        for (var i = 0, len = masterColumn.values.length; i &lt; len; i++) {
+            for (var j in codes) {
+                   if (masterColumn.values[i] === codes[j][sRelation]) {
+                    keys.push([masterColumn.values[i], codes[j][sValue]]);
+                    values.push([codes[j][sLabel]]);
+                }
+            }
+        }
+        var sourceId = &quot;lookup-&quot; + subFieldName;
+        gridView.addLookupSource({
+            id: sourceId,
+            levels: 2,
+            keys: keys,
+            values: values
+        });
+        var column = gridView.columnByField(subFieldName);
+        column.lookupSourceId = sourceId;
+        column.lookupKeyFields = [masterFieldName, subFieldName];
+        gridView.setColumn(column);
+    },
+
+    /**
+     * 그리드의 체크박스 컬럼으로 설정한다.
+     *
+     * @method setCheckboxColumn
+     * @param {object}       gridView  grid
+     * @param {array|string} fieldName 필드명
+     * @param {object}       [options]
+     * @param {object}       [options.styles=DEF.styles.formatYn]       Y/N으로 구분되는 컬럼의 format 스타일
+     * @param {object}       [options.renderer=DEF.renderer.checkboxYn] Y/N으로 구분되는 컬럼의 checkbox renderer
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setCheckboxColumn(me.gridView, [&quot;field1&quot;]);
+     *     }
+     */
+    setCheckboxColumn: function(gridView, fieldName, options) {
+        options = options || {};
+        var fieldNames = [].concat(fieldName);
+        for (var i = 0, len = fieldNames.length; i &lt; len; i++) {
+            var column = gridView.columnByField(fieldNames[i]);
+            column.styles =  options.styles || DEF.styles.formatYn;
+            column.renderer = options.renderer || DEF.renderer.checkboxYn;
+            column.tag = UT.isString(column.tag) ? column.tag + &quot;[editable]&quot; : &quot;[editable]&quot;;
+            gridView.setColumn(column);
+
+            column.styles = DEF.styles.editable;
+            gridView.setColumn(column);
+        }
+    },
+
+    /**
+     * 그리드의 정수 숫자 컬럼으로 설정한다.
+     *
+     * @method setIntegerColumn
+     * @param {object}       gridView  grid
+     * @param {array|string} fieldName 필드명
+     * @param {object}       [options]
+     * @param {number}       [options.maxLength=DEF.editor.integer.maxLength]               입력할 수 있는 문자의 최대 개수. 0 이면 제한이 없다
+     * @param {boolean}      [options.positiveOnly=DEF.editor.integer.positiveOnly]         true: 양수값만 입력할수 있다
+     * @param {string}       [options.numberFormat=DEF.styles.formatInteger.numberFormat]   &quot;#,000&quot; : comma
+     * @param {string}       [options.textAlignment=DEF.styles.formatInteger.textAlignment] &quot;far&quot;: 오른쪽 정렬
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setIntegerColumn(me.gridView, [&quot;field1&quot;]);
+     *     }
+     */
+    setIntegerColumn: function(gridView, fieldName, options) {
+        options = options || {};
+        var fieldNames = [].concat(fieldName);
+        for (var i = 0, len = fieldNames.length; i &lt; len; i++) {
+            var column = gridView.columnByField(fieldNames[i]);
+            column.editor = {
+                type: DEF.editor.integer.type,
+                integerOnly: DEF.editor.integer.integerOnly,
+                maxLength: options.maxLength || DEF.editor.integer.maxLength,
+                positiveOnly: UT.isBoolean(options.positiveOnly) ? options.positiveOnly : DEF.editor.integer.positiveOnly
+            };
+            column.styles = {
+                numberFormat: options.numberFormat || DEF.styles.formatInteger.numberFormat,
+                textAlignment: options.textAlignment || DEF.styles.formatInteger.textAlignment
+            };
+            gridView.setColumn(column);
+        }
+    },
+
+    /**
+     * 그리드의 소수점 숫자 컬럼으로 설정한다.
+     *
+     * @method setDecimalColumn
+     * @param {object}       gridView  grid
+     * @param {array|string} fieldName 필드명
+     * @param {object}       [options]
+     * @param {number}       [options.maxLength=DEF.editor.decimal.maxLength]               입력할 수 있는 문자의 최대 개수. 0 이면 제한이 없다
+     * @param {boolean}      [options.positiveOnly=DEF.editor.decimal.positiveOnly]         true: 양수값만 입력할수 있다
+     * @param {string}       [options.numberFormat=DEF.styles.formatDecimal.numberFormat]   &quot;#,000.00&quot; : comma, 소수점 2자리
+     * @param {string}       [options.textAlignment=DEF.styles.formatDecimal.textAlignment] &quot;far&quot;: 오른쪽 정렬
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setDecimalColumn(me.gridView, [&quot;field1&quot;]);
+     *     }
+     */
+    setDecimalColumn: function(gridView, fieldName, options) {
+        options = options || {};
+        var fieldNames = [].concat(fieldName);
+        for (var i = 0, len = fieldNames.length; i &lt; len; i++) {
+            var column = gridView.columnByField(fieldNames[i]);
+            column.editor = {
+                type: DEF.editor.decimal.type,
+                integerOnly: DEF.editor.decimal.integerOnly,
+                maxLength: options.maxLength || DEF.editor.decimal.maxLength,
+                positiveOnly: UT.isBoolean(options.positiveOnly) ? options.positiveOnly : DEF.editor.decimal.positiveOnly
+            };
+            column.styles = {
+                numberFormat: options.numberFormat || DEF.styles.formatDecimal.numberFormat,
+                textAlignment: options.textAlignment || DEF.styles.formatDecimal.textAlignment
+            };
+            gridView.setColumn(column);
+        }
+    },
+
+    /**
+     * 그리드의 DatePicker 컬럼으로 설정한다.
+     *
+     * @method setDatePickerColumn
+     * @param {object}       gridView  grid
+     * @param {array|string} fieldName 필드명
+     * @param {object}       [options]
+     * @param {object}       [options.editor=DEF.editor.datePicker]  DateCellEditor
+     * @param {object}       [options.styles=DEF.styles.formatDate]  날짜 format 스타일
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setDatePickerColumn(me.gridView, [&quot;field1&quot;]);
+     *     }
+     */
+    setDatePickerColumn: function(gridView, fieldName, options) {
+        options = options || {};
+        var fieldNames = [].concat(fieldName);
+        for (var i = 0, len = fieldNames.length; i &lt; len; i++) {
+            var column = gridView.columnByField(fieldNames[i]);
+
+            column.editor = options.editor || DEF.editor.datePicker;
+            column.styles = options.styles || DEF.styles.formatDate;
+            gridView.setColumn(column);
+        }
+    },
+
+    /**
+     * 그리드의 icon 컬럼으로 설정한다.
+     *
+     * @method setIconColumn
+     * @param {object}       gridView  grid
+     * @param {array|string} fieldName 필드명
+     * @param {object}       [options]
+     * @param {object}       [options.styles=DEF.styles.icons.search] 검색 icon 스타일 // DEF.styles.icons 참조.
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setIconColumn(me.gridView, [&quot;field1&quot;]);
+     *     }
+     */
+    setIconColumn: function(gridView, fieldName, styles) {
+        var fieldNames = [].concat(fieldName);
+
+        for (var i = 0, len = fieldNames.length; i &lt; len; i++) {
+            var column = gridView.columnByField(fieldNames[i]);
+            column.renderer = {
+                type: &quot;icon&quot;
+            };
+            column.imageList = DEF.icons.id;
+            if (styles === DEF.styles.icons.required) {
+                column.tag = UT.isString(column.tag) ? column.tag + &quot;[required-icon]&quot; : &quot;[required-icon]&quot;;
+            } else if (styles === DEF.styles.icons.attach) {
+                column.tag = UT.isString(column.tag) ? column.tag + &quot;[attach-icon]&quot; : &quot;[attach-icon]&quot;;
+            } else {
+                column.tag = UT.isString(column.tag) ? column.tag + &quot;[icon]&quot; : &quot;[icon]&quot;;
+            }
+            column.styles = styles || DEF.styles.icons.search;
+            gridView.setColumn(column);
+        }
+    },
+
+    /**
+     * 그리드의 dynamic style을 지정한다.
+     *
+     * @method setColumnDynamicStyle
+     * @param {object}       gridView  grid
+     * @param {array|string} fieldName 필드명
+     * @param {string}       criteria  조건식 (예)&quot;values[&#x27;field2&#x27;] &lt;&gt; &#x27;Y&#x27;&quot;
+     * @param {object}       styles    적용할 스타일
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setColumnDynamicStyle(me.gridView, [&quot;field1&quot;], &quot;values[&#x27;field2&#x27;] &lt;&gt; &#x27;Y&#x27;&quot;, {background: &quot;#fafafa&quot;});
+     *     }
+     */
+    setColumnDynamicStyle: function(gridView, fieldName, criteria, styles) {
+        var fieldNames = [].concat(fieldName);
+
+        for (var i = 0, len = fieldNames.length; i &lt; len; i++) {
+            var column = gridView.columnByField(fieldNames[i]);
+            column.dynamicStyles = [{
+                criteria: criteria,
+                styles: styles
+            }];
+            gridView.setColumn(column);
+        }
+    },
+
+    /**
+     * 그리드의 컬럼 스타일 지정
+     *
+     * @method setColumnStyle
+     * @param {object}       gridView  grid
+     * @param {array|string} fieldName 필드명
+     * @param {object}       styles    적용할 스타일
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setColumnStyle(me.gridView, [&quot;field1&quot;], {background: &quot;#fafafa&quot;});
+     *     }
+     */
+    setColumnStyle: function(gridView, fieldName, styles) {
+        var fieldNames = [].concat(fieldName);
+        for (var i = 0, len = fieldNames.length; i &lt; len; i++) {
+            var column = gridView.columnByField(fieldNames[i]);
+            column.styles = styles;
+            gridView.setColumn(column);
+        }
+    },
+
+    /**
+     * 그리드의 컬럼 프로퍼티 값 지정
+     *
+     * @method setColumnProperty
+     * @param {object}       gridView      grid
+     * @param {array|string} fieldName     필드명
+     * @param {string}       propertyName  프로퍼티 명
+     * @param {object}       propertyValue 프로퍼티 값
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setColumnProperty(me.gridView, &quot;field1&quot;, &quot;textInputCase&quot;, &quot;upper&quot;);
+     *     }
+     */
+    setColumnProperty: function(gridView, fieldName, propertyName, propertyValue) {
+        var fieldNames = [].concat(fieldName);
+        for (var i = 0, len = fieldNames.length; i &lt; len; i++) {
+            var column = gridView.columnByField(fieldNames[i]) || gridView.columnByName(fieldNames[i]);
+            gridView.setColumnProperty(column, propertyName, propertyValue);
+        }
+    },
+
+    /**
+     * 그리드의 action button 컬럼으로 설정한다.
+     *
+     * @method setActionButtonColumn
+     * @param {object}       gridView      grid
+     * @param {array|string} fieldName     필드명
+     * @param {function}     [clickedCallback()]         버튼 클릭 후 콜백함수
+     * @param {object}       clickedCallback().grid      grid
+     * @param {object}       clickedCallback().itemIndex itemIndex
+     * @param {object}       clickedCallback().column    column
+     * @async
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setActionButtonColumn(me.gridView, &quot;field1&quot;, function(grid, itemIndex, column) {
+     *             ...
+     *         });
+     *     }
+     */
+    setActionButtonColumn: function(gridView, fieldName, clickedCallback) {
+        var fieldNames = [].concat(fieldName);
+        for (var i = 0, len = fieldNames.length; i &lt; len; i++) {
+            var column = gridView.columnByField(fieldNames[i]);
+            column.tag = UT.isString(column.tag) ? column.tag + &quot;[button]&quot; : &quot;[button]&quot;;
+            column.button = &quot;action&quot;;
+            column.alwaysShowButton = true; //셀 버튼을 항상 표시합니다.
+            gridView.setColumn(column);
+        }
+        if (UT.isFunction(clickedCallback)) {
+            gridView.onCellButtonClicked = function(grid, itemIndex, column) {
+                clickedCallback.call(this, grid, itemIndex, column);
+            };
+        }
+    },
+
+    /**
+     * 그리드의 row를 그룹화 한다
+     *
+     * @method setColumnRowGroupBy
+     * @param {object}       gridView      grid
+     * @param {array|string} fieldName     필드명
+     * @param {object}       [options]     옵션
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setColumnRowGroupBy(me.gridView, &quot;field1&quot;, {mergeMode: false});
+     *     }
+     */
+    setColumnRowGroupBy: function(gridView, fieldName, options) {
+        var fieldNames = [].concat(fieldName);
+        options = options || {};
+        options.headerStatement = UT.isString(options.headerStatement) ? options.headerStatement : &quot;${columnHeader}: ${groupValue}&quot;;
+        gridView.groupBy(fieldNames);
+        gridView.setRowGroup(options);
+    },
+
+    /**
+     * 그리드의 row를 merge 한다.
+     *
+     * @method setColumnRowMerge
+     * @param {object}       gridView      grid
+     * @param {array|string} fieldName     필드명
+     * @param {object}       [options.criteria]     옵션
+     *             criteria 옵션은 해당 사이트 참고
+     *             참조 사이트
+     *                column cell merge
+                     http://demo.realgrid.com/Demo/ColumnCellMerging
+                    criteria 조건들
+                    http://demo.realgrid.com/Demo/ExpressionConcept
+                    merge시 데이타내용상단으로
+                    http://demo.realgrid.com/Demo/ColumnBlanking#
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         GRID.setColumnRowMerge(me.gridView, &quot;field1&quot;, {criteria: &quot;value&quot;});
+     *     }
+     */
+    setColumnRowMerge: function(gridView, fieldName, options) {
+        options = options || {
+            criteria : &quot;value&quot;
+        };
+        var fieldNames = [].concat(fieldName);
+        for (var i = 0, len = fieldNames.length; i &lt; len; i++) {
+            var column = gridView.columnByField(fieldNames[i]);
+            column.mergeRule = {
+                    criteria : options.criteria
+                    };
+            gridView.setColumn(column);
+        }
+    },
+
+    /**
+     * 그리드의 validator를 설정한다.
+     * &lt;br&gt;
+     * 설정 한 후에 필요한 곳에서 GRID.invalidData()를 호출하여 유효성 검사를 할 수 있다
+     *
+     * @method setValidator
+     * @param {object} gridView  grid
+     * @param {array}  validator 유효성 검사 설정
+     * @example
+     *     setupGrid: function() {
+     *         var me = this;
+     *         var validator = [];
+     *         validator.push({
+     *             fieldName: &quot;field1&quot;,
+     *             check: [&quot;required&quot;, &quot;!space&quot;, &quot;unique&quot;],
+     *             maxLength: 18
+     *         });
+     *         GRID.setValidator(me.gridView, validator);
+     *     }
+     */
+    setValidator: function(gridView, validator) {
+        var required = [];
+        for (var i = 0, len = validator.length; i &lt; len; i++) {
+            var column = gridView.columnByField(validator[i].fieldName);
+            if (column) {
+                if (UT.isArray(validator[i].check) &amp;&amp; validator[i].check.indexOf(&quot;required&quot;) &gt; -1) {
+                    required.push(validator[i].fieldName);
+                }
+                if (UT.isNumber(validator[i].maxLength)) {
+                    GRID.setColumnProperty(gridView, validator[i].fieldName, &quot;editor&quot;, {maxLength: validator[i].maxLength});
+                }
+            }
+        }
+        GRID.setIconColumn(gridView, required, DEF.styles.icons.required);
+        gridView.$$Custom$$.validator = function() { // 그리드의 커스텀 함수로 만듬.
+            return VALID.isValidGridData(gridView, validator);
+        };
+    },
+
+    /**
+     * 그리드의 데이터 유효성 검사
+     *
+     * @method invalidData
+     * @param  {object}   gridView grid
+     * @return {boolean}  true is invalid
+     * @example
+     *     onSaveList: function() {
+     *         var me = this;
+     *         if (GRID.invalidData(me.gridView)) {
+     *             return;
+     *         }
+     *     }
+     */
+    invalidData: function(gridView) {
+        if (gridView.isItemEditing()) {
+            gridView.commit();
+        }
+        if (UT.isFunction(gridView.$$Custom$$.validator)) {
+            return !gridView.$$Custom$$.validator();
+        }
+        return false;
+    },
+
+    /**
+     * 그리드 목록에서 신규/수정/삭제/체크 row의 목록을 반환한다
+     *
+     * @method allStateRows
+     * @param  {object} gridView grid
+     * @param  {object} [outputFormat=DEF.styles.outputFormat]  서버로 전송할 포맷 지정
+     * @return {object}
+     * &lt;pre&gt;
+     * {
+     *     created: [], // 신규
+     *     updated: [], // 수정
+     *     deleted: [], // 삭제
+     *     checked: []  // 체크
+     * }
+     * &lt;/pre&gt;
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         var rows = GRID.allStateRows(me.gridView);
+     *         me.$.saveInfo.body = {
+     *             insertData: rows.created,
+     *             updateData: rows.updated,
+     *             deleteData: rows.deleted
+     *         };
+     *         UT.save(me.$.saveInfo);
+     *     }
+     */
+    allStateRows: function(gridView, outputFormat) {
+        return {
+            created: GRID.createdStateRows(gridView, outputFormat),
+            updated: GRID.updatedStateRows(gridView, outputFormat),
+            deleted: GRID.deletedStateRows(gridView, outputFormat),
+            checked: GRID.checkedStateRows(gridView, outputFormat)
+        };
+    },
+
+    /**
+     * 그리드 목록에서 신규로 추가된 row의 목록을 반환한다
+     *
+     * @method createdStateRows
+     * @param  {object}  gridView grid
+     * @param  {object}  [outputFormat=DEF.styles.outputFormat]  서버로 전송할 포맷 지정
+     * @return {array}
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         var created = GRID.createdStateRows(me.gridView);
+     *         me.$.saveInfo.body = {
+     *             insertData: created
+     *         };
+     *         UT.save(me.$.saveInfo);
+     *     }
+     */
+    createdStateRows: function(gridView, outputFormat) {
+        if (gridView.isItemEditing()) {
+            gridView.commit();
+        }
+        outputFormat = outputFormat || DEF.styles.outputFormat;
+        var rows = [];
+        var provider = gridView.getDataProvider();
+        var created = provider.getStateRows(&quot;created&quot;);
+        for (var i = 0, len = created.length; i &lt; len; i++) {
+            // rows.push(provider.getJsonRow(created[i]));
+            rows.push(provider.getOutputRow(outputFormat, created[i]));
+        }
+        return rows;
+    },
+
+    /**
+     * 그리드 목록에서 수정된 row의 목록을 반환한다
+     *
+     * @method updatedStateRows
+     * @param  {object}  gridView grid
+     * @param  {object}  [outputFormat=DEF.styles.outputFormat]  서버로 전송할 포맷 지정
+     * @return {array}
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         var updated = GRID.updatedStateRows(me.gridView);
+     *         me.$.saveInfo.body = {
+     *             updateData: updated
+     *         };
+     *         UT.save(me.$.saveInfo);
+     *     }
+     */
+    updatedStateRows: function(gridView, outputFormat) {
+        if (gridView.isItemEditing()) {
+            gridView.commit();
+        }
+        outputFormat = outputFormat || DEF.styles.outputFormat;
+        var rows = [];
+        var provider = gridView.getDataProvider();
+        var updated = provider.getStateRows(&quot;updated&quot;);
+        for (var i = 0, len = updated.length; i &lt; len; i++) {
+            // rows.push(provider.getJsonRow(updated[i]));
+            rows.push(provider.getOutputRow(outputFormat, updated[i]));
+        }
+        return rows;
+    },
+
+    /**
+     * 그리드 목록에서 삭제된 row의 목록을 반환한다
+     *
+     * @method deletedStateRows
+     * @param  {object}  gridView grid
+     * @param  {object}  [outputFormat=DEF.styles.outputFormat]  서버로 전송할 포맷 지정
+     * @return {array}
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         var deleted = GRID.deletedStateRows(me.gridView);
+     *         me.$.saveInfo.body = {
+     *             deleteData: deleted
+     *         };
+     *         UT.save(me.$.saveInfo);
+     *     }
+     */
+    deletedStateRows: function(gridView, outputFormat) {
+        if (gridView.isItemEditing()) {
+            gridView.commit();
+        }
+        outputFormat = outputFormat || DEF.styles.outputFormat;
+        var rows = [];
+        var provider = gridView.getDataProvider();
+        var deleted = provider.getStateRows(&quot;deleted&quot;);
+        for (var i = 0, len = deleted.length; i &lt; len; i++) {
+            // rows.push(provider.getJsonRow(deleted[i]));
+            rows.push(provider.getOutputRow(outputFormat, deleted[i]));
+        }
+        return rows;
+    },
+
+    /**
+     * 그리드 목록의 checkbox에서 체크된 row의 목록을 반환한다
+     *
+     * @method checkedStateRows
+     * @param  {object}  gridView grid
+     * @param  {object}  [outputFormat=DEF.styles.outputFormat]  서버로 전송할 포맷 지정
+     * @return {array}
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         var checked = GRID.checkedStateRows(me.treeGridView);
+     *         for(var i=0, len = created.length; i &lt; len; i++) {
+     *             ...
+     *         }
+     *     }
+     */
+    checkedStateRows: function(gridView, outputFormat) {
+        if (gridView.isItemEditing()) {
+            gridView.commit();
+        }
+        outputFormat = outputFormat || DEF.styles.outputFormat;
+        var rows = [];
+        var provider = gridView.getDataProvider();
+        var checked = gridView.getCheckedRows();
+        for (var i = 0, len = checked.length; i &lt; len; i++) {
+            //rows.push(provider.getJsonRow(checked[i]));
+            rows.push(provider.getOutputRow(outputFormat, checked[i]));
+        };
+        return rows;
+    },
+
+    /**
+     * JSON checkedState Rows
+     */
+    checkedStateJsonRows: function(gridView) {
+        if (gridView.isItemEditing()) {
+            gridView.commit();
+        }
+        var rows = [];
+        var provider = gridView.getDataProvider();
+        var checked = gridView.getCheckedRows();
+        for (var i = 0, len = checked.length; i &lt; len; i++) {
+            rows.push(provider.getJsonRow(checked[i]));
+        };
+        return rows;
+    },
+
+    /**
+     * 팝업에서 선택된 목록 반환
+     * &lt;br&gt;
+     * 선택된 데이터가 없을 시 &quot;선택된 항목이 없습니다&quot; 메시지 출력됨
+     *
+     * @method selectedList
+     * @param  {object}   gridView grid
+     * @param  {function} selectedCallback(selected, itemIndex)          체크박스에에 의해 선택된 정보를 반환할 콜백 함수
+     * @param  {object}   selectedCallback(selected, itemIndex).selected 선택된 정보
+     * @param  {object}   selectedCallback(selected, itemIndex).index    선택된 dataRow와 연결된 itemIndex
+     * @param  {object}  [options]
+     * @param  {boolean} [options.checkable=true]             선택된 정보를 반환한 후에 해당 데이터의 check 가능 여부 설정
+     * @param  {boolean} [options.clearChecked=false]         선택된 정보를 반환한 후에 해당 데이터의 check를 해제할 지 여부 설정
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         GRID.selectedList(me.gridView, function(selected, itemIndex) {
+     *             me.fire(&quot;addto-operorg&quot;, selected);
+     *         });
+     *     }
+     */
+    selectedList: function(gridView, selectedCallback, options) {
+        if (gridView.isItemEditing()) {
+            gridView.commit();
+        }
+        options = options || {};
+        var selected = [], itemIndex = [];
+        var checked = gridView.getCheckedRows();
+        for (var i = 0, len = checked.length; i &lt; len; i++) {
+            if (UT.isBoolean(options.checkable) &amp;&amp; options.checkable === false) {
+                gridView.setCheckable(checked[i], false);
+            }
+            selected.push(gridView.getDataProvider().getJsonRow(checked[i]));
+            itemIndex.push(gridView.getItemIndex(checked[i]));
+        };
+        if (selected.length &gt; 0) {
+            if (UT.isBoolean(options.clearChecked) &amp;&amp; options.clearChecked === true) {
+                gridView.checkAll(false, true);
+                gridView.setAllCheck(false);
+            }
+            selectedCallback.call(this, selected, itemIndex);
+        } else {
+            UT.alert(I18N.translate(MSG[&quot;N1600&quot;])); // 선택된 항목이 없습니다
+        }
+    },
+
+    /**
+     * 그리드의 모든 데이터행을 리턴한다.
+     * &lt;br&gt;
+     * 트리 그리드일 경우에는 트리구조가 없는 구조로 리턴한다.
+     *
+     * @method allRows
+     * @param  {object}   gridView grid
+     * @param  {object}  [options]
+     * @param  {boolean} [options.exceptDeleted=false] 삭제된 row 제외.
+     * @param  {string} [options.datetimeFormat]
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         var all = GRID.allRows(me.gridView);
+     *         for (var i = 0, len = all.length; i &lt; len; i++) {
+     *             ...
+     *         }
+     *     }
+     */
+    allRows: function(gridView, options) {
+        if (gridView.isItemEditing()) {
+            gridView.commit();
+        }
+        options = options || {};
+        var provider = gridView.getDataProvider();
+        var rows = [];
+        if (UT.isFunction(gridView.setTreeOptions)) { // tree 이면
+            var flat = function(arr) {
+                if (!arr) {
+                    return [];
+                }
+                var flats = [];
+                for (var i = 0, len = arr.length; i &lt; len; i++) {
+                    var children = [];
+                    if (arr[i].rows) {
+                        children = children.concat(arr[i].rows);
+                        delete arr[i].rows;
+                    }
+                    flats.push(arr[i]);
+                    if (children.length &gt; 0) {
+                        flats = flats.concat(flat(children));
+                    }
+                }
+                return flats;
+            };
+            rows = flat(provider.getJsonRows(-1, true, &quot;rows&quot;)); // 전체 데이터
+        } else {
+            if(UT.isString(options.datetimeFormat)){
+                rows = provider.getOutputRows({datetimeFormat : options.datetimeFormat},0,-1);
+            }else{
+                rows = provider.getJsonRows(0, -1);
+            }
+        }
+        var filter = function(all) {
+            var filtered = [];
+            for (var i = 0, len = all.length; i &lt; len; i++) {
+                if (provider.getRowState(i) !== &quot;deleted&quot; &amp;&amp; provider.getRowState(i) !== &quot;createAndDeleted&quot;) {
+                    filtered.push(all[i]);
+                }
+            }
+            return filtered;
+        };
+        return options.exceptDeleted ? filter(rows) : rows;
+    },
+
+    /**
+     * 그리드 row 추가
+     *
+     * @method addRow
+     * @param  {object}       gridView         grid
+     * @param  {array|object} rowData          행 데이터 - rowData가 배열이이면 복수의 행, object이면 단일행 추가.
+     * @param  {string}       [position=&quot;top&quot;] 추가할 위치(top, bottom, before(현재row기준), after(현재row기준))
+     * @param  {function}     [addedCallback]  row가 추가된 후에 호출될 콜백 함수
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         GRID.addRow(me.gridView, {
+     *             field1: &quot;value1&quot;,
+     *             field2: &quot;value2&quot;
+     *         });
+     *     }
+     */
+    addRow: function(gridView, rowData, position, addedCallback) {
+        if (gridView.isItemEditing()) {
+            gridView.commit();
+        }
+        position = UT.isString(position) ? position.toLowerCase() : &quot;top&quot;;
+        var provider = gridView.getDataProvider();
+        switch(position) {
+        case &quot;before&quot;:
+            var index = gridView.getCurrent().itemIndex;
+            if (index &lt; 0) {
+                index = 0;
+            }
+            if (UT.isArray(rowData)) { // 배열
+                provider.insertRows(index, rowData);
+            } else {
+                provider.insertRow(index, rowData);
+            }
+            gridView.setCurrent({itemIndex: index});
+            break;
+        case &quot;after&quot;:
+            var index = gridView.getCurrent().itemIndex;
+            if (index &lt; 0) {
+                index = 0;
+                if (UT.isArray(rowData)) { // 배열
+                    provider.insertRows(index, rowData);
+                } else {
+                    provider.insertRow(index, rowData);
+                }
+            } else {
+                if (UT.isArray(rowData)) { // 배열
+                    provider.insertRows(index + 1, rowData);
+                } else {
+                    provider.insertRow(index + 1, rowData);
+                }
+            }
+            gridView.setCurrent({itemIndex: index + 1});
+            break;
+        case &quot;bottom&quot;:
+            if (UT.isArray(rowData)) { // 배열
+                provider.addRows(rowData);
+            } else {
+                provider.addRow(rowData);
+            }
+            gridView.setCurrent({itemIndex: provider.getRowCount() - 1});
+            break;
+        case &quot;top&quot;:
+        default:
+            if (UT.isArray(rowData)) { // 배열
+                provider.insertRows(0, rowData);
+            } else {
+                provider.insertRow(0, rowData);
+            }
+            gridView.setCurrent({itemIndex: 0});
+            break;
+        }
+        GRID.itemCountPropertyBinding(gridView);
+        if (UT.isFunction(addedCallback)) {
+            addedCallback.call(this);
+        }
+    },
+
+    /**
+     * 트리 그리드의 현재 노드 추가
+     *
+     * @method addCurrentRow
+     * @param  {object}       gridView grid
+     * @param  {function}     addedCallback()                        row가 추가된 후에 호출될 콜백 함수
+     * @param  {object}       addedCallback().parentRow              상위 row의 값. null 이면 root를 뜻함.
+     * @param  {function}     addedCallback().setValue(value)        추가된 row에 저장할 value를 할당하는 함수
+     * @param  {array|object} addedCallback().setValue(value).value  추가된 row에 저장할 value. value가 배열이면 복수의 행, object이면 단일행 추가.
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         GRID.addCurrentRow(me.gridView, function(parentRow, setValue) {
+     *             setValue({
+     *                 field1: parentRow.field1,
+     *                 field2: &quot;value2&quot;
+     *             });
+     *         });
+     *     }
+     */
+    addCurrentRow: function(gridView, addedCallback) {
+        if (UT.isFunction(gridView.setTreeOptions)) {// 트리인 경우에만.
+            if (gridView.isItemEditing()) {
+                gridView.commit();
+            }
+            var provider = gridView.getDataProvider();
+            var current = gridView.getCurrent();
+            var parentId = provider.getParent(current.dataRow);
+
+            addedCallback.call(this, provider.getJsonRow(parentId), function(value) {
+                if (UT.isArray(value)) { // 배열
+                    for (var i = 0, len = value.length; i &lt; len; i++) {
+                        var childId = provider.addChildRow(parentId, value[i]);
+                        gridView.setCurrent({itemIndex: gridView.getItemIndex(childId)});
+                    }
+                } else {
+                    var childId = provider.addChildRow(parentId, value);
+                    gridView.setCurrent({itemIndex: gridView.getItemIndex(childId)});
+                }
+                GRID.itemCountPropertyBinding(gridView);
+            });
+        }
+    },
+
+    /**
+     * 트리 그리드의 하위 노드 추가
+     *
+     * @method addChildRow
+     * @param {object}       gridView grid
+     * @param {function}     addedCallback()                        row가 추가된 후에 호출될 콜백 함수
+     * @param {object}       addedCallback().parentRow              상위 row의 값
+     * @param {function}     addedCallback().setValue(value)        추가된 row에 저장할 value를 할당하는 함수.
+     * @param {array|object} addedCallback().setValue(value).value  추가된 row에 저장할 value. value가 배열이면 복수의 행, object이면 단일행 추가.
+     * @param {object}       [options]
+     * @param {string}       [options.addableMode=&quot;strict&quot;] 추가 옵션
+     * &lt;pre&gt;
+     * &quot;strict&quot; - 신규행의 하위 노드는 추가하지 못한다. &quot;신규 노드에는 하위노드를 추가할 수 없습니다&quot; 메시지 출력됨.
+     * &quot;always&quot; - 제한 없이 항상 추가 가능
+     * &lt;/pre&gt;
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         GRID.addChildRow(me.gridView, function(parentRow, setValue) {
+     *             setValue({
+     *                 field1: parentRow.field1,
+     *                 field2: &quot;value2&quot;
+     *             });
+     *         });
+     *     }
+     */
+    addChildRow: function(gridView, addedCallback, options) {
+        if (UT.isFunction(gridView.setTreeOptions)) {// 트리인 경우에만.
+            if (gridView.isItemEditing()) {
+                gridView.commit();
+            }
+            options = options || {};
+            var provider = gridView.getDataProvider();
+            var current = gridView.getCurrent();
+            var parentId = current.dataRow;
+            if (parentId &lt; 0) { // 현재 노드가 없으면 하위 노드 추가를 할 수 없다.
+                return;
+            }
+            var addableMode = options.addableMode || &quot;&quot;;
+            addableMode = addableMode.toLowerCase() === &quot;always&quot; ? addableMode : &quot;strict&quot;;
+            if (addableMode === &quot;strict&quot; &amp;&amp; provider.getRowState(parentId) === &quot;created&quot;) {
+                UT.alert(I18N.translate(MSG[&quot;N1800&quot;])); // 신규 노드에는 하위노드를 추가할 수 없습니다
+                return;
+            } else {
+                addedCallback.call(this, provider.getJsonRow(parentId), function(value) {
+                    if (UT.isArray(value)) { // 배열
+                        for (var i = 0, len = value.length; i &lt; len; i++) {
+                            var childId = provider.addChildRow(parentId, value[i]);
+                            gridView.expand(current.itemIndex);
+                            gridView.setCurrent({itemIndex: gridView.getItemIndex(childId)});
+                        }
+                    } else {
+                        var childId = provider.addChildRow(parentId, value);
+                        gridView.expand(current.itemIndex);
+                        gridView.setCurrent({itemIndex: gridView.getItemIndex(childId)});
+                    }
+                    GRID.itemCountPropertyBinding(gridView);
+                });
+            }
+        }
+    },
+
+    /**
+     * 그리드의 목록데이터 지우기
+     *
+     * @method clearRows
+     * @param {object} gridView grid
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         GRID.clearRows(me.gridView);
+     *     }
+     */
+    clearRows: function(gridView) {
+        gridView.getDataProvider().clearRows();
+        GRID.itemCountPropertyBinding(gridView);
+    },
+
+    /**
+     * 그리드의 목록 로드 - 그리드에 목록데이터 셋팅
+     *
+     * @method setRows
+     * @param {object}   gridView   grid
+     * @param {array}    rows       목록데이터
+     * @param {function} [callback] 데이터 셋팅 완료 후 호출될 콜백 함수
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         ...
+     *         GRID.setRows(me.gridView, rows);
+     *     }
+     */
+    setRows: function(gridView, rows, callback) {
+        var provider = gridView.getDataProvider();
+        provider.setRows(rows);
+        GRID.itemCountPropertyBinding(gridView);
+        if (UT.isFunction(callback)) {
+            callback.call(this);
+        }
+    },
+
+    /**
+     * 트리 그리드의 목록 로드 - 그리드에 목록데이터 셋팅
+     *
+     * @method setTreeRows
+     * @param {object}   gridView      grid
+     * @param {array}    rows          목록데이터
+     * @param {string}   treeFieldName 트리가 적용될 필드명
+     * @param {function} [callback]    데이터 셋팅 완료 후 호출될 콜백 함수
+     * @async
+     * @example
+     *     someFunction: function(e, res) {
+     *         var me = this;
+     *         ...
+     *         GRID.setTreeRows(me.gridView, rows, &quot;tree&quot;, function() {
+     *             ...
+     *         });
+     *     }
+     */
+    setTreeRows: function(gridView, rows, treeFieldName, callback) {
+        var provider = gridView.getDataProvider();
+        provider.setRows(rows, treeFieldName, false);
+        GRID.itemCountPropertyBinding(gridView);
+        if (UT.isFunction(callback)) {
+            callback.call(this);
+        }
+    },
+
+    /**
+     * 그리드의 목록 조회 요청
+     *
+     * @method findList
+     * @param {object} gridView grid
+     * @param {object} ajax     sc-ajax 객체
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         GRID.findList(me.gridView, me.$.findList);
+     *     }
+     */
+    findList: function(gridView, ajax) {
+        UT.request(ajax);
+    },
+
+    /**
+     * 그리드의 목록 데이터 저장
+     * &lt;br&gt;
+     * &quot;저장 하시겠습니까?&quot; 또는 &quot;변경된 내용이 없습니다&quot; 메시지 출력
+     *
+     * @method saveList
+     * @param {object}   gridView grid
+     * @param {function} callback()                     &quot;저장 하시겠습니까?&quot; confirm 에서 ok 가 클릭된 후 호출될 콜백 함수
+     * @param {array}    callback().created             신규 추가된 데이터
+     * @param {array}    callback().updated             수정된 데이터
+     * @param {function} callback().request(ajax)       서버로 저장을 요청할 콜백 함수
+     * @param {object}   callback().request(ajax).ajax  sc-ajax 객체
+     * @param {object}   [optons]
+     * @param {boolean}  [optons.force=false]           true 이면 변경된 내용이 없어도 confirm 으로 수행된다.
+     * @param {object}   [optons.outputFormat=DEF.styles.outputFormat]  서버로 전송할 포맷 지정
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         GRID.saveList(me.gridView, function(created, updated, request) {
+     *             me.$.saveList.body = {
+     *                 insertData: created,
+     *                 updateData: updated
+     *             };
+     *             request(me.$.saveList);
+     *         });
+     *     }
+     */
+    saveList: function(gridView, callback, options) {
+        options = options || {};
+        var force = UT.isBoolean(options.force) ? options.force : false;
+        var outputFormat = options.outputFormat || DEF.styles.outputFormat;
+        var rows = GRID.allStateRows(gridView, outputFormat);
+        if (rows.created.length &gt; 0 || rows.updated.length &gt; 0 || force) {
+            UT.confirm(I18N.translate(MSG[&quot;N1200&quot;]), function() { // 저장 하시겠습니까?
+                callback.call(this, rows.created, rows.updated, function(ajax) {
+                    UT.request(ajax);
+                });
+            });
+        } else {
+            UT.alert(I18N.translate(MSG[&quot;N1700&quot;])); // 변경된 내용이 없습니다
+        }
+    },
+
+    /**
+     * 그리드의 row 삭제
+     * &lt;br&gt;
+     * &quot;삭제 하시겠습니까?&quot; 또는 &quot;수정중인 데이터가 있습니다. 삭제 하시겠습니까?&quot; 또는 &quot;선택된 항목이 없습니다&quot; 메시지 출력
+     *
+     * @method deleteList
+     * @param {object}   gridView grid
+     * @param {function} callback()                     &quot;삭제 하시겠습니까?&quot; confirm 에서 ok 가 클릭된 후 호출될 콜백 함수
+     * @param {array}    callback().deleted             삭제된 데이터
+     * @param {function} callback().request(ajax)       서버로 삭제를 요청할 콜백 함수
+     * @param {object}   callback().request(ajax).ajax  sc-ajax 객체
+     * @param {object}   [optons]
+     * @param {string}   [optons.message]               &quot;삭제 하시겠습니까?&quot; 와 다른 메시지를 출력할 경우 지정
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         GRID.deleteList(me.gridView, function(deleted, request) {
+     *             if (deleted.length &gt; 0) {
+     *                 me.$.deleteList.body = {
+     *                    deleteMenus: deleted
+     *                 }
+     *                 request(me.$.deleteList);
+     *             }
+     *         });
+     *     }
+     */
+    deleteList: function(gridView, callback, options) {
+        options = options || {};
+        var checked = gridView.getCheckedRows();
+        if (checked.length &gt; 0) {
+            var provider = gridView.getDataProvider();
+            var updated = provider.getStateRows(&quot;updated&quot;);
+
+            var deletes = []; // 기존 &amp; checked
+            var creates = []; // 신규 &amp; checked
+            var updates = []; // 수정중
+
+            for (var i = 0, len = updated.length; i &lt; len; i++) {
+                if (gridView.isCheckedItem(updated[i]) === false) {
+                    updates.push(updated[i]);
+                }
+            }
+            for (var i = 0, len = checked.length; i &lt; len; i++) {
+                var state = provider.getRowState(checked[i]);
+                if (state === &quot;none&quot; || state === &quot;updated&quot;) {
+                    deletes.push(provider.getJsonRow(checked[i]));
+                } else if (state === &quot;created&quot;) {
+                    creates.push(checked[i]);
+                }
+            };
+
+            var message = options.message || I18N.translate(MSG[&quot;N1300&quot;]); // 삭제 하시겠습니까?
+            if (updates.length &gt; 0) {
+                message = I18N.translate(MSG[&quot;N1400&quot;]); // 수정중인 데이터가 있습니다. 삭제 하시겠습니까?
+            }
+            UT.confirm(message, function(btn) {
+                provider.removeRows(checked); // grid에서 row 제거.
+                GRID.itemCountPropertyBinding(gridView);
+
+                callback.call(this, deletes, function(ajax) {
+                    UT.request(ajax);
+                });
+            });
+        } else {
+            UT.alert(I18N.translate(MSG[&quot;N1600&quot;])); // 선택된 항목이 없습니다
+        }
+    },
+
+    /**
+     * 그리드의 목록 로드 완료 - 그리드에 목록데이터 셋팅
+     *
+     * @method completeFindList
+     * @param {object}   gridView   grid
+     * @param {array}    rows       목록데이터
+     * @param {function} [callback] 데이터 셋팅 완료 후 호출될 콜백 함수
+     * @async
+     * @example
+     *     someFunction: function(e, res) {
+     *         var me = this;
+     *         GRID.completeFindList(me.gridView, res.response);
+     *     }
+     */
+    completeFindList: function(gridView, rows, callback) {
+        GRID.setRows(gridView, rows, callback);
+    },
+
+    /**
+     * 트리 그리드의 목록 로드 완료 - 그리드에 목록데이터 셋팅
+     *
+     * @method completeTreeFindList
+     * @param {object}   gridView      grid
+     * @param {array}    rows          목록데이터
+     * @param {string}   treeFieldName 트리가 적용될 필드명
+     * @param {function} [callback]    데이터 셋팅 완료 후 호출될 콜백 함수
+     * @async
+     * @example
+     *     someFunction: function(e, res) {
+     *         var me = this;
+     *         GRID.completeTreeFindList(me.gridView, res.response, &quot;tree&quot;, function() {
+     *             ...
+     *         });
+     *     }
+     */
+    completeTreeFindList: function(gridView, rows, treeFieldName, callback) {
+        GRID.setTreeRows(gridView, rows, treeFieldName, callback);
+    },
+
+    /**
+     * 그리드의 목록 데이터 저장 완료
+     * &lt;br&gt;
+     * &quot;요청을 완료 하였습니다&quot; 또는 &quot;오류가 발생하였습니다.\n관리자에게 문의하세요&quot; 메시지 출력
+     *
+     * @method completeSaveList
+     * @param {object}   gridView          grid
+     * @param {object}   result            서버에서의 처리 결과
+     * @param {function} [successCallback] 성공시 호출될 콜백 함수
+     * @param {function} [failureCallback] 실패시 호출될 콜백 함수
+     * @async
+     * @example
+     *     someFunction: function(e, res) {
+     *         var me = this;
+     *         GRID.completeSaveList(me.gridView, res.response, function() {
+     *             ...
+     *         });
+     *     }
+     */
+    completeSaveList: function(gridView, result, successCallback, failureCallback) {
+        UT.completeRequest({
+            result: result,
+            success: {
+                message: I18N.translate(MSG[&quot;N1500&quot;]), // 요청을 완료 하였습니다
+                callback: successCallback
+            },
+            failure: {
+                message: UT.failureMessage(result), // 오류가 발생하였습니다.\n관리자에게 문의하세요
+                callback: failureCallback
+            }
+        });
+    },
+
+    /**
+     * 그리드의 목록 데이터 삭제 완료
+     * &lt;br&gt;
+     * &quot;요청을 완료 하였습니다&quot; 또는 &quot;오류가 발생하였습니다.\n관리자에게 문의하세요&quot; 메시지 출력
+     *
+     * @method completeDeleteList
+     * @param {object}   gridView          grid
+     * @param {object}   result            서버에서의 처리 결과
+     * @param {function} [successCallback] 성공시 호출될 콜백 함수
+     * @param {function} [failureCallback] 실패시 호출될 콜백 함수
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         GRID.completeDeleteList(me.gridView, res.response, function() {
+     *             ...
+     *         });
+     *     }
+     */
+    completeDeleteList: function(gridView, result, successCallback, failureCallback) {
+        UT.completeRequest({
+            result: result,
+            success: {
+                message: I18N.translate(MSG[&quot;N1500&quot;]), // 요청을 완료 하였습니다
+                callback: successCallback
+            },
+            failure: {
+                message: UT.failureMessage(result), // 오류가 발생하였습니다.\n관리자에게 문의하세요
+                callback: failureCallback
+            }
+        });
+    },
+
+    /**
+     * 트리 그리드의 체크 cell 이 클릭 되었을때 이벤트
+     *
+     * @method onCheckCellClicked
+     * @param {object} gridView          grid
+     * @param {object} cell              셀 정보
+     * @param {object} [options]
+     * @param {boolean}[options.children=true] true: 자식 노드들도 동일한 check 값을 적용
+     * @param {boolean}[options.ancestor=true] true: 조상 노드들도 동일한 check 값을 적용. uncheck시에는 클릭된 cell 과 동일한 레벨에 check 된 것이 없어야 부모 노드가 uncheck 된다
+     * @param {object} [options.values] true 값, false 값 정의
+     * @param {string} [options.values.trueValue=&quot;Y&quot;] true 값
+     * @param {string} [options.values.falseValue=&quot;N&quot;] false 값
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         me.gridView.onDataCellClicked = function(grid, cell) {
+     *             if(cell.fieldName == &quot;field1&quot;) {
+     *                 GRID.onCheckCellClicked(grid, cell, {children: true, ancestor: true});
+     *             }
+     *         }
+     *
+     *     }
+     */
+    onCheckCellClicked: function(gridView, cell, options) {
+        options = options || {};
+        var children = UT.isBoolean(options.children) ? options.children : true;
+        var ancestor = UT.isBoolean(options.ancestor) ? options.ancestor : true;
+        var values = options.values || { trueValue: &quot;Y&quot;, falseValue: &quot;N&quot; };
+
+        var fieldName = cell.fieldName;
+        var provider = gridView.getDataProvider();
+
+        setTimeout(function() { // 이벤트가 끝나기 전까지 값이 바뀌지 않기 때문에.
+            var data = provider.getJsonRow(cell.dataRow);
+            var checkedValue = data[fieldName];
+            if (children) {
+                var checker1 = function(dataRow, value) {
+                    provider.setValue(dataRow, fieldName, value);
+                    var children = provider.getChildren(dataRow);
+                    if (children != null) {
+                        for (var i = 0, len = children.length; i &lt; len; i++) {
+                            checker1(children[i], value);
+                        }
+                    }
+                };
+                checker1(cell.dataRow, checkedValue);
+                gridView.expand(cell.itemIndex, true);
+            }
+
+            if (ancestor) {
+                if (checkedValue === values.trueValue) {
+                    var ancestors = provider.getAncestors(cell.dataRow);
+                    for (var i = 0, len = ancestors.length; i &lt; len; i++) {
+                        provider.setValue(ancestors[i], fieldName, checkedValue);
+                    }
+                } else {
+                    var checker2 = function(dataRow, value) {
+                        provider.setValue(dataRow, fieldName, value);
+                        var parent = provider.getParent(dataRow);
+                        if (parent != null &amp;&amp; parent &gt; -1) {
+                            var children = provider.getChildren(parent);
+                            var existTrueValue = false;
+                            for (var i = 0, len = children.length; i &lt; len; i++) {
+                                var dataChild = provider.getJsonRow(children[i]);
+                                if (dataChild[fieldName] === values.trueValue) {
+                                    existTrueValue = true;
+                                    break;
+                                }
+                            }
+                            if (existTrueValue === false) {
+                                checker2(parent, checkedValue);
+                                gridView.expand(parent, true);
+                            }
+                        }
+                    };
+                    checker2(cell.dataRow, checkedValue);
+                }
+            }
+
+        }, 10);
+
+    },
+
+    /**
+     * 그리드의 주어진 row의 하위 모든 leaf 노드의 rowId 만 리턴한다.
+     *
+     * @method getTreeLeafRowIds
+     * @param {object} gridView grid
+     * @param {number} rowId    데이터행 index
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         var leafs = GRID.getTreeLeafRowIds(me.gridView, -1); // -1 이면 전체
+     *         me.gridView.setCellStyles(leafs, &quot;field1&quot;, DEF.styles.actionable.id); // leaf 노드만 actionable
+     *     }
+     */
+    getTreeLeafRowIds: function(gridView, rowId) {
+        var provider = gridView.getDataProvider();
+        var all = provider.getDescendants(rowId);
+        var leafs = [];
+        for (var i = 0, len = all.length; i &lt; len; i++) {
+            if (provider.getChildCount(all[i]) === 0) {
+                leafs.push(all[i]);
+            }
+        }
+        return leafs;
+    },
+
+    /**
+     * 그리드의 체크된 row를 위로 이동시킨다
+     *
+     * @method moveUp
+     * @param {object}   gridView   grid
+     * @param {function} [callback] 이동 후 호출될 콜백함수
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         GRID.moveUp(me.gridView, function() {
+     *             ...
+     *         });
+     *     }
+     */
+    moveUp: function(gridView, callback) {
+        var checked = gridView.getCheckedRows();
+        if (checked.length &gt; 0) {
+            var provider = gridView.getDataProvider();
+            for (var i = 0, len = checked.length; i &lt; len; i++) {
+                if (checked[i] &gt; 1) {
+                    if (gridView.isCheckedItem(checked[i] - 1) === false) {
+                        provider.moveRow(checked[i], checked[i] - 1);
+                        gridView.checkItem(checked[i], false);
+                        gridView.checkItem(checked[i] - 1, true);
+                    }
+                }
+            }
+        }
+        if (UT.isFunction(callback)) {
+            callback.call(this);
+        }
+    },
+
+    /**
+     * 그리드의 체크된 row를 아래로 이동시킨다
+     *
+     * @method moveDown
+     * @param {object}   gridView   grid
+     * @param {function} [callback] 이동 후 호출될 콜백함수
+     * @async
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         GRID.moveDown(me.gridView, function() {
+     *             ...
+     *         });
+     *     }
+     */
+    moveDown: function(gridView, callback) {
+        var checked = gridView.getCheckedRows();
+        if (checked.length &gt; 0) {
+            var provider = gridView.getDataProvider();
+            var rowCount = provider.getRowCount();
+            for (var len = checked.length, i = len - 1; i &gt;= 0; i--) { // 아래부터 이동
+                if (checked[i] &lt; rowCount - 1) {
+                    if (gridView.isCheckedItem(checked[i] + 1) === false) {
+                        provider.moveRow(checked[i], checked[i] + 1);
+                        gridView.checkItem(checked[i], false);
+                        gridView.checkItem(checked[i] + 1, true);
+                    }
+                }
+            }
+        }
+        if (UT.isFunction(callback)) {
+            callback.call(this);
+        }
+    },
+
+    /**
+     * 그리드의 checkBar 헤더 visible 설정
+     *
+     * @method visibleCheckBarHeader
+     * @param {object}  gridView grid
+     * @param {boolean} visible  true is visible
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         GRID.visibleCheckBarHeader(me.gridView, false);
+     *     }
+     */
+    visibleCheckBarHeader: function(gridView, visible) {
+        gridView.setCheckBar({ // header의 전체 선택/해제 기능
+            showAll: visible
+        });
+    },
+
+    /**
+     * 그리드의 소팅 기능 여부 설정
+     *
+     * @method sortable
+     * @param {object}  gridView grid
+     * @param {boolean} sortable true is sortable
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         GRID.sortable(me.gridView, false); // 소팅기능 없음
+     *     }
+     */
+    sortable: function(gridView, sortable) {
+        gridView.setSortingOptions({
+            enabled: sortable
+        });
+    },
+
+    /**
+     * 그리드의 읽기 전용 설정
+     *
+     * @method readOnly
+     * @param {object}  gridView grid
+     * @param {boolean} readonly true is readonly
+     * @param {array|string} exFieldName 제외 필드명
+     * @example
+     *     someFunction: function() {
+     *         var me = this;
+     *         if (...) {
+     *             GRID.readOnly(me.gridView, true);
+     *         } else {
+     *             GRID.readOnly(me.gridView, false);
+     *         }
+     *     }
+     */
+    readOnly: function(gridView, readonly, exFieldName){
+        if (readonly) {
+            if (typeof gridView.$$Custom$$.editables === &quot;undefined&quot;) {
+                gridView.$$Custom$$.editables = [];
+            }
+            if (typeof gridView.$$Custom$$.visibles === &quot;undefined&quot;) {
+                gridView.$$Custom$$.visibles = {
+                    checkBar: gridView.getCheckBar().visible,
+                    stateBar: gridView.getStateBar().visible,
+                    icons: [],
+                    requiredIcons: [],
+                    buttons: []
+                };
+            }
+            var columnNames = gridView.getColumnNames(false);
+            for (var i in columnNames) {
+                var columnName = columnNames[i];
+                var column = gridView.columnByName(columnName);
+
+                if(!!exFieldName &amp;&amp; exFieldName.indexOf(columnName) &gt; -1) {
+                    continue;
+                }
+
+                if (UT.isString(column.tag) &amp;&amp; column.tag.indexOf(&quot;[editable]&quot;) &gt; -1) {
+                    if (gridView.$$Custom$$.editables.indexOf(columnName) === -1) {
+                        gridView.$$Custom$$.editables.push(columnName);
+                    }
+                }
+                if (UT.isString(column.tag) &amp;&amp; column.tag.indexOf(&quot;[required-icon]&quot;) &gt; -1) {
+                    if (gridView.$$Custom$$.visibles.requiredIcons.indexOf(columnName) === -1) {
+                        gridView.$$Custom$$.visibles.requiredIcons.push(columnName);
+                    }
+                }
+                if (UT.isString(column.tag) &amp;&amp; column.tag.indexOf(&quot;[icon]&quot;) &gt; -1 &amp;&amp; column.visible === true) {
+                    if (gridView.$$Custom$$.visibles.icons.indexOf(columnName) === -1) {
+                        gridView.$$Custom$$.visibles.icons.push(columnName);
+                    }
+                }
+                if (UT.isString(column.tag) &amp;&amp; column.tag.indexOf(&quot;[button]&quot;) &gt; -1 &amp;&amp; column.buttonVisibility !== &quot;hidden&quot;) {
+                    gridView.setColumnProperty(column, &quot;buttonVisibility&quot;, &quot;hidden&quot;);
+                    gridView.$$Custom$$.visibles.buttons.push({columnName: columnName, visibility: column.buttonVisibility});
+                }
+            }
+            GRID.setColumnStyle(gridView, gridView.$$Custom$$.editables, DEF.styles.readonly);
+            GRID.setColumnStyle(gridView, gridView.$$Custom$$.visibles.requiredIcons, DEF.styles.icons.empty);
+            GRID.setColumnProperty(gridView, gridView.$$Custom$$.visibles.icons, &quot;visible&quot;, false);
+            gridView.setOptions({
+               checkBar: { visible: false },
+               stateBar: { visible: false }
+            });
+            gridView.setEditOptions({
+                editable: false
+            });
+
+        } else {
+            if (UT.isArray(gridView.$$Custom$$.editables)) {
+                GRID.setColumnStyle(gridView, gridView.$$Custom$$.editables, DEF.styles.editable);
+            }
+            if (typeof gridView.$$Custom$$.visibles === &quot;object&quot;) {
+                if (UT.isArray(gridView.$$Custom$$.visibles.requiredIcons)) {
+                    GRID.setColumnStyle(gridView, gridView.$$Custom$$.visibles.requiredIcons, DEF.styles.icons.required);
+                }
+                if (UT.isArray(gridView.$$Custom$$.visibles.icons)) {
+                    GRID.setColumnProperty(gridView, gridView.$$Custom$$.visibles.icons, &quot;visible&quot;, true);
+                }
+                for (var i = 0, len = gridView.$$Custom$$.visibles.buttons.length; i &lt; len; i++) {
+                    var button = gridView.$$Custom$$.visibles.buttons[i];
+                    gridView.setColumnProperty(button.columnName, &quot;buttonVisibility&quot;, button.visibility);
+                }
+                gridView.setOptions({
+                    checkBar: { visible: gridView.$$Custom$$.visibles.checkBar },
+                    stateBar: { visible: gridView.$$Custom$$.visibles.stateBar }
+                });
+            }
+            gridView.setEditOptions({
+                editable: true
+            });
+            delete gridView.$$Custom$$.editables;
+            delete gridView.$$Custom$$.visibles;
+        }
+    }
+};
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<sc-link rel="import" href="es-notice-management.html"></sc-link>
+<sc-link rel="import" href="es-notice-info.html"></sc-link>
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 공지사한 광리
+    ** @Description     : 
+    ** @Author          : jhPark
+    ** @Create Date     : 2021.08.19
+    ** @History         : 2021.08.19 jhPark 최초작성
+    ******************************************************************************************
+-->
+
+<dom-module id="em-notice-management">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<div class="hbox flex">
+			<es-notice-management id="noticeListCon" class="flex"
+				on-find-noticeinfo="onFindNoticeInfo"
+				on-init-notice="onInitNotice"></es-notice-management>
+			<div class="hspace-10"></div>
+	        <es-notice-info id="noticeInfoCon" class="flex"
+	        	on-find-list="onFindNoticeList"></es-notice-info>
+        </div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-notice-management',
+			
+			onFindNoticeInfo : function(e, data){
+                var me = this;
+                me.$.noticeInfoCon.load(data);
+			},
+			
+			onFindNoticeList: function() {
+                var me = this;
+                me.$.noticeListCon.onSearch(true);
+            },
+			
+			onInitNotice : function(){
+                var me  = this;
+                me.$.noticeInfoCon.initNotice();
+			}
+		});
+	</script>
+
+
+</dom-module>

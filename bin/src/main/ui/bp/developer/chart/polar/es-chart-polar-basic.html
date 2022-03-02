@@ -1,0 +1,121 @@
+<dom-module id="es-chart-polar-basic">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-polar-basic',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "name": "Highcharts:Polar chart",
+			    "width": 500,
+			    "type": "polarcolumn",
+			    "title": "Highcharts Polar Chart",
+			    "plotArea": {
+			        "circular": true
+			    },
+			    "xAxes": {
+			        "tick": {
+			            "styles": {
+			                "suffix": "°"
+			            }
+			        }
+			    },
+			    "yAxes": {
+			    },
+			    "series": [{
+			        "type": "polarcolumn",
+			        "name": "Column",
+			        "itemWidth": 1,
+			        "items": [8, 7, 6, 5, 4, 3, 2, 1],
+			        "label": {
+			            "styles": {
+			                "fontSize": 12
+			            }
+			        },
+			        "styles": {
+			            "fill": "#7cb5ec"
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }, {
+			        "type": "polarline",
+			        "name": "Line",
+			        "items": [1, 2, 3, 4, 5, 6, 7, 8],
+			        "label": {
+			            "styles": {
+			                "fontSize": 12
+			            }
+			        },
+			        "styles": {
+			            "line": "#555,2px",
+			            "fill": "#555"
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }, {
+			        "type": "polararea",
+			        "name": "Area",
+			        "items": [1, 8, 2, 7, 3, 6, 4, 5],
+			        "label": {
+			            "styles": {
+			                "fontSize": 12
+			            }
+			        },
+			        "styles": {
+			            "line": "#90ED7D,2px",
+			            "fill": "#4090ED7D",
+			            "marker": {
+			                "border": "#90ED7D",
+			                "fill": "#90ED7D"
+			            }
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }],
+			    "legend": {
+			        "position": "bottom",
+			        "styles": {
+			            "border": "#999",
+			            "paddingLeft": 11,
+			            "paddingRight": 11,
+			            "paddingTop": 5,
+			            "paddingBottom": 5,
+			            "background": null
+			        },
+			        "itemStyles": {
+			            "fontBold": true
+			        }
+			    }
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

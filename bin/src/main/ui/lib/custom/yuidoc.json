@@ -1,0 +1,10 @@
+{
+    "name": "API",
+    "description": "API",
+    "version": "0.0.1",
+    "options": {
+        "extension": ".html,.js",
+        "exclude": "apidocs",
+        "outdir": "./apidocs"
+    }
+}

@@ -1,0 +1,25 @@
+<sc-link rel="import" href="es-lifecycle-description.html"></sc-link>
+
+<dom-module id="em-lifecycle-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="hbox flex" title-text="라이프 사이클">
+			<es-lifecycle-description class="fit flex"></es-lifecycle-description>
+		</sc-panel>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-lifecycle-guide',
+		properties : {
+
+		},
+		initialized : function() {
+
+		}
+	});
+	</script>
+</dom-module>

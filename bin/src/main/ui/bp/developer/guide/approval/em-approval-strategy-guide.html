@@ -1,0 +1,49 @@
+<sc-link rel="import" href="es-approval-strategy-description.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-approval-strategy-guide">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-panel class="flex" title-text="결재 후 처리 서비스">
+			<es-approval-strategy-description class="fit"></es-approval-strategy-description>
+		</sc-panel>
+		<es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-approval-strategy-guide',
+		properties : {
+			srcList : {
+				type : Array,
+				value : function() {
+					return [{
+						title        : "ApprovalService.java",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/approval/source/approval-service-java.txt"
+					}, {
+						title        : "ApprovalFactory.java",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/approval/source/approval-factory-java.txt"
+					}, {
+						title        : "ApprovalStrategy.java",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/approval/source/approval-strategy-java.txt"
+					}, {
+						title        : "PrApprovalStrategy.java",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/approval/source/pr-approval-strategy-java.txt"
+					}]
+				}
+			}
+		}
+	});
+	</script>
+</dom-module>

@@ -1,0 +1,244 @@
+<dom-module id="ep-area-target-list">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: [팝업] (특정영역) 현황 조회
+        ** @Description		: 현장상황정보 > 현장 현황 > [팝업](특정영역) 현황 조회 
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.02.20
+        ** @History 		: 2020.02.20 jhkim 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+         -->
+         <!-- 코드 조회-->
+		 <sc-request-group init></sc-request-group>
+		 
+		 <sc-ajax id="findPhoneNumber"
+			url="findPhoneNumber.do"
+			body="{{smsInfo}}"
+			on-response="completeFindPhoneNumber">
+		</sc-ajax>
+		
+		<sc-ajax id="sendSms"
+			url="sendSms.do"
+			body="{{smsInfo}}"
+			on-response="completeSendSms">
+		</sc-ajax>
+		 
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+
+		<div class="vbox flex">
+			<sc-tab-navigation id="tabNavi" class="w-790 flex">
+				<sc-grid id="gridWorkerPanel" data-provider="{{workerList}}" title-text="작업자" use-state ="false" use-selection="false" selection-style="singleRow" show-selection-header="false" on-item-click="onItemClick">
+			        <cc-grid-toolbar>
+		            </cc-grid-toolbar>
+			        <sc-grid-columns>
+			            <sc-image-column   width="70"   header-text="수신상태"  image-change-function="onImageChange"   image-display ="auto" ></sc-image-column>
+			            <sc-data-column 	width="70" 	text-align="center" 	header-text="협력사"   data-field="vendorName" item-style-function="onStyleFontColor"></sc-data-column>
+			            <sc-data-column 	width="90" 	text-align="center" 	header-text="직종"   data-field="targetJobName" item-style-function="onStyleFontColor"></sc-data-column>
+			            <sc-data-column 	width="100" 	text-align="center" 	header-text="작업자명"   data-field="targetName" item-style-function="onStyleFontColor"></sc-data-column>
+			            <sc-data-column 	width="120" 	text-align="center" 	header-text="위치"   data-field="areaName"></sc-data-column>
+			            <sc-date-column 	width="130" 	text-align="center" 	header-text="수신시간" data-field="updatedDt" display-format = "yyyy/MM/dd HH:mm:ss"></sc-date-column>
+			            <sc-data-column 	width="100" 	text-align="left" 		header-text="특이사항"   data-field="weakType" ></sc-data-column>
+			            <sc-image-column 	width="50" 	header-text="SMS" data-field="sms" singular-source="ui/assets/img/grid/icon_sms.png" image-display ="auto"></sc-image-column>
+			        </sc-grid-columns>
+			        <sc-grid-fields>
+			        	<sc-grid-field data-field="iconImage"></sc-grid-field>
+	                    <sc-grid-field data-field="sensorId"></sc-grid-field>
+	                    <sc-grid-field data-field="targetId"></sc-grid-field>
+	                    <sc-grid-field data-field="labelColor"></sc-grid-field>
+	                </sc-grid-fields>
+		        </sc-grid>
+		        <sc-grid id="gridVehiclePanel" data-provider="{{vehicleList}}" title-text="이동장비" use-state ="false" use-selection="false" selection-style="singleRow" show-selection-header="false">
+			        <cc-grid-toolbar>
+		            </cc-grid-toolbar>
+			        <sc-grid-columns>
+			            <sc-image-column   width="70"   header-text="수신상태"  image-change-function="onImageChange"   image-display ="auto" ></sc-image-column>
+			            <sc-data-column 	width="70" 	text-align="center" 	header-text="협력사"   data-field="vendorName" item-style-function="onStyleFontColor"></sc-data-column>
+			            <sc-data-column 	width="120" 	text-align="center" 	header-text="유형"   data-field="targetJobName" item-style-function="onStyleFontColor"></sc-data-column>
+			            <sc-data-column 	width="120" 	text-align="center" 	header-text="이동장비명"   data-field="targetName" item-style-function="onStyleFontColor"></sc-data-column>
+			            <sc-data-column 	width="120" 	text-align="center" 	header-text="위치"   data-field="areaName"></sc-data-column>
+			            <sc-date-column 	width="130" 	text-align="center" 	header-text="수신시간" data-field="updatedDt" display-format = "yyyy/MM/dd HH:mm:ss"></sc-date-column>
+			        </sc-grid-columns>
+			        <sc-grid-fields>
+			        	<sc-grid-field data-field="iconImage"></sc-grid-field>
+	                    <sc-grid-field data-field="sensorId"></sc-grid-field>
+	                    <sc-grid-field data-field="targetId"></sc-grid-field>
+	                    <sc-grid-field data-field="labelColor"></sc-grid-field>
+	                </sc-grid-fields>
+		        </sc-grid>
+				<sc-grid id="gridUnmappingPanel" data-provider="{{unmappingList}}" title-text="미교부 앱" use-state ="false" use-selection="false" selection-style="singleRow" show-selection-header="false" on-item-click="onItemClick">
+			        <cc-grid-toolbar>
+		            </cc-grid-toolbar>
+			        <sc-grid-columns>
+			            <sc-image-column   width="60"   header-text="수신상태"  image-change-function="onImageChange"   image-display ="auto" ></sc-image-column>
+			            <sc-data-column 	fill-width="200"	text-align="center" 	header-text="앱아이디"   data-field="targetName" item-style-function="onStyleFontColor" style-name="link"></sc-data-column>
+			            <sc-data-column 	width="120" 	text-align="center" 	header-text="위치"   data-field="areaName"></sc-data-column>
+			            <sc-date-column 	width="130" 	text-align="center" 	header-text="수신시간" data-field="updatedDt" display-format = "yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss"></sc-date-column>
+			        </sc-grid-columns>
+			        <sc-grid-fields>
+			        	<sc-grid-field data-field="iconImage"></sc-grid-field>
+	                    <sc-grid-field data-field="sensorId"></sc-grid-field>
+	                    <sc-grid-field data-field="targetId"></sc-grid-field>
+	                    <sc-grid-field data-field="labelColor"></sc-grid-field>
+	                </sc-grid-fields>
+		        </sc-grid>
+			</sc-tab-navigation>
+		</div>
+		<sc-dialog id="smsDialog" title-text="SMS보내기" style="width:400px; height:280px"
+			modal="true" draggable="true">
+	        <table class="tb-form">
+	        	<colgroup>
+	        		<col style="width:100px;"/>
+	        		<col/>
+	        	</colgroup>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="수신자"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-text-field value="{{smsInfo.phoneNumber}}" readonly ="true"></sc-text-field>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="제목"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-text-field value="{{smsInfo.title}}"></sc-text-field>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="SMS 내용"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-textarea-field class="h-100" max-length="70" placeholder="센터에서 연락을 요청하였습니다." value="{{smsInfo.body}}"  ></sc-textarea-field>
+	        		</td>
+	        	</tr>
+	        </table>
+	        <div  style= "text-align:center; margin-top: 5%;">
+	        	 <sc-button  text="확인" on-click="onOk" ></sc-button>
+	        	 <sc-button style="margin-left: 10px;" text="취소" on-click="onCancle"></sc-button>
+	        </div>
+		</sc-dialog>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "ep-area-target-list",
+
+            properties:{
+				workerList : {
+					type : Array,
+					value : function(){
+						return[];
+					}
+				},
+				vehicleList : {
+					type : Array,
+					value : function(){
+						return[];
+					}
+				},
+				unmappingList : {
+					type : Array,
+					value : function(){
+						return[];
+					}
+				},
+				smsInfo: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+			},
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+			initialized : function(){
+				var me = this;
+			},
+			load: function(data){
+				var me= this;
+
+				me.set('workerList', data.workerList);
+				me.set('vehicleList', data.vehicleList);
+				me.set('unmappingList', data.unmappingList);
+			},
+			onImageChange: function(data, item){
+	            return '/ui/assets/img/marker/' +data.iconImage;
+	         },
+	         onStyleFontColor: function(data, item){
+		         return (data.labelColor)?{fontColor: data.labelColor}:null;
+           	 },
+           	onItemClick : function(e){
+				var me = this,
+				data = e.detail.data,
+				item = e.detail.item;
+			
+				if (item.dataField == "sms") {
+					me.set("smsInfo.workerId", data.targetId);
+					UT.request(me.$.findPhoneNumber);
+				}
+           	},
+           	
+           	completeFindPhoneNumber : function(e,res){
+				var me =this;
+				
+				var smsDialog = me.$.smsDialog;
+				me.set("smsInfo.phoneNumber", res.response.phoneNumber);
+				smsDialog.show();
+				me.set("smsInfo.title", "");
+				me.set("smsInfo.body", "");
+			},
+			
+			onOk : function(){
+				var me = this;
+				UT.request(me.$.sendSms);
+				me.$.smsDialog.hide();
+				
+			},
+			onCancle : function(){
+				var me = this;
+				me.$.smsDialog.hide();
+			},
+			completeSendSms : function(e,res){
+				var me = this,
+					result = res.response;
+				
+				if(result.result_status === 'S'){
+	                UT.alert("전송에 성공하였습니다.", function(){ // 저장하였습니다.
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+			},
+           	 
+
+        });
+	</script>
+
+</dom-module>

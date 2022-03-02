@@ -1,0 +1,142 @@
+<dom-module id="es-data-save-description">
+	<style>
+    table, th, td {
+ 		border:1px solid black;
+ 		border-collapse:collapse;
+ 		box-sizing: border-box;
+ 		padding: 3px;
+ 	}
+ 	th {
+ 		background-color:lightgray
+ 	}
+    </style>
+	<template>
+		<p>
+			<b>dataProvider의 주요 method</b><br/>
+			자세한 내용은 API를 참조 <a href="http://gcs.emro.co.kr:8090/pages/viewpage.action?pageId=5309126" target="_blank">[그리드 API 바로가기]</a>
+			<br/>
+			<table>
+				<tr>
+					<th>method</th>
+					<th>parameters</th>
+					<th>return</th>
+					<th>description</th>
+				</tr>
+				<tr>
+					<td>getItems</td>
+					<td>none</td>
+					<td>type : Array</td>
+					<td>모든 데이터를 가져온다.</td>
+				</tr>
+				<tr>
+					<td>getItemAt</td>
+					<td>1. index (type : Number)</td>
+					<td>type : Object</td>
+					<td>지정한 rowIndex의 데이터를 가져온다.</td>
+				</tr>
+				<tr>
+					<td>getNewItems</td>
+					<td>none</td>
+					<td>type : Array</td>
+					<td>신규 추가된 데이터들을 가져온다.</td>
+				</tr>
+				<tr>
+					<td>getUpdateItems</td>
+					<td>none</td>
+					<td>type : Array</td>
+					<td>수정된 데이터들을 가져온다.</td>
+				</tr>
+				<tr>
+					<td>getRemoveItems</td>
+					<td>none</td>
+					<td>type : Array</td>
+					<td>삭제된 데이터들을 가져온다.(삭제의 기준은 removeItems, removeItemAt, removeAll 함수를 통해 삭제된 함수 들)</td>
+				</tr>
+				<tr>
+					<td>selectionCheckedItems</td>
+					<td>none</td>
+					<td>type : Array</td>
+					<td>selection에 체크된 데이터들을 가져온다.</td>
+				</tr>
+				<tr>
+					<td>selectionCheckedIndexes</td>
+					<td>none</td>
+					<td>type : Array</td>
+					<td>selection에 체크된 데이터 index들을 가져온다.</td>
+				</tr>
+				<tr>
+					<td>addItem</td>
+					<td>item (type : Object)</td>
+					<td>none</td>
+					<td>마지막 행 뒤에 새로운 행을 추가한다.</td>
+				</tr>
+				<tr>
+					<td>addItems</td>
+					<td>items (type : Array)</td>
+					<td>none</td>
+					<td>마지막 행 뒤에 새로운 행들을 추가한다.</td>
+				</tr>
+				<tr>
+					<td>addItemAt</td>
+					<td>1. index (type : Number)<br/>2. item (type : Object)</td>
+					<td>none</td>
+					<td>특정 행 위치에 새로운 행을 삽입한다.</td>
+				</tr>
+				<tr>
+					<td>removeAll</td>
+					<td>
+					1. collectRemoveItems (type : Boolean, default : true)<br/> : removeItems에 수집될지 여부<br/>
+					</td>
+					<td>type : none</td>
+					<td>모든 행을 삭제한다.</td>
+				</tr>
+				<tr>
+					<td>removeItems</td>
+					<td>
+					1. isActualRemove (type : Boolean, default : false)<br/> : 체크된 항목을 화면상에서 삭제시킬지 여부<br/>
+					2. isNewItemsClear (type : Boolean, default : true)<br/>신규항목을 체크할지 여부
+					</td>
+					<td>type : Array</td>
+					<td>selection에 체크된 항목중에 신규 추가 건들을 제외하여 리턴한다.</td>
+				</tr>
+				<tr>
+					<td>removeItemAll</td>
+					<td>none</td>
+					<td>none</td>
+					<td>모든 행을 삭제한다.</td>
+				</tr>
+				<tr>
+					<td>removeItemAt</td>
+					<td>index (type : Number)</td>
+					<td>none</td>
+					<td>특정 행을 삭제한다.</td>
+				</tr>
+				<tr>
+					<td>setItemAt</td>
+					<td>1. index (type : Number)<br/>2. item (type : Object)</td>
+					<td>none</td>
+					<td>rowIndex 데이터를 수정한다.<br/>
+					((비고)) 두 번째 매개변수에 지정된 값만 변경된다.<br/>
+					((주의)) 반복문에서는 sorting, filtering 이 걸려있는 경우 정상적인 작동이 보장되지 않으므로 <b>setItemAtBatch</b>을 사용해야 한다.</td>
+				</tr>
+				<tr>
+					<td>setItemAtBatch</td>
+					<td>1.indexes (type : Array or Boolean) : 적용할 행의 index 배열, 또는 true로 설정 시 전체 행에 적용<br/>
+					2. callback (type : function) : 이 callback 함수에서 리턴된 값에 의해 해당 로우데이터가 변경된다.<br/>
+					3. options (type : Object)<br/>
+					&nbsp;&nbsp;visibleOnly (type : Boolean, default : false) : 전체 행에 적용할 때, 화면에 보여지는 행만 적용할지 여부.<br/>
+					&nbsp;&nbsp;useNodeIndex (type : Boolean, default : false) : 적용할 행의 고유아이디(rowId)를 사용할지 여부.</td>
+					<td>none</td>
+					<td>여러개의 index를 이용하여 로우데이터를 변경한다.<br/>
+					콜백함수에서 리턴되는 데이터가 변경된다.</td>
+				</tr>
+			</table>
+			<br/>
+		</p>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-data-save-description'
+	});
+	</script>
+</dom-module>

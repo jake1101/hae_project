@@ -1,0 +1,50 @@
+<sc-link rel="import" href="es-ptw-appr-list.html"></sc-link>
+<sc-link rel="import" href="es-ptw-detail.html"></sc-link>
+
+<dom-module id="em-ptw-appr-list">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		
+		<sc-pages id="pages" class="vbox flex" selected-index="0">
+			<es-ptw-appr-list id="list" class="flex" on-request-ptw="onShowDetail"></es-ptw-appr-list>
+			
+			<template>
+				<es-ptw-detail id="detail" on-close="onShowList"></es-ptw-detail>
+			</template>
+		</sc-pages>
+		
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-ptw-appr-list',
+			
+			onShowDetail : function(e, data) {
+	    		var me = this;
+	    		
+	    		// 상세 화면으로 페이지 전환
+	    		me.$.pages.selectItem(me.$.detail);
+	    		// 상세 화면 load 함수 호출
+	    		me.$.detail.load(data);
+	    	},
+	    	
+	    	// 리스트 화면 이동
+	    	onShowList : function(e, data) {
+	    		var me = this;
+	    		
+	    		// 리스트 화면으로 페이지 전환
+	    		me.$.pages.selectItem(me.$.list);
+	    		
+	    		me.$.list.onSearch();
+	    	}
+		});
+	</script>
+
+
+</dom-module>

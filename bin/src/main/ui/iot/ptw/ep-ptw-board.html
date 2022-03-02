@@ -1,0 +1,114 @@
+<dom-module id="ep-ptw-board">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 작업허가제 사진등록 팝업
+        ** @Description		: 작업허가제 사진등록 팝업
+        ** @Author 			: JongHoon Baek
+        ** @Create Date 	: 2020.05.19
+        ** @History 		: 2020.05.19 JongHoon Baek 최초작성
+        ******************************************************************************************
+    -->
+
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+	</style>
+	
+	<template>
+		<sc-ajax id="findPtwContents"
+			url="findPtwContents.do"
+			body="{{searchParam}}"
+			on-response="completeFindPtwContents">
+		</sc-ajax>	
+			
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+			
+		<cc-page-title-bar title-text="양식 상세 정보(사진)">
+<!-- 			<sc-button text="수정" hidden="[[!formula('isUpdate')]]" on-click="onSaveBoard" auth-s></sc-button> -->
+<!-- 			<sc-button text="삭제" hidden="[[!formula('isDeletable')]]" on-click="onDeleteBoard" auth-s></sc-button> -->
+<!-- 			<sc-button text="답글" hidden="[[!formula('isReplUseYn')]]" on-click="onAddReplyBoard" auth-s></sc-button> -->
+			<sc-button text="저장"  on-click="onSave" auth-s></sc-button>
+<!-- 			<sc-button text="목록" on-click="onShowBoardList" auth-r></sc-button> -->
+		</cc-page-title-bar>
+<!-- 		<div> -->
+		
+		<sc-panel title-text="내용">
+			<sc-editor id="editorPanel"  value="{{boardInfo.content}}" editable="true"></sc-editor>
+			
+		</sc-panel>
+<!-- 		</div> -->
+			
+	</template>
+	
+	<script>
+		Polymer({
+			is : "ep-ptw-board",
+			
+			properties : {
+				
+				
+				searchParam: {
+					type : Object,
+					value : function(){
+						return {
+						};
+					}
+				},
+				boardInfo: {
+					type : Object,
+					value : function(){
+						return {
+						};
+					}
+				},
+				
+			
+			},
+			
+			load:function(param){
+ 				var me = this;
+ 				
+ 				
+//  				var param = me.htmlDecode(param);
+//  				if(param != "undefined"){
+//  				me.set("boardInfo.content",param);
+//  				}
+				me.set("searchParam.id",param);
+
+				
+				UT.request(me.$.findPtwContents);
+			},
+			completeFindPtwContents : function(e,res){
+				var me = this;
+				var result = res.response;
+				
+				var content =me.htmlDecode(result.content);
+				if(UT.isNotEmpty(result)){
+ 					me.set("boardInfo.content",content);
+ 				}
+// 				me.$.editorPanel.syncValue();
+			},
+			
+			 htmlDecode : function(input){
+			  var e = document.createElement('textarea');
+			  e.innerHTML = input;
+			  // handle case of empty input
+			  return e.childNodes.length === 0 ? "" : e.childNodes[0].wholeText;
+			},
+			onSave: function(){
+				var me =this;
+				me.$.editorPanel.syncValue();
+				me.fire("save-content",me.boardInfo.content);
+			},
+			
+ 	         onClose: function(){
+ 	        	this.fire('close');
+ 			 } 
+ 			 
+	
+		})
+	
+	</script>
+	
+</dom-module>

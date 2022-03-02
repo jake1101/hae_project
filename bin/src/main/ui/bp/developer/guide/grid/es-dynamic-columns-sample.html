@@ -1,0 +1,103 @@
+<dom-module id="es-dynamic-columns-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-ajax id="findList"
+				 url="json/item-qta-list.json"
+				 on-response="completeFindList">
+	    </sc-ajax>
+		
+		<!-- 그리드 패널 -->
+		<sc-grid id="gridPanel" editable="true">
+			<cc-grid-toolbar>
+				<sc-button text="조회" on-click="onFindList"></sc-button>
+			</cc-grid-toolbar>
+			<sc-grid-columns>
+				
+			</sc-grid-columns>
+		</sc-grid>
+		
+		<!-- 기본컬럼 -->
+		<template id="defaultColumnsTemplate">
+			<sc-grid-columns id="defaultColumns">
+				<sc-data-column data-field="rfx_item_lno"	header-text="항번"		width="100"	text-align="center"	editable="false"></sc-data-column>
+				<sc-data-column data-field="item_cd"		header-text="품목코드"	width="100"	text-align="center"	editable="false"></sc-data-column>
+			</sc-grid-columns>
+		</template>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-dynamic-columns-sample',
+		properties : {
+			
+		},
+		
+		behaviors : [
+    		Polymer.Templatizer
+    	],		
+		
+		initialized : function() {
+			
+		},
+		// 조회 버튼 클릭
+		onFindList : function() {
+			var me = this;
+			
+			UT.request(me.$.findList);
+		},
+		// 데이터 조회 후 처리
+		completeFindList : function(e, res) {
+			var me = this,
+				result = res.response;
+			
+			// 기본컬럼
+			var columns = UT.templateColumns(this, '#defaultColumnsTemplate', '#defaultColumns');
+			
+			// 조회결과
+			if(result.length > 0) {
+				var list = [];
+				
+				for(var i=0; i<result.length; i++) {
+					var item = result[i],					// 품목
+						itemQtaList = item.itemQtaList;		// 품목별 견적서 리스트
+					
+					for(var j=0; j<itemQtaList.length; j++) {
+						// 업체 품목견적 정보
+						var itemQta = itemQtaList[j];
+						
+						var vdCd      = itemQta["vd_cd"],		// 협력사코드
+							dataField = "item_amt_" + vdCd,		// 동적컬럼 dataField (협력사 별 견적금액)
+							value     = itemQta["item_amt"];	// 동적컬럼 value (협력사 견적금액)
+						
+						item[dataField] = value;	// 품목의 업체 견적금액
+						
+						if(i === 0) {
+							var headerText = itemQta["vd_nm"] + " (" + vdCd + ")";	// 동적컬럼 headerText
+				
+							// 동적컬럼 생성
+							var column = me.createColumn(dataField, headerText, 150, "right", true);
+							columns.push(column);
+						}
+					}
+					list.push(item);
+				}
+			}
+			me.$.gridPanel.setColumns(columns);		// column 셋팅
+			me.$.gridPanel.setDataProvider(list);	// dataProvider 셋팅
+		},
+		// 컬럼 생성
+		createColumn : function(dataField, headerText, width, textAlign, i18nDisabled) {
+			var column = document.createElement("sc-data-column");
+			column.dataField    = dataField;
+			column.headerText   = headerText;
+			column.width        = width || "100";
+			column.textAlign    = textAlign || "center";
+			column.i18nDisabled = i18nDisabled || "false";
+			return column;
+		}
+	});
+	</script>
+</dom-module>

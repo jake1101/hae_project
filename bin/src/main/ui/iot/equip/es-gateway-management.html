@@ -1,0 +1,504 @@
+<sc-link rel="import" href="ep-gateway-map.html"></sc-link>
+<dom-module id="es-gateway-management">
+	<!--
+        ******************************************************************************************
+        ** @Program-name    : 게이트웨이 관리
+        ** @Description     :
+        ** @Author          : mskim
+        ** @Create Date     : 2019.04.10
+        ** @History         : 2019.04.10 mskim 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+         -->
+		<!-- 코드 조회-->
+		<sc-request-group init>
+			<sc-code-group>
+				<sc-code id="findListUseFlag" code="USEFLAG" value="{{codes.useFlag}}" ></sc-code> 
+				<sc-code id="findListGwType" code="GWTYPE" value="{{codes.type}}" ></sc-code> 
+				<sc-code id="findListGwType" code="IOT010" value="{{codes.gwType}}" ></sc-code> 
+				<sc-code id="findListRowCount" code="ROWCOUNT" value="{{codes.rowCount}}" ></sc-code> 
+				<sc-code id="findListHour" code="HOUR" value="{{codes.hour}}" ></sc-code> <!-- 타임존 -->
+			</sc-code-group>
+		
+		</sc-request-group>
+
+		
+		<!-- 완료 -->
+		<sc-ajax	
+				id="findListLoraGateway"		
+				url="findListLoraGateway.do"
+				body="{{searchParam}}"
+				last-response="{{resultList}}"
+				>
+		</sc-ajax>
+		
+<!-- 		<sc-ajax -->
+<!-- 				id="findListGatewayLog" -->
+<!-- 				url="findListGatewayLog.do" -->
+<!-- 				on-response = "completeFindListGatewayLog" -->
+<!-- 				> -->
+<!-- 		</sc-ajax> -->
+		
+		<!-- 완료 -->
+		<sc-ajax
+				id="saveListGateway"
+				url="saveListGateway.do"
+				on-response="completeSaveListGateway">
+		</sc-ajax>
+		<sc-ajax
+				id="deleteListGateway"
+				url="deleteListGateway.do"
+				on-response="completeDeleteListGateway">
+		</sc-ajax>
+<!-- 		<sc-ajax -->
+<!-- 				id="createOutLine" -->
+<!-- 				url="createOutLine.do" -->
+<!-- 				on-response="completeCreateOutLine"> -->
+<!-- 		</sc-ajax> -->
+		
+		
+
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+
+		<div class="vbox flex">
+
+			<sc-grid id="gridPanel" data-provider="{{resultList}}" editable="true" class="flex" on-item-click="onItemClick"	 validation-group="save">
+				<cc-grid-toolbar title-text="게이트웨이 목록">
+					<sc-button text="추가"        on-click="onAddGateway" auth-s></sc-button>
+					<sc-button text="삭제"        on-click="onDeleteGateway" auth-s></sc-button>
+					<sc-button text="저장"        on-click="onSaveGateway" auth-s></sc-button>
+<!-- 					<sc-button text="outLine생성" on-click="onCreateOutLine" auth-s></sc-button> -->
+				</cc-grid-toolbar>
+				<sc-grid-columns>
+					<sc-data-column data-field="name"   header-text="게이트웨이 ID" width="150" text-align="left" required="true" editable="true"></sc-data-column>
+					<sc-data-column data-field="lat"    required="true"  header-text="위도" width="150" text-align="center" editable="false" ></sc-data-column>
+					<sc-data-column data-field="lon"   required="true"   header-text="경도" width="150" text-align="center" editable="false" max-length="60"></sc-data-column>
+					<sc-image-column data-field="button_point"   image-cls="search" width="30" text-align="center" editable="false"></sc-image-column>
+<!-- 					<sc-combobox-column data-field="useFlag"     header-text="사용여부" width="80" text-align="center" editable="true" display-field="label" value-field="data" items="{{codes.useFlag}}"  -->
+<!-- 									required="true"  domain-only-or-empty="true"></sc-combobox-column> -->
+				 	<sc-checkbox-column data-field="useFlag" header-text="사용여부" width="100" text-align="center" editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+					<sc-date-column data-field="lastSendDt"  header-text="마지막통신시간" width="150" text-align="center" editable="false" display-format="yyyy-MM-dd HH:mm:ss" ></sc-date-column>
+<!-- 					<sc-image-column data-field="button_log"     image-cls="search" width="30" text-align="center" editable="false"></sc-image-column> -->
+					<sc-data-column data-field="state"           header-text="상태" width="100" text-align="center" editable="false"></sc-data-column>
+					<sc-data-column data-field="description"     header-text="설명" width="250" text-align="left" editable="true"></sc-data-column>
+					<sc-data-column data-field="gwErrorCode"     header-text="에러코드" width="80" text-align="center" editable="false"></sc-data-column>
+					<sc-combobox-column data-field="type"        header-text="설치유형" width="100" text-align="center" editable="true" display-field="label" value-field="data" items="{{codes.type}}" 
+								required="true"  domain-only-or-empty="true"></sc-combobox-column>
+					<sc-combobox-column data-field="gatewayType"  required="true"   header-text="GW유형" width="100" text-align="center" editable="true" display-field="label"
+							 value-field="data" items="{{codes.gwType}}"  domain-only-or-empty="true"></sc-combobox-column>
+				</sc-grid-columns>
+				<sc-grid-fields>
+					<sc-grid-field data-field="siteId"></sc-grid-field>
+					<sc-grid-field data-field="id"></sc-grid-field>
+					<sc-grid-field data-field="deleted"></sc-grid-field>
+					<sc-grid-field data-field="setupPoint" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="movingPoint" data-type="object"></sc-grid-field>
+				</sc-grid-fields>
+			</sc-grid>
+<!-- 			<sc-splitter split-type="horizontal"></sc-splitter> -->
+			
+<!-- 			<div class="vbox flex-4"> -->
+<!-- 			<table  class="tb-form"> -->
+<!-- 					<colgroup> -->
+<!-- 						<col style="width:150px"> -->
+<!-- 						<col style="width:150px"> -->
+<!-- 						<col style="width:150px"> -->
+<!-- 						<col style="width:150px"> -->
+<!-- 						<col > -->
+<!-- 					</colgroup> -->
+<!-- 					<tr> -->
+<!-- 						<th><sc-label text="날짜"></sc-label></th> -->
+<!-- 						<td> -->
+<!-- 							<sc-date-field value="{{searchParam.now}}" display-format="yyyy-MM-dd" style="width : 140px;"></sc-date-field> -->
+<!-- 						</td> -->
+<!-- 						<th><sc-label text="조회건수"></sc-label></th> -->
+<!-- 						<td> -->
+<!-- 							<sc-combobox-field value="{{searchParam.rowCount}}" selected-index="0"  -->
+<!-- 								items="{{codes.rowCount}}" display-field="label" value-field="data"  -->
+<!-- 								placeholder="선택"> -->
+<!-- 	                    	</sc-combobox-field> -->
+<!-- 						</td> -->
+<!-- 						<th > -->
+<!-- 						<sc-button text="Search" on-click="onLogSearch" style="float:right"></sc-button> -->
+<!-- 						</th> -->
+						
+<!-- 					</tr> -->
+<!-- 				</table> -->
+<!-- 				<sc-grid id="logGridPanel" data-provider="{{resultLogList}}" editable="true" class="flex" validation-group="save" use-selection="false"> -->
+<!-- 					<cc-grid-toolbar title-text="GPS Log List [[gatewayName]]"> -->
+<!-- 					</cc-grid-toolbar> -->
+<!-- 					<sc-grid-columns> -->
+<!-- 						<sc-data-column data-field="lat"            header-text="위도" width="200" text-align="center" editable="false"></sc-data-column> -->
+<!-- 						<sc-data-column data-field="lon"            header-text="경도" width="200" text-align="center" editable="false" ></sc-data-column> -->
+<!-- 						<sc-date-column data-field="lockDt"       header-text="Lock Time" width="150" text-align="center" editable="false" display-format="yyyy-MM-dd HH:mm:ss"></sc-date-column> -->
+<!-- 					</sc-grid-columns> -->
+<!-- 				</sc-grid> -->
+<!-- 			</div > -->
+	</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-gateway-management",
+            properties : {
+                codes: {
+                    type : Object,
+                    reset : false,
+                    value : function() {
+                        return {
+                        }
+                    }
+                },
+                
+                currentRowIndex:Number,
+
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                siteInfo: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+
+                // 조회 결과 리스트
+                resultBeaconList: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+                
+                siteArr: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+                
+                movingType: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+                
+                userSiteInfos: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+                
+                gatewayName :{
+                	type: String
+                }
+                
+                
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            // 초기화 완료 후 호출 함수
+            initialized : function() {
+                var me = this;
+                me.set('searchParam.now', new Date());
+                me.set('searchParam.hour', ""+new Date().getHours());
+                me.onSearch();
+           },
+           
+			// grid item click 이벤트
+			onItemClick : function(event) {
+				var me = this,
+					data = event.detail.data,
+					item = event.detail.item,
+                	provider = event.detail.provider;
+				
+				me.currentRowIndex = item.rowIndex;
+				
+				var polygon;
+				for(var i = 0 ;  i< me.userSiteInfos.length; i++){
+					if(data.siteId== me.userSiteInfos[i].id){
+						polygon=me.userSiteInfos[i].polygon;
+					}
+				}
+                
+				if(item.dataField === "button_point") {					// 품목
+// 					var lat = data.lat;
+// 					var lon = data.lon;
+// 					me.showMapPopup(lat, lon);
+					var allList = provider.getItems();
+					me.showMapPopup(data,allList);
+				}
+// 				else if(item.dataField === "name"){
+// 					if(provider.getItemState(item.rowIndex) == "created"){
+// 	                    return;
+// 	                }
+// 					me.set("gatewayName","["+data.name+"]");
+// 					me.searchParam.gatewayId=data.id;
+// 					me.onLogSearch();
+// 				} 
+            },
+            
+            // 지도 생성 팝업
+            showMapPopup : function(dataInfo, allList) {
+            	var me = this;
+            	
+            	var mapPopup = UT.popup("ep-gateway-map", me, 1000, 600,{
+           			'apply-point' :  function(popup, e){
+           				var provider = me.$.gridPanel.getDataProvider(),
+           					result = e.detail;
+   	   					provider.setItemAt(me.currentRowIndex, {
+   	   						'lat': result.lat,
+   	   						'lon': result.lon
+   	   					});
+                 		popup.close();
+           			}
+           		},{resizable:false});
+           		mapPopup.show();
+           		mapPopup.getWindowContent().load(dataInfo, allList);
+            },
+            
+            /******************************
+             * 버튼 이벤트
+             ******************************/
+            onSearch : function() {
+                var me = this;
+                
+                if(!me.validate('search')){
+                	UT.alert("STD.E0000");
+                	return;
+                }
+                
+                me.set("resultList", []);
+
+                if(!me.validate('siteInfo')){
+                    UT.alert("IOT.E0001");
+                    return false;
+                }
+
+                UT.request(me.$.findListLoraGateway);
+            },
+//             completeFindListGatewayLog : function(e,res){
+//             	var me = this;
+//             	var resultLogList = res.response;
+//            		me.set("resultLogList",resultLogList);
+//             },
+//             onLogSearch: function(){
+//             	var me = this;
+//             	var tempDate = me.get("searchParam.now");
+//             	me.$.findListGatewayLog.body = {
+//                         'gatewayId':me.searchParam.gatewayId,
+//                         'startDt': me.searchParam.now,
+//                         'rowCount':me.get('searchParam.rowCount'),
+//                 };
+//                 UT.request(me.$.findListGatewayLog);
+            	
+//             },
+
+            onAddGateway : function(){
+                var me = this
+                    ,searchParam = this.get("searchParam")
+                    ,provider = me.$.gridPanel.getDataProvider()
+                    ,currCell = me.$.gridPanel.getCurrentCell();
+
+
+                if(!me.validate('search')){
+                    UT.alert("STD.E0000");
+                    return false;
+                }
+
+                // 그리드 신규행 추가
+                var row = {
+                    siteId: searchParam.siteId,   
+                    useFlag: 'Y',
+                    type : 'none'
+                };
+                if(currCell == null){
+                	provider.addItemAt(0,row);
+                }else{
+                	provider.addItemAt(currCell.rowIndex+1, row);
+                }
+            },
+
+            // 문서번호 현황 저장
+            onSaveGateway : function(){
+                var me = this;
+
+                // 저장 유효성 체크
+                if(!me.validation()) {
+                    return;
+                }
+
+                var provider = me.$.gridPanel.getDataProvider(),
+                    created = provider.getNewItems(),
+                    updated = provider.getUpdateItems();
+
+                if(created.length + updated.length === 0) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+
+                UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+                    me.$.saveListGateway.body = {
+                        insertList: created,
+                        updateList: updated
+                    };
+                    UT.request(me.$.saveListGateway);
+                });
+            },
+
+            // 저장 유효성 체크
+            validation: function() {
+                var me = this;
+
+                // 기본 validate
+                if(!me.validate('save')) {
+                    UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return false;
+                }
+
+                // 중복 체크
+                var provider = me.$.gridPanel.getDataProvider(),
+                    rows = provider.getItems();
+                var unique_check = {};
+                for (var i=0, len = rows.length; i<len; i++) {
+                    if(typeof unique_check[rows[i].serialNumber] == "undefined"){
+                        unique_check[rows[i].serialNumber] = 0;
+                    } else {
+                        //UT.alert(me.translate("STD.E1000",null, me.translate('사업자번호')),null,true); // "'{0}'에 동일한 값이 존재합니다"
+                        //return false;
+                    }
+                }
+
+                return true;
+            },
+
+            // 고객사 저장 완료
+            completeSaveListGateway: function(e, res){
+                var me = this,
+                    message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                        me.onSearch();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+
+            },
+            onDeleteGateway: function() {
+                var me = this,
+                    message = "STD.N1300", // 삭제 하시겠습니까?
+                    provider = this.$.gridPanel.getDataProvider();
+                var checked = provider.selectionCheckedIndexes();
+
+                if (checked && checked.length > 0) {
+                    UT.confirm(message, function() {
+                        var deleted = provider.selectionCheckedItems();
+                        if(UT.isNotEmpty(deleted)){
+                            me.$.deleteListGateway.body = {
+                                deleteList: deleted
+                            };
+                            UT.request(me.$.deleteListGateway);
+                        }
+                    });
+                }
+                else{
+                    UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+                }
+            },
+            // 삭제 완료
+            completeDeleteListGateway: function(e, res) {
+                var me = this,
+                    message = "STD.N2500"; // 삭제하였습니다.
+
+                UT.alert(message, function(){
+                    me.onSearch();
+                });
+            },
+//             onCreateOutLine: function() {
+//                 var me = this,
+//                     provider = this.$.gridPanel.getDataProvider();
+//                 me.$.createOutLine.body = {
+//                         siteId: me.get('searchParam.siteId')
+//                 };
+//                 UT.request(me.$.createOutLine);
+//             },
+            // outLine생성완료
+//             completeCreateOutLine: function(e, res) {
+//                 var me = this,
+//                     message = "IOT.CREATEOUTLINE"; // 삭제하였습니다.
+//                 UT.alert(message);
+//             },
+            
+//             completefindUserSiteInfo: function(e, res){
+//             	var me  = this;
+//             	var list=res.response;
+//             	me.siteArr  = [];
+//             	me.movingType = [];
+//             	me.userSiteInfos = [];
+//             	if(list){
+//             		for(var i  = list.length-1 ; i >-1 ; i--){
+//             			me.siteArr[i] = {'NAME':list[i].name, 'VAL':list[i]};
+            			
+//             			if(list[i].adjunction != null){
+//             				me.movingType.push({
+//                     			id:list[i].id
+//                     			, isMoving:list[i].adjunction.isMoving
+//                     		});
+//             			}else{
+//                     		movingType.push({
+//                     			id:list[i].id
+//                     			, isMoving:null
+//                     		});
+//                         }
+            			
+//             			var pinPoint = list[i].pinPoint;
+//             			if(pinPoint !== null){
+// 	                		me.userSiteInfos.push({
+// 	                			id:list[i].id
+// 	                			, name:list[i].name
+// 	                			, point:pinPoint
+// 	                			, polygon:list[i].polygon
+// 	                		});
+//                 		}
+//             		}
+            		
+//             	}
+//             }
+        });
+	</script>
+
+</dom-module>

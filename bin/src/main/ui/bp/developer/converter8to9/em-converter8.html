@@ -1,0 +1,40 @@
+<sc-link rel="import" href="es-converter8-js.html"></sc-link>
+<sc-link rel="import" href="es-converter8-file.html"></sc-link>
+<sc-link rel="import" href="es-converter8-tester.html"></sc-link>
+
+<dom-module id="em-converter8">
+    
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    	
+    	<cc-page-title-bar></cc-page-title-bar>
+    	<div class="vbox flex">
+	        <sc-tab-navigation id="tabNavi"  class="flex">
+	            <es-converter8-js title-text="Editor"></es-converter8-js>
+	            <es-converter8-file id="file" title-text="Folder"></es-converter8-file>
+	            <es-converter8-tester id="tester" title-text="Folder Preview"></es-converter8-tester>
+	        </sc-tab-navigation>
+        </div>
+       
+    </template>
+    
+    <script>
+        Polymer({
+            is: "em-converter8",
+            
+            properties : {
+            },
+            
+            initialized : function(e) {
+				
+			},
+            
+        });
+    </script>
+
+</dom-module>

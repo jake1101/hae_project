@@ -1,0 +1,17 @@
+[
+		{
+			"cd" : "TEST",
+			"item_cd" : "A",
+			"item_nm" : "테스트_테스트1"
+		},
+		{
+			"cd" : "TEST",
+			"item_cd" : "B",
+			"item_nm" : "테스트_테스트2"
+		},
+		{
+			"cd" : "TEST",
+			"item_cd" : "C",
+			"item_nm" : "테스트_테스트3"
+		}
+]

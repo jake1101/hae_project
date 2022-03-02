@@ -1,0 +1,171 @@
+<dom-module id="es-date-field-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+    	<sc-panel title-text="sc-date-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th>
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<sc-date-field value="{{data.value_1}}" default-value="0d"></sc-date-field> [[data.value_1]]
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="format"></sc-label>
+    				</th>
+    				<td>
+    					<sc-date-field value="{{data.value_2}}" format="MM-DD-YYYY"></sc-date-field> [[data.value_2]]
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="stringDate"></sc-label>
+    				</th>
+    				<td>
+    					<sc-date-field value="{{data.value_3}}" string-date="true"></sc-date-field> [[data.value_3]]
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="stringFormat"></sc-label>
+    				</th>
+    				<td>
+    					<sc-date-field value="{{data.value_4}}" string-date="true" string-format="YYYY-MM-DD"></sc-date-field> [[data.value_4]]
+    				</td>
+    			</tr>
+    			<tr>
+    				<th rowspan="2">
+    					<sc-label text="minDate / maxDate"></sc-label>
+    				</th>
+    				<td>
+    					<div class="field-box" style="width:100%">
+	    					<sc-date-field value="{{data.value_5}}" max-date="{{data.value_6}}"></sc-date-field>
+	    					<span style="margin:0 2px"> ~ </span>
+	    					<sc-date-field value="{{data.value_6}}" min-date="{{data.value_5}}"></sc-date-field>
+	    				</div>
+    				</td>
+    			</tr>
+    			<tr>
+    				<td>[[data.value_5]] ~ [[data.value_6]]</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    	
+    	<sc-panel title-text="sc-period-date-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th>
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<sc-period-date-field from-value="{{data.period_from_value}}" to-value="{{data.period_to_value}}"
+    										default-from-value="-1M" default-to-value="0d"	
+   											min-date="{{compareDate.minDate}}" max-date="{{compareDate.maxDate}}"
+   											string-date="true">
+    									<!--
+    										format="YYYY/MM/DD" string-format="YYYYMMDD"
+    									 -->
+    					</sc-period-date-field>
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    	
+    	<sc-panel title-text="sc-month-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th>
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<sc-month-field value="{{data.month_value_1}}" string-date="true">
+    									<!--
+    										format="YYYY/MM" string-format="YYYYMM"
+    									 -->
+    					</sc-month-field>
+    				</td>
+    			</tr>
+    			<tr>
+    				<th>
+    					<sc-label text="minDate / maxDate"></sc-label>
+    				</th>
+    				<td>
+    					<div class="field-box" style="width:100%">
+	    					<sc-month-field value="{{data.month_min_value}}" max-date="{{data.month_max_value}}"></sc-month-field>
+	    					<span style="margin:0 2px"> ~ </span>
+	    					<sc-month-field value="{{data.month_max_value}}" min-date="{{data.month_min_value}}"></sc-month-field>
+    					</div>
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    	
+    	<sc-panel title-text="sc-period-month-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th>
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<sc-period-month-field from-value="{{data.period_month_from_value}}" to-value="{{data.period_month_to_value}}"
+    										default-from-value="-1M" default-to-value="0M"	
+   											min-date="{{compareDate.minMonth}}" max-date="{{compareDate.maxMonth}}"
+   											string-date="true">
+    									<!--
+    										format="YYYY/MM/DD" string-format="YYYYMMDD"
+    									 -->
+    					</sc-period-month-field>
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    </template>
+    <script>
+    Polymer({
+    	is : "es-date-field-sample",
+    	properties : {
+    		compareDate : {
+    			type : Object,
+    			value : function() {
+    				var now = new Date(), yr = now.getFullYear().toString();
+    				
+    				return {
+    					minDate : yr + "0101",
+    					maxDate : yr + "1231",
+    					minMonth : yr + "01",
+    					maxMonth : yr + "12"
+    				}
+    			}
+    		},
+    		data : {
+    			type : Object,
+    			value : function() {
+    				return {}
+    			}
+    		}
+    	}
+    });
+    </script>
+</dom-module>

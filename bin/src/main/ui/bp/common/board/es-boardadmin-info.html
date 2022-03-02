@@ -1,0 +1,342 @@
+<sc-link rel="import" href="em-board.html"></sc-link>
+
+<dom-module id="es-boardadmin-info">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+
+        <!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+
+        <!-- 게시판 상세정보 : 조회 -->
+        <sc-ajax id="findInfoBoardAdmin"
+                 url="findInfoBoardAdmin.do"
+                 body="{{searchParam}}"
+                 last-response="{{resultInfo}}">
+        </sc-ajax>
+
+        <!-- 게시판 상세정보 : 저장 -->
+        <sc-ajax id="saveInfoBoardAdmin"
+                 url="saveInfoBoardAdmin.do"
+                 on-response="completeSaveInfoBoardAdmin">
+        </sc-ajax>
+
+        <!-- 게시판 상세정보 : 삭제 -->
+        <sc-ajax id="deleteInfoBoardAdmin"
+                 url="deleteInfoBoardAdmin.do"
+                 on-response="completeDeleteInfoBoardAdmin">
+        </sc-ajax>
+
+        <cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+        <!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+
+        <cc-sub-title-bar title-text="게시판상세정보">
+            <sc-button text="미리보기" on-click="onShowPreview" auth-r></sc-button>
+            <sc-button text="저장" on-click="onSaveBoardAdmin" auth-s></sc-button>
+            <sc-button text="삭제" on-click="onDeleteBoardAdmin" auth-s></sc-button>
+        </cc-sub-title-bar>
+
+        <div class="fit page">
+            <table class="tb-form" validation-group="save">
+                <colgroup>
+                    <col style="width:150px">
+                    <col>
+                    <col style="width:150px">
+                    <col>
+                </colgroup>
+
+                <tr>
+                    <th><sc-label text="이름"></sc-label></th>
+                    <td colspan="3">
+                        <sc-text-field required="true" max-length="100" value="{{resultInfo.board_nm}}" readonly="[[!formula('isEditable')]]"></sc-text-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="타이틀"></sc-label></th>
+                    <td colspan="3">
+                        <sc-text-field required="true" max-length="100" value="{{resultInfo.board_disp_nm}}" readonly="[[!formula('isEditable')]]"></sc-text-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="목록수"></sc-label></th>
+                    <td colspan="3">
+                        <sc-number-field required="true" max-length="38" strip-chars-re="/[^(0-9)]/" value="{{resultInfo.board_list_cnt}}" readonly="[[!formula('isEditable')]]" format-type="number"></sc-number-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="페이지수"></sc-label></th>
+                    <td>
+                        <sc-number-field required="true" max-length="38" strip-chars-re="/[^(0-9)]/" value="{{resultInfo.board_page_cnt}}" readonly="[[!formula('isEditable')]]" format-type="number"></sc-number-field>
+                    </td>
+                    <th><sc-label text="제목길이"></sc-label></th>
+                    <td>
+                        <sc-number-field required="true" max-length="38" strip-chars-re="/[^(0-9)]/" value="{{resultInfo.board_tit_len}}" readonly="[[!formula('isEditable')]]" format-type="number"></sc-number-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="권한적용여부"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field input-value="{{resultInfo.role_apply_yn}}" checked-value="Y" un-checked-value="N" readonly="[[!formula('isEditable')]]"></sc-checkbox-field>
+                    </td>
+                    <th><sc-label text="사용여부"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field input-value="{{resultInfo.use_yn}}" checked-value="Y" un-checked-value="N" readonly="[[!formula('isEditable')]]"></sc-checkbox-field>
+                    </td>
+                </tr>
+
+                <!-- <tr>
+                    <th><sc-label text="에디터유형"></sc-label></th>
+                    <td colspan="3">
+                        <sc-combobox-field
+                                display-field="edit_typ_nm" value-field="edit_typ_cd"
+                                items="{{comboEditTypList}}" value="{{resultInfo.edit_typ}}" readonly="[[!formula('isEditable')]]">
+                        </sc-combobox-field>
+                    </td>
+                </tr> -->
+
+                <tr>
+                    <th><sc-label text="첨부파일사용여부"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field input-value="{{resultInfo.att_disp_yn}}" checked-value="Y" un-checked-value="N" readonly="[[!formula('isEditable')]]"></sc-checkbox-field>
+                    </td>
+                    <th><sc-label text="첨부파일용량제한"></sc-label></th>
+                    <td>
+                        <div class="field-box">
+                            <sc-text-field strip-chars-re="/[^(0-9)]/" max-length="38" value="{{resultInfo.att_size}}" readonly="[[!formula('isEditable')]]"></sc-text-field>
+                            <sc-label text="KB" i18n-disabled></sc-label>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="댓글사용여부"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field input-value="{{resultInfo.comnt_use_yn}}" checked-value="Y" un-checked-value="N" readonly="[[!formula('isEditable')]]"></sc-checkbox-field>
+                    </td>
+                    <th><sc-label text="답글사용여부"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field input-value="{{resultInfo.repl_use_yn}}" checked-value="Y" un-checked-value="N" readonly="[[!formula('isEditable')]]"></sc-checkbox-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="비밀글사용여부"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field input-value="{{resultInfo.secrt_use_yn}}" checked-value="Y" un-checked-value="N" readonly="[[!formula('isEditable')]]"></sc-checkbox-field>
+                    </td>
+                    <th><sc-label text="게시기간사용여부"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field input-value="{{resultInfo.prd_use_yn}}" checked-value="Y" un-checked-value="N" readonly="[[!formula('isEditable')]]"></sc-checkbox-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="번호보이기여부"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field input-value="{{resultInfo.post_no_disp_yn}}" checked-value="Y" un-checked-value="N" readonly="[[!formula('isEditable')]]"></sc-checkbox-field>
+                    </td>
+                    <th><sc-label text="조회수보이기여부"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field input-value="{{resultInfo.view_cnt_disp_yn}}" checked-value="Y" un-checked-value="N" readonly="[[!formula('isEditable')]]"></sc-checkbox-field>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><sc-label text="등록일보이기여부"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field input-value="{{resultInfo.reg_dt_disp_yn}}" checked-value="Y" un-checked-value="N" readonly="[[!formula('isEditable')]]"></sc-checkbox-field>
+                    </td>
+                    <th><sc-label text="등록자보이기여부"></sc-label></th>
+                    <td>
+                        <sc-checkbox-field input-value="{{resultInfo.reg_nm_disp_yn}}" checked-value="Y" un-checked-value="N" readonly="[[!formula('isEditable')]]"></sc-checkbox-field>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </template>
+
+    <!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+    <script>
+        Polymer({
+            is: "es-boardadmin-info",
+            properties : {
+                /* // 에디터 유형 콤보
+                comboEditTypList : {
+                    type: Array,
+                    value: function() {
+                        return [{edit_typ_nm: "sc-editor", edit_typ_cd: "sc-editor"}];
+                    }
+                }, */
+
+                // 조회 조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+
+                // 조회 결과
+                resultInfo : {
+                    type: Object,
+                    value : function(){
+                        return {};
+                    }
+                }
+            },
+
+            formulas: {
+                // 신규 상태
+                isNew : function() {
+                    return (this.resultInfo && this.resultInfo.is_new === true);
+                },
+                // 수정 상태
+                isMod: function() {
+                    return (this.resultInfo && !UT.isEmpty(this.resultInfo.board_id));
+                },
+
+                // 수정 가능 상태
+                isEditable: function() {
+                    return (this.formula('isNew') || this.formula('isMod'));
+                }
+            },
+
+            load: function(data) {
+                var me = this;
+
+                if(data.is_new === true) {
+                    me.set("resultInfo", data);
+                    me.applyFormula();
+                } else {
+                    me.set("searchParam", data);
+                    me.onSearch();
+                }
+            },
+
+            // 게시판 상세정보 : 조회
+            onSearch: function(){
+                var me = this;
+
+                UT.request(me.$.findInfoBoardAdmin, function(e, res) {
+                    me.applyFormula();
+                });
+            },
+
+            // 초기화
+            onClear: function(){
+                var me = this;
+
+                // 게시판 상세정보 초기화
+                me.reset();
+                me.applyFormula();
+            },
+
+            onShowPreview: function() {
+                var me = this;
+
+                if(!me.formula('isMod')){
+                    UT.alert("STD.ADM1007"); // "저장 후 미리보기를 할 수 있습니다."
+                    return;
+                }
+
+           		var previewPopup = UT.popup('em-board', me, "60%", "80%", {}, {titleText : "게시판 미리보기"});
+                previewPopup.show();
+                previewPopup.getWindowContent().load({board_id: me.resultInfo.board_id});
+            },
+
+            // 게시판 상세정보 : 저장
+            onSaveBoardAdmin : function(){
+                var me = this;
+
+                if(!me.formula('isEditable')){
+                    UT.alert(me.translate("STD.E1012",null,'게시판명'),null,true); //"'{0}'을(를) 선택하십시오"
+                    return;
+                }
+
+                // 저장 유효성 체크
+                if(!me.validate('save')){
+                    UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return;
+                }
+
+                UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+                    me.$.saveInfoBoardAdmin.body = {
+                        boardAdminInfo : me.resultInfo
+                    };
+                    UT.request(me.$.saveInfoBoardAdmin);
+                });
+            },
+
+            // 게시판 상세정보 : 저장 완료
+            completeSaveInfoBoardAdmin :function(e, res){
+                var me = this,
+                    result = res.response;
+
+                if(result.result_status === 'S'){
+                    UT.alert("STD.N2400", function(){// 저장하였습니다.
+                        me.fire("clear");
+                    });
+                } else {
+                    UT.alert(result.result_message);
+                }
+
+            },
+
+            // 게시판 상세정보 : 삭제
+            onDeleteBoardAdmin : function(){
+                var me = this;
+
+                // 한번 저장된 게시판만 삭제가능
+                if(!me.formula('isMod')){
+                    UT.alert("STD.ADM1009"); // "저장 후 삭제를 할 수 있습니다."
+                    return;
+                }
+
+                UT.confirm("STD.N1300", function() { // "삭제 하시겠습니까?"
+                    me.$.deleteInfoBoardAdmin.body = {
+                        boardAdminInfo : me.resultInfo
+                    };
+                    UT.request(me.$.deleteInfoBoardAdmin);
+                });
+            },
+
+            // 게시판 상세정보 : 삭제 완료
+            completeDeleteInfoBoardAdmin:function(e, res){
+                var me = this,
+                    result = res.response;
+
+                if(result.result_status === 'S'){
+                    UT.alert("STD.N2500", function(){ // 삭제하였습니다.
+                        me.fire("clear");
+                    });
+                } else {
+                    UT.alert(result.result_message);
+                }
+
+            }
+
+        });
+    </script>
+
+</dom-module>

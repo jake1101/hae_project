@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+ESGMSTR: 결재마스터
+ESGMDOC: 결재본문
+ESGAMLK: 업무결재연동
+ESGLINE: 결재선
+ -->
+
+<mapper namespace="approvalLink">
+
+    <insert id="insertApprovalLink">
+    /* approvalLink.insertApprovalLink: 업무 결재 연동 등록 */
+    INSERT 
+      INTO ESGMALK (
+           SYS_ID
+         , APP_ID
+         , APRV_ID
+         , APRV_TYPCD
+         , USE_YN
+         , REG_ID
+         , REG_DT
+         , MOD_ID
+         , MOD_DT
+    ) VALUES (
+           #{g.tenant}
+         , #{p.app_id}
+         , #{p.aprv_id}
+         , #{p.aprv_typcd}
+         , 'Y'
+         , #{g.username}
+         , #{g.now}
+         , #{g.username}
+         , #{g.now}
+    )
+    </insert>
+
+    <update id="updateApprovalLinkUnuse">
+    /* approvalLink.updateApprovalLinkUnuse: 업무 결재 연동 수정(사용안함)*/
+    UPDATE ESGMALK 
+       SET MOD_DT = #{g.now}
+         , MOD_ID = #{g.username}
+         , USE_YN = 'N'
+     WHERE SYS_ID     = #{g.tenant}
+       AND APP_ID     = #{p.app_id}
+       AND APRV_TYPCD = #{p.aprv_typcd}
+    </update>
+
+    <delete id="deleteApprovalLink">
+    /* approvalLink.deleteApprovalLink: 업무 결재 연동 삭제 */
+    DELETE 
+      FROM ESGMALK
+     WHERE SYS_ID = #{g.tenant}
+       AND APRV_ID = #{p.aprv_id}
+       AND APP_ID = #{p.app_id}
+    </delete>
+
+    <select id="getApprovalIdByAppId" resultType="string">
+    /* approvalLink.getApprovalIdByAppId: 사용중인 결재 아이디 */
+    SELECT APRV_ID
+      FROM ESGMALK
+     WHERE SYS_ID = #{g.tenant}
+       AND APP_ID = #{p.app_id}
+       AND APRV_TYPCD = #{p.aprv_typcd}
+       AND USE_YN = 'Y'
+    </select>
+    
+</mapper>

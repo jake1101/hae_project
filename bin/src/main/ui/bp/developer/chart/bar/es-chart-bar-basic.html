@@ -1,0 +1,161 @@
+<dom-module id="es-chart-bar-basic">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-bar-basic',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "type": "bar",
+				"palettes":[{
+					"name": "color1",
+			        "alpha": 1.0,
+					"fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+						'#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+				}],
+				"styles": {
+					//"background": "#10ffff00",
+					//"border": "#888800"
+				},
+			    "title": {
+			        "text": "Historic World Population by Region"
+			    },
+				"subtitle": {
+					"visible": true,
+					"anchor": "title",
+					"anchorAlign": "bottom",
+					"text": "Source: <a href='https://en.wikipedia.org/wiki/World_population'>Wikipedia.org</a>",
+					"styles": {
+					}
+				},
+				"titlePane": {
+					"styles": {
+						"padding": 4
+					}
+				},
+			    "xAxes": {
+					"revered": true,
+			        "title": "",
+			        "paddingNear": 0.2,
+			        "paddingFar": 0.2,
+			        "categories":['Africa', 'America', 'Asia', 'Europe', 'Oceania']
+			    },
+			    "yAxes": {
+			        "title": {
+			            "text": "Population (millions)",
+			            "styles": {
+			                "textAlignment": "right"
+			            }
+			        }
+			    },
+			    "series": [{
+			        "name": "Year 1800",
+					"itemWidth": 0.7,
+			        "items": [107, 31, 635, 203, 2],
+			        "label": {
+						"offsetX": 10,
+			            "styles": {
+			                "fontSize": "11",
+							"fontBold": true
+			            }
+			        },
+			        "styles": {
+			            "background": "p(color1:0)",
+						"border":"",
+						"hovered": {
+							fillBrightness: 1.5
+						}
+			       	},
+					"animations": [{
+					}],
+					"itemAnimations": [{
+						"property": "value"
+					}]
+				}, {
+			        "name": "Year 1900",
+			        "itemWidth": 0.7,
+			        "items": [133, 156, 947, 408, 6],
+					"label": {
+						"offsetX": 10,
+						"styles": {
+							"fontSize": "11",
+							"fontBold": true
+						}
+					},
+			        "styles": {
+						"fontSize": "7",
+						"lineType": "curved",
+						"fill": "p(color1:1)",
+						"border":"",
+						"label": {
+							"visible": false
+						}
+					},
+					"animations": [{
+					}],
+					"itemAnimations": [{
+						"property": "value"
+					}]
+				}, {
+					"name": "Year 2012",
+			        "itemWidth": 0.7,
+			        "items": [1052, 954, 4250, 740, 38],
+					"label": {
+						"offsetX": 10,
+						"styles": {
+							"fontSize": "11",
+							"fontBold": true
+						}
+					},
+			        "styles": {
+						"fontSize": "7",
+						"lineType": "curved",
+			        	"fill": "p(color1:2)",
+						"border":"",
+						"label": {
+							"visible": false
+						}
+					},
+					"animations": [{
+					}],
+					"itemAnimations": [{
+						"property": "value"
+					}]
+				}],
+			    "legend": {
+					"position": "floating",
+					"top": 50,
+					"right": 20,
+					"layout": "vertical",
+					"styles": {
+						"border": "#999",
+						"shadow": "#333"
+					},
+					"itemStyles": {
+						"fontBold": true
+					}
+			    }
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

@@ -1,0 +1,26 @@
+<sc-link rel="import" href="es-worker-weak-info.html"></sc-link>
+
+<dom-module id="em-worker-weak-info">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<es-worker-weak-info id="workerList" class="flex"></es-worker-weak-info>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-worker-weak-info',
+			load: function(param){
+				var me = this;
+				me.$.workerList.onSearch(param);
+			}
+		});
+	</script>
+
+
+</dom-module>

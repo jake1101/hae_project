@@ -1,0 +1,2294 @@
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 세종 대시보드
+    ** @Description     : 경쟁사 제품 디자인 차용
+    ** @Author          : jhPark
+    ** @Create Date     : 2021.07.13
+    ** @History         : 2021.07.13 jhPark 최초작성
+    ******************************************************************************************
+-->
+<sc-link rel="stylesheet" type="text/css" href="./css/realtime-dashboard.css"></sc-link>
+<sc-link rel="import" href="./es-sejong-model.html"></sc-link>
+<sc-link rel="import" href="../shared/ep-target-history.html"></sc-link>
+<sc-link rel="import" href="../site/es-three-model-sejong.html"></sc-link>
+<sc-link rel="import" href="../input/es-vehicle-management.html"></sc-link>
+<sc-link rel="import" href="ep-safedate-setting.html"></sc-link>
+<sc-link rel="import" href="ep-sejong-worker-list.html"></sc-link>
+
+<sc-link rel="import" href="ep-tiff-map.html"></sc-link>
+
+<dom-module id="es-sejong-dashboard-new">
+<style>
+:host { @apply (--vbox-layout);
+	font-family: 'Noto Sans KR';
+	font-size: 13px;
+}
+
+#lowBoxContainer {
+	border: 1px solid #2C4670;
+	border-radius: 0px 0px 13px 13px;
+	border-top: none;
+}
+
+.lowbox {
+	margin: 5px 3px;
+	background-color: #1E3155;
+	position: relative;
+	overflow: hidden;
+	border: 1px solid #2C4670;
+	border-radius: 10px;
+}
+
+.lowBoxTitle {
+	width: 100%;
+	height: 35px;
+	text-align: center;
+	border: none;
+	line-height: 35px;
+	font-size: 18px;
+	font-weight: 500;
+}
+
+.infoBox {
+	height: 100%;
+	background: #1E3155;
+}
+
+.sejong-btn {
+	width: 31px;
+}
+
+.three-list-btn {
+	width: 100px;
+}
+
+.sejong-btn, .three-list-btn {
+	background-color: white;
+	color: #385a8c;
+	height: 31px;
+	padding: 5px;
+	margin: 5px;
+	border-radius: 5px;
+	line-height: 29px;
+	font-weight: 700;
+	font-size: 15px;
+	z-index: 2;
+	border: 1px solid gray;
+	box-shadow: 1px 1px 1px 0px #000;
+}
+
+#three-list-btn-box {
+	position: absolute;
+	left: 35px;
+	top: 54px;
+	z-index: 2;
+	padding-left: 15px;
+	display: none;
+}
+
+.sejong-top-site-text {
+	font-size: 27px;
+	font-weight: 900;
+	line-height: 48px;
+}
+
+.sejong-top-time-text {
+	font-size: 18px;
+	font-weight: 500;
+	line-height: 48px;
+}
+
+.weather-text {
+	font-size: 18px;
+	line-height: 27px;
+}
+
+.weather-icon {
+	font-size: 27px;
+	line-height: 54px;
+}
+
+.sejong-safeday-text {
+	font-size: 18px;
+	font-weight: 500;
+	line-height: 54px;
+}
+
+.sejong-safeday-text sc-label {
+	background-color: tomato;
+	height: 54px;
+	width: 180px;
+	text-align: center;
+	border-radius: 15px;
+	cursor: pointer;
+}
+
+.sejong-top-area {
+	min-height: 65px;
+	border-bottom: 1px solid #2C4770;
+	overflow: hidden;
+	border: 1px solid #2C4670;
+	border-radius: 13px 13px 0px 0px;
+}
+
+.locationWorkerInfo {
+	margin: 2px 3px;
+	padding-bottom: 10px;
+	background-color: #1E3155;
+	height: 100%;
+	position: relative;
+	overflow: hidden;
+	border: 1px solid #2C4670;
+	border-radius: 10px;
+}
+
+.toggle-btn {
+	width: 18px;
+	height: 18px;
+	padding: 0;
+	font-size: 18px;
+}
+
+.allWorker {
+	position: absolute;
+	height: calc(100% - 35px);
+	overflow-y: scroll;
+	top: 35px;
+	width: 100%;
+}
+
+.allWorker::-webkit-scrollbar {
+	
+}
+
+.allWorker::-webkit-scrollbar-thumb {
+	
+}
+
+.allWorker::-webkit-scrollbar-track {
+	
+}
+
+.row-level-box {
+	margin-top: 5px;
+	display: inline-block;
+	background-color: #3b5386;
+	border-radius: 3px;
+	cursor: pointer;
+	padding: 2px 4px;
+}
+
+.row-level1 {
+	margin-left: 5%;
+	width: 90%;
+	font-size: 18px;
+}
+
+.row-level2 {
+	margin-left: 10%;
+	width: 85%;
+	font-size: 18px;
+	display: inline-block;
+}
+
+.row-level3 {
+	margin-left: 15%;
+	width: 80%;
+	font-size: 18px;
+	display: inline-block;
+}
+
+.row-level4 {
+	margin-top: 5px;
+	margin-left: 20%;
+	padding-left: 10px;
+	width: 75%;
+	font-size: 14px;
+	display: inline-block;
+	background-color: #2c4670;
+	cursor: pointer;
+}
+
+.row-count {
+	position: absolute;
+	right: 5%;
+	display: inline-block;
+	width: 40px;
+	text-align: center;
+	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+	text-decoration: underline;
+	color: #a7e8f1;
+}
+
+.workerPopup {
+	text-decoration: underline;
+	color: #a7e8f1;
+}
+
+.realtime-top-time-text {
+	cursor: pointer;
+}
+
+.searchWorkerInput {
+	width: 60%;
+	margin-top: 5px;
+	position: relative;
+	left: 20%;
+}
+
+.whole-tab {
+	background-color: #1e3155;
+	color: white;
+	width: 100%;
+	height: 32px;
+	font-size: 20px;
+	font-weight: 500;
+	font-family: 'Noto Sans KR' !important;
+	text-align: center;
+}
+
+.tab-btn {
+	background-color: #1e3155;
+	color: white;
+	width: 50%;
+	height: 32px;
+	font-size: 20px;
+	font-weight: 500;
+	font-family: 'Noto Sans KR' !important;
+}
+
+.tab-btn:not(.btn-selected) {
+	color: #797979;
+	background: #223860;
+	font-size: 16px;
+	font-weight: 400;
+	border: 1px solid #2C4670;
+}
+
+.tab-box {
+	height: calc(100% - 35px);
+	width: 100%;
+	position: absolute;
+	top: 35px;
+}
+
+.workerPlace {
+	position: relative;
+}
+
+.workerPlace:before {
+	content: attr(tooltip-text) "로 이동";
+	position: absolute;
+	min-width: 75px;
+	border-radiu: 3px;
+	border: solid 1px #4a4f4b;
+	background-color: #555555;
+	text-align: center;
+	font-family: MalgunGothic;
+	font-size: 12px;
+	font-weight: normal;
+	font-stretch: normal;
+	font-style: normal;
+	line-height: 30px;
+	text-align: center;
+	color: #ffffff;
+	display: none;
+	z-index: 4;
+	left: -84px;
+	top: -3px;
+}
+
+.workerPlace:before {
+	
+}
+
+.workerPlace:after {
+	content: "";
+	display: none;
+	position: absolute;
+	left: -10px;
+	top: 3px;
+	z-index: 4;
+	border: 8px solid #000;
+	border-color: transparent transparent transparent #555555;
+}
+
+.workerPlace:hover:before, .workerPlace:hover:after {
+	display: block;
+}
+
+.search-icon {
+	top: 3px;
+	color: #1e3155;
+	font-size: 20px;
+	line-height: 28px;
+	position: relative;
+	margin-left: 6px;
+	font-weight: 600;
+}
+
+.search-input {
+	height: 25px;
+	font-size: 20px;
+	border: none;
+	width: 90%;
+	line-height: 27px;
+	margin-left: 2px;
+}
+
+.search-span {
+	height: max-content;
+	margin: auto 6px;
+	border-radius: 5px;
+	background: #ffffff;
+}
+
+#focusMap {
+	background-color: gray; 
+	position: relative; 
+	height: 100%; 
+	opacity: 0.5;
+}
+</style>
+
+<template>
+	<!--
+   ************************************************************************************************************
+   * Service Area
+   ************************************************************************************************************
+-->
+	<sc-request-group id="codes" init>
+		<sc-code-group>
+			<sc-code code="IOT003" value="{{codes.targetType}}"></sc-code>
+			<sc-code code="IOT004" value="{{codes.vehicleJobList}}"></sc-code>
+		</sc-code-group>
+		<!-- 협력사 조회 -->
+		<sc-ajax url="findListVendor.do" last-response="{{codes.vendorList}}" body="{{searchParam}}"></sc-ajax>
+		<sc-ajax url="findListJobType.do" last-response="{{codes.jobTypeList}}" body="{{searchParam}}"></sc-ajax>
+		<sc-ajax id="testDataJson" url="test.json" last-response="{{testData}}"></sc-ajax>
+	</sc-request-group>
+
+	<!-- 인원 현황 조회 -->
+	<sc-ajax id="workerAggregation" url="workerAggregation.do" body="{{searchParam}}" on-response="completeWorkerAggregation"></sc-ajax>
+	<!-- 작업 허가서 조회 -->
+	<sc-ajax id="low4Dashboard" url="low4Dashboard.do" body="{{searchParam}}" last-response="{{ptwReqList}}"></sc-ajax>
+	<!-- 알림 조회 -->
+	<sc-ajax id="getAlarmDashboard" url="getAlarmDashboard.do" body="{{searchParam}}" last-response="{{alarmList}}"></sc-ajax>
+	<!-- 날씨 정보 조회 -->
+	<sc-ajax id="getWeatherInfo" url="getWeatherInfo.do" body="{{searchParam}}" on-response="completeGetWeatherInfo"></sc-ajax>
+	<!-- 현장 현황 조회 -->
+	<sc-ajax id="findSiteRealTime" url="findSiteRealTime.do" body="{{searchParam}}" on-response="completeFindSiteRealTime"></sc-ajax>
+	
+
+	<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+	<!--
+    ************************************************************************************************************
+    * UI Area
+    ************************************************************************************************************
+-->
+	<!-- 바깥 배경 Start -->
+	<div class="vbox flex realtime-back-ground-color" id="back">
+		<!-- 안쪽 배경 -->
+		<div class="vbox flex realtime-sub-back-ground-color" id="backsub"
+			style="margin: 10px;">
+			<!-- 상단 타이틀 -->
+			<div class="hbox sejong-top-area">
+				<div class="vbox realtime-top-left-area">
+					<div class="hbox">
+						<!-- 사이트 이름 -->
+						<div class="vbox sejong-top-site-text">{{siteName}}</div>
+						<div class="hspace-50"></div>
+						<!-- 시간정보 -->
+						<div class="vbox sejong-top-time-text">[[currentDate]] [[dayOfWeek]] [[currentTime]]</div>
+						<div class="hspace-50"></div>
+
+						<!-- 날씨 정보 Start -->
+						<div id="weatherInfoBox1" class="vbox">
+							<div class="hbox">
+								<i id="weatherIcon" class="weather-icon"></i>
+							</div>
+						</div>
+						<div class="hspace-15"></div>
+						<div id="" class="vbox">
+							<div class="hbox weather-icon">{{weatherText}}</div>
+						</div>
+						<div class="hspace-20"></div>
+						<div id="weatherInfoBox2" class="vbox">
+							<div class="hbox weather-text">
+								<span style="width: 30px;">
+									<i class="ri-temp-hot-line weather-text"></i>
+								</span>
+								{{weatherInfo.skinTemp}}
+								<i class="ri-celsius-line weather-text"></i>
+							</div>
+							<div class="hbox weather-text">
+								<span style="width: 30px;">
+									<i class="ri-windy-line weather-text"></i>
+								</span>
+								{{weatherInfo.wsd}} m/s
+							</div>
+						</div>
+						<div class="hspace-10"></div>
+						<div id="weatherInfoBox3" class="vbox">
+							<div class="hbox weather-text">
+								<span style="width: 90px;">초미세먼지 </span>
+								{{weatherInfo.pm25Value}} ㎍/㎥
+							</div>
+							<div class="hbox weather-text">
+								<span style="width: 90px;">미세먼지 </span>
+								{{weatherInfo.pm10Value}} ㎍/㎥
+							</div>
+						</div>
+						<div class="hspace-50"></div>
+						<!-- 날씨 정보 End -->
+						<div class="vbox sejong-safeday-text">
+							<sc-label text="무재해 달성 {{safeDate}}일차" on-click="changeSafeDate"></sc-label>
+						</div>
+					</div>
+				</div>
+
+				<!-- 새로고침 -->
+				<div class="vbox flex realtime-top-right-area">
+					<div class="hbox a-flex-end">
+						<div class="vbox realtime-top-time-text" on-click="refresh">새로고침 : [[refreshSecond]]</div>
+						<div class="hspace-30"></div>
+						<div id="windowmax" class="window-max" on-click="onWindowMax"></div>
+					</div>
+				</div>
+			</div>
+			<!-- 상단 타이틀 END -->
+
+			<!-- 중단 지도 및 출역 현황 Start -->
+			<div class="hbox flex-8 realtime-content" style="overflow: hidden;">
+				<!-- 지도 | 3D -->
+				<div class="vbox" style="width: 100%; position: relative; overflow: hidden;">
+					<div id="mapDiv" style="height: 100%; width: 100%; position: absolute; z-index: 1;">
+						<cc-ol-map-container id="mapContainer" on-change-view-display="changeAreaDisplay" danger-hidden="ture"
+							show-view-marker="true" show-view-label="true" grid-hidden="true" filter-hidden="true" three-hidden="true" style="height: 80%;">
+						</cc-ol-map-container>
+						<div style="height: 20%; background-color: white;">
+							<div id="focusMap"></div>
+						</div>
+					</div>
+				</div>
+				<!-- 지도 | 3D END -->
+			</div>
+			<!-- 하단 부분 Start -->
+			<div id="lowBoxContainer" class="hbox" style="height: 250px;">
+				<!-- 출역 인원 Start -->
+				<div id="low1" class="vbox flex lowbox">
+					<p>
+						<button class="tab-btn btn-selected left-btn fst-btn" on-click="tabChange">전체 관제 현황</button>
+						<button class="tab-btn right-btn" on-click="tabChange">관제인원 상세 현황</button>
+					</p>
+					<!-- 관제현황 tab -->
+					<div class="tab-box">
+						<div id="sejongControlPieChart" class="vbox flex chartDiv" style="width: 100%; height: 86%;"></div>
+						<div class="_control-nonetext vbox flex a-center font-15-500 place-none-text" style="display: none; line-height: 150px; text-align: center;">투입 작업자가 없습니다.</div>
+						<p style="text-align: center; font-size: 15px;">출역인원 ({{wholeWorkerCnt}}명)</p>
+					</div>
+					<!-- 교부현황 tab -->
+					<div class="tab-box" style="left: 100%;">
+						<div id="sejongManagedPieChart" class="vbox flex chartDiv" style="width: 100%; height: 86%;"></div>
+						<div class="_managed-nonetext vbox flex a-center font-15-500 place-none-text" style="display: none; line-height: 150px; text-align: center;">모바일앱 관제 인원이 없습니다.</div>
+						<p style="text-align: center; font-size: 15px;">관제인원 ({{managedWorkerCnt}}명)</p>
+					</div>
+				</div>
+				<!-- 출역 인원 END -->
+				<!-- 출역 관리 Start -->
+				<div id="low2" class="vbox flex lowbox">
+					<p>
+						<button class="tab-btn btn-selected left-btn fst-btn" on-click="tabChange">직종 별 근로자</button>
+						<button class="tab-btn right-btn" on-click="tabChange">협력사 별 근로자</button>
+					</p>
+					<!-- 직종 별 근로자 tab -->
+					<div class="tab-box" style="overflow: hidden;">
+						<div id="sejongJobBarChart" class="vbox flex chartDiv" style="width: 100%; height: 86%"></div>
+						<div class="_worker-nonetext vbox flex a-center font-15-500 place-none-text" style="display: none; line-height: 150px; text-align: center;">투입 작업자가 없습니다.</div>
+						<p class="" style="text-align: center; font-size: 15px">작업자 ({{wholeWorkerCnt}}명)</p>
+					</div>
+					<!-- 협력사 별 근로자 tab -->
+					<div class="tab-box" style="left: 100%; overflow: hidden;">
+						<!-- 파이차트 -->
+						<div id="sejongVendorBarChart" class="vbox flex chartDiv" style="width: 100%; height: 86%"></div>
+						<div class="_vendor-nonetext vbox flex a-center font-15-500 place-none-text" style="display: none; line-height: 150px; text-align: center;">투입 작업자가 없습니다.</div>
+						<!-- 타이틀 -->
+						<p class="" style="text-align: center; font-size: 15px;">작업자 ({{wholeWorkerCnt}}명)</p>
+					</div>
+				</div>
+				<!-- 출역 관리 END -->
+
+				<!-- 위험지역 출입이력 | 취약 근로자 Start -->
+				<div id="low3" class="vbox flex lowbox">
+					<p class="whole-tab">취약근로자</p>
+					<!-- 취약 근로자 tab -->
+					<div id="weakTestDiv" class="tab-box">
+						<sc-grid id="weakTest" data-provider="{{weakWorkerList}}" title-text="취약 근로자" use-state="false" use-selection="false" focus-visible="false" show-number-line="true" row-height="25"
+							header-height="35" select-mode="none" use-dummy="false" column-fit-style="evenFill" on-item-click="seachWeakWorker">
+							<sc-grid-columns>
+								<sc-data-column data-field="vendorName" header-text="협력사" width="100" text-align="center" editable="false"></sc-data-column>
+								<sc-data-column data-field="workerName" header-text="이름" width="100" text-align="center" editable="false"></sc-data-column>
+								<sc-data-column data-field="weakType" header-text="유형" text-align="center" width="200" editable="false"></sc-data-column>
+							</sc-grid-columns>
+							<sc-grid-fields>
+								<sc-grid-field data-field="workerId"></sc-grid-field>
+								<sc-grid-field data-field="isMobileYn"></sc-grid-field>
+								<sc-grid-field data-field="condition"></sc-grid-field>
+							</sc-grid-fields>
+						</sc-grid>
+					</div>
+				</div>
+				<!-- 위험지역 출입이력 | 취약 근로자 END -->
+
+				<!-- 알림 및 작업허가서 Start -->
+				<div id="low4" class="vbox flex lowbox">
+					<p>
+						<!-- 버튼 이벤트 만들기 -->
+						<button class="tab-btn btn-selected left-btn fst-btn" on-click="tabChange">알림</button>
+						<button class="tab-btn right-btn" on-click="tabChange">작업허가서</button>
+					</p>
+					<!-- 알림 tab -->
+					<div id="gridAlarmPanelDiv" class="tab-box">
+						<sc-grid id="gridAlarmPanel" data-provider="{{alarmList}}" use-state="false" use-selection="false" focus-visible="false"
+							show-number-line="false" row-height="50" header-height="35" use-dummy="false" column-fit-style="evenFill">
+							<sc-grid-columns>
+								<sc-date-column data-field="sendDt" header-text="시간" width="40" text-align="center" display-format="HH:mm:ss"></sc-date-column>
+								<sc-data-column data-field="alarmTypeName" header-text="유형" width="60" text-align="center" editable="false" max-length="60"></sc-data-column>
+								<sc-data-column data-field="content" header-text="내용" text-align="left" fill-width="280" editable="false" max-length="300" text-wrap="normal"></sc-data-column>
+							</sc-grid-columns>
+							<sc-grid-fields>
+								<sc-grid-field data-field="seq" data-type="number"></sc-grid-field>
+								<sc-grid-field data-field="popup" data-type="object"></sc-grid-field>
+								<sc-grid-field data-field="marker" data-type="object"></sc-grid-field>
+								<sc-grid-field data-field="geoJson" data-type="object"></sc-grid-field>
+								<sc-grid-field data-field="id"></sc-grid-field>
+								<sc-grid-field data-field="recipient"></sc-grid-field>
+								<sc-grid-field data-field="answerer"></sc-grid-field>
+								<sc-grid-field data-field="siteId" data-type="number"></sc-grid-field>
+								<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+								<sc-grid-field data-field="targetInfo" data-type="object"></sc-grid-field>
+								<sc-grid-field data-field="location" data-type="object"></sc-grid-field>
+							</sc-grid-fields>
+						</sc-grid>
+					</div>
+					<!-- 작업허가서 tab -->
+					<div id="dangerTestDiv" class="tab-box" style="left: 100%">
+						<sc-grid id="dangerTest" data-provider="{{ptwReqList}}" use-state="false" use-selection="false" focus-visible="false"
+							show-number-line="false" row-height="50" header-height="35"	use-dummy="false" column-fit-style="evenFill">
+							<sc-grid-columns>
+								<sc-data-column width="40" text-align="center" header-text="승인" data-field="status_nm"></sc-data-column>
+								<sc-data-column fill-width="80" text-align="center" header-text="작업명" data-field="ptw_nm" text-wrap="normal"></sc-data-column>
+								<sc-data-column width="70" text-align="center" header-text="신청업체" data-field="vendor_nm"></sc-data-column>
+								<sc-data-column width="80" text-align="center" header-text="신청일" data-field="appr_dt"></sc-data-column>
+								<sc-data-column width="90" text-align="center" header-text="작업기간" data-field="dur" text-wrap="normal"></sc-data-column>
+							</sc-grid-columns> 
+						</sc-grid>
+					</div>
+				</div>
+				<!-- 알림 및 작업허가서 END -->
+			</div>
+			<!-- 하단 부분 END -->
+		</div>
+		<!-- 안쪽 배경 END -->
+	</div>
+	<!-- 바깥 배경 END -->
+
+	<!-- 3D 팝업 알림용 div -->
+	<!-- 	<div id="shipPopupInfoDiv" class="shipPopup" style="display:none;"> -->
+	<!-- 		<div id="ship_arrow"></div><div>3D 화면을 보려면 클릭하세요</div> -->
+	<!-- 	</div> -->
+	<div id="threeTooltip" class="listTooltip" hidden>
+		<div id="tooltipClose" class="close" on-click="closeTooltip">x</div>
+		<ul id="tooltip"></ul>
+	</div>
+</template>
+
+<!--
+    ************************************************************************************************************
+    * Script Area
+    ************************************************************************************************************
+--> <script>
+	Polymer({
+		is : "es-sejong-dashboard-new",
+
+		properties : {
+			codes : {
+				type : Object,
+				value : function() {
+					return {
+						vendorList : [] // 협력사 목록
+						,
+						targetType : [] // 표시 유형
+						,
+						workerJobList : [] // 작업자 유형
+						,
+						vehicleJobList : []
+					// 이동장비 유형
+					};
+				},
+				reset : false
+			},
+			
+			siteCondition : { // 현장 정보
+				type : Object,
+				value : function() {
+					return {}
+				}
+			},
+			
+			searchCondition : {
+				type : Object,
+				value : function() {
+					return {};
+				}
+			},
+			
+			searchParam : {
+				type : Object,
+				value : function() {
+					return {
+						siteId : SCMdiManager.searchParam.site_id
+					};
+				}
+			},
+			
+			// 메시지
+			resultInfo : {
+				type : Object,
+				value : function() {
+					return {
+						alarmMsg : this.translate("IOT.E0008"), // 조회된 실시간 위치 정보가 없습니다.
+						newSensorId : ""
+					};
+				}
+			},
+			
+			display : {
+				type : Object,
+				value : function() {
+					return {};
+				}
+			},
+			
+			// 지도
+			map : {
+				type : Object,
+				value : function() {
+					return {};
+				}
+			},
+
+			workerMarkerLayer : {
+				type : Object,
+				value : function() {
+					return {};
+				}
+			},
+			
+			vehicleMarkerLayer : {
+				type : Object,
+				value : function() {
+					return {};
+				}
+			},
+			
+			currentDate : {
+				type : Object,
+				value : function() {
+					return "";
+				}
+			},
+
+			dayOfWeek : {
+				type : Object,
+				value : function() {
+					return "";
+				}
+			},
+
+			currentTime : {
+				type : Object,
+				value : function() {
+					return "";
+				}
+			},
+
+			safeDay : {
+				type : Object,
+				value : function() {
+					return new Date();
+				}
+			},
+			
+			safeDate : {
+				type : Object,
+				value : function() {
+					return 1;
+				}
+			},
+			
+			refreshSecond : {
+				type : Object,
+				value : function() {
+					return 180;
+				}
+			},
+			
+			smsInfo : {
+				type : Object,
+				value : function() {
+					return {};
+				}
+			},
+			
+			colorTone : {
+				type : Object,
+				value : function() {
+					return 'black';
+				}
+			},
+			
+			titleColor : {
+				type : Object,
+				value : function() {
+					return '#1E3155';
+				}
+			},
+			
+			mapHidden : {
+				type : Object,
+				value : function() {
+					return 'true';
+				}
+			},
+			
+			weakParam : {
+				type : Object,
+				value : function() {
+					var toDay = new Date();
+
+					return {
+						siteId : SCMdiManager.searchParam.site_id,
+						onlyWeakWorker : "Y",
+						attendDt : moment(toDay).format("YYYY-MM-DD")
+					};
+				}
+			},
+
+			oriOption : {
+				type : Object,
+				value : function() {
+					return {
+						tooltip: {
+				            trigger: 'item',
+				            formatter: '클릭하여 상세인원 확인'
+				        },
+						legend : {
+							bottom : '0%',
+							show : false,
+							itemWidth : 8,
+							textStyle : {
+								fontSize : 17,
+								color : "#fff",
+								fontFamily : "Noto Sans KR",
+							},
+							formatter : function(name) {
+								return name;
+							}
+						},
+						series : [ {
+							type : 'pie',
+							radius : '80%',
+							label : {
+								color : "#fff",
+								fontFamily : "Noto Sans KR",
+								show : true,
+								position : 'outside',
+								formatter : "{b}({c})",
+								alignTo : "edge",
+								edgeDistance: "5%"
+							},
+							height : "auto",
+							center: ["50%", "55%"],
+							labelLayout: function (data) {
+								for(var i in data.labelLinePoints){
+									if(data.labelLinePoints[i][1] > 170){
+								        return {
+											x: 430,
+								            y: 140,
+											labelLinePoints : [
+												[data.labelLinePoints[0][0], 140],
+												[data.labelLinePoints[1][0], 140],
+												[data.labelLinePoints[2][0], 140]
+											]
+								          };
+									}
+								}
+							}
+						} ]
+					};
+				},
+			},
+			
+			barOption : {
+				type : Object,
+				value : function() {
+					return {
+						tooltip: {
+				            trigger: 'item',
+				            formatter: '클릭하여 상세인원 확인'
+				        },
+						grid : {
+							height : "80%",
+							top : "10%"
+						},
+						xAxis : {
+							type : 'value'
+						},
+						yAxis : {
+							type : 'category',
+							inverse : true
+						},
+						series : [ {
+							type : 'bar',
+							barWidth : "60%",
+							label : {
+								show : true,
+								position : 'insideLeft',
+								formatter : "{b}({c})"
+							}
+						} ]
+					}
+				}
+			},
+			
+			threeSearchParam : {
+            	type : Object,
+            	value : function(){
+            		return {
+	            		siteId : SCMdiManager.searchParam.site_id,
+	            		onlyHavingModelYn : "Y"
+	            	}
+            	}
+	        },
+	        
+	        conditions : {
+            	type : Object,
+            	value : function(){
+            		return {
+            			"active" : "앱 작업중", 
+            			"inactive" : "작업종료",
+            			"unknown" : "알수없음"
+            		}
+            	}
+            }
+		},
+
+		/***** 초기화 완료 후 호출 함수 *****/
+		initialized : function() {
+			var me = this;
+			//상단 정보 설정
+			me.initHeaderInfo();
+			//맵 설정
+			me.initMap();
+			//Grid 설정
+			me.initGrid();
+			//시작시 필요한 ajax 호출
+			me.onSearch();
+			//시작시 확대 화면
+// 			me.onWindowMax();
+		},
+		
+		/***** 초기 호출 함수 Start *****/
+		/* 상단 정보 */
+		initHeaderInfo : function(){
+			var me = this;
+			
+			var d = new Date();
+			var currentDate = d.getFullYear() + "년 " + (d.getMonth() + 1) + "월 " + d.getDate() + "일";
+
+			// 현재일자
+			me.set("currentDate", currentDate);
+
+			// 요일
+			var week = [ '일', '월', '화', '수', '목', '금', '토' ];
+			var dayOfWeek = week[d.getDay()];
+			me.set("dayOfWeek", "(" + dayOfWeek + ")");
+			
+
+			// 현재시간
+			me.timeInterval = setInterval(function() {
+				me.setTimeText();
+			}, 1000); // 1초
+
+			me.set("safeDay", this.$.mapContainer.areaList[0].safeDay);
+			me.set("safeDate", this.$.mapContainer.areaList[0].safeDayCount);
+
+			//사이트 이름
+			me.set("siteName", SCMdiManager.searchParam.site_name);
+		},
+		/* 그리드 설정 */
+		initGrid : function() { // 그리드 초기화
+			var me = this;
+		
+			var fontStyle = {
+				"default" : {
+					"fontSize" : "12",
+					"fontName" : "Noto Sans KR"
+				},
+	
+				header : {
+					fontSize : "16",
+					fontBold : false
+				}
+			}
+			
+			var sejongColor = "#2c4670,1px";
+			var sejongColor2 = "#3b5386";
+			var sejongColor3 = "#1E3155";
+			var white = "#FFF"
+	
+			var sejongStyles = {
+				"default" : {
+					"background" : sejongColor3,
+					"color" : white,
+					"borderLeft" : sejongColor,
+					"borderRight" : sejongColor,
+					"borderTop" : sejongColor,
+					"borderBottom" : sejongColor
+				},
+				grid : {
+					background : sejongColor3,
+				},
+				header : {
+					background : sejongColor2,
+					color : white,
+					selectedColor : white,
+					selectedBackground : sejongColor2,
+					hoveredColor : white,
+					hoveredBackground : sejongColor2,
+					borderLeft : sejongColor,
+					borderRight : sejongColor,
+					borderTop : sejongColor,
+					borderBottom : sejongColor
+				},
+				body : {
+					background : white,
+					color : white,
+					cell : {
+						borderLeft : sejongColor,
+						borderRight : sejongColor,
+						borderTop : sejongColor,
+						borderBottom : sejongColor
+					}
+				},
+				rowIndicator : {
+					background : sejongColor3,
+					borderLeft : sejongColor,
+					borderRight : sejongColor,
+					borderTop : sejongColor,
+					borderBottom : sejongColor,
+					color : white
+				}
+			};
+	
+			me.set("fontStyle", fontStyle);
+			me.set("sejongStyles", sejongStyles);
+	
+			me.$.gridAlarmPanel.loadStyles(fontStyle);
+			me.$.dangerTest.loadStyles(fontStyle);
+			me.$.weakTest.loadStyles(fontStyle);
+	
+			me.$.gridAlarmPanel.loadStyles(sejongStyles);
+			me.$.dangerTest.loadStyles(sejongStyles);
+			me.$.weakTest.loadStyles(sejongStyles);
+		
+			$(".es-sejong-dashboard-new .sc-grid").css("background-color", sejongColor3);
+			$(".es-sejong-dashboard-new .grid-container").css("margin", "5px");
+			$(".es-sejong-dashboard-new .grid-container").css("border", "none");
+			$(".es-sejong-dashboard-new .grid-container").children().css("height", "94%");
+		},
+		/* 맵 설정 */
+		initMap : function(){
+			var me = this;
+			me.set("map", me.$.mapContainer.map);
+			var markerSource = new ol.source.Vector({});	
+	    	var markerLayer = new ol.layer.Vector({source: markerSource});
+	    	//검색 Marker 관련
+			var selected_source = new ol.source.Vector({});
+	    	var selected_layer = new ol.layer.Vector({source: selected_source});
+
+	    	me.map.addLayer(markerLayer);
+	    	me.map.addLayer(selected_layer);
+	    	me.map.set('markerSource', markerSource);
+	    	me.map.set('markerLayer', markerLayer);
+	    	me.map.set('selected_source', selected_source);
+	    	me.map.set('selected_layer', selected_layer);
+	    	
+	    	createVectorSourceLayer(me.map, 'overlay');
+
+	    	//마우스 오버시 이벤트 발생
+	    	me.map.on('pointermove', function(e) {
+	    		me.map.get('overlay_source').clear();
+				me.map.removeOverlay(me.map.getOverlayById('targetPopup'));
+				me.map.removeOverlay(me.map.getOverlayById('shipPopup'));
+				
+				var selected = null;
+				me.map.forEachFeatureAtPixel(e.pixel, function(f) {
+	  		    	selected = f;
+	  		    	return true;
+	  		  	});
+				
+				var featureTypeList = new Set();
+	    	    me.map.forEachFeatureAtPixel(e.pixel, function (feature) {
+	    	    	featureTypeList.add(feature.get('type'));
+	    	    })
+
+		    	if (featureTypeList.has('groupMarker') || featureTypeList.has('targetMarker')) {
+			    	me.map.getTargetElement().style.cursor = 'pointer';
+		    	}
+		    	else {
+		    		me.map.getTargetElement().style.cursor = '';
+		    		return;		    		
+		    	}
+	    		
+	    		if(selected.get('type') == "targetMarker" || selected.get('type') == "groupMarker"){
+					var targetList = me.map.getFeaturesAtPixel(e.pixel,{layerFilter : function(layer){return layer === me.map.get("markerLayer");}});
+					if(targetList.length == 0){
+						targetList = me.map.getFeaturesAtPixel(e.pixel,{layerFilter : function(layer){return layer === me.map.get("selected_layer");}});
+					}
+					if(UT.isNotEmpty(targetList)){
+						var info = targetList[0].get('targetInfo');
+						if(info.targetType == 'vehicle') {
+							info.targetName = info.driverInfo.name; 
+							info.targetJobName = info.driverInfo.jobTypeName; 
+							focusTarget(me.map, info, targetList.length);							
+						}
+						else {
+							focusTarget(me.map, info, targetList.length);							
+						}
+						return;
+					}
+		    	}
+    			else if(selected.get('type') == 'marker'){
+			    	if(UT.isNotEmpty(selected.get('modelName'))){
+						var div = me.$.shipPopupInfoDiv;
+						if(div == null) return;
+						div.style.display="block";
+						var overlay = new ol.Overlay({
+							id : 'shipPopup',
+							element : div,
+							offset : [0,-28],
+							positioning : 'bottom-center',
+							position : selected.getGeometry().getCoordinates()
+						});
+						me.map.addOverlay(overlay);
+						return;
+			    	}
+				}
+			});
+	    	
+	    	//마커 클릭시 workerPopup 호출
+	    	me.map.on("click", function(e) {
+	    		var coordinate = ol.proj.transform(e.coordinate, "EPSG:900913", 'EPSG:4326');
+	    		console.log(e.coordinate);
+	    		console.log(e.pixel_);
+	    		
+	    		//클릭한 feature 정보 수집
+	    		var featureTypeList = new Set();
+	    		var featureList = [];
+	    	    me.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
+	    	    	featureTypeList.add(feature.get('type'));
+	    	    	featureList.push(feature);
+	    	    })
+	    	    
+	    	    var worker;
+	    	    var workerList;
+	    	    
+	    	    featureList.forEach(function(feature){
+	    	    	if(feature.get('type') == 'targetMarker' && feature.id_){
+	    	    		worker = feature.get('targetInfo');
+	    	    	}
+	    	    	else if(feature.get('type') == 'groupMarker'){
+	    	    		workerList = feature.get('workerList');
+	    	    	}
+	    	    })
+	    	    //feature에 따른 분기처리
+				if(featureTypeList.has('targetMarker')){
+					me.searchWorkerPopup(worker.targetId);
+				} else {
+					if(featureTypeList.has('groupMarker')){
+						me.openWorkerListPopup(workerList, "그룹");
+					}
+				}
+	    	});
+			// 눈 모양 아이콘 default 설정.
+			me.$.mapContainer.querySelector("#anchorLabel").fire('click', event); // anchor 영역 선택 처리
+			me.$.mapContainer.querySelector("#siteLabel").fire('click', event); // site 현장 선택 처리
+			me.$.mapContainer.querySelector("#areaLabel").fire('click', event); // area 영역 선택 처리
+			me.$.mapContainer.querySelector("#buildingLabel").fire('click', event); // building 영역 선택 처리
+			//지도 버튼 삭제 및 위치 조정
+			$("#mapDiv .ol-zoom").css("display", "none");
+			$("#mapDiv .ol-rotate").css("display", "none");
+			$("#mapDiv .viewControl").css("left","auto").css("right", "188px");
+			$("#mapDiv .viewControl .viewPanel").css("left","-142px");
+			//해상도 변화 이벤트
+			me.map.getView().on('change:resolution', function(e) {
+				if(!me.get("wheelOn")){
+					me.countArea();
+					me.set("wheelOn", false)					
+				}
+			});
+			//마우스 휠 이벤트
+			me.map.on('wheel', function(e) {
+				me.set("wheelOn", true);
+				setTimeout(function() {
+					me.countArea();
+				}, 300);
+			});
+
+			//tiff 파일 지도 업로드
+            var tileLayer = new ol.layer.Group({
+				                title: 'Overlay',
+				                layers: [
+				                    new ol.layer.Tile({
+				                        title: 'Overlay',
+				                        source: new ol.source.XYZ({
+				                            attributions: '',
+				                            minZoom: 17,
+				                            maxZoom: 22,
+				                            url: './ui/iot/dashboard/icon/tile/tile3/{z}/{x}/{-y}.png',
+				                            tileSize: [256, 256]
+				                        })
+				                    }),
+				                ]
+				            })
+            
+// 			me.map.addLayer(tileLayer);
+
+            me.set("tileLayer", tileLayer);
+		},
+		/***** 초기 호출 함수 End *****/
+		
+		/***** onSearch 함수 Start *****/
+		onSearch : function() {
+			if (!this.isInitialized) return;
+			var me = this;
+			
+			me.set("byJobType", null);
+			me.set("byLocation", null);
+
+			me.searchParam.vendorIds = me.searchCondition.vendorIds;
+			me.searchParam.jobTypeIds = me.searchCondition.jobTypeIds;
+			me.searchParam.vehicleTypes = me.searchCondition.vehicleTypes;
+			me.set("resultInfo.alarmMsg", me.translate("IOT.E0008"));
+			me.resultInfo.newSensorId = "";
+			UT.request(me.$.workerAggregation);
+			UT.request(me.$.getAlarmDashboard);
+			UT.request(me.$.low4Dashboard);
+			UT.request(me.$.getWeatherInfo);
+			
+			me.$.mapContainer.dangerLayerRedraw();
+			me.focusMapMove();
+		},
+		/* 사이트 실시간 정보 */
+		completeFindSiteRealTime : function(e, res) {
+			var me = this;
+			me.set("siteCondition", res.response);
+			
+			console.log(me.siteCondition);
+			
+			var workerList = me.get("siteCondition.gridWorkerList");
+			var vehicleList = me.get("siteCondition.gridVehicleList");
+
+			if(workerList != null && vehicleList != null){
+				var workerFeatures = me.getFeatureList(workerList);
+				var vehicleFeatures = me.getFeatureList(vehicleList);
+				
+				me.map.set('workerFeatures', workerFeatures);
+				me.map.set('vehicleFeatures', vehicleFeatures);
+			}
+
+			
+			//현장 좌표 변환
+			var coords = []
+			var coordsX = []
+			var coordsY = []
+			var prevCoords = me.siteCondition.site.locInfoGeoJson.coordinates;
+			
+			//좌표 변환
+			for(var i in prevCoords[0]){
+				coords.push(me.changeCoordinates(prevCoords[0][i]));
+			}
+			
+			//좌표 최대값 최소값 구하기
+			for(var i in coords){
+				coordsX.push(coords[i][0]);
+				coordsY.push(coords[i][1]);
+			}
+			var MaxX = Math.max.apply(null, coordsX);
+			var MinX = Math.min.apply(null, coordsX);
+			var MaxY = Math.max.apply(null, coordsY);
+			var MinY = Math.min.apply(null, coordsY);
+			
+			me.set("MaxX", MaxX);
+			me.set("MinX", MinX);
+			me.set("MaxY", MaxY);
+			me.set("MinY", MinY);
+			
+			
+// 			$("#focusMap").draggable();
+			me.focusMapMove();
+			
+			me.map.getView().on('change:center', function(e) {
+				me.focusMapMove();
+			});
+			
+			//구역 별 인원 수 카운트
+			me.countArea();
+		},
+		/* 날씨 정보 */
+		completeGetWeatherInfo : function(e, res) {
+			var me = this;
+
+			var result = res.response || {};
+
+			var weatherInfo = result.body || [];
+
+			//데이터 저장
+			me.set("weatherInfo", weatherInfo);
+
+			me.getWeatherIconInfo(weatherInfo, "ri");
+		},
+		/* 출력 인원 */
+		completeWorkerAggregation: function(e, res){
+			var me = this;
+// 			var result = res.response;
+			var result = me.testData;
+			
+			//관제 상태 지정
+			var wholeList = result.byLocation.wholeList;
+			if(wholeList != null) {
+				var weakWorkerList = wholeList.filter(worker => worker.weakType);
+
+				me.set("wholeList", wholeList);
+				me.set("byLocation" ,result.byLocation);
+				me.set("byJobType" ,result.byJobType);
+				me.set("weakWorkerList" ,weakWorkerList);
+	
+				if(!me.get("isAutocomplete")){
+					me.autocompleteSetting();
+				}
+
+				me.resetChart();
+			}
+			
+			//윈도우 크기 변경 이벤트, 차트 다시 그리기 -> canvas 크기가 고정이기 때문에
+			//지도나 3D 모델의 해상도도 흐려진다. 다시 그려줘야 할까?
+			window.addEventListener('resize', function(event) {
+			    me.resetChart();
+			}, true);
+			
+			//지도 검색을 위해 뒤로 미룸
+			UT.requestNotUseLoading(me.$.findSiteRealTime);
+		},
+
+		/***** onSearch 함수 End *****/
+		
+		/***** Chrat 함수 Start *****/
+		/* 차트 시작 */
+		drawChart : function() {
+			var me = this;
+
+			var windowMax = me.$.windowmax;
+			
+			//전체 작업자
+			var wholeList = me.get("wholeList");
+			
+			//직종, 협력사, 관제인원 분류
+			var jobList = me.topListArray(wholeList, "jobTypeName", 4);
+			var vendorList = me.topListArray(wholeList, "vendorName", 4);
+			var controlList = me.topListArray(wholeList, "col1", 2);
+			
+			//관제인원만 추출, 교부현황
+			var managedWorkerList = wholeList.filter(e=>e.col1=="관제인원");
+			var managedList = me.topListArray(managedWorkerList, "workStatus", 4);
+			//인원수 저장
+			me.set("wholeWorkerCnt", wholeList.length);
+			me.set("managedWorkerCnt", managedWorkerList.length);
+
+			me.createChart('worker', jobList);
+			me.createChart('vendor', vendorList);
+			me.createChart('control', controlList);
+			me.createChart('managed', managedList);
+			
+			//취약 근로자 차트 추가
+			console.log(me.wholeList);
+			var weakList = me.topListArray(whileList, "weakType", 5);
+			console.log(weakList);
+			me.createChart('weak', weakList);
+		},
+		/* 상위 리스트 불러오기 */
+		topListArray : function(data, colName, topCnt){
+			var wholeList = data;
+			//컬럼을 set으로 저장
+			var colSet = new Set();
+			
+			wholeList.forEach(function(el){
+				colSet.add(el[colName]);
+			});
+			
+			//컬럼, 인원수, 그에 맞는 인원 정보를 저장
+			var groupList = [];
+			
+			colSet.forEach(function(col){
+				var workerList = []
+				wholeList.forEach(function(el){
+					if(el[colName] == col){
+						workerList.push(el);
+					}
+				});
+				
+				groupList.push({target_name: col, cnt: workerList.length, dataList: workerList});
+			})
+			//인원순으로 정렬
+			groupList = groupList.sort(function (a, b) {
+			    return b.cnt - a.cnt;
+			});
+			
+			//차트데이터로 저장(기타는 따로 묶어서)
+			var chartList = [];
+			var etcList = [];
+			var cnt = 0
+			for(var i in groupList){
+				var workerList = []
+				if(i < topCnt){
+					chartList.push(groupList[i]);
+				}
+				else {
+					cnt = cnt + groupList[i].cnt;
+					etcList = etcList.concat(groupList[i].dataList);
+				}
+			}
+			chartList.push({target_name: "기타", cnt: cnt, dataList: etcList});
+			return chartList;
+		},
+		/* 차트 생성 */
+		createChart : function(div, dataList) {
+			var me = this;
+
+			//차트 설정
+			var chartDataList = [];
+
+			for (var idx in dataList) {
+				var item = dataList[idx];
+				var colorArry = ['#4477ED', '#9559EA', '#FF00FF', '#c23531'];
+				// 차트 데이터
+				if(item.cnt > 0){
+					chartDataList.push({
+						itemStyle : { color : colorArry[idx] },
+						value : item.cnt,
+						name : item.target_name
+					});					
+				}
+			}
+			
+			var chartDom = null;
+			var chart = null;
+			var option = {};
+
+			if (div == "worker") {
+				chartDom = me.$.sejongJobBarChart;
+				option = me.get("barOption")
+			} else if (div == "control") {
+				chartDom = me.$.sejongControlPieChart;
+				option = me.get("oriOption");
+			} else if (div == "vendor") {
+				chartDom = me.$.sejongVendorBarChart;
+				option = me.get("barOption")
+			} else if (div == "managed") {
+				chartDom = me.$.sejongManagedPieChart;
+				option = me.get("oriOption");
+			}
+
+			chart = echarts.init(chartDom);
+			
+			if (dataList[0].cnt > 0) {
+				//차트에 데이터 저장
+				option.series[0].data = chartDataList;
+			} else {
+				option = {
+					series : [ {
+						type : 'pie',
+						data : []
+					} ]
+				};
+
+				$("._" + div + "-nonetext").css("display", "block");
+				$("._" + div + "-nonetext").prev().css("display", "none");
+			}
+			chart.setOption(option);
+			//차트 팝업 이벤트 추가
+			chart.on('click', function(param){
+				var value = param.data.name;
+				var workerList = dataList.filter(el => el.target_name == value)[0].dataList;
+				
+				me.openWorkerListPopup(workerList, value);
+			});
+			me.set(div, chart);
+		},
+		
+		/* 차트 재시작 */
+		resetChart : function() {
+			var me = this;
+
+			//차트 제거
+			echarts.dispose(me.$.sejongJobBarChart);
+			echarts.dispose(me.$.sejongControlPieChart);
+			echarts.dispose(me.$.sejongManagedPieChart);
+			echarts.dispose(me.$.sejongVendorBarChart);
+			
+			//대시보드에서 벗어 날시 차트 크기 강제 지정
+			if(!$(me).parent().parent().hasClass("item-selected")){
+				var height = $(".tab-box").height() * 0.86;
+				var width = $(".tab-box").width();
+				
+				$(".chartDiv").css("height", "174px");
+				$(".chartDiv").css("width", "456px");
+			}
+			else {
+				$(".chartDiv").css("height", "86%");
+				$(".chartDiv").css("width", "100%");
+			}
+
+			me.drawChart();
+		},
+		/***** Chrat 함수 End *****/
+		
+		/***** 시간 & 날짜 & 윈도우 함수 Strat *****/
+		/* 시간 지정 */
+		setTimeText : function() {
+			var me = this;
+
+			var d = new Date();
+			var hours = d.getHours();
+			var minutes = d.getMinutes();
+			//var seconds = d.getSeconds();
+
+			if (hours < 10) {
+				hours = "0" + hours;
+			}
+			if (minutes < 10) {
+				minutes = "0" + minutes;
+			}
+			/* if(seconds < 10){
+				seconds = "0" + seconds;
+			} */
+
+			var currentTime = hours + ":" + minutes /* +":" + seconds */;
+			me.set("currentTime", currentTime);
+
+			// refresh 초
+			var refreshSecond = me.get("refreshSecond") || 0;
+
+			if (refreshSecond <= 0) {
+				me.set("refreshSecond", 180);
+				//             		me.searchData();
+				me.refresh();
+			} else {
+				me.set("refreshSecond", --refreshSecond);
+			} 
+		},
+		/* 날씨 아이콘 */
+		getWeatherIconInfo : function(param, prefix) {
+			var me = this;
+			var pty = param.pty; // 강수형태(PTY) 코드 : 없음(0), 비(1), 비/눈(2), 눈(3), 소나기(4) 여기서 비/눈은 비와 눈이 섞여 오는 것을 의미 (진눈개비)
+			var sky = param.sky; // 맑음 0 ～ 5 , 구름많음 6 ～ 8 ,  흐림  9 ～ 10
+			
+			/**
+			 * icon
+			 * 05_비, 09_눈비, 07_눈, 05_비
+			 * 01_낮_맑음, 10_밤_맑음, 04_구름많음, 03_흐림 
+			 * 12_정보없음
+			 */
+			var icon;
+			var weatherText;
+
+			if (pty == 0) { // 없음
+				if (sky <= 5) { // 맑음
+					// 낮 or 밤(1or10)
+					icon = prefix + '-sun-line';
+					weatherText = "맑음";
+
+				} else if (sky >= 9) { // 흐림
+					icon = prefix + '-sun-cloudy-line';
+					weatherText = "흐림";
+
+				} else { // 구름많음
+					icon = prefix + '-foggy-line';
+					weatherText = "구름많음";
+				}
+
+			} else {
+				if (pty == 1) { // 비
+					icon = prefix + '-drizzle-line';
+					weatherText = "비";
+
+				} else if (pty == 2) { // 비/눈
+					icon = prefix + '-hail-line';
+					weatherText = "비/눈";
+
+				} else if (pty == 3) { // 눈
+					icon = prefix + '-snowy-line';
+					weatherText = "눈";
+
+				} else if (pty == 4) { // 소나기
+					icon = prefix + '-heavy-showers-line';
+					weatherText = "소나기";
+				}
+			}
+
+			me.set("weatherText", weatherText);
+			$(me.$.weatherIcon).addClass(icon);
+		},
+		/* 윈도우 확대 축소 */
+		onWindowMax : function() {
+			var me = this;
+
+			// 확대 축소 버튼
+			var windowMax = me.$.windowmax;
+
+			// 탑메뉴
+			var topmenu = $('#headWrap');
+			// 탭바
+			var mdiTabbar = $('#mdiTabbar');
+			// 메뉴경로
+			var mdiBreadCrumb = $('#mdiBreadCrumb');
+			// 왼쪽 메뉴
+			var mdiLeftMenu = $('#mdiLeftMenu');
+
+			//전체 div
+			var pages = $('#mdiPages');
+
+			// 원래 사이즈 상태
+			if (windowMax.classList.contains('window-max')) {
+				windowMax.classList.remove('window-max');
+				windowMax.classList.add('window-return');
+
+				// 탑메뉴 숨김
+				topmenu.css("display", "none");
+				// 탭바 숨김
+				mdiTabbar.css("display", "none");
+				// 메뉴경로 숨김
+				mdiBreadCrumb.css("display", "none");
+				// 왼쪽 사이드 바 숨김
+				mdiLeftMenu.css("display", "none");
+
+				$('#backsub').addClass('fullback');
+
+				$('.mdiTabsDiv')[0].style.display = 'none';
+
+				// sc-mdi-window (padding 제거)
+				var domList = document.querySelectorAll('sc-mdi-window');
+
+				for (var i = 0; i < domList.length; i++) {
+					var domElem = domList[i];
+					domElem.classList.add("padding-none");
+				}
+
+				// 전체화면 실행
+				me.openFullscreen();
+
+				setTimeout(function() {
+					var domList = document.querySelectorAll('sc-mdi-window');
+
+					for (var i = 0; i < domList.length; i++) {
+						var domElem = domList[i];
+						domElem.style.width = "100%";
+						domElem.style.height = "100%";
+					}
+				}, 700);
+
+				// 확대 사이즈 상태
+			} else {
+				windowMax.classList.remove('window-return');
+				windowMax.classList.add('window-max');
+
+				// 탑메뉴 보임
+				topmenu.css("display", "");
+				// 탭바 보임
+				mdiTabbar.css("display", "");
+				// 메뉴경로 보임
+				mdiBreadCrumb.css("display", "");
+				// 왼쪽 사이드 바 보임
+				mdiLeftMenu.css("display", "");
+
+				pages.css("position", "");
+				$('#backsub').removeClass('fullback');
+
+				$('.mdiTabsDiv')[0].style.display = 'block';
+
+				// 전체화면 취소
+				me.closeFullscreen();
+
+				// sc-mdi-window (padding 제거)
+				var domList = document.querySelectorAll('sc-mdi-window');
+
+				for (var i = 0; i < domList.length; i++) {
+					var domElem = domList[i];
+					domElem.classList.remove("padding-none");
+				}
+			}
+
+			// SC-MDI : RESIZE FUNCTION
+			$('sc-mdi')[0]._onUtilAreaResize();
+		},
+		/* 확대 */
+		openFullscreen : function() {
+			var me = this;
+
+			var elem = document.documentElement;
+
+			if (elem.mozRequestFullScreen) { /* Firefox */
+				elem.mozRequestFullScreen();
+			} else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+				elem.webkitRequestFullscreen();
+			} else if (elem.msRequestFullscreen) { /* IE/Edge */
+				elem.msRequestFullscreen();
+			}
+
+			this.$.lowBoxContainer.style.height = "350px";
+			this.$.backsub.style.margin = "0px";
+			$(".sejong-top-area").css("min-height", "79px");
+			$(".place-none-text").css("line-height", "250px");
+		},
+		/* 축소 */
+		closeFullscreen : function() {
+			var me = this;
+
+			if (document.mozCancelFullScreen) { /* Firefox */
+				document.mozCancelFullScreen();
+			} else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+				document.webkitExitFullscreen();
+			} else if (document.msExitFullscreen) { /* IE/Edge */
+				document.msExitFullscreen();
+			}
+
+			this.$.lowBoxContainer.style.height = "250px";
+			this.$.backsub.style.margin = "10px";
+			$(".sejong-top-area").css("min-height", "65px");
+			$(".place-none-text").css("line-height", "150px");
+		},
+		/***** 시간 & 날짜 & 윈도우 함수 End *****/
+		
+		/***** 화면 전환 함수 Strat*****/
+		map_btn : function() {
+			var me = this;
+			me.$.mapDiv.style.top = "0%";
+			me.$.threeDDiv.style.top = "100%";
+			event.stopImmediatePropagation();
+		},
+
+		threeD_btn : function() {
+			this.$.mapDiv.style.top = "100%";
+			this.$.threeDDiv.style.top = "0%";
+		},
+		threeD_change : function(event) {
+			var me = this;
+			var info = $(event.target).next(".three_info")[0];
+			this.$.mapDiv.style.top = "100%";
+			this.$.threeDDiv.style.top = "0%";
+			
+			me.set("currThreeD", info.dataInfo);
+
+			me.modelName = info.dataInfo.modelName;
+			var modelName = info.dataInfo.modelName;
+			
+			me.searchParam.areaId = info.dataInfo.id;
+
+// 			if(gloader.loaded[modelName]){
+// 				me.loadThree(gloader.loaded[modelName].scene.clone(), modelName);
+// 			}else{
+// 				gloader.load(modelName+'.glb', function(model){
+// 					gloader.loaded[modelName] = model;
+// 					me.loadThree(gloader.loaded[modelName].scene.clone(), modelName);
+// 				});
+// 			}
+			gloader.load(modelName+'.glb', function(model){
+				gloader.loaded[modelName] = model;
+				me.loadThree(gloader.loaded[modelName].scene.clone(), modelName);
+			});
+		},
+		/* 행 슬라이드 */
+		rowSlide : function(e){
+			var row = $(e.target);
+			
+			if(row.hasClass("row-level-box")){
+				row.children(".toggle-btn").toggleClass("ri-add-line");
+				row.children(".toggle-btn").toggleClass("ri-subtract-line");
+				row.nextAll().slideToggle(100);
+				
+			}
+			else{
+				row.toggleClass("ri-add-line");
+				row.toggleClass("ri-subtract-line");
+				row.parent().nextAll().slideToggle(100);
+			}
+			event.stopImmediatePropagation();
+		},
+		/* 탭 전환 */
+		tabChange : function(e) {
+			var me = this;
+
+			var $btn = $(e.target);
+
+			if ($btn.hasClass("btn-selected")) {
+				if(e.target.dataWorker){
+					e.target.dataValue = "취약 근로자";
+					me.workerPopup(e);					
+				}
+				return;
+			}
+
+			$btn.toggleClass("btn-selected");
+			$btn.next().toggleClass("btn-selected");
+			$btn.prev().toggleClass("btn-selected");
+
+			if ($btn.hasClass("fst-btn")) {
+				$btn.parent().nextAll().eq(1).css("left", "100%");
+				$btn.parent().nextAll().eq(0).css("left", "0");
+			} else {
+				$btn.parent().nextAll().eq(1).css("left", "0");
+				$btn.parent().nextAll().eq(0).css("left", "100%");
+			}
+		},
+		/***** 화면 전환 함수 End*****/
+		
+		/***** 팝업 호출 및 검색 함수 Start *****/
+		/* 작업자 리스트 팝업 */
+		workerPopup : function(e){
+			var me = this;
+			var data = e.target.dataWorker
+			var value = e.target.dataValue
+			
+			//이벤트 전파 방지
+			event.stopImmediatePropagation();
+
+			me.openWorkerListPopup(data, value);
+		},
+		/* 3D 레이어 이동 */
+		searchThreeD : function(e){
+			var me = this;
+			var areaId = e.target.dataAreaId
+			var layerId = e.target.dataLayerGroupId
+			
+			var threeList = me.get("threeList");
+			threeList.forEach(function(el){
+				if(el.id == areaId){
+					me.$.threeDContainer.layerChange(el, layerId);
+				}
+			});
+			this.$.mapDiv.style.top = "100%";
+			this.$.threeDDiv.style.top = "0%";
+		},
+		/* 3D 작업자 검색 */
+		searchWorker3D: function(data){
+			var me = this;
+			if(data.isVehicle == "Y"){
+				return UT.alert("이동 장비는 3D 정보가 없습니다.");
+			}
+			var threeList = me.get("threeList");
+			threeList.forEach(function(el){
+				if(el.id == data.areaId){
+					me.threeComponent.focusTarget(data.positionId);
+				}
+			});
+			this.$.mapDiv.style.top = "100%";
+			this.$.threeDDiv.style.top = "0%";
+		},
+		/* Map 작업자 검색 */
+		searchWorker : function(data){
+			var me = this;
+			
+			var isExist = false;
+			if(data.isVehicle == "Y"){
+				var vehicleList = me.map.get('vehicleFeatures');
+				vehicleList.forEach(function(vehicle){
+					if(vehicle.values_.targetInfo.targetId == data.vehicleId){
+						var x = me.changeCoordinates(vehicle.values_.targetInfo.geoJson.coordinates);
+						var a = me.map.getView().getZoom();
+						me.map.getView().setZoom(a - 1); 
+						me.map.getView().setZoom(a);
+				    	me.map.getView().setCenter(x);		
+	
+						selectTarget(me.map, vehicle);
+						isExist = true;
+						return;
+					}
+				})
+				
+			}
+			else{
+				var workerList = me.map.get('workerFeatures');
+				workerList.forEach(function(worker){
+					if(worker.values_.targetInfo.targetName == data.targetName){
+						var x = me.changeCoordinates(worker.values_.targetInfo.geoJson.coordinates);
+						var a = me.map.getView().getZoom();
+						me.map.getView().setZoom(a - 1);
+						me.map.getView().setZoom(a);
+				    	me.map.getView().setCenter(x);		
+	
+						selectTarget(me.map, worker);
+						isExist = true;
+						return;
+					}
+				})
+			}
+			
+			if(isExist==false){
+				UT.alert("위치정보가 없는 작업자이므로 표시할 수 없습니다.");
+			}
+			me.countArea();
+			me.$.mapDiv.style.top = "0%";
+			me.$.threeDDiv.style.top = "100%";
+		},
+		/* 전체 인원에서 작업자 이름 검색 */
+		searchWorkerPopup : function(id, workerList){
+			var me = this;
+			var data = workerList ? workerList : me.get("byLocation").wholeList;
+			var value = "전체 인원"
+			var target;
+			
+			for(var i =0; i< data.length; i++){
+				if(data[i].workerId == id || data[i].vehicleId == id){
+					target = data[i];
+					break;
+				}
+			}
+			
+			if(!target){
+				UT.alert("아직 출역이력이 존재하지 않습니다. 현장 출역이 확인 된 이후에 검색 가능합니다.");
+				return;
+			}
+			
+			//이벤트 전파 방지
+			event.stopImmediatePropagation();
+			
+			me.openWorkerListPopup(data, value, target);	
+		},
+		
+		seachWeakWorker : function(event){
+			var me = this;
+			me.searchWorkerPopup(event.detail.data.workerId, me.get("weakWorkerList"));
+		},
+		
+		openWorkerListPopup : function(data, value, target) {
+			var me = this;
+			
+			var gridPopup = UT.popup("ep-sejong-worker-list", me, 1000, 600, {
+				'close' : function(popup) {
+					popup.close();
+				}
+			}, {
+				resizable : false
+			});	
+
+			gridPopup.show();
+			gridPopup.getWindowContent().load(data, value, target);	
+		},
+		/***** 팝업 호출 및 검색 함수 End *****/
+		
+		/***** Map 작업자 그룹 함수 Strat *****/
+		countArea : function(){
+			var me = this;
+			var wholeList = me.get("wholeList");
+			
+			//해상도, x축 크기
+			var resolution = me.map.getView().getResolution();
+			var extent = me.map.get('extent')[2] - me.map.get('extent')[0];
+			var standard = resolution * 1000 / extent;
+			var divCnt;
+
+			//기준에 따른 영역 수 지정
+			if(standard > 3.5) divCnt = 1;
+			else if(standard >2.79) divCnt =4;
+			else if(standard >2.21) divCnt =8;
+			else if(standard >1.75) divCnt =9;
+			else if(standard >1.39) divCnt =10;
+			else if(standard >1.10) divCnt =11;
+			else if(standard >0.87) divCnt =12;
+			else if(standard >0.69) divCnt =13;
+			else if(standard >0.60) divCnt =14;
+			else divCnt =15;
+			
+			//스타일 속성
+			var stroke = new ol.style.Stroke({
+				color: 'rgba(255, 228, 0, 0.8)',
+				width: 2
+			});
+			var fill = new ol.style.Fill({
+				color: 'rgba(255, 174, 0, 0.4)'
+			});
+			
+			//소스 생성 및 초기화
+			var markerSource = me.map.get('markerSource');
+			var groupSource = me.map.get('groupSource') || new ol.source.Vector({});
+			
+			//현재 그려진 소스 지우기
+			markerSource.clear();
+			groupSource.clear();
+			
+			//작업자, 이동장비 가져오고 합치기
+			var workerFeatures = me.map.get('workerFeatures');
+			var vehicleFeatures = me.map.get('vehicleFeatures');
+// 			var vehicleFeatures = [];
+			if(workerFeatures == null && vehicleFeatures == null) return;
+			var newFeatures = workerFeatures.concat(vehicleFeatures);
+			
+			//작업자 feature 추가
+			markerSource.addFeatures(newFeatures);
+			
+			//현장 좌표 변환
+// 			var coords = []
+// 			var coordsX = []
+// 			var coordsY = []
+// 			var prevCoords = me.siteCondition.site.locInfoGeoJson.coordinates;
+			
+// 			//좌표 변환
+// 			for(var i in prevCoords[0]){
+// 				coords.push(me.changeCoordinates(prevCoords[0][i]));
+// 			}
+			
+// 			//좌표 최대값 최소값 구하기
+// 			for(var i in coords){
+// 				coordsX.push(coords[i][0]);
+// 				coordsY.push(coords[i][1]);
+// 			}
+// 			var MaxX = Math.max.apply(null, coordsX);
+// 			var MinX = Math.min.apply(null, coordsX);
+// 			var MaxY = Math.max.apply(null, coordsY);
+// 			var MinY = Math.min.apply(null, coordsY);
+			
+			var MaxX = me.MaxX;
+			var MinX = me.MinX;
+			var MaxY = me.MaxY;
+			var MinY = me.MinY;
+			
+			//영역 사이의 단위 구하기
+			var diffX = (MaxX - MinX)/divCnt;
+			var diffY = (MaxY - MinY)/divCnt;
+			
+			var circleFeatures = [];
+			
+			//가상 격자 수가 일정 이하 일시 전체 표시
+			if(divCnt < 15){
+				for(var i = 1; i <= divCnt; i++){
+					for(var j = 1; j <= divCnt; j++){
+						var cnt = 0;
+						var errorCnt = 0;
+						//구역별 좌표 지정
+						var divCood1 = [MinX + diffX*(i-1), MinY + diffY*(j-1)];
+						var divCood2 = [MinX + diffX*(i), MinY + diffY*(j-1)];
+						var divCood3 = [MinX + diffX*(i), MinY + diffY*(j)];
+						var divCood4 = [MinX + diffX*(i-1), MinY + diffY*(j)];
+						var divCoords = [divCood1, divCood2, divCood3, divCood4, divCood1]
+						var div = new ol.geom.Polygon([divCoords]);
+						
+						//중앙 좌표 구하기
+						var coordX = 0;
+						var coordY = 0;
+						
+						//feature에 저장할 정보
+						var workerList = [];
+						
+						for(var k in newFeatures){
+							var coordinates = newFeatures[k].values_.geometry.flatCoordinates;
+							//영역에 사람의 좌표가 있다면 수를 카운트하면서 중앙 좌표 합 구하기
+							if(div.intersectsCoordinate(coordinates)){
+								var wf = newFeatures[k];
+								//아이디가 같으면 저장, filter의 결과는 배열이고 아이디는 고유 번호이기에 첫번째 녀석만 가져온다.
+								var target;
+								for(var l in wholeList){
+									var e = wholeList[l];
+									if(e.workerId == wf.values_.targetInfo.targetId || e.vehicleId == wf.values_.targetInfo.targetId ){
+										target = e;
+									}
+								};
+		 						coordX += coordinates[0];
+		 						coordY += coordinates[1];
+		 						markerSource.removeFeature(newFeatures[k]);
+		 						if(!target){
+// 		 							console.log("오류 정체 - 지도에는 있으나 출역인원에는 없는 사람");
+// 		 							console.log(wf.values_.targetInfo);
+		 							errorCnt++;
+		 						} else {
+			 						workerList.push(target);		 							
+		 						}
+				 				cnt++;
+							}							
+						}
+// 						cnt = cnt - errorCnt;
+						//해당 구역의 혼자라면 다시 생성
+						if(cnt == 1){
+							markerSource.addFeature(wf);
+						}
+						//격자 확인용 코드
+						var divFeature = new ol.Feature(div);
+						divFeature.setStyle(new ol.style.Style({
+							stroke: new ol.style.Stroke({
+								color: 'rgba(0, 0, 0, 1)',
+								width: 2
+							})
+			    	    }));
+						circleFeatures.push(divFeature);
+
+						var text = new ol.style.Text({
+							font: '600 12px Noto Sans KR',
+							text: (cnt - errorCnt) + "명",
+		    	       		fill: new ol.style.Fill({
+			   	       		      color: '#6c6c6c'
+			   	       		    }),
+							stroke: new ol.style.Stroke({
+		    	       		      color: '#f3f3f3',
+		    	       		      width: 2
+		    	       		    })
+						});
+						//해당 구역의 2명 이상 있다면 feature 추가
+						if(cnt > 1){
+							//사람의 중심과 해상도에 따라 원을 동적으로 생성
+							var radius = 300 * me.logCal(cnt+5, 40) * resolution / 9;
+							var circle = new ol.geom.Circle([coordX/cnt, coordY/cnt], radius);
+							
+							//원 feature
+							var circleFeature = new ol.Feature(circle);
+							
+							//원 feature에 정보 저장
+							circleFeature.set("workerList", workerList);
+							circleFeature.set("type", "groupMarker");
+										
+							//feature 스타일 지정
+							circleFeature.setStyle(new ol.style.Style({
+								fill: fill,
+								stroke: stroke,
+								text: text,
+								zIndex: cnt
+				    	    }));
+							
+							circleFeatures.push(circleFeature);
+						}
+					}
+				}
+				//소스에 feature 추가
+				groupSource.addFeatures(circleFeatures);
+			}
+			me.map.set('groupSource', groupSource);
+			//첫 실행에서만 rayer 추가
+			if(me.map.get('groupLayer')){	
+			}
+			else{
+				//레이어에 소스 추가
+			    var groupLayer = new ol.layer.Vector({
+					source: groupSource
+			    });
+				//map에 레이어 추가
+			    me.map.addLayer(groupLayer);
+				//레이어와 소스 map에 저장
+			    me.map.set('groupLayer', groupLayer);
+			}
+			//휠 움직임 정지로 변경
+			setTimeout(function() {
+				me.set("wheelOn", false);
+			}, 500);
+		},
+		/***** Map 작업자 그룹 함수 End *****/
+		
+		/***** 기타 함수 Start *****/
+		//좌표계 변환
+		changeCoordinates : function(coordinate){
+			return ol.proj.transform(coordinate, 'EPSG:4326', "EPSG:900913");
+		},
+		//로그 계산
+		logCal : function(x, base) {
+			  return Math.log(x) / Math.log(base);
+		},
+		destroyed : function(popup, e) {
+			var me = this;
+			clearInterval(me.timeInterval);
+			me.ws.close();
+		},
+		//새로고침
+		refresh : function() {
+			var me = this;
+			me.set("refreshSecond", 180);
+			me.onSearch();
+		},
+		getFeatureList : function(list) {
+			var me = this;
+			var features = [];
+
+			list.forEach(function(object) {
+				if (object.geoJson) {
+					var feature = geoJson.readFeature(object.geoJson);
+					feature.setStyle(new ol.style.Style({
+						image : new ol.style.Icon({
+							crossOrigin : 'anonymous',
+							anchor : [ 22.5, 45 ],
+							anchorXUnits : 'pixels',
+							anchorYUnits : 'pixels',
+							scale : 0.5,
+							src : object.imagePath,
+						}),
+						zIndex : 300
+					}));
+					feature.setId(object.sensorId);
+					feature.set('type', 'targetMarker');
+					feature.set('targetType', object.targetType);
+					feature.set('targetInfo', object);
+					features.push(feature);
+
+					object.feature = feature;
+				}
+			});
+			return features;
+		},
+		changeSafeDate : function() {
+			var me = this;
+			var safePopup = UT.popup('ep-safedate-setting', me, 300, 200, {}, {
+				titleText : "",
+				resizable : false
+			});
+			safePopup.show();
+			safePopup.getWindowContent().load(me.safeDay, me.safeDate);
+		},
+		/* 검색 자동완성 */
+		autocompleteSetting : function(){
+			var me = this;
+			
+			me.set("isAutocomplete", true);
+			
+			$.getScript('/js/hangul/hangul.js', function(){
+				//검색창 자동 완성 코드
+				var resultList = me.get("wholeList");
+				//이부분이 초성 검색이 가능하게 만들어 주는 부분
+				let source = $.map(resultList, function(item) { //json[i] 번째 에 있는게 item 임.
+					chosung = "";
+					//Hangul.d(item, true) 을 하게 되면 item이 분해가 되어서 
+					//["ㄱ", "ㅣ", "ㅁ"],["ㅊ", "ㅣ"],[" "],["ㅂ", "ㅗ", "ㄲ"],["ㅇ", "ㅡ", "ㅁ"],["ㅂ", "ㅏ", "ㅂ"]
+					//으로 나오는데 이중 0번째 인덱스만 가지고 오면 초성이다.
+					
+					Hangul.d(item.workerName, true).forEach(function(strItem, index) {
+						if(strItem[0] != " "){	//띄어 쓰기가 아니면
+							chosung += strItem[0];//초성 추가
+						}
+					});
+					return {
+						label : chosung + "|" +item.workerName, //실제 검색어랑 비교 대상 ㄱㅊㅂㅇㅂ|김치 볶음밥 이 저장된다.
+						chosung : chosung,	//ㄱㅊㅂㅇㅂ
+						value : item.workerName, //김치 볶음밥
+						id : item.workerId, 
+						vendorName : item.vendorName,
+						jobTypeName : item.jobTypeName
+					}
+				});
+			    $(me.$.searchInput).autocomplete({
+			        source: source,
+			        select: function(event, ui) {
+			        	me.searchWorkerPopup(ui.item.id);
+			        },
+			        focus: function(event, ui) {
+			            return false;
+			        }
+			    }).autocomplete( "instance" )._renderItem = function( ul, item ) {
+			    	$(ul).css("max-height", "200px").css("overflow", "auto").css("overflow-x", "hidden");
+					return $( "<li>" )	//기본 tag가 li로 되어 있음 
+						.append( "<div>" +item.vendorName + " [" + item.jobTypeName+ "] " + item.value + "</div>" )	//여기에다가 원하는 모양의 HTML을 만들면 UI가 원하는 모양으로 변함.
+						.appendTo( ul );	//웹 상으로 보이는 건 정상적인 "김치 볶음밥" 인데 내부에서는 ㄱㅊㅂㅇㅂ,김치 볶음밥 에서 검색을 함.
+			    };
+			    
+		    	var key = $.Event("keydown");
+		    	key.which = 40;
+		    	key.keyCode = 40;
+		    	
+			    $(me.$.searchInput).keyup(function (e) {
+			        if(e.which === 13 && $(".ui-menu").css("display") == "none") {
+			        	$(me.$.searchInput).trigger(key);
+			        }            
+			    });
+			    
+			    $(me.$.searchInput).on('mouseup', function (e) {
+			    	if($(".ui-menu").css("display") == "none"){
+			    		$(me.$.searchInput).trigger(key);			    		
+			    	}
+			    });
+			})
+		},
+		/* 지도 조감도에서 현재 화면 위치 */
+		focusMapMove : function(){
+			var me = this;
+
+			// 현재 화면의 pixel
+			var pixel = me.map.getSize();
+			// 현장의 최소 좌표 pixel
+			var pixel2 = me.map.getPixelFromCoordinate([me.MinX, me.MinY]);
+			// 현장의 최대 좌표 pixel
+			var pixel3 = me.map.getPixelFromCoordinate([me.MaxX, me.MaxY]);
+			
+			// 화면 길이 - 화면의 x축 좌표의 최대 픽셀 값
+			var viewLength = pixel[0];
+			// 전체 길이 - x축 좌표의 픽셀 차이 값
+			var wholeLength = pixel3[0] - pixel2[0];
+			// 왼쪽 길이 - 현장의 좌측 끝 픽셀 값 --> 최소값이 반드시 좌측 끝은 아니기에 추가적인 로직이 필요하다.
+			var leftLength = - pixel2[0];
+
+			// 조감도의 focus 길이
+			var width = viewLength * 100 / wholeLength;
+			// 조감도의 focus 위치
+			var left = leftLength * 100 / wholeLength;
+
+			$("#focusMap").css("width", width + "%");				
+			$("#focusMap").css("left", left + "%");				
+		},
+		
+		focusMapMove2 : function(){
+			var me = this;
+			
+			var rad = me.map.getView().getRotation();
+			// 현재 화면의 pixel
+			var pixel = me.map.getSize();
+			// 현장의 현재 pixel
+			var pixel2 = me.map.getPixelFromCoordinate([me.MinX, me.MinY]);
+			//화면 좌상단의 좌표
+			var coords1 = me.map.getCoordinateFromPixel([0,0]);
+			//화면 우상단의 좌표
+			var coords2 = me.map.getCoordinateFromPixel([pixel[0],0]);
+			//현장의 픽셀을 화면 좌변을 기준으로 끌고 온 뒤 변환한 좌표
+			var coords3 = me.map.getCoordinateFromPixel([0,pixel2[1]]);
+			
+			//전체 길이 - 현장의 대각선을 화면을 기준으로 내적킨 길이
+			var wholeLength = (
+								new ol.geom.LineString([[me.MaxX, me.MaxY], [me.MinX, me.MinY]])
+							).getLength() * Math.cos(rad);
+			//화면 길이 - 화면 상단의 좌우 픽셀을 기준으로 한 길이
+			var viewLength = (
+								new ol.geom.LineString([coords1, coords2])
+							).getLength();
+			//왼쪽 길이 - 조감도에 기준이 될 이동 길이
+			var leftLength = (
+								new ol.geom.LineString([coords3, [me.MinX, me.MinY]])
+							).getLength();
+			
+			var width = viewLength * 100 / wholeLength;
+			var left = leftLength * 100 / wholeLength;
+
+			$("#focusMap").css("width", width + "%");				
+			if(pixel2[0] >= 0) {
+				$("#focusMap").css("left", left * (-1) + "%");
+			}
+			else {
+				$("#focusMap").css("left", left + "%");				
+			}
+		},
+		/***** 기타 함수 End *****/
+		
+	});
+</script></dom-module>

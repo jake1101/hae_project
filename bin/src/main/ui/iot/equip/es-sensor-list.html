@@ -1,0 +1,717 @@
+<sc-link rel="import" href="ep-alarm-setting.html"></sc-link>
+<sc-link rel="import" href="ep-tag-report.html"></sc-link>
+<dom-module id="es-sensor-list">
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 스마트태그 관리
+    ** @Description     :
+    ** @Author          : mskim
+    ** @Create Date     : 2019.04.10
+    ** @History         : 2019.04.10 mskim 최초작성
+    ******************************************************************************************
+-->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+<!--
+   ************************************************************************************************************
+   * Service Area
+   ************************************************************************************************************
+-->
+		<!-- 코드 조회-->
+		<sc-request-group init>
+			<sc-code-group>
+				<sc-code code="IOT003" value="{{codes.targetType}}" ></sc-code> <!-- 대상유형 -->
+				<sc-code code="IOT012" value="{{codes.type}}" ></sc-code> <!-- SENSOR타입 -->
+				<sc-code code="IOT014" value="{{codes.useFlag}}" ></sc-code> <!-- YN -->
+				<sc-code code="IOT026" value="{{codes.poductName}}" ></sc-code> <!-- YN -->
+				<sc-code code="IOT027" value="{{codes.modelName}}" ></sc-code> <!-- YN -->
+			</sc-code-group>
+		</sc-request-group>
+
+		<!-- 조회 -->
+		<sc-ajax id="findSensorList"
+			url="findSensorList.do"
+			body="{{searchParam}}"
+			on-response="completeFindSensorList">
+		</sc-ajax>
+		<!-- 조회 -->
+		<sc-ajax id="findListSensorLog"
+			url="findListSensorLog.do"
+			body="{{searchParam}}"
+			on-response="completeFindListSensorLog">
+		</sc-ajax>
+		
+		<!-- 저장 -->
+		<sc-ajax id="saveListSensor"
+			url="saveListSensor.do"
+			on-response="completeSaveListSensor">
+		</sc-ajax>
+		<!-- 저장 -->
+		<sc-ajax id="deleteSensor"
+			url="deleteSensor.do"
+			on-response="completeDeleteSensor">
+		</sc-ajax>
+
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+<!--
+    ************************************************************************************************************
+    * UI Area
+    ************************************************************************************************************
+-->
+		<div class="vbox flex">
+			<cc-search-container on-search="onSearch" auth-r>
+				<table validation-group="search">
+					<colgroup>
+						<col style="width:120px">
+						<col>
+						<col style="width:110px">
+						<col>
+						<col style="width:120px">
+						<col>
+						<col style="width:120px">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="스마트태그 번호"></sc-label></th>
+						<td>
+							<sc-text-field value="{{searchParam.name}}" on-enter="onSearch" max-length="16"></sc-text-field>
+						</td>
+						<th><sc-label text="스마트태그 ID"></sc-label></th>
+						<td>
+							<sc-text-field value="{{searchParam.nodeId}}" on-enter="onSearch" max-length="30"></sc-text-field>
+						</td>
+						<th><sc-label text="사용중지 포함"></sc-label></th>
+						<td>
+							<sc-checkbox-field input-value="{{searchParam.includeNotUse}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+						</td>
+					</tr>
+				</table>
+			</cc-search-container>
+			
+			<sc-grid id="gridPanel" data-provider="{{resultList}}" editable="true" class="flex" on-item-click="onItemClick" 
+					 validation-group="save">
+					 
+				<cc-grid-toolbar title-text="스마트태그 목록">
+					<sc-button text="태그 QR코드" on-click="onOpenQr" auth-s></sc-button>
+ 					<sc-button text="엑셀업로드" on-click="onExcelUpload" auth-e></sc-button>
+					<sc-button text="추가" on-click="onAddSensor" auth-s></sc-button>
+					<sc-button text="저장" on-click="onSaveSensor" auth-s></sc-button>
+					<sc-button text="삭제" on-click="onDeleteSensor" auth-s></sc-button>
+<!-- 					<sc-button text="알림일괄설정" on-click="onAllSensorAlarmSetting" auth-s></sc-button> -->
+				</cc-grid-toolbar>
+				
+				<sc-grid-columns>
+					<sc-data-column data-field="name"         header-text="스마트태그번호" width="100" text-align="center" required="true" max-length="18"  style-name="link"  item-editable-function="itemEditableFunction"></sc-data-column>
+					<sc-data-column data-field="nodeId"  required="true"     header-text="스마트태그ID" width ="250" text-align="left" item-editable-function="itemEditableFunction"></sc-data-column>
+					<sc-combobox-column data-field="type" header-text="용도" text-align="center" item-editable-function="itemEditableFunction2" required="true" domain-only-or-empty="true"
+						display-field="label" value-field="data" items="{{codes.type}}">
+					</sc-combobox-column>
+					<sc-combobox-column data-field="product" header-text="제조사" text-align="center" editable="true" domain-only-or-empty="true" width ="150" required="true"
+						display-field="label" value-field="data" items="{{codes.poductName}}">
+					</sc-combobox-column>
+					<sc-combobox-column data-field="model" header-text="모델명" text-align="center" editable="true" width ="150" required="true"  domain-only-or-empty="true"
+						display-field="label" value-field="data" items="{{codes.modelName}}">
+					</sc-combobox-column>
+					<sc-checkbox-column data-field="useFlag" header-text="사용여부" width="100" text-align="center" editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+					<sc-combobox-column data-field="targetType" header-text="대상" width="100" text-align="center" editable="false" 
+						display-field="label" value-field="data" items="{{codes.targetType}}">
+					</sc-combobox-column>
+					<sc-data-column data-field="targetName"   header-text="대상명" width="150" text-align="center" editable="false"  max-length="60"></sc-data-column>
+					<sc-data-column data-field="lastGeo" header-text="최종위치" width="200" text-align="center" editable="false"  max-length="60"></sc-data-column>
+					<sc-date-column data-field="lastSendDt" header-text="최종수신시간" width="150" text-align="center" display-format="yyyy/MM/dd HH:mm:ss"></sc-date-column>
+					<sc-data-column data-field="battery" data-type="number" header-text="배터리" width="70" text-align="center" editable="false"  max-length="60"></sc-data-column>
+<!-- 					<sc-image-column data-field="alarmSetting" header-text="알림"  width="100" editable="false" image-cls="search" exclude-export="true" ></sc-image-column> -->
+					<sc-data-column data-field="qrCode"    style-name="link"  header-text="QR출력"     width="120" text-align="center" editable="false"  max-length="60"  exclude-export="true"  ></sc-data-column>
+				</sc-grid-columns>
+				<sc-grid-fields>
+					<sc-grid-field data-field="id" data-type="number"></sc-grid-field>
+					<sc-grid-field data-field="siteId"></sc-grid-field>
+					<sc-grid-field data-field="setupInfo" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="alarm" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+				</sc-grid-fields>
+			</sc-grid>
+			
+			<div class="vspace-10"></div>	
+			<table  class="tb-form">
+				<colgroup>
+					<col style="width:150px">
+					<col style="width:350px">
+					<col >
+				</colgroup>
+				<tr>
+					<th><sc-label text="교부일"></sc-label></th>
+					<td style="text-align:center">
+							<sc-date-field value="{{searchParam.startDt}}" display-format="yyyy-MM-dd" required="true"  default-value="-1d" style="width : 140px;"></sc-date-field>
+						~
+							<sc-date-field value="{{searchParam.endDt}}" display-format="yyyy-MM-dd" required="true"  default-value="0d" style="width : 140px;"></sc-date-field>
+					</td>
+					<th >
+					<sc-button text="Search" on-click="onLogSearch" style="float:right"></sc-button>
+					</th>
+				</tr>
+			</table>
+			
+			<sc-grid id="gridPanel2" data-provider="{{resultList2}}" editable="true" class="flex">
+				<cc-grid-toolbar title-text="스마트태그 교부 이력 [[sensorName]]">
+				</cc-grid-toolbar>
+				<sc-grid-columns>
+					<sc-date-column header-text="교부일" data-field="createdDt" width="200" text-align="left" display-format="yyyy/MM/dd HH:mm:ss"></sc-date-column>
+					<sc-date-column header-text="회수일" data-field="updatedDt" width="200" text-align="left" display-format="yyyy/MM/dd HH:mm:ss"></sc-date-column>
+					<sc-data-column data-field="targetName" header-text="작업자" width="150" text-align="center"></sc-data-column>
+					<sc-data-column data-field="description" header-text="비고" width="300" text-align="right"></sc-data-column>
+				</sc-grid-columns>
+				
+				<sc-grid-fields>
+					<sc-grid-field data-field="id"></sc-grid-field>
+					<sc-grid-field data-field="siteId"></sc-grid-field>
+				</sc-grid-fields>
+			</sc-grid>
+		</div>
+		<input type="hidden" id = "f_tag_object" />
+	</template>
+
+<!--
+    ************************************************************************************************************
+    * Script Area
+    ************************************************************************************************************
+-->
+	<script>
+        Polymer({
+            is: "es-sensor-list",
+            properties : {
+                codes: {
+                    type : Object,
+                    reset : false,
+                    value : function() {
+                        return {
+                        }
+                    }
+                },
+                
+                currentRowIndex:Number,
+                checkedRowIndex:[],
+
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+
+                // 조회 결과 리스트
+                resultList: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+                
+                sensorName: {
+                    type: String,
+                }
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            // 초기화 완료 후 호출 함수
+            initialized : function() {
+                var me = this;
+                
+                me.onSearch();
+            },
+            
+            // 엔터키 조회
+            onEnterSearch: function(){
+                var me = this;
+
+                me.onSearch();
+            },
+
+            // 고객사 현황 조회
+            onSearch : function(param) {
+                var me = this;
+                
+                if(param && param.site_id){
+                	me.set("searchParam.siteId", param.site_id);
+                }
+                
+                if(!me.validate('search')){
+                    UT.alert("STD.E0000");
+                    return false;
+                }
+                
+                me.set("resultList", []);
+                
+                // 고객사 현황 조회
+                UT.request(me.$.findSensorList);
+            },
+            
+            completeFindSensorList: function(e, res){
+            	var me = this;
+            	var resultList = res.response || [];
+            	for(var i = 0 ; i < resultList.length; i++){
+            		if(UT.isNotEmpty(resultList[i].lastPos)){
+            			resultList[i].lastGeo = resultList[i].lastPos;
+            		}else{
+            			if(UT.isNotEmpty(resultList[i].lastGeo)){
+//     	            		resultList[i].lastGeo = "lat :" +resultList[i].lastGeo.lat + ", lon :"+ resultList[i].lastGeo.lon;
+            				resultList[i].lastGeo ="영역외"
+            			}
+            		}
+            	}
+            	if(UT.isNotEmpty(resultList)){
+					for(var i = 0 ; i < resultList.length; i++){
+						resultList[i].qrCode = "[QR출력]";
+					}
+            	}
+            	me.set("resultList", resultList);
+            },
+            
+            onAddSensor : function(){
+                var me = this
+                ,searchParam = this.get("searchParam")
+                ,provider = me.$.gridPanel.getDataProvider()
+                ,currCell = me.$.gridPanel.getCurrentCell();
+
+                if(!me.validate('search')){
+                    UT.alert("STD.E0000");
+                    return false;
+                }
+
+                // 그리드 신규행 추가
+                var row = {
+//                     siteId: searchParam.siteId,   // 회사
+                    useFlag: "Y"                     // 사용여부
+                };
+                
+                if(currCell == null){
+                	provider.addItemAt(0,row);
+                }else{
+                	provider.addItemAt(currCell.rowIndex+1, row);
+                }
+                
+            },
+            
+            onSaveSensor : function(){
+                var me = this;
+
+                // 저장 유효성 체크
+                if(!me.validation()) {
+                    return;
+                }
+
+                var provider = me.$.gridPanel.getDataProvider()
+                ,created = provider.getNewItems()
+                ,updated = provider.getUpdateItems();
+                
+             	// 중복 체크
+                var  rows = provider.getItems();
+                
+                var unique_check2 = {};
+                for (var i=0, len = rows.length; i<len; i++) {
+                    if(typeof unique_check2[rows[i].nodeId] == "undefined"){
+                    } else {
+                        UT.alert("STD.N1900"); // 중복 데이터가 있습니다.
+                        return false;
+                    }
+                }
+                
+                for(var idx in created){
+                	var item = created[idx];
+                	item.property = {
+                   		product: item.product
+                   		,model: item.model
+                   	};
+                	
+                	item.lastGeo = null;
+                }
+                
+                for(var idx in updated){
+                	var item = updated[idx];
+                	item.property.product =item.product;
+                	item.property.model =item.model;
+
+                	item.lastGeo = null;
+                }
+                
+                if(created.length + updated.length === 0) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+
+                UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+                    me.$.saveListSensor.body = {
+                        insertList: created,
+                        updateList: updated
+                    };
+                    UT.request(me.$.saveListSensor);
+                });
+            },
+
+            // 저장 유효성 체크
+            validation: function() {
+                var me = this;
+
+                // 기본 validate
+                if(!me.validate('save')) {
+                    UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return false;
+                }
+
+                // 중복 체크
+                var provider = me.$.gridPanel.getDataProvider()
+                ,rows = provider.getItems();
+                var unique_check = {};
+                for (var i=0, len = rows.length; i<len; i++) {
+                    if(typeof unique_check[rows[i].serialNumber] == "undefined"){
+                        unique_check[rows[i].serialNumber] = 0;
+                    } else {
+                        //UT.alert(me.translate("STD.E1000",null, me.translate('사업자번호')),null,true); // "'{0}'에 동일한 값이 존재합니다"
+                        //return false;
+                    }
+                }
+
+                return true;
+            },
+
+            completeSaveListSensor: function(e, res){
+                var me = this;
+
+                if(res.response.result_status === 'S'){
+                    //UT.alert("STD.N2400", function(){ // 저장하였습니다.
+                    UT.alert(res.response.result_message, function(){ // 저장하였습니다.
+                        me.onSearch();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+
+            },
+            
+            onDeleteSensor : function(){		
+  			  var me =this;
+  			
+  			  var provider = me.$.gridPanel.getDataProvider();
+  			  var selectionItems = provider.selectionCheckedItems();
+  			  var deleted = provider.removeItems();
+  				
+  			  
+  			 for(var idx in deleted){
+             	var item = deleted[idx];
+             	item.lastGeo = null;
+             }
+  			  if (selectionItems.length === 0) {
+                    UT.alert("STD.N1600");
+                    return;
+                }
+
+                UT.confirm("STD.N1300", function() {
+                    if(deleted.length > 0){
+                        me.$.deleteSensor.body = {
+                      		  deleteList : deleted
+                        };
+                       UT.request(me.$.deleteSensor);
+                    }
+                });
+  				
+  			},
+  			
+  			completeDeleteSensor : function(e,res){
+  				var me = this,
+                result = res.response;
+
+	            if (result.result_status === 'S') {
+	                UT.alert("STD.N2500", function () { // 삭제하였습니다.
+	                    me.onSearch();
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+  				
+  			},
+            
+            
+			// grid item click 이벤트
+			onItemClick : function(event) {
+				var me = this,
+					data = event.detail.data,
+					item = event.detail.item,
+                	provider = event.detail.provider;
+				
+				me.currentRowIndex = item.rowIndex; 
+                
+				if(item.dataField === "alarmSetting") {
+					var sensorId = data.id;
+					var batteryMinValue, batteryTermMin, delayMinValue, delayTermMin;
+					
+					if(UT.isNotEmpty(data.alarm) && UT.isNotEmpty(data.alarm.battery)){
+						batteryMinValue = data.alarm.battery.minValue;
+						batteryTermMin = data.alarm.battery.termMin;
+					}
+					
+					if(UT.isNotEmpty(data.alarm) && UT.isNotEmpty(data.alarm.delay)){
+						delayMinValue = data.alarm.delay.minValue;
+						delayTermMin = data.alarm.delay.termMin;
+					}
+					
+					var alarm = {
+						checkStartTime  : (UT.isEmpty(data.alarm) ? "" : data.alarm.checkStartTime)
+						,checkEndTime    : (UT.isEmpty(data.alarm) ? "" : data.alarm.checkEndTime)
+						,batteryMinValue : batteryMinValue
+						,batteryTermMin  : batteryTermMin
+						,delayMinValue   : delayMinValue
+						,delayTermMin    : delayTermMin
+						,farWay          : (UT.isEmpty(data.alarm) ? "" : data.alarm.farWay)
+					}
+					
+					me.showAlarmSettingPopup('single', alarm);
+				}else if(item.dataField === "name"){
+					
+					if(provider.getItemState(item.rowIndex) == "created"){
+	                    return;
+	                }
+					me.searchParam.sensorId=data.id;
+					
+					me.set("sensorName","["+data.name+"]");
+					me.onLogSearch();
+				}else if(item.dataField == "qrCode"){
+					
+					var agent = navigator.userAgent.toLowerCase();
+
+					if ( (navigator.appName == 'Netscape' && navigator.userAgent.search('Trident') != -1) || (agent.indexOf("msie") != -1) ) {
+						$("#f_tag_object").val(JSON.stringify([data]));
+			   			 
+			   			var popupWidth = 700;
+			   			var popupHeight = 600;
+
+			   			var left= (window.screen.width / 2) - (popupWidth / 2);
+			   			var top= (window.screen.height / 2) - (popupHeight / 2);
+			   			
+			   			var tagReportPopup = UT.popupWindow("/report/jsp/tagQr.jsp",me,"width=700 , height=600 , top="+top+",left="+left+ ",location=no,menubar=no,status=no");
+					}else {
+						$("#f_tag_object").val(JSON.stringify([data]));
+			   			 
+			   			var popupWidth = 730;
+			   			var popupHeight = 600;
+
+			   			var left= (window.screen.width / 2) - (popupWidth / 2);
+			   			var top= (window.screen.height / 2) - (popupHeight / 2);
+			   			
+			   			var tagReportPopup = UT.popupWindow("/report/jsp/tagQrChrome.jsp",me,"width=730 , height=600 , top="+top+",left="+left+ ",location=no,menubar=no,status=no");
+					}
+				}
+				
+            },
+            onLogSearch: function(){
+            	var me = this;
+                UT.request(me.$.findListSensorLog);
+            	
+            },
+            
+            completeFindListSensorLog :function(e,res){
+            	var me = this,
+            		resultList = res.response;
+            	me.set("resultList2",resultList);
+            },
+            itemEditableFunction : function(data,item){
+            	var me = this;
+            	
+            	if(me.$.gridPanel.getDataProvider().getItemState(item.rowIndex) != "created"){
+            		return false;
+            	}else{
+            		return true;
+            	} 
+            },
+            
+            // 알림 설정 팝업
+            showAlarmSettingPopup : function(mode, alarm) {
+            	var me = this;
+            	
+           		var mapPopup = UT.popup("ep-alarm-setting", me, 740, 250,{
+           			'close-popup' :  function(popup, e){
+                 		popup.close();
+           			},
+           			'apply-setting' : function(popup, e){
+           				var provider = me.$.gridPanel.getDataProvider()
+           				,result = e.detail;
+           				
+           				var alarmData = {
+           					checkStartTime  : result.checkStartTime
+           					,checkEndTime    : result.checkEndTime
+           					,battery         : {minValue : result.batteryMinValue, termMin : result.batteryTermMin}
+           					,delay           : {minValue : result.delayMinValue, termMin : result.delayTermMin}
+           					,farWay          : result.farWay
+ 	   					};
+           				
+           				if(mode === 'single'){
+    	   					provider.setItemAt(me.currentRowIndex, {
+    	   						'alarm': alarmData
+    	   					});
+    	   					
+           				}else if(mode === 'multi'){
+           					var checked = provider.selectionCheckedItems();
+           					for(var i = 0; i < me.checkedRowIndex.length ; i++){
+           						provider.setItemAt(me.checkedRowIndex[i],  {
+           							'alarm': alarmData
+           						});
+           					}
+           					
+           				}
+           				
+	   					popup.close();
+           			}
+           		});
+           		mapPopup.show();
+           		mapPopup.getWindowContent().load(alarm);
+            },
+            
+            onAllSensorAlarmSetting : function(){
+            	 var me = this
+            	 ,provider = this.$.gridPanel.getDataProvider();
+            	 
+            	 me.checkedRowIndex = provider.selectionCheckedIndexes();
+            	 
+	             var checked = provider.selectionCheckedIndexes();
+	             
+	             if (checked && checked.length > 0) {
+	            	 var checked = provider.removeItems();
+	            	 
+	            	 if(UT.isNotEmpty(checked) ){
+	            		 me.showAlarmSettingPopup('multi', {});
+	            	 }
+	            	 
+	             }else{
+	            	 UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+	             }
+            },
+            
+             onExcelUpload: function(){
+             	var me = this;
+          	
+             	var importerPopup = UT.popup('cc-excel-import', me, 800, 600, null, {closable : true});
+ 				var importer = importerPopup.getContent();
+
+				importer.headerRowIndex = 1;
+ 				
+ 				importer.autoColumnMapping = true;
+
+ 				var includeColumns= ['name', 'nodeId', 'type', 'product', 'model', 'useFlag'];
+
+ 				importer.includeColumns= includeColumns;
+ 				
+ 				//excelCellText의 양쪽 공백을 제거하고 gridHeaderText와 비교 하도록 변경
+ 				importer.isEqualsHeaderText = function(gridHeaderText, excelCellText){
+ 				    var trimExcelCellText = excelCellText.trim();
+ 				    if(gridHeaderText === trimExcelCellText){
+ 				        return true;
+ 				    }else{
+ 				        return false;
+ 				    }
+ 				};
+
+ 				var typeComboDatas = UT.getArrayValuesByKey(me.codes.type, "label");
+ 				var productComboDatas = UT.getArrayValuesByKey(me.codes.poductName, "label");
+ 				var modelComboDatas = UT.getArrayValuesByKey(me.codes.modelName, "label");
+ 				
+ 				importer.doImport(me.$.gridPanel, function(rows){
+ 					var idx = 0;
+ 					rows.forEach(function(row) {
+ 	 					
+ 						var provider = me.$.gridPanel.getDataProvider();
+ 		 				var oldRows = provider.getItems();
+
+ 		                var unique_check2 = {};
+                     	unique_check2[row.nodeId] = 0;
+ 		                for (var i=0, len = oldRows.length; i<len; i++) {
+ 		                     if(typeof unique_check2[oldRows[i].nodeId] == "undefined"){
+ 		                     	unique_check2[oldRows[i].nodeId] = 0;
+ 		                     } else {
+ 		                         return;
+ 		                     }
+ 		                 }
+ 		 				
+ 						if(typeComboDatas.indexOf(row.type) === -1) {
+ 							row.type = null;
+ 						}else{
+ 							row.type = me.codes.type[typeComboDatas.indexOf(row.type)].data;
+	 					}
+ 						if(productComboDatas.indexOf(row.product) === -1) {
+ 							row.product = null;
+ 						}else{
+ 							row.product = me.codes.poductName[productComboDatas.indexOf(row.product)].data;
+	 					}
+ 						if(modelComboDatas.indexOf(row.model) === -1) {
+ 							row.model = null;
+ 						}else{
+ 							row.model = me.codes.modelName[modelComboDatas.indexOf(row.model)].data;
+	 					}
+	 					if(row.useFlag != "N"){
+							row.useFlag = "Y";
+		 				}
+	 					me.$.gridPanel.getDataProvider().addItemAt(idx, row);
+	 					idx++;
+ 					});
+
+ 					if(idx >= 0 && rows.length > idx){
+ 						UT.alert("중복행을 제외한 "+idx+"행을 업로드 하였습니다.");
+ 	 				}
+
+ 				}, me);
+				
+ 				importerPopup.show();
+             },
+            
+            onOpenQr : function(){
+            	var me = this;
+            	var provider = me.$.gridPanel.getDataProvider();
+   			    var selectionItems = provider.selectionCheckedItems();
+   			    
+	   			 if (selectionItems.length === 0) {
+	                 UT.alert("STD.N1600");
+	                 return;
+	             }
+	   			 
+	   			var agent = navigator.userAgent.toLowerCase();
+
+				if ( (navigator.appName == 'Netscape' && navigator.userAgent.search('Trident') != -1) || (agent.indexOf("msie") != -1) ) {
+			   		 $("#f_tag_object").val(JSON.stringify(selectionItems));
+		   			 
+		   			var popupWidth = 700;
+		   			var popupHeight = 600;
+	
+		   			var left= (window.screen.width / 2) - (popupWidth / 2);
+		   			var top= (window.screen.height / 2) - (popupHeight / 2);
+		   			
+		   			var tagReportPopup = UT.popupWindow("/report/jsp/tagQr.jsp",me,"width=700 , height=600 , top="+top+",left="+left + ",titlebar=no,toolbar=no,location=no,menubar=no,status=no");
+				}else {
+					$("#f_tag_object").val(JSON.stringify(selectionItems));
+		   			 
+		   			var popupWidth = 730;
+		   			var popupHeight = 600;
+	
+		   			var left= (window.screen.width / 2) - (popupWidth / 2);
+		   			var top= (window.screen.height / 2) - (popupHeight / 2);
+		   			
+		   			var tagReportPopup = UT.popupWindow("/report/jsp/tagQrChrome.jsp",me,"width=730 , height=600 , top="+top+",left="+left + ",titlebar=no,toolbar=no,location=no,menubar=no,status=no");
+						
+				}
+	   			 
+            },
+
+            itemEditableFunction2 : function(data, item){
+				return UT.isEmpty(data.targetName);
+            }
+        });
+	</script>
+
+</dom-module>

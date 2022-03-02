@@ -1,0 +1,29 @@
+<dom-module id="es-menu-control-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<cc-sub-title-bar title-text="메뉴 동적으로 생성" i18n-disabled>
+			<sc-button text="UT.createWindow로 메뉴 생성" on-click="onClickCreateWindow" i18n-disabled></sc-button>
+			<sc-button text="UT.createWindowByMenuId로 메뉴 생성" on-click="onClickCreateWindowByMenuId" i18n-disabled></sc-button>
+		</cc-sub-title-bar>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-menu-control-sample',
+		
+        onClickCreateWindow: function (e) {
+			UT.createWindow("GUI11000", "테스트 메뉴", "ui/bp/developer/guide/lifecycle/em-lifecycle-guide.html", function(module) {
+				UT.alert("UT.createWindow 메뉴 생성 > 모듈 initialized 호출 > 콜백함수 호출(Alert)", null, true);
+			});
+        },
+        onClickCreateWindowByMenuId: function (e) {
+            UT.createWindowByMenuId("GUI11000", function(module) {
+                UT.alert("UT.createWindowByMenuId 메뉴 생성 > 모듈 initialized 호출 > 콜백함수 호출(Alert)", null, true);
+            });
+        }
+	});
+	</script>
+</dom-module>

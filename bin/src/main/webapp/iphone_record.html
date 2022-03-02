@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	
+<!-- 	<link rel="stylesheet" href="../css/video-js.css"> -->
+	<script src="../bower_components/jquery/dist/jquery.min.js"></script>
+<!-- 	<script src="../js/cctv/video.min.js"></script> -->
+<!-- 	<script src="../js/cctv/videojs-contrib-hls.js"></script> -->
+	<script>
+		var player;
+		$(document).ready(function(){
+			
+			var varUA = navigator.userAgent.toLowerCase(); //userAgent 값 얻기
+		    console.log(varUA);
+			
+// 			player = videojs('example-video0', {
+// 				autoplay: true,
+// 				muted: true,
+// 				loop: false
+// 		    });
+		});
+	</script>
+</head>
+
+<!-- Site wrapper -->
+<body>
+	<video style='' id='example-video0' class='video-js vjs-default-skin four' controls preload='auto' >
+		 <source src="/repository/iphone_1.mp4" type='video/mp4' >
+		 <source src="/repository/iphone_1.webm" type='video/webm' >
+		 <source src="/repository/iphone_1.m4v" type='video/mp4' >
+	</video>
+<!-- 	<video tabindex="-1" class="video-stream html5-main-video" controlslist="nodownload"  -->
+<!-- 	src="blob:https://www.youtube.com/35f25033-73cc-4fcc-a45e-37325b1889b7"  -->
+<!-- 	style="width: 721px; height: 721px; left: 280px; top: 0px;"> -->
+<!-- 	</video> -->
+
+<!-- <!-- 	<video width="100%" height="400" controls="controls" preload="none"> --> -->
+<!--       <source type="video/mp4" src="/repository/iphone_record1.m4v"> -->
+<!--       <source type="video/mp4" src="/repository/iphone_record1.mp4"> -->
+<!--       <source type="video/webm" src="/repository/iphone_record1.webm"> -->
+<!-- 	</video> -->
+
+</body>
+
+</html>

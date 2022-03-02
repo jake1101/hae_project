@@ -1,0 +1,28 @@
+<dom-module id="es-java-validation-description">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<p>
+			각 업무의 service 로직 수행 시, 화면에서 조회한 시점의 업무 진행상태 값이 현재 DB의 업무 진행상태 값과 동일한지 여부를 판단하여 validation을 수행하도록 한다.<br/>
+		</p><br/>
+		<p>
+			<b>Validator.java</b><br/>
+			Validator 인터페이스의 구현체를 작성하고, validate 함수를 해당 업무의 service에서 호출한다.<br/>
+			validate 함수의 param은 화면에서 조회한 시점의 업무 데이터이고, 해당 param을 가지고 현재 DB의 업무 진행상태와 비교한다.<br/>
+			validate 함수에서 리턴하는 resultMap은 smartsuite.app.common.shared.Const.RESULT_STATUS 를 가진 Map으로,<br/>
+			해당 값은 진행상태의 변경이 없으면 smartsuite.app.common.shared.Const.SUCCESS, 변경이 되었다면 smartsuite.app.common.shared.Const.INVALID_STATUS_ERR 을 가진다.<br/>
+		</p><br/>
+		<p>
+			<b>ValidatorUtil.java</b><br/>
+			Validator에서 validate 수행을 위해 조회된 결과를 가지고 resultMap으로 변환해주는 util<br/>
+		</p>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-java-validation-description'
+	});
+	</script>
+</dom-module>

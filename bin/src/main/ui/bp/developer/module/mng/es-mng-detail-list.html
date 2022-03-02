@@ -1,0 +1,78 @@
+<dom-module id="es-mng-detail-list">
+<!-- 
+/**
+ *
+ *	@description : 관리자 개발 화면 예제 - 서브리스트
+ *  <pre>
+ * </pre>
+ * @author : Yeon-u Kim
+ * @FileName : 
+ * @Since 2017. 2. 21.
+ * @변경이력 : [2017. 2. 21.] Yeon-u Kim 최초작성
+ */
+-->
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+	</style>
+	
+	<template>
+		<!-- ajax 선언 부 -->
+		<sc-ajax id="findList"
+            url="/ui/bp/developer/module/json/devMngDetail.json"
+            body="{{data.param}}"
+            last-response="{{data.list}}">
+        </sc-ajax>
+        
+       <cc-sub-title-bar title-text="서브리스트" i18n-disabled></cc-sub-title-bar>
+       
+       <sc-grid id="gridPanel"	class="flex"	data-provider="{{data.list}}">
+	       	<cc-grid-toolbar>
+	       		<sc-button text="추가"></sc-button>
+	       		<sc-button text="저장"></sc-button>
+	       		<sc-button text="삭제"></sc-button>
+	       	</cc-grid-toolbar>
+	       	<sc-grid-columns>
+	       		<sc-data-column	data-field="item_cd"	header-text="상세코드"></sc-data-column>
+	       		<sc-data-column	data-field="item_nm"	header-text="상세코드명"></sc-data-column>
+	       	</sc-grid-columns>
+	       	<sc-grid-fields>
+	       		<sc-grid-field	data-field="cd"></sc-grid-field>
+	       	</sc-grid-fields>
+	       </sc-grid>
+	</template>
+	
+	<script>
+	Polymer({
+			is : 'es-mng-detail-list',
+			properties : {
+				data: {
+					type: Object,
+					value: function(){
+						return {
+							param: {},
+							list: []
+						};
+					}
+				}
+			},
+			//최초 호출
+			initialized : function(){
+			},
+			//로드
+			load: function(param){
+				var me = this;
+				//파라미터 셋팅
+				me.set("data.param",UT.copy(param));
+				//상세리스트 조회처리
+				me.findList();
+			},
+			//조회요청
+			findList: function(){
+				var me = this;
+				UT.request(me.$.findList);
+			}
+		});
+	</script>
+</dom-module>

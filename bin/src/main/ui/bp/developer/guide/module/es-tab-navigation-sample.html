@@ -1,0 +1,38 @@
+<sc-link rel="import" href="es-tab1-sample.html"></sc-link>
+<sc-link rel="import" href="es-tab2-sample.html"></sc-link>
+
+<dom-module id="es-tab-navigation-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+    	<sc-tab-navigation id="tabNavi" class="flex" selected-index="0"
+    			on-item-activate="onItemActivate" on-item-deselect="onItemDeselect" on-item-select="onItemSelect">
+			<es-tab1-sample id="tab1" title-text="기본정보"></es-tab1-sample>
+			<!-- 최초 생성되는 화면을 제외한 나머지 페이지는 template 태그를 이용하여 동적생성 하도록 한다 -->
+			<template>
+				<es-tab2-sample id="tab2" title-text="담당자"></es-tab2-sample>
+			</template>
+		</sc-tab-navigation>
+    </template>
+    
+    <script>
+    Polymer({
+    	is : "es-tab-navigation-sample",
+    	onItemActivate : function(event) {
+    		var me = this;
+    		console.log(event.type + " : ", event.detail);
+    	},
+    	onItemDeselect : function(event) {
+    		var me = this;
+    		console.log(event.type + " : ", event.detail);
+    	},
+    	onItemSelect : function(event) {
+    		var me = this;
+    		console.log(event.type + " : ", event.detail);
+    	}
+    });
+    </script>
+</dom-module>

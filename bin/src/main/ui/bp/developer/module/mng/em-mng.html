@@ -1,0 +1,66 @@
+<script src="/ui/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<sc-link rel="import" href="/ui/bp/developer/shared/es-source-viewer.html"></sc-link>
+
+<sc-link rel="import"	href="es-mng-list.html"></sc-link>
+<sc-link rel="import"	href="es-mng-detail-list.html"></sc-link>
+<sc-link rel="import"	href="../tab/es-dynamic-tab.html"></sc-link>
+
+<dom-module id="em-mng">
+<!-- 
+/**
+ *
+ *	@description : 관리자 개발 화면 예제
+ *  <pre>
+ * </pre>
+ * @author : Yeon-u Kim
+ * @FileName : 
+ * @Since 2017. 2. 21.
+ * @변경이력 : [2017. 2. 21.] Yeon-u Kim 최초작성
+ */
+-->
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+	</style>
+	
+	<template>
+		<cc-page-title-bar title-text="관리자화면" i18n-disabled></cc-page-title-bar>
+		<div class="hbox flex-7">
+			<es-mng-list class="flex-5" on-reset="onReset" on-find-detail="findDetail"></es-mng-list>
+			<sc-splitter split-type="vertical"></sc-splitter>
+			<div class="vbox flex-5">
+				<es-mng-detail-list id="detail" class="vbox flex-5"></es-mng-detail-list>
+				<es-dynamic-tab id="tab" class="vbox flex-5"></es-dynamic-tab>
+			</div>
+		</div>
+		
+		<!-- source viewer를 위해 필요한 구역 실제로 사용할때 제거함. -->
+		<sc-panel class="vbox flex-3" title-text="Source Viewer">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/module/mng/em-mng.html" class="flex"></es-source-viewer>
+        </sc-panel>
+        <!-- source viewer를 위해 필요한 구역 실제로 사용할때 제거함. -->
+	</template>
+	
+	<script>
+	Polymer({
+			is : 'em-mng',
+			properties : {
+			},
+			//최초 호출
+			initialized : function(){
+			},
+			//상세 화면 리셋
+			onReset: function(e,data){
+				var me = this;
+				me.$.detail.reset();
+			},
+			//상세화면 조회
+			findDetail: function(e,data){
+				var me = this;
+				me.onReset();
+				me.$.detail.load(data);
+			}
+		});
+	</script>
+</dom-module>

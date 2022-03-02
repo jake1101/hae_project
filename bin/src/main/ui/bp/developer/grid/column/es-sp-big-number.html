@@ -1,0 +1,65 @@
+<dom-module id="es-sp-big-number">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" editable="true" stateful="true" aggregate="true">
+ <sc-grid-columns>
+     <sc-data-column data-field="column_1"   header-text="column_1"  width="120" text-align="left"   editable="true" editor-maskre="/[0-9]/" ></sc-data-column>
+     <sc-data-column data-field="column_2"   header-text="column_2"  width="120" text-align="left"   editable="true"  editor-maskre="/[0-9]/" ></sc-data-column>
+     <sc-data-column data-field="column_3"   header-text="multi"  width="300" text-align="left"   editable="true" converter="onConvert" aggregate-function="ag"></sc-data-column>
+ </sc-grid-columns>
+        </sc-grid>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-sp-big-number',
+            
+            properties : {
+                resultList: {
+                    type:Array
+                },
+                test : {
+                    type:Object,
+                    value:true
+                },
+                test2 : {
+                    type:Object,
+                    value:false
+                }
+            },
+            
+            onConvert:function(rowIndex, dataField, data){
+            	var col1 = new BigNumber(data["column_1"]);
+            	var col2 =  new BigNumber(data["column_2"]);
+            	var result = col1.mul(col2);
+            	
+            	return result.toFormat(); 
+            },
+            ag:function(dataField, datas){
+            	
+            	var result = new BigNumber('0');
+            	
+            	for(var i=0; i<datas.length; ++i){
+            		var number = datas[i][dataField].replace(/[^0-9]/g, "");
+            		result = result.plus(new BigNumber(number));
+            	}
+            	
+            	return result.toFormat();
+            }
+
+            
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

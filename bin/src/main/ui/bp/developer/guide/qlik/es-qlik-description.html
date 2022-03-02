@@ -1,0 +1,42 @@
+<dom-module id="es-qlik-description">
+	<style>
+ 	table, th, td {
+ 		border:1px solid black;
+ 		border-collapse:collapse;
+ 		box-sizing: border-box;
+ 		padding: 3px;
+ 	}
+ 	th {
+ 		background-color:lightgray
+ 	}
+    </style>
+    <template>
+    	<p>
+    		<b>cc-qlik-dashboard-iframe</b><br/>
+    		qlik dashboard display를 관리하며 인증 절차를 포함한다..<br/>
+    		<table>
+				<tr>
+					<th>프로퍼티</th>
+					<th>설명</th>
+				</tr>
+				<tr>
+					<td>dashboardId</td>
+					<td>메뉴 파라미터에서 dashboardId를 가져와 등록한 매핑된 정보와 비교한다.(appId와 sheet를 가져온다.)</td>
+				</tr>
+				<tr>
+					<td>dashboard</td>
+					<td>실제선택한 dashboardId에 해당하는 appId와 Sheet정보</td>
+				</tr>
+			</table>
+			<br/>
+    	</p>
+    </template>
+    <script>
+    Polymer({
+    	is : "es-qlik-description",
+    	properties : {
+    		
+    	}
+    });
+    </script>
+</dom-module>

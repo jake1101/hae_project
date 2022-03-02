@@ -1,0 +1,61 @@
+<dom-module id="smartsuite-notice-item">
+	<template>
+		<style>
+			.scNoticeWrapper {
+				margin-left : 10px;
+				margin-right : 10px;
+				margine-bottom : 2px;
+			}
+			
+			.scNoticeWrapper .content {
+				font-size : 15px;
+				font-weight : bold;
+			}
+			
+			.scNoticeWrapper .date {
+				border-bottom : 1px solid silver;
+			}
+		</style>
+		
+		<div id="wrapper" class="scNoticeWrapper">
+			<div id="schedText" class="content">{{schedName}}</div>
+			<div id="dateText" class="date">{{dateText}}</div>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'smartsuite-notice-item',
+			
+			properties :{
+				schedInfo : {
+					type : Object
+				},
+				
+				dateText : {
+					type : String
+				},
+				
+				schedName : {
+					type : String
+				},
+				
+				descText : {
+					type : String
+				}
+			},
+			
+			attached : function() {
+				var me = this;
+				me.dateText = StringUtil.setDateFormat( me.schedInfo.tzSendDate ,'s') 
+								+ ' - ' + (me.schedInfo.siteId) 
+								+ ' - ' + (me.schedInfo.siteName) 
+								+ ' - ' + (me.schedInfo.sensorId) 
+								+ ' - ' + me.schedInfo.notice_date.getDate();
+								
+				me.schedName = me.schedInfo.id+ "-" + me.schedInfo.type;
+				me.descText = me.schedInfo.sched_desc;
+			}
+		});
+	</script>
+</dom-module>

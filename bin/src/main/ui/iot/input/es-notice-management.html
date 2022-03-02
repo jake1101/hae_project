@@ -1,0 +1,233 @@
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 공지사한 광리
+    ** @Description     : 
+    ** @Author          : jhPark
+    ** @Create Date     : 2021.08.19
+    ** @History         : 2021.08.19 jhPark 최초작성
+    ******************************************************************************************
+-->
+<dom-module id="es-notice-management">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		<!-- 코드 조회-->
+		<sc-request-group init>
+			<sc-code-group>
+				<sc-code code="IOT038" value="{{typeList}}"></sc-code>
+			</sc-code-group>
+		</sc-request-group>		
+		<!-- 공지 리스트 조회 -->
+		<sc-ajax	id="findListNotice"	url="findListNotice.do"	body="{{searchParam}}"	on-response="completeFindListNoitc"></sc-ajax>
+		<!-- 공지 사항 삭제 요청 -->
+		<sc-ajax	id="deleteNotice"	url="deleteNotice.do" on-response="completeDeleteNotice"></sc-ajax>
+		
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+
+		<div class="vbox flex">
+			<cc-search-container on-search="onSearch" auth-r>
+				<table>
+					<colgroup>
+						<col style="width:60px">
+						<col style="width:250px">
+						<col style="width:60px">
+						<col>
+						<col style="width:120px">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="제목"></sc-label></th>
+						<td>
+							<sc-text-field value="{{searchParam.title}}" placeholder="공지사항 제목" on-enter="onSearch"></sc-text-field>
+						</td>
+						<th><sc-label text="대상자"></sc-label></th>
+						<td>
+	                		<sc-combobox-field items="{{typeList}}" display-field="label" value-field="data" value="{{searchParam.recipientType}}" placeholder="전체"></sc-combobox-field>
+						</td>
+						<th><sc-label text="사용중지 포함"></sc-label></th>
+						<td>
+							<sc-checkbox-field input-value="{{searchParam.includeNotUse}}" checked-value="Y" un-checked-value="N"></sc-text-field>
+						</td>
+					</tr>
+				</table>
+			</cc-search-container>
+            
+            <div class="hbox flex">
+            	<div class="vbox flex-5">
+            		<sc-grid id="noticeListGrid" data-provider="{{noticeList}}"  class="flex" use-selection="true" use-state="false" on-item-click="onItemClick">
+						<cc-grid-toolbar>
+							<sc-button text="추가" on-click="onAdd" auth-s></sc-button>
+							<sc-button text="삭제" on-click="onDelete" auth-s></sc-button>
+						</cc-grid-toolbar>
+						<sc-grid-columns>
+							<sc-data-column	data-field="title"		header-text="제목"	width="300" text-align="center" style-name="link"></sc-data-column>
+							<sc-data-column	data-field="recipientText"		header-text="대상자"	width="100" text-align="center"></sc-data-column>
+							<sc-data-column	data-field="writer"		header-text="공지자"	width="100" text-align="center"></sc-data-column>
+							<sc-group-column	header-text="공지기간"	column-name="dateColumns"	width="200">
+								<sc-date-column	data-field="startDt"header-text="시작날짜"	width="100" editable="false" display-format="yyyy/MM/dd"></sc-date-column>
+				                <sc-date-column	data-field="endDt"	header-text="종료날짜"	width="100" editable="false" display-format="yyyy/MM/dd"></sc-date-column>
+				            </sc-group-column>
+						 </sc-grid-columns>
+						 <sc-grid-fields>
+							<sc-grid-field data-field="notiId"></sc-grid-field>
+							<sc-grid-field data-field="siteId"></sc-grid-field>
+							<sc-grid-field data-field="recipientTypes" data-type="object"></sc-grid-field>
+						 </sc-grid-fields>
+					</sc-grid>
+				</div>
+            </div>
+		</div>
+
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-notice-management",
+            properties : {
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                }
+            },
+            /** 초기화 설정 **/
+            initialized : function() {
+                var me = this;
+                me.onSearch();
+            },
+            //검색 및 새로고침
+            onSearch : function(isSave) {
+                var me = this;
+				me.fire('init-notice', "N");
+                if(isSave == true){
+                	me.reset();
+                }
+                if(me.searchParam.includeNotUse == "Y"){
+                	me.searchParam.useFlag = "N";
+                }
+                else {
+                	me.searchParam.useFlag = null;
+                }
+                UT.request(me.$.findListNotice);
+            },
+            //삭제 요청 완료
+			completeDeleteNotice: function(e,res){
+				var me = this,
+                result = res.response;
+
+	            if (result.result_status === 'S') {
+	                UT.alert("STD.N2500", function () { // 삭제하였습니다.
+	                	me.reset();
+						me.onSearch();
+						me.fire('init-notice', "N");
+	                });
+	            } else {
+	                UT.alert(result.result_message);
+	            }
+			},
+			//검색 요청 완료
+			completeFindListNoitc: function(e, res){
+				var me = this;
+				var result = res.response;
+				var typeList = me.get("typeList");
+				
+				if(result == null){
+					UT.alert("검색결과가 없습니다.");
+				}
+				//대상자 코드 배열을 텍스트 배열로 변환후 저장
+				for(var i in result){
+					var recipientText;
+					var recipientArray = [];
+					var targets = result[i].recipientTypes;
+					for(var j in typeList){
+						for(var k in targets){
+							if(targets[k] == typeList[j].data){
+								recipientArray.push(typeList[j].label);
+							}
+						}
+					}
+					recipientText = recipientArray.join();
+					result[i].recipientText = recipientText;
+					if(targets.length == 3){
+						result[i].recipientText = "전체";
+					}
+				}
+				
+				me.fire('init-notice', "N");
+				me.set("noticeList", result);
+			},
+            /** 그리드 이벤트 함수 **/
+            //공지사항 상세보기
+            onItemClick : function(event){
+            	var me = this;
+				var data = event.detail.data;
+				var item = event.detail.item;
+				var provider = event.detail.provider;
+				
+				me.rowIndex = item.rowIndex;
+
+				if(item.dataField == "title"){
+					me.fire('find-noticeinfo', data);
+				}
+            },
+            /** 버튼 이벤트 함수 **/
+            //신규공지사항추가
+            onAdd : function() {
+                var me = this;
+                me.fire('init-notice', "N");
+            },
+            //공지사항삭제
+            onDelete : function(){		
+				var me =this;
+				
+				var provider = me.$.noticeListGrid.getDataProvider();
+				var selectionItems = provider.selectionCheckedItems();
+				
+				if (selectionItems.length === 0) {
+                    UT.alert("STD.N1600");
+                    return;
+                }
+
+				var notiIds = [];
+				for(var i in selectionItems){
+					notiIds.push(selectionItems[i].notiId);
+				}
+
+				UT.confirm("STD.N1300", function() {
+					var deleted = provider.removeItems();
+					if(deleted.length > 0){
+						me.$.deleteNotice.body = {
+							notiIds : notiIds,
+							siteId : SCMdiManager.searchParam.site_id
+						};
+						UT.request(me.$.deleteNotice);
+					}
+				});
+			},
+            
+        });
+	</script>
+
+</dom-module>

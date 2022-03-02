@@ -1,0 +1,19 @@
+[{
+	"chr_nm"       : "김담당",
+	"chr_dept"     : "영업1팀",
+	"chr_job"      : "대리",
+	"chr_email"    : "kim@waikiki.com",
+	"chr_phone_no" : "010-1111-2222"
+}, {
+	"chr_nm"       : "이담당",
+	"chr_dept"     : "구매3팀",
+	"chr_job"      : "차장",
+	"chr_email"    : "lee@waikiki.com",
+	"chr_phone_no" : "010-3333-4444"
+}, {
+	"chr_nm"       : "박담당",
+	"chr_dept"     : "마케팅팀",
+	"chr_job"      : "과장",
+	"chr_email"    : "park@waikiki.com",
+	"chr_phone_no" : "010-5555-6666"
+}]

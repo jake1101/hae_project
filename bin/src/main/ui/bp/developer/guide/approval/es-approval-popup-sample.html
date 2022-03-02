@@ -1,0 +1,87 @@
+<dom-module id="es-approval-popup-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<!-- 권한 -->
+		<cc-auth-checker check-list="auth-a"></cc-auth-checker>
+		
+		<!-- 페이지 타이틀 바 -->
+		<cc-page-title-bar title-text="구매요청">
+			<!-- 결재요청 버튼 (auth-a : 결재권한) -->
+			<sc-button text="결재요청" on-click="onRequestApproval" auth-a></sc-button>
+		</cc-page-title-bar>
+		
+		<sc-panel title-text="구매요청 기본정보">
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:150px"/>
+	        		<col/>
+	        	</colgroup>
+				<tr>
+					<th><sc-label text="구매요청번호"></sc-label></th>
+					<td><sc-text-field class="w-150" value="{{prData.pr_no}}" readonly></sc-text-field></td>
+				</tr>
+				<tr>
+					<th><sc-label text="구매요청명"></sc-label></th>
+					<td><sc-text-field value="{{prData.pr_tit}}" max-length="200"></sc-text-field></td>
+				</tr>
+			</table>
+		</sc-panel>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'es-approval-popup-sample',
+			properties : {
+				prData : {
+					type : Object,
+					value : function() {
+						return {}
+					}
+				},
+				// 결재유형코드 (그룹코드 : G003)
+				aprvTypeCd : {
+					type : String,
+					value : function() {
+						return "PR";	// 구매요청
+					}
+				}
+			},
+			// 결재요청 버튼 클릭
+			onRequestApproval : function() {
+				var me = this
+				
+				// "결재상신 하시겠습니까?"
+				UT.confirm("STD.APR1002", function() {	// "예" 버튼 클릭 시
+					
+					// 결재팝업에 전달할 파라미터
+					var param = {
+						app_id     : me.get("prData.pr_id"),	// 업무 모듈의 id
+						aprv_typcd : me.aprvTypeCd,				// 결재유형코드
+						doc_tit    : me.get("prData.pr_tit")	// 업무 모듈의 제목이 있으면 결재제목으로 사용한다.(suffix: "_결재요청")
+					};
+					
+					// 가이드 화면이라 view mode로 띄웁니다.
+					var isViewMode = true;
+					
+					// 결재팝업 호출
+					UT.popupApproval(me, param,
+						// savedCallback (결재 팝업에서 이벤트 처리후 실행되는 callback 함수 내용을 정의한다.)
+						function(sts, popup) {
+							if(sts === "P") {	// 결재상신 시
+								//me.onClose(); 상세화면 닫기
+							} else {			// 결재 임시저장 시
+								//me.findPrDetail(); 화면 재조회
+							}
+	                	},
+	                	isViewMode
+	                );
+				});
+			}
+		});
+	</script>
+</dom-module>

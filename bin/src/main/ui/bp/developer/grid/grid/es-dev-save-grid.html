@@ -1,0 +1,115 @@
+<dom-module id="es-dev-save-grid">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <!-- 조회 -->
+        <sc-ajax id="sampleAjax" url="/ui/dev/pr/findListPr.do" body="{{searchParam}}" last-response="{{resultList}}"></sc-ajax>
+         
+        <!--저장 -->
+        <sc-ajax id="sampleSave"    url="sampleSave.do"></sc-ajax>
+
+        <!-- 삭제 -->
+        <sc-ajax id="sampleDelete"  url="deleteSave.do"></sc-ajax>
+
+
+        <sc-toolbar>
+            <sc-label text="그리드 저장" ></sc-label>
+            <sc-spacer></sc-spacer>
+            <sc-button text="조회(바인딩)" on-click="onSearch"></sc-button>
+            <sc-button text="조회(callback)" on-click="onSearch2"></sc-button>
+            
+        </sc-toolbar>
+  
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" editable="true">
+            <sc-toolbar>
+                <sc-button text="추가(addItem)" on-click="onAddItem"></sc-button>
+                <sc-button text="첫로우에추가(addItemAt)" on-click="onAddItemAt"></sc-button>
+                <sc-button text="삭제" on-click="onDelete"></sc-button>
+                <sc-button text="저장" on-click="onSave"></sc-button>
+            </sc-toolbar>
+            <sc-grid-columns>
+                <sc-data-column data-field="col1"  header-text="컬럼1"  width="100"  text-align="center" ></sc-data-column>
+                <sc-data-column data-field="col2"  header-text="컬럼2"  width="200" editable="true"  text-align="center" ></sc-data-column>
+                <sc-data-column data-field="col3"  header-text="컬럼3"  width="200"  text-align="left"   ></sc-data-column>
+                <sc-data-column data-field="col4"  header-text="컬럼4"  width="200"  text-align="left"   ></sc-data-column>
+                <sc-data-column data-field="col5"  header-text="컬럼5"  width="200"  text-align="left"   ></sc-data-column>
+            </sc-grid-columns>
+        </sc-grid>
+        
+    </template>
+          
+    <script>
+        Polymer({
+            is: 'es-dev-save-grid',
+            
+            properties : {
+                searchParam : {
+                    type : Object,
+                    value : function(){
+                        return {};
+                    }
+                },
+                resultList: {
+                    type:Array
+                }
+                
+            },
+
+            initialized : function(){
+                 this.$.sampleAjax.service();
+            },
+            onAddItem : function(){
+                var me = this, provider = me.$.gridPanel.getDataProvider();
+                provider.addItem({col1:'기본값'});
+            },
+            onAddItemAt : function(){
+                var me = this, provider = me.$.gridPanel.getDataProvider();
+                provider.addItemAt(0,{col1:'기본값'});
+            },
+
+
+            onDelete : function(){
+                var me = this, provider = me.$.gridPanel.getDataProvider();
+                //selection에 체크된 항목중 신규 추가된 항목을 제외하고 가져 옵니다.
+                //신규 추가된 항목이 체크된 상태에서 removeItems() 호출시 신규 추가된 항목은 삭제 됩니다.
+                //신규 추가된 항목을 체크하여도 삭제하고 싶지 않알때는  removeItems(false)호출하면 됩니다.
+                
+                var removeItems = provider.removeItems();
+
+                 /* 저장 방법 sample
+                me.$.sampleDelete.body = {
+                    deleteList: removeItems
+                };
+                */
+               
+                SCAlert.show('삭제할 항목('+removeItems.length+')',JSON.stringify(removeItems, null, "\t"));
+            },
+            onSave : function(){
+                var me = this, provider = me.$.gridPanel.getDataProvider();
+                var newItems = provider.getNewItems();
+                var updateItems = provider.getUpdateItems();
+
+                /* 저장 방법 sample
+                me.$.sampleSave.body = {
+                    insertList: newItems,
+                    updateList: updateItems
+                };
+                */
+                var saveItems =    newItems.concat(updateItems); 
+                SCAlert.show('저장할 항목('+saveItems.length+')',
+                     '[신규]: '+JSON.stringify(newItems, null, "\t") + '</br>'+
+                     '[수정]: '+JSON.stringify(updateItems, null, "\t")
+                    );   
+                
+
+
+            }
+            
+        });
+    </script>
+
+</dom-module>

@@ -1,0 +1,54 @@
+<sc-link rel="import" href="es-menu-list.html"></sc-link>
+<!-- <sc-link rel="import" href="es-menufunc-list.html"></sc-link> -->
+<!-- <sc-link rel="import" href="es-menufunc-url-list.html"></sc-link> -->
+
+<dom-module id="em-menu">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    	<cc-page-title-bar></cc-page-title-bar>
+    	
+    	<div class="hbox flex">
+	        <es-menu-list id="menuList" on-selected-menu="onSelectedMenu" class="flex"></es-menu-list>
+<!-- 	        <div class="hspace-10"></div> -->
+<!-- 	        <div class="vbox flex-4"> -->
+<!-- 	        	<es-menufunc-list id="funcList" class="flex-4" on-saved-func="onSavedFunc"></es-menufunc-list> -->
+<!-- 	        	<es-menufunc-url-list id="menufuncList" class="flex-6"></es-menufunc-url-list>	         -->
+<!-- 	        </div> -->
+    	</div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'em-menu',
+            properties: {
+            	menuInfo : {
+	            	type: Object,
+	            	value: function(){
+	            		return {};
+	            	}
+            	}
+            },
+            // 메뉴가 선택됨
+            onSelectedMenu: function(e, data) {
+                var me = this;
+                me.set("menuInfo",data);
+//                 me.$.funcList.load(data);
+//                 me.$.menufuncList.load(data);
+            },
+            //기능이 수정됨
+            onSavedFunc: function(){
+            	var me = this;
+            	var menuInfo = me.get("menuInfo");
+            	 me.$.menufuncList.load(menuInfo);
+            }
+
+        });
+    </script>
+
+</dom-module>

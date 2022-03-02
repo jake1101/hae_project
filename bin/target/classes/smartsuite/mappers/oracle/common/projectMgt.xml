@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="projectMgt">
+	<select id="findProjectList" resultType="map">
+		SELECT CDDT.SYS_ID      /*시스템 아이디*/ 
+              ,CDDT.DTL_CD AS PJT_CD     /*상세 코드*/ 
+              ,CDDT.SORT_ORD    /*정렬 순서*/ 
+              ,CDDL.DTL_CD_NM AS PJT_NM   /*상세 코드 명*/
+              ,PJT.PM_CD
+              , ( SELECT CHR_NM
+                    FROM PJT_C# PJT_C 
+                   WHERE PJT_C.SYS_ID = PJT.SYS_ID
+                       AND PJT_C.CHR_ITN_MAIL = PJT.PM_CD
+                       AND PJT_C.STS   != 'D' )                   AS PM_NM
+              ,PJT.CHR_CD DBMS_CHR_CD
+              , ( SELECT CHR_NM
+                    FROM PJT_C# PJT_C 
+                   WHERE PJT_C.SYS_ID = PJT.SYS_ID
+                       AND PJT_C.CHR_ITN_MAIL = PJT.CHR_CD
+                       AND PJT_C.STS   != 'D' )                   AS DBMS_CHR_NM
+              ,PJT.NOTI_YN AS DBMS_NOTI_YN
+              ,PJT.DBMS_CD
+              ,PJT.DBMS_VER
+          FROM ESACDDT CDDT
+    LEFT OUTER JOIN ESACDDL CDDL 
+            ON CDDT.SYS_ID     = CDDL.SYS_ID 
+           AND CDDT.GRP_CD     = CDDL.GRP_CD 
+           AND CDDT.DTL_CD     = CDDL.DTL_CD 
+           AND CDDL.LANG_CD = #{g.locale}
+    INNER JOIN PJT_M# PJT
+            ON CDDT.SYS_ID     = PJT.SYS_ID
+           AND CDDT.DTL_CD = PJT.PJT_CD
+           AND PJT.STS != 'D'  
+         WHERE CDDT.SYS_ID     = #{g.tenant}
+           AND CDDT.GRP_CD    = '#020'
+           <if test="p.pjt_cd != null and p.pjt_cd != ''">
+       	   AND CDDT.DTL_CD = #{p.pjt_cd}
+       	   </if>
+           AND CDDT.STS != 'D'
+           AND CDDT.USE_YN = 'Y'
+      ORDER BY CDDT.SORT_ORD
+	</select>
+	
+	<select id="findProjectInfo" resultType="map">
+		SELECT PJT.SYS_ID      /*시스템 아이디*/ 
+              ,CDDT.DTL_CD AS PJT_CD     /*상세 코드*/ 
+              ,PJT.PM_CD
+              , ( SELECT CHR_NM
+                    FROM PJT_C# PJT_C 
+                   WHERE PJT_C.SYS_ID = PJT.SYS_ID
+                       AND PJT_C.CHR_ITN_MAIL = PJT.PM_CD
+                       AND PJT_C.STS   != 'D' )                   AS PM_NM
+              ,PJT.CHR_CD DBMS_CHR_CD
+              , ( SELECT CHR_NM
+                    FROM PJT_C# PJT_C 
+                   WHERE PJT_C.SYS_ID = PJT.SYS_ID
+                       AND PJT_C.CHR_ITN_MAIL = PJT.CHR_CD
+                       AND PJT_C.STS   != 'D' )                   AS DBMS_CHR_NM
+              ,PJT.NOTI_YN AS DBMS_NOTI_YN
+              ,PJT.DBMS_CD
+              ,PJT.DBMS_VER
+          FROM ESACDDT CDDT
+    LEFT OUTER JOIN ESACDDL CDDL 
+            ON CDDT.SYS_ID     = CDDL.SYS_ID 
+           AND CDDT.GRP_CD     = CDDL.GRP_CD 
+           AND CDDT.DTL_CD     = CDDL.DTL_CD 
+           AND CDDL.LANG_CD = #{g.locale}
+    LEFT OUTER JOIN PJT_M# PJT
+            ON CDDT.SYS_ID     = PJT.SYS_ID
+           AND CDDT.DTL_CD = PJT.PJT_CD
+           AND PJT.STS != 'D'  
+         WHERE CDDT.SYS_ID     = #{g.tenant}
+           AND CDDT.GRP_CD    = '#020'
+           AND CDDT.DTL_CD = #{p.pjt_cd}
+           AND CDDT.STS != 'D'
+           AND CDDT.USE_YN = 'Y'
+	</select>
+	
+	<select id="findProjectModules" resultType="map">
+		SELECT CDDT.SYS_ID      /*시스템 아이디*/ 
+			  ,COALESCE(MDL.PJT_CD, #{p.pjt_cd}) PJT_CD
+              ,CDDT.DTL_CD AS MDL_CD    /*상세 코드*/ 
+              ,CDDT.SORT_ORD    /*정렬 순서*/ 
+              ,CDDL.DTL_CD_NM AS MDL_NM   /*상세 코드 명*/
+              ,MDL.CHR_CD MDL_CHR_CD
+              , ( SELECT CHR_NM
+                    FROM PJT_C# PJT_C 
+                   WHERE PJT_C.SYS_ID = MDL.SYS_ID
+                       AND PJT_C.CHR_ITN_MAIL = MDL.CHR_CD
+                       AND PJT_C.STS   != 'D' )                   AS MDL_CHR_NM
+              ,MDL.USE_YN MDL_USE_YN
+              ,MDL.NOTI_YN AS MDL_NOTI_YN
+          FROM ESACDDT CDDT
+    LEFT OUTER JOIN ESACDDL CDDL 
+            ON CDDT.SYS_ID     = CDDL.SYS_ID 
+           AND CDDT.GRP_CD     = CDDL.GRP_CD 
+           AND CDDT.DTL_CD     = CDDL.DTL_CD 
+           AND CDDL.LANG_CD = #{g.locale}
+    LEFT OUTER JOIN PJT_D# MDL
+            ON CDDT.SYS_ID     = MDL.SYS_ID
+           AND MDL.PJT_CD = #{p.pjt_cd}
+           AND CDDT.DTL_CD = MDL.MDL_CD
+           AND MDL.STS != 'D'  
+         WHERE CDDT.SYS_ID     = #{g.tenant}
+           AND CDDT.GRP_CD    = '#010'
+           AND CDDT.STS != 'D'
+           AND CDDT.USE_YN = 'Y'
+      ORDER BY CDDT.SORT_ORD
+	</select>
+	
+	<select id="findProjectExists" resultType="int">
+        SELECT COUNT(*)
+          FROM PJT_M# PJT
+         WHERE PJT.SYS_ID       = #{g.tenant}        /* 시스템아이디 */
+           AND PJT.PJT_CD  = #{p.pjt_cd}
+           AND PJT.STS != 'D'
+    </select>
+    
+    <select id="findProjectModuleExists" resultType="int">
+        SELECT COUNT(*)
+          FROM PJT_D# MDL
+         WHERE MDL.SYS_ID       = #{g.tenant}        /* 시스템아이디 */
+           AND MDL.PJT_CD  = #{p.pjt_cd}
+           AND MDL.MDL_CD  = #{p.mdl_cd}
+           AND MDL.STS != 'D'
+    </select>
+    
+    <insert id="insertProject">
+		INSERT INTO PJT_M#
+			(
+				SYS_ID      
+				,PJT_CD
+				,PM_CD      
+				,CHR_CD
+				,NOTI_YN
+				,DBMS_CD
+				,DBMS_VER
+				,STS
+				,REG_ID
+				,REG_DT
+				,MOD_ID
+				,MOD_DT
+			)
+		VALUES(
+				 #{g.tenant}      
+				,#{p.pjt_cd}
+				,#{p.pm_cd}    
+				,#{p.dbms_chr_cd}
+				,#{p.dbms_noti_yn}
+				,#{p.dbms_cd}
+				,#{p.dbms_ver}
+				,'C'
+				,#{g.username}
+				,#{g.now}
+				,#{g.username}
+				,#{g.now}
+			)
+	</insert>
+	
+	<update id="updateProject">
+		UPDATE PJT_M# SET
+			PM_CD  =   #{p.pm_cd},
+			CHR_CD  =  #{p.dbms_chr_cd},
+			NOTI_YN  = #{p.dbms_noti_yn},
+			DBMS_CD  = #{p.dbms_cd},
+			DBMS_VER = #{p.dbms_ver},
+			STS = 'U',
+			MOD_ID = #{g.username},
+			MOD_DT = #{g.now}
+		WHERE SYS_ID = #{g.tenant}
+		  AND PJT_CD = #{p.pjt_cd}
+	</update>
+	
+	<delete id="deleteProject">
+		DELETE PJT_M#
+		 WHERE SYS_ID = #{g.tenant}
+		   AND PJT_CD = #{p.pjt_cd}
+	</delete>
+	
+	<delete id="deleteModuleByPjtCd">
+		DELETE PJT_D#
+		 WHERE SYS_ID = #{g.tenant}
+		   AND PJT_CD = #{p.pjt_cd}
+	</delete>
+	
+	<insert id="insertModule">
+		INSERT INTO PJT_D#
+			(
+				SYS_ID      
+				,PJT_CD
+				,MDL_CD      
+				,CHR_CD
+				,USE_YN
+				,NOTI_YN
+				,STS
+				,REG_ID
+				,REG_DT
+				,MOD_ID
+				,MOD_DT
+			)
+		VALUES(
+				 #{g.tenant}      
+				,#{p.pjt_cd}
+				,#{p.mdl_cd}     
+				,#{p.mdl_chr_cd}
+				,#{p.mdl_use_yn}
+				,#{p.mdl_noti_yn}
+				,'C'
+				,#{g.username}
+				,#{g.now}
+				,#{g.username}
+				,#{g.now}
+			)
+	</insert>
+	
+	<update id="updateModule">
+		UPDATE PJT_D# SET
+			CHR_CD  =  #{p.mdl_chr_cd},
+			USE_YN  =  #{p.mdl_use_yn},
+			NOTI_YN  = #{p.mdl_noti_yn},
+			STS = 'U',
+			MOD_ID = #{g.username},
+			MOD_DT = #{g.now}
+		WHERE SYS_ID = #{g.tenant}
+		  AND PJT_CD = #{p.pjt_cd}
+		  AND MDL_CD = #{p.mdl_cd}
+	</update>
+	
+	<delete id="deleteModule">
+		DELETE PJT_D#
+		 WHERE SYS_ID = #{g.tenant}
+		   AND PJT_CD = #{p.pjt_cd}
+		   AND MDL_CD = #{p.mdl_cd}
+	</delete>
+	
+	<select id="findChrList" resultType="map">
+		SELECT CHR.SYS_ID      /*시스템 아이디*/ 
+              ,CHR.CHR_ITN_MAIL
+              ,CHR.CHR_ITN_MAIL CHR_CD   
+              ,CHR.CHR_NM
+              ,CHR.CHR_EXT_MAIL
+          FROM PJT_C# CHR
+         WHERE CHR.SYS_ID     = #{g.tenant}
+           AND CHR.STS != 'D'  
+           <if test="p.chr_nm != null and p.chr_nm != ''">
+	           <bind name="usernamePattern" value="'%' + p.chr_nm + '%'" />
+	       AND UPPER(CHR.CHR_NM) LIKE UPPER(#{usernamePattern})
+	       </if>
+	       <if test="p.chr_itn_mail != null and p.chr_itn_mail != ''">
+	           <bind name="mailPattern" value="'%' + p.chr_itn_mail + '%'" />
+	       AND UPPER(CHR.CHR_ITN_MAIL) LIKE UPPER(#{mailPattern})
+	       </if>
+      ORDER BY CHR.CHR_NM
+	</select>
+	
+	<insert id="insertChr">
+		INSERT INTO PJT_C#
+			(
+				SYS_ID      
+				,CHR_ITN_MAIL
+				,CHR_NM      
+				,CHR_EXT_MAIL
+				,STS
+				,REG_ID
+				,REG_DT
+				,MOD_ID
+				,MOD_DT
+			)
+		VALUES(
+				 #{g.tenant}      
+				,#{p.chr_itn_mail}
+				,#{p.chr_nm}
+				,#{p.chr_ext_mail}
+				,'C'
+				,#{g.username}
+				,#{g.now}
+				,#{g.username}
+				,#{g.now}
+			)
+	</insert>
+	
+	<update id="updateChr">
+		UPDATE PJT_C# SET
+			CHR_NM = #{p.chr_nm},
+			CHR_EXT_MAIL = #{p.chr_ext_mail},
+			STS = 'U',
+			MOD_ID = #{g.username},
+			MOD_DT = #{g.now}
+		WHERE SYS_ID = #{g.tenant}
+		  AND CHR_ITN_MAIL = #{p.chr_itn_mail}
+	</update>
+	
+	<update id="deleteChr">
+		DELETE PJT_C# 
+		 WHERE SYS_ID = #{g.tenant}
+		   AND CHR_ITN_MAIL = #{p.chr_itn_mail}
+	</update>
+</mapper>

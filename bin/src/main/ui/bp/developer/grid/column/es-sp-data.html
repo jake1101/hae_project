@@ -1,0 +1,53 @@
+<!-- 
+	text, number 형태에 데이터를 입력 수정할 수 있는 기본 컬럼이다.
+	data-type을 변경하여 number형태에 데이터를 입력 수정 삭제 할 수있으며,
+	use-multi-line속성을 이용하여 multiline Cell Editor(Shift+Enter 줄바꿈) 를 이용할 수 있다.
+-->
+
+<dom-module id="es-sp-data">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" editable="true" >
+        	<cc-grid-toolbar>
+        		<sc-button text="조회" on-click="onSearch"></sc-button>
+        	</cc-grid-toolbar> 
+                <sc-grid-columns>
+					<sc-data-column data-field="colunm_1"   header-text="colunm_1"  ></sc-data-column>
+					<sc-data-column data-field="colunm_2"   header-text="colunm_2" ></sc-data-column>
+					<sc-data-column data-field="colunm_3"   width="200" header-text="number 입력 컬럼" 		editable="true" text-align="right" data-type="number" ></sc-data-column>
+					<sc-data-column data-field="colunm_4"   width="200" header-text="text 입력 컬럼" 			editable="true"	text-align="left" ></sc-data-column>
+					<sc-data-column data-field="colunm_5"   width="200" header-text="multiLine 입력 컬럼" 		editable="true" text-align="left" use-multi-line="true"></sc-data-column>
+                </sc-grid-columns>
+        </sc-grid>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+<script>
+    
+    Polymer({
+        is: 'es-sp-data',
+        
+        
+        properties : {
+        	resultList : {
+                type : Array,
+            }
+        },
+        
+        onSearch : function(){
+        	this.fire('search');
+        }
+        
+        
+    });
+</script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

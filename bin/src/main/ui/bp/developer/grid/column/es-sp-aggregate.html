@@ -1,0 +1,40 @@
+<dom-module id="es-sp-aggregate">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" aggregate="true" aggregate-group="true" aggregate-group-columns='["colunm_1", "colunm_2"]' editable="true" >
+                <sc-grid-columns>
+                    <sc-data-column data-field="colunm_1"   header-text="colunm_1"  width="150" text-align="left"   editable="true"     ></sc-data-column>
+                    <sc-data-column data-field="colunm_2"   header-text="colunm_2"  width="150" text-align="left"   editable="true"     ></sc-data-column>
+                    <sc-data-column data-field="colunm_3"   header-text="colunm_3"  width="150" text-align="left"   editable="false"    style-name="link"   ></sc-data-column>
+                    <sc-data-column data-field="colunm_4"   header-text="colunm_4"  width="150" text-align="left"   editable="false"    aggregate-title="합계 =>"></sc-data-column>
+                    <sc-data-column data-field="colunm_5"   header-text="colunm_5"  width="150" text-align="left"   editable="true"     format-type="amt"   data-type="number" aggregate-kind="sum"></sc-data-column>
+                    <sc-data-column data-field="colunm_6"   header-text="colunm_6"  width="150" text-align="left"   editable="true"     format-type="amt"   data-type="number" aggregate-title="rows =>"></sc-data-column>
+                    <sc-data-column data-field="colunm_7"   header-text="colunm_7"  width="150" text-align="left"   editable="true"     aggregate-kind="count"></sc-data-column>
+                </sc-grid-columns>
+        </sc-grid>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-sp-aggregate',
+            
+            properties : {
+                resultList: {
+                    type:Array
+                },
+            },
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

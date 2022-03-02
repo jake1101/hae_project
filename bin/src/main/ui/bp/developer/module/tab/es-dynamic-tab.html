@@ -1,0 +1,60 @@
+<sc-link rel="import"	href="es-dynamic-detail.html"></sc-link>
+
+<dom-module id="es-dynamic-tab">
+<!-- 
+/**
+ *
+ *	@description : 동적 탭화면 개발 예제
+ *  <pre>
+ * </pre>
+ * @author : Yeon-u Kim
+ * @FileName : 
+ * @Since 2017. 2. 21.
+ * @변경이력 : [2017. 2. 21.] Yeon-u Kim 최초작성
+ */
+-->
+	<style>
+		:host {
+			@apply(--fit-layout);
+		}
+	</style>
+	
+	<template>
+		<sc-tab-navigation id="tabnavi" class="fit" i18n-disabled>
+			<template is="dom-repeat" items="{{dataList}}" as="data">
+				<es-dynamic-detail id="{{data.id}}" title-text="{{data.nm}}" data-info="{{data}}"></es-dynamic-detail>
+			</template>
+		</sc-tab-navigation>
+	</template> 
+	
+	<script>
+	Polymer({
+			is : 'es-dynamic-tab',
+			properties : {
+				dataList: {
+					type: Object,
+					value: function(){
+						return [];
+					}
+				}
+			},
+			//최초 호출
+			initialized : function(){
+				this.set('dataList', [{
+					'id' : '1',
+					'nm' : "next",
+					data : {
+						'no' : '1111'
+					}
+				},
+				{
+					'id' : '2',
+					'nm' : "next1",
+					data: {
+						'no' : '2222'
+					}
+				}]);  
+			}
+		});
+	</script>
+</dom-module>

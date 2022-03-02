@@ -1,0 +1,540 @@
+<sc-link rel="import" href="ep-popup.html"></sc-link>
+<sc-link rel="import" href="../../shared/ep-user-list.html"></sc-link>
+<sc-link rel="import" href="../../shared/ep-job-list.html"></sc-link>
+
+<dom-module id="es-detail">
+<!-- 
+/**
+ *
+ *	@description : 업무 모듈 상세 화면
+ *  <pre>
+ * </pre>
+ * @author : Yeon-u Kim
+ * @FileName : 
+ * @Since 2017. 02. 10
+ */
+-->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+	
+	<!--  화면 구성 시작-->
+	<template>
+		<!-- ajax-->
+		<!-- sc-ajax url에 findData.do로 변경하여 사용한다. -->
+		<sc-ajax
+			id="findDetail"
+	        url="/ui/bp/developer/module/json/devDetail.json"
+	        body="{{data}}"
+	        on-response="onfindDetailHandler"></sc-ajax>
+	        
+       <sc-ajax
+			id="saveData"
+	        url="savaData.do"
+	        on-response="onSaveResultHandler"></sc-ajax> 
+		
+		<!-- 코드 조회 -->
+		<sc-code-group>
+			<!-- 구매요청유형 콤보박스 목록 조회 P049 -->
+            <!-- <sc-ajax
+                url="/pro/getPurcReqTyp.do"
+                body="HD"
+                content-type="text/plain" 
+                last-response="{{codes.purcRfqTypCode}}">
+            </sc-ajax> -->
+            <!-- 통화코드 -->
+			<sc-code code="C004"	value="{{codes.commCurCode}}"></sc-code>
+			<!-- 구매요청 승인 상태 -->
+			<sc-code code="P011"	value="{{codes.prAprvStsCode}}"></sc-code>
+			<!-- 구매 진행상태 -->    
+	    	<sc-code code="P044"	value="{{codes.prProgStsCode}}"></sc-code>
+	    	<!-- 구매 유형 -->    
+        	<sc-code code="P045"	value="{{codes.purcTypCode}}"></sc-code>
+        	<!-- 공통 단위 코드 -->
+	        <sc-code code="C007"	value="{{codes.comboUnitCode}}"></sc-code>
+        </sc-code-group>
+	
+		<cc-page-title-bar title-text="상세화면">
+			<sc-button text="저장" on-click="onSave"	hidden="[[!formula('editable')]]"></sc-button>
+			<sc-button text="닫기" on-click="onClose"></sc-button>
+		</cc-page-title-bar>
+		
+		<!-- div : vbox flex-6은 source viewer를 위해 필요한 구역 실제로 사용할때 제거함. -->
+		<div class="vbox flex-6">
+		<!-- div : vbox flex-6은 source viewer를 위해 필요한 구역 실제로 사용할때 제거함. -->
+			<div class="flex page">
+				<sc-panel title-text="기본정보" collapsible="true">
+				<!-- form -->
+					<table class="tb-form">
+						<colgroup>
+			        		<col style="width:150px"/>
+			        		<col/>
+			        		<col style="width:150px"/>
+			        		<col/>
+			        	</colgroup>
+						<tr>
+						<th>
+							<sc-label text="구매운영조직"></sc-label>
+						</th>
+						<td>
+							<cc-operorg-combobox-field id="operorgcombobox" class="w-150" oper-unit-cd="PO" value="{{data.oper_org_cd}}" selected-index="0" placeholder="필수" required="true" disabled="[[!formula('editable')]]"></cc-operorg-combobox-field>
+						</td>
+						<th>
+							<sc-label text="구매요청번호"></sc-label>
+						</th>
+						<td>
+							<div class="field-box" style="width:100%">
+								<sc-text-field class="w-150" value="{{data.pr_no}}" readonly></sc-text-field>
+								<span style="margin:0 5px">&#47;</span>
+								<sc-text-field class="w-50 align-right" value="{{data.pr_rev}}" readonly></sc-text-field>
+								<span style="margin-left:5px">[[translate('차')]]</span>
+							</div>
+						</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="구매요청명"></sc-label>
+							</th>
+							<td colspan="3">
+								<sc-text-field value="{{data.pr_tit}}" required="true" readonly="[[!formula('editable')]]" max-length="200"></sc-text-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="구매유형"></sc-label>
+							</th>
+							<td>
+								<sc-combobox-field class="w-150" display-field="label" value-field="data" items="{{codes.purcTypCode}}" value="{{data.purc_typ}}" required="true" disabled></sc-combobox-field>
+							</td>
+							<th>
+								<sc-label text="구매요청자"></sc-label>
+							</th>
+							<td>
+								<sc-text-field class="w-150" value="{{data.pr_req_nm}}" readonly></sc-text-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="구매요청부서"></sc-label>
+							</th>
+							<td>
+								<sc-text-field class="w-150" value="{{data.pr_req_dept_nm}}" readonly></sc-text-field>
+							</td>
+							<th>
+								<sc-label text="구매요청자전화번호"></sc-label>
+							</th>
+							<td>
+								<sc-text-field class="w-150" value="{{data.pr_req_phone_no}}" readonly="[[!formula('editable')]]" mask-re="/[0-9\-]/" strip-chars-re="/[ㄱ-힣]/" max-length="18"></sc-text-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="구매요청유형"></sc-label>
+							</th>
+							<td>
+								<sc-combobox-field class="w-150" display-field="label" value-field="data" items="{{codes.purcRfqTypCode}}" value="{{data.purc_req_typ}}" required="true" disabled="[[!formula('editable')]]"></sc-combobox-field>
+							</td>
+							<th>
+							</th>
+							<td>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="통화"></sc-label>
+							</th>
+							<td>
+								<!-- 통화 단위는 data를 display-field로 사용함 -->
+								<sc-combobox-field class="w-150" display-field="data" value-field="data" items="{{codes.commCurCode}}" value="{{data.cur}}" selected-index="0" placeholder="필수" required="true" disabled="[[!formula('editable')]]"></sc-combobox-field>
+							</td>
+							<th>
+								<sc-label text="구매요청합계금액" ></sc-label>
+							</th>
+							<td>
+								<sc-number-field  class="w-150 align-right" value="{{data.pr_tot_amt}}" input-cover="true" format-type="amt" readonly></sc-number-field>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<sc-label text="용도/비고"></sc-label>
+							</th>
+							<td colspan="3">
+								<sc-textarea-field value="{{data.pr_rem}}"  max-length="1000" readonly="[[!formula('editable')]]"></sc-textarea-field>
+							</td>
+						</tr>					
+					</table>
+				</sc-panel>
+				
+				<sc-grid id="gridPanel" title-text="물품정보" collapsible="true" aggregate=true use-dummy="false"
+					 editable="[[formula('editable')]]"
+					 on-item-click="onItemClick"
+					 use-selection="[[formula('editable')]]">
+				<cc-grid-toolbar>
+					<!-- <sc-button text="품목추가"	on-click="onShowPrCateItemPopup"	hidden="[[!formula('editable')]]"	auth-s></sc-button> -->
+					<sc-button text="일괄적용팝업"	on-click="onPopup"			hidden="[[!formula('editable')]]"	auth-s></sc-button>
+					<sc-button text="삭제"		on-click="onDeletePrItem"			hidden="[[!formula('editable')]]"	auth-s></sc-button>
+				</cc-grid-toolbar>
+				<sc-grid-columns>
+					<sc-data-column		data-field="pr_lno"			header-text="항번"			width="50"	text-align="center"	editable="false"></sc-data-column>
+					<sc-combobox-column	data-field="pr_prog_sts"	header-text="구매진행상태"		width="120"	text-align="center"	editable="false"
+										display-field="label"		value-field="data"			items="{{codes.prProgStsCode}}"></sc-combobox-column>
+					<sc-data-column		data-field="item_cd"		header-text="품목코드"			width="100"	text-align="center"	editable="false"></sc-data-column>
+					<sc-data-column		data-field="item_nm"		header-text="품목명"			width="250"	text-align="left"	editable="false"></sc-data-column>
+					<sc-data-column		data-field="spec"			header-text="규격"			width="250"	text-align="left"	editable="false"></sc-data-column>
+					<sc-combobox-column	data-field="unit_cd"		header-text="단위"			width="60"	text-align="center"	editable="true"
+										display-field="data"		value-field="data"			items="{{codes.comboUnitCode}}"></sc-combobox-column>
+					<sc-data-column		data-field="item_qty"		header-text="수량"			width="80"	text-align="right"	editable="true"
+										required="true"				validator-function="gridValidator"
+										data-type="number"			format-type="qty" vaidator-type="qty"></sc-data-column>
+					<sc-data-column		data-field="pr_price"		header-text="구매요청단가"		width="100"	text-align="right"	editable="true"
+										data-type="number"			format-type="amt"			vaidator-type="price" aggregate-title="합계"></sc-data-column>
+					<sc-data-column		data-field="pr_amt"			header-text="구매요청금액"		width="100"	text-align="right"	editable="false" converter="onAmtConverter"
+										data-type="number"			format-type="amt"			aggregate="true" aggregate-kind="sum"	aggregate-format="amt"></sc-data-column>
+					<sc-date-column		data-field="rd_date"		header-text="납품요청일"		width="100"	text-align="center"	visible="false" required="true"></sc-date-column>
+					<sc-data-column		data-field="rd_locat"		header-text="납품요청장소"		width="150"	text-align="left"	visible="false"></sc-data-column>
+					<sc-group-column	hide-child-headers="true"	header-text="구매그룹"			width="180"	text-align="center"	editable="false">
+						<sc-data-column	data-field="purc_grp_cd"								width="50"	text-align="center"	editable="false"	required="true"></sc-data-column>
+						<sc-data-column	data-field="purc_grp_nm"								width="100"	text-align="center" required="true"></sc-data-column>
+						<sc-image-column	image-cls="search"		data-field="button_purc_grp"	width="30"	text-align="center" editable="false"></sc-image-column>
+					</sc-group-column>
+					<sc-group-column	hide-child-headers="true"	header-text="구매요청의뢰자"	width="180"	text-align="center"	editable="false">
+						<sc-data-column	data-field="pr_sug_id"									width="60"	text-align="center"	editable="false"></sc-data-column>
+						<sc-data-column	data-field="pr_sug_nm"									width="100"	text-align="center"></sc-data-column>
+						<sc-image-column	image-cls="search"
+										data-field="button_pr_sug"								width="30"	text-align="center" editable="false"></sc-image-column>
+					</sc-group-column>
+					<sc-group-column	hide-child-headers="true"	header-text="검수담당자"		width="180"	text-align="center"	editable="false"	visible="false">
+						<sc-data-column	data-field="gr_chr_id"									width="60"	text-align="center"	editable="false" required="true"></sc-data-column>
+						<sc-data-column	data-field="gr_chr_nm"									width="100"	text-align="center" required="true"></sc-data-column>
+						<sc-image-column	image-cls="search"
+										data-field="button_gr_chr"								width="30"	text-align="center" editable="false"></sc-image-column>
+					</sc-group-column>
+					<sc-data-column	data-field="cntr_yn"		header-text="단가계약여부"			width="100"	text-align="center"	editable="false"	item-label-function="onItemLabelFn"></sc-data-column>
+					<sc-data-column	data-field="auto_po_yn"		header-text="직발주여부"			width="100"	text-align="center"	editable="false"	item-label-function="onItemLabelFn"></sc-data-column>
+				</sc-grid-columns>
+				<sc-grid-fields>
+					<sc-grid-field	data-field="pr_id"				data-type="text"></sc-grid-field>
+					<sc-grid-field	data-field="pr_item_id"			data-type="text"></sc-grid-field>
+					<sc-grid-field	data-field="oper_org_cd"		data-type="text"></sc-grid-field>
+					<sc-grid-field	data-field="pr_mod_prog_sts"	data-type="text"></sc-grid-field>
+					<sc-grid-field	data-field="cur"				data-type="text"></sc-grid-field>
+					<sc-grid-field	data-field="cntr_no"			data-type="text"></sc-grid-field>
+					<sc-grid-field	data-field="cntr_rev"			data-type="text"></sc-grid-field>
+					<sc-grid-field	data-field="cntr_item_id"		data-type="text"></sc-grid-field>
+					<sc-grid-field	data-field="cntr_item_lno"		data-type="text"></sc-grid-field>
+				</sc-grid-fields>
+			</sc-grid>
+			</div>
+		<!-- div : vbox flex-6은 source viewer를 위해 필요한 구역 실제로 사용할때 제거함. -->
+		</div>
+		<!-- div : vbox flex-6은 source viewer를 위해 필요한 구역 실제로 사용할때 제거함. -->
+		
+		<!-- source viewer를 위해 필요한 구역 실제로 사용할때 제거함. -->
+		<sc-panel class="vbox flex-4" collapsible="true" title-text="Source Viewer">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/module/es-detail.html" class="flex"></es-source-viewer>
+        </sc-panel>
+        <!-- source viewer를 위해 필요한 구역 실제로 사용할때 제거함. -->
+        
+	</template>
+	
+	<script>
+		Polymer({
+			is: 'es-detail',
+			properties : {
+				titleText : {
+					type : Object,
+					value : function(){
+						return	'상세화면'; 
+					}
+				},
+				//developer용 소스 viewer를 사용하기위한 임시용 , 실제로 사용안한
+				data : {
+					type: Object,
+					value : function(){
+						return{};
+					},
+				},
+				codes : {
+                	type : Object,
+                	value : function(){
+                		return {
+	                		commCurCode    : [],
+	                		prAprvStsCode  : [],
+	        				prProgStsCode  : [],
+	        				purcTypCode    : [],
+	        				comboUnitCode  : [],
+	        				purcRfqTypCode : [{"data":"NC","label":"일반구매"},{"data":"UC","label":"단가계약"}]
+                		};
+                	},
+                	reset: false	//초기화 대상에서 제외할 경우
+                },
+                currentUser : {
+					type : Object,
+					value : function() {
+						return {};
+					}
+				}
+			},
+			//ui의 상태값을 설정하는 formulas 함수 (호출시  formula('editable'))
+			formulas: {
+				editable: function(){
+					var me = this;
+					return (me.get("data.pr_type") != "P");
+				}
+			},
+			/************************************************** 
+			 * 초기화 설정
+			 **************************************************/
+			// 1. 화면 로딩시 최초 호출
+			initialized : function(){
+				var me = this;
+			},
+			// 2. 화면 load
+			load : function(data) {
+				var me = this;
+				
+				//currentUser에 세션 사용자 정보 할당
+				me.set('currentUser', SCSessionManager.currentUser);
+				
+				if(data) {
+					//신규생성
+					if(UT.isEmpty(data.pr_id)) {
+						me.set("pageType", "PR");
+						
+						me.set("prData.purc_req_typ", (data.purc_req_typ || "NC"));
+						me.set("prData.purc_typ"    , "MT");
+						
+						//데이타에 따라 ui 화면을 처리할경우 호출
+						me.applyFormula();
+						//me.applyFormula('editable'); //단건의 ui 화면을 처리할 경우 호출.
+					} else {
+						me.set("searchParam.pr_id", data.pr_id);
+						me.findDetail();	//pr 상세 조회
+					}
+				}
+			},
+			// 상세 조회
+			findDetail : function() {
+				var me = this;
+				
+				//request요청
+				UT.request(me.$.findDetail);
+			},
+			// 상세 조회후 handler
+			onfindDetailHandler : function(e, res) {
+				var me = this;
+				var lastResponse = res.response;
+				
+				me.set("data", lastResponse);
+				//그리드 데이타 셋팅
+				me.$.gridPanel.setDataProvider(lastResponse.prItems);
+				
+				//source Viewer용 
+				me.$.viewer.setData(JSON.stringify(lastResponse.prItems, null, "\t"));
+				
+				me.applyFormula();
+			},
+			/************************************************** 
+			 * validation 설정
+			 **************************************************/
+			/************************************************** 
+			 * 그리드 이벤트
+			**************************************************/
+			// grid item click 이벤트
+			onItemClick : function(event) {
+				var me = this;
+				var data = event.detail.data,
+					item = event.detail.item,
+                	provider = event.detail.provider;
+                                
+				if(["RN","RQ"].indexOf(data['pr_prog_sts']) > -1) {
+					//현재 row 인덱스를 담아둔다.
+					me.rowIndex = item.rowIndex;
+					
+					if(item.dataField === "button_purc_grp") {			//구매그룹일 경우
+						me.showJobPopup();
+					} else if(item.dataField === 'button_pr_sug') {		//구매요청 의뢰자일 경우
+						me.showUserPopup('pr_sug');
+					} else if(item.dataField === 'button_gr_chr') {		//검수 담당자일 경우
+						me.showUserPopup('gr_chr');
+					}
+				}
+            },
+			// grid label function
+            onItemLabelFn : function(data, item) {
+            	if(item.dataField === "cntr_yn") {
+            		return UT.isEmpty(data['cntr_no']) ? "N" : "Y";
+            	} else {
+            		return data[item.dataField] || "N"; 
+            	}
+            },
+          	//grid converter
+			onAmtConverter: function(rowIndex,fieldName,data){
+				var qty   = data['item_qty'] || 0;
+        		var price = data['pr_price'] || 0;
+        		return qty * price;
+			},
+			// 품목 삭제 버튼 클릭시
+			onDeletePrItem : function() {
+				var me = this;
+				
+				var provider = me.$.gridPanel.getDataProvider();
+				var checked = provider.selectionCheckedItems();
+				
+				if(checked.length === 0) {
+					UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+				} else {
+					UT.confirm("STD.N1300", function() {	// "삭제 하시겠습니까?"
+						var deleted = provider.removeItems(true);	// 그리드에서 체크된 데이터를 지워주고, db에서 삭제해야 할 데이터 목록울 리턴한다.
+						
+						if(deleted.length > 0) {
+							var oldDeleted = me.data.deletedPrItems;
+			              	if(typeof oldDeleted === "undefined") {
+			              		oldDeleted = new Array();
+			              	}
+			               	//기존 deleted 리스트와 합친다.
+			               	var deletedPrItems = oldDeleted.concat(deleted);
+			               	me.set('data.deletedPrItems', deletedPrItems);
+			               	
+			               	//합계 재계산
+							me.set('data.pr_tot_amt', provider.getSummary('pr_amt', 'sum'));
+						}
+					});
+		        }
+			},
+			// 구매그룹 팝업 호출
+            showJobPopup : function(param, autoComplete) {
+            	var me = this;
+            	
+            	var defaultParam = {
+        				comp_cd      : me.currentUser.comp_cd,
+            			purc_grp_typ : 'PU'	//직무유형이 구매
+           		};
+            	if(UT.isObject(param)) {
+            		for(var keys in param) {
+            			defaultParam[keys] = param[keys];
+            		}
+            	}
+            	
+            	var jobPopup = UT.popup("ep-job-list", me, 650, 500, {
+    				'selected-items' : function(popup, e) {
+    					var result   = e.detail,
+    						selected = result[0];
+       					
+       					var provider = me.$.gridPanel.getDataProvider();
+       					provider.setCellValue(me.rowIndex, 'purc_grp_cd', selected.purc_grp_cd);
+       					provider.setCellValue(me.rowIndex, 'purc_grp_nm', selected.purc_grp_nm);
+       					
+               			popup.close();
+    				}
+    			}, {titleText : "구매그룹 검색"});
+           		jobPopup.show();
+           		jobPopup.getWindowContent().load({singleSelect:true, defaultParam:defaultParam, autoComplete:autoComplete});
+            },
+            // 사용자 팝업 호출
+            showUserPopup : function(usrTyp, param, autoComplete) {
+            	var me = this;
+            	me.usrTyp = usrTyp;
+            	
+            	var titleText = null;
+            	if(usrTyp === 'pr_sug') {
+            		titleText = "구매요청 의뢰자 검색";
+            	} else if(usrTyp === 'gr_chr') {
+            		titleText = "검수 담당자 검색";
+            	}
+            	
+            	var userPopup = UT.popup('ep-user-list', me, 650, 500, {
+					'selected-items' : function(popup, e) {
+						var result   = e.detail,
+							selected = result[0];
+						
+						var provider = me.$.gridPanel.getDataProvider();
+						provider.setCellValue(me.rowIndex, me.usrTyp+'_id', selected.usr_id);
+						provider.setCellValue(me.rowIndex, me.usrTyp+'_nm', selected.usr_nm);
+						
+						popup.close();
+					}
+				}, {titleText : titleText});
+				userPopup.show();
+				userPopup.getWindowContent().load({singleSelect : true, defaultParam : param, autoComplete : autoComplete});
+            },
+          	//팝업 호출 이벤트
+			onPopup : function(){
+				var me = this;
+				
+				//팝업에 load 함수에 파라미터를 셋팅한다.
+				var param = {
+					purc_grp_typ : 'PU'
+				};
+				/* var options = {
+						singleSelect : false,
+						autoComplete : false,
+						defaultParam : param
+						title : "타이틀"
+				}; */
+				//팝업에 options을 설정한다.
+				//팝업 호출
+				var popup = UT.popup("ep-popup", me, 400,400,{
+					'selected-items' : function(popup,e){
+						//팝업에 이벤트 리스너를 등록한다.
+						//e.detail이 팝업에서 me.fire("selected-items",data); 의 data.
+					}
+				});
+				popup.show();
+				popup.getWindowContent().load(param);
+			},
+			/************************************************** 
+			* 버튼 이벤트
+			**************************************************/
+			//저장 이벤트
+			onSave: function(){
+				var me = this;
+				
+				//validate 체크 로직 수행
+				//me.validate('data') element에 validation-group="data" 를  
+				//넣은 경우 그룹명을 가지고 validation을 수행합니다.
+				if(!me.validate()){
+					UT.alert("STD.E0000");
+					return;
+				}
+				UT.confirm("STD.N1200",function(){
+					//ajax에 body에 직접넣거나,바인딩하여 넣거나 한다.
+					me.$.saveData.body = {
+						data : me.get('data')
+						//items : provider.getNewItem() 
+					};
+					//다국어처리안하는 alert처리 방법 UT.alert("한글",okCallbackFunction,i18nDisabled);
+					UT.alert("UT.request(me.$.saveData); 호출",function(){
+						me.onSaveResultHandler(null,{response : {result_status : "S"}});
+					},true);
+					//UT.request(me.$.saveData);
+				});
+			},
+			//저장 완료 콜백 함수 (sc-ajax에 on-response로 등록한 함수)
+			onSaveResultHandler: function(e,res){
+				var me = this;
+				//결과값을 콜백에서 바로 받을 경우 두번째 argument인자에 reponse로 처리,
+				//혹은 sc-ajax에 last-response로 바인딩된 값으로 처리 (일반적인 조회처리시에 주로사용.)
+				var result = res.response;
+				//성공인자는 각 모듈에 호출되는 ajax의 결과값에 따라 처리한다.
+				if (UT.isObject(result) && result.result_status === "S") {
+					UT.alert("STD.N1500"); //요청이 완료되었습니다.
+					me.findDetail();
+				}else{
+					//저장실패 시의 메세지는 각 업무 모듈에 실패 상태값에 따라 처리한다.
+					//저장실패
+               		UT.alert(UT.failureMessage(result));
+				}
+			},
+			//닫기 이벤트
+			onClose : function() {
+				//닫기 이벤트 클릭시 현재화면과 하위의 component의 property,그리드에 대해 reset처리를 수행한다.
+				this.reset();
+				this.fire('close');
+			}
+		});
+	</script>
+
+</dom-module>

@@ -1,0 +1,9 @@
+/*
+Product: Things Board
+License Type: Production
+Purchase Date: 2017.07.07
+Expiration Date: UNLIMITED
+Hostname: board.hatiolab.com
+Customer: HatioLab
+*/
+var ThingsLicense = "5eyJMaWNlbnNlIFR5cGUiOiJQcm9kdWN0aW9uIiwiRXhwaXJhdGlvbiBEYXRlIjoiVU5MSU1JVEVEIiwiSG9zdG5hbWUiOiJib2FyZC5oYXRpb2xhYi5jb20iLCJLZXkiOiJBeGdxSEE0M0hnc0FRQm9MS3lNZEZRa2FEVHNaQ0NvWURFMHpDZ0lwR2pFVEVqWlZJd2dWT3hZSkRBNE9PQ0lIQWhrRUZSSUFMU1VUQ1JBK0h3a0ZBQmsxTnhRUEp6Y1hIaVFaSlNNSUZUc1ZHanNSQ3ljM0J3QXBFd2dsQUNWSkNpOGNTdzRlUHdZV09Cb1BBQVFRQnhzQU9rb0tMekk3QWhBM0xBPT0ifQ==30427"

@@ -1,0 +1,61 @@
+<!-- 
+fitRowHeight : 데이터 양에 따라 자동으로 row height을 알맞게 조정
+rowResizable : 사용자가 마우스 드레그를 통해 row height를 조정
+
+text-wrap이 default로 none으로 선언되어있다. 데이터 양에 따라 줄 변경을 설정하고 싶다면
+해당 프로퍼티의 값을 normal로 설정하면 된다.
+
+해당 샘플에서는 데이터 양이 제일 많은 about컬럼에 데이터 양에 따라 row heigth가 자동 설정되었다.
+ -->
+
+<dom-module id="es-sp-height">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" fit-row-height="true" row-resizable="true" editable="{{gridEditable}}" >
+        	<cc-grid-toolbar>
+        		<sc-button text="조회" on-click="onSearch" ></sc-button>
+        	</cc-grid-toolbar>
+			<sc-grid-columns>
+			    <sc-data-column data-field="balance"   		header-text="balance"		width="150" text-align="left"   editable="false" ></sc-data-column>
+			    <sc-data-column data-field="picture"   		header-text="picture"		width="150" text-align="left"   editable="false" ></sc-data-column>
+			    <sc-data-column data-field="age"   			header-text="age"			width="150" text-align="right"  editable="false" ></sc-data-column>
+			    <sc-data-column data-field="eyeColor"   	header-text="eyeColor"		width="150" text-align="left"   editable="true" ></sc-data-column>
+			    <sc-data-column data-field="name"   		header-text="name"			width="150" text-align="left"   editable="true" ></sc-data-column>
+			    <sc-data-column data-field="about"   		header-text="about"			width="250" text-align="left"   editable="true" text-wrap="normal" ></sc-data-column>
+			    <sc-data-column data-field="greeting"   	header-text="greeting"		width="150" text-align="left"   editable="true" ></sc-data-column>
+			    <sc-data-column data-field="favoriteFruit"  header-text="favoriteFruit" width="150" text-align="left"   editable="true" ></sc-data-column>
+			    
+			    
+			</sc-grid-columns>
+        </sc-grid>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-sp-height',
+            
+            properties : {
+                resultList: {
+                    type:Array
+                }
+            },
+            onSearch : function(){
+            	this.fire('search');
+            }
+
+            
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

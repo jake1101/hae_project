@@ -1,0 +1,589 @@
+<sc-link rel="import" href="ep-site-map.html"></sc-link>
+<sc-link rel="import" href="ep-area-map.html"></sc-link>
+<sc-link rel="import" href="ep-fit-area-map.html"></sc-link>
+<sc-link rel="import" href="ep-default-setting-map.html"></sc-link>
+
+<dom-module id="es-site-management">
+	<!--
+        ******************************************************************************************
+        ** @Program-name    : 현장관리
+        ** @Description     :
+        ** @Author          : jhkim
+        ** @Create Date     : 2020.01.02
+        ** @History         : 2020.01.02 jhkim 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+        <!-- 코드 조회-->
+		<sc-request-group init>
+			<sc-code-group>
+				<sc-code code="USEFLAG" value="{{codes.useFlag}}"></sc-code>
+				<sc-code code="YN" value="{{codes.yn}}"></sc-code>
+			</sc-code-group>
+			<sc-ajax id="comboAllCustomerList" url="getComboCustomer.do" last-response="{{codes.customerList}}"></sc-ajax>
+		</sc-request-group>
+
+		<!-- 현장 목록 조회 -->
+		<sc-ajax
+			id="findListSite"
+			url="findListSite.do"
+			body="{{searchParam}}"
+			on-response="completeFindListSite">
+		</sc-ajax>
+
+		<!-- 현장 목록 저장 -->
+		<sc-ajax
+			id="saveListSite"
+			url="saveListSite.do"
+			on-response="completeSaveListSite">
+		</sc-ajax>
+
+		<!-- 현장 목록 삭제 -->
+		<sc-ajax
+			id="deleteListSite"
+			url="deleteListSite.do"
+			on-response="completeDeleteListSite">
+		</sc-ajax>
+		
+		<!-- 영역 목록 조회 -->
+		<sc-ajax id="findListArea"
+			url="findListArea.do"
+			body="{{searchAreaParam}}"
+			on-response="completeFindArea">
+		</sc-ajax>
+		
+		<!-- 영역 목록 삭제 -->
+		<sc-ajax id="deleteAreaList"
+			url="deleteAreaList.do"
+			on-response="completeDeleteAreaList">
+		</sc-ajax>
+
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+
+		<div class="vbox flex">
+			<cc-search-container on-search="onSearch" auth-r>
+				<table>
+					<colgroup>
+						<col style="width:120px">
+						<col>
+						<col style="width:120px">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="운영사"></sc-label></th>
+						<td>
+							<sc-combobox-field id="companyCombo"
+								display-field="name" value-field="id" items="{{codes.customerList}}" 
+								value="{{searchParam.companyId}}" 
+								on-enter="onSearch"
+								required="true">
+							</sc-combobox-field>
+						</td>
+						<th><sc-label text="사용중지포함"></sc-label></th>
+						<td><sc-checkbox-field input-value="{{searchParam.includeNotUse}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field></td>
+					</tr>
+				</table>
+			</cc-search-container>
+       		<sc-grid id="gridPanel" data-provider="{{siteList}}" editable="true" class="flex" on-item-click="onItemClick" validation-group="save">
+				<cc-grid-toolbar>
+					<sc-button text="추가" on-click="onAddSite" auth-s></sc-button>
+					<sc-button text="저장" on-click="onSaveSite" auth-s></sc-button>
+					<sc-button text="삭제" on-click="onDeleteSite" auth-s></sc-button>
+				</cc-grid-toolbar>
+				<sc-grid-columns>
+					<sc-data-column data-field="name"      header-text="현장명" width="180" text-align="center" required="true" max-length="18" editable="true" style-name="link"></sc-data-column>
+					<sc-data-column data-field="address"             header-text="주소" width="300" text-align="left" editable="true" ></sc-data-column>
+					<sc-data-column data-field="lat"    required="true"  header-text="위도" width="120" text-align="center" editable="false" ></sc-data-column>
+					<sc-data-column data-field="lon"   required="true"   header-text="경도" width="120" text-align="center" editable="false" max-length="60"></sc-data-column>
+					<sc-image-column data-field="button_point" image-cls="search" width="30" text-align="center" editable="false" cursor="pointer"></sc-image-column>
+					<sc-data-column data-field="fit_area" column-name="fit_area" width="120" header-text="위치정보수집영역" cursor="pointer" style-name="link" > </sc-data-column>
+					<sc-data-column data-field="officeNumber"        header-text="현장 소장 연락처" width="120" text-align="center" editable="true"></sc-data-column>
+					<sc-checkbox-column data-field="useFlag" header-text="사용여부" width="100" text-align="center" editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+					<sc-data-column data-field="sortOrder"       header-text="정렬" width="60" text-align="center" editable="true" data-type="number"></sc-data-column>
+					<sc-data-column data-field="details" column-name="details" header-text="상세정보" cursor="pointer" style-name="link" > </sc-data-column>
+					<sc-data-column data-field="defaultSetting" column-name="defaultSetting" header-text="지도 기본 위치" cursor="pointer" style-name="link" > </sc-data-column>
+ 				</sc-grid-columns>
+				<sc-grid-fields>
+					<sc-grid-field data-field="id"></sc-grid-field>
+ 					<sc-grid-field data-field="companyId"></sc-grid-field>
+					<sc-grid-field data-field="geoJson" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="adjunction" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="startDt" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="endDt" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="fitGeoJson" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="siteFitArea" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="polygon" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="pinPoint" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="siteCd"></sc-grid-field>
+					<sc-grid-field data-field="workerInterfaceYn"></sc-grid-field>
+				</sc-grid-fields>
+			</sc-grid>
+			<div class="vspace-10"></div>
+       		<sc-grid id="areaGridPanel" is-tree="true"  editable="true" class="flex" on-item-click="onAreaItemClick">
+				<cc-grid-toolbar title-text="영역관리 {{selectVersionName}}">
+					<sc-button text="영역 등록" on-click="onAddArea" auth-s></sc-button>
+					<sc-button text="영역 삭제" on-click="onDeleteArea" auth-s></sc-button>
+				</cc-grid-toolbar>
+						<sc-grid-columns>
+							<sc-data-column data-field="id" header-text="Id" width="120" text-align="center" data-type="number" item-style-function="itemStyleFunction"></sc-data-column>
+							<sc-data-column data-field="name"             header-text="영역" width="200" text-align="left" max-length="60"></sc-data-column>
+							<sc-combobox-column	data-field="type"         header-text="타입" width="100" display-field="label" value-field="data" items="{{codes.typ}}"></sc-combobox-column>
+							<sc-data-column data-field="levelOrder"       header-text="정렬" width="80" text-align="center"  data-type="number"></sc-data-column>
+							<sc-data-column data-field="lineColor"        header-text="선색" width="100" text-align="center"></sc-data-column>
+							<sc-data-column data-field="backgroundColor"  header-text="배경색" width="100" text-align="center"></sc-data-column>
+							<sc-data-column data-field="description"      header-text="설명" width="200" text-align="center"></sc-data-column>
+							<sc-image-column data-field="area_icon"       header-text="영역관리" width="70" image-cls="search"></sc-image-column>
+						</sc-grid-columns>
+				<sc-grid-fields>
+					<sc-grid-field data-field="parentId" data-type="number"></sc-grid-field>
+					<sc-grid-field data-field="siteId" data-type="number"></sc-grid-field>
+					<sc-grid-field data-field="publishId" data-type="number"></sc-grid-field>
+					<sc-grid-field data-field="adjunction" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="pinCircle" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="polygon" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="geoJson" data-type="object"></sc-grid-field>
+					<sc-grid-field data-field="beaconCount" data-type="number"></sc-grid-field>
+				</sc-grid-fields>
+			</sc-grid>
+		</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-site-management",
+            properties : {
+                codes: {		// 코드
+                    type : Object,
+                    reset : false,
+                    value : function() {
+                        return {
+                        	customerList : []
+                        };
+                    }
+                },
+                currentRowIndex:Number,
+                searchParam: {	 // 조회조건
+                    type: Object,
+                    value: function(){
+                    	return {
+		            		companyId: SCMdiManager.searchParam.company_id
+		            	};
+                    }
+                },
+                siteList: {	// Site 리스트
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+                areaList: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+                area: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+                selectVersionName : String,
+            },
+            formulas : {
+                isEditable: function() {	// 수정할수 있는 상태
+                    return (this.siteInfo.isNew === true) || !UT.isEmpty(this.siteInfo.id);
+                }
+            },
+            initialized : function() {		// 초기화 완료 후 호출 함수
+                var me = this;
+                me.onSearch();
+            },
+            onSearch : function() {		// 조회
+                var me = this;
+                if(!me.validate('search')){
+                	UT.alert("STD.E0000");
+                	return;
+                }
+                me.set('siteList',[]);
+                me.set('searchAreaParam.siteId', null);
+                me.set('selectVersionName', "");
+                me.$.areaGridPanel.setHierachyDataProvider([], "children");
+                UT.requestNoDefault(me.$.findListSite);
+            },
+            completeFindListSite : function(e, res){
+                var me = this;
+
+                var array =  res.response;
+                Array.prototype.forEach.call(array, function(e, v){
+                	e.details = "[상세]";
+                	e.fit_area = "[설정]";
+                	//jhPark
+                	e.defaultSetting = "[설정]";
+                });
+                                
+            	me.siteList = res.response;
+            },
+			// 현장 grid item click 이벤트
+			onItemClick : function(event) {
+				var me = this
+				,data = event.detail.data
+				,item = event.detail.item
+				,provider = event.detail.provider;
+				
+				me.rowIndex = item.rowIndex;
+				if(item.dataField === "name" && provider.getItemState(item.rowIndex) != "created"){		// 영역 조회
+					if(UT.isEmpty(data.lon) || UT.isEmpty(data.lat) ){
+						UT.alert("현장위치를 지정해주세요");
+						return;
+					}
+					me.onFindArea(data.id, data.name);
+				}
+
+				if(item.dataField === "button_point" || item.dataField === "details") {	 	// 위치 & 상세 팝업
+					me.currentRowIndex = item.rowIndex;
+					if(data.pinPoint){
+						me.showSitePopup(data.id, data);
+					}else{
+						me.showSitePopup(null,data);
+					}
+				}
+
+				if(item.dataField === "fit_area"){			//위치정보 수집영역
+					if(UT.isEmpty(data.pinPoint)){
+						UT.alert("현장영역을 먼저 입력하세요");							
+					}else{
+						var lat = data.pinPoint.lat;
+						var lon = data.pinPoint.lon;
+						me.showFitAreaPopup(data.id, lat, lon, data.fitGeoJson);
+					}
+				}
+				
+				//기본 위치 설정
+				if(item.dataField === "defaultSetting"){
+					if(UT.isEmpty(data.pinPoint)){
+						UT.alert("현장영역을 먼저 입력하세요");							
+					}else{
+						var lat = data.pinPoint.lat;
+						var lon = data.pinPoint.lon;
+						me.showDefaultSettingPopup(data.id, item);
+					}
+				}
+            },
+         	// 현장 추가
+            onAddSite : function(){
+                 var me = this,
+                     searchParam = this.get("searchParam"),
+                     provider = me.$.gridPanel.getDataProvider();
+
+                 if(!me.validate('search')){
+                     UT.alert("STD.E0000");
+                     return false;
+                 }
+                // 그리드 신규행 추가
+                 var row = {
+                    companyId: searchParam.companyId,   // 회사
+                    useFlag: "Y",                     // 사용여부
+                    details : "[상세]",
+                    fit_area : "[설정]",
+                    currentTimezone :"Asia/Seoul",
+                    pinPoint : {},
+                 	adjunction : {rotation : 0, dangerBeaconTerm : 30, isMoving:"false"}
+                 };
+                 provider.addItemAt(0, row);
+            },
+            // 현장 저장
+            onSaveSite : function(){
+                var me = this;
+
+                var provider = me.$.gridPanel.getDataProvider();
+
+                var created = provider.getNewItems();
+                var updated = provider.getUpdateItems();
+
+                if(!me.$.gridPanel.validateRows(provider.getUpdateIndexes()) || !me.$.gridPanel.validateRows(provider.getNewIndexes())){
+                	UT.alert("유효한 값을 입력해주세요");
+					return;
+                }
+                
+                if(created.length + updated.length === 0) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+
+                 me.$.saveListSite.body = {
+                     insertList: created,
+                     updateList: updated
+                 };
+                 UT.request(me.$.saveListSite);
+            },
+            // 현장 삭제
+            onDeleteSite : function(){
+                var me = this;
+
+                var provider = me.$.gridPanel.getDataProvider();
+				var checked = provider.selectionCheckedItems();
+				var deleted = [];
+				
+		        if(checked.length == 0){
+					UT.alert("삭제할 행을 선택하세요");
+					return;
+                }else{
+					for(var chk in checked){
+						if(UT.isNotEmpty(checked[chk].id)){
+							deleted.push(checked[chk]);
+						}
+					}
+                }
+
+                me.$.deleteListSite.body = {
+                	deleteList: deleted
+                };
+                UT.request(me.$.deleteListSite);
+            },
+            completeSaveListSite: function(e, res){
+                var me = this;
+                var message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                        me.onSearch();
+                    });
+                } else {
+                    message ="STD.E9600";
+                    UT.alert(message);
+                }
+            },
+            completeDeleteListSite : function(e, res){
+            	var me = this,
+                message = "STD.N1500"; // 요청을 완료하였습니다.
+
+	            if(res.response.result_status === 'S'){
+	                UT.alert(message, function(){
+	                	 me.onSearch();
+	                });
+	            } else {
+	                message = res.response.result_message;
+	                UT.alert(message);
+	            }
+            },
+         	// 현장 팝업
+            showSitePopup : function(id, data) {
+            	var me = this;
+            	
+           		var sitePopup = UT.popup("ep-site-map", me, 1600, 800,{
+           			'apply-point' :  function(popup, e){
+                 		popup.close();
+                 		me.onSearch();
+           			}
+           		},{resizable:false});
+           		sitePopup.show();
+           		sitePopup.getWindowContent().load(id, data);
+            },
+         	//  위치정보 수집영역 팝업
+            showFitAreaPopup : function(id, lat, lon, fitArea) {
+            	var me = this;
+            	
+           		var fitAreaPopup = UT.popup("ep-fit-area-map", me, 1600, 800,{
+           			'apply-fitarea' :  function(popup, e){
+                 		me.onSearch();
+           			}
+           		},{resizable:false});
+           		fitAreaPopup.show();
+           		fitAreaPopup.getWindowContent().load(id, lat, lon, fitArea);
+            },
+         	//	지도 기본 위치 설정 팝업
+            showDefaultSettingPopup : function(id, item) {
+            	var me = this;
+            	
+            	var provider = me.$.gridPanel.getDataProvider();
+           		var defaultSettingPopup = UT.popup("ep-default-setting-map", me, 1300, 600,{
+					'defaultSettingSave' : function(popup, data){
+						var siteId = data.detail.siteID
+						var zoomLevel = data.detail.zoomLevel
+						var center = data.detail.center
+						var rotation = data.detail.rotation
+						
+						if(!provider.getItems()[item.rowIndex].adjunction){
+							provider.getItems()[item.rowIndex].adjunction = {};
+						} 
+						
+						var newAdjunction = provider.getItems()[item.rowIndex].adjunction;
+						
+						newAdjunction.zoomLevel = zoomLevel;
+						newAdjunction.center = center;
+						newAdjunction.rotation = rotation;							
+						
+						provider.setItemAt(item.rowIndex,{ adjunction : newAdjunction});
+	                	   
+	                	popup.close();	
+						me.$.saveListSite.body = {
+							insertList : []	
+		                	,updateList: [provider.getItems()[item.rowIndex]]
+		                };
+		                UT.request(me.$.saveListSite);
+					}
+    			}, {resizable : false});
+           		defaultSettingPopup.show();
+           		defaultSettingPopup.getWindowContent().load(id, provider.getItems()[item.rowIndex].adjunction);
+            },
+            // 영역 아이템 클릭
+            onAreaItemClick : function(event){
+            	var me = this
+				,data = event.detail.data
+				,item = event.detail.item
+				,provider = event.detail.provider;
+				
+				me.rowIndex = item.rowIndex;
+				
+				var siteData;
+				for(i = 0 ; i < me.get('siteList').length; i++){
+					if(me.get('searchAreaParam.siteId') == me.get('siteList')[i].id){
+						siteData = me.get('siteList')[i];
+					}
+				}
+
+				// 영역 팝업 호출
+				if(item.dataField === "area_icon"){
+					me.showAreaPopup(data, me.get('areaList').children, siteData);
+				}
+            },
+            // 영역 조회
+            onFindArea : function(siteId, siteName){
+            	var me = this;
+            	me.$.areaGridPanel.setHierachyDataProvider([], "children");
+            	me.set('selectVersionName', "("+siteName+")");
+            	me.set("searchAreaParam", {'siteId' : siteId,});
+            	UT.requestNoDefault(me.$.findListArea);
+            },
+            completeFindArea :function(e, res){
+            	var me = this;
+            	var result = res.response;
+            	if(result){
+	            	me.set('area', result);
+	            	//tree
+	            	var tree = result.slice(1);
+	            	var hier = new CCHierachicalData();
+	            	var hierachiDatas = hier.HierachyTransformByKey(tree, "id", "parentId", "children", null, null, true);
+	            	me.set('areaList', hierachiDatas);
+	                me.$.areaGridPanel.setHierachyDataProvider(hierachiDatas, "children");
+	            }
+            },
+            // 영역 추가
+            onAddArea : function(){
+            	var me = this;
+            	var provider = me.$.gridPanel.getDataProvider();
+            	
+            	var siteData;
+            	if(UT.isEmpty(me.get('searchAreaParam.siteId'))){
+            		UT.alert("현장을 선택해주시기 바랍니다.");
+            		return;
+            	}
+				for(i = 0 ; i < me.get('siteList').length; i++){
+					if(me.get('searchAreaParam.siteId') == me.get('siteList')[i].id){
+						siteData = me.get('siteList')[i];
+					}
+				}
+				var data = {'siteId':me.get('searchAreaParam.siteId'), id: null};
+
+				if(UT.isEmpty(me.get('areaList'))){
+					me.showAreaPopup(data, null, siteData);
+				}else{
+					me.showAreaPopup(data, me.get('areaList').children, siteData);	
+				}
+            },
+            // 영역 삭제
+            onDeleteArea : function(){
+            	 var me = this,
+                 provider = me.$.areaGridPanel.getDataProvider();
+            	 if(UT.isEmpty(me.get('searchAreaParam'))){
+             		UT.alert("선택된 현장정보가 없습니다.");
+             		return;
+             	 }
+
+ 				var checked = provider.selectionCheckedItems();
+	             if (checked.length === 0) {
+	                 UT.alert("STD.N1600"); // "선택된 항목이 없습니다",
+	                 return;
+	             }
+				var deleted = provider.removeItems(true);	// 그리드에서 체크된 데이터를 지워주고, db에서 삭제해야 할 데이터 목록을 리턴한다.
+                if(deleted.length > 0) {
+                    for(var i in checked){
+						checked[i].areaId = checked[i].id;
+                    }
+                   me.$.deleteAreaList.body = {checked : checked};
+                   UT.requestNoDefault(me.$.deleteAreaList);
+                } else {
+                	me.completeDeleteAreaList(null, {response : {result_status : "S"}});
+                }
+            },
+            completeDeleteAreaList : function(e, res){
+            	var me = this,
+                message = "STD.N1500"; // 요청을 완료하였습니다.
+
+	            if(res.response.result_status === 'S'){
+	                UT.alert(message, function(){
+	                	UT.requestNoDefault(me.$.findListArea);
+	                });
+	            } else {
+	                message = res.response.result_message;
+	                UT.alert(message);
+	            }
+            },
+            // 영역 팝업
+            showAreaPopup : function(areaData, areaListData, siteData){
+            	var me = this;
+				var areaPopup = UT.popup("ep-area-map", me, 1400, 800,{
+					'close' : function(popup) {
+						popup.close();
+						UT.requestNoDefault(me.$.findListArea);
+					}
+				},{resizable:false});
+				areaPopup.show();
+				areaPopup.getWindowContent().load(areaData, areaListData, siteData, me.get('area'));
+            },
+            itemStyleFunction: function(data, item){
+            	var me = this;
+            	
+            	var iconPath = "";
+            	
+            	var type = data.type;
+            	if(type == "anchor"){
+            		iconPath = "ui/assets/img/common/tree_ico_map1.png";
+            	}else if(type == "area"){
+            		iconPath = "ui/assets/img/common/tree_ico_map2.png";
+            	}else if(type == "building"){
+            		iconPath = "ui/assets/img/common/tree_ico_map3.png";
+            	}else if(type == "marker"){
+            		iconPath = "ui/assets/img/common/tree_ico_map4.png";
+            	}
+				return {
+					iconUrl : iconPath
+				};
+            }
+        });
+	</script>
+</dom-module>

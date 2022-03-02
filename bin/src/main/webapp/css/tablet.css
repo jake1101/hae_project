@@ -1,0 +1,99 @@
+@charset "utf-8";
+
+
+
+.list_tag_wrap{padding: 20px;}
+
+
+.list2_tag .tag_red{
+	position: relative;
+	padding: 20px;
+	width:100%; 
+	height:auto;  
+	color:#ee4d5c; 
+	border-left: 7px solid #ee4d5c;
+    background: url("../img/ico_red.png") 95% 50% no-repeat;
+	background-color:#eee;
+}
+
+.list2_tag .tag_orange{
+	margin-top: 20px;
+	position: relative;
+	padding: 20px;
+	width:100%; 
+	height:auto;  
+	color:#e88356; 
+	border-left: 7px solid #e88356;
+    background: url("../img/ico_orange.png") 95% 50% no-repeat;
+	background-color:#eee;
+}
+
+.list2_tag .tag_blue{
+	margin-top: 20px;
+	position: relative;
+	padding: 20px;
+	width:100%; 
+	height:auto; 
+	color:#5c6db2; 
+	border-left: 7px solid #5c6db2;
+    background: url("../img/ico_blue.png") 95% 50% no-repeat;
+	background-color:#eee;
+}
+
+
+.list2_tag p{ font-size:18px; line-height: 20px; margin: 5px 0 0 0 !important;}
+.list2_tag h3{ font-size:26px; line-height: 30px; margin: 10px 0 0 0 !important;}
+
+
+
+
+
+.container {
+	background-color: white;
+}
+
+.text-input {
+	width: 250px;
+	height: 30px;
+	font-size: 20px !important;
+}
+
+.content-wrapper {
+	height:80%;
+	min-height: 80% !important;
+	background:#e1e1e3;
+}
+.content {
+	height:100%;
+}
+
+.wrapper {
+	height: 100% !important;
+	overflow: hidden;
+}
+
+.main-footer {
+	height: 10% !important;
+}
+
+.main-header {
+	height: 40px !important;
+}
+
+.main-sidebar {
+	height: 100% !important;
+	padding-top: 0px !important;
+}
+
+.sidebar-menu {
+	height: 75% !important;
+	/* overflow:scroll; */
+}
+
+.user-panel {
+	padding-top: 0 !important;
+}
+
+.navbar-static-top {
+	height: 100% !important;
+}

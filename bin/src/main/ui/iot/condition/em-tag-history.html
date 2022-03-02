@@ -1,0 +1,30 @@
+<sc-link rel="import" href="es-tag-history.html"></sc-link>
+
+<dom-module id="em-tag-history">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 태그별 현장 이력조회
+        ** @Description		: 현장상황정보 > 태그별 현장 이력조회
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.05.29
+        ** @History 		: 2020.05.29 jhkim 최초작성
+        ******************************************************************************************
+    -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<es-tag-history class="flex"></es-tag-history>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-tag-history'
+		});
+	</script>
+
+</dom-module>

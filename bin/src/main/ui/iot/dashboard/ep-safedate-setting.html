@@ -1,0 +1,105 @@
+<dom-module id="ep-safedate-setting">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 무사고 시작일 설정 팝업
+        ** @Description		: 무사고 시작일 설정 팝업
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.04.10
+        ** @History 		: 2020.04.10 jhkim 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+		.safeText{
+			font-size: 27px; font-weight: 600; justify-content: flex-end;font-family : 'Noto Sans KR';
+		}
+	</style>
+	<template>
+		<sc-ajax id ="saveSafeDay" 
+			url="saveSafeDay.do" 
+			on-response="completeSave"
+		>
+		</sc-ajax>
+		<sc-label class="safeText" text ="무재해 달성 현황"></sc-label>
+		<br/>
+		<sc-label class="safeText" text ="달성 [[safeDate]]일째"></sc-label>
+		<br/>
+		<div>
+			<sc-label  class="" text ="시작일"  style="margin-left:2px; margin-right:2px;"></sc-label> 
+			<sc-date-field value="{{safeDay}}" display-format="yyyy-MM-dd" style="width : 100px;" max-date="{{today}}"></sc-date-field>
+			<sc-button text="변경" style="margin-left:2px; margin-right:2px;" on-click='change'></sc-button>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is : "ep-safedate-setting",
+			properties : {
+				searchParam: {
+					type : Object,
+					value : function(){
+						return {
+							siteId : SCMdiManager.searchParam.site_id
+						};
+					}
+				},
+				today: {
+                    type: Object,
+                    value: function(){
+                        return new Date();
+                    }
+                },
+				safeDay: {
+                    type: Object,
+                    value: function(){
+                        return new Date();
+                    }
+                },
+                safeDate: {
+                    type: Object,
+                    value: function(){
+                        return 1;
+                    }
+                }
+			},
+			load:function(safeDay, safeDate){
+ 				var me = this;
+ 				me.safeDate = safeDate;
+ 				if(typeof(safeDay)=="string"){
+	 				me.safeDay = new Date(Date.parse(safeDay));
+ 	 			}else{
+	 				me.safeDay = safeDay;
+ 	 	 		}
+ 			},
+			completeSave :function(e, res){
+            	var me = this;
+            	var result = res.response;
+            	if(result){
+                	UT.alert('변경되었습니다.');
+	            	me.set('safeDate', result);
+
+	            	//sejong dash board 추가
+	            	var array = ['main','alarm','operate','realtime','site', 'sejong'];
+
+	            	for(var i = 0; i <array.length; i++){
+		            	if(!UT.isEmpty(document.querySelector('es-'+array[i]+'-dashboard'))){
+		            		document.querySelector('es-'+array[i]+'-dashboard').safeDate =result;
+		            		document.querySelector('es-'+array[i]+'-dashboard').safeDay =me.safeDay;
+		            	}
+		            }
+            	}else{
+            		UT.alert('변경에 실패했습니다. \n관리자에게 문의하세요');
+                }
+	        },
+			change : function(){
+				var me = this;
+				me.$.saveSafeDay.body = {
+					siteId :  SCMdiManager.searchParam.site_id, 
+					safeDay : me.safeDay 
+				};
+ 				UT.request(me.$.saveSafeDay);	
+			}
+		})
+	</script>
+</dom-module>

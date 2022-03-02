@@ -1,0 +1,73 @@
+<dom-module id="widget-component-setting">
+    <style>
+	    :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+       <!-- 설정 -->
+          	<section class="option">
+              	<h5>Module</h5>
+              	<div class="p_innerbox">
+                   <table>
+                   <colgroup>
+                       <col style="width:25%" />
+                       <col style="width:75%" />
+                   </colgroup>
+                   <tr>
+                   <th><sc-label text="module path" style="width:36px;"></sc-label></th>
+                   <td>
+                   	<sc-textarea-field value="{{fields.componentUrl}}" style="height:80px;" required></sc-textarea-field>
+                    <div class="inner_button">
+	                	<sc-button text="적용" on-click="onApply"></sc-button>
+                    </div>
+                   </td>
+                   </tr>
+                   </table>
+                  </div>
+              </section>
+    </template>
+    <script>
+        Polymer({
+            is: "widget-component-setting",
+
+            properties: {
+            	fields :{
+            		type : Object,
+            		value : function(){
+            			return {
+            				componentUrl : '/ui/bp/common/job/job/em-job.html'
+            			}
+            		}
+            	}
+            },
+            observers : [
+       		],
+            initSetting: function(){
+            	this.widgetDraw();
+            },
+            getTemplateData: function(){
+            	return {widget_type:'component',contents : this.fields};
+            },
+            widgetDraw: function(){
+            	this.fire('re-draw',this.getTemplateData());
+            },
+            onApply: function(){
+            	var me = this;
+            	me.widgetDraw();
+            },
+            setting: function(contents){
+            	 var me = this;
+            	 contents.componentUrl = contents.contents.componentUrl;
+            	 me.fields = contents;
+            	 this.widgetDraw();
+            },
+            resetData: function(){
+            	var me = this;
+            	me.fields.componentUrl = '/ui/bp/common/job/job/em-job.html';
+            }
+            
+    	});
+    </script>
+</dom-module>

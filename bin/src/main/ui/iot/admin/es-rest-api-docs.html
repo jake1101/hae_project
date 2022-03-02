@@ -1,0 +1,1211 @@
+<dom-module id="es-rest-api-docs">
+	<!--
+        ******************************************************************************************
+        ** @Program-name    : API DOCS 메뉴
+        ** @Description     : 서버에서 제공하는 API목록과 해당 내용들을 편하게 볼 수 있도록 지원.
+        ** @Author          : yshong
+        ** @Create Date     : 2021.01.13
+        ** @History         : 2021.01.13 yshong 최초 작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+		.level1, .level2, .level3 {
+			font-weight : bold; cursor : pointer; padding : 0px;
+		}
+		.level1 {
+			background-color : #3a526b;
+			font-size : 16px;
+			color : white;
+			border-bottom:2px solid #ffffff;
+		}
+		.level2 {
+			background-color : #bfbfbf;
+			font-size : 16px;
+			color : black;
+			margin-bottom : 4px;
+		}
+		.level3{
+			background-color : #ffffff;
+			border-bottom: 1px solid #666666;
+			border-bottom-color : #666666;
+			font-size : 13px;
+			color : black;
+			min-height : 35px;
+		}
+		.level1>.panel-heading:hover, .level2>.panel-heading:hover, .level3:hover , .selected{
+			background-color : #e72e17;
+			color : white;
+		}
+		.panel-body {
+			padding : 4px 10px 0px 10px;
+		}
+		.list-group {
+			margin-bottom :5px;
+		}
+		.panel-heading {
+		    padding: 10px 15px;
+	    	border-bottom: 1px solid transparent;
+		  	border-top-left-radius: 3px;
+		  	border-top-right-radius: 3px;
+	    }
+	    .requestList {
+	    	padding:8px; height:18px;
+	    }
+	    .menuPanel {
+	    	position : fixed;
+	    	display : none;
+	    	z-index : 9999;
+	    	background-color : white;
+	    	border : 1px solid gray;
+	    	border-radius : 5px;
+	    	width : 140px;
+	    	padding : 4px; 1px;
+	    }
+	    .menuPanel > ul > li > a {
+	    	display : block; padding : 0px 3px; line-height: 22px; font-size : 14px; font-weight : bold;
+	    }
+	    .menuPanel > ul > li > a:hover {
+	    	background-color : #0081ce; color : white;
+	    }
+	    .menuBtn{
+	    	float : right; background : none; color : white; border-radius : 10px; line-height :15px;
+	    }
+	    .menuBtn:hover{
+	    	background : #424242; 
+	    }
+	    .menuBtn2{
+	    	float : right; background : none; color : #3a526b; border-radius : 10px; line-height :15px;
+	    }
+	    .menuBtn2:hover{
+	    	background : #bfbfbf; 
+	    }
+	    .topBtn {
+	    	float:right; margin-right:10px;
+	    }
+	    
+	    .docs-header {
+	    	display: block;
+	    	font-size : 15px;
+	    	font-weight : bold;
+	    	line-height : 22px;
+	    	user-select : none;
+	    }
+	    #requestDetail > tbody > tr > td{
+	    	padding : 7px 0px;
+	    }
+/* 	    .needSave { */
+/* 	    	background-color : #e72e17; color : white; */
+/* 	    } */
+
+	</style>
+	<template>
+
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+         -->
+		<!-- 코드 조회-->
+		<sc-request-group init>
+			<!-- 공통 코드 조회 -->
+			<sc-code-group>
+				<sc-code code="IOT014" value="{{codes.useFlag}}"></sc-code> <!-- 사용여부(Y/N) -->
+			</sc-code-group>
+		</sc-request-group>
+
+		<!-- 고객사번호 현황 목록 조회 -->
+		<sc-ajax
+				id="findListCustomer"
+				url="findListCustomer.do"
+				body="{{searchParam}}"
+				on-response="completeFindListCustomer">
+		</sc-ajax>
+
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+
+		<div class="vbox flex">
+			<div class="hbox flex">
+				<div class="vbox flex-3">
+					<div style="text-align : center;">
+                		<sc-button text="{{containerToggleBtnString}}" style="float:left; margin-right:10px;"  on-mouseover="toggleBool" on-click="toggleBool"   auth-r></sc-button>
+					</div>
+					<cc-search-container on-search="onSearch" hidden = "{{containerToggleBoolean}}"auth-r>
+						<table validation-group="search">
+							<colgroup>
+								<col style="width:120px">
+								<col style="width:150px">
+								<col style="width:50px">
+							</colgroup>
+							<tr>
+								<th><sc-label text="API URL" ></sc-label></th>
+								<td>
+									<sc-text-field autofocus="true" value="{{searchParam.url}}" on-keyup="onSearchLagging" on-enter="onSearch"></sc-text-field>
+								</td>
+							</tr>
+						</table>
+					</cc-search-container>
+					<div class="vspace-5"></div>
+					<div>
+                		<sc-button class="topBtn" text="프로젝트 추가" on-click="onProjectAdd"   auth-r></sc-button>
+                		<sc-button class="topBtn" text="전체 접기" on-click="onCollapseAll"   auth-r></sc-button>
+						<sc-button class="topBtn" text="전체 펼치기" on-click="onExpandAll"     auth-r></sc-button>
+					</div>
+					<div class="vspace-5"></div>
+					<div id="treeDiv" class="vbox flex list-group" style="overflow:auto; user-select:none;">
+				   		<!--  -->
+				   		<div id="projectMenuPanel" class="menuPanel">
+				   	   		<ul>
+				   	   			<li><a on-click="onClickProjectRenameMenu">이름 변경하기</a></li>
+				   	   			<li><a on-click="onClickProjectCopy">프로젝트 복사하기</a></li>
+				   	   			<li><a on-click="onClickProjectRemove">삭제하기</a></li>
+				   	   		</ul>
+				   	    </div>
+				   		<div id="serviceMenuPanel" class="menuPanel">
+				   	   		<ul>
+				   	   			<li><a on-click="onClickServiceRenameMenu">이름 변경하기</a></li>
+				   	   			<li><a on-click="onClickServiceCopy">서비스 복사하기</a></li>
+				   	   			<li><a on-click="onClickServiceAddRequest">리퀘스트 추가하기</a></li>
+				   	   			<li><a on-click="onClickServiceRemove">삭제하기</a></li>
+				   	   		</ul>
+				   	    </div>
+				   		<div id="requestMenuPanel" class="menuPanel">
+				   	   		<ul>
+				   	   			<li><a on-click="onClickRequestCopy">리퀘스트 복사하기</a></li>
+				   	   			<li><a on-click="onClickRequestRemove">삭제하기</a></li>
+				   	   		</ul>
+				   	    </div>
+					    <ul class="list-group">
+		                    <template id="projectRepeater" is="dom-repeat" items="{{projectList}}"  as="project" index-as="projectIndex">
+                            <li class="level1 " style=""> 	
+                                <div class="panel-heading"  on-click="panelHeaderClick" data="#project_{{projectIndex}}">
+                                    <h3 class="panel-title" data="#project_{{projectIndex}}">
+                                        {{project.entity.name}}
+                                        <sc-button class="menuBtn" text="+" tabindex="-1" on-click="openProjectMenu"></sc-button>
+                                    </h3>
+                                </div>
+                                
+                                <div id = "project_{{projectIndex}}" class="panel-collapse collapse panel-body">
+                                    <ul class="list-group">
+                                    <template id="serviceRepeat_{{projectIndex}}" parent-index="{{projectIndex}}" is="dom-repeat" items="{{project.children}}" index-as="serviceIndex" as="service" filter="isContainRequest">
+                                    <template is="dom-if" if="{{service!=null}}">
+                                        <li class="level2 list-group-item">
+                                            <div class="panel-heading" on-click="panelHeaderClick" data="#service_{{projectIndex}}_{{serviceIndex}}">
+                                                <h4 class="panel-title" data="#service_{{projectIndex}}_{{serviceIndex}}">
+                                                    {{service.entity.name}}
+                                                    <sc-button class="menuBtn" text="+" tabindex="-1" project-index="{{projectIndex}}" service-index="{{serviceIndex}}" on-click="openServiceMenu"></sc-button>
+                                                </h4>
+                                            </div>
+                                            
+                                            <div id="service_{{projectIndex}}_{{serviceIndex}}" class="panel-collapse collapse panel-body" data="serviceBody">
+                                                <ul class="list-group">
+                                                    <template id="requestRepeater_{{projectIndex}}_{{serviceIndex}}" is="dom-repeat" items="{{service.children}}" as="request" filter="isContainTextValue" index-as="requestIndex">
+				                                    <template is="dom-if" if="{{request!=null}}">
+                                                        <li class="level3 list-group-item">
+                                                            <h3  id="request_{{projectIndex}}_{{serviceIndex}}_{{requestIndex}}" class="requestList panel-heading"
+                                                                data="{{request.entity.id}}" project-index="{{projectIndex}}" service-index="{{serviceIndex}}" request-index="{{requestIndex}}" 
+                                                                on-click="onRequestClick">
+                                                                {{request.entity.name}}
+                                                                <sc-button class="menuBtn2" text="+" tabindex="-1" 
+	                                                                project-index="{{projectIndex}}" service-index="{{serviceIndex}}" request-index="{{requestIndex}}" 
+	                                                                on-click="openRequestMenu"></sc-button>
+                                                            </h3>
+                                                        </li>
+                                                    </template>
+                                                    </template>
+                                                </ul>							
+                                            </div>
+                                        </li>
+                                    </template>
+                                    </template>
+                                    </ul>
+                                </div>
+                            </li>
+		                   </template>
+		                </ul>
+					</div>					
+				</div>
+				<sc-splitter split-type="vertical"></sc-splitter>
+				<div class = "data-detail vbox flex-9" style="padding:0px 15px; ">
+					<div class="vspace-10" style="background-color:#f5f5f5"></div>
+					<div class="hbox" style="height:30px;">
+						<sc-label class="docs-header" style="width:190px; font-size:18px;" text="REQUEST NAME"></sc-label> 
+						<div class="flex hbox">
+							<sc-text-field value="{{reqData.name}}" on-enter="onSearch"></sc-text-field>
+						</div>
+						<div style= "padding :0px 15px;">
+							<sc-button id="saveBtn" class="" title="단축키 : Ctrl+s" style="font-weight : bold;width : 150px;" text="SAVE" on-click="saveRequest"></sc-button>
+						</div>
+					</div>
+					<div class="vspace-10" style="background-color:#f5f5f5"></div>
+					<div style="overflow : auto; padding : 3px 15px;">
+						<table id="requestDetail" style="width : 100%">
+							<colgroup>
+								<col style="width:150px">
+								<col style="width:20px">
+								<col style="width:300px">
+								<col style="width:20px">
+								<col style="width:*">
+								<col style="width:20px">
+								<col style="width:60px">
+							</colgroup>
+							<tr>
+								<td>
+									<sc-label class="docs-header" text="METHOD"></sc-label>
+									<sc-text-field value="{{reqData.method.name}}"></sc-text-field>
+								</td>
+								<td></td>
+								<td>
+									<sc-label class="docs-header" text="SERVER (:conf.apiUrl)"></sc-label> 
+									<sc-text-field value="{{defaultData.serverDomain}}"></sc-text-field>
+								</td>
+								<td></td>
+								<td>
+									<sc-label class="docs-header" text="URI"></sc-label> 
+									<sc-text-field value="{{reqData.uri.path}}"></sc-text-field>
+								</td>
+								<td></td>
+								<td style = "position:relatvie; bottom:4px; vertical-align:bottom;">
+									<sc-button  style="height:fit-content;background-color:#3a526b; margin-bottom:4px; width:60px;font-weight : bold;"
+										 title="단축키 : Ctrl+Enter" text="SEND" on-click="sendRequest"></sc-button>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="7">
+									<sc-label class="docs-header" text="Decription"></sc-label>
+									<sc-textarea-field id="resData" style="height:100px" value="{{reqData.description}}"></sc-textarea-field>
+								</td>
+							</tr>
+							<tr style="height:200px">
+								<td colspan="3" >
+									<sc-label class="docs-header" text="Request Header"></sc-label>
+									<div style="height:200px; border:1px solid #b8b8b8; padding : 5px;" tabindex="-1">
+										<table class="flex" style="width:100%">
+											<colgroup>
+												<col width="18px">
+												<col width="120px">
+												<col width="15px">
+												<col width="*">
+												<col width="30px">
+											</colgroup>
+											<tbody>
+												<template id="reqHeaderRepeat" is="dom-repeat" items="{{reqData.headers}}"  as="header">
+                                                <tr>
+                                                    <td>
+                                                    <sc-checkbox-field default-value="true" value="{{header.enabled}}"></sc-checkbox-field>
+                                                    </td>
+                                                    <td>
+                                                    <sc-text-field value="{{header.name}}" on-enter="onSearch"></sc-text-field>
+                                                    </td>
+                                                    <td> <span>&nbsp;:</span> </td>
+                                                    <td>
+                                                    <sc-text-field value="{{header.value}}" on-enter="onSearch"></sc-text-field>
+                                                    </td>
+                                                    <td>
+                                                    <sc-button style="background:none; color:black;" tabindex="-1"
+                                                        on-click="onClickHeaderRemove" data="{{index}}" text="X"></sc-button>							                         
+                                                    </td>
+                                                </tr>
+							                    </template>
+							                    <tr>
+							                   		<td></td>
+							                   		<td colspan="2">
+							                   			<sc-button on-click="addReqHeaderRow" tabindex="-1" text="헤더 추가하기"></sc-button>
+							                   		</td>
+							                    </tr>
+											</tbody>
+										</table>
+									</div>
+								</td>
+								<td></td>
+								<td colspan="3">
+									<sc-label class="docs-header" text="Request Body"></sc-label>
+									<sc-textarea-field id="reqData" class="vbox" style="height:212px;" value="{{reqData.body.textBody}}"></sc-textarea-field>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="7">
+									<sc-label class="docs-header" text="Response"></sc-label>
+									<sc-textarea-field id="resData" style="height:260px" value="{{reqData.result}}"></sc-textarea-field>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<sc-dialog id="renameProjectDialog" title-text="프로젝트 이름 설정하기" style="width:400px; height:150px"
+			modal="true" draggable="true">
+			<sc-text-field id="projectName" value="{{selectedProject.entity.name}}" autofocus="true" on-enter="onProjectRenameOk"></sc-text-field>
+			<div  style= "text-align:center; margin-top: 10%;">
+	        	<sc-button  text="확인" on-click="onProjectRenameOk" ></sc-button>
+	        	<sc-button style="margin-left: 10px;" text="취소" on-click="onProjectRenameCancel"></sc-button>
+	        </div>
+		</sc-dialog>
+		<sc-dialog id="renameServiceDialog" title-text="서비스 이름 설정하기" style="width:400px; height:150px"
+			modal="true" draggable="true">
+			<sc-text-field id="serviceName" value="{{selectedService.entity.name}}" autofocus="true" on-enter="onServiceRenameOk"></sc-text-field>
+			<div  style= "text-align:center; margin-top: 10%;">
+	        	<sc-button  text="확인" on-click="onServiceRenameOk" ></sc-button>
+	        	<sc-button style="margin-left: 10px;" text="취소" on-click="onServiceRenameCancel"></sc-button>
+	        </div>
+		</sc-dialog>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-rest-api-docs",
+            properties : {
+                codes: {
+                    type : Object,
+                    reset : false,
+                    value : function() {
+                        return {
+                        }
+                    }
+                },
+                containerToggleBoolean : {
+                	type : Boolean,
+                	value : false
+                },
+                containerToggleBtnString : {
+                	type : String,
+                	computed : 'computeToggleString(containerToggleBoolean)'
+                },
+                
+                methodTypes : {
+                	type : Array,
+                	value : function(){
+                		return [
+                			{"data" : "GET", "label" : "GET"},
+                			{"data" : "POST", "label" : "POST"}
+                		];
+                		
+                	}
+                },
+                searchParam : {
+                	type : Object,
+                	value : function(){
+                		return {
+                			"url" : ""
+                		};
+                	}
+                	
+                },
+                reqData : {
+                	type : Object,
+                	value : function(){
+                		return {};
+                	}
+                },
+                defaultData : {
+                	type : Object,
+                	value : function(){
+						return {
+							"serverDomain" : conf.apiUrl.split("/external")[0]
+						};             		
+                	}
+                },
+                projectList : {
+                	type : Array,
+                	value : function(){
+                		return [];
+                	}
+                },
+                searchTimeOut : {
+                	type : Object,
+                	value : null
+                },
+                startTime : {
+                	type : Number,
+                	value : 0
+                }
+                
+                
+            },
+            // 검색창 접기 펴기 관련
+            computeToggleString : function(bool){
+            	return bool?"검색창 펼치기" : "검색창 접기";
+            },
+         	// 검색창 접기 펴기 관련
+            toggleBool : function(){
+            	var me = this;
+            	me.set("containerToggleBoolean", !me.containerToggleBoolean);
+            },
+            /******************************
+             * 초기화 설정
+             ******************************/
+            // 초기화 완료 후 호출 함수
+            initialized : function() {
+                var me = this;
+                console.log("init");
+                try{
+	                var selectedRequestId = localStorage.getItem("selectedRequestId");
+	                if(selectedRequestId){
+		                me.set("selectedRequestId", selectedRequestId);
+	                }
+                }catch(e){
+                	console.log("api-docs data is not exist in this local storage.. skip")
+                }
+//                 $(".data-detail sc-text-field input, .data-detail sc-textarea-field textarea").keyup(function(event){
+//	                 	$("#saveBtn").addClass("needSave");
+//                 });
+                $(".es-rest-api-docs sc-button").each(function(index,item){
+                	$(this).attr("tabindex",-1);
+                });
+                $(document).keydown(function(e){
+                	// SAVE 단축키 
+                	if(e.ctrlKey && e.which === 83){ 
+                        e.preventDefault();
+                        me.saveRequest();
+                        return false;
+                    }
+                	// SEND 단축키
+                	if(e.ctrlKey && e.which === 13){ 
+                        e.preventDefault();
+                        me.sendRequest();
+                        return false;
+                    }
+                	if(e.altKey && e.which === 38){ // up arrow 
+                        e.preventDefault();
+                        var selected = $(".selected.es-rest-api-docs");
+                        if(selected==null || selected.length == 0){
+                        	selected = $(".requestList").eq(0);
+                        }
+                        
+                        $(".selected.es-rest-api-docs").removeClass("selected");
+                        
+                     	// 이전 요소의 선택
+                        var prevElement;
+                        var level3_li = selected.parent();
+                        if(level3_li.prev("li.level3").length!=0 ){
+                        	prevElement = $(level3_li).prev("li.level3").children().addClass("selected");
+                        }else{
+                        	var level2_li = $(level3_li).parents("li.level2");
+                        	if($(level2_li).prev("li.level2").length!=0){
+                        		prevElement = $(level2_li).prev("li.level2").find("li.level3").eq(-1).children().addClass("selected");
+                        	}else{
+                        		var level1_li = $(level2_li).parents("li.level1");
+                        		if($(level1_li).prev("li.level1").length!=0){
+                        			prevElement = $(level1_li).prev("li.level1").find("li.level2").eq(-1).find("li.level3").eq(-1).children().addClass("selected");
+                        		}else{
+                        			// 다음 것이 없다. 없앴던 놈에게 다시 준다.
+                        			selected.addClass("selected");
+                        			prevElement = selected;
+                        		}
+                        	}
+                        }
+                        var currentScrollTop = $("#treeDiv.es-rest-api-docs").scrollTop() ;
+                        console.log("currentScrollTop : "  + currentScrollTop);
+                        console.log("prevElement.position().top : "  + prevElement.position().top);
+                        $("#treeDiv.es-rest-api-docs").scrollTop(
+                        		currentScrollTop
+                        		- ((prevElement.position().top < 200)?(200 - prevElement.position().top):0)
+                        );
+                        
+                        me.onRequestClick({"target":prevElement[0]});
+                        
+                        
+                        return false;
+                    }
+                	if(e.altKey && e.which === 40){ // down arrow 
+                        e.preventDefault();
+                        var selected = $(".selected.es-rest-api-docs");
+                        $(".selected.es-rest-api-docs").removeClass("selected");
+                        if(selected==null || selected.length == 0){
+                        	selected = $(".requestList").eq(0);
+                        }
+                        
+                        // 다음 요소의 선택
+                        var nextElement;
+                        var level3_li = selected.parent();
+                        if(level3_li.next("li.level3").length!=0 ){
+                        	nextElement = $(level3_li).next("li.level3").children().addClass("selected");
+                        }else{
+                        	var level2_li = $(level3_li).parents("li.level2");
+                        	if($(level2_li).next("li.level2").length!=0){
+                        		nextElement = $(level2_li).next("li.level2").find("li.level3").eq(0).children().addClass("selected");
+                        	}else{
+                        		var level1_li = $(level2_li).parents("li.level1");
+                        		if($(level1_li).next("li.level1").length!=0){
+                        			nextElement = $(level1_li).next("li.level1").find("li.level2").eq(0).find("li.level3").eq(0).children().addClass("selected");
+                        		}else{
+                        			// 다음 것이 없다. 없앴던 놈에게 다시 준다.
+                        			selected.addClass("selected");
+                        			nextElement = selected;
+                        		}
+                        	}
+                        }
+                        var currentScrollTop = $("#treeDiv.es-rest-api-docs").scrollTop() ;
+                        $("#treeDiv.es-rest-api-docs").scrollTop(
+                        		currentScrollTop
+                        		+ ((nextElement.position().top > 700)?(nextElement.position().top-700):0)
+                        );
+                        
+                        me.onRequestClick({"target":nextElement[0]});
+                        return false;
+                    }
+                	
+                })
+                
+                // 조회
+                me.onSearch();
+            },
+            // 약간의 시간을 두고 keyUp 이 발생하면 
+            onSearchLagging: function() {
+            	var me = this;
+//             		me.onSearch();
+            	if(me.searchTimeOut){
+	            	clearInterval(me.searchTimeOut);
+            	}
+            	me.searchTimeOut = setTimeout(function(){
+            		console.log("onSearch!");
+            		me.onSearch();
+            	},500);
+            },
+            
+            
+            onSearch : function() {
+            	var me = this;
+            	me.readTextFile("/repository/talendApiDocs.json"); 
+            	me.startTime = (new Date()).getTime(); 
+            },
+            readTextFile : function(fileWithPath) {
+            	var me = this;
+                $.ajax({
+					type:"GET",
+					url : fileWithPath,
+			        data : null,
+			        dataType: "json",
+			        timeout: 3000,
+			        success: function(data) {
+			        	console.log("after Success Read : " +  ((new Date()).getTime() - me.startTime));
+			        	var projectList = data.entities;
+			        	var serviceList;
+			        	var requestList;
+			        	for(var i=0; i<projectList.length; i++){
+			        		serviceList = projectList[i].children;
+			        		if(serviceList){
+			        			serviceList.sort(me.sort); // 서비스 정렬
+			        			for(var j=0; j<serviceList.length; j++){
+			        				requestList = serviceList[j].children;
+			        				if(requestList){
+			        					requestList.sort(me.sort); // 리퀘스트 정렬
+			        				}
+			        				requestList = null;
+			        			}
+			        		}
+			        		serviceList = null;
+			        	}
+			        	
+			        	console.log("after Success Read and for loop: " + ((new Date()).getTime() - me.startTime));
+        				me.set("projectList", projectList);
+			        	console.log("after ProjectList set: " + ((new Date()).getTime() - me.startTime));
+        				setTimeout(function(){
+				        	console.log("after setTimeout: " + ((new Date()).getTime() - me.startTime));
+        					var projectIndex;
+        					var serviceIndex;
+        					var requestIndex;
+        					var dataIndex;
+        					var selectedRequestId = me.get("selectedRequestId");
+        					if(selectedRequestId){
+		        				$(".requestList.es-rest-api-docs").each(function(index,item){
+		       						console.log("each item time: " + ((new Date()).getTime() - me.startTime));
+		       						console.log("each item time: " + item.data);
+		        					if(item.data == selectedRequestId){
+		        						$(".selected.es-rest-api-docs").removeClass("selected");
+		        						item.classList.add("selected");
+		        						dataIndex = item.id.split("_");
+			       						console.log("after each: " + ((new Date()).getTime() - me.startTime));
+		        						return false;
+		        					}
+		        					
+		        				})
+        					}
+	        				if(dataIndex) {
+	       						me.set("reqData", $(`#requestRepeater_${dataIndex[1]}_${dataIndex[2]}`)[0].get(`items.${dataIndex[3]}.entity`));
+	        				}
+
+       						console.log("after Success Read and for loop and setting selected: " + ((new Date()).getTime() - me.startTime));
+        				},300);
+			        },
+			        fail : function(data){
+			        	console.log(data);
+			        }
+				});// end of ajax
+                
+            },
+            
+            onRequestClick : function(event){
+            	var me = this;
+            	console.log(event.target);
+            	//var data = event.target.data.entity;
+        	    console.log("onRequestClick");
+            	var data = me.projectList[event.target.projectIndex].children[event.target.serviceIndex].children[event.target.requestIndex].entity;
+            	// 선택한 request 의 DOM에  selected 클래스를 추가하고
+            	// 두 군데 모두 selectedRequestId 에 담아둔다. (me.selectedRequestId, localStorage.selectedReqeustId)
+            	$(".selected.es-rest-api-docs").removeClass("selected");
+            	event.target.classList.add("selected");
+            	me.set("selectedRequestId", data.id);
+            	localStorage.setItem("selectedRequestId", data.id);
+            	
+            	
+            	//query params 처리..
+            	var queryParams = "";
+            	var items = null;
+            	// GET메소드 라면 uri 뒤로 ?와 함께 queryString 이 필요하다. (미구현) 
+            	if("GET"==data.method.name){
+	            	if(data.uri.query!=null && data.uri.query.items!=null && data.uri.query.items.length>0){
+	            		queryParams = "?";
+	            		items = data.uri.query.items;
+	            		for(var i =0; i<items.length; i++){
+	            			queryParams += i==0?'':'&' + items[i].name + "=" + items[i].value; 
+	            		}
+	            	}
+            	}
+           		data.queryParams = queryParams;
+            	me.set("reqData", data); //entity
+            },
+            
+            // 해당 request 가  검색조건에 해당하는 문자열을 가진 이름인지 확인한다.
+            isContainTextValue : function (item){
+            	var me = this;
+            	var value = me.searchParam.url;
+            	if(UT.isEmpty(value)) {
+            		return true;
+            	}
+            	return item.entity.name.indexOf(me.searchParam.url)>=0;
+            } ,
+        	// tree 내 검색조건에 부합하는 request 들만 표출하기 위한 filter이다.
+            isContainRequest : function(item){
+            	var me = this;
+            	var requests = item.children;
+            	return requests==null || requests.some(req => me.isContainTextValue(req));
+            },
+            // 전체 접기
+            onCollapseAll : function(){
+            	$('.collapse.es-rest-api-docs').slideUp(200);
+            },
+            // 전체 펼치기
+            onExpandAll : function(){
+            	$('.collapse.es-rest-api-docs').slideDown(200);
+            },
+            
+            // 패널의 헤더를 클릭하면 바디쪽으로 하이드 한다.
+            // panel header 의 data에는  panel body 의 id가 담겨있다.
+            panelHeaderClick : function(param){
+            	$(param.target.data+".es-rest-api-docs").slideToggle(200);
+            },
+            
+            // 우측에 설정된 정보로 API call을 시행한다.
+            sendRequest : function(){
+            	var me = this;
+            	console.log(me.reqData);
+            	if(me.reqData.uri==null){
+            		UT.alert("")
+            		
+            	}
+            	var reqData = me.reqData;
+            	var url = me.defaultData.serverDomain + reqData.uri.path;
+            	if(reqData.queryParams){
+            		url += reqData.queryParams;
+            	}
+            	//api호출
+           		$.ajax({
+   					type:reqData.method.name,
+   					url : url,
+   			        data : reqData.body.textBody,
+   			        dataType: "json",
+   			        timeout: 3000,
+   			        beforeSend : function(xhr){
+   			        	for(var i=0; i<reqData.headers.length; i++){
+   							if(reqData.headers[i].enabled==true){
+   					            xhr.setRequestHeader(reqData.headers[i].name,reqData.headers[i].value);
+   							}		
+   			        	}
+   			        },
+   			        success: function(data) {  
+   			        	UT.alert("요청을 성공하였습니다.");
+   			        	var prettyJson = JSON.stringify(data, null, 2);
+   			        	me.set('reqData.result',prettyJson);
+   			        },
+   			        error : function(e){
+   			        	UT.alert("요청에 실패하였습니다.");
+   			        	me.set('reqData.result',"호출에 실패하였습니다. 입력한 정보를 다시한번 확인해주세요.\n"+JSON.stringify(e,null,2));
+   			        },
+   				});// end of ajax
+				
+            	
+            },
+            
+            // 전체 내용을 파일로 만들어 API를 호출하여 서버의 ~/repository/talendApiDocs.json 으로 저장한다.
+            saveRequest : function(message){
+            	var me = this;
+            	var docsJson = {
+            			"version" : 6,
+            			"entities" : me.get("projectList")
+            	};
+            	
+            	var blob = new Blob([JSON.stringify(docsJson, null, 2)], {type : 'application/json'});
+            	
+                var data = new FormData();
+        	    data.append("file", blob, "talendApiDocs.json");
+
+                $.ajax({
+                    type: "POST",
+                    enctype: 'multipart/form-data',
+                    url: conf.raycomApiUrl + "file/docs/upload",
+                    data: data,
+                    processData: false,
+                    contentType: false,
+                    cache: false,
+                    timeout: 600000,
+                    success: function (data) {
+                    	if(typeof message =="string"){
+	                    	UT.alert(message);
+                    	}else{
+	                    	UT.alert("저장하였습니다.");
+                    	}
+//                     	$("#saveBtn").removeClass("needSave");
+                    	me.onSearch();
+                    },
+                    error: function (e) {
+                        console.log("ERROR : ", e);
+                    }
+                });
+            },
+            // 해당 객체간 순서를 정의할 때 사용한다. service/request 객체 내 entity.name 값을 비교한다.
+            sort: function(a, b) {
+	           	var nameA = a.entity.name; 
+	           	var nameB = b.entity.name; 
+              	if (nameA < nameB) {
+               		return -1;
+              	}
+              	if (nameA > nameB) {
+              		return 1;
+              	}
+              	return 0;
+            },
+            // request Header 의 항목을 가장 아래쪽에 추가한다.
+            addReqHeaderRow : function(){
+            	var me = this;
+            	var reqData = me.get("reqData");
+            	var newHeader = {"enabled" : true, "name":null, "value":null};
+            	reqData.headers.push(newHeader)
+            	me.set("reqData",reqData);
+            	me.$.reqHeaderRepeat.notifyPath("reqData.headers");
+            	me.$.reqHeaderRepeat.render();
+//             	$("#saveBtn").addClass("needSave");
+            },
+         	// request Header 의 해당 항목을 제거한다.
+            onClickHeaderRemove : function(event){
+            	var me = this;
+            	var index = event.target.data;
+            	me.reqData.headers.splice(index,1);
+            	me.$.reqHeaderRepeat.notifyPath("reqData.headers");
+            	me.$.reqHeaderRepeat.render();
+//             	$("#saveBtn").addClass("needSave");
+            },
+            
+            /////////////////////////////////////////////////
+            //  project CUD
+            /////////////////////////////////////////////////
+            // 프로젝트 메뉴버튼을 눌렀을 때 메뉴를 연다.
+            openProjectMenu : function(event){
+            	var me = this;
+            	// polymer dom-repeat 의 기능으로 해당 Dom Element 에 맵핑된 item 과 index 를 얻어낼 수 있다.
+            	var dataObject = me.$.projectRepeater.itemForElement(event.target);
+            	var index = me.$.projectRepeater.indexForElement(event.target);
+            	// 메뉴를 열기 전 해당 프로젝트의 기본적인 정보를 담아둔다.
+            	// 복사하기, 이름변경하기, 삭제하기 등에 사용될 내용이다.
+            	me.set("selectedProject", dataObject);
+            	me.set("selectedProjectIndex", index);
+            	
+            	$("#projectMenuPanel.es-rest-api-docs").show();
+            	var y;
+            	if(event.y >700 ){
+            		y = event.y - $("#projectMenuPanel.es-rest-api-docs").css("height").split("px")[0];
+            	}else{
+            		y = event.y
+            	}
+            	
+            	$("#projectMenuPanel.es-rest-api-docs").css("left",event.x - 5 );
+            	$("#projectMenuPanel.es-rest-api-docs").css("top",y - 5 );
+           		var hideTimeout;
+            	$("#projectMenuPanel.es-rest-api-docs").mouseout(function(){
+            		var panel = this;
+            		hideTimeout = setTimeout(function(){
+            			$(panel).hide();
+               		},300);
+            	})
+            	$("#projectMenuPanel.es-rest-api-docs").mouseover(function(){
+            		clearInterval(hideTimeout);
+            	})
+            },
+        	// 새 프로젝트를 추가 할 때 이다. 
+            onProjectAdd : function(){
+            	var me = this;
+            	var newProject = {
+            		entity : {type : "Project", id : UT.generateUUID(), name : ""}
+					,children : []            	
+            	};
+            	me.set("selectedProjectIndex", me.get("projectList").length);
+            	me.set("selectedProject", newProject);
+            	me.onClickProjectRenameMenu();
+            },
+         	// 프로젝트 메뉴중 이름 변경하기 버튼을 눌렀을 때  renameProjectDialog 를 띄운다. 기존 객체와 신규 객체 모두 사용한다.
+            onClickProjectRenameMenu : function(){
+            	var me = this;
+            	$("#projectMenuPanel.es-rest-api-docs").hide();
+            	var renameProjectDialog = me.$.renameProjectDialog;
+            	renameProjectDialog.show();
+            },
+            // 프로젝트 메뉴 중 복사하기 버튼을 눌렀을 떄 
+            onClickProjectCopy : function(){
+            	var me = this;
+            	var oldProject = me.get("selectedProject");
+            	// 선택한 프로젝트의 내용을 불러와 새 프로젝트의 children 에 담아준다.
+            	var newProject = {
+            		entity : {type : "Project", id : UT.generateUUID(), name : "copy " + oldProject.entity.name}
+					,children : oldProject.children            	
+            	};
+            	// 프로젝트 리스트의 마지막 인덱스를 참고하여 마지막에 프로젝트를 추가한다.
+            	me.set("selectedProjectIndex", me.get("projectList").length);
+            	me.set("selectedProject", newProject);
+            	me.onClickProjectRenameMenu();
+            },
+            
+            // 프로젝트 메뉴 중 삭제하기 버튼을 눌렀을 때
+            onClickProjectRemove : function(){
+            	var me = this;
+            	$("#projectMenuPanel.es-rest-api-docs").hide();
+            	UT.confirm("정말로 삭제하시겠습니까?", function(){
+            		var selectedProjectIndex = me.get("selectedProjectIndex");
+            		var projectList = me.get("projectList");
+            		projectList.splice(selectedProjectIndex,1);
+            		me.set("projectList", projectList);
+            		me.saveRequest("삭제되었습니다.");
+            	}, function(){
+            		return;
+            	})
+            },
+            // sc-dialog 에서 입력한 이름으로 변경한다. 기존 객체와 신규 객체 모두 사용한다.
+            onProjectRenameOk : function(){
+            	var me = this;
+            	var renameProjectDialog = me.$.renameProjectDialog;
+            	var projectList = me.get("projectList");
+            	projectList[me.get("selectedProjectIndex")] = me.get("selectedProject");
+            	console.log(me.get("selectedProject"));
+            	me.set("projectList",projectList);
+            	me.$.projectRepeater.set("projectList",projectList);
+            	me.saveRequest();
+            	renameProjectDialog.hide();
+            },
+            // sc-dialog 에서 입력한 이름을 적용하지 않는다. 그냥 끈다.
+            onProjectRenameCancel : function(){
+            	var me = this;
+            	var renameProjectDialog = me.$.renameProjectDialog;
+            	renameProjectDialog.hide();
+            },
+            
+			/////////////////////////////////////////////////
+            //  service CUD
+            /////////////////////////////////////////////////
+            // 서비스 메뉴버튼을 눌렀을 때 메뉴를 연다.
+            openServiceMenu : function(event){
+            	var me = this;
+            	var projectIndex = event.target.projectIndex;
+            	var serviceIndex = event.target.serviceIndex;
+            	// 메뉴를 열기 전 해당 서비스의 기본적인 정보를 담아둔다.
+            	// 복사하기, 이름변경하기, 삭제하기 등에 사용될 내용이다.
+            	me.set("selectedServiceIndex", serviceIndex);
+            	me.set("selectedProjectIndex", projectIndex);
+            	var serviceList = me.get("projectList")[projectIndex].children;
+            	me.set("selectedService", serviceList[serviceIndex]);
+            	me.set("serviceList",serviceList);
+            	var y;
+            	if(event.y >700 ){
+            		y = event.y - $("#serviceMenuPanel.es-rest-api-docs").css("height").split("px")[0];
+            	}else{
+            		y = event.y
+            	}
+            	
+            	$("#serviceMenuPanel.es-rest-api-docs").show();
+            	$("#serviceMenuPanel.es-rest-api-docs").css("left",event.x - 5 );
+            	$("#serviceMenuPanel.es-rest-api-docs").css("top", y - 5 );
+           		var hideTimeout;
+            	$("#serviceMenuPanel.es-rest-api-docs").mouseout(function(){
+            		var panel = this;
+            		hideTimeout = setTimeout(function(){
+            			$(panel).hide();
+               		},300);
+            	})
+            	$("#serviceMenuPanel.es-rest-api-docs").mouseover(function(){
+            		clearInterval(hideTimeout);
+            	})
+            },
+        	// 새 서비스를 추가 할 때 이다. 
+            onServiceAdd : function(){
+            	var me = this;
+            	var newService = {
+            		entity : {type : "service", id : UT.generateUUID(), name : ""}
+					,children : []            	
+            	};
+            	// 신규 index 번호를 가져온다.
+            	me.set("selectedServiceIndex", me.get("serviceList").length);
+            	me.set("selectedService", newService);
+            	me.onClickServiceRenameMenu();
+            },
+         	// 서비스 메뉴중 이름 변경하기 버튼을 눌렀을 때  renameServiceDialog 를 띄운다. 기존 객체와 신규 객체 모두 사용한다.
+            onClickServiceRenameMenu : function(){
+            	var me = this;
+            	$("#serviceMenuPanel.es-rest-api-docs").hide();
+            	var renameServiceDialog = me.$.renameServiceDialog;
+            	renameServiceDialog.show();
+            },
+            // 서비스 메뉴 중 복사하기 버튼을 눌렀을 떄 
+            onClickServiceCopy : function(){
+            	var me = this;
+            	var oldService = me.get("selectedService");
+            	// 선택한 서비스 내용을 불러와 새 서비스의 children 에 담아준다.
+            	var newService = {
+            		entity : {type : "service", id : UT.generateUUID(), name : "copy " + oldService.entity.name}
+					,children : oldService.children            	
+            	};
+            	// 서비스 리스트의 마지막 인덱스를 참고하여 마지막에 서비스를 추가한다.
+            	me.set("selectedServiceIndex", me.get("serviceList").length);
+            	me.set("selectedService", newService);
+            	me.onClickServiceRenameMenu();
+            },
+            // 서비스 메뉴 중 새로운 리퀘스트 추가 하기 버튼을 눌렀을 때
+            onClickServiceAddRequest : function(){
+            	var me = this;
+            	
+            	$("#serviceMenuPanel.es-rest-api-docs").hide();
+            	
+            	var selectedProjectIndex = me.get("selectedProjectIndex");
+            	var selectedServiceIndex = me.get("selectedServiceIndex");
+            	var selectedService = me.get("selectedService");
+            	// 선택한 서비스 내용을 불러와 새 서비스의 children 에 담아준다.
+            	var newRequest = {
+            			entity : {
+            				type : "Request", 
+            				id : UT.generateUUID(), 
+            				name : "",
+            				"method": {
+           	                  "requestBody": true,
+           	                  "name": "POST"
+           	                },
+            				"body": {
+           	                  "formBody": {
+           	                    "overrideContentType": true,
+           	                    "encoding": "application/x-www-form-urlencoded",
+           	                    "items": []
+           	                  },
+           	                  "bodyType": "Text"
+           	                },
+            				"uri": {
+           	                  "query": {
+           	                    "delimiter": "&",
+           	                    "items": []
+           	                  },
+           	                  "scheme": {
+           	                    "name": "http",
+           	                    "version": "V11"
+           	                  },
+           	                  "host": "localhost:8088",
+           	                  "path": "/external/api/v1.5/"
+           	                },
+           	             	"headers": [
+                             {
+                               "enabled": true,
+                               "name": "Content-Type",
+                               "value": "application/json"
+                             },
+                             {
+                               "enabled": true,
+                               "name": "userToken",
+                               "value": "f0f03141-ee8a-4e82-bb80-3beba998fe68\t\t\t"
+                             }
+                           ]
+            		}
+            	};
+            	if(selectedService.children==null) { 
+            		selectedService.children = [];
+            	}
+            	// reqData에 새로 만든 request를 바인딩 한다.
+            	me.set("reqData", newRequest.entity);
+            	// 현재 선택된 서비스의 children 에 해당 request 를 추가한다. 
+            	var length = selectedService.children.length; 
+            	selectedService.children[length] = newRequest;
+            	me.set("selectedService", selectedService);
+            	me.set("serviceList."+me.selectedServiceIndex , selectedService);
+            	me.set("projectList", me.projectList);
+            	
+            	$("#requestRepeater_"+selectedProjectIndex + "_"+ selectedServiceIndex)[0].render();
+            	// 기존에 빨갛게 되어있던 것은 없애고, 새롭게 빨간것을 지정한다.
+            	setTimeout(function(){
+	            	var h3Level3 =  $("#request_"+selectedProjectIndex + "_"+ selectedServiceIndex+"_"+length);
+	            	$(".selected").removeClass("selected");
+	            	h3Level3.addClass("selected");
+	            	var currentScrollTop = $("#treeDiv.es-rest-api-docs").scrollTop() ;
+	                $("#treeDiv.es-rest-api-docs").scrollTop(
+	                		currentScrollTop
+	                		+ ((h3Level3.position().top > 700)?(h3Level3.position().top-700):0)
+	                );
+            	}, 200);
+            },
+            
+            // 서비스 메뉴 중 삭제하기 버튼을 눌렀을 때
+            onClickServiceRemove : function(){
+            	var me = this;
+            	$("#serviceMenuPanel.es-rest-api-docs").hide();
+            	UT.confirm("정말로 삭제하시겠습니까?", function(){
+            		var selectedServiceIndex = me.get("selectedServiceIndex");
+            		var serviceList = me.get("serviceList");
+            		serviceList.splice(selectedServiceIndex,1);
+            		me.set("serviceList", serviceList);
+            		me.get("projectList")[me.get("selectedProjectIndex")].children = serviceList;
+            		me.saveRequest("삭제되었습니다.");
+            	}, function(){
+            		return;
+            	})
+            },
+            // sc-dialog 에서 입력한 이름으로 변경한다. 기존 객체와 신규 객체 모두 사용한다.
+            onServiceRenameOk : function(){
+            	var me = this;
+            	var renameServiceDialog = me.$.renameServiceDialog;
+            	// TODO
+            	var serviceList = me.get("serviceList");
+            	serviceList[me.get("selectedServiceIndex")] = me.get("selectedService");
+            	me.set("serviceList",serviceList);
+            	me.get("projectList")[me.get("selectedProjectIndex")].children = serviceList;
+            	// dom-repeat 에 다시 넣어준다.
+            	me.$.projectRepeater.set("projectList",me.get("projectList"));
+            	me.saveRequest();
+            	renameServiceDialog.hide();
+            },
+            // sc-dialog 에서 입력한 이름을 적용하지 않는다. 그냥 끈다.
+            onServiceRenameCancel : function(){
+            	var me = this;
+            	var renameServiceDialog = me.$.renameServiceDialog;
+            	renameServiceDialog.hide();
+            },
+            
+			/////////////////////////////////////////////////
+            //  request CUD
+            /////////////////////////////////////////////////
+            // 리퀘스트 메뉴버튼을 눌렀을 때 메뉴를 연다.
+            openRequestMenu : function(event){
+            	var me = this;
+            	event.stopPropagation();
+            	console.log("openRequestMenu");
+            	var projectIndex = event.target.projectIndex;
+            	var serviceIndex = event.target.serviceIndex;
+            	var requestIndex = event.target.requestIndex;
+            	// 메뉴를 열기 전 해당 서비스의 기본적인 정보를 담아둔다.
+            	// 복사하기, 이름변경하기, 삭제하기 등에 사용될 내용이다.
+            	me.set("selectedProjectIndex", projectIndex);
+            	me.set("selectedServiceIndex", serviceIndex);
+            	me.set("selectedRequestIndex", requestIndex);
+
+            	var serviceList = me.get("projectList")[projectIndex].children;
+            	var requestList = serviceList[serviceIndex].children;
+            	me.set("selectedService", serviceList[serviceIndex]);
+            	me.set("serviceList",serviceList);
+            	var y;
+            	if(event.y >700 ){
+            		y = event.y - $("#requestMenuPanel.es-rest-api-docs").css("height").split("px")[0];
+            	}else{
+            		y = event.y
+            	}
+            	
+            	$("#requestMenuPanel.es-rest-api-docs").show();
+            	$("#requestMenuPanel.es-rest-api-docs").css("left",event.x - 5 );
+            	$("#requestMenuPanel.es-rest-api-docs").css("top", y - 5 );
+           		var hideTimeout;
+            	$("#requestMenuPanel.es-rest-api-docs").mouseout(function(){
+            		var panel = this;
+            		hideTimeout = setTimeout(function(){
+            			$(panel).hide();
+               		},300);
+            	})
+            	$("#requestMenuPanel.es-rest-api-docs").mouseover(function(){
+            		clearInterval(hideTimeout);
+            	})
+            },
+        	// 리퀘스트 메뉴 중 복사하기 버튼을 눌렀을 떄 
+            onClickRequestCopy : function(){
+            	var me = this;
+				$("#requestMenuPanel.es-rest-api-docs").hide();
+            	var selectedProjectIndex = me.get("selectedProjectIndex");
+            	var selectedServiceIndex = me.get("selectedServiceIndex");
+            	var selectedRequestIndex = me.get("selectedRequestIndex");
+            	var selectedService = me.get("selectedService");
+            	// 선택한 서비스 내용을 불러와 새 서비스의 children 에 담아준다.
+            	var copyRequest = UT.copy(me.$.projectRepeater.get("items."+selectedProjectIndex + ".children." + selectedServiceIndex + ".children." + selectedRequestIndex));
+            	copyRequest.entity.id = UT.generateUUID();
+            	copyRequest.entity.name =copyRequest.entity.name + "_copy";
+            	if(selectedService.children==null) { 
+            		selectedService.children = [];
+            	}
+            	// reqData에 새로 만든 request를 바인딩 한다.
+            	me.set("reqData", copyRequest.entity);
+            	// 현재 선택된 서비스의 children 에 해당 request 를 추가한다. 
+            	var length = selectedService.children.length; 
+            	selectedService.children[length] = copyRequest;
+            	
+//             	me.$.projectRepeater.notifyPath(`items.${selectedProjectIndex}.children.${selectedServiceIndex}.children.${length}.entity.name` , copyRequest.entity.name);
+//             	me.$.projectRepeater.notifyPath(`projectList.${selectedProjectIndex}.children.${selectedServiceIndex}.children.${length}.entity.name` , copyRequest.entity.name);
+            	$("#requestRepeater_"+selectedProjectIndex + "_"+ selectedServiceIndex)[0].set(`items.${length}.entity.name`,copyRequest.entity.name);
+            	console.log($("#requestRepeater_"+selectedProjectIndex + "_"+ selectedServiceIndex)[0].get(`items.${length}.entity.name`));
+//             	$("#serviceRepeat"+selectedProjectIndex)[0].render();
+            	$("#requestRepeater_"+selectedProjectIndex + "_"+ selectedServiceIndex)[0].render();
+            	// 기존에 빨갛게 되어있던 것은 없애고, 새롭게 빨간것을 지정한다.
+            	setTimeout(function(){
+	            	var h3Level3 =  $("#request_"+selectedProjectIndex + "_"+ selectedServiceIndex+"_"+length);
+	            	$(".selected").removeClass("selected");
+	            	h3Level3.addClass("selected");
+	            	var currentScrollTop = $("#treeDiv.es-rest-api-docs").scrollTop() ;
+	                $("#treeDiv.es-rest-api-docs").scrollTop(
+	                		currentScrollTop
+	                		+ ((h3Level3.position().top > 700)?(h3Level3.position().top-700):0)
+	                );
+            	}, 200);
+            },
+         	// 리퀘스트 메뉴 중 삭제하기 버튼을 눌렀을 때
+            onClickRequestRemove : function(){
+            	var me = this;
+            	$("#requestMenuPanel.es-rest-api-docs").hide();
+            	UT.confirm("정말로 삭제하시겠습니까?", function(){
+            		var selectedServiceIndex = me.get("selectedServiceIndex");
+            		var selectedRequestIndex = me.get("selectedRequestIndex");
+            		var serviceList = me.get("serviceList");
+            		var requestList = serviceList[selectedServiceIndex].children;
+            		requestList.splice(selectedRequestIndex,1);
+            		me.set("serviceList", serviceList);
+//             		console.log(me.projectList);
+            		me.saveRequest("삭제되었습니다.");
+            	}, function(){
+            		return;
+            	})
+            },
+
+            
+
+        });
+	</script>
+
+</dom-module>

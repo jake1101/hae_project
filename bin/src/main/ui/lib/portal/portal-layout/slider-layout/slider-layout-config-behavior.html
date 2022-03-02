@@ -1,0 +1,639 @@
+<script>
+Polymer.SliderLayoutConfigBehaviorImpl = {
+	listeners : {
+		'interact-drag-start' : '_onWidgetInteractDragStart',
+		'interact-drag-end' : '_onWidgetInteractDragEnd',
+		'interact-resize-end' : '_onWidgetInteractResizeEnd',
+		'slider-changed' : '_onColumnSizeChanged',
+	},
+	
+	nonReusable: true,
+	
+	properties: {
+		interactDraggableSelector : {
+       		type : String,
+       		value : 'sc-widget > #hoverArea > .titleBar'
+       	},
+       	draggable : {
+       		type : Boolean,
+			value : true
+       	},
+        pageId: {
+        	type: Number,
+        },
+        _editMode: {
+            type: Boolean,
+            value: false
+        },
+        _widgets: {
+            type: Array,
+            value: function() {
+                return [];
+            },
+        },
+        _widgetLayout: {
+        	type: Object,
+        },
+        _importList: {
+            type: Array,
+            value: function() {
+                return [];
+            }
+        },
+        _toLayoutId: {
+        	type: Number,
+        },
+        _placeHolder : {
+        	type : Object
+        },
+        _currentPortlet : {
+        	type : Object
+        },
+        colSize : {
+        	type : Number,
+        	value : 1
+        },
+        _layoutChange : {
+        	type : Object,
+        	value : false,
+        	notify : true,
+        	observer : '_layoutChanged'
+        },
+        interactDraggable : {
+			type : Object,
+			value : true
+		},
+	},
+	
+	_toggleTools: function (e) {
+		e.preventDefault();
+		e.stopPropagation();
+		
+		$(this.$.portalToolbar).toggle();
+		if(!$(this.$.portalToolbar).is(":visible")){
+			$(this.$.slider).hide();
+			$(this.$.manager).hide();
+		}
+	},
+	
+	_toggleSilder: function (e) {
+		this.$.slider.load(this._getColumnWidths());
+		$(this.$.slider).toggle();
+	},
+	
+	_toggleManager: function (e) {
+    	$(this.$.manager).toggle();
+    	this.$.manager.style.width = "";
+    	this.$.manager.style.height = "100%";
+    },
+    
+    closeManager: function (e) {
+        $(this.$.manager).hide(200);
+    },
+    
+    _onWidgetInteractResizeEnd : function(event) {
+    	if(event.srcElement === this.$.manager) {
+			return;
+		}
+    	
+    	event.target.style.width = "100%";
+    	this._layoutChange = true;
+    },
+    
+	_onWidgetInteractDragStart : function(event) {
+		if(event.srcElement === this.$.manager) {
+			return;
+		}
+		var target = event.detail.target.parentElement.parentElement;
+		if(target.classList.contains('not-reorderable')) {
+			event.preventDefault();
+		}
+		this.style.userSelect = "none";
+		target.style.zIndex = 1;
+		
+		target.style.left = target.offsetLeft+"px";
+		target.style.top =  target.offsetTop+"px";
+		target.style.width = target.getBoundingClientRect().width+"px";
+		target.style.position="absolute";
+		this._createPlaceholder(target);
+	},
+	
+	_onInteractDrag : function(event) {
+		if(event.srcElement === this.$.manager) {
+			return;
+		}
+		
+		var target = event.target.parentElement.parentElement,
+			x = (parseFloat(target.style.left.replace('px', '')) || 0) + event.dx;
+	        directionPortlet = (event.dx < 0),
+			y = (parseFloat(target.style.top.replace('px', '')) || 0) + event.dy,
+	        direction = (event.dy < 0);
+		
+		if(this._preventedInteractDragging === true || target == this) {
+			return;	
+		}
+		target.style.left = x + 'px';
+		target.style.top = y + 'px';
+		
+		var portlet = this._currentPortlet = this._getCurrentPortlet(target, directionPortlet);
+		
+		this._movePortlet(target, portlet);
+		
+	    this.fire('interact-drag', event);
+	},
+	
+	_movePortlet : function(target, portlet) {
+		var childNodes = portlet.querySelectorAll("sc-widget");
+		
+		if(childNodes.length === 0 ){
+			Polymer.dom(portlet).appendChild(this._placeHolder);
+			return;
+		}
+		for(i = childNodes.length - 1; i >= 0; i--) {
+			var item = childNodes[i];
+			
+			if(item === this._placeHolder || item === target){
+				continue;
+			}
+			var intersection = this._intersectsWithPointer(item, target);
+			
+			if (!intersection) {
+				continue;
+			}
+			var horizontalDirection = target.getBoundingClientRect().top > item.getBoundingClientRect().top ? "top" :  "bottom";
+			if(horizontalDirection === "top"){
+				portlet.insertBefore(this._placeHolder, item);
+				return;
+			}else if(horizontalDirection === "bottom"){
+				var nextElementSibling = item.nextElementSibling;
+			    if (!nextElementSibling) {
+			    	portlet.appendChild(this._placeHolder);
+			    	return;
+			    }else{
+			    	portlet.insertBefore(this._placeHolder, nextElementSibling);
+			    	return;
+			    }
+			}
+		}
+		if(portlet !== this._placeHolder.parentElement){
+			portlet.appendChild(this._placeHolder);
+		}
+		
+	},    		
+	
+	_intersectsWithPointer :  function(item, target) {
+		var dragRect = target.getBoundingClientRect(),
+		itemRect = item.getBoundingClientRect(),
+		dragTopPos = dragRect.top,
+		dragBottomPos = dragRect.bottom,
+		itemPosCenter = itemRect.bottom-(itemRect.height/2),  
+		horizontalDirection = this._placeHolder.getBoundingClientRect().top > itemRect.top ? "top" :  "bottom";
+	
+		if(horizontalDirection === "top"){
+			return (Number(dragTopPos) < Number(itemPosCenter));
+		}
+		else if(horizontalDirection === "bottom"){
+			return (Number(dragBottomPos) > Number(itemPosCenter));
+		}
+	},
+	
+	_getCurrentPortlet :  function(target, directionPortlet) {
+		var portlets = Polymer.dom(this.root).querySelectorAll(".portlet");
+		var portlet,
+			target,
+			targetRect,
+			portletRect,
+			position,
+			center,
+			result;
+		
+		for(var i=0; i<portlets.length; ++i){
+			portlet = portlets[i];
+			portletRect = portlet.getBoundingClientRect();
+			targetRect = target.getBoundingClientRect();
+			position = directionPortlet ? targetRect.left : targetRect.right;
+			center = portletRect.left + (portletRect.width / 2);
+				/* console.log((position > portletRect.right && position < center)); */
+				if((targetRect.left >= portletRect.left && targetRect.left <= center)){
+					result = portlet;
+					break;
+				}
+				if((targetRect.right <= portletRect.right && targetRect.right >= center)){
+					result = portlet;
+					break;
+				}
+		}
+		if(!result){
+			result = target.parentElement;
+		}
+		return result;
+	},
+
+	/**  */
+	_onWidgetInteractDragEnd : function(event) {
+		if(event.srcElement === this.$.manager) {
+			return;
+		}
+		
+		var portal = Polymer.dom(this),
+		    target = event.detail.target.parentElement.parentElement; 
+		
+		target.style.zIndex = null;
+		target.style.left = "";
+		target.style.top = "";
+		target.style.position = "";
+		target.style.width = "100%";
+		
+		var portlets = Polymer.dom(this.root).querySelectorAll(".portlet");
+		for(var i=0; i<portlets.length; ++i){
+			portlet = portlets[i];
+			if(portlet.contains(this._placeHolder)){
+				target.parentElement.removeChild(target);
+				portlet.insertBefore(target, this._placeHolder);
+				portlet.removeChild(this._placeHolder);	
+			}
+		}
+		
+		this._placeHolder = null;
+		this._layoutChange = true;
+		this.style.userSelect = "";
+		
+	},            
+	
+	_createPlaceholder: function(target){
+		var me = this;
+			portlet = target.parentElement;
+			
+		
+		if(!this._placeHolder){   				
+			var element = document.createElement("div");
+		
+			element.style["padding"] = 0;
+			element.style["border"] = 0;
+			element.style["background"] = "aliceblue";
+			element.style["opacity"] = 0.8;
+		    
+			element.style["margin"] = "0 1em 1em 0";
+			    			
+			
+			var rect = target.getBoundingClientRect();
+			
+			element.style["width"] = "100%";
+			element.style["height"] = rect.bottom-rect.top+"px";
+			this._placeHolder = element;
+		}
+		
+		portlet.insertBefore(this._placeHolder, target);
+	},
+
+    attached: function () {
+    	this.$.manager.setDragFunction(
+    			this._onSpriteInteractDragStart,
+    			this._onSpliteInteractDrag,
+    			this._onSpriteInteractDragEnd
+    	);
+    },
+    
+    /** 참고) this가 sc-portal-manager임 */
+    _onSpriteInteractDragStart : function(event) {
+		var target = event.detail.target,
+			info = target.info,
+			portal = this.parentNode;
+		
+		this.parentNode.style.userSelect = "none";
+		
+		// ghost 생성부분
+		var ghostWidget = document.createElement('sc-widget'),
+			portal = this.parentNode,
+			portlets = Polymer.dom(portal.root).querySelectorAll(".portlet");  			
+        Polymer.dom(portlets[0]).appendChild(ghostWidget);
+        var uuid = this.generateUUID();
+		ghostWidget.setAttribute('id', uuid);
+        ghostWidget.setAttribute('title', info.title);
+        ghostWidget.setAttribute('type', info.type); 
+        ghostWidget.style.height = "200px";
+        ghostWidget.style.width = "100%";
+		this._ghostWidget = ghostWidget;
+		
+		var rect = target.getBoundingClientRect();
+		var portalRect = portal.getBoundingClientRect();  
+		this._ghostWidget.style.left = (rect.left-portalRect.left)+"px";
+		this._ghostWidget.style.top =  (rect.top-portalRect.top)+"px";
+		this._ghostWidget.style.position="absolute";
+		this._ghostWidget.style.zIndex = 1;
+		portal._createPlaceholder(ghostWidget);
+		
+		window.preventMouseOver = true;
+	},
+	
+	/** 참고) this가 sc-portal-manager임 */
+	_onSpliteInteractDrag : function(event) {
+		var target = this._ghostWidget,
+			x = (parseFloat(target.style.left.replace('px', '')) || 0) + event.dx;
+	        directionPortlet = (event.dx < 0),
+			y = (parseFloat(target.style.top.replace('px', '')) || 0) + event.dy,
+	        direction = (event.dy < 0),
+	        portal = this.parentNode;
+		
+		if(this._preventedInteractDragging === true || target == this) {
+			return;	
+		}
+		target.style.left = x + 'px';
+		target.style.top = y + 'px';
+		
+		var portlet = portal._currentPortlet = portal._getCurrentPortlet(target, directionPortlet);
+		portal._movePortlet(target, portlet);
+	},
+	
+	/** 참고) this가 sc-portal-manager임 */
+	_onSpriteInteractDragEnd : function(event){
+		var portal = this.parentNode,
+			portlets = Polymer.dom(portal.root).querySelectorAll(".portlet"),
+			widget,
+			widgetInfo = event.detail.target.info,
+			widgetCommonInfo = portal.getWidgetInfoFromWidgetManager(widgetInfo.title, widgetInfo.type);
+		
+		for(var i=0; i<portlets.length; ++i){
+			portlet = portlets[i];
+			if(portlet.contains(portal._placeHolder)){
+				if(this._ghostWidget){
+					portal.addListener(this._ghostWidget);
+					portlet.insertBefore(this._ghostWidget, portal._placeHolder);
+					portal.importWidgetHTML(widgetCommonInfo.type, widgetCommonInfo.portlet_loc);
+					var content = portal.createWidgetContent(this._ghostWidget, this._ghostWidget.id, event.detail.target.info);
+					if (event.detail.target.info.editable && event.detail.target.info.editable.toString() == 'true')
+						portal.createWidgetPropertyContent(this._ghostWidget, content);
+				}
+				portlet.removeChild(portal._placeHolder);    										
+			}
+			
+		}
+		this._ghostWidget.style.left = "";
+		this._ghostWidget.style.top = "";
+		this._ghostWidget.style.position = "";
+		this._ghostWidget.style["z-index"] = "";
+		this._ghostWidget.style.width = "100%";
+		this._ghostWidget = null;
+		portal._placeHolder = null; 
+		this.parentNode.style.userSelect = "";
+		
+		portal._layoutChange = true;
+		window.preventMouseOver = false;
+	},
+
+    getWidget: function(type, title){
+      var widgets = this.$.manager.widgets;
+      for(var i=0; i<widgets.length; i++){
+        if(type === widgets[i].type && title === widgets[i].title) {
+          return widgets[i];
+        }
+      }
+      return null;
+    },
+    
+    addWidget: function (info) {
+        if(info.UUID){
+        	this.createWidget(info, info.UUID);
+        }else{
+        	this.createWidget(info.info, this.generateUUID())	
+        }
+        
+    },
+	addListener: function(portlet){
+		portlet.removeEventListener('onClose', this.onWidgetClose);
+    	portlet.addEventListener('onClose', this.onWidgetClose.bind(this));
+	},
+	onWidgetClose: function(e){
+		this._layoutChange = true;
+		this.$.manager.addTypeInList(e.target.type, e.target.title);
+	},
+    createWidget: function (info, uuid) {
+    	var widget = document.createElement('sc-widget');
+		var widgetInfo = this.getWidget(info.type, info.title);
+		if(!widgetInfo) {
+			return;
+		}
+		var widgetCommonInfo = this.getWidgetInfoFromWidgetManager(widgetInfo.title, widgetInfo.type);
+        
+		// 어트리뷰트 및 스타일 설정
+        widget.setAttribute('id',  uuid);
+        widget.setAttribute('title', info.title);
+        widget.setAttribute('type', info.type);
+        widget.style.width = "100%";
+        widget.style.height = info.height;
+        if(this.id !== "sliderLayoutConfig" && this.commonConfig && this.commonConfig.use_userlayout === 'N') {
+        	widget.setAttribute('fixed-widget', '');
+        }
+        
+		// 동작 설정 - 설정 화면에서는 적용하지 않음
+		if(this.tagName.indexOf('CONFIG') === -1) {
+			widget.mouseoverHead	= (widgetInfo.headable === 'N');	// 마우스 오버 헤드 표시 여부
+	        widget.refreshable		= widgetInfo.refreshable;			// 새로고침 가능 여부
+	        widget.disableClose 	= 
+	        	((this.id !== "sliderLayoutConfig" && this.commonConfig && this.commonConfig.use_userlayout === 'N') || widgetInfo.closeable === 'N');   // 종료 가능 여부
+			widget.hideHeader		= (widgetInfo.display_header === 'N');// 헤더 표시 여부
+			/* if(this.id !== "sliderLayoutConfig" && this.commonConfig && this.commonConfig.use_userlayout === 'N') {
+				widget.allowResize = false;
+			} */
+			widget.allowResize=false;
+		}
+        
+        // 위젯에 설정 적용 
+        this.importWidgetHTML(widgetCommonInfo.type, widgetCommonInfo.portlet_loc, true);
+        this.appendToWidgets(widget);
+        this.addListener(widget);
+
+        var content = this.createWidgetContent(widget, uuid, info);
+        var portlets = Polymer.dom(this.root).querySelectorAll(".portlet");
+        
+        if(portlets[info.portletIdx]){
+        	portlets[info.portletIdx].appendChild(widget);
+        }
+        Polymer.dom.flush();
+
+    },
+    
+    appendToWidgets: function (widget) {
+        this.push('_widgets', widget);
+    },            
+    
+    importWidgetHTML: function (widgetName, portletLoc, includeProperty) {
+        if (this._importList.indexOf(widgetName)) {
+        	if(portletLoc === undefined) portletLoc = '../../../../../ui/lib/portal-widget/' + widgetName; 
+            this.importLink(portletLoc + '/' + widgetName + '.html');
+            this.push('_importList', widgetName);
+        }
+    },
+    
+    /** 위젯 내의 컨텐츠를 생성한다. */
+    createWidgetContent: function (widget, uuid, info) {
+        var content = document.createElement(info.type);
+        content.setAttribute('widget-id', uuid);
+        content.widgetID = uuid;
+        content.portletParam = info.param;
+        content.style.display = 'inline';
+
+        Polymer.dom(widget).appendChild(content);
+
+        return content;
+    },            
+    
+    /** sc-widget-manager로 부터 관리자가 생성한 위젯 정보를 가져온다. */
+    getWidgetInfoFromWidgetManager: function(widgetTitle, widgetType) {
+    	var widgets = this.$.manager.widgets;
+    	for(var i = 0; i < widgets.length; i++) {
+    		if(widgets[i].title === widgetTitle && widgets[i].type === widgetType) {
+    			return widgets[i];
+    		}
+    	}
+    },
+    
+    /** 레이아웃 정보가 변경될 때 마다 호출되어 레이아웃을 저장한다. */
+    _layoutChanged :  function(value){
+    	if(value){
+    		this._saveLayout();
+    	}
+    },
+    
+    createColumn : function(colList){
+    	var parent = Polymer.dom(this.root).querySelector('#contentContainer-cell');
+    	var widths = [];
+    	
+    	for (var i = 0; i < colList.length; i++) {
+    		var columnOuter = document.createElement('div');
+    		columnOuter.setAttribute('class', 'column');
+    		columnOuter.style.width =colList[i]; 
+    		
+    		var column =  document.createElement('div');
+        	column.setAttribute('class', 'portlet');
+        	columnOuter.appendChild(column);
+        	Polymer.dom(parent).appendChild(columnOuter);
+        	widths.push(columnOuter.offsetLeft + columnOuter.getBoundingClientRect().width);
+    	}
+    	this.$.slider.load(this._getColumnWidths());
+    },
+    
+    _getColumnWidths :  function(){
+    	var columns = Polymer.dom(this.root).querySelectorAll('.column');
+    	var widths = [];
+    	for (var i = 0; i < columns.length; i++) {
+        	widths.push(columns[i].offsetLeft + columns[i].getBoundingClientRect().width);
+    	}
+    	return widths; 
+    	
+    },
+    
+    _onColumnSizeChanged : function(target){
+    	var list = target.detail.left,
+    		columns = Polymer.dom(this.root).querySelectorAll('.column'),
+    		container = Polymer.dom(this.root).querySelector("#contentContainer"),            		
+    		preWidth = 0,
+    		lastWidth = 100;
+    	
+    	
+    	var containerRect = container.getBoundingClientRect();
+    	
+    	for (var i = 0; i < list.length; i++) {
+    		var width = (list[i]-preWidth)*100/containerRect.width;
+    		columns[i].style["width"] = width+'%';
+    		
+    		lastWidth -= width; 
+    		preWidth = list[i]; 
+    	}
+    	
+    	columns[columns.length-1].style["width"] = lastWidth + "%";
+    	this._layoutChange=true;
+    	
+    	this.fire('widget-resized');
+    	
+    },
+    
+    _addColumn : function(){
+    	var parent = Polymer.dom(this.root).querySelector('#contentContainer-cell'),
+    		columns = Polymer.dom(this.root).querySelectorAll('.column');
+    	
+    	if(columns.length >= 4){
+    		return;
+    	}
+    	
+    	var columnRating = 100/(columns.length+1);
+    	columnRating = Math.floor(columnRating*100)/100;
+    	
+		for (var i = 0; i < columns.length; i++) {
+			columns[i].style.width = columnRating +"%";
+    	}
+    	
+		var columnOuter = document.createElement('div');
+		columnOuter.setAttribute('class', 'column');
+		columnOuter.style.width = columnRating +"%";
+    	var column =  document.createElement('div');
+    	column.setAttribute('class', 'portlet');
+    	columnOuter.appendChild(column);
+    	Polymer.dom(parent).appendChild(columnOuter);
+    	this._layoutChange = true;
+    	this.$.slider.load(this._getColumnWidths());
+    },
+    
+    _removeColumn : function(){
+    	var parent = Polymer.dom(this.root).querySelector('#contentContainer-cell'),
+    		columns = Polymer.dom(this.root).querySelectorAll('.column'),
+    		portlets = Polymer.dom(this.root).querySelectorAll('.portlet');
+    	
+    	if(columns.length <= 1){
+    		return;
+    	}
+    	
+    	var columnRating = 100/(columns.length-1);
+    	columnRating = Math.floor(columnRating*100)/100;
+    	
+		for (var i = 0; i < columns.length; i++) {
+			columns[i].style.width = columnRating +"%";
+    	}
+		var count = portlets[portlets.length-1].childElementCount
+		for(var i = 0; i < count; i++){
+			Polymer.dom(portlets[portlets.length-2]).appendChild(portlets[portlets.length-1].children[0]);
+		}
+		
+		Polymer.dom(parent).removeChild(parent.lastElementChild);
+		this._layoutChange = true;
+		this.$.slider.load(this._getColumnWidths());
+    },
+    
+    removeWidget: function(widget) {
+        for (var i = 0; i < this._widgets.length; i++) {
+            if (this._widgets[i].getAttribute('id') == widget.getAttribute('id'))
+                this._widgets.splice(i, 1);
+        }
+
+        var widgetId = widget.children[2].getAttribute('widget-id');
+
+        this.$.protocolDeleteWidgetProperty.body = {
+            wdgt_id : widgetId
+        };
+
+        this.$.protocolDeleteWidgetProperty.generateRequest();
+
+        Polymer.dom(this).removeChild(widget);
+        this._layoutChange = true;
+    },
+    
+    _closeLayout : function(){
+    	var parent = Polymer.dom(this.root).querySelector('#contentContainer-cell'),
+			columns = Polymer.dom(this.root).querySelectorAll('.column');
+    	
+    	for (var i = 0; i < columns.length; i++) {
+    		Polymer.dom(parent).removeChild(columns[i]);	
+    	}
+    },
+    
+    _initVars: function() {
+        this._widgets = [];
+        this._maxZindex = 0;
+        this.layout = [];
+    }
+};
+
+Polymer.SliderLayoutConfigBehavior = [
+	Polymer.SliderLayoutConfigBehaviorImpl
+];
+</script>

@@ -1,0 +1,3326 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<service-descriptor id="procurement/pr">
+    <!-- 
+      ###################################################################################################################################
+      ###################################################################################################################################
+      ###################################                     구 매 요 청 공 통 START           ###########################################
+      ###################################################################################################################################
+      ###################################################################################################################################
+    -->
+    
+    <service id="testMail" label="RFI 등록 정보 조회">
+        <script>
+            <![CDATA[
+                var resultMap = new Map();
+                var sendMap   = new Map();
+                
+                try
+                {
+                    sendMap.user_nm = "김병철";
+                    resultMap  = $jdbc.query("procurement/pr", "testMail", sendMap);
+                   
+                }
+                catch(e)
+                {
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "조회시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    resultMap.put("rtrn_code", "E"     );
+                    resultMap.put("rtrn_msg" , rtrn_msg);
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+            ]]>
+        </script>
+    </service>
+    
+    <service id="get.pr.code.list" label="구매요청 Code 정보">
+        <script>
+            <![CDATA[
+            if($data.userSO)
+            	$data.userSO = $jdbc.query("procurement/pr", "get.session.info", $data.userSO);
+            
+            var param = new Map();
+            param.grp_cd = 'C022'; //여부
+            $data.C022 = $jdbc.queryList("framework","framework.code.list.select",param);
+            param.grp_cd = 'P003'; //비용유형
+            $data.P003 = $jdbc.queryList("framework","framework.code.list.select",param);
+            param.grp_cd = 'P007'; //구매요청 방식
+            $data.P007 = $jdbc.queryList("framework","framework.code.list.select",param);
+            param.grp_cd = 'P008'; //계정유형
+            $data.P008 = $jdbc.queryList("framework","framework.code.list.select",param);
+            param.grp_cd = 'P011'; //구매요청 결재상태
+            $data.P011 = $jdbc.queryList("framework","framework.code.list.select",param);
+            param.grp_cd = 'P040'; //구매요청 변경요청진행상태
+            $data.P040 = $jdbc.queryList("framework","framework.code.list.select",param);
+            param.grp_cd = 'P044'; //구매요청 진행상태
+            $data.P044 = $jdbc.queryList("framework","framework.code.list.select",param);
+            param.grp_cd = 'P045'; //구매유형
+            $data.P045 = $jdbc.queryList("framework","framework.code.list.select",param);
+            param.grp_cd = 'P049'; //구매요청유형
+            $data.P049 = $jdbc.queryList("framework","framework.code.list.select",param);
+            param.grp_cd = 'P050'; //매장형태
+            $data.P050 = $jdbc.queryList("framework","framework.code.list.select",param);
+            param.grp_cd = 'P052'; //회계지정범주
+            $data.P052 = $jdbc.queryList("framework","framework.code.list.select",param);
+            param.grp_cd = 'P053'; //구매요청Type
+            $data.P053 = $jdbc.queryList("framework","framework.code.list.select",param);
+            param.grp_cd = 'P056'; //구매유형
+            $data.P056 = $jdbc.queryList("framework","framework.code.list.select",param);
+            param.grp_cd = 'P071'; //구매유형
+            $data.P071 = $jdbc.queryList("framework","framework.code.list.select",param);
+            param.grp_cd = 'P072'; //구매유형
+            $data.P072 = $jdbc.queryList("framework","framework.code.list.select",param);
+            param.use_yn  = 'Y';
+            $data.COMSC  = $jdbc.queryList("admin/code", "companylist.select", param);
+            ]]>
+        </script>
+    </service>
+    
+    <service id="get.pr.getcosttyp.list" label="">
+        <script>
+            <![CDATA[
+                var param        = new Map();
+                param.grp_cd = 'P052'; //회계지정범주
+                $data.P052 = $jdbc.queryList("framework","framework.code.list.select",param);
+            ]]>
+        </script>
+    </service>
+    
+    <!-- 
+      ###################################################################################################################################
+      ###################################################################################################################################
+      ###################################                     구 매 요 청 공 통 END            ############################################
+      ###################################################################################################################################
+      ###################################################################################################################################
+    -->
+    
+    <!-- 
+      ###################################################################################################################################
+      ###################################################################################################################################
+      ###################################                 Biztalk Interface JOB START         ###########################################
+      ###################################################################################################################################
+      ###################################################################################################################################
+    -->
+     <declare>
+        <job id="biztalk.send">
+            <script>
+	            <![CDATA[
+	                importClass(Packages.emro.util.StringUtil);
+	                var strUtil   = new StringUtil();
+	                
+	                try
+	                {
+	                    var erp_send_yn = "N";
+	                    
+	                    /**************************************************************************************************  
+	                     *****************                                                                 ****************
+	                     *****************           구매팀전송 또는 결재상신인 경우에만 ERP Interface          ****************
+	                     *****************           trans_flag : send - 구매팀전송                             ****************
+	                     *****************                        app  - 결재상신                               ****************
+	                     *****************                                                                 ****************
+	                     *************************************************************************************************/ 
+                        var stub          = "";
+                        var method        = "";
+                        headerSO.bitk_cd  = "PR";
+                        
+                        if( strUtil.isEmpty(headerSO.sap_pr_no) )
+                        {
+                            var sapMap         = $jdbc.query("procurement/pr", "select.sap_pr_no", headerSO);
+                            headerSO.sap_pr_no = sapMap.sap_pr_no;
+                        }
+                        
+                        if( strUtil.isEmpty(headerSO.sap_pr_no) )
+                            headerSO.bitk_mod  = "C";
+                        else
+                            headerSO.bitk_mod  = "U";
+                        
+                        //Biztalk Master Hd 테이블에 관계사별 Interface Method를 조회한다.
+                        var bitkSO        = $jdbc.query("biztalk", "select.esabkhd", headerSO);
+                        
+                        if( !strUtil.isEmpty(bitkSO) )
+                        {
+                            var erpSendList = new List();
+                            /**************************************************************
+                            **********    ERP 전송시 변경된 데이터만 보내기  START  ***********
+                            ***************************************************************/
+                            if( headerSO.bitk_mod  == "C" )
+                                $jdbc.batch("procurement/pr", "insertGlobalTemporaryTable", gridSC);       //생성시에는 Grid전체 데이터
+                            else
+                            {
+                                $jdbc.batch("procurement/pr", "insertGlobalTemporaryTable", updateSC);     //변경시에는 변경된 데이터
+                                    
+                                $jdbc.update("procurement/pr", "insert.globtemp.pr", headerSO);
+                            }
+                            
+                            //전송할 데이터 존재여부 체크
+                            var erp_send_chk = $jdbc.query("procurement/pr", "chk.erp.send", headerSO);    
+                            
+                            if( !strUtil.isEmpty(erp_send_chk) )
+                            {
+                                if( erp_send_chk.cnt == "0" )
+                                    erp_send_yn  = "N";
+                                else
+                                {
+                                    erp_send_yn  = "Y";
+                                    
+                                    //ERP PR LNO 채번
+                                    if( headerSO.bitk_mod  == "C" )
+                                        $jdbc.update("procurement/pr", "update.prdt.sap_pr_lno.by.insert", headerSO);
+                                    else
+                                    {
+	                                    var erpSendSC     = $jdbc.queryList("procurement/pr", "erp.send.data", headerSO); //Header정보 
+	                                    $jdbc.batch("procurement/pr", "update.prdt.sap_pr_lno.by.update", erpSendSC);
+	                                    
+	                                }
+                                }
+                            }
+                            else
+                               erp_send_yn  = "N";
+                               
+                            /************************************************************
+                            **********    ERP 전송시 변경된 데이터만 보내기  END  ***********
+                            *************************************************************/   
+                               
+                            if( erp_send_yn  == "Y" )    
+                            {    
+                                stub               = bitkSO.bitk_stub;
+                                method             = bitkSO.bitk_mthd;
+                                
+                                var makeHdSql      = "";
+                                var makeDtSql      = "";
+                                var makeSvSql      = "";
+                                var hdDel          = ",   \n";
+                                var dtDel          = ",   \n";
+                                var svDel          = ",   \n";
+                                
+                                headerSO.bitk_div  = "H";
+                                var bitkHdSC       = $jdbc.queryList("biztalk", "select.esabkdt", headerSO); //Header정보
+                                headerSO.bitk_div  = "D";
+                                var bitkDtSC       = $jdbc.queryList("biztalk", "select.esabkdt", headerSO); //Item정보
+                                headerSO.bitk_div  = "S";
+                                var bitkSvSC       = $jdbc.queryList("biztalk", "select.esabkdt", headerSO); //Service정보
+                                
+                                //Header정보 조회
+                                for( var i = 0 ; i < bitkHdSC.size() ; i++ )
+                                {
+                                    if( i == bitkHdSC.size() - 1 )
+                                        hdDel = "";
+                                    
+                                    var bitkHdItem = bitkHdSC.get(i);
+                                    var bitk_field = bitkHdItem.bitk_field;
+                                    
+                                    if( bitk_field == "AP_SEND_FLAG" )
+                                    {
+                                        if( headerSO.elec_aprv_yn == "Y" )
+                                            bitk_field = "'X'";
+                                        else
+                                        {
+                                            if( headerSO.auto_aprv_yn == "Y" )
+                                                bitk_field = "'X'";
+                                            else
+                                                bitk_field = "''";
+                                        }
+                                    }
+                                        
+                                    makeHdSql = makeHdSql + bitk_field + " AS " + bitkHdItem.bitk_alias + hdDel;  
+                                }
+                                
+                                //물품 + 회계정보 조회
+                                for( var i = 0 ; i < bitkDtSC.size() ; i++ )
+                                {
+                                    var bitkDtItem = bitkDtSC.get(i);
+                                    if( i == bitkDtSC.size() - 1 )
+                                        dtDel = "";
+                                    makeDtSql = makeDtSql + bitkDtItem.bitk_field + " AS " + bitkDtItem.bitk_alias + dtDel;  
+                                }
+                                
+                                //서비스정보 조회
+                                for( var i = 0 ; i < bitkSvSC.size() ; i++ )
+                                {
+                                    var bitkSvItem = bitkSvSC.get(i);
+                                    if( i == bitkSvSC.size() - 1 )
+                                        svDel = "";
+                                    makeSvSql = makeSvSql + bitkSvItem.bitk_field + " AS " + bitkSvItem.bitk_alias + svDel;  
+                                }
+                                
+                                if( bitkDtSC.size() == 0 )
+                                    makeDtSql      = "*";
+                                if( bitkSvSC.size() == 0 )
+                                    makeSvSql      = "*";
+                                
+                                headerSO.make_hd_sql = makeHdSql;
+                                headerSO.make_dt_sql = makeDtSql;
+                                headerSO.make_sv_sql = makeSvSql;
+                                
+                                var ifparam = $jdbc.query    ("biztalk", "select.biztalk.espprhd", headerSO);
+                                var i_dt    = $jdbc.queryList("biztalk", "select.biztalk.espprdt", headerSO);
+                                var i_sv    = $jdbc.queryList("biztalk", "select.biztalk.espprsv", headerSO);
+                                
+                                ifparam.it_list_it  = i_dt;
+                                ifparam.it_list_sv  = i_sv;
+                                
+                                $data.ifparam       = ifparam;
+                            }
+                        }
+                        else
+                        {
+                            $jdbc.batch("procurement/pr", "insertGlobalTemporaryTable", gridSC);       //생성시에는 Grid전체 데이터
+                        }
+	                }
+	                catch(e)
+	                {
+	                    $jdbc.rollback();
+	                    erp_send_yn  = "N";
+	                    var err_msg  = "";
+	                    var err      = e.toString();
+	                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+	                    
+	                    if ( strUtil.isEmpty(ora_err) )
+	                       err_msg = err;
+	                    else
+	                       err_msg = ora_err;
+	                    
+	                    rtrn_msg     = fail_msg + " " + "\n" + "에러내용" + " : " + err_msg;
+	                    
+	                    resultMap.rtrn_code   = "E";
+	                    resultMap.rtrn_msg    = rtrn_msg;
+	                }
+	            ]]>
+	        </script>
+	        <if expression="{erp_send_yn=='Y'}">
+	            <then>
+	            <wsproxy stub="{stub}" method="{method}">
+	                <input value="{$data.ifparam}" />
+	                <output target="{$data}" property="ifresult"/>
+	            </wsproxy>
+	            </then>
+	        </if>
+	        <script>
+	            <![CDATA[
+	                try
+	                {
+	                    if( erp_send_yn == "Y" )
+	                    {
+	                        var returnVal = new Map();
+	                        var err_list  = new List();
+	                        requery_flag  = "Y";
+	                        
+	                        returnVal.sap_pr_no = '';
+                            returnVal.rtn_flag  = 'E';
+                            returnVal.rtn_msg   = '표준구매오류';
+                            returnVal.err_list  = null;
+	                        
+	                        headerSO.rtn_flag  = returnVal.rtn_flag;
+	                        headerSO.rtn_msg   = returnVal.rtn_msg;
+	                        headerSO.sap_pr_no = returnVal.sap_pr_no;
+	                        
+	                        if( returnVal.rtn_flag == "E" )
+	                        {
+	                           rtrn_msg = "[ERP Message]" + "\n" + returnVal.rtn_msg;
+	                           
+	                           if( returnVal.err_list != null )
+	                           {
+	                               var errSC = returnVal.err_list;
+	                               
+	                               for( var i = 0 ; i < errSC.size() ; i++ )
+	                               {
+	                                  var errItem = errSC.get(i);
+                                      rtrn_msg = rtrn_msg + "\n" + errItem.zmsg;
+	                               }
+	                           }   
+	                                                   
+	                           if( headerSO.bitk_mod  == "U" )  
+	                           {                         
+	                               $jdbc.rollback();
+	                               requery_flag = "N";
+	                           }    
+	                           
+	                        }
+	                        else
+	                        {
+	                           rtrn_msg = "[ERP Message]" + "\n" + returnVal.rtn_msg;
+	                        }
+	                        
+	                        resultMap.sap_pr_no     = returnVal.sap_pr_no;
+	                        resultMap.rtrn_code     = returnVal.rtn_flag;
+	                        resultMap.erp_rtrn_code = returnVal.rtn_flag;
+	                        resultMap.rtrn_msg      = rtrn_msg;
+	                         
+	                    }
+	                    
+	                    headerSO.rtrn_code = resultMap.rtrn_code;
+	                } 
+	                catch(e)
+	                {
+	                   $jdbc.rollback();
+	                   erp_send_yn  = "N";
+	                   var err_msg  = "";
+	                   var err      = e.toString();
+	                   var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+	                   
+	                   if ( strUtil.isEmpty(ora_err) )
+	                      err_msg = err;
+	                   else
+	                      err_msg = ora_err;
+	                   
+	                   requery_flag = "N";
+	                   rtrn_msg     = fail_msg + " " + "\n" + "에러내용" + " : " + err_msg;
+	                   resultMap.requery_flag = requery_flag;
+	                   resultMap.rtrn_code    = "E";
+	                   resultMap.rtrn_msg     = rtrn_msg;
+	                } 
+	            ]]>
+	        </script> 
+        </job>
+        
+        <job id="biztalk.app.send">
+            <script>
+                <![CDATA[
+                    importClass(Packages.emro.util.StringUtil);
+                    importPackage(Packages.emro.util);
+                    var sendMap      = new Map();
+                    var bitkMap      = new Map();
+                    var bitkList     = new List();
+                    var strUtil      = new StringUtil();
+                    var mode         = "";
+                    var succ_msg     = "";
+                    var fail_msg     = "";
+                    var erp_send_yn  = "N";
+                    var iCnt         = 1;
+                    var stub         = "";
+                    var method       = "";
+                    
+                    try
+                    {
+                        headerSO.bitk_mod  = "A";
+                        var bitkSO         = $jdbc.query("biztalk", "select.esabkhd", headerSO);
+                            
+                         if( !strUtil.isEmpty(bitkSO) )
+                         {
+                             stub               = bitkSO.bitk_stub;
+                             method             = bitkSO.bitk_mthd;
+                             erp_send_yn        = "Y";                 //ESABKHD 테이블에 존재하는 경우에만 Biztalk과 Interface를 한다.
+                             
+                             var makeHdSql      = "";
+                             var makeDtSql      = "";
+                             var makeSvSql      = "";
+                             var hdDel          = ",   \n";
+                             var dtDel          = ",   \n";
+                             var svDel          = ",   \n";
+                             
+                             var bitkHdSC       = new List();
+                             var bitkDtSC       = new List();
+                             var bitkSvSC       = new List();
+                             
+                             headerSO.bitk_div  = "H";
+                             bitkHdSC       = $jdbc.queryList("biztalk", "select.esabkdt", headerSO); //Header정보
+                                
+                             //Header정보 조회
+                             for( var i = 0 ; i < bitkHdSC.size() ; i++ )
+                             {
+                                 if( i == bitkHdSC.size() - 1 )
+                                     hdDel = "";
+                                 
+                                 var bitkHdItem = bitkHdSC.get(i);
+                                 var bitk_field = bitkHdItem.bitk_field;
+                                 
+                                 if( bitk_field == "AP_SEND_FLAG" )
+                                 {
+                                     if( headerSO.elec_aprv_yn == "Y" )
+                                         bitk_field = "'X'";
+                                     else
+                                         bitk_field = "''";
+                                 }
+                                 
+                                 if( bitk_field == "IV_WF_IND" )
+                                 {
+                                     bitk_field = "'X'";
+                                 }
+                                 
+                                 if( bitk_field == "IV_INFO_CHK" )
+                                 {
+                                     bitk_field = "''";
+                                 }
+                                     
+                                 makeHdSql = makeHdSql + bitk_field + " AS " + bitkHdItem.bitk_alias + hdDel;  
+                             }
+                             
+                             
+                             headerSO.make_hd_sql = makeHdSql;
+                             
+                             bitkMap = $jdbc.query    ("biztalk", "select.biztalk.espprhd", headerSO);
+                                
+                             $data.ifparam       = bitkMap;
+                        }
+                    }
+                    catch(e)
+                    {
+                        $jdbc.rollback();
+                        erp_send_yn  = "N";
+                        var err_msg  = "";
+                        var err      = e.toString();
+                        var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                        
+                        if ( strUtil.isEmpty(ora_err) )
+                           err_msg = err;
+                        else
+                           err_msg = ora_err;
+                        
+                        rtrn_msg     = fail_msg + " " + "\n" + "에러내용" + " : " + err_msg;
+                        
+                        resultMap.rtrn_code   = "E";
+                        resultMap.rtrn_msg    = rtrn_msg;
+                    }
+                ]]>
+            </script>
+            
+            <if expression="{erp_send_yn=='Y'}">
+                <then>
+                <wsproxy stub="{stub}" method="{method}">
+                    <input value="{$data.ifparam}" />
+                    <output target="{$data}" property="ifresult"/>
+                </wsproxy>
+                </then>
+            </if>
+        </job>
+        
+        <job id="wcms.pr.reject">
+	        <script>
+	            <![CDATA[
+	            	try
+	            	{
+			            var param   = $data.prdtSO;
+			            var ifparam = new Map();
+			            var i_dt    = new List();
+			            var sendYn  = false;
+			            
+			            var stub    = "";
+			            var method  = "";
+			            
+			            if(param.pr_send_yn=="Y"){
+			                param.ap_send_flag = "";
+			            }else{
+			                param.ap_send_flag = "X";
+			            }           
+			            
+			            ifparam             = new Map();
+			            i_dt                = new List();
+			            
+			            ifparam.itbl        = i_dt;
+			            
+			            $data.ifparam       = ifparam;
+			            erp_send_yn         = "Y";
+			            
+	            	}
+	            	catch(e)
+	            	{
+	            		$jdbc.rollback();
+	                    erp_send_yn  = "N";
+	                    var err_msg  = "";
+	                    var err      = e.toString();
+	                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+	                    
+	                    if ( strUtil.isEmpty(ora_err) )
+	                       err_msg = err;
+	                    else
+	                       err_msg = ora_err;
+	                    
+	                    rtrn_msg     = fail_msg + " " + "\n" + "에러내용" + " : " + err_msg;
+	                    
+	                    resultMap.rtrn_code   = "E";
+	                    resultMap.rtrn_msg    = rtrn_msg;
+	            	}
+	            ]]>
+	        </script>
+	        <if expression="{erp_send_yn=='Y'}">
+	            <then>
+	            <wsproxy stub="{stub}" method="{method}">
+	                <input value="{$data.ifparam}" />
+	                <output target="{$data}" property="ifresult" />
+	            </wsproxy>
+	            </then>
+	        </if>
+            <script>
+                <![CDATA[
+                	try
+	                {
+	                    if( erp_send_yn == "Y" )
+	                    {
+	                    	var returnVal = new Map();
+			                
+			                returnVal.sap_pr_no = $data.ifresult.doc_id;
+			                returnVal.rtn_flag  = $data.ifresult.ok_bit;
+			                returnVal.rtn_msg   = $data.ifresult.message;
+			                
+			                param.sap_pr_no = returnVal.sap_pr_no;
+			                param.rtn_flag  = returnVal.rtn_flag;
+			                param.rtn_msg   = returnVal.rtn_msg;
+			                
+			                resultMap.rtn_flag = returnVal.rtn_flag;
+			                resultMap.rtn_msg  = returnVal.rtn_msg;
+			                
+			                if(returnVal.rtn_flag=="Y"){
+			                
+			                    if(returnVal.sap_pr_no!="" && returnVal.sap_pr_no!=null){
+			                        param.sap_pr_no = returnVal.sap_pr_no;
+			                    }
+			                }
+	                    }
+	                } 
+	                catch(e)
+	                {
+	                   $jdbc.rollback();
+	                   erp_send_yn  = "N";
+	                   var err_msg  = "";
+	                   var err      = e.toString();
+	                   var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+	                   
+	                   if ( strUtil.isEmpty(ora_err) )
+	                      err_msg = err;
+	                   else
+	                      err_msg = ora_err;
+	                   
+	                   requery_flag = "N";
+	                   rtrn_msg     = fail_msg + " " + "\n" + "에러내용" + " : " + err_msg;
+	                   resultMap.requery_flag = requery_flag;
+	                   resultMap.rtrn_code    = "E";
+	                   resultMap.rtrn_msg     = rtrn_msg;
+	                } 
+                
+                $data.returnVal = returnVal;            
+                ]]>
+            </script>
+        </job> 
+        
+        <job id="aprv.after.pr.auto.send">
+            <script>
+                <![CDATA[
+                    try
+                    {
+                    
+                        var chk_auto_po_cnt  = $jdbc.queryList("biztalk", "select.auto.po.cnt" , headerSO);
+                        var check_auto_po_yn  = false;
+                        if( chk_auto_po_cnt.size() > 0)  
+                        {
+                            for( var k = 0 ; k < chk_auto_po_cnt.size() ; k++ )
+                            { 
+                                var vdItem = chk_auto_po_cnt.get(k);
+                                headerSO.ref_vd = vdItem.ref_vd;
+                                
+                                var chk_auto_po      = $jdbc.queryList("biztalk", "select.auto.po" , headerSO);
+                                
+                                var po_no = $helper.generateCodeCompCd('PO', headerSO.s_comp_cd);
+                                headerSO.po_no = po_no;
+                                for( var i = 0 ; i < chk_auto_po.size() ; i++ )
+                                {  
+                                    var accItem  = chk_auto_po.get(i);
+                                    var po_lno   = i + 1;
+                                    
+                                    headerSO.pr_lno = accItem.pr_lno;
+                                    headerSO.po_lno = po_lno;
+                                    
+                                    var pre_check_auto_po = $jdbc.query("biztalk", "select.check_auto_po_cnt" , headerSO);
+                                    
+                                    if (pre_check_auto_po.cnt < 1){
+	                                    $jdbc.update("procurement/po" , "insert.auto.podt" ,  headerSO);
+	                                    $jdbc.update("procurement/po" , "insert.auto.poac" ,  headerSO);
+	                                    $jdbc.update("procurement/po" , "insert.auto.posv" ,  headerSO);
+	                                    check_auto_po_yn = true;
+                                    }
+                                }
+                                
+                                if (check_auto_po_yn){
+	                                $jdbc.update("procurement/po" , "insert.auto.pohd"  ,  headerSO);
+	                                $jdbc.update("procurement/po" , "update.prdt.status",  headerSO);
+	                                $jdbc.commit();
+	                                
+	                                
+	                                headerSO.bitk_mod  = "C";
+	                                headerSO.bitk_cd   = "PO";
+	                                headerSO.auto_flag = "Y";
+	                                headerSO.auto_yn   = "Y"; //자동발주여부 FLAG 
+	                                
+	                                $service.callJob("aprv.after.erp.send");
+	                                
+	                                if( headerSO.rtrn_code == "S" )
+	                                {
+	                                    $jdbc.update("biztalk","update.po.ifflag"  , headerSO);
+	                                    $jdbc.commit();
+	                                    
+	                                    headerSO.bitk_div  = "H";
+	                                    headerSO.bitk_mod  = "A";
+	                                    headerSO.bitk_cd   = "PO";
+	                                    headerSO.auto_flag = "N";
+	                                    $service.callJob("aprv.after.erp.send");
+	                                    
+	                                }
+                                }
+                            }
+                        }
+                    }
+                    catch(e)
+                    {
+                       
+                    }
+                ]]>
+            </script>
+        </job>
+        
+        <job id="aprv.after.erp.send">
+            <script>
+                <![CDATA[
+                    importClass(Packages.emro.util.StringUtil);
+                    importPackage(Packages.emro.util);
+                    var sendMap      = new Map();
+                    var resultMap    = new Map();
+                    var bitkMap      = new Map();
+                    var bitkList     = new List();
+                    var strUtil      = new StringUtil();
+                    var mode         = "";
+                    var succ_msg     = "";
+                    var fail_msg     = "";
+                    var erp_send_yn  = "N";
+                    var iCnt         = 1;
+                    var stub         = "";
+                    var method       = "";
+                    
+                    var mro_send_yn  = "N";
+                         
+                    try
+                    {
+                        var bitkSO      = $jdbc.query("biztalk", "select.esabkhd", headerSO );
+                            
+                         if( !strUtil.isEmpty(bitkSO) )
+                         {
+                             stub               = bitkSO.bitk_stub;
+                             method             = bitkSO.bitk_mthd;
+                             erp_send_yn        = "Y";                 //ESABKHD 테이블에 존재하는 경우에만 Biztalk과 Interface를 한다.
+                             
+                             var makeHdSql      = "";
+                             var makeDtSql      = "";
+                             var makeSvSql      = "";
+                             var hdDel          = ",   \n";
+                             var dtDel          = ",   \n";
+                             var svDel          = ",   \n";
+                             
+                             var bitkHdSC       = new List();
+                             var bitkDtSC       = new List();
+                             var bitkSvSC       = new List();
+                             
+                             if( bitkAprvSO.auto_flag == "Y" )
+                             {
+                                 headerSO.bitk_div  = "H";
+                                 bitkHdSC       = $jdbc.queryList("biztalk", "select.esabkdt", headerSO); //Header정보
+                                 headerSO.bitk_div  = "D";
+                                 bitkDtSC       = $jdbc.queryList("biztalk", "select.esabkdt", headerSO); //Item정보
+                                 headerSO.bitk_div  = "S";
+                                 bitkSvSC       = $jdbc.queryList("biztalk", "select.esabkdt", headerSO); //Service정보
+                                 
+                                 $jdbc.update("procurement/po", "insert.globtemp.po", headerSO);
+                             }
+                             else
+                             {
+                                headerSO.bitk_div  = "H";
+                                bitkHdSC       = $jdbc.queryList("biztalk", "select.esabkdt", headerSO); //Header정보
+                             }
+                                
+                             //Header정보 조회
+                             for( var i = 0 ; i < bitkHdSC.size() ; i++ )
+                             {
+                                 if( i == bitkHdSC.size() - 1 )
+                                     hdDel = "";
+                                 
+                                 var bitkHdItem = bitkHdSC.get(i);
+                                 var bitk_field = bitkHdItem.bitk_field;
+                                 
+                                 if( bitk_field == "AP_SEND_FLAG" )
+                                 {
+                                     if( headerSO.elec_aprv_yn == "Y" )
+                                         bitk_field = "'X'";
+                                     else
+                                         bitk_field = "''";
+                                 }
+                                 
+                                 if( bitk_field == "IV_WF_IND" )
+                                 {
+                                     bitk_field = "'X'";
+                                 }
+                                 
+                                 if( bitk_field == "IV_INFO_CHK" )
+                                 {
+                                     bitk_field = "''";
+                                 }
+                                     
+                                 makeHdSql = makeHdSql + bitk_field + " AS " + bitkHdItem.bitk_alias + hdDel;  
+                             }
+                             
+                             
+                             //물품 + 회계정보 조회
+                             for( var i = 0 ; i < bitkDtSC.size() ; i++ )
+                             {
+                                 var bitkDtItem = bitkDtSC.get(i);
+                                 if( i == bitkDtSC.size() - 1 )
+                                     dtDel = "";
+                                 makeDtSql = makeDtSql + bitkDtItem.bitk_field + " AS " + bitkDtItem.bitk_alias + dtDel;  
+                             }
+                             
+                             //서비스정보 조회
+                             for( var i = 0 ; i < bitkSvSC.size() ; i++ )
+                             {
+                                 var bitkSvItem = bitkSvSC.get(i);
+                                 if( i == bitkSvSC.size() - 1 )
+                                     svDel = "";
+                                 makeSvSql = makeSvSql + bitkSvItem.bitk_field + " AS " + bitkSvItem.bitk_alias + svDel;  
+                             }
+                             
+                             if( bitkDtSC.size() == 0 )
+                                 makeDtSql      = "*";
+                             if( bitkSvSC.size() == 0 )
+                                 makeSvSql      = "*";
+                             
+                             headerSO.make_hd_sql = makeHdSql;
+                             headerSO.make_dt_sql = makeDtSql;
+                             headerSO.make_sv_sql = makeSvSql;
+                             
+                             
+                             if( headerSO.bitk_cd == "PR" )
+                             {
+                                bitkMap = $jdbc.query    ("biztalk", "select.biztalk.espprhd", headerSO);
+                             }   
+                             else if( bitkAprvSO.bitk_cd == "PO" )
+                             {
+                                bitkMap = $jdbc.query    ("biztalk", "select.biztalk.esppohd", headerSO);
+                                
+                                if( bitkAprvSO.auto_flag == "Y" )
+                                {
+                                    bitkList   = $jdbc.queryList("biztalk", "select.biztalk.esppodt", headerSO);
+                                    bitkSvList = $jdbc.queryList("biztalk", "select.biztalk.espposv", headerSO);
+                                    
+                                    bitkMap.it_item  = bitkList;
+                                    bitkMap.it_srvc  = bitkSvList;
+                                }
+                                
+                             }
+                             else if( bitkAprvSO.bitk_cd == "PO_CHG" )
+                             {
+                                bitkMap = $jdbc.query    ("biztalk", "select.biztalk.espchrq", headerSO);
+                             }
+                             else if( headerSO.bitk_cd == "GRM" || headerSO.bitk_cd == "GRC" )
+                             {
+                                makeHdSql = '';
+                                makeDtSql = '';
+                                hdDel     = ",   \n";
+                                dtDel     = ",   \n";
+                                
+                                headerSO.gr_lno      = "''";
+                                headerSO.gr_lno_flag = 'N';
+                                
+                                headerSO.bitk_div  = "H";
+                                var bitkHdSC       = $jdbc.queryList("biztalk", "select.esabkdt", headerSO); //Header정보
+                                headerSO.bitk_div  = "D";
+                                var bitkDtSC       = $jdbc.queryList("biztalk", "select.esabkdt", headerSO); //Item정보
+                                
+                                for( var i = 0 ; i < bitkHdSC.size() ; i++ )
+                                {
+                                    if( i == bitkHdSC.size() - 1 )
+                                        hdDel = "";
+                                    
+                                    var bitkHdItem = bitkHdSC.get(i);
+                                    var bitk_field = bitkHdItem.bitk_field;
+                                    
+                                    if( bitk_field == "AP_SEND_FLAG" )
+                                     {   
+                                         bitk_field = "'X'";
+                                     }
+                                        
+                                    makeHdSql = makeHdSql + bitk_field + " AS " + bitkHdItem.bitk_alias + hdDel;  
+                                }
+                                
+                                for( var i = 0 ; i < bitkDtSC.size() ; i++ )
+                                {
+                                    var bitkDtItem = bitkDtSC.get(i);
+                                    if( i == bitkDtSC.size() - 1 )
+                                        dtDel = "";
+                                    makeDtSql = makeDtSql + bitkDtItem.bitk_field + " AS " + bitkDtItem.bitk_alias + dtDel;  
+                                }
+                                
+                                if( bitkDtSC.size() == 0 )
+                                    makeDtSql      = "*";
+                                
+                                headerSO.make_hd_sql = makeHdSql;
+                                headerSO.make_dt_sql = makeDtSql;
+                                
+                                bitkMap = $jdbc.query    ("biztalk", "select.biztalk.espgrhd", headerSO);
+                                
+                                var i_dt        = $jdbc.queryList("biztalk", "select.biztalk.espgrdt", headerSO);
+                                bitkMap.it_item = i_dt;
+                             }
+                             
+                             $data.ifparam       = bitkMap;
+                        }
+                    }
+                    catch(e)
+                    {
+                        $jdbc.rollback();
+                        erp_send_yn  = "N";
+                        var err_msg  = "";
+                        var err      = e.toString();
+                        var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                        
+                        if ( strUtil.isEmpty(ora_err) )
+                           err_msg = err;
+                        else
+                           err_msg = ora_err;
+                        
+                        rtrn_msg     = fail_msg + " " + "\n" + "에러내용" + " : " + err_msg;
+                        
+                        resultMap.rtrn_code   = "E";
+                        resultMap.rtrn_msg    = rtrn_msg;
+                    }
+                ]]>
+            </script>
+            
+            <if expression="{erp_send_yn=='Y'}">
+                <then>
+                <wsproxy stub="{stub}" method="{method}">
+                    <input value="{$data.ifparam}" />
+                    <output target="{$data}" property="ifresult"/>
+                </wsproxy>
+                </then>
+            </if>
+            
+            <script>
+                <![CDATA[
+                    try
+                    { 
+                        $logger.info("$data.ifresult:"+$data.ifresult);
+    
+                        if( erp_send_yn == "Y" )
+                        {
+                            var returnVal = new Map();
+                            var returnList = new List();
+                            
+                            if(headerSO.bitk_cd == "GRM")
+                            {
+                                returnVal.sap_gr_no     = $data.ifresult.ev_mblnr;
+                                returnVal.sap_gr_yr     = $data.ifresult.ev_mjahr;
+                                returnVal.sap_gr_cno    = $data.ifresult.ev_smbln;
+                                returnVal.sap_gr_cyr    = $data.ifresult.ev_sjahr;
+                                returnVal.rtn_flag      = $data.ifresult.ev_rtn_flag;
+                                returnVal.rtn_msg       = $data.ifresult.ev_rtn_msg;
+                                
+                                rtrn_msg = "[SAP Message]" + "\n" + returnVal.rtn_msg;
+                                
+                                try{
+                                    returnList  = $data.ifresult.et_item;
+                                    for(var i=0;i<returnList.size();i++)
+                                    {
+                                        returnList.get(i).comp_cd    = headerSO.s_comp_cd;
+                                        returnList.get(i).s_comp_cd  = headerSO.s_comp_cd;
+                                        returnList.get(i).gr_no      = headerSO.gr_no;
+                                        returnList.get(i).gr_lno     = returnList.get(i).zeile;
+                                        returnList.get(i).sap_po_no  = returnList.get(i).ebeln;
+                                        returnList.get(i).sap_po_lno = returnList.get(i).ebelp;
+                                        returnList.get(i).sap_gr_no  = $data.ifresult.ev_mblnr;
+                                        returnList.get(i).sap_gr_yr  = $data.ifresult.ev_mjahr;
+                                        returnList.get(i).sap_gr_cno = returnList.get(i).smbln;
+                                        returnList.get(i).sap_gr_cyr = returnList.get(i).sjahr;
+                                        if(returnList.get(i).zrtn_msg != "" && returnList.get(i).zrtn_msg != null)
+                                        { 
+                                            rtrn_msg                     += returnList.get(i).zrtn_msg+"\n";
+                                            returnList.get(i).rtrn_msg   = rtrn_msg;
+                                            returnList.get(i).rtrn_code  = returnVal.rtn_flag;
+                                        }
+                                    }
+                                }catch(e){
+                                    returnList  = null;
+                                }
+                                
+                                headerSO.sap_gr_no   = returnVal.sap_gr_no;
+                                headerSO.sap_gr_yr   = returnVal.sap_gr_yr;
+                                headerSO.sap_gr_cno  = returnVal.sap_gr_cno;
+                                headerSO.sap_gr_cyr  = returnVal.sap_gr_cyr;
+                                
+                                
+                                
+                                resultMap.gr_no         = headerSO.gr_no;   
+                                resultMap.sap_gr_no     = returnVal.sap_gr_no;
+                                resultMap.sap_gr_yr     = returnVal.sap_gr_yr;
+                                resultMap.sap_gr_cno    = returnVal.sap_gr_cno;
+                                resultMap.sap_gr_cyr    = returnVal.sap_gr_cyr;
+                                resultMap.rtrn_code     = returnVal.rtn_flag;
+                                resultMap.rtrn_msg      = rtrn_msg;
+                                
+                                headerSO.rtrn_code = resultMap.rtrn_code;
+                                headerSO.rtrn_msg  = rtrn_msg;
+                                
+                                if(resultMap.rtrn_code=="S"){
+                                    if(resultMap.sap_gr_no!="" && resultMap.sap_gr_no!=null){
+                                        headerSO.prog_sts = '110';
+                                        resultMap.prog_sts ='110';
+                                        
+                                        try
+                                        {
+                                            var updateList = $jdbc.queryList("procurement/gr","get.guarantee.list", headerSO);
+                                            if(updateList.size()>0)
+                                            {
+                                               importPackage(Packages.emro.edoc.guarantee);
+                                               var gm = new GuaranteeManager();
+                                               gm.guarSave(updateList);
+                                               
+                                               hearderInfo.pr_prog_sts = 'GC';
+                                            }
+                                        }
+                                        catch(e)
+                                        {
+                                        }
+                                        
+                                        $jdbc.update("procurement/gr","update.gr.send.complete", headerSO);
+                                        
+                                        if(headerSO.mro_yn=="Y")
+                                        {
+                                            mro_send_yn = "Y";
+                                        }
+                                        
+                                        //물품검수완료 sms.mail발송  sendmailsvc
+                                        $data.sendParam = headerSO;
+                                        $data.sendParam.comp_cd = headerSO.s_comp_cd;
+                                        $service.callJob("send.mail.gr.approved");
+                                    }
+                                }
+                            }
+                            else if(headerSO.bitk_cd == "GRC")
+                            {
+                                returnVal.rtn_flag      = $data.ifresult.ev_rtn_flag;
+                                returnVal.rtn_msg       = $data.ifresult.ev_rtn_msg;
+                                
+                                rtrn_msg = "[SAP Message]" + "\n" + returnVal.rtn_msg;
+                                
+                                if($data.ifresult.et_msg!=null)
+                                {
+                                    rtnList = $data.ifresult.et_msg;
+                                     
+                                    for(var i=0;i<rtnList.size();i++)
+                                    {
+                                        rtnList.get(i).gr_no     = headerSO.gr_no;
+                                        if(headerSO.bitk_mod=="C")
+                                        {                       
+                                            rtnList.get(i).sap_po_no  = rtnList.get(i).ebeln; 
+                                            rtnList.get(i).sap_po_lno = rtnList.get(i).ebelp;
+                                            rtnList.get(i).sap_gr_no  = rtnList.get(i).mblnr;
+                                            rtnList.get(i).sap_gr_yr  = rtnList.get(i).mjahr;
+                                            rtnList.get(i).s_comp_cd  = headerSO.s_comp_cd;
+                                            rtnList.get(i).comp_cd    = headerSO.s_comp_cd;
+                                            rtnList.get(i).pr_prog_sts = 'GC';
+                                        }
+                                        rtnList.get(i).ses_no    = rtnList.get(i).lblni;
+                                        
+                                        if(rtnList.get(i).zrtn_msg != "" && rtnList.get(i).zrtn_msg != null)
+                                        {
+                                            rtrn_msg                  += "\n" +rtnList.get(i).zrtn_msg;
+                                            rtnList.get(i).rtrn_msg   = rtrn_msg;
+                                            rtnList.get(i).rtrn_code  = returnVal.rtn_flag;
+                                        }
+                                    }
+                                }
+                                
+                                resultMap.gr_no         = headerSO.gr_no;
+                                resultMap.rtrn_code     = returnVal.rtn_flag;
+                                resultMap.rtrn_msg      = rtrn_msg;
+                                
+                                headerSO.rtrn_code = resultMap.rtrn_code;
+                                headerSO.rtrn_msg  = rtrn_msg;
+                                
+                                if(resultMap.rtrn_code=="S"){
+                                    headerSO.prog_sts = '110';
+                                    resultMap.prog_sts ='110';
+                                    try
+                                    {
+                                        var updateList = $jdbc.queryList("procurement/gr","get.guarantee.list", headerSO);
+                                        if(updateList.size()>0)
+                                        {
+                                           importPackage(Packages.emro.edoc.guarantee);
+                                           var gm = new GuaranteeManager();
+                                           gm.guarSave(updateList);
+                                           
+                                           hearderInfo.pr_prog_sts = 'GC';
+                                        }
+                                    }
+                                    catch(e)
+                                    {
+                                    }
+                                    
+                                    $jdbc.update("procurement/gr","update.gr.send.complete", headerSO);
+                                    $jdbc.batch("procurement/gr","update.gr.send.complete.dt",rtnList);
+                                    
+                                    //공사검수완료 sms.mail발송  sendmailsvc
+                                    $data.sendParam = headerSO;
+                                    $data.sendParam.comp_cd = headerSO.s_comp_cd;
+                                    $service.callJob("send.mail.gr.approved");
+                                }
+                            }
+                            else if( headerSO.bitk_cd == "PO" && headerSO.auto_flag == "Y" )
+                            {
+                                returnVal.sap_po_no = $data.ifresult.ev_ebeln;
+                                returnVal.rtn_flag  = $data.ifresult.ev_rtn_flag;
+                                returnVal.rtn_msg   = $data.ifresult.ev_rtn_msg;
+                                err_list            = $data.ifresult.et_msg;
+                                
+                                returnVal.err_list = err_list;
+                                
+                                if( returnVal.rtn_flag == "E" )
+                                {
+                                   rtrn_msg = "[ERP Message]" + "\n" + returnVal.rtn_msg;
+                                   
+                                   if( returnVal.err_list != null )
+                                   {
+                                       var errSC = returnVal.err_list;
+                                       
+                                       for( var i = 0 ; i < errSC.size() ; i++ )
+                                       {
+                                          var errItem = errSC.get(i);
+                                          
+                                          rtrn_msg = rtrn_msg + "\n" + errItem.zrtn_msg;
+                                       }
+                                   }
+                                }
+                                else
+                                {
+                                   rtrn_msg = "[ERP Message]" + "\n" + returnVal.rtn_msg;
+                                }
+                                   
+                                headerSO.sap_po_no   = returnVal.sap_po_no;
+                                headerSO.rtrn_code   = returnVal.rtn_flag;
+                                headerSO.rtrn_msg    = rtrn_msg;
+                                
+                            }
+                                                        
+                            $logger.info("resultMap:"+resultMap);
+                        }
+                    } 
+                    catch(e)
+                    {
+                       erp_send_yn  = "N";
+                       var err_msg  = "";
+                       var err      = e.toString();
+                       var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                       
+                       if (ora_err==null)
+                          err_msg = err;
+                       else
+                          err_msg = ora_err;
+                       
+                       rtrn_msg     = fail_msg + " " + "\n" + "에러내용" + " : " + err_msg;
+                       $logger.info("rtrn_msg ==============>"+rtrn_msg);
+                       resultMap.rtrn_code   = "E";
+                       resultMap.rtrn_msg    = rtrn_msg;
+                    }
+                    
+                    var mroParam    = new Map();
+                    var mroResult   = new Map();
+                    var i_dt        = new List();
+                    i_dt            = $jdbc.queryList("biztalk", "select.mrok.grsend", headerSO);
+                    mroParam.record = i_dt;
+                    $data.mroParam  = mroParam;
+                    
+                    resultMap = headerSO;
+                    $logger.info("RESULT:" + resultMap);
+                    
+                    ]]>
+            </script>
+            <if expression="{mro_send_yn=='Y'}">
+                <then>
+                <wsproxy stub="MROK_0094_PurchActCheckInfoSnd" method="MROK_0094_PurchActCheckInfoSnd">
+                    <input value="{$data.mroParam}" />
+                    <output target="{$data}" property="ifresult" />
+                </wsproxy>
+                </then>
+            </if>
+            <script>
+                <![CDATA[
+                ]]>
+            </script>
+        </job>
+        
+        <job id="aprv.after.auto.send.cntr">
+            <script>
+                <![CDATA[
+                    importClass(Packages.emro.util.StringUtil);
+                    importPackage(Packages.emro.util);
+                    var resultMap    = new Map();
+                    var sendMap      = new Map();
+                    var sendList     = new List();
+                    var strUtil      = new StringUtil();
+                    var mode         = "";
+                    var succ_msg     = "";
+                    var fail_msg     = "";
+                    var erp_send_yn  = "N";
+                    var iCnt         = 1;
+                    
+                    try
+                    {
+                        var aprvMap    = new Map();
+                        var aprvList   = new List();
+                        
+                        var method     = "";
+                        erp_send_yn    = "Y";                 
+                        
+                        aprvMap.aprv_ref_no  = aprvSO.aprv_key;
+                        aprvList.add(aprvMap);
+                        
+                        sendMap.aprv_doc_url = "";
+                        sendMap.aprv_doc_no  = "";
+                        sendMap.aprv_doc_typ = aprvSO.doc_typ;
+                        sendMap.aprv_sts     = aprvSO.aprv_sts;
+                        sendMap.aprv_key     = aprvList;
+                        $data.ifparam        = sendMap;
+                        
+                    }
+                    catch(e)
+                    {
+                        $jdbc.rollback();
+                        erp_send_yn  = "N";
+                        var err_msg  = "";
+                        var err      = e.toString();
+                        var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                        
+                        if ( strUtil.isEmpty(ora_err) )
+                           err_msg = err;
+                        else
+                           err_msg = ora_err;
+                        
+                        rtrn_msg     = fail_msg + " " + "\n" + "에러내용" + " : " + err_msg;
+                        
+                        resultMap.rtrn_code   = "E";
+                        resultMap.rtrn_msg    = rtrn_msg;
+                    }
+                ]]>
+            </script>
+            <if expression="{erp_send_yn=='Y'}">
+                <then>
+                <wsproxy stub="{method}" method="{method}">
+                    <input value="{$data.ifparam}" />
+                    <output target="{$data}" property="ifresult"/>
+                </wsproxy>
+                </then>
+            </if>
+        </job>
+        
+        <job id="send.mail.gr.approved">
+            <script>
+                <![CDATA[
+                //검수완료시 업체에게 sms, email발송
+                var hearderInfo  = $data.grInfo; //기본정보
+                
+                var result = $jdbc.query("procurement/gr", "get.send.mail.mt.info", hearderInfo);
+                
+                ////////////////////////////////////////////////////////////////////////////////////
+                // 1. SMS
+                ////////////////////////////////////////////////////////////////////////////////////
+                
+                ///////////////////////////////////////////////////////////////
+                // 1.1 ESASMTP 에서 SMS정보를 가져온다.
+                ///////////////////////////////////////////////////////////////
+                var param        = new Map();
+                param.job_cls    = result.job_cls; //* 검수승인 SMS 발송'APRV_GR'
+
+                var smsContents = $jdbc.query("email", "select.sms.template", param);
+                
+                ///////////////////////////////////////////////////////////////
+                // 1.2. SMS내용 준비
+                ///////////////////////////////////////////////////////////////
+                var system      = "000000";
+                
+                var snd_title   = "";
+                var reciever    = "";
+                
+                try
+                {
+                    snd_title = smsContents.snd_title;
+                    reciever = result.vd_chr_mobile_no;
+                        
+                    //%comp_nm% 시스템 검수승인 안내.계약/발주No: %po_no%
+                    snd_title = snd_title.replace('%comp_nm%' , result.comp_nm);
+                    snd_title = snd_title.replace('%po_no%'   , result.po_no);
+    
+                    if(result.job_cls == 'APRV_GR' && reciever!='' && reciever!=null && snd_title!='' && snd_title!=null)
+                    {   
+                        $helper.sendSMS(system, reciever, snd_title);
+                    }
+                }
+                catch(e)
+                {
+                    $logger.info(e.toString());
+                }
+                
+                
+                ////////////////////////////////////////////////////////////////////////////////////
+                // 2. E-MAIL
+                ////////////////////////////////////////////////////////////////////////////////////
+                param = new Map();
+                
+                var exmld         = $xmlManager.getDescriptor("properties");
+                var serverPath    = exmld.getDescriptorElement("server.url").getText();    //메일  JSP 참조하기 위한 URL(WAS)
+                var webserverPath = exmld.getDescriptorElement(result.comp_cd + ".webserver.url").getText(); //메일 image URL(외부웹서버)  ←←←← 추가(2012-08-29)
+
+                ///////////////////////////////////////////////////////////////
+                // 2.1 ESASMTP 에서 메일 정보를 가져온다.
+                ///////////////////////////////////////////////////////////////
+
+                //param.comp_cd    = 'N';            //* 전 관계사가 동일 할 경우는 'N'
+                param.job_cls    = result.job_cls; //* 검수승인 메일 발송
+
+                var mailContents = $jdbc.query("email", "select.email.template", param);
+
+                $data.idx        = 0;
+                $data.mails      = new List();
+
+                var snd_title    = "";
+                var snd_subject  = "";
+
+                try {
+                    snd_title    = mailContents.snd_title;
+                    snd_subject  = mailContents.snd_subject;
+    
+                    ///////////////////////////////////////////////////////////////
+                    // 2. EMAIL내용 준비
+                    ///////////////////////////////////////////////////////////////
+                    //var result = resultList.get(i);
+                    // email 정보 조회 예시>
+                    //mailContents.snd_title   =  (%comp_nm%)에서 보내는 검수승인 안내메일 입니다.
+                    //mailContents.snd_subject = 발송처 : %comp_nm%<br/>
+                    //                           수신처 : %vd_nm%<br/><br/>
+                    //                           아래의 계약건에 대해 검수승인이 완료되었습니다.<br/><br/>
+                    //                           계약/발주번호 : %cntr_no% / %po_no%<br/>
+                    //                           계약명 : %po_tit%<br/>
+                    //                           승인일자 : %aprv_date%<br/>
+                    //                           검수담당자 : %gr_chr_nm%<br/>
+                    
+                    //mailContents.snd_title   =  (%comp_nm%)에서 보내는 정산확정 요청메일 입니다.
+                    //mailContents.snd_subject = %receive_nm% 님<br/><br/>
+                    //                           아래와 같이 (%comp_nm%)시스템에 접속하여 정산확정 절차 수행 바랍니다.<br/><br/>
+                    //                           공급업체명 : %vd_nm% (공급업체코드 : %vd_cd%)<br/>
+                    //                           검수번호 : %gr_no%<br/>
+                    //                           검수금액 : %dely_tot_amt%<br/>
+                    //                           계약/발주번호 : %cntr_no% / %po_no%<br/>
+                    //                           계약명 : %po_tit%<br/>
+                    //                           계약금액 : %cntr_amt%<br/>
+                    
+                    
+                    // replace word
+                    snd_title   = snd_title.replace('%comp_nm%'        , result.comp_nm);
+    
+                    snd_subject = snd_subject.replace('%receive_nm%'   , result.gr_chr_nm);     //정산확정
+                    snd_subject = snd_subject.replace('%comp_nm%'      , result.comp_nm);
+                    snd_subject = snd_subject.replace('%vd_nm%'        , result.vd_nm);
+                    snd_subject = snd_subject.replace('%vd_cd%'        , result.vd_cd);         //정산확정
+                    snd_subject = snd_subject.replace('%cntr_no%'      , result.cntr_no);
+                    snd_subject = snd_subject.replace('%po_no%'        , result.po_no);
+                    snd_subject = snd_subject.replace('%gr_no%'        , result.gr_no);         //정산확정
+                    snd_subject = snd_subject.replace('%dely_tot_amt%' , result.dely_tot_amt);  //정산확정
+                    snd_subject = snd_subject.replace('%po_tit%'       , result.po_tit);
+                    snd_subject = snd_subject.replace('%aprv_date%'    , result.aprv_date);
+                    snd_subject = snd_subject.replace('%gr_chr_nm%'    , result.gr_chr_nm);
+                    snd_subject = snd_subject.replace('%cntr_amt%'     , result.cntr_amt);      //정산확정
+                        
+                    var mail = new Map();
+                    mail.from           = result.gr_chr_email;
+                    mail.fromName       = result.gr_chr_nm;
+                    mail.to             = result.vd_chr_email;
+                    mail.toName         = result.vd_chr_nm;
+    
+                    mail.snd_title      = snd_title;   //메일 제목
+                    mail.snd_subject    = snd_subject; //메일 본문
+                    mail.url            = serverPath + "/mails/templateMail.jsp"; //공통메일 템플릿
+                    mail.image_url      = webserverPath + "/mails/img/";  //메일  JSP 참조하기 위한 URL(WAS) ←←←← 추가변경(2012-08-29)
+                    mail.comp_cd        = result.comp_cd;  //각사별 메일 템플릿 구분자
+                        
+                    if(result.vd_chr_email != null) {
+                        $jdbc.update("email", "insert.email", mail);
+                    }
+                }
+                catch(e)
+                {
+                    $logger.info(e.toString());
+                }
+                
+                ]]>
+            </script>
+        </job>
+        
+    </declare>
+    
+    <!-- 
+      ###################################################################################################################################
+      ###################################################################################################################################
+      ###################################                Biztalk Interface JOB  END          ############################################
+      ###################################################################################################################################
+      ###################################################################################################################################
+    -->
+    
+    
+    <!-- 
+      ###################################################################################################################################
+      ###################################################################################################################################
+      ###################################                 구 매 요 청 조 회       START      ##############################################
+      ###################################################################################################################################
+      ###################################################################################################################################
+    -->
+    <!--
+    ***************************************************************************************************************************
+    ** @Description    : PR정보(공통)
+    ** @Author         : 김병철(phatchul)
+    ** @Create Date    : 2012.04.17
+    ** @History        : 1) 2012.04.17-최초 생성
+    **                   2) 2012.05.24 - 김병철 수정
+    **                      Default Setting값을 DB에서 조회함.
+    ***************************************************************************************************************************
+    -->
+    <service id="get.prinfo" label="구매요청정보 조회">
+         <script>
+            <![CDATA[
+                importClass(Packages.emro.util.StringUtil);
+                
+                var searchSO  = new Map();
+                var resultMap = new Map();
+                var headerSO  = new Map();
+                var gridList  = new List();
+                var accList   = new List();
+                var strUtil   = new StringUtil();
+                
+                try
+                {
+                    searchSO = $data.searchSO;
+                    
+                    //신규생성인 경우 Default Setting값 조회
+                    if( StringUtil.isEmpty(searchSO.pr_no) )
+                    {
+                        if( !StringUtil.isEmpty(searchSO.rfq_no) )
+                        {
+                            $data.headerSO = $jdbc.query("procurement/pr", "select.espprhd.default.by.cntr", searchSO);
+                            $data.gridSC   = $jdbc.queryList("procurement/pr", "select.espprdt.default.by.cntr", searchSO);
+                        }
+                        else
+                            $data.headerSO = $jdbc.query("procurement/pr", "select.prinfo.default", searchSO);
+                    }
+                    else
+                    {
+                        $data.headerSO = $jdbc.query("procurement/pr", "select.espprhd", searchSO);
+                        $data.gridSC   = $jdbc.queryList("procurement/pr", "select.espprdt", searchSO);
+                        accList        = $jdbc.queryList("procurement/pr", "select.espprac", searchSO);
+                        
+                        gridList = $data.gridSC;
+                        
+                        for( var i = 0 ; i < gridList.size() ; i++ )
+                        {
+                            var gridMap  = gridList.get(i);
+                            var rowList  = new List();
+                            
+                            for( var j = 0 ; j < accList.size() ; j++ )
+                            {
+                                var accMap = accList.get(j);
+                                var colMap = new Map(); 
+                                
+                                if( ( gridMap.get("copy_flag") == "N" && gridMap.get("pr_lno") == accMap.get("pr_lno") )
+                                     || ( gridMap.get("copy_flag") == "Y" && gridMap.get("tmp_pr_lno") == accMap.get("tmp_pr_lno") ) )
+                                {
+                                    colMap.put("pr_no"          , accMap.get("pr_no"          ) ); //구매요청 번호       
+                                    colMap.put("pr_lno"         , accMap.get("pr_lno"         ) ); //구매요청 항번
+                                    colMap.put("pr_line_no"     , accMap.get("pr_line_no"     ) ); //구매요청 항번       
+                                    colMap.put("line_no"        , accMap.get("line_no"        ) ); //구매요청 항번       
+                                    colMap.put("pr_svc_lno"     , accMap.get("pr_svc_lno"     ) ); //구매요청 서비스 항번
+                                    colMap.put("pr_acc_lno"     , accMap.get("pr_acc_lno"     ) ); //구매요청 계정 항번  
+                                    colMap.put("acc_typ"        , accMap.get("acc_typ"        ) ); //계정 유형           
+                                    colMap.put("qty_or_rate"    , accMap.get("qty_or_rate"    ) ); //수량 OR 율          
+                                    colMap.put("budget_amt"     , accMap.get("budget_amt"     ) ); //예산금액            
+                                    colMap.put("gl_acc_cd"      , accMap.get("gl_acc_cd"      ) ); //G/L ACCOUNT코드     
+                                    colMap.put("gl_acc_nm"      , accMap.get("gl_acc_nm"      ) ); //G/L ACCOUNT코드명   
+                                    colMap.put("gl_date"        , accMap.get("gl_date"        ) ); //G/L 일자            
+                                    colMap.put("cost_acc_cd"    , accMap.get("cost_acc_cd"    ) ); //Cost Ctr 코드       
+                                    colMap.put("cost_acc_nm"    , accMap.get("cost_acc_nm"    ) ); //Cost Ctr 코드명     
+                                    colMap.put("wbs_cd"         , accMap.get("wbs_cd"         ) ); //WBS 코드            
+                                    colMap.put("wbs_nm"         , accMap.get("wbs_nm"         ) ); //WBS 코드명          
+                                    colMap.put("fund_center_cd" , accMap.get("fund_center_cd" ) ); //FUND Ctr 코드       
+                                    colMap.put("fund_center_nm" , accMap.get("fund_center_nm" ) ); //FUND Ctr 코드명     
+                                    colMap.put("asset_no"       , accMap.get("asset_no"       ) ); //자산번호            
+                                    colMap.put("asset_no_nm"    , accMap.get("asset_no_nm"    ) ); //자산번호명          
+                                    colMap.put("asset_sub_no"   , accMap.get("asset_sub_no"   ) ); //자산하위번호        
+                                    colMap.put("tmp_asset_no"   , accMap.get("tmp_asset_no"   ) ); //임시자산번호        
+                                    colMap.put("order_no"       , accMap.get("order_no"       ) ); //오더번호            
+                                    colMap.put("order_no_nm"    , accMap.get("order_no_nm"    ) ); //오더번호명
+                                    colMap.put("order_no_amt"   , accMap.get("order_no_amt"   ) ); //투자예산잔액
+                                    colMap.put("svc_master"     , accMap.get("svc_master"     ) ); //서비스마스터            
+                                    colMap.put("svc_master_nm"  , accMap.get("svc_master_nm"  ) ); //서비스마스터명
+                                    colMap.put("sap_pr_no"      , accMap.get("sap_pr_no"      ) ); //ERP 구매요청번호
+                                    colMap.put("sap_pr_lno"     , accMap.get("sap_pr_lno"    ) ); //ERP 구매요청항번
+                                    
+                                    rowList.add(colMap);
+                                    
+                                }
+                            }
+                            
+                            if( rowList.size() == 0 )
+                            	rowList = null;
+                            
+                            gridMap.put("accList", rowList );
+                        }
+                    }
+                         
+                    resultMap.rtrn_code = "S";
+                    resultMap.rtrn_msg  = "";
+                }
+                catch(e)
+                {
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "조회시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    
+                    resultMap.rtrn_code = "E";
+                    resultMap.rtrn_msg  = rtrn_msg;
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>
+    
+    <service id="get.pay.calc" label="PO standby list 콤보">
+        <script>
+            <![CDATA[
+                var resultSO  = new Map();
+                var deleteSC  = new List();
+                
+                $jdbc.batch("procurement/pr", "insert.temp.for.pr", $data.gridSC  );
+                rtnSC = $jdbc.queryList("procurement/pr", "get.pay.calc", resultSO);
+                rtnSO = $jdbc.query("procurement/pr", "get.pay.calc.sum", resultSO);
+            ]]>
+        </script>
+    </service>
+    
+    <service id="delete.prdt" label="">
+        <script>
+            <![CDATA[
+                importClass(Packages.emro.util.StringUtil);
+                importPackage(Packages.emro.util);
+                var strUtil   = new StringUtil();
+                var resultMap = new Map();
+                var deleteSC  = new List();
+                
+                try
+                {
+	                $jdbc.batch("procurement/pr", "delete.espprdt", $data.deleteSC  );
+	                
+	                resultMap.rtrn_code   = "S";
+	                resultMap.rtrn_msg    = "정상적으로 삭제가 되었습니다.";
+	             }
+	             catch(e)
+                 {
+                    $jdbc.rollback();
+                    var err_msg  = "";
+                    var err      = e.toString();
+                    $logger.info("err==============>"+err);
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    
+                    if ( strUtil.isEmpty(ora_err) )
+                       err_msg = err;
+                    else
+                       err_msg = ora_err;
+                    
+                    rtrn_msg     = "삭제시 에러가 발생을 하였습니다." + " " + "\n" + "에러내용" + " : " + err_msg;
+                    
+                    resultMap.rtrn_code   = "E";
+                    resultMap.rtrn_msg    = rtrn_msg;
+                }
+                $logger.info("resultMap==============>"+resultMap);
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>
+    
+    <service id="validation.prdt" label="">
+        <script>
+            <![CDATA[
+                importClass(Packages.emro.util.StringUtil);
+                importPackage(Packages.emro.util);
+                
+                var strUtil   = new StringUtil();
+                var resultMap = new Map();
+                var insAccSC  = new List();
+                var gridSC    = $data.gridSC;
+                
+                try
+                {
+                    for( var i = 0 ; i < gridSC.size() ; i++ )
+                    {
+                        var gridItem = gridSC.get(i);
+                        var accSC    = gridItem.accList;
+                        
+                        //회계정보
+                        if( ( !strUtil.isEmpty(gridItem.cost_typ) || gridItem.cost_typ != "." ) && !strUtil.isEmpty(accSC) )
+                        {
+                            for( var j = 0 ; j < accSC.size() ; j++ )
+                            {
+                               var accItem    = accSC.get(j);
+                               accItem.pr_no  = gridItem.pr_no;
+                               accItem.pr_lno = gridItem.pr_lno;
+                               accItem.pr_amt = gridItem.pr_amt;
+                               accItem.mode   = gridItem.editstatus;
+                               
+                               insAccSC.add(accItem);
+                            }
+                        }
+                    }
+                    
+                    $jdbc.batch("procurement/pr" , "insert.espprac.temp", insAccSC  );
+                    
+                    $data.resultList = $jdbc.queryList("procurement/pr", "select.prac.validation", null);
+                    
+                    resultMap.rtrn_code   = "S";
+                    resultMap.rtrn_msg    = "";
+                    
+                 }
+                 catch(e)
+                 {
+                    $jdbc.rollback();
+                    var err_msg  = "";
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    
+                    if ( strUtil.isEmpty(ora_err) )
+                       err_msg = err;
+                    else
+                       err_msg = ora_err;
+                    
+                    rtrn_msg     = "조회시 에러가 발생을 하였습니다." + " " + "\n" + "에러내용" + " : " + err_msg;
+                    
+                    resultMap.rtrn_code   = "E";
+                    resultMap.rtrn_msg    = rtrn_msg;
+                }
+                $logger.info("resultMap==============>"+resultMap);
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>
+    
+    <!--
+    ***************************************************************************************************************************
+    ** @Description    : PR정보 저장
+    ** @Author         : phatchul
+    ** @Create Date    : 2012.04.17
+    ** @History        : 1) 2012.04.17-최초 생성
+    ** @Description    : ESPPRHD, ESPPRDT, ESPPRSV, ESPPRAC 테이블 Transaction 처리시 
+    **                   ERP Interface 오류이거나 에러가 발생을 하면 모든 데이터 Rollback 처리함
+    ***************************************************************************************************************************
+    -->
+    <service id="save.prinfo" label="구매요청정보(통합)정보 저장">
+        <script>
+            <![CDATA[
+                importClass(Packages.emro.util.StringUtil);
+                importPackage(Packages.emro.util);
+                var resultMap    	= new Map();
+                var strUtil      	= new StringUtil();
+                var mode         	= "";
+                var succ_msg     	= "";
+                var fail_msg     		= "";
+                var insSvcSC     		= new List();
+                var insAccSC     	= new List();
+                var erp_send_yn  	= "N";
+                var requery_flag 	= "N";
+                var iCnt         		= 1;
+                
+                
+                /*********************************************************************************************************  
+                 *****************                                                                 						****************
+                 *****************    ESPPRHD, ESPPRDT, ESPPRSV, ESPPRAC 테이블 Transaction 처리     	****************
+                 *****************                                                                 						****************
+                 *********************************************************************************************************/ 
+                try
+                {
+                    var headerSO          	= $data.headerSO; //기본정보
+                    var gridSC            	= $data.gridSC;   //물품정보
+                    var updateSC          	= $data.updateSC; //변경된정보
+                    var tmpSO             	= $data.tmpSO; //기본정보
+                    var priceList         		= new List();  //단가계약인 pr
+                    var orgnTransmitFiles 	= $data.orgnTransmitFiles;
+                    var orgnDeleteFiles   	= $data.orgnDeleteFiles;
+                    var transmitFiles     	= $data.transmitFiles;    
+                    var deleteFiles       		= $data.deleteFiles;
+                    var sTmpModFlag      	= "";
+                    var sPrChgPurc        	= "";
+                    
+                    if( strUtil.isEmpty(headerSO.elec_aprv_yn) )
+                        headerSO.elec_aprv_yn = "N";
+                        
+                    if( strUtil.isEmpty(tmpSO) )
+                        sTmpModFlag = "N";
+                    else    
+                        sTmpModFlag = tmpSO.tmp_mod_flag;
+                    
+                    if( !strUtil.isEmpty(headerSO.isPr) && !headerSO.isPr )
+                        sPrChgPurc  = "Y";
+                    else
+                        sPrChgPurc  = "N";
+                        
+                    // TODO : 자동결재 셋팅은 룰관리로 적용 필요
+                    if( headerSO.elec_aprv_yn == "N" && headerSO.trans_flag == "send")
+                        headerSO.auto_aprv_yn = "Y";
+                    else 
+                        headerSO.auto_aprv_yn = "N";
+                        
+                   /**********************************************************
+                     **********    단가계약 Ceiling금액 Check  START  ***********
+                    ***********************************************************/
+                    if(headerSO.trans_flag == "send" || headerSO.trans_flag == "app")
+                    {
+	                    for( var i = 0 ; i < gridSC.size() ; i++ )
+	                    {
+	                        var gridItem      = gridSC.get(i);
+	                        gridItem.cur      = headerSO.cur;
+	                        //단가계약PR만 담기
+	                        if( strUtil.isEmpty(headerSO.pr_no) ){
+		                        if(!strUtil.isEmpty(gridItem.price_cntr_no))
+		                        {
+		                        	priceList.add(gridItem);
+		                        }
+		                    }else{
+		                    	if(!strUtil.isEmpty(gridItem.price_cntr_no) && gridItem.editstatus != 'D')
+		                        {
+		                        	priceList.add(gridItem);
+		                        }
+		                    }
+	                    }
+	                    
+	                   	if( priceList.size() > 0 )
+	                   	{
+		                    //요청할 PR Item Temp로 Insert
+		                    $jdbc.batch("procurement/pr", "insert.temp.for.pr.ceiling", priceList);
+		                    
+		                    var ceilingErrList = $jdbc.queryList("procurement/pr", "check.ceiling", null);
+		                    
+		                    if( ceilingErrList.size() > 0 )
+		                    {
+		                    	resultMap.rtrn_code = "E";
+		                    	resultMap.rtrn_msg  = "";
+		                    	$data.put("ceilingErrList", ceilingErrList);
+		                    }
+		                    
+		                    $jdbc.commit();
+		                }
+		            }
+                    /**********************************************************
+                    **********    단가계약 Ceiling금액 Check  END  ***********
+                    ***********************************************************/
+                    
+                    if(resultMap.rtrn_code != "E")
+                    {
+	                    /**************  구매요청번호 채번  *****************/
+	                    if( strUtil.isEmpty(headerSO.pr_no) )
+	                    {
+	                        mode           = "C";
+	                        
+	                        if( headerSO.trans_flag == "send" )
+	                        {
+	                            succ_msg       = "구매팀으로 전송되었습니다.";
+	                            fail_msg       = "구매팀전송시 에러가 발생을 하였습니다.";
+	                        }
+	                        else if( headerSO.trans_flag == "app" )
+	                        {
+	                            succ_msg       = "결재요청이 완료되었습니다.";
+	                            fail_msg       = "결재상신시 에러가 발생을 하였습니다.";
+	                        }
+	                        else
+	                        {
+		                        succ_msg       = "임시 저장이 되었습니다.";
+		                        fail_msg       = "임시 저장시 에러가 발생을 하였습니다.";
+		                    }
+	                        headerSO.pr_no = $helper.generateCode('PR');
+	                        
+	                        succ_msg       = "구매요청번호 : " + headerSO.pr_no + "\n" + succ_msg;
+	                    }
+	                    else
+	                    {
+	                        if( headerSO.trans_flag == "send" )
+	                        {
+	                            succ_msg       = "구매팀으로 전송되었습니다.";
+	                            fail_msg       = "구매팀전송시 에러가 발생을 하였습니다.";
+	                        }
+	                        else if( headerSO.trans_flag == "app" )
+	                        {
+	                            succ_msg       = "결재요청이 완료되었습니다.";
+	                            fail_msg       = "결재상신시 에러가 발생을 하였습니다.";
+	                        }
+	                        else if( headerSO.trans_flag == "del" )
+	                        {
+	                            succ_msg       = "삭제 되었습니다.";
+	                            fail_msg       = "삭제시 에러가 발생을 하였습니다.";
+	                        }
+	                        else
+	                        {
+		                       succ_msg       = "수정이 되었습니다.";
+		                       fail_msg       = "수정시 에러가 발생을 하였습니다.";
+		                    }
+		                    
+		                    if( strUtil.isEmpty(headerSO.sap_pr_no) )
+	                        {
+	                            var sapMap         = $jdbc.query("procurement/pr", "select.sap_pr_no", headerSO);
+	                            headerSO.sap_pr_no = sapMap.sap_pr_no;
+	                        }
+	                        
+	                        mode           = "U";
+	                    }
+	                    
+	                    headerSO.mode = mode;
+	                        
+	                    for( var i = 0 ; i < gridSC.size() ; i++ )
+	                    {
+	                        var gridItem      	= gridSC.get(i);
+	                        var accSC         	= gridItem.accList;
+	                        gridItem.pr_no    	= headerSO.pr_no;
+	                        gridItem.purc_typ 	= headerSO.purc_typ;
+	                        gridItem.cur      	= headerSO.cur;
+	                        gridItem.mode     	= mode;
+	                        gridItem.oper_org_sn = headerSO.oper_org_sn;
+	                        
+	                        //pr_lno가 없을 시
+	                        if ( strUtil.isEmpty(gridItem.pr_lno) )
+	                        {
+	                            var prLnoMap    = $jdbc.query("procurement/pr", "prdt.max.count", headerSO);
+	                            
+	                            gridItem.pr_lno = ( parseInt(prLnoMap.cnt) + iCnt ) * 10;
+	                            iCnt++;
+	                        }
+	                        
+	                        //품목의 구매유형이 '공사/용역'인 경우에 서비스테이블를 생성한다.
+	                        if( gridItem.purc_typ == "CT" )
+	                        {
+	                            //pr_lno가 없을 시
+	                            if ( strUtil.isEmpty(gridItem.pr_svc_lno) )
+	                            {
+	                                gridItem.pr_svc_lno = "10"; //서비스는 무조건 하나
+	                            }
+	                            
+	                           insSvcSC.add(gridItem);
+	                        }
+	                        
+	                        //회계정보
+	                        if( ( !strUtil.isEmpty(gridItem.cost_typ) || gridItem.cost_typ != "." ) && !strUtil.isEmpty(accSC) )
+	                        {
+	                            for( var j = 0 ; j < accSC.size() ; j++ )
+	                            {
+	                               var accItem        = accSC.get(j);
+	                               accItem.pr_no      = gridItem.pr_no;
+	                               accItem.pr_lno     = gridItem.pr_lno;
+	                               accItem.mode       = gridItem.editstatus;
+	                               
+	                               insAccSC.add(accItem);
+	                            }
+	                        }
+	                        
+	                        
+	                        //단가계약PR만 담기
+	                        if(!strUtil.isEmpty(gridItem.price_cntr_no))
+	                        {
+	                        	priceList.add(gridItem);
+	                        }
+	                    }
+	                    
+	                    // =================================================
+	                    //               첨부파일 처리 - 2012.07.30
+	                    // =================================================
+	                    var attach = new AttachmentAgency();
+	                   
+	                    if(orgnTransmitFiles != null || orgnDeleteFiles != null)
+	                    {
+	                        //시행품의 첨부파일
+	                        var grpcd1 = attach.save( headerSO.orgn_rpt_att_no, 
+	                                                  orgnTransmitFiles, 
+	                                                  orgnDeleteFiles );
+	                        headerSO.orgn_rpt_att_no = grpcd1;
+	                    }
+	                   
+	                    //첨부파일
+	                    var grpcd2 = attach.save( headerSO.att_no, 
+	                                              transmitFiles, 
+	                                              deleteFiles );
+	                    headerSO.att_no = grpcd2; 
+			            
+			            /**********************************************************
+			            ***************     데이터 이중화 방지    START  *************
+			            ***********************************************************/
+			            var err_cnt     = 0;
+			            var err_chk_msg = "";
+			            
+			            
+			            if( sPrChgPurc == "Y" )
+			            {
+			              headerSO.trans_flag   = "send";
+			              headerSO.auto_aprv_yn = "Y";
+			            }
+			              
+			            
+			            if( sTmpModFlag != "Y" && sPrChgPurc != "Y" )
+			            {
+				            //Status Check
+		                    var prhd_status = $jdbc.query("procurement/pr", "chk.status.prhd", gridItem);
+		                    if( !strUtil.isEmpty(prhd_status) )
+		                    {
+		                        if( !strUtil.isEmpty(prhd_status.err_msg) )
+		                        {
+		                           err_chk_msg  = err_chk_msg + prhd_status.err_msg + "\n";
+		                           
+		                           err_cnt++;
+		                        }
+		                    }
+	                    }
+	                     
+	                    if( err_cnt == 0 )
+	                    {   
+				            for( var i = 0 ; i < gridSC.size() ; i++ )
+		                    {
+		                        var gridItem   = gridSC.get(i);
+		                        
+		                        
+		                        if( sTmpModFlag != "Y" && sPrChgPurc != "Y" )
+	                            {
+						            //Status Check
+						            var prdt_status = $jdbc.query("procurement/pr", "chk.status.prdt", gridItem);
+						            
+						            if( !strUtil.isEmpty(prdt_status) )
+				                    {
+				                        if( !strUtil.isEmpty(prdt_status.err_msg) )
+				                        {
+				                           err_chk_msg  = err_chk_msg + prdt_status.err_msg + "\n";
+					                       
+					                       err_cnt++;
+					                    }
+				                    }
+			                    }
+			                    
+			                    //Rfx에 데이터 생성여부 Check
+			                    var rfq_dup_chk = $jdbc.query("procurement/pr", "chk.dup.rfq", gridItem);
+			                    
+			                    if( !strUtil.isEmpty(rfq_dup_chk) )
+			                    {
+				                    if( rfq_dup_chk.cnt != "0" )
+				                    {
+				                        err_chk_msg     = err_chk_msg + "'" + rfq_dup_chk.rfq_no + "' 해당 RFx로 생성된 구매요청건 입니다." + "\n";
+				                        
+				                        err_cnt++;
+				                    }
+			                    }
+			                    
+					            //PO에 데이터 생성여부 Check
+					            var po_dup_chk = $jdbc.query("procurement/pr", "chk.dup.po", gridItem);
+					            
+					            if( !strUtil.isEmpty(po_dup_chk) )
+			                    {
+						            if( po_dup_chk.cnt != "0" )
+				                    {
+				                        err_chk_msg     = "'" + po_dup_chk.po_no + "' 해당 발주로 생성된 구매요청건 입니다." + "\n";
+				                        
+				                        err_cnt++;
+				                    }
+					            }
+					            
+					        }
+				        }
+				        
+				        if( err_cnt > 0 ) 
+				        {
+				            resultMap.requery_flag = "Y";
+	                        resultMap.rtrn_code    = "E";
+	                        resultMap.rtrn_msg     = err_chk_msg;
+				        }
+				        
+			            /**********************************************************
+	                    ***************     데이터 이중화 방지    END    *************
+	                    ***********************************************************/
+                    }
+                    
+                    /**********************************************************
+                    **********    구매요청 테이블 Transaction  START  ***********
+                    ***********************************************************/
+                    if( resultMap.rtrn_code != "E" )
+                    {
+						for( var i = 0 ; i < gridSC.size() ; i++ ) {
+		                	var gridItem   = gridSC.get(i);
+		                	
+		                	// var pre_check_auto_po = $jdbc.query("biztalk", "select.check_auto_po_cnt" , gridItem);
+		                	
+		                	 if ((gridItem.pr_mod_cnt < 2 || gridItem.release_flag == "Y")){		
+								$jdbc.update("procurement/pr", "merge.espprdt", gridItem);
+							}
+						}                  
+	                    
+	                    //ESPPRHD Merge
+	                    $jdbc.update("procurement/pr", "merge.espprhd", headerSO           );
+	                    //ESPPRSV Insert
+	                    $jdbc.batch("procurement/pr" , "merge.espprsv", insSvcSC          );
+	                    //ESPPRAC Merge
+	                    $jdbc.batch("procurement/pr" , "merge.espprac", insAccSC           );
+	                    
+	                    resultMap.rtrn_code   = "S";
+	                    resultMap.rtrn_msg    = succ_msg;
+	                    requery_flag          = "Y";
+	                }
+	                resultMap.pr_no       = headerSO.pr_no;
+	                
+	                headerSO.rtrn_code = resultMap.rtrn_code; //2012.10.23 추가
+	                
+	                /**********************************************************
+                    **********    구매요청 테이블 Transaction  END    ***********
+                    ***********************************************************/
+	                
+	                
+	                /**********************************************************
+                    **********             Biztalk Call Job         ***********
+                    ***********************************************************/
+
+                    if( resultMap.rtrn_code == "S" && headerSO.purc_req_typ == "NC" && ( headerSO.trans_flag == "send" || headerSO.trans_flag == "app" || (headerSO.trans_flag == "del" && !strUtil.isEmpty(headerSO.sap_pr_no))) )
+                    {
+                        
+                        if( sPrChgPurc == "Y" )
+                            $jdbc.update("procurement/pr","update.pr.ifflag.by.gu", headerSO);
+                        else
+                            $jdbc.update("procurement/pr","update.pr.ifflag", headerSO);
+                            
+                      //  if( resultMap.rtrn_code == "S" && headerSO.auto_aprv_yn == "Y" )
+                      //      $service.callJob("biztalk.app.send");
+                    }
+                    else if( headerSO.trans_flag != "temp" )
+                    {
+                        if( resultMap.rtrn_code == "S" )
+                        {
+                            if( sPrChgPurc == "Y" )
+                                $jdbc.update("procurement/pr","update.pr.status.by.gu", headerSO);
+                            else
+                                $jdbc.update("procurement/pr","update.pr.status", headerSO);
+                        }    
+                    }    
+                    
+                    if( resultMap.rtrn_code == "S" )
+                    {
+                        requery_flag          = "Y";
+                        
+                        if( headerSO.trans_flag == "send" )
+                            $service.callJob("aprv.after.pr.auto.send");
+                    }
+                    
+                    resultMap.requery_flag = requery_flag;   
+               
+               		// var pre_check_auto_po  = $jdbc.query("biztalk", "select.check_auto_po_cnt" , headerSO);
+                   
+                    if( resultMap.rtrn_code == "S" && headerSO.trans_flag == "send" && resultMap.auto_yn == "Y") 
+                    {
+                        succ_msg = "구매요청번호 : " + resultMap.pr_no + " 이\n" +
+                                   "발주번호     : " + resultMap.po_no + " 으로 \n" + 
+                                   "자동발주되었습니다.";
+                        
+                        resultMap.rtrn_msg = succ_msg;
+                    }
+                    
+                }
+                catch(e)
+                {
+                    $jdbc.rollback();
+                    var err_msg  = "";
+                    var err      = e.toString();
+                    $logger.info("err==============>"+err);
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    
+                    rtrn_msg     = fail_msg + " " + "\n" + "에러내용" + " : " + err_msg;
+                    
+                    resultMap.requery_flag = "N";
+                    resultMap.rtrn_code    = "E";
+                    resultMap.rtrn_msg     = rtrn_msg;
+                }
+                
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>
+    
+    <service id="save.qrinfo" label="구매견적의뢰 저장">
+        <script>
+            <![CDATA[
+                importClass(Packages.emro.util.StringUtil);
+                importPackage(Packages.emro.util);
+                var resultMap    = new Map();
+                var strUtil      = new StringUtil();
+                var mode         = "";
+                var succ_msg     = "";
+                var fail_msg     = "";
+                var insSvcSC     = new List();
+                var erp_send_yn  = "N";
+                var requery_flag = "N";
+                var iCnt         = 1;
+                
+                
+                /**************************************************************************************************  
+                 *****************                                                                 ****************
+                 *****************    ESPPRHD, ESPPRDT, ESPPRSV, ESPPRAC 테이블 Transaction 처리     ****************
+                 *****************                                                                 ****************
+                 *************************************************************************************************/ 
+                try
+                {
+                    var headerSO          = $data.headerSO; //기본정보
+                    var gridSC            = $data.gridSC;   //물품정보
+                    var transmitFiles     = $data.transmitFiles;    
+                    var deleteFiles       = $data.deleteFiles;
+                    
+                    /**************  구매요청번호 채번  *****************/
+                    if( strUtil.isEmpty(headerSO.pr_no) )
+                    {
+                        mode           = "C";
+                        
+                        if( headerSO.trans_flag == "send" )
+                        {
+                            succ_msg       = "구매팀으로 전송되었습니다.";
+                            fail_msg       = "구매팀전송시 에러가 발생을 하였습니다.";
+                        }
+                        else
+                        {
+                            succ_msg       = "임시 저장이 되었습니다.";
+                            fail_msg       = "임시 저장시 에러가 발생을 하였습니다.";
+                        }
+                        headerSO.pr_no = $helper.generateCode('QR');
+                        
+                        succ_msg       = "구매요청번호 : " + headerSO.pr_no + "\n" + succ_msg;
+                    }
+                    else
+                    {
+                        if( headerSO.trans_flag == "send" )
+                        {
+                            succ_msg       = "구매팀으로 전송되었습니다.";
+                            fail_msg       = "구매팀전송시 에러가 발생을 하였습니다.";
+                        }
+                        else if( headerSO.trans_flag == "del" )
+                        {
+                            succ_msg       = "삭제 되었습니다.";
+                            fail_msg       = "삭제시 에러가 발생을 하였습니다.";
+                        }
+                        else
+                        {
+                           succ_msg       = "수정이 되었습니다.";
+                           fail_msg       = "수정시 에러가 발생을 하였습니다.";
+                        }
+                        
+                        mode           = "U";
+                    }
+                    
+                    headerSO.mode = mode;
+                        
+                    for( var i = 0 ; i < gridSC.size() ; i++ )
+                    {
+                        var gridItem      = gridSC.get(i);
+                        
+                        gridItem.pr_no    = headerSO.pr_no;
+                        gridItem.purc_typ = headerSO.purc_typ;
+                        gridItem.cur      = headerSO.cur;
+                        gridItem.mode     = mode;
+                        
+                        //pr_lno가 없을 시
+                        if ( strUtil.isEmpty(gridItem.pr_lno) )
+                        {
+                            var prLnoMap    = $jdbc.query("procurement/pr", "prdt.max.count", headerSO);
+                            
+                            gridItem.pr_lno = ( parseInt(prLnoMap.cnt) + iCnt ) * 10;
+                            
+                            iCnt++;
+                        }
+                        
+                        //품목의 구매유형이 '공사/용역'인 경우에 서비스테이블를 생성한다.
+                        if( gridItem.purc_typ == "CT" )
+                        {
+                            //pr_lno가 없을 시
+                            if ( strUtil.isEmpty(gridItem.pr_svc_lno) )
+                            {
+                                gridItem.pr_svc_lno = "10"; //서비스는 무조건 하나
+                            }
+                            
+                           insSvcSC.add(gridItem);
+                        }
+                    }
+                    
+                    // =================================================
+                    //               첨부파일 처리 
+                    // =================================================
+                    var attach = new AttachmentAgency();
+                    var grpcd2 = attach.save( headerSO.att_no, transmitFiles, deleteFiles );
+                    
+                    headerSO.att_no = grpcd2; 
+                    
+                    /**********************************************************
+                    ***************     데이터 이중화 방지    START  *************
+                    ***********************************************************/
+                    var err_cnt     = 0;
+                    var err_chk_msg = "";
+                     
+                    if( err_cnt == 0 )
+                    {   
+                        for( var i = 0 ; i < gridSC.size() ; i++ )
+                        {
+                            var gridItem   = gridSC.get(i);
+                            
+                            //Rfx에 데이터 생성여부 Check
+                            var rfq_dup_chk = $jdbc.query("procurement/pr", "chk.dup.rfq", gridItem);
+                            
+                            if( !strUtil.isEmpty(rfq_dup_chk) )
+                            {
+                                if( rfq_dup_chk.cnt != "0" )
+                                {
+                                    err_chk_msg     = err_chk_msg + "'" + rfq_dup_chk.rfq_no + "' 해당 RFx로 생성된 구매요청건 입니다." + "\n";
+                                    
+                                    err_cnt++;
+                                }
+                            }
+                            
+                            //PO에 데이터 생성여부 Check
+                            var po_dup_chk = $jdbc.query("procurement/pr", "chk.dup.po", gridItem);
+                            
+                            if( !strUtil.isEmpty(po_dup_chk) )
+                            {
+                                if( po_dup_chk.cnt != "0" )
+                                {
+                                    err_chk_msg     = "'" + po_dup_chk.po_no + "' 해당 발주로 생성된 구매요청건 입니다." + "\n";
+                                    
+                                    err_cnt++;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if( err_cnt > 0 ) 
+                    {
+                        resultMap.requery_flag = "Y";
+                        resultMap.rtrn_code    = "E";
+                        resultMap.rtrn_msg     = err_chk_msg;
+                    }
+                    
+                    /**********************************************************
+                    ***************     데이터 이중화 방지    END    *************
+                    ***********************************************************/
+                    
+                    /**********************************************************
+                    **********    구매요청 테이블 Transaction  START  ***********
+                    ***********************************************************/
+                    if( resultMap.rtrn_code != "E" )
+                    {
+                        //ESPPRDT Merge
+                        $jdbc.batch("procurement/pr" , "merge.espprdt", gridSC      );
+                        //ESPPRHD Merge
+                        $jdbc.update("procurement/pr", "merge.espprhd", headerSO    );
+                        //ESPPRSV Insert
+                        $jdbc.batch("procurement/pr" , "merge.espprsv", insSvcSC    );
+                        
+                        resultMap.rtrn_code   = "S";
+                        resultMap.rtrn_msg    = succ_msg;
+                        requery_flag          = "Y";
+                    }
+                    
+                    resultMap.pr_no    = headerSO.pr_no;
+                    headerSO.rtrn_code = resultMap.rtrn_code;
+                    
+                    /**********************************************************
+                    **********    구매요청 테이블 Transaction  END    ***********
+                    ***********************************************************/
+
+                    if( resultMap.rtrn_code == "S" )
+                    {
+                        $jdbc.update("procurement/pr","update.pr.status", headerSO);
+                        
+                        requery_flag = "Y";
+                    }    
+                    
+                    resultMap.requery_flag = requery_flag;   
+                }
+                catch(e)
+                {
+                    $jdbc.rollback();
+                    var err_msg  = "";
+                    var err      = e.toString();
+                    $logger.info("err==============>"+err);
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    
+                    rtrn_msg     = fail_msg + " " + "\n" + "에러내용" + " : " + err_msg;
+                    
+                    resultMap.requery_flag = "N";
+                    resultMap.rtrn_code    = "E";
+                    resultMap.rtrn_msg     = rtrn_msg;
+                }
+                
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>  
+    
+    <service id="get.aprv" label="구매요청목록 조회">
+        <script>
+            <![CDATA[
+                importPackage(Packages.emro.util);
+                importClass(Packages.emro.util.StringUtil);
+                var resultMap    = new Map();
+                var strUtil      = new StringUtil();
+                
+                try
+                {
+                    var aprvSO     = $data.aprvSO; //기본정보
+                    /************************************************************************
+                    ***************                   전 자 결 재           ********************
+                    *************************************************************************/
+                    if( aprvSO.trans_flag == "app" )
+                    {
+                        var sAprvCnt = "1";
+                        var proper = $xmlManager.getDescriptor("properties");
+                        var aprvUrl  = proper.getDescriptorElement($user.s_comp_cd+".approval.url").getText();
+                        var maxPath  = proper.getDescriptorElement("webserver.url"   ).getText();
+                        
+                        aprvSO.job_cd = "PR";
+                        var aprvInfo = $jdbc.query("procurement/pr", "get.aprv.query.no", aprvSO );
+                        
+                        var aprvCnt = $jdbc.query("procurement/pr", "get.aprv.cnt", aprvSO );
+                       
+                        if( aprvCnt != null )
+                        {
+                            sAprvCnt = aprvCnt.aprv_cnt;
+                        }
+                        
+                        if( aprvInfo != null )
+                        {
+                            aprvSO.max_row = aprvInfo.max_row;
+                            var max_url = maxPath + aprvInfo.max_url + "?sys_id=EMRO&comp_cd=" + aprvSO.s_comp_cd + "&locale=" + $user.locale + "&doc_no=" + aprvInfo.doc_no + "&pr_no=" + aprvSO.pr_no;
+                            
+                            aprvSO.max_url = max_url;
+                            
+	                        //XML 데이터를 생성
+	                        var xml = new CreateXmlData(); 
+	                        xml.mapDataToXML("HEADER", $jdbc.query    ("procurement/pr", "aprv.pr.header."+aprvInfo.doc_no, aprvSO )      ); //개요
+	                        xml.listDataToXML("ITEM" , $jdbc.queryList("procurement/pr", "aprv.pr.item."+aprvInfo.doc_no  , aprvSO ), "Y" ); //상세내역
+	                        
+	                        if( aprvInfo.doc_no == "1.1" )
+                                xml.mapDataToXML("ETC",    $jdbc.query    ("procurement/pr", "aprv.pr.etc."+aprvInfo.doc_no, aprvSO )      ); //개요
+	                        
+	                        xml.attachListDataToXML( $jdbc.query('procurement/pr', 'get.aprv.pr.attach', aprvSO).att_no );
+	                        
+	                        aprvSO.url          = aprvUrl;
+	                        aprvSO.aprv_ref_no  = $user.s_comp_cd + "@" + aprvSO.pr_no + "@" + sAprvCnt;
+	                        aprvSO.aprv_req_id  = $user.usr_id;
+	                        aprvSO.aprv_doc_typ = "PR";
+	                        aprvSO.aprv_xml     = xml.getXmlData();
+	                        
+	                        $data.aprvSO        = aprvSO;
+	                    }
+                    }
+                    
+                    resultMap.rtrn_code   = "S";
+                    resultMap.rtrn_msg    = "";
+                }
+                catch(e)
+                {
+                   $jdbc.rollback();
+                   erp_send_yn  = "N";
+                   var err_msg  = "";
+                   var err      = e.toString();
+                   var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                   
+                   if ( strUtil.isEmpty(ora_err) )
+                      err_msg = err;
+                   else
+                      err_msg = ora_err;
+                   
+                   rtrn_msg     = "에러내용" + " : " + err_msg;
+                   resultMap.rtrn_code   = "E";
+                   resultMap.rtrn_msg    = rtrn_msg;
+                }  
+                $data.rtnSO = resultMap; 
+            ]]>
+        </script>
+    </service>
+
+	<service id="select.pr.excel.item" label="">
+		<script>
+			<![CDATA[
+				var resultMap = new Map();
+				//품목조회시 사용하는 운영조직으로 변경
+				var param = $data.param;
+				param.oper_unit_cd = "IO";
+				param.comp_cd = $user.comp_cd;
+				$data.getOperOrgSn = $jdbc.queryList('admin/org', 'operorg.io_combolist', param);
+
+				for( var i = 0 ; i < $data.uploadSC.size() ; i++ )
+				{
+					var uploadSO = $data.uploadSC.get(i);
+					uploadSO.seq = i+1;
+					//해당 품목 코드 존재여부 확인
+					uploadSO.oper_org_sn = $data.getOperOrgSn[0].oper_org_sn;//품목에서 사용하는 운영조직
+					uploadSO.endRowNum = '0'; //품목조회시 필요값
+					uploadSO.pageRowNum = '500'; // 품목조회시 필요값
+					uploadSO.prc_cnt_yn = 'N'; // 품목조회시 필요값
+					
+					var checkItemcd = $jdbc.queryList("procurement/pr", "select.pr.item.cataloglist", uploadSO);
+
+					for (var itemIndex=0; itemIndex< checkItemcd.size(); itemIndex++){
+						var detailItemInfo = checkItemcd.get(itemIndex);
+						if (uploadSO.item_cd == detailItemInfo.item_cd){
+						
+							uploadSO.bas_unit_cd 		= detailItemInfo.bas_unit_cd;
+							uploadSO.item_nm 			= detailItemInfo.item_nm;
+							uploadSO.spec 				= detailItemInfo.spec;
+							uploadSO.auto_po_yn 		= detailItemInfo.auto_po_yn;
+							uploadSO.auto_po_yn_nm	= detailItemInfo.auto_po_yn_nm;
+							uploadSO.rep_cd_yn 		= detailItemInfo.rep_cd_yn;
+							uploadSO.auto_po_yn 		= detailItemInfo.auto_po_yn;
+							uploadSO.prc_yn 				= detailItemInfo.prc_yn;
+							
+							if ("Y" == detailItemInfo.auto_po_yn || "Y" == detailItemInfo.prc_yn){
+								uploadSO.vd_cd 				= detailItemInfo.vd_cd;
+								uploadSO.pr_price			= detailItemInfo.item_price;
+								uploadSO.item_price			= detailItemInfo.item_price;
+							}
+							continue;
+						}
+					}
+
+
+					//해당 업체 코드 존재여부 확인
+					uploadSO.oper_org_sn = param.oper_org_sn;// 업체에서 사용하는 운영조직
+					uploadSO.rfxFlag = 'X'; //업체조회시 필요값
+					uploadSO.ext_cd  =  '003'; //업체조회시 필요값
+					var checkVdcd = $jdbc.queryList("common/popup", "select.all.vendor", uploadSO);
+
+					for (var checkVdIndex=0; checkVdIndex< checkVdcd.size(); checkVdIndex++){
+						var detailVdInfo = checkVdcd.get(checkVdIndex);
+						if (uploadSO.vd_cd.toUpperCase() == detailVdInfo.vd_cd.toUpperCase()){
+							uploadSO.vd_nm_loc = detailVdInfo.vd_nm_loc;
+							uploadSO.vd_cd = detailVdInfo.vd_cd;
+							continue;
+						}
+					}
+
+					if(checkItemcd.size() == 0){
+						resultMap.item_rtrn_code = "F";
+						resultMap.item_rtrn_msg  = "업체코드 "+uploadSO.vd_cd+"의  품목코드  "+uploadSO.item_cd+" 가 존재하지 않습니다.";
+					}else{
+						resultMap.item_rtrn_code = "S";
+						resultMap.item_rtrn_msg  = "";
+					}
+
+					if(checkVdcd.size() == 0){
+						resultMap.vdcd_rtrn_code = "F";
+						resultMap.vdcd_rtrn_msg  = "업체코드  "+uploadSO.vd_cd+" 가   존재하지 않습니다.";
+					}else{
+						resultMap.vdcd_rtrn_code = "S";
+						resultMap.vdcd_rtrn_msg  = "";
+					}
+				}
+
+				if(resultMap.item_rtrn_code == "F"){//아이템 코드가 없을때
+					resultMap.rtrn_code = "F";
+					resultMap.rtrn_msg = resultMap.item_rtrn_msg;
+				}else if(resultMap.vdcd_rtrn_code == "F"){//업체코드가 없을때
+					resultMap.rtrn_code = "F";
+					resultMap.rtrn_msg = resultMap.vdcd_rtrn_msg;
+				}else{
+					resultMap.rtrn_code = "S";
+					$data.excelSC = $data.uploadSC;
+					$jdbc.batch("procurement/pr", "insert.temp.excel.item", $data.uploadSC );
+				}
+				$data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>
+    
+    <service id="get.pr.list" label="구매요청목록 조회">
+        <script>
+            <![CDATA[
+                importClass(Packages.emro.util.StringUtil);
+                var resultMap = new Map();
+                var gridSC    = new List();
+                var itemList  = new List();
+                var strUtil   = new StringUtil();
+                
+                try
+                {
+                    var param = $data.searchSO;
+                    if(param.isCopySearch){//구매요청복사시 조회할때
+                    	gridSC    = $jdbc.queryList("procurement/pr", "select.pr.list.copySearch", param);
+                    }else{
+	                    gridSC    = $jdbc.queryList("procurement/pr", "select.pr.list", param);
+                    }
+                    
+                    resultMap.rtrn_code = "S";
+                    resultMap.rtrn_msg  = "";
+                }
+                catch(e)
+                {
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "조회시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    
+                    resultMap.rtrn_code = "E";
+                    resultMap.rtrn_msg  = rtrn_msg;
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+                $data.gridSC = gridSC;
+                $data.rtnSO  = resultMap;
+            ]]>
+        </script>
+    </service>
+    
+	<service id="get.reject.cause" label="반송사유 조회">
+        <script>
+            <![CDATA[
+            importClass(Packages.emro.util.StringUtil);
+            var strUtil   = new StringUtil();
+            var resultMap = new Map();
+            
+            try
+                {
+                    var resultSO     = new Map();
+                    var reject_cause = "";
+                    var sEnt         = "\n\n";
+                    var resultList   = $jdbc.queryList("procurement/pr", "select.pr_reject.list", $data.searchSO);
+
+                    for( var i = 0 ; i < resultList.size() ; i++ )
+                    {
+                    	var itemSO = resultList.get(i);
+                    	
+                    	if( i == resultList.size() - 1 )
+                        	sEnt = "";
+                        if( !strUtil.isEmpty( itemSO.reject_cause ) )
+                        	reject_cause = reject_cause + "[ 항번 : " + itemSO.pr_lno + " ]\n" + "반송사유 : \n" + itemSO.reject_cause + sEnt; 
+                    }
+   
+					resultSO.reject_cause = reject_cause;                    
+                    
+                    resultMap.rtrn_code = "S";
+                    resultMap.rtrn_msg  = "";
+                }
+                catch(e)
+                {
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "조회시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    
+                    resultMap.rtrn_code = "E";
+                    resultMap.rtrn_msg  = rtrn_msg;
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+                $data.resultSO = resultSO;
+                $data.rtnSO    = resultMap;
+            ]]>
+        </script>
+    </service>
+            
+    <service id="get.pr.progstslist" label="구매요청진행현황 조회">
+        <script>
+            <![CDATA[
+                var resultMap = new Map();
+                
+                try
+                {
+                    importPackage(Packages.emro.util);
+                    importClass(Packages.emro.util.StringUtil);
+                    
+                    var proper = $xmlManager.getDescriptor("properties");
+                    var ozUrl  = proper.getDescriptorElement("ozserver.url").getText();
+                    var ozSO   = new Map();
+                    ozSO.url   = ozUrl;
+                    $data.ozSO = ozSO;  
+                        
+                    $data.resultList = $jdbc.queryList("procurement/pr", "select.pr.progstslist", $data.searchInfo);
+                    resultMap.put("rtrn_code", "S");
+                    resultMap.put("rtrn_msg" , "" );
+                }
+                catch(e)
+                {
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "조회시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    resultMap.put("rtrn_code", "E"     );
+                    resultMap.put("rtrn_msg" , rtrn_msg);
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>
+    
+    <service id="delete.pr.list" label="구매요청삭제 (espprhd)">
+        <script>
+            <![CDATA[
+                importClass(Packages.emro.util.StringUtil);
+                var strUtil      = new StringUtil();
+                var erp_send_yn  = "N";
+                var fail_msg     = "";
+                var resultMap    = new Map();
+                var updateSC     = new List();
+                var headerSO     = $data.delSO;
+                
+                try
+                {
+                    var err_cnt     = 0;
+                    var err_chk_msg = "";
+			        
+                    headerSO.mode = "D";
+                    var prhd_status = $jdbc.query("procurement/pr", "chk.status.prhd", headerSO);
+                    if( !strUtil.isEmpty(prhd_status) )
+                    {
+                        if( !strUtil.isEmpty(prhd_status.err_msg) )
+                        {
+                           err_chk_msg  = prhd_status.err_msg;
+                           err_cnt++;
+                        }
+                    }
+                    
+                    if( err_cnt > 0 ) 
+                    {
+                        resultMap.requery_flag = "Y";
+                        resultMap.rtrn_code    = "E";
+                        resultMap.rtrn_msg     = err_chk_msg;
+                    }
+                    else
+                    {
+                        $jdbc.update("procurement/pr", "pr.delete", headerSO);
+                        
+                        resultMap.put("rtrn_code"   , "S"  );
+                        resultMap.put("rtrn_msg"    , ""   );
+                    }
+                    
+                    /**********************************************************
+                    **********             Biztalk Call Job         ***********
+                    ***********************************************************/
+                    if( headerSO.purc_req_typ == "NC" && !strUtil.isEmpty(headerSO.sap_pr_no) && resultMap.rtrn_code == "S" && headerSO.if_typ == "S")
+                        $service.callJob("biztalk.send");
+                        
+                    /************************************************************************
+                    ***************   PR상태, 결재상태, ERP번호 등 UPDATE   ********************
+                    *************************************************************************/
+                    if( resultMap.rtrn_code != "E" )
+                    {
+                        $jdbc.update("procurement/pr","update.pr.ifflag", headerSO);
+                    }    
+                } 
+                catch(e)
+                {
+                   $jdbc.rollback();
+                   erp_send_yn  = "N";
+                   var err_msg  = "";
+                   var err      = e.toString();
+                   var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                   
+                   if ( strUtil.isEmpty(ora_err) )
+                      err_msg = err;
+                   else
+                      err_msg = ora_err;
+                   
+                   rtrn_msg     = "에러내용" + " : " + err_msg;
+                   resultMap.rtrn_code   = "E";
+                   resultMap.rtrn_msg    = rtrn_msg;
+                } 
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>        
+    </service>  
+    
+    <service id="copy.prinfo" label="구매요청복사">
+        <script>
+            <![CDATA[
+            var resultMap = new Map();
+                
+            try
+            {
+                var param = $data.headerInfo;
+                /*
+                 * pr_no 채번
+                 */
+                param.new_pr_no = $helper.generateCode('PR');
+                $jdbc.update("procurement/pr", "copy.espprhd", param);
+                $jdbc.update("procurement/pr", "copy.espprdt", param);
+                $jdbc.update("procurement/pr", "copy.espprsv", param);
+                $jdbc.update("procurement/pr", "copy.espprac", param);
+            
+                resultMap.put("rtrn_code"   , "S"  );
+                resultMap.put("rtrn_msg"    , ""   );
+                param.pr_no = param.new_pr_no;
+                $data.headerInfo = param;
+            }
+            catch(e)
+            {
+                var err      = e.toString();
+                var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                rtrn_msg     = "COPY 도중 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                resultMap.put("rtrn_code"   , "E"     );
+                resultMap.put("rtrn_msg"    , rtrn_msg);
+            }
+            $data.rtnSO = resultMap;
+            
+            ]]>
+        </script>
+    </service>
+
+    <service id="get.pr.modify.request.list" label="변경요청대상목록 조회">
+        <script>
+            <![CDATA[
+                var resultMap = new Map();
+                
+                try
+                {
+                    $data.resultList = $jdbc.queryList("procurement/pr", "select.pr.modify.request.list", $data.searchInfo);
+                    resultMap.put("rtrn_code", "S");
+                    resultMap.put("rtrn_msg" , "" );
+                }
+                catch(e)
+                {
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "조회시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    resultMap.put("rtrn_code", "E"     );
+                    resultMap.put("rtrn_msg" , rtrn_msg);
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>
+    
+    <service id="save.pr.modify.request" label="변경요청대상목록 저장">
+        <script>
+            <![CDATA[
+                var resultMap = new Map();
+                
+                try
+                {
+                    $jdbc.batch("procurement/pr",  "update.pr.modify.request.init.espprdt", $data.gridSC);
+                    $jdbc.batch("procurement/pr",  "update.pr.modify.request.espprdt",      $data.gridSC);
+                    $jdbc.update("procurement/pr", "update.pr.modify.request.espprhd",      $data.headerSO);
+                    
+                    resultMap.put("rtrn_code", "S");
+                    resultMap.put("rtrn_msg" , "" );
+                }
+                catch(e)
+                {
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "조회시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    resultMap.put("rtrn_code", "E"     );
+                    resultMap.put("rtrn_msg" , rtrn_msg);
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>
+    
+    <service id="save.pr.release" label="변경요청승인대상목록 승인/반려">
+        <script>
+            <![CDATA[
+                var resultMap = new Map();
+                
+                try
+                {
+                    $jdbc.update("procurement/pr", "update.pr.modify.request.espprhd", $data.headerInfo);
+                    $jdbc.batch("procurement/pr",  "update.pr.modify.request.espprdt", $data.updateDetail);
+                    
+                    resultMap.put("rtrn_code", "S");
+                    resultMap.put("rtrn_msg" , "" );
+                }
+                catch(e)
+                {
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = ( $data.headerInfo.mod_req_prog_sts == "A" ) ? "PR변경요청 승인 시 " : "PR변경요청 반려 시 ";
+                    rtrn_msg    += "에러가 발생하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    resultMap.put("rtrn_code", "E"     );
+                    resultMap.put("rtrn_msg" , rtrn_msg);
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>
+    
+    <service id="get.pr.release.list" label="변경요청승인대상목록 조회">
+        <script>
+            <![CDATA[
+                var resultMap = new Map();
+                
+                try
+                {
+                    $data.resultList = $jdbc.queryList("procurement/pr", "select.pr.release.list", $data.searchInfo);
+                    resultMap.put("rtrn_code", "S");
+                    resultMap.put("rtrn_msg" , "" );
+                }
+                catch(e)
+                {
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "PR변경요청승인목록 조회시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    resultMap.put("rtrn_code", "E"     );
+                    resultMap.put("rtrn_msg" , rtrn_msg);
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>
+
+    <service id="get.pr.receiptlist" label="PR접수 조회">
+        <script>
+            <![CDATA[
+                var resultMap  = new Map();
+                var searchInfo = new Map();
+                var resultList = new List();
+                
+                try
+                {
+                    importPackage(Packages.emro.util);
+                    importClass(Packages.emro.util.StringUtil);
+                    
+                    searchInfo = $data.searchInfo;
+                    
+                    if( searchInfo.isPopup == "Y" )
+                    {
+                        $jdbc.batch("procurement/pr", "insert.temp.for.rfx.list", $data.tempList);
+                        
+	                    var add_sql   = "";
+	                    add_sql += "AND ( \n";
+	                    add_sql += "                               PRDT.MOD_STS IS NULL \n";
+	                    add_sql += "                            OR PRDT.MOD_STS <> 'D' \n"; 
+	                    add_sql += "                           ) \n";
+	                    
+	                    add_sql += "                       AND NOT EXISTS ( SELECT 'x' \n";
+	                    add_sql += "                                          FROM ESPTEMP \n";
+	                    add_sql += "                                         WHERE PRDT.SYS_ID  = SYS_ID \n";
+	                    add_sql += "                                           AND PRDT.COMP_CD = COMP_CD \n";
+	                    add_sql += "                                           AND PRDT.PR_NO   = PR_NO \n";
+	                    add_sql += "                                           AND PRDT.PR_LNO  = PR_LNO \n";
+	                    add_sql += "                                       ) \n";
+	                    
+                        add_sql += "                       AND ( \n";
+                        add_sql += "                               ( \n";
+                        add_sql += "                               AND PRDT.COST_TYP IN ( SELECT COST_TYP \n";
+                        add_sql += "                                                        FROM ESPTEMP \n";
+                        add_sql += "                                                       WHERE SYS_ID  = PRDT.SYS_ID \n";
+                        add_sql += "                                                         AND COMP_CD = PRDT.COMP_CD ) \n";
+                        add_sql += "                               ) \n";
+                        add_sql += "                            OR \n";
+                        add_sql += "                               ( \n";
+	                    add_sql += "                               ) \n";
+	                    add_sql += "                           ) \n";
+	                    
+                        searchInfo.put("addsql", add_sql);
+                    } 
+                    
+                    if(searchInfo.multi_pr_no != null || searchInfo.multi_sap_pr_no != null)
+                    {
+                        $jdbc.batch('procurement/pr', 'insert.multi_pr_no.temp2'     ,  $data.prNoList);
+                        $jdbc.batch('procurement/pr', 'insert.multi_sap_pr_no.temp2' ,  $data.sapPrNoList);
+                        $jdbc.batch('procurement/pr', 'insert.multi_sap_grp_cd.temp2',  $data.sapGrpList);                            
+                    }
+                    
+                    resultList = $jdbc.queryList("procurement/pr", "select.pr.receiptlist", searchInfo);
+                    
+                    resultMap.put("rtrn_code", "S");
+                    resultMap.put("rtrn_msg" , "" );
+                    
+                    //구매 운영조직 콤보박스 데이터 조회
+                    var param = new Map();
+                    param.oper_unit_cd = "PO";
+                    param.comp_cd = $user.comp_cd;
+                    $data.operOrgSnSC = $jdbc.queryList('admin/org', 'operorg.po_combolist', param);
+                    $data.resultList = resultList;
+                }
+                catch(e)
+                {
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "조회시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    resultMap.put("rtrn_code", "E"     );
+                    resultMap.put("rtrn_msg" , rtrn_msg);
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>
+    
+    <service id="select.progsts" label="접수 - PR상태 체크">
+        <script>
+            <![CDATA[
+                var resultMap = new Map();
+                var checkSO   = $data.checkSO
+                
+                try
+                {
+                    resultMap.check_yn = $jdbc.query("procurement/pr", "select.prdt.prog_sts", checkSO ).check_yn;
+                    
+                    checkSO.check_yn = resultMap.check_yn; 
+                }
+                catch(e)
+                {
+                    $jdbc.rollback();
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "PR변경시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    resultMap.put("rtrn_code", "E"     );
+                    resultMap.put("rtrn_msg" , rtrn_msg);
+                }
+                
+                $data.rtnSO = checkSO;
+            ]]>
+        </script>
+    </service>
+    
+    <service id="update.prdt.prog_sts" label="접수 - PR접수(espprdt)">
+        <script>
+            <![CDATA[
+                var resultMap = new Map();
+                var prdtSC    = $data.prdtSC;
+                
+                try
+                {
+                    $jdbc.batch("procurement/pr", "prdt.prog_sts.update", $data.prdtSC);
+                    resultMap.put("rtrn_code", "S");
+                    resultMap.put("rtrn_msg" , "" );
+                }
+                catch(e)
+                {
+                    $jdbc.rollback();
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "접수시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    resultMap.put("rtrn_code", "E"     );
+                    resultMap.put("rtrn_msg" , rtrn_msg);
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>
+
+    <service id="update.prdt.purc_grp_cd" label="구매그룹변경 - PR접수(물품)(공사/용역) (espprdt)">
+        <script>
+            <![CDATA[
+                var resultMap = new Map();
+                
+                try
+                {
+                    $jdbc.batch("procurement/pr", "prdt.purc_grp_cd.update", $data.prdtSC);
+                    resultMap.put("rtrn_code", "S");
+                    resultMap.put("rtrn_msg" , "" );
+                }
+                catch(e)
+                {
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "구매그룹변경시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    resultMap.put("rtrn_code", "E"     );
+                    resultMap.put("rtrn_msg" , rtrn_msg);
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>  
+
+    <service id="update.prdt.reject" label="PR 반송 - PR접수(물품)(공사/용역) (espprdt)">
+        <script>
+            <![CDATA[
+                importClass(Packages.emro.util.StringUtil);
+                var strUtil      = new StringUtil();
+                var erp_send_yn  = "N";
+                var fail_msg     = "";
+                var resultMap    = new Map();
+                var updateSC     = new List();
+                var headerSO     = $data.prdtSO;
+                var rejectSC     = headerSO.list;
+                
+                try
+                {
+                    $jdbc.batch("procurement/pr", "prdt.reject.update", rejectSC);
+                    
+                    headerSO.pr_lno = "";
+                    headerSO.elec_aprv_yn = "Y";
+                                            
+                    /**********************************************************
+                    **********             Biztalk Call Job         ***********
+                    ***********************************************************/
+                    if( headerSO.purc_req_typ == "NC" && !strUtil.isEmpty(headerSO.sap_pr_no) && headerSO.if_typ == "S")
+                        $service.callJob("biztalk.send");
+                    else if( headerSO.pr_no.substring(0, 2) == "WR" )
+                        $service.callJob("wcms.pr.reject"); 
+                        
+                        
+                    /************************************************************
+                    **********   PR상태, 결재상태, ERP번호 등 UPDATE   *************
+                    *************************************************************/
+                    if( resultMap.rtrn_code != "E" )
+                    {    
+                        $jdbc.batch("procurement/pr","update.pr.ifflag", rejectSC);
+                    }
+                } 
+                catch(e)
+                {
+                   $jdbc.rollback();
+                   erp_send_yn  = "N";
+                   var err_msg  = "";
+                   var err      = e.toString();
+                   var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                   
+                   if ( strUtil.isEmpty(ora_err) )
+                      err_msg = err;
+                   else
+                      err_msg = ora_err;
+                   
+                   rtrn_msg     = "에러내용" + " : " + err_msg;
+                   resultMap.rtrn_code   = "E";
+                   resultMap.rtrn_msg    = rtrn_msg;
+                } 
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+        <script>
+            <![CDATA[
+                try
+                {
+                    if( resultMap.rtrn_code != "E" )
+                    {
+                        ///////////////////////////////////////////////////////////////
+	                    // 1. ESASMTP 에서 메일 정보를 가져온다.
+	                    ///////////////////////////////////////////////////////////////
+	                    
+	                    headerSO.comp_cd    = $user.s_comp_cd;
+	                    headerSO.job_cls    = "PR_REJECT";
+	                    headerSO.send_nm    = $user.usr_nm;
+	                    headerSO.send_email = $user.email;
+	                    
+	                    var exmld         = $xmlManager.getDescriptor("properties");
+	                    var serverPath    = exmld.getDescriptorElement("server.url").getText(); //메일  JSP 참조하기 위한 URL(WAS)
+	                    var webserverPath = exmld.getDescriptorElement("webserver.url").getText(); //메일 image URL(외부웹서버)  ←←←← 추가(2012-08-29)
+	                    
+	                    var mailInfo = $jdbc.query("procurement/pr", "select.email.info", headerSO);
+	                    var mailContents = $jdbc.query("email", "select.email.template", headerSO);
+	                    
+	                    if( mailContents && mailInfo)
+	                    {
+	                       if(headerSO.send_email != null && mailInfo != null)
+	                       {
+	                           var snd_title   = mailContents.snd_title;
+	                           var snd_subject = mailContents.snd_subject;
+	                               
+	                           snd_title   = snd_title.replace  ('%send_nm%'      , headerSO.send_nm);      //from 
+	                           snd_subject = snd_subject.replace('%receive_nm%'   , headerSO.pr_req_nm);    //to
+	                           snd_subject = snd_subject.replace('%pr_no%'        , headerSO.pr_no);        //PR번호
+	                           snd_subject = snd_subject.replace('%pr_title%'     , headerSO.pr_tit);       //PR제목
+	                           snd_subject = snd_subject.replace('%reject_cause%' , headerSO.reject_cause); //반송사유
+	                           snd_subject = snd_subject.replace('%purc_grp_nm%'  , headerSO.purc_grp_nm);  //구매담당자
+	                           
+	                           ///////////////////////////////////////////////////////////////
+	                           // 2. EMAIL내용 준비
+	                           ///////////////////////////////////////////////////////////////
+	                           $data.idx   = 0;
+	                           $data.mails = new List();
+	                           
+	                           var mail = new Map();
+	                           mail.from        = headerSO.send_email;
+	                           
+	                           if(headerSO.send_email == null || headerSO.send_email == "")
+	                               mail.from     = mailContents.sys_email;
+	                           
+	                           mail.fromName     = headerSO.send_nm;
+	                           
+	                           if(headerSO.send_nm == null || headerSO.send_nm == "")
+	                               mail.fromName = mailContents.sys_email_nm;
+	                           
+	                           mail.to           = mailInfo.receive_email;
+	                           mail.toName       = mailInfo.receive_nm;
+	                           
+	                           mail.snd_title    = snd_title;   //메일 제목
+	                           mail.snd_subject  = snd_subject; //메일 본문
+	                           mail.url          = serverPath + "/mails/templateMail.jsp"; //공통메일 템플릿
+	                           mail.image_url    = webserverPath + "/mails/img/";  //메일  JSP 참조하기 위한 URL(WAS) ←←←← 추가변경(2012-08-29)
+	                           mail.comp_cd      = $user.s_comp_cd;  //각사별 메일 템플릿 구분자
+	                           
+	                           if(mail.from != null && mail.fromName != null && mail.to != null && 
+	                              mail.toName != null && mail.snd_title != null && mail.snd_subject != null)
+	                           {
+	                              $jdbc.update("email", "insert.email", mail);
+	                           }
+	                       }
+	                    }
+	                    
+	                    resultMap.put("rtrn_code", "S");
+	                    resultMap.put("rtrn_msg" , "" );
+                    }
+                }
+                catch(e)
+                {
+                    $jdbc.rollback();
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "구매요청 반송시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    resultMap.put("rtrn_code", "E"     );
+                    resultMap.put("rtrn_msg" , rtrn_msg);
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>
+    
+    <service id="get.itemprice.itemlist" label="단가계약일괄지정">
+        <script>
+            <![CDATA[
+                var resultMap = new Map();
+                
+                try
+                {
+                    $jdbc.batch("procurement/pr", "insertGlobalTemporaryTable", $data.itemList);
+                    $data.result = $jdbc.queryList("procurement/pr", "select.itemprice.itemlist", $data.searchSO);
+
+                    resultMap.put("rtrn_code", "S");
+                    resultMap.put("rtrn_msg" , "" );
+                }
+                catch(e)
+                {
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "조회시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    resultMap.put("rtrn_code", "E"     );
+                    resultMap.put("rtrn_msg" , rtrn_msg);
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+                $data.put("resultMSG", resultMap);
+            ]]>
+        </script>
+    </service>  
+    
+     <service id="update.itemprice.itemlist" label="단가계약일괄지정">
+        <script>
+            <![CDATA[
+                var resultMap = new Map();
+                
+                try
+                {
+                    var searchSO = $data.searchSO;                
+                    var chkSC    = $data.chkSC;
+                    var updates  = new List();
+                    
+                    var itemList = $jdbc.queryList("procurement/pr", "select.itemprice.for_update", searchSO);
+                    
+                    for( var i=0; i<itemList.size(); i++ )
+                    {
+                        var item = itemList.get(i);
+                        
+                        for( var j=0; j<chkSC.size(); j++ )
+                        {
+                            var obj = chkSC.get(j);
+                            
+                            if( obj.item_cd == item.item_cd )
+                            {
+                                obj.put( "pr_price"      , item.pr_price );
+                                obj.put( "vd_cd"         , searchSO.vd_cd );
+                                obj.put( "price_cntr_no" , searchSO.price_cntr_no);
+                                obj.put( "cntr_no"       , item.cntr_no );
+                                updates.add(obj);
+                            }
+                        }
+                    }
+                     
+                    $jdbc.batch("procurement/pr", "update.itemprice.itemlist", updates);
+
+                    resultMap.put("rtrn_code", "S");
+                    resultMap.put("rtrn_msg" , "단가구매로 전환 되었었습니다." );
+                }
+                catch(e)
+                {
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "조회시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    resultMap.put("rtrn_code", "E"     );
+                    resultMap.put("rtrn_msg" , rtrn_msg);
+                }
+                $logger.info("resultMap ====>"+resultMap);
+                $data.rtnSO = resultMap;
+            ]]>
+        </script>
+    </service>
+    
+    <service id="update.mrosend" label="행복나래 처리완료 (PR_PROG_STS : 업데이트) - 2012.07.20 추가">
+        <script>
+            <![CDATA[
+                var resultMap = new Map();
+                var mrosendSC = $data.mrosendSC;
+                
+                try
+                {
+                    $jdbc.batch("procurement/pr", "update.mrosend", mrosendSC);
+                    
+                    resultMap.put("rtrn_code", "S");
+                    resultMap.put("rtrn_msg" , "" );
+                }
+                catch(e)
+                {
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "처리시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    resultMap.put("rtrn_code", "E"     );
+                    resultMap.put("rtrn_msg" , rtrn_msg);
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+                $data.put("resultMSG", resultMap);
+            ]]>
+        </script>
+    </service>
+    
+    <service id="get.item.cate.tree" label="분류검색 조회">
+        <script>
+                <![CDATA[
+                $data.resultList = $jdbc.queryList("procurement/pr", "item.cate.tree.select", $data.searchInfo);
+                ]]>
+        </script>
+    </service>
+    
+    <service id="get.pr.item.cataloglist" label="품목검색 조회">
+        <script>
+            <![CDATA[
+                var resultMap = new Map();
+                var param = $data.searchInfo;
+                
+                var param1 = $data.param;
+                
+                try
+                {
+                    param.endRowNum=param1.endRowNum;
+                    param.pageRowNum=param1.pageRowNum;
+                    resultMap.put("tot_cnt"   ,0 );
+                    
+                    $data.resultList = $jdbc.queryList("procurement/pr", "select.pr.item.cataloglist", param);
+                    
+                    var map1 = $data.resultList[0];
+	                    
+                    if(map1==null ||  map1 ==undefined){ 
+                          resultMap.put("tot_cnt"   , "0");           
+                     }else{
+                         $data.resultList.setTotalRowNum(map1.total_row_num);
+                         resultMap.put("tot_cnt"   ,map1.total_row_num );                                 
+                     }
+                        
+                    resultMap.put("rtrn_code", "S");
+                    resultMap.put("rtrn_msg" , "" );
+                }
+                catch(e)
+                {
+                    var err      = e.toString();
+                    var ora_err  = err.substring(err.indexOf("ORA"), err.length);
+                    rtrn_msg     = "품목검색시 에러가 발생을 하였습니다." + "\n" + "에러내용" + " : " + ora_err;
+                    resultMap.put("rtrn_code", "E"     );
+                    resultMap.put("rtrn_msg" , rtrn_msg);
+                }
+                
+                $logger.info("resultMap ====>"+resultMap);
+                $data.rtnSO = resultMap;
+                $data.put("resultMap"     , resultMap  );
+            ]]>
+        </script>
+    </service>
+
+    <service id="get.pr.item.myItemSave" label="나의 품목지정 저장">
+       <script>
+            <![CDATA[
+               var itemList = $data.myItemList;
+               var myItem;
+               
+                for(var i=0; i<itemList.size(); i++){
+                    myItem = $jdbc.queryList("procurement/pr", "select.pr.item.myItemListInfo", itemList.get(i));
+                    if(myItem.size() > 0 ){
+                        $jdbc.update("procurement/pr", "update.pr.item.myItemUse", itemList.get(i));
+                    }else{
+                        $jdbc.update("procurement/pr", "insert.pr.item.myItemSave", itemList.get(i));                       
+                    }
+                }
+            ]]>
+      </script>
+    </service>
+
+    <service id="get.pr.item.myItemClear" label="나의 품목 해제 저장">
+       <script>
+            <![CDATA[
+               $jdbc.batch("procurement/pr", "update.pr.item.myItemClear", $data.myItemList);
+            ]]>
+      </script>
+    </service>
+    
+    <!-- 
+      ###################################################################################################################################
+      ###################################################################################################################################
+      #######################                                품 목 검 색 조 회       END                       ############################
+      ###################################################################################################################################
+      ###################################################################################################################################
+    -->
+    
+    <service id="get.pr.resultList" label="구매실적대장(품목단위)">
+        <script>
+            <![CDATA[
+            var param = $data.searchParam;
+            $data.resultList = $jdbc.queryList("procurement/pr", "select.pr.resultList", param);
+            ]]>
+        </script>
+    </service>
+    
+    <service id="get.pr.resultCntrList" label="구매실적대장(계약단위)">
+        <script>
+            <![CDATA[
+            var param = $data.searchParam;
+            $data.resultList = $jdbc.queryList("procurement/pr", "select.pr.resultCntrList", param);
+            ]]>
+        </script>
+    </service>
+    
+    <service id="get.pr.stsList" label="PR현황조회">
+        <script>
+            <![CDATA[
+            var param = $data.searchInfo;
+            $data.resultList = $jdbc.queryList("procurement/pr", "select.pr.stsList", param);
+            ]]>
+        </script>
+    </service>
+    
+    <service id="get.pr.stsList.detail" label="PR현황 상세조회">
+        <script>
+            <![CDATA[
+            var param = $data.searchInfo;
+            
+            $data.resultList = $jdbc.queryList("procurement/pr", "select.pr.stsList.hist", param);
+            ]]>
+        </script>
+    </service>
+    
+    <service id="search.wcms.file.list">
+    	<script>
+    		var list = $data.list;
+    		
+    		$jdbc.batch('procurement/pr', 'insert.temp.for.rfx.list', list);
+    		$data.resultList = $jdbc.queryList('procurement/pr', 'search.wcms.file.list', null);
+    	</script>
+    </service>
+    
+</service-descriptor>

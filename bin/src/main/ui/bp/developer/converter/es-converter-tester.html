@@ -1,0 +1,170 @@
+<dom-module id="es-converter-tester">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }        
+        #oldEditor { 
+            border:1px solid #dedede;
+        }
+        #newEditor { 
+            border:1px solid #dedede;
+        }       
+        
+    </style>
+    
+    <template>
+        <sc-ajax id="findConvertedSources" url="converter/findConvertedSources.do" body="{{findParam}}" last-response="{{resultList}}" on-response="onFindConvertedSources"></sc-ajax>    
+        
+        
+		
+		<cc-sub-title-bar title-text="Folder Convert">
+			<sc-button text="findAndGenerate" on-click="findAndGenerate"></sc-button>
+		</cc-sub-title-bar>        
+        <div>
+        	<input type="file" id="folderbrowse" webkitdirectory mozdirectory msdirectory odirectory directory  multiple hidden/>
+        	<table class="tb-form" >
+        		<colgroup>
+	        		<col style="width:200px"/>
+	        		<col></col>
+	        		<col style="width:200px"/>
+	        		<col></col>
+	        	</colgroup>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="배포 경로 중  ui가 위치한 폴더" ></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-text-field value="{{findParam.uipath}}"></sc-text-field>
+	        		</td>
+	        		<th>
+	        			<sc-label text="컨버팅이 된 위치(ui 폴더 내)" ></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-text-field value="{{findParam.path}}"></sc-text-field>
+	        		</td>
+	        	</tr>
+	        </table>
+	        <div class="vbox" id="buttonContainer" on-click="btnListener" style="height:100px; overflow:auto;">
+	    </div>
+	    </div>
+        <div class="vspace-10"></div>
+		<div class="flex page" id="previewCont">
+			
+		</div>
+    </template>
+            
+    
+    <script>
+        Polymer({
+            is: "es-converter-tester",
+            
+            properties: {
+                findParam: {
+                    type: Object,
+                    value: function() {
+                        return {
+                        	uipath : 'D:\\dev\\etna_polymer\\eclipse-jee-kepler-SR2-win32-x86_64\\workspace\\standard-common\\src\\main\\ui',
+                        	path : 'D:\\dev\\etna_polymer\\eclipse-jee-kepler-SR2-win32-x86_64\\workspace\\standard-common\\src\\main\\ui\\source7'
+                        };
+                    }
+                },
+                resultList : {
+                    type  : Array,
+                    value : function() {
+                        return []
+                    }
+                }
+            },
+            onBrowseUIPath: function(){
+            	var me = this;
+            	this.$.folderbrowse.onchange = function(e){
+            		me.set('findParam.uipath',e.target.value);
+            	}
+            	this.$.folderbrowse.click();
+            },
+            
+            onBrowseConvertedPath: function(){
+            	var me = this;
+            	this.$.folderbrowse.onchange = function(){
+            		me.set('findParam.path',e.target.value);
+            	}
+            	this.$.folderbrowse.click();
+            },
+            
+            findAndGenerate : function(){
+            	UT.request(this.$.findConvertedSources);
+            },
+            
+            doConvert: function() {
+                var me = this;
+                UT.request(me.$.convert);               
+            },
+            getParentATag : function(el){
+            	var current = el;
+            	while(current != null && current.tagName.toLowerCase() !== 'a'){
+            		if(current === this.$.buttonContainer || current === this.domHost){
+            			current = null;
+            			break;
+            		}
+            		current = current.parentElement;
+            	}
+            	
+            	return current;
+            },
+            
+            btnListener : function(e){
+            	var me= this,
+            		el = this.getParentATag(e.target);
+            	if(!el){
+            		return;
+            	}
+            	var target = el.getAttribute('modulepath');
+            	if(target){
+            		
+            		/*<sc-link rel="import" href="es-converter8-js.html"></sc-link>*/
+            		/*
+            		var newLink = document.createElement('sc-link');
+            		newLink.rel = "import";
+            		newLink.href = target;
+            		document.body.appendChild(newLink);
+            		me.$.previewCont.innerHTML = '';
+            		*/
+            		
+            		me.importLink(target, function(moduleName){
+            			var module = document.createElement(moduleName);
+            			me.$.previewCont.innerHTML = '';
+            			me.$.previewCont.appendChild(module);
+            		});
+            		
+            	}
+            },
+            onFindConvertedSources : function(e, res) {
+                var me = this;
+                    lastResponse = res.response;
+                
+                var div;
+                for(var i = 0; i < lastResponse.length; i++){
+                	var result = lastResponse[i];
+                	
+               		div = document.createElement('div');
+               		this.$.buttonContainer.appendChild(div);
+                	
+                	if(UT.isString(result.deployPath)){
+                		var aTag = document.createElement('a');
+                		var modulePath = 'ui'+result.deployPath.split('\\').join('/');
+                		aTag.href = '#';
+                		aTag.setAttribute('modulepath', modulePath);
+                		aTag.innerHTML = i+'.|<b>'+modulePath+'</b>|\t';
+                		div.appendChild(aTag);
+                	}
+                	
+                }
+            }
+
+
+                        
+        });
+    </script>
+
+</dom-module>

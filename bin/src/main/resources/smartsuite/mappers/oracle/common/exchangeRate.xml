@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exchangeRate">
+	
+	<!-- 환율관리 데이터를 조회한다 -->
+	<select id="findListExchangeRate" resultType="map">
+	/* exchangeRate.findListExchangeRate */
+           SELECT A.SYS_ID 		/*시스템 아이디*/
+                 ,A.BAS_DATE 	/*기준 일자*/
+                 ,A.BAS_CUR 	/*기준 통화*/
+                 ,A.EXCH_CUR 	/*환산 통화*/
+                 ,A.BAS_RATE 	/*기준 율*/
+                 ,A.USD_RATE	/*미화 환산율*/
+             FROM ESMEXCH A
+  LEFT OUTER JOIN ESACDDT B
+               ON B.SYS_ID = A.SYS_ID
+              AND B.GRP_CD = 'C004'
+              AND B.DTL_CD = A.EXCH_CUR
+            WHERE A.SYS_ID = #{g.tenant}
+		<if test='p.exch_cur != null and p.exch_cur != ""'>
+              AND A.EXCH_CUR 	= #{p.exch_cur}  /* 통화 */
+		</if>
+		<if test='p.bas_date != null'>
+              AND A.BAS_DATE 	= #{p.bas_date}  /* 환율기준일 */
+		</if>
+		 ORDER BY B.SORT_ORD
+	</select>
+	
+	<!-- 환율관리 데이터를 INSERT 한다 -->
+	<insert id="insertExchangeRate">
+	/* exchangeRate.insertExchangeRate */
+		INSERT INTO ESMEXCH
+		(
+				 SYS_ID		/*시스템 아이디*/
+      			,BAS_DATE	/*기준 일자*/ 
+				,BAS_CUR	/*기준 통화*/
+				,EXCH_CUR	/*환산 통화*/
+				,BAS_RATE	/*기준 율*/
+				,USD_RATE   /*미화 환산율*/
+				,REG_ID		/*등록자 아이디*/
+      			,REG_DT		/*등록 일시*/
+      	)
+      	VALUES
+      	(
+      			 #{g.tenant}
+      			,#{p.bas_date}
+      			,#{p.bas_cur}
+      			,#{p.exch_cur}
+      			,#{p.bas_rate}
+      			,#{p.usd_rate}
+      			,#{g.username}
+      			,#{g.now}
+      	)
+	</insert>
+	
+	<!-- 환율관리 데이터를 UPDATE 한다 -->
+	<update id="updateExchangeRate">
+	/* exchangeRate.updateExchangeRate */
+		UPDATE ESMEXCH
+		<trim prefix="set" prefixOverrides=",">
+				 MOD_ID 				= #{g.username}				/*수정자 아이디*/ 
+			  	,MOD_DT 				= #{g.now}					/*수정 일시*/
+				,BAS_RATE 				= #{p.bas_rate}
+				,USD_RATE 				= #{p.usd_rate}
+		</trim>
+		 WHERE SYS_ID 		= #{g.tenant}
+		   AND BAS_DATE     = #{p.bas_date}
+		   AND BAS_CUR      = #{p.bas_cur}
+		   AND EXCH_CUR     = #{p.exch_cur}
+	</update>
+	
+	<!-- 환율관리 데이터를 DELETE 한다. -->
+	<delete id="deleteExchangeRate">
+	/* exchangeRate.deleteExchangeRate */
+		DELETE 
+		  FROM ESMEXCH
+		 WHERE SYS_ID 		= #{g.tenant}
+		   AND BAS_DATE		= #{p.bas_date}
+		   AND BAS_CUR      = #{p.bas_cur}
+		   AND EXCH_CUR     = #{p.exch_cur}
+	</delete>
+	
+</mapper>

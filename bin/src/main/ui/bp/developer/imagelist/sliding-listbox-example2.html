@@ -1,0 +1,125 @@
+<dom-module id="sliding-listbox-example2">
+	<style>
+	</style>
+	
+	<template>
+		<!--
+			클릭시에만 
+		 -->
+		<span style="font-size:20px;font-weight:bold;">클릭하여 정보 설정</span>
+		<div style="display:flex;flex-direction:row;">
+			<div style="width:120px;height:120px;display:inline-block;">
+				<sc-sliding-listbox
+					button-type="overMouse"
+					button-position="overlapped"
+					scroll-type="stepwise"
+					display-marker="false"
+					initial-index="0"
+					
+					on-click-item="onClickItem"
+					items="{{data}}">
+					<template>
+						<img src="{{data}}" style="height:120px;width:120px;margin:auto;">
+					</template>
+				</sc-sliding-listbox>
+			</div>
+			<div style="flex:1;">
+				<table class="tb-form">
+					<tr>
+						<th><span>이름</span></th>
+						<td><span>[[selectedPicInfo.name]]</span></td>
+						<th><span>URL</span></th>
+						<td><span>[[selectedPicInfo.data]]</span></td>
+					</tr>
+					<tr>
+						<th><span>설명</span></th>
+						<td><span>[[selectedPicInfo.desc]]</span></td>
+						<th><span>해시태그</span></th>
+						<td><span>[[selectedPicInfo.hashTag]]</span></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		
+		
+		<!--
+			스크롤 될때 
+		 -->
+		<span style="font-size:20px;font-weight:bold;">이동하여 정보 설정</span>
+		<div style="display:flex;flex-direction:row;">
+			<div style="width:120px;height:120px;display:inline-block;">
+				<sc-sliding-listbox
+					button-type="overMouse"
+					button-position="overlapped"
+					scroll-type="stepwise"
+					display-marker="false"
+					initial-index="0"
+					
+					on-move-end="onMoveEnd"
+					items="{{data}}">
+					<template>
+						<img src="{{data}}" style="height:120px;width:120px;margin:auto;">
+					</template>
+				</sc-sliding-listbox>
+			</div>
+			<div style="flex:1;">
+				<table class="tb-form">
+					<tr>
+						<th><span>이름</span></th>
+						<td><span>[[selectedPicInfo2.name]]</span></td>
+						<th><span>URL</span></th>
+						<td><span>[[selectedPicInfo2.data]]</span></td>
+					</tr>
+					<tr>
+						<th><span>설명</span></th>
+						<td><span>[[selectedPicInfo2.desc]]</span></td>
+						<th><span>해시태그</span></th>
+						<td><span>[[selectedPicInfo2.hashTag]]</span></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is: 'sliding-listbox-example2',
+			
+			properties: {
+				data: {
+					type: Object
+				},
+				
+				selectedPicInfo: {
+					type: Object,
+					value: function() {
+						return { name: '', data: '', desc: '', hashTag: '' };
+					}
+				},
+				
+				selectedPicInfo2: {
+					type: Object,
+					value: function() {
+						return { name: '', data: '', desc: '', hashTag: '' };
+					}
+				}
+			},
+			
+			attached: function() {
+				var me = this;
+				me.set('selectedPicInfo', me.data[0]);
+				me.set('selectedPicInfo2', me.data[0]);
+			},
+			
+			onClickItem: function(event, detail) {
+				var me = this;
+				me.set('selectedPicInfo', detail.data);
+			},
+			
+			onMoveEnd: function(event, detail) {
+				var me = this;
+				me.set('selectedPicInfo2', detail.data);
+			}
+		});
+	</script>
+</dom-module>

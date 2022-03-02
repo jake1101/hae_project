@@ -1,0 +1,53 @@
+<!-- 
+
+## 법인등록번호
+
+이 예제는 국내에서 사용되는 기준으로 작성되었습니다.
+
+## Validation
+
+- input-mask : 999999-9999999
+- input-mask로 인해 제한이 거려 maxlength는 지정하지 않았습니다. 
+
+ -->
+
+<dom-module id="es-corp-reg-no-ex-1">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+    <template>
+        <table class="tb-form">
+            <tr>
+                <td>
+                    <sc-text-field class="w-200" input-mask="999999-9999999" value="{{value}}"></sc-text-field>
+                </td>
+            </tr>
+        </table>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-corp-reg-no-ex-1',
+            properties:{
+                value: String,
+            },
+
+            observers:['log(value)'],
+
+            log: function (value) {
+                console.log(value);
+            },
+
+            setValue: function() {
+            	var me = this;
+
+            	me.set("value", "123123-1231231");
+            }
+		});
+	</script>
+
+</dom-module>

@@ -1,0 +1,41 @@
+<beans:beans 
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+	
+	<!-- Tenancy Filter -->
+	<beans:bean id="tenantFilter"
+	class="smartsuite.spring.tenancy.web.filter.DefaultTenancyFilter"
+	p:paramName="tenant" p:tenantResolver-ref="tenantResolver"
+	p:tenantProvider-ref="tenantProvider" p:changeableUrls-ref="changeableUrls"
+	p:failureHandler-ref="failureHandler"/>
+	
+	<!-- Tenancy Resolver -->
+	<beans:bean id="tenantResolver" p:defaultTenant-ref="defaultTenant"
+				class="smartsuite.spring.tenancy.web.resolver.DefaultTenantResolver"/>
+
+	<!-- Tenancy Provider with DB Service -->
+	<beans:bean id="tenantProvider" p:defaultTenant-ref="defaultTenant" p:tenantService-ref="tenantService"
+				class="smartsuite.spring.tenancy.web.provider.ServiceTenantProvider"/>
+	
+	<!-- 디폴트 테넌시 -->
+	<beans:bean id="defaultTenant" p:id="EMRO" p:name="EMRO" 
+				class="smartsuite.spring.tenancy.core.DefaultTenant"/>
+				
+	<!-- 테넌시 정보 조회 -->
+	<beans:bean id="tenantService" class="smartsuite.tenancy.TenantServiceImpl"/>
+	
+	<!-- 테넌시 정보 인증 실패 -->
+	<beans:bean id="failureHandler"  
+				class="smartsuite.spring.tenancy.web.exception.DefaultTenantFailureHandler"/>
+				<!-- p:defaultFailureUrl="/tenancyFailure.do" -->
+	
+	<!-- 테넌시 정보 변경 가능한 URL List -->
+	<util:list id="changeableUrls" value-type="java.lang.String">
+		<beans:value>/loginProcess.do</beans:value>
+		<beans:value>/ssoLoginProcess.do</beans:value>
+	</util:list> 
+	
+</beans:beans>

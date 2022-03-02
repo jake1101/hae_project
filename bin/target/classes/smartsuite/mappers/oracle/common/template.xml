@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- ESATMPB: 템플릿 -->
+<mapper namespace="template">
+
+	<resultMap type="map" id="resultMap-findInfoTmp">
+        <result property="tmp_bas_cont" column="TMP_BAS_CONT" jdbcType="VARCHAR" javaType="string" />
+    </resultMap>
+	<select id="findListTmp" resultMap="resultMap-findInfoTmp">
+		/* template.findListTmp: 템플릿 목록 조회 */
+		SELECT SYS_ID	
+			, TMP_CLS
+			, TMP_BAS_ID
+			, TMP_BAS_NM
+			, TMP_BAS_CONT
+			, CONT_PARAM_NM
+			, STS
+			, REG_ID
+			, REG_DT
+			, MOD_ID
+			, MOD_DT
+		
+		FROM ESATMPB
+		WHERE SYS_ID = #{g.tenant}
+			AND STS != 'D'
+	 ORDER BY TMP_BAS_ID, TMP_BAS_NM
+	</select>
+
+	<resultMap type="map" id="resultMap-findInfoTmpById">
+        <result property="tmp_bas_cont" column="TMP_BAS_CONT" jdbcType="VARCHAR" javaType="string" />
+    </resultMap>
+	<select id="findTemplateBaseById" resultMap="resultMap-findInfoTmpById">
+		/* template.findTemplateBaseById: 템플릿 내용 상세 조회 */
+		SELECT SYS_ID	
+			, TMP_CLS
+			, TMP_BAS_ID
+			, TMP_BAS_NM
+			, TMP_BAS_CONT
+			, CONT_PARAM_NM
+			, STS
+			, REG_ID
+			, REG_DT
+			, MOD_ID
+			, MOD_DT
+		
+		FROM ESATMPB
+		WHERE SYS_ID = #{g.tenant}
+			AND TMP_BAS_ID = #{p.tmp_bas_id}
+			AND TMP_CLS= #{p.tmp_cls}
+	</select>
+	
+	<insert id="insertTmp">
+		/* template.insertTmp: 템플릿신규등록 */
+		INSERT INTO ESATMPB(
+			SYS_ID	
+			, TMP_CLS
+			, TMP_BAS_ID
+			, TMP_BAS_NM
+			, TMP_BAS_CONT
+			, CONT_PARAM_NM
+			, STS
+			, REG_ID
+			, REG_DT
+			, MOD_ID
+			, MOD_DT
+		)
+		VALUES(
+			#{g.tenant}
+			,#{p.tmp_cls}
+			,#{p.tmp_bas_id}
+			,#{p.tmp_bas_nm}
+			,#{p.tmp_bas_cont}
+			,#{p.cont_param_nm}
+			,'C'
+			,#{g.username}
+			,#{g.now}
+			,#{g.username}
+			,#{g.now}
+		)
+	</insert>
+	<update id="updateTmp">
+		/* template.updateTmp: 템플릿수정 */
+		UPDATE ESATMPB
+		 SET STS='U'
+		 	, MOD_DT = #{g.now}
+		 	, MOD_ID = #{g.username}
+		 	<if test='p.tmp_cls != null'>
+         		, TMP_CLS = #{p.tmp_cls}
+         	</if>
+		 	<if test='p.tmp_bas_id != null'>
+         		, TMP_BAS_ID = #{p.tmp_bas_id}
+         	</if>
+         	<if test='p.tmp_bas_nm != null'>
+         		, TMP_BAS_NM = #{p.tmp_bas_nm}
+         	</if>
+         	<if test='p.tmp_bas_cont != null'>
+         		, TMP_BAS_CONT = #{p.tmp_bas_cont}
+         	</if>
+         	<if test='p.cont_param_nm != null'>
+         		, CONT_PARAM_NM = #{p.cont_param_nm}
+         	</if>
+		 WHERE SYS_ID = #{g.tenant}
+		 	AND TMP_BAS_ID = #{p.tmp_bas_id}
+	</update>
+	
+	<select id="getTmpCount" resultType="int">
+		SELECT COUNT(*)
+    	  FROM ESATMPB
+    	 WHERE SYS_ID = #{g.tenant}
+     		  AND  TMP_BAS_ID = #{p.tmp_bas_id}
+    </select>
+    
+    <delete id="deleteMailInfo">
+    	DELETE FROM ESACFML
+    		WHERE TMP_ID IN (SELECT TMP_ID FROM ESATMPM
+    			WHERE SYS_ID = #{g.tenant}
+    				AND TMP_BAS_ID = #{p.tmp_bas_id})
+    </delete>
+	<delete id="deleteMailList">
+		DELETE FROM ESATMPM
+			WHERE SYS_ID = #{g.tenant}
+				AND TMP_BAS_ID = #{p.tmp_bas_id}
+	</delete>
+		<delete id="deleteTmp">
+		/* template.deleteList: 템플릿삭제 */
+		DELETE FROM ESATMPB
+			WHERE sys_id = #{g.tenant}
+				AND tmp_cls= #{p.tmp_cls}
+				AND tmp_bas_id = #{p.tmp_bas_id}
+	</delete>
+
+	<resultMap type="map" id="resultMap-findInfoById">
+        <result property="tmp_cont" column="TMP_CONT" jdbcType="CLOB" javaType="string" />
+    </resultMap>
+    
+	<select id="findTemplateByAprvTypCd" resultMap="resultMap-findInfoById">
+		/* template.findTemplateByAprvTypCd : 템플릿 사용하는 모듈 기준 템플릿 상세 조회*/
+		SELECT A.SYS_ID
+			, A.TMP_ID
+			, A.TMP_CLS
+			, A.TMP_BAS_ID
+			, A.TMP_NM
+			, A.TMP_CONT
+			, A.PARAM_CLASS_NM	
+			, B.APRV_TYP_CD
+			, B.APRV_TYP_NM
+			, B.USE_YN
+		FROM ESATMPM A
+			INNER JOIN ESACFAP B
+				ON 	 A.SYS_ID = B.SYS_ID
+				AND  A.TMP_ID = B.TMP_ID 
+				AND  B.APRV_TYP_CD = #{p.app_id}
+	   WHERE  
+			A.STS != 'D'
+	</select>	
+	
+	<select id="findTemplateByMailKey" resultMap="resultMap-findInfoById">
+		/* template.findTemplateByMailKey : 템플릿 사용하는 모듈 기준 템플릿 상세 조회*/
+		SELECT A.SYS_ID
+			, A.TMP_ID
+			, A.TMP_CLS
+			, A.TMP_BAS_ID
+			, A.TMP_NM
+			, A.TMP_CONT
+			, A.PARAM_CLASS_NM
+			, A.STS
+			, A.REG_ID
+			, A.REG_DT
+			, A.MOD_ID
+			, A.MOD_DT
+			, B.MAIL_SET_ID
+			, B.MAIL_SET_NM
+			, B.USE_YN
+			, B.SND_CLS
+		
+		FROM ESATMPM A
+			INNER JOIN ESACFML B
+				ON 	<!-- A.SYS_ID = B.SYS_ID
+				AND  -->A.TMP_ID = B.TMP_ID 
+				AND B.MAIL_SET_ID = #{p.app_id}
+		
+		WHERE <!-- A.SYS_ID = #{g.tenant}
+			AND  -->A.STS != 'D'
+	</select>	
+	
+	<resultMap type="map" id="resultMap-findTmpByTmpId">
+        <result property="tmp_bas_cont" column="TMP_BAS_CONT" jdbcType="CLOB" javaType="string" />
+    </resultMap>
+	<select id="findTmpByTmpId" resultMap="resultMap-findTmpByTmpId">
+		/* template.findTemplateBaseById: 템플릿 내용 상세 조회 */
+		SELECT SYS_ID	
+			, TMP_CLS
+			, TMP_BAS_ID
+			, TMP_BAS_NM
+			, TMP_BAS_CONT
+			, CONT_PARAM_NM
+			, STS
+			, REG_ID
+			, REG_DT
+			, MOD_ID
+			, MOD_DT
+		
+		FROM ESATMPB
+		WHERE SYS_ID = #{g.tenant}
+			AND UPPER(TMP_BAS_ID) = UPPER(#{p.tmp_bas_id})
+	</select>
+</mapper>
+

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>html\cc-purc-grp.html - API</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="icon" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+                <h1><img src="../assets/css/logo.png" title="API" width="117" height="52"></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.0.1</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+                    <h2 class="off-left">APIs</h2>
+                    <div id="api-tabview" class="tabview">
+                        <ul class="tabs">
+                            <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-elements">Elements</a></li>
+                            <li><a href="#api-modules">Modules</a></li>
+                        </ul>
+                
+                        <div id="api-tabview-filter">
+                            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+                        </div>
+                
+                        <div id="api-tabview-panel">
+                            <ul id="api-classes" class="apis classes">
+                                <li><a href="../classes/DEF.html">DEF</a></li>
+                                <li><a href="../classes/EDITOR.html">EDITOR</a></li>
+                                <li><a href="../classes/GRID.html">GRID</a></li>
+                                <li><a href="../classes/I18N.html">I18N</a></li>
+                                <li><a href="../classes/MSG.html">MSG</a></li>
+                                <li><a href="../classes/UPLOAD.html">UPLOAD</a></li>
+                                <li><a href="../classes/UT.html">UT</a></li>
+                                <li><a href="../classes/VALID.html">VALID</a></li>
+                            </ul>
+                
+                                <ul id="api-elements" class="apis elements">
+                                    <li><a href="../elements/cc-approval-summary.html">&lt;cc-approval-summary&gt;</a></li>
+                                    <li><a href="../elements/cc-dept-search.html">&lt;cc-dept-search&gt;</a></li>
+                                    <li><a href="../elements/cc-editor.html">&lt;cc-editor&gt;</a></li>
+                                    <li><a href="../elements/cc-from-to-date.html">&lt;cc-from-to-date&gt;</a></li>
+                                    <li><a href="../elements/cc-linked-vender.html">&lt;cc-linked-vender&gt;</a></li>
+                                    <li><a href="../elements/cc-multi-text-field.html">&lt;cc-multi-text-field&gt;</a></li>
+                                    <li><a href="../elements/cc-operorg-combobox-field.html">&lt;cc-operorg-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-operorg-multi-combobox-field.html">&lt;cc-operorg-multi-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-purc-grp.html">&lt;cc-purc-grp&gt;</a></li>
+                                    <li><a href="../elements/cc-sg-search.html">&lt;cc-sg-search&gt;</a></li>
+                                    <li><a href="../elements/cc-sp-operorg-combobox-field.html">&lt;cc-sp-operorg-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-sp-operorg-multi-combobox-field.html">&lt;cc-sp-operorg-multi-combobox-field&gt;</a></li>
+                                    <li><a href="../elements/cc-upload.html">&lt;cc-upload&gt;</a></li>
+                                    <li><a href="../elements/cc-user-search.html">&lt;cc-user-search&gt;</a></li>
+                                </ul>
+                
+                            <ul id="api-modules" class="apis modules">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+                    Show:
+                    <label for="api-show-inherited">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </div>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<h1 class="file-heading">File: html\cc-purc-grp.html</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+&lt;!-- 
+/**
+ * 구매그룹(purc_grp_cd) 커스텀 태그
+ *
+ *     &lt;cc-purc-grp value=&quot;{{value}}&quot; display=&quot;{{displayValue}}&quot; purc-grp-typ=&quot;PU&quot;&gt;&lt;/cc-purc-grp&gt;
+ *
+ * @element cc-purc-grp
+ *
+ *
+ * @attribute value purc_grp_cd값 binding value &lt;br&gt;
+ * [string]
+ *
+ *
+ * @attribute display purc_grp_nm값 binding value &lt;br&gt;
+ * [string]
+ *
+ *
+ * @attribute value-field value로 binding될 필드명. 기본값:purc_grp_cd &lt;br&gt;
+ * [string] [optional] 
+ *
+ *
+ * @attribute display-field input 영역에 표시될 필드명. 기본값:purc_grp_nm &lt;br&gt;
+ * [string] [optional] 
+ *
+ *
+ * @attribute purc-grp-typ 직무유형&lt;br&gt;
+ * [string]
+ *
+ */
+--&gt;
+&lt;link rel=&quot;import&quot; href=&quot;../../../bp/shared/ep-job-list.html&quot;&gt;
+
+&lt;dom-module id=&quot;cc-purc-grp&quot;&gt;
+    &lt;style&gt;
+    &lt;/style&gt;
+    
+    &lt;template&gt;
+        &lt;div class=&quot;field-box&quot;&gt;
+            &lt;sc-text-field value=&quot;{{display}}&quot; 
+                trigger-cls=&quot;search&quot; on-trigger-click=&quot;onFind&quot; on-enter=&quot;onFind&quot; on-keydown=&quot;onKeyDown&quot; maxLength=&quot;200&quot;
+                readonly$=&quot;[[readonly]]&quot; class$=&quot;[[class]]&quot; placeholder$=&quot;[[placeholder]]&quot; required$=&quot;[[required]]&quot; disabled$=&quot;[[disabled]]&quot;&gt;
+            &lt;/sc-text-field&gt;
+            &lt;span style=&quot;margin:4px 0 0 5px;&quot;&gt;{{value}}&lt;/span&gt;
+        &lt;/div&gt;
+    &lt;/template&gt;
+    
+    &lt;script&gt;
+        Polymer({
+            is: &quot;cc-purc-grp&quot;,
+            properties: {
+                value: {
+                    type: String,
+                    value: &quot;&quot;,
+                    notify: true
+                },
+                display: {
+                    type: String,
+                    value: &quot;&quot;,
+                    notify: true
+                },
+                valueField: {
+                    type: String,
+                    value: &quot;purc_grp_cd&quot;
+                },
+                displayField: {
+                    type: String,
+                    value: &quot;purc_grp_nm&quot;
+                },
+                purcGrpTyp: {
+                    type: String,
+                    value: &quot;&quot;
+                }
+            },
+
+            attached: function(){
+
+            },
+    
+            // 사용자의 keydown
+            onKeyDown: function() {
+                var me = this;
+                if (me.readonly === true) {
+                    return;
+                }
+                me.set(&quot;value&quot;, &quot;&quot;);
+            },
+            
+            // 구매그룹 찾기
+            onFind: function(){
+                var me = this;
+               
+                if (me.readonly === true) {
+                    return;
+                }
+                if(!me.purcGrpTyp){
+                    UT.alert(this.translate(&quot;직무유형을 선택하십시오&quot;));
+                    return;
+                }
+                var param = {
+                    comp_cd: SCSessionManager.currentUser.comp_cd,
+                    purc_grp_typ: me.get(&quot;purcGrpTyp&quot;) //직무유형
+                };
+                param[me.displayField] = me.get(&quot;display&quot;);
+                
+                UT.autoCompleteObject(&quot;ep-job-list&quot;, me, param, function(result) {
+                    me.set(&quot;display&quot;, result[me.displayField]);
+                    me.set(&quot;value&quot;, result[me.valueField]);
+                },{title : me.translate(&quot;구매그룹검색&quot;)});
+            }
+        });
+    &lt;/script&gt;
+&lt;/dom-module&gt;
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

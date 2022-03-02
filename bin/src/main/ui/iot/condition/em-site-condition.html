@@ -1,0 +1,30 @@
+<sc-link rel="import" href="es-site-condition.html"></sc-link>
+
+<dom-module id="em-site-condition">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 현장 현황
+        ** @Description		: 현장상황정보 > 현장 현황
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.02.10
+        ** @History 		: 2020.02.10 jhkim 최초작성
+        ******************************************************************************************
+    -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<es-site-condition class="flex"></es-site-condition>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-site-condition'
+		});
+	</script>
+
+</dom-module>

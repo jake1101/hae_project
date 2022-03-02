@@ -1,0 +1,133 @@
+<dom-module id="es-chart-combinations-column-line">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-combinations-column-line',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "type": "column",
+				"palettes":[{
+					"name": "color1",
+			        "alpha": 1.0,
+					"fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+						'#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+				},{
+					"name": "line1",
+					"alpha": 1.0,
+					"strokes": [
+						'#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+						'#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'
+					]
+				}],
+				"styles": {
+					//"fill": "#10ffff00",
+					//"border": "#888800"
+				},
+			    "title": {
+			        "text": "Monthly Average Rainfall",
+			        "styles" : {
+					},
+			    },
+				"subtitle": {
+					"visible": true,
+					"anchor": "title",
+					"anchorAlign": "bottom",
+					"text": "Source: WorldClimate.com",
+					"styles": {
+					}
+				},
+				"titlePane": {
+					"styles": {
+						"padding": 4
+					}
+				},
+			    "xAxes": {
+			        "title": "",
+					"paddingNear": 0.2,
+					"paddingFar": 0.2,
+			        "categories":[
+			            "Jan",
+			            "Feb",
+			            "Mar",
+			            "Apr",
+			            "May",
+			            "Jun",
+			            "Jul",
+			            "Aug",
+			            "Sep",
+			            "Oct",
+			            "Nov",
+			            "Dec"
+			         ]
+
+			    },
+			    "yAxes": {
+			        "title": "Rainfall (mm)"
+			    },
+			    "series": [   {
+					"name": "London",
+			        "itemWidth": 0.7,
+			        "items": [48.9, 38.8, 39.3, 41.4, 47.0, 48.3, 59.0, 59.6, 52.4, 65.2, 59.3, 51.2],
+			        "label": {
+			        },
+			        "styles": {
+						"fontSize": "7",
+						"lineType": "curved",
+			        	"fill": "p(color1:2)",
+						"border":"",
+					},
+					"animations": [{
+					}],
+					"itemAnimations": [{
+						"property": "value"
+					}]
+				},{
+					"name": "Tokyo",
+					"type": "line",
+
+					"items": [23.6, 20.8, 30.5, 43.4, 51.0, 84.5, 45.0, 55.3, 43.2, 83.5, 23.6, 92.3],
+					"label": false,
+					"styles": {
+						"fill": "p(color1:0)",
+						"line": "p(line1:0)",
+						"border":"",
+						"shapeName": "diamond",
+						"hovered": {
+							fillBrightness: 1.5
+						}
+					},
+					"animations": [{
+					}],
+					"itemAnimations2": [{
+						"property": "value"
+					}]
+				}],
+			    "legend": {
+					"styles": {
+					}
+			    }
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

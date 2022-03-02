@@ -1,0 +1,55 @@
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 공종코드 관리
+    ** @Description     : 
+    ** @Author          : jh.Park
+    ** @Create Date     : 2021-09-07
+    ** @History         : 2021-09-07 jhPark 최초작성
+    ******************************************************************************************
+-->
+
+<sc-link rel="import" href="es-const-type-list.html"></sc-link>
+
+<dom-module id="em-const-type">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    	<cc-page-title-bar></cc-page-title-bar>
+    	
+    	<div class="hbox flex">
+	        <es-const-type-list id="menuList" on-selected-menu="onSelectedMenu" class="flex"></es-const-type-list>
+    	</div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'em-const-type',
+            properties: {
+            	menuInfo : {
+	            	type: Object,
+	            	value: function(){
+	            		return {};
+	            	}
+            	}
+            },
+            // 메뉴가 선택됨
+            onSelectedMenu: function(e, data) {
+                var me = this;
+                me.set("menuInfo",data);
+            },
+            //기능이 수정됨
+            onSavedFunc: function(){
+            	var me = this;
+            	var menuInfo = me.get("menuInfo");
+            	 me.$.menufuncList.load(menuInfo);
+            }
+
+        });
+    </script>
+
+</dom-module>

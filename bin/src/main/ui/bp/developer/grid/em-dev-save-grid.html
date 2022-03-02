@@ -1,0 +1,131 @@
+<dom-module id="em-dev-save-grid">
+  <!-- layout Style -->
+  <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+  <!--  화면 구성 시작-->
+    <template>
+    <sc-ajax id="findListPr" url="/ui/dev/pr/findListPr.do" body="{{searchParam}}" last-response="{{resultList}}"></sc-ajax>
+        <!-- page title toolbar -->
+        <sc-toolbar>
+          <sc-label text="그리드 조회 샘플(이벤트)  " ></sc-label>
+            <sc-spacer></sc-spacer>
+            <sc-button text="조회(바인딩)" on-click="onSearch"></sc-button>
+        </sc-toolbar>
+    <sc-panel collapsible="true">
+      <!--  조회 조건 테이블--> 
+         <table class="table">
+            <colgroup>
+              <col style="width:150px"></col>
+              <col></col>
+              <col style="width:150px"></col>
+              <col></col>
+            </colgroup>
+            <tr>
+              <th>
+                <sc-label text="운영조직" ></sc-label>
+              </th>
+              <td>
+                <cc-operorg-multi-combobox-field id="operorgcombobox" oper-unit-cd="PO" value="{{searchParam.oper_org_cd}}" placeholder="선택없음" required="true"></cc-operorg-multi-combobox-field>
+              </td>
+              <th>
+                <sc-label text="구매요청일" ></sc-label>
+              </th>
+              <td colspan="3">
+                <sc-period-date-field required="true" from-value="{{searchParam.from_create_date}}" to-value="{{searchParam.to_create_date}}" default-from-value="-1M" string-date="false"></sc-period-date-field>
+              </td>
+            </tr>           
+              
+          </table>
+        </sc-panel>
+        <!-- editable="{{gridEditable}}" -->
+        
+        <sc-grid  id="gridPanel" title-text="구매요청목록" data-provider="{{resultList}}"  editable="true">
+          <sc-toolbar>
+            <sc-button text="추가(addItem)" on-click="onAddItem"></sc-button>
+            <sc-button text="추가(addItemAt)" on-click="onAddItemAt"></sc-button>
+            <sc-button text="삭제" on-click="onDelete"></sc-button>
+            <sc-button text="저장" on-click="onSave"></sc-button>
+          </sc-toolbar>
+          <sc-grid-columns>
+              <sc-data-column data-field="pr_rev"       header-text="차수"      width="50"    text-align="center"   editable="false" ></sc-data-column>
+              <sc-data-column data-field="pr_tit"       header-text="구매요청 명"    width="300"   text-align="left"     editable="false" ></sc-data-column>
+              <sc-data-column data-field="cur"        header-text="통화"      width="50"    text-align="center"   editable="false" ></sc-data-column>
+              <sc-data-column data-field="pr_tot_amt"         header-text="요청금액" width="100" text-align="right" editable="true"  ></sc-data-column>
+              <sc-date-column data-field="pr_req_date"    header-text="구매요청 일자"       width="120"   text-align="center"   editable="true"  ></sc-date-column>
+              <sc-data-column data-field="pr_req_nm"      header-text="요청자"       width="100"   text-align="center"   editable="false" ></sc-data-column>
+              <sc-data-column data-field="pr_req_dept_nm"   header-text="구매요청 부서"     width="100"   text-align="center"   editable="true" ></sc-data-column>
+              <sc-data-column data-field="tot_item_cnt"     header-text="전체 품목 수"     width="100"   text-align="center"   editable="true" ></sc-data-column>
+              <sc-data-column data-field="reject_item_cnt"  header-text="반려 건수"     width="100"   text-align="center"   editable="true" ></sc-data-column>
+            </sc-grid-columns>
+      </sc-grid>
+      
+  </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+      
+        Polymer({
+            is: 'em-dev-save-grid',
+            
+            properties : {
+                searchParam : {
+                  type : Object,
+                  value : function(){
+                    return {};
+                  }
+                },
+                resultList: {
+                  type:Array
+                }
+                
+            },
+            
+            //리스트(바인딩) 조회
+            onSearch : function(){
+                UT.request(this.$.findListPr);
+            },
+              
+            onAddItem : function(){
+                var me = this, provider = me.$.gridPanel.getDataProvider();
+                provider.addItem({});
+            },
+            onAddItemAt : function(){
+                var me = this, provider = me.$.gridPanel.getDataProvider();
+                provider.addItemAt(0,{});
+            },
+
+            onDelete : function(){
+                var me = this, provider = me.$.gridPanel.getDataProvider();
+                var removeItems = provider.removeItems();
+
+                console.log('removeItems : ' ,removeItems);
+            },
+            onSave : function(){
+                var me = this, provider = me.$.gridPanel.getDataProvider();
+                var newItems = provider.newItems();
+                var updateItems = provider.updateItems();
+
+                console.log('newItems : ' ,newItems);
+                console.log('updateItems : ' ,updateItems);
+
+
+            },
+            initialized : function(){
+                this.onSearch();
+            }
+
+               
+          
+      
+      
+        });
+            
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

@@ -1,0 +1,179 @@
+<dom-module id="es-grid-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-grid id="gridPanel"
+				 editable="{{editable}}"
+				 use-state="{{useState}}"
+				 use-selection="{{useSelection}}"
+				 selection-mode="{{selectionMode}}"
+				 show-selection-header="{{showSelectionHeader}}"
+				 show-number-line="{{showNumberLine}}"
+				 focus-visible="{{focusVisible}}"
+				 use-context-menu="{{useContextMenu}}"
+				 auto-fill="{{autoFill}}"
+				 selection-able-function="onSelectionAbleFn"
+				 row-style-function="onRowStyleFn">
+        	<cc-grid-toolbar result-hidden="true" btn-group-hidden="true">
+        		<sc-button text="editable 변경"				on-click="onBtnClick"	data-args="editable"></sc-button>
+        		<sc-button text="useState 변경"				on-click="onBtnClick"	data-args="useState"></sc-button>
+        		<sc-button text="useSelection 변경"			on-click="onBtnClick"	data-args="useSelection"></sc-button>
+        		<sc-button text="selectionMode 변경"		on-click="onBtnClick"	data-args="selectionMode"		hidden="{{!formula('isUseSelection')}}"></sc-button>
+        		<sc-button text="showSelectionHeader 변경"	on-click="onBtnClick"	data-args="showSelectionHeader"	hidden="{{!formula('isSelectionModeCheck')}}"></sc-button>
+        		<sc-button text="showNumberLine 변경"		on-click="onBtnClick"	data-args="showNumberLine"></sc-button>
+        		<sc-button text="focusVisible 변경"			on-click="onBtnClick"	data-args="focusVisible"></sc-button>
+        		<sc-button text="useContextMenu 변경"		on-click="onBtnClick"	data-args="useContextMenu"></sc-button>
+        		<sc-button text="autoFill 변경"				on-click="onBtnClick"	data-args="autoFill"></sc-button>
+        	</cc-grid-toolbar>
+        	<sc-grid-columns>
+        		<sc-data-column header-text="컬럼1"	data-field="col_1"	editable="false"	text-align="center"></sc-data-column>
+        		<sc-data-column header-text="컬럼2"	data-field="col_2"	editable="true"		text-align="right"	data-type="number"></sc-data-column>
+        		<sc-data-column header-text="컬럼3"	data-field="col_3"	editable="true"		text-align="center"></sc-data-column>
+        	</sc-grid-columns>
+        </sc-grid>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-grid-sample',
+		properties : {
+			resultList : {
+				type : Array,
+				value : function() {
+					return [
+						{col_1 : "test1", col_2 : 11111, col_3 : "AAAAA"},
+						{col_1 : "test2", col_2 : 22222, col_3 : "BBBBB"},
+						{col_1 : "test3", col_2 : 33333, col_3 : "CCCCC"},
+						{col_1 : "test4", col_2 : 44444, col_3 : "aaaaa"},
+						{col_1 : "test5", col_2 : 55555, col_3 : "bbbbb"}
+					]
+				}
+			},
+			editable : {
+				type : Object,
+				value : function() {
+					return true
+				}
+			},
+			useState : {
+				type : Object,
+				value : function() {
+					return true
+				}
+			},
+			useSelection : {
+				type : Object,
+				value : function() {
+					return true
+				}
+			},
+			selectionMode : {
+				type : String,
+				value : "check"
+			},
+			showSelectionHeader : {
+				type : Object,
+				value : function() {
+					return true
+				}
+            },
+            showNumberLine : {
+            	type : Object,
+				value : function() {
+					return true
+				}
+            },
+            focusVisible : {
+            	type : Object,
+				value : function() {
+					return true
+				}
+            },
+            useContextMenu : {
+            	type : Object,
+				value : function() {
+					return true
+				}
+            },
+            autoFill : {
+            	type : Object,
+				value : function() {
+					return false
+				}
+            }
+		},
+		formulas : {
+			isUseSelection : function() {
+				return this.useSelection;
+			},
+			isSelectionModeCheck : function() {
+				return this.formula('isUseSelection') && (this.selectionMode === "check");
+			}
+		},
+		initialized : function() {
+			var me = this;
+			me.$.gridPanel.setDataProvider(me.resultList);
+		},
+		// 속성 변경 버튼 클릭 시
+		onBtnClick : function(event) {
+			var me = this,
+				changeType = event.target.dataset.args,
+				oldValue = me.get(changeType);
+			
+			// "selectionMode 변경" 버튼 클릭 시
+			if(changeType === "selectionMode") {
+				me.set(changeType, (oldValue === "check" ? "radio" : "check"));
+				
+				me.applyFormula("isSelectionModeCheck");
+			} else {
+				me.set(changeType, !oldValue);
+				
+				if(changeType === "useSelection") {
+					me.applyFormula("isUseSelection");
+					me.applyFormula("isSelectionModeCheck");
+				}
+			}
+			console.log("changeType", changeType, "oldValue", oldValue, "newValue", me.get(changeType));
+		},
+		/**************************************************
+		 * [sc-grid > selection-able-function]
+		 *
+		 *  selection의 row 별 체크 가능여부를 true/false로 리턴한다.
+		 **************************************************/
+		onSelectionAbleFn : function(data) {
+			if(UT.isNumber(data["col_2"]) && (data["col_2"] % 2 === 0 )) {
+				return true;
+			}
+			return false;
+		},
+		/**************************************************
+		 * [sc-grid > row-style-function]
+		 *
+		 *  row 별 style을 지정한다.
+		 *  - 스타일 적용 우선 순위(required > itemStyleFunction(column) > rowStyleFunction(grid) > editable)
+		 **************************************************/
+		onRowStyleFn : function(data) {
+			if(data["col_3"] === "CCCCC") {
+				return {
+					fontSize     : 12,
+					fontWeight   : "bold",
+					fontFamily   : "Arial",
+					fontStyle    : "italic",
+					fontColor    : "#ff111111",
+					background   : "#cccccc",
+					align        : "center"
+				}
+			} else if(data["col_3"] === "aaaaa") {
+				return {
+					iconUrl      : "ui/assets/img/btn_tabclose.png",
+					iconLocation : "right",
+					iconPadding  : 5,
+					align        : "left"
+				}
+			}
+		}
+	});
+	</script>
+</dom-module>

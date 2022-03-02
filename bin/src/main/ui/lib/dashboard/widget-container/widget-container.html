@@ -1,0 +1,333 @@
+<link rel="import" href="../util/sc-behavior-draggable.html"/>
+
+<dom-module id="widget-container">
+    <template>
+    <style>
+    	/*  :host {
+
+                background-color: #fff;
+                display: block;
+                cursor: auto;
+                display: inline-block;
+                box-shadow: 0px 1px 1px #999;
+            } */
+    	
+    	
+    	
+    	
+    </style>
+       <div id="titleBar" class="widgetTitleBar">
+            <span id="widgetTitleText">{{translate(widget_title)}}</span>
+            <div class="btnbar">
+	            <div id="refreshBtn"  class="refreshBtn" on-click="onRefresh"></div>
+	            <div id="settingsBtn" class="settingsBtn" on-click="_onSettingsBtnTap"></div>
+	            <div id="closeBtn"    class="closeBtn"></div>
+            </div>
+        </div>
+        <content></content>
+        <div id="handle" style="z-index:100"></div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'widget-container',
+
+            behaviors: [BehaviorDraggable,Polymer.SCResizableBehavior],
+			
+            properties: {
+                widget_title: String,
+                minWidth: {
+                    type: Number,
+                    value: 100
+                },
+                minHeight: {
+                    type: Number,
+                    value: 100
+                },
+                noPositionSnapping: Boolean,
+                noSizeSnapping: Boolean,
+                disableMovement: {
+                    type: Boolean,
+                    value: false,
+                    observer: 'determineMovementAvailability'
+                },
+                disableResizing: {
+                    type: Boolean,
+                    value: false,
+                    observer: 'determineResizingAvailability'
+                },
+                disableClose: {
+                    type: Boolean,
+                    value: false,
+                    observer: 'determineCloseAvailability'
+                },
+                disableSettings: {
+                    type: Boolean,
+                    value: false,
+                    observer: 'determineSettingAvailability'
+                },
+                allowResize: {
+                    type: Boolean,
+                    value: false,
+                    readonly: true
+                },
+                contentWidget: Object,
+                contentWidgetProperty: Object,
+                editMode: {
+                    type: Boolean,
+                    value: true,
+                    observer: '_toggleEditMode'
+                },
+                _showingProperty: {
+                    type: Boolean,
+                    value: false
+                },
+                _snapValueWidth: Number,
+                _snapValueHeight: Number,
+                defaultStyle:{
+                	type: Object,
+                	value: function(){
+                		return {
+                			headerBackgroundColor: '#f7f7f7',
+                			headerFontColor: '#000000'
+                		}
+                	}
+                
+                },
+                dashboardSettled:{
+                	type: Object,
+                	value: true
+                }
+            },
+        	listeners : {
+           	},
+            ready: function () {
+                this.lockMouseCoordinate = true;
+                this.noRightBottomBound = true;
+            },
+            attached: function () {
+                this.setSettings();
+            },
+
+            setSettings: function () {
+                this.boundRect = {
+                    left: 0,
+                    top: 0,
+                    right: this.dashboard.width,
+                    bottom: this.dashboard.height
+                }
+                this._snapValueWidth = this.dashboard.gridSize;
+                this._snapValueHeight = this.dashboard.gridSize;
+            },
+            determineMovementAvailability: function () {
+                if (this.disableMovement) {
+                    this.toggleDrag(false);
+                }
+            },
+
+            toggleDrag: function (show) {
+                if (show) {
+                    if (!this.disableMovement) {
+                        this.listen(this, 'track', '_onDragMove');
+                        this.listen(this, 'up', '_onDragEnd');
+                        this.style.cursor = 'move';
+                    }
+                } else {
+                    this.unlisten(this, 'track', '_onDragMove');
+                    this.unlisten(this, 'up', '_onDragEnd');
+                    this.style.cursor = 'auto';
+                }
+            },
+
+            determineResizingAvailability: function () {
+                if (!this.disableResizing) {
+                    this.toggleResize(true);
+                } else {
+                    this.$.handle.style.display = 'none';
+                }
+            },
+
+            toggleResize: function (show) {
+                if (show) {
+                    if (!this.disableResizing) {
+                        this.listen(this.$.handle, 'down', '_onHandleDown');
+                        this.listen(this.$.handle, 'track', '_onHandleMove');
+                        this.listen(this.$.handle, 'up', '_onHandleUp');
+                        this.$.handle.style.display = 'inline-block';
+                    }
+                } else {
+                    this.unlisten(this.$.handle, 'down', '_onHandleDown');
+                    this.unlisten(this.$.handle, 'track', '_onHandleMove');
+                    this.unlisten(this.$.handle, 'up', '_onHandleUp');
+                    this.$.handle.style.display = 'none';
+                }
+            },
+
+            determineCloseAvailability: function () {
+                if (!this.disableClose) {
+                    this.toggleClose(true);
+                } else {
+                    this.$.closeBtn.style.display = 'none';
+                }
+            },
+
+            toggleClose: function (show) {
+                if (show) {
+                    if (!this.disableClose) {
+                        this.listen(this.$.closeBtn, 'tap', '_onCloseBtnTap');
+                        this.$.closeBtn.style.display = 'inline-block';
+                    }
+                } else {
+                    this.unlisten(this.$.closeBtn, 'tap', '_onCloseBtnTap');
+                    this.$.closeBtn.style.display = 'none';
+                }
+            },
+
+            determineSettingAvailability: function () {
+                if (!this.disableSettings) {
+                    this.toggleSettings(true);
+                }
+            },
+
+            toggleSettings: function (show) {
+                if (show) {
+                    this.$.settingsBtn.style.display = 'inline-block';
+                } else {
+                    this.$.settingsBtn.style.display = 'none';
+                }
+            },
+
+           
+            setHeaderVisible: function(visible){
+            	if(visible){
+            		this.$.titleBar.classList.remove('hide');            		
+            	}else{
+            		this.$.titleBar.classList.add('hide');
+            	}
+            },
+            setZindex: function (zIndex) {
+                this.style.zIndex = zIndex;
+            },
+
+            snapWidget: function () {
+                if (!this.noPositionSnapping) {
+                    this.x = Math.round(this.x / this._snapValueWidth) * this._snapValueWidth;
+                    this.y = Math.round(this.y / this._snapValueHeight) * this._snapValueHeight;
+                }
+            },
+            snapSizeToGrid: function () {
+              /*   if (!this.noSizeSnapping) {
+                    var x = Math.round((this.x + this.width) / this._snapValueWidth) * this._snapValueWidth;
+                    var y = Math.round((this.y + this.height) / this._snapValueHeight) * this._snapValueHeight;
+                    var parsedSize = this.preventOutBoundRect(x, y);
+
+                    this.width = parsedSize.width;
+                    this.height = parsedSize.height;
+                } */
+            },
+
+            _onHandleDown: function (e) {
+                this.allowResize = true;
+                this.fire('resize', {state: 'started'});
+                this.updateLocalBound();
+            },
+
+            _onHandleMove: function (e) {
+                if (this.allowResize) {
+                    this.fire('resize', {state: 'resizing'});
+
+                    var localCoordinate = this.globalToLocal(e.detail);
+                    var parsedSize = this.checkMinSize(localCoordinate.x, localCoordinate.y);
+
+                    this.width = parsedSize.width;
+                    this.height = parsedSize.height;
+                    this.contentResize();
+                }
+            },
+			
+            _onHandleUp: function (e) {
+                this.allowResize = false;
+                this.fire('resize', {state: 'ended'});
+            },
+            
+            getHeaderHeight: function(){
+				var me =  this, height = 0;
+				var headerRec = me.$.titleBar.getBoundingClientRect();
+				if(headerRec != null){
+					height = headerRec.height;	
+				}
+				
+				return headerRec.height;
+			},
+			
+            checkMinSize: function (width, height) {
+                width = width > this.minWidth ? width : this.minWidth;
+                height = height > this.minHeight ? height : this.minHeight;
+
+                return {width: width, height: height};
+            },
+
+            preventOutBoundRect: function (x, y) {
+                var width = x > this.boundRect.right ? (Math.floor(this.boundRect.right / this._snapValueWidth) * this._snapValueWidth) - this.x : x - this.x;
+                var height = y > this.boundRect.bottom ? (Math.floor(this.boundRect.bottom / this._snapValueHeight) * this._snapValueHeight) - this.y : y - this.y;
+
+                width = x - this.x;
+                height = y - this.y;
+
+                return {width: width, height: height};
+            },
+
+            _onCloseBtnTap: function (e) {
+            	this.fire('widget-remove');
+            },
+
+            afterCoordinateAssign: function () {
+                this.snapWidget();
+            },
+
+            _onSettingsBtnTap: function () {
+            	this.fire('widget-setting',this);
+            },
+            onRefresh: function(){
+            	var me = this;
+            	this.refresh();
+            },
+
+            showWidgetContent: function () {
+                this.contentWidgetProperty.fire('toggleWidget');
+                this._showingProperty = false;
+            },
+
+            showWidgetProperty: function () {
+                this.contentWidget.fire('toggleWidget');
+                this._showingProperty = true;
+            },
+            
+            contentResize: function() {
+                if (typeof this.contentWidget.resize === 'function'){
+                    this.contentWidget.resize(this.info.widget_content);
+                }
+            },
+            
+            refresh: function() {
+                if (typeof this.contentWidget.refresh === 'function')
+                    this.contentWidget.refresh();
+            },
+
+            _toggleEditMode: function (value) {
+                this.toggleDrag(value);
+                this.toggleResize(value);
+                this.toggleSettings(value);
+                this.toggleClose(value);
+                return value;
+            },
+            setDashboard: function(view){
+            	this._dashboard = view;
+            },
+        	get dashboard(){
+				
+				return this._dashboard;
+			}
+        })
+    </script>
+</dom-module>

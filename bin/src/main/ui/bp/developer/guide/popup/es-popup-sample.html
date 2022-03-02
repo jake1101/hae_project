@@ -1,0 +1,147 @@
+<sc-link rel="import" href="ep-custom-popup.html"></sc-link>
+
+<dom-module id="es-popup-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-panel title-text="sc-popup-manager 샘플" collapsible="true">
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+	        	</colgroup>
+	            <tr>
+	            	<th>
+	            		<sc-label text="품목명"></sc-label>
+	            	</th>
+	            	<td>
+	            		<div class="field-box">
+		            		<sc-text-field class="w-300" id="txt" value="{{data.item_nm}}" max-length="120" placeholder="품목명을 입력하세요"></sc-text-field>
+		            		<sc-button text="SCPopupManager.popup()" on-click="onShowCustomPopup1" style="margin-left:2px" i18n-disabled></sc-button>
+		            		<sc-button text="UT.popup()" on-click="onShowCustomPopup2" style="margin-left:2px" i18n-disabled></sc-button>
+		            	</div>
+	            	</td>
+	            </tr>
+	            <tr>
+	            	<th>
+	            		<sc-label text="수량"></sc-label>
+	            	</th>
+	            	<td>
+	            		<sc-number-field class="w-150 align-right" value="{{data.item_qty}}" input-cover="true" format-type="amt" readonly></sc-number-field>
+	            	</td>
+	            </tr>
+	            <tr>
+	            	<th>
+	            		<sc-label text="단가"></sc-label>
+	            	</th>
+	            	<td>
+	            		<sc-number-field class="w-150 align-right" value="{{data.item_price}}" input-cover="true" format-type="amt" readonly></sc-number-field>
+	            	</td>
+	            </tr>
+	            <tr>
+	            	<th>
+	            		<sc-label text="납품요청일"></sc-label>
+	            	</th>
+	                <td>
+	                	<sc-date-field class="w-150" value="{{data.rd_date}}" readonly></sc-date-field>
+	                </td>
+	            </tr>
+	            <tr>
+	        		<th>
+	          			<sc-label text="기타"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-textarea-field class="h-80" value="{{data.rem}}" readonly></sc-textarea-field>
+	        		</td>
+	        	</tr>
+	        </table>
+		</sc-panel>
+	</template>
+	<script>
+		Polymer({
+			is : 'es-popup-sample',
+			properties : {
+				data : {
+					type : Object,
+					value : function() {
+						return {}
+					}
+				}
+			},
+			// 팝업호출1 버튼 클릭 시
+			onShowCustomPopup1 : function() {
+				var me = this;
+				
+				// 파라미터
+				var param = {"item_nm" : me.get("data.item_nm")};
+				
+				// 팝업 재사용 시
+				if(!me.customPopup1) {
+					me.customPopup1 = SCPopupManager.popup("ep-custom-popup", me, 600, 400, {
+						modal: true,
+						destroyOnHided: false	// hide 시 destroy하지 않도록 함 (재사용)
+					});
+				}
+				me.customPopup1.titleText = "Custom Popup 1";
+					
+				var content1 = me.customPopup1.getWindowContent();
+				// 이벤트 리스너
+				content1.addEventListener('apply-data', function(e) {
+					me.onApplyData(e.detail);
+					me.customPopup1.close();
+				});
+				
+				// 팝업 숨겨질 때 reset 호출
+				me.customPopup1.addEventListener("sc-window-hided", function(e) {
+					content1.reset();
+				});
+				
+				me.customPopup1.show();
+				me.customPopup1.getWindowContent().load(param);
+			},
+			// 팝업호출2 버튼 클릭 시
+			onShowCustomPopup2 : function() {
+				var me = this;
+				
+				// 파라미터
+				var param = {"item_nm" : me.get("data.item_nm")};
+				
+					
+				// Util.js의 popup 생성 공통 처리
+				var customPopup2 = UT.popup("ep-custom-popup", me, 600, 400, {
+					// 이벤트 리스너
+					"apply-data" : function(popup, e) {
+						me.onApplyData(e.detail);
+						popup.close();
+					}
+				}, {	// options
+					/*
+					modal                 : true,	// default
+					maximizable           : false,	// default
+					draggable             : true,	// default
+					resizable             : true,	// default
+					closable              : true,	// default
+					collapsible           : false,	// default
+					i18nDisabled          : false,	// default
+					resizeOnBrowserResize : true,	// default
+					refitOnBrowserResize  : true,	// default
+					*/
+					title : "Custom Popup 2"
+				});
+				customPopup2.show();
+				customPopup2.getWindowContent().load(param);
+			},
+			onApplyData : function(popupData) {
+				var me = this;
+				
+				me.set("data.item_qty"  , popupData["item_qty"]);
+				me.set("data.item_price", popupData["item_price"]);
+				me.set("data.rd_date"   , popupData["rd_date"]);
+				me.set("data.rem"       , popupData["rem"]);
+			}
+		});
+	</script>
+</dom-module>

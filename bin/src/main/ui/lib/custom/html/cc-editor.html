@@ -1,0 +1,377 @@
+<script>
+	window.DEXT5_ROOTPATH = "ui/lib/dext5editor/js" 
+</script>
+<script src="../../dext5editor/js/dext5editor.js"></script>
+<dom-module id="cc-editor">
+    <style>
+        :host {
+			display : block;
+		}
+    </style>
+    <template>
+    	<sc-toolbar class="header" hidden$="[[!headable]]">
+    		<div class="title">[[titleText]]</div>
+    		<sc-button class="collapsible" hidden="[[!collapsible]]" on-click="_onEditorCollapseButtonClick"></sc-button>
+    	</sc-toolbar>
+    	<div class="content-wrap">
+	    	<div class="content">
+				<div class="dext5-editor"></div>
+	        </div>
+    	</div>
+    </template>
+    <script>
+		(function(){
+			DEXT5.config.ProductKey = "0G85-5252-6TJW-GA30";
+            DEXT5.config.LicenseKey = "BgjZo3tp3NAG22bEBJX7YJrnpJVblJrjXJVamgfXZNWYZNWZhNWYZoR4SutUIWxrQTM6Pje6QS0VQjd4QjcUJg6tIg6UJHttBfdHJfxqITM7Qi68yepuPxFdQWd4QfdayTQ7QjEZQfLUJgttBc==";
+            DEXT5.config.Runtimes = "html5";
+            DEXT5.config.DevelopLangage = "JAVA";
+            DEXT5.config.RemoveComment = "0"; // 에디터에 들어온 내용 중 주석을 미삭제합니다. -->
+            
+            // 에디터에 로드 할 언어를 설정합니다. 
+            DEXT5.config.Lang = "ko-kr"; // ko-kr:한국어(대한민국), en-us:영어(미국), zh-cn:중국어(중국), zh-tw:중국어(대만), ja-jp:일본어
+            // 에디터를 edit, view 모드로 설정합니다.
+			DEXT5.config.Mode = "view";
+            // 에디터의 너비값을 설정합니다. 기본값은 "900px" 으로 설정됩니다.
+			DEXT5.config.Width = "100%";
+			// 에디터의 높이값을 설정합니다. 기본값은 "550px" 입니다.
+			DEXT5.config.Height = "100%";
+            // 팝업창, 우클릭 메뉴를 띄우고 싶은 윈도우를 설정합니다 .
+            DEXT5.config.DialogWindow = parent.window;
+         	
+            // 에디터가 로드 완료(작업준비)
+            DEXT5.config.LoadedEvent = function(editor) {
+            	var editorId = editor.ID,
+            		editorEl = document.getElementById(editorId);
+            	while(editorEl.tagName != 'CC-EDITOR') {
+            		editorEl = editorEl.parentElement;
+            	}
+            	if((DEXT5EDITORS[editorId] = editorEl)) {
+            		DEXT5EDITORS[editorId]._initialized();
+				}
+            };
+            
+            var editorIndex = 0;
+            var DEXT5EDITORS = {};
+            
+            CCEditor = Polymer({
+            	is: "cc-editor",
+            	
+                properties: {
+                	container : {
+	      				type : Boolean,
+	      				value : true,
+	      				reflectToAttribute : true
+	      			},
+	      			titleText : {
+	      				type : String,
+	      				value : ''
+	      			},
+	      			headable : {
+	      				type : Boolean,
+	      				value : false,
+	      				reflectToAttribute : true
+	      			},
+                	_dext5EditorConfig : {
+						type : Object,
+						value : function() {
+							return {};
+						}
+					},
+					
+					height: {
+						type: Number,
+						value: function(){
+							return 300;
+						},
+						observer: "_changedHeight"
+					},
+					
+                    editable: {
+                        type: Object,
+                        value: function() {
+                            return true;
+                        },
+                        observer: "_changedEditable"
+                    },
+                    
+                    valueType: {
+                        type: String,
+                        value: "body", // body, body-ex, html, html-ex
+                        notify: true,
+                        observer: "_changedValueType"
+                    },
+                    
+                    value: {
+                        type: String,
+                        notify: true,
+                        observer: "_changedValue"
+                    }
+                },
+                
+             	// dext5editor 초기화 완료
+                _initialized : function() {
+					if(this._isInitialized) {
+						console.error('this element[' + this.id + '] is initialized');
+						return;
+					}
+					this._isInitialized = true;
+					this.doContentElementResize();
+					this.fire('editor-initialized', this.instance, {bubbles : false});
+				},
+				
+				
+				observers : [
+					'_headableChanged(titleText, collapsible)'
+				],
+				
+				behaviors : [
+					Polymer.SCResizableBehavior,
+					Polymer.SCCollapsibleBehavior
+				],
+				
+				listeners : {
+					'sc-resize' : 'doContentElementResize'
+				},
+				
+				
+				// dext5Editor 초기화 합니다. 
+                prepare : function() {
+					this.mixin(DEXT5.config, this._dext5EditorConfig);
+					this.instance = new Dext5editor((DEXT5.config.EditorHolder = this.editorId));
+				},
+				
+				attached : function() {
+					if(!this._isPrepared) {
+						this._isPrepared = true;
+						this.prepare();
+					}
+				},
+				
+				// dext5editor 엘리먼트 id 반환
+				get editorId() {
+					if(!this._editorId) {
+						this.editorElement.setAttribute('id', (this._editorId = this._generateId()));
+					}
+					return this._editorId;
+				},
+				
+				// dext5editor 엘리먼트 반환
+				get editorElement() {
+					if(!this._editorElement) {
+						this._editorElement = this.$$('.dext5-editor');
+					}
+					return this._editorElement;
+				},
+				
+				// editorId 반환
+				_generateId : function() {
+					return this.tagName.toLowerCase() + '-' + ++editorIndex;
+				},
+				
+				// 에디터의 Height를 설정
+				_changedHeight: function(value){
+					this._dext5EditorConfig.Height = value + 'px';
+					
+					if(this._isInitialized) {
+						DEXT5.setSize(DEXT5.config.Width, value, this.editorId);
+					}
+				},
+				
+				// edit 모드 설정
+                _changedEditable: function() {
+                	if( this._checkValueAsync("_editChangeAsync", "_changedEditable") ){
+                		this._dext5EditorConfig.Mode = this.editable ? 'edit' : 'view';
+    					DEXT5.setEditorMode(this._dext5EditorConfig.Mode, this.editorId);
+                	}
+                	
+                },
+				
+                _checkValueAsync: function(target, func){
+                	if(!this._isInitialized){
+                		if(this[target]){
+                			this.cancelAsync(this[target]);
+                		}
+                		this[target] = this.async(this[func], 100);
+            			return false;
+                	}
+                	
+                	delete this[target];
+                	
+                	return true;                	
+                },
+                
+                _changedValueType: function(){
+                	this._changedValue();
+                },
+                
+                // value 값 설정
+                _changedValue: function() {
+                	if( this._checkValueAsync("_valueChangeAsync", "_changedValue") ){
+                		if(this.editorId) {
+                			var value = this.value || "";
+                			value = value.replace(/</g, "&lt;"),
+                			value = value.replace(/>/g, "&gt;");
+
+                    		switch(this.get("valueType")) {
+    	                        case "html-ex": // <html> 부터 </html>까지의 소스
+    	                        	DEXT5.setHtmlValueEx(value, this.editorId);
+    	                            break;
+    	                        case "body-ex": // <body> 부터 </body> 까지의 소스
+    	                        	DEXT5.setBodyValueEx(value, this.editorId);
+    	                            break;
+    	                        case "html": // <html> 태그 내부의 소스
+    	                        	DEXT5.setHtmlValue(value, this.editorId);
+    	                            break;
+    	                        case "text": // 순수 텍스트 
+    	                        	DEXT5.setInsertText(value, this.editorId);
+    	                        	break;
+    	                        default:     // <body> 태그 내부의 소스
+    	                        	DEXT5.setBodyValue(value, this.editorId);
+    	                            break;
+                            }
+                    	}
+                		
+                	}
+                	
+                },
+                
+                // 에디터 값과 bind 변수값을 동기화한다. 
+                syncValue: function() {
+                	if(this._isInitialized) {
+	                    if(this.editorId) {
+	                        switch(this.get("valueType")) {
+		                        case "html-ex":
+		                            this.set("value", DEXT5.getHtmlValueEx(this.editorId) );
+		                            break;
+		                        case "body-ex":
+		                        	this.set("value", DEXT5.getBodyValueEx(this.editorId) );
+		                            break;
+		                        case "html":
+		                        	this.set("value", DEXT5.getHtmlValue(this.editorId));
+		                            break;
+		                        case "text":
+		                        	this.set("value", DEXT5.getBodyTextValue(this.editorId));
+		                        	break;
+		                        default:
+		                        	this.set("value", DEXT5.getBodyValue(this.editorId));
+		                            break;
+		                   }
+	                    }
+                	}
+                },
+                
+                // 현재 커서 위치에 html 삽입
+                setInsertHtml: function(html) {
+                	if(this._isInitialized) {
+	                    if(this.editorId) {
+	                    	DEXT5.setInsertHTML(html, this.editorId);
+	                    }
+                	}
+                },
+
+                getInnerHtml: function() {
+                    if(this._isInitialized) {
+                        if(this.editorId) {
+                            return DEXT5.getDext5BodyDom(this.editorId).innerHTML;
+                        }
+                    }
+                    return "";
+                },
+                
+                // 에디터 콘텐츠 값의 유무 검사
+                isEmpty: function() {
+                    return DEXT5.isEmpty(this.editorId);
+                },
+                
+                _onEditorCollapseButtonClick : function() {
+	    			if(this.collapsed) {
+	    				this.expand();
+	    			}
+	    			else {
+	    				this.collapse();
+	    			}
+	    		},
+	    		
+	    		get _contentElement() {
+	    			return this.editorContent;
+	    		},
+	    		
+	    		get editorHeader() {
+	      			if(!this._editorHeader) {
+	      				this._editorHeader = this.querySelector('sc-toolbar.header');
+	      			}
+	      			return this._editorHeader;
+	      		},
+	    		
+	    		get editorHeaderHeight() {
+	      			if(!this._editorHeaderRect || this.headable && !this._editorHeaderRect.height) {
+	      				this._editorHeaderRect = this.editorHeader.getBoundingClientRect();
+	      			}
+	      			return this._editorHeaderRect.height;
+	      		},
+	      		
+	      		get editorContent() {
+	      			if(!this._editorContent) {
+	      				this._editorContent = this.querySelector('div.content');
+	      			}
+	      			return this._editorContent;
+	      		},
+	      		
+	      		get editorContentPaddingBottom() {
+					if(!this._editorContentPaddingBottom) {
+						this._editorContentPaddingBottom = Number(getComputedStyle(this.editorContent).paddingBottom.replace('px', ''))
+					}    			
+					return this._editorContentPaddingBottom;
+	      		},
+	      		
+	      		get editorContentPaddingLeft() {
+					if(!this._editorContentPaddingLeft) {
+						this._editorContentPaddingLeft = Number(getComputedStyle(this.editorContent).paddingLeft.replace('px', '')) * 2;
+					}    			
+					return this._editorContentPaddingLeft;
+	      		},
+	      		
+	      		get editorBorderWidth() {
+	      			if(!this._editorBorderWidth) {
+	      				this._editorBorderWidth =  Number(this.getComputedStyleValue('border-left-width').replace('px', '')) * 2;
+	      			}
+	      			return this._editorBorderWidth;
+	      		},
+	    		
+	    		doContentElementResize : function() {
+	      			Polymer.dom.addDebouncer(this.debounce('_debounceEditorResize', this._doContentElementResize, 16));
+	    		},
+	    		
+	    		_doContentElementResize : function() {
+	    			var rect, height;
+	       			if(!this.isAttached) {
+	       				return;
+	       			}
+	      			rect = this.getBoundingClientRect();
+	      			height = rect.height - (this.headable ? (this.editorHeaderHeight + 2) : 0) - this.editorContentPaddingBottom;
+	      			this.editorContent.style.width = (rect.width - this.editorContentPaddingLeft - this.editorBorderWidth) + 'px';
+	      			this.editorContent.style.height = height + 'px';
+	      			this.editorElement.style.width = this.editorContent.style.width; 
+	      			this.editorElement.style.height = height + 'px';
+	      			if(this._isInitialized) {
+		      			DEXT5.SetSize(this.editorElement.style.width.replace('px', ''), this.editorElement.style.height.replace('px', ''), this.editorId);
+	      			}
+	    		},
+	    		
+	    		_headableChanged : function(titleText, collapsible) {
+	    			this.headable = !!(titleText || collapsible); 
+	    		},
+                
+                // 메모리 해제
+                _destroy: function() {
+                    DEXT5.destroy(this.editorId);
+                    this.instance = null;
+					this._editorId = null;
+					this._editorElement = null;
+                }
+                
+            });
+			
+		}());
+    </script>
+</dom-module>

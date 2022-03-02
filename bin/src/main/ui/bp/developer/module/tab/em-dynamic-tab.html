@@ -1,0 +1,62 @@
+<script src="/ui/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<sc-link rel="import" href="/ui/bp/developer/shared/es-source-viewer.html"></sc-link>
+
+<sc-link rel="import"	href="es-dynamic-tab.html"></sc-link>
+
+<dom-module id="em-dynamic-tab">
+<!-- 
+/**
+ *
+ *	@description : 
+ *  <pre>
+ * </pre>
+ * @author : Yeon-u Kim
+ * @FileName : 
+ * @Since 2017. 2. 27.
+ * @변경이력 : [2017. 2. 27.] Yeon-u Kim 최초작성
+ */
+-->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+	
+	<template>
+		<cc-page-title-bar title-text="동적 탭화면" i18n-disabled>
+			<sc-spacer></sc-spacer>
+			<sc-button text="reset" on-click="onReset" i18n-disabled></sc-button>
+		</cc-page-title-bar>
+		
+		<es-dynamic-tab id="tab" class="vbox flex-5"></es-dynamic-tab>
+		
+		<!-- source viewer를 위해 필요한 구역 실제로 사용할때 제거함. -->
+		<sc-panel class="vbox flex-5" collapsible="true" title-text="Source Viewer">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/module/tab/es-dynamic-tab.html" class="flex"></es-source-viewer>
+        </sc-panel>
+        <!-- source viewer를 위해 필요한 구역 실제로 사용할때 제거함. -->
+	</template>
+	
+	<script>
+	Polymer({
+			is : 'em-dynamic-tab',
+			properties : {
+			},
+			/************************************************** 
+			 * 초기화 설정
+			 **************************************************/
+			// 1. 화면 로딩시 최초 호출
+			initialized : function(){
+			},
+			/************************************************** 
+			 * 그리드 이벤트
+			 **************************************************/
+			/************************************************** 
+			 * 버튼 이벤트
+			 **************************************************/
+			 onReset: function(){
+				this.$.tab.reset(); 
+			 }
+		});
+	</script>
+</dom-module>

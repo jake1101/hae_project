@@ -1,0 +1,185 @@
+<dom-module id="smartsuite-user-list">
+
+    <style>
+       :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+    <template>
+    
+        <sc-ajax id="findList" url="../../../findListUserInCalendar.do" body="{{findList.param}}" last-response="{{resultList}}"></sc-ajax>
+            
+        <!-- 공통코드 -->
+        <sc-request-group init>
+            <sc-ajax url="getAllCompanyList.do" last-response="{{codes.companies}}"></sc-ajax> <!-- 회사목록 -->
+        </sc-request-group>
+        
+        <div class="vbox flex">
+            <sc-toolbar class="calendar-page-title">
+            	<sc-spacer></sc-spacer>
+				<sc-button text="조회" class="complete-btn borderPlus" on-click="onFindList"></sc-button>
+    		</sc-toolbar>    		
+        	
+	        <table class="calendar-tb-search" style="border: 1px solid silver;">
+	            <tr>
+	                <th width="100px"><sc-label text="회사"></sc-label></th>
+	                <td>
+	                    <sc-combobox-field id="compCdCombo"
+	                        display-field="comp_nm" value-field="comp_cd" 
+	                        items="{{codes.companies}}" value="{{findList.param.comp_cd}}" placeholder="전체">
+	                    </sc-combobox-field>
+	                </td>
+	                <th width="100px"><sc-label text="부서명"></sc-label></th>
+	                <td><sc-text-field value="{{findList.param.dept_nm}}" max-length="200" on-enter="onFindList"></sc-text-field></td>
+	            </tr>
+	            <tr>
+	                <th><sc-label text="아이디"></sc-label></th>
+	                <td><sc-text-field value="{{findList.param.usr_id}}" max-length="200" on-enter="onFindList"></sc-text-field></td>
+	                <th><sc-label text="이름"></sc-label></th>
+	                <td><sc-text-field value="{{findList.param.usr_nm}}" max-length="200" on-enter="onFindList"></sc-text-field></td>
+	            </tr>
+	        </table>
+    	
+    		<sc-toolbar class="calendar-page-title">
+				<sc-button text="선택" class="complete-btn borderPlus" on-click="onSelectedList"></sc-button>
+    		</sc-toolbar>
+    		<div class="calendar-flex">
+    			<sc-grid id="gridPanel" editable="false" selection-mode="[[selectionMode]]"	use-state="false"
+        			 data-provider="{{resultList}}" on-item-click="onDataCellClicked">
+	            	<sc-grid-columns>
+	                    <sc-data-column data-field="usr_id"		header-text="아이디"		width="100"	text-align="center"></sc-data-column>
+                    	<sc-data-column data-field="usr_nm"		header-text="이름"		width="150"	text-align="center"></sc-data-column>
+	            	</sc-grid-columns>
+        		</sc-grid>
+    		</div>
+        </div>
+
+    </template>
+    
+    <script>
+        Polymer({
+            is: "smartsuite-user-list",
+            properties: {
+            	titleText:{
+                    type: String,
+    				value: "사용자검색"
+    			},
+    			
+                findList: {
+                    type: Object,
+                    value: function(){
+                        return {
+                            param: {}
+                        };
+                    }
+                },
+                codes: {
+                    type: Object,
+                    value: function(){
+                        return {
+                            companies: []
+                        };
+                    },
+                    reset: false
+                },
+                selectionMode: {
+                    type: String,
+                    value: function() {
+                    	return 'check';
+                    }
+                },
+                resultList : {
+                	type : Array,
+                	value : function() {
+                		return [];
+                	}
+                }
+            },
+            
+            // find list url
+            getAjaxUrl: function() {
+                var me = this;
+                return me.$.findList.url;
+            },
+            
+            // 팝업 load 및 옵션 설정
+            load: function(options) {
+                var me = this;
+                options = options || {};
+                me.set("selectionMode", options.singleSelect ? 'radio' : 'check');
+                me.set("autoComplete" , UT.isBoolean(options.autoComplete) ? options.autoComplete : false);
+
+                if (UT.isObject(options.defaultParam)) {
+                    me.set("findList.param", options.defaultParam);
+                }
+                if(UT.isArray(options.dataRows)) { // 배열 데이터
+                    var provider = me.$.gridPanel.getDataProvider();
+                    provider.addItems(options.dataRows);
+                }
+                if(UT.isArray(options.disabled)){
+                	var disabledArray = options.disabled;
+                	
+                	for(var i=0; i<disabledArray.length; i++) {
+						var strId = disabledArray[i];
+						
+						me.$[strId].disabled = true;
+					}
+                }
+
+                me.onFindList();
+            },
+            
+            
+          	//그리드이벤트
+            onDataCellClicked: function(e){
+            	var me = this,
+                data = e.detail.data,
+                item = e.detail.item;
+                var grid = me.$.gridPanel;
+                var current = grid.getCurrentCell();
+                
+                var index = current.rowIndex;
+                
+                grid.selectionCheck(index,true,(me.get("selectionMode") === "radio"));
+                
+            },
+            
+            // 검색(조회)
+            onFindList: function() {
+                var me = this;
+                UT.request(me.$.findList);
+            },
+            
+            // 선택 목록 반환
+            onSelectedList: function() {
+                var me = this;
+                
+                var provider = me.$.gridPanel.getDataProvider();
+            	var selected = provider.selectionCheckedItems();
+            	
+				if(selected.length > 0) {
+                    me.fire('selected-items', selected);
+                	me.onClose();
+				} else {
+					UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+				}
+            },
+          	//닫기
+            onClose : function() {
+            	var me = this;
+            	
+            	me.clearData();
+            	me.fire('close');
+            },
+            clearData : function() {
+            	var me = this;
+                me.reset();
+            },
+            behaviors:[
+                Polymer.CCAutocompleteBehavior
+            ]
+        });
+    </script>
+
+</dom-module>

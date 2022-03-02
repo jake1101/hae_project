@@ -1,0 +1,129 @@
+<script src="/ui/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<sc-link rel="import" href="es-sp-height.html"></sc-link>
+<sc-link rel="import" href="../shared/es-source-viewer.html"></sc-link>
+<dom-module id="em-sp-height">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <!--  화면 구성 시작-->
+    <template>
+    	<cc-page-title-bar></cc-page-title-bar>
+		<es-sp-height id="grid" class="vbox flex-5" on-search="onSearch"></es-sp-height>        	
+        <sc-panel class="vbox flex-5" collapsible="false" title-text="Source Viewer">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/grid/advanced/es-sp-height.html"></es-source-viewer>
+        </sc-panel>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'em-sp-height',
+            
+            properties : {
+                source : {
+                    type : String,
+                    value : null
+                },
+                data : {
+                    type: Array,
+                    value:  [
+                             {
+                            	    "balance": "$3,075.80",
+                            	    "picture": "http://placehold.it/32x32",
+                            	    "age": 24,
+                            	    "eyeColor": "green",
+                            	    "name": "Clayton Galloway",
+                            	    "about": "Ex consequat incididunt ipsum duis voluptate nostrud labore anim. Et non deserunt velit sunt laborum. Deserunt eiusmod mollit aute ipsum exercitation dolore eu. Sit occaecat ipsum deserunt voluptate Lorem consequat sit do ex incididunt officia.\r\n",
+                            	    "registered": "2016-10-31T11:45:44 -09:00",
+                            	    "longitude": -137.750915,
+                            	    "greeting": "Hello, Clayton Galloway! You have 6 unread messages.",
+                            	    "favoriteFruit": "banana"
+                            	  },
+                            	  {
+                            	    "balance": "$3,159.41",
+                            	    "picture": "http://placehold.it/32x32",
+                            	    "age": 20,
+                            	    "eyeColor": "green",
+                            	    "name": "Rosanna Dejesus",
+                            	    "about": "Ut eu aliquip quis aliquip sit adipisicing labore laborum magna et quis mollit esse duis. Aute laborum enim ex cupidatat sint. Qui ullamco Lorem culpa qui elit consequat tempor nisi elit esse qui occaecat. Incididunt est commodo excepteur adipisicing adipisicing esse exercitation. Adipisicing mollit mollit nostrud deserunt est esse sint amet amet minim enim aliquip.\r\n",
+                            	    "registered": "2014-10-27T01:16:22 -09:00",
+                            	    "longitude": -136.935745,
+                            	    "greeting": "Hello, Rosanna Dejesus! You have 6 unread messages.",
+                            	    "favoriteFruit": "apple"
+                            	  },
+                            	  {
+                            	    "balance": "$3,210.17",
+                            	    "picture": "http://placehold.it/32x32",
+                            	    "age": 34,
+                            	    "eyeColor": "blue",
+                            	    "name": "Brennan Stanley",
+                            	    "about": "Laborum adipisicing esse irure enim commodo eu qui minim Lorem nulla. Irure nulla reprehenderit est adipisicing nulla ut in incididunt consectetur ut irure id elit ipsum. Labore dolore est fugiat adipisicing ullamco consequat ipsum id. Proident officia irure velit sunt laborum do.\r\n",
+                            	    "registered": "2016-07-31T03:59:02 -09:00",
+                            	    "longitude": 25.276713,
+                            	    "greeting": "Hello, Brennan Stanley! You have 10 unread messages.",
+                            	    "favoriteFruit": "apple"
+                            	  },
+                            	  {
+                            	    "balance": "$2,007.75",
+                            	    "picture": "http://placehold.it/32x32",
+                            	    "age": 26,
+                            	    "eyeColor": "green",
+                            	    "name": "Ophelia Velazquez",
+                            	    "about": "Irure fugiat aute incididunt consectetur reprehenderit in Lorem incididunt sunt aliqua. Commodo laboris tempor officia consequat et ea cillum officia tempor. In fugiat dolor exercitation eiusmod. Voluptate voluptate ut adipisicing dolore Lorem exercitation enim dolore laborum quis. Ullamco commodo et cillum nisi ut ipsum ipsum do dolore esse fugiat ut. Nulla sint labore do cupidatat ut quis ut. Est id esse nisi commodo nulla aliquip pariatur cillum tempor eu nulla reprehenderit dolor ut.\r\n",
+                            	    "registered": "2014-03-26T10:41:19 -09:00",
+                            	    "longitude": 58.058215,
+                            	    "greeting": "Hello, Ophelia Velazquez! You have 5 unread messages.",
+                            	    "favoriteFruit": "apple"
+                            	  },
+                            	  {
+                            	    "balance": "$2,082.14",
+                            	    "picture": "http://placehold.it/32x32",
+                            	    "age": 36,
+                            	    "eyeColor": "blue",
+                            	    "name": "Bryant Allen",
+                            	    "about": "Reprehenderit cillum tempor officia elit labore nisi sunt qui. Occaecat culpa ipsum minim cillum fugiat incididunt elit aute velit est nostrud reprehenderit exercitation labore. Deserunt est velit duis deserunt pariatur proident est voluptate et anim eu id aliquip. Nisi amet mollit sunt et ipsum anim elit consectetur non. Ad officia cupidatat commodo eiusmod ad nostrud eu officia nisi amet.\r\n",
+                            	    "registered": "2014-03-07T09:41:32 -09:00",
+                            	    "longitude": 45.281241,
+                            	    "greeting": "Hello, Bryant Allen! You have 3 unread messages.",
+                            	    "favoriteFruit": "apple"
+                            	  }
+                            	]
+                }
+            },
+            
+            
+           // 화면 생성 완료
+            initialized: function() {
+                var me = this;
+                this.$.viewer.setData(JSON.stringify(me.data, null, "\t"));
+            },
+            _onResponse: function(e, res){
+            	var me = this;
+            	var result = res.response;
+            	me.$.viewer.setSource(result);
+
+            },
+            onSearch: function(){
+                var me = this;
+                me.$.grid.resultList = me.data;
+            },
+            onEdit: function(){
+                var me = this;
+                me.$.grid.gridEditable = !me.$.grid.gridEditable;
+            },
+            _onResponse: function(e, res){
+            	
+            }
+        
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

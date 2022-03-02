@@ -1,0 +1,104 @@
+<script src="/ui/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<sc-link rel="import" href="es-dev-validate-grid.html"></sc-link>
+<sc-link rel="import" href="../shared/es-source-viewer.html"></sc-link>
+<dom-module id="em-dev-validate-grid">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <!--  화면 구성 시작-->
+    <template>
+
+		<sc-panel class="vbox flex-5" collapsible="false" title-text="sc-grid validate샘플">
+              
+           <es-dev-validate-grid id="esValiGrid" on-search="onSearch"></es-dev-validate-grid>
+        </sc-panel>	
+        <div class="vbox flex-5">
+             <es-source-viewer id="viewer" url="/ui/bp/developer/grid/grid/es-dev-validate-grid.html"></es-source-viewer>
+        </div>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'em-dev-validate-grid',
+            
+            properties : {
+                htmlTarget:{
+                    type:String
+                },
+                data : {
+                    type: Array,
+                    value:  [
+                                {
+                                    col1 : "",
+                                    col2 : "abcdefg",
+                                    col3 : "a",
+                                    col4 : 101,
+                                    col5 : 9,
+                                    col6 : '2017-02-19',
+                                    col7 : '2017-02-17',
+                                    col8 : 'reverse',
+                                    col9 :  100
+                                   
+                                },
+                                {
+                                    col1 : "",
+                                    col2 : "abcdefg",
+                                    col3 : "a",
+                                    col4 : 101,
+                                    col5 : 9,
+                                    col6 : '2017-02-19',
+                                    col7 : '2017-02-17',
+                                    col8 : 'reverse',
+                                    col9 :  100
+                                   
+                                },
+                                {
+                                    col1 : "",
+                                    col2 : "abcdefg",
+                                    col3 : "a",
+                                    col4 : 101,
+                                    col5 : 9,
+                                    col6 : '2017-02-19',
+                                    col7 : '2017-02-17',
+                                    col8 : 'reverse',
+                                    col9 :  100
+                                   
+                                },
+                                {
+                                    col1 : "",
+                                    col2 : "abcdefg",
+                                    col3 : "a",
+                                    col4 : 101,
+                                    col5 : 9,
+                                    col6 : '2017-02-19',
+                                    col7 : '2017-02-17',
+                                    col8 : 'reverse',
+                                    col9 :  100
+                                   
+                                }
+                                
+                               
+                            ]
+                }
+            },
+            
+           // 화면 생성 완료
+            initialized: function() {
+                var me = this;
+                this.$.viewer.setData(JSON.stringify(me.data, null, "\t"));
+            },
+            onSearch :  function(){
+            	this.$.esValiGrid.resultList = this.data;
+            }
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

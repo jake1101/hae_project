@@ -1,0 +1,38 @@
+<sc-link rel="import" href="es-chart-combinations-column-line.html"></sc-link>
+<sc-link rel="import" href="../es-chart-source-viewer.html"></sc-link>
+
+<dom-module id="em-chart-combinations-column-line">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-panel class="vbox flex" title-text="combinations chart column&line">
+			<es-chart-combinations-column-line class="fit flex" on-chart-load="onChartLoad"></es-chart-combinations-column-line>
+			<es-chart-source-viewer id="viewer" url="/ui/bp/developer/chart/combinations/es-chart-combinations-column-line.html" class="flex"></es-chart-source-viewer>
+		</sc-panel>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-chart-combinations-column-line',
+		properties : {
+			data : {
+				type : Object,
+				value : function() {
+					return {}
+				}
+			}
+		},
+		initialized : function() {
+		},
+		setViewerData : function() {
+			var me = this;
+			me.$.viewer.setData(JSON.stringify(me.get("data"), null, "\t"));
+		},
+		onChartLoad : function(){
+			//this.setViewerData();
+		}
+	});
+	</script>
+</dom-module>

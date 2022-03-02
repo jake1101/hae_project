@@ -1,0 +1,229 @@
+<sc-link rel="import" href="../../dashboard/sc-dashboard-canvas.html"></sc-link>
+<sc-link rel="import" href="../../tools/sc-widget-palette.html"></sc-link>
+<sc-link rel="import" href="../../tools/sc-widget-settings.html"></sc-link>
+<sc-link rel="import" href="../../tools/sc-dashboard-settings.html"></sc-link>
+
+<dom-module id="es-dashboard-detail">
+    <style>
+		:host {
+            margin: 0;
+            position: relative;
+            display: block; 
+            @apply(--vbox-layout);
+        }
+        sc-dashboard-canvas {
+            background-color: #f3f3f3;
+            float:left;
+            border-top:0;
+        }
+        .tools{
+       		border: 1px solid #d6d6d6;
+        }
+      
+    </style>
+
+    <template>
+    <cc-page-title-bar>
+    	<sc-button text="저장" on-click="onSave"></sc-button>
+    	<sc-button text="{{_editSwitchBtnText}}" on-click="onEditable"></sc-button>
+    	<sc-button text="닫기" on-click="onClose"></sc-button>
+    </cc-page-title-bar>
+     <div class="hbox flex">
+     <sc-tab-navigation id="widgetTools"  style="width:200px"  class="db_tab">
+      	<sc-dashboard-settings id="dashboardSetting" title=""  height="100%" 
+			                       on-dashboard-info-changed="onDashboardInfoChanged"
+			                       on-dashboard-style-changed="onDashboardStyleChanged"></sc-dashboard-settings>
+     	<sc-widget-palette     id="widgetPalette" title="Widget"  class="flex"   height="100%"   on-drag="_determineState"></sc-widget-palette>
+	   	<sc-widget-settings    id="widgetSetting" title="Properties"  class="flex"   height="100%" 
+	    	                       on-widget-info-changed="onWidgetInfoChanged"></sc-widget-settings>
+     </sc-tab-navigation>
+   	 <sc-dashboard-canvas id="dashboard" width="100%" height="100%" class="flex"
+  		 						 grid-size="10" do-scale-width auto 
+   		                     on-canvas-widget-selected="onWidgetSelected"
+   		                     on-widget-setting="onWidgetSetting"
+   		                     on-dashboard-settings="onDashboardSetting"
+   		                     on-widget-drag-end="onWidgetDragEnd"
+   		                     on-dashboard-canvas-close="onClose"
+   		                     >
+     </sc-dashboard-canvas>
+    
+		<!-- sc-grid import를-->
+		<sc-grid hidden="true" use-stateful="false"><sc-grid-columns></sc-grid-columns></sc-grid>
+	</div>
+    </template>
+    <script>
+        Polymer({
+            is: "es-dashboard-detail",
+
+            properties: {
+                _editMode: {
+                    type: Boolean,
+                    value: true
+                },
+                paletteCollapseBtnHidden: {
+                	type : Boolean,
+                	value : true
+                },
+                _widgetSettingMode: {
+                	type: Boolean,
+                	value: false
+                },
+                _editSwitchBtnText: {
+                	type: String,
+                	value: '미리보기'
+                }
+            }, 
+            listeners : {
+    		},
+    		onSave : function(){
+    			var me = this;
+    			me.dashboard.saveLayout();
+    		},
+    		onEditable : function(){
+    			this._toggleEditMode();
+    		},
+    		initialized: function () {
+    			var me= this;
+    			
+    			
+    			me.$.widgetPalette.setOuterView(me);
+    			me.$.widgetPalette.setDashboard(me.$.dashboard);
+    			me.dashboardInitialized = true;
+            },
+        	load: function(param){
+    			var me = this;
+            	if(param.sts == 'C'){
+            		me.viewMode = 'C';
+            		me._editMode = true;
+            		me.onPaletteCollapse();
+            		me.$.dashboardSetting.initSetting();
+            	}else{
+            		me.viewMode = 'U';
+            		me._editMode = false;
+            		//me.$.dashboardSetting.setDashboardInfo(param.dashboard_content);
+            	}
+            	me.toolsVisible(false);
+            	me.dashboard.load(param);
+           		me.dashboard._editMode = me._editMode ;
+           		me.dashboard._onResize();
+            	me.$.widgetPalette.widgetSearch();
+    		},
+			get dashboard(){
+            	if(!this._dashboard){
+            		this._dashboard = this.querySelector('sc-dashboard-canvas');
+            	}
+            	return this._dashboard;
+            },
+            _onGpPotalAttached: function() {
+            	this.fire("gate-attached");
+            },
+
+            _determineState: function (e) {
+                if (e.detail.state == 'started') {
+                    e.target.updateLocalBound();
+                }
+            },
+
+            _toggleEditMode: function (e) {
+				var me = this;
+				me._editMode = !me._editMode;
+				me.dashboard._editMode = me._editMode;
+				me.toolsVisible();
+				me.dashboard.toggleEditMode();
+            },
+			toolsVisible: function(isAnimate){
+				var me = this,duration = 0,
+				isAnimate = (isAnimate === false) ? isAnimate : true;
+				if(isAnimate){
+					duration = 300;
+				}
+				
+				if(me._editMode === false){
+					$('#widgetTools').animate({width:0,right: 0},duration);
+					$('#widgetTools').hide();
+					me._editSwitchBtnText = '편집';
+				}else{
+					$('#widgetTools').animate({width:200,right: 200}, duration);
+					$('#widgetTools').show();
+					me._editSwitchBtnText = '미리보기';
+				}
+			},
+            _refreshWidgets: function(e) {
+                this.dashboard.refreshWidgets();
+            },
+
+            refresh: function() {
+                this._refreshWidgets();
+            },
+            setWidgetProperties: function(widgetInfo){
+            	var me = this;
+	            me.$.widgetSetting.setWidgetProperties(widgetInfo);
+            },
+            
+            onWidgetSelected: function(e,info){
+            	var me = this,
+            	    widget = info.widget,
+            	    widgetSettingMode = info.widgetSettingMode;
+            	if(widgetSettingMode){
+            		me.setWidgetProperties(widget.info.widget_content);
+            	}
+            },
+            onWidgetSetting: function(e,widget){
+            	var me = this;
+            	me.setWidgetProperties(widget.info.widget_content);
+            	this.$.widgetTools.selectIndex(2);
+            	me.paletteCollapseBtnHidden = false;
+            },
+            onPaletteCollapse: function(){
+            	var me = this;
+            	me.$.dashboard.widgetSettingMode = false;
+            	me.paletteCollapseBtnHidden = true;
+            },
+            onDashboardSetting: function(e,dashboardParam) {
+            	var me = this;
+            	me.paletteCollapseBtnHidden = true;
+               	me.$.dashboardSetting.setDashboardInfo(dashboardParam);
+            },
+            
+            onDashboardInfoChanged: function(e,param){
+            	var me = this;
+            	me.$.dashboard.setDashboardInfo(param.dashboardInfo);
+            },
+            onDashboardStyleChanged: function(e,param){
+            	var me = this,
+            	    dashboardStyle = param.dashboardStyle;
+            	if(dashboardStyle){
+	            	me.$.dashboard.setDashboardStyle(dashboardStyle);
+            	}
+            },
+            onWidgetInfoChanged: function(e,param){
+            	var me = this,
+            		widgetInfo = param.widgetInfo;
+            	if(widgetInfo){
+	            	me.$.dashboard.widgetRedraw(widgetInfo);
+            	}
+            },
+            onWidgetDragEnd: function(e,param){
+            	var me = this;
+            	widgetInfo = param.widgetInfo;
+            	if(widgetInfo){
+	            	me.setWidgetProperties(widgetInfo);
+            	}
+            },
+            onClose: function(){
+            	var me = this;
+            	me._editMode = false;
+            	me.fire('dashboard-detail-close');
+            	
+            	me.resetData();
+    			me.$.dashboard.resetData();
+    		},
+    		resetData: function(){
+    			this.$.dashboardSetting.resetData();
+    			this.$.widgetTools.selectIndex(0);
+    			this.toolsVisible(false);
+    		}
+    		
+        });
+    </script>
+</dom-module>

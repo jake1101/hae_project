@@ -1,0 +1,227 @@
+<dom-module id="es-site-table">
+	<!--
+        ******************************************************************************************
+        ** @Program-name    : 운영현황표
+        ** @Description     :
+        ** @Author          : jhkim
+        ** @Create Date     : 2020.05.07
+        ** @History         : 2020.05.07 jhkim 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+		<sc-ajax id="mappingList" url="getMappingList.do" last-response="{{mappingList}}" body="{{searchParam}}"></sc-ajax>
+		<sc-ajax id="areaWorkerMappingList" url="getAreaMappingList.do" last-response="{{areaWorkerMappingList}}" body="{{workerParam}}"></sc-ajax>
+		<sc-ajax id="areaVehicleMappingList" url="getAreaMappingList.do" last-response="{{areaVehicleMappingList}}" body="{{vehicleParam}}"></sc-ajax>
+		<sc-ajax id="sensorList" url="getSensorList.do" on-response="completeGetSensorList" body="{{searchParam}}"></sc-ajax>
+
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+        <div class="vbox flex">
+        	<sc-button text="새로고침" style="width:80px" on-click="refresh"></sc-button>
+	        <div class="hbox" style="min-height:350px;">
+	        	<div class="vbox" style="width:460px; max-height : 293px;">
+	        		<cc-sub-title-bar title-text="스마트태그 운영 상황"></cc-sub-title-bar>
+	        		<div class="vspace-10"></div>
+					<sc-grid id="mappingPanel" data-provider="{{mappingList}}" use-selection="false" use-state="false" show-number-line="false" column-fit-style="even" use-dummy="false">
+						<sc-grid-columns>
+							<sc-data-column data-field="mapping_status"  header-text="교부상태" width="110" text-align="center"  fill-width="0"></sc-data-column>
+							<sc-data-column data-field="충전필요"  header-text="충전필요" width="82" text-align="center" ></sc-data-column>
+							<sc-data-column data-field="충전불필요"  header-text="배터리 정상" width="82" text-align="center" ></sc-data-column>
+							<sc-data-column data-field="신호없음"  header-text="배터리 미확인" width="82" text-align="center"></sc-data-column>
+							<sc-data-column data-field="전체"  header-text="전체" width="82" text-align="center" ></sc-data-column>
+						</sc-grid-columns>
+					</sc-grid>
+				</div>
+				<div class="hspace-10"></div>
+		        <div class="vbox flex" style="max-height : 293px;">
+		        	<cc-sub-title-bar title-text="영역별 작업자 스마트태그 교부 상황"></cc-sub-title-bar>
+	        		<div class="vspace-10"></div>
+					<sc-grid id="areaWorkerMappingPanel" data-provider="{{areaWorkerMappingList.statistics}}"  use-selection="false" use-state="false" column-fit-style="even" use-dummy="false">
+						<sc-grid-columns>
+							<sc-data-column data-field="area_name"  header-text="영역명" width="150" text-align="center" ></sc-data-column>
+							<sc-data-column data-field="교부"  header-text="교부" width="82" text-align="center" ></sc-data-column>
+							<sc-data-column data-field="미교부"  header-text="미교부" width="82" text-align="center" ></sc-data-column>
+							<sc-data-column data-field="전체"  header-text="전체" width="82" text-align="center" ></sc-data-column>
+							<sc-data-column data-field="충전필요"  header-text="충전필요" width="82" text-align="center" ></sc-data-column>
+							<sc-data-column data-field="충전불필요"  header-text="배터리 정상" width="82" text-align="center" ></sc-data-column>
+							<sc-data-column data-field="충전여부알수없음"  header-text="배터리 미확인" width="82" text-align="center" ></sc-data-column>
+						</sc-grid-columns>
+					</sc-grid>
+	       	 	</div>
+				<div class="hspace-10"></div>
+		        <div class="vbox flex" style="max-height : 293px;">
+		        	<cc-sub-title-bar title-text="영역별 이동장비 스마트태그 교부 상황"></cc-sub-title-bar>
+	        		<div class="vspace-10"></div>
+					<sc-grid id="areaVehicleMappingPanel" data-provider="{{areaVehicleMappingList.statistics}}"  use-selection="false" use-state="false" column-fit-style="even" use-dummy="false">
+						<sc-grid-columns>
+							<sc-data-column data-field="area_name"  header-text="영역명" width="150" text-align="center" ></sc-data-column>
+							<sc-data-column data-field="교부"  header-text="교부" width="82" text-align="center" ></sc-data-column>
+							<sc-data-column data-field="미교부"  header-text="미교부" width="82" text-align="center" ></sc-data-column>
+							<sc-data-column data-field="전체"  header-text="전체" width="82" text-align="center" ></sc-data-column>
+							<sc-data-column data-field="충전필요"  header-text="충전필요" width="82" text-align="center" ></sc-data-column>
+							<sc-data-column data-field="충전불필요"  header-text="배터리 정상" width="82" text-align="center" ></sc-data-column>
+							<sc-data-column data-field="충전여부알수없음"  header-text="배터리 미확인" width="82" text-align="center" ></sc-data-column>
+						</sc-grid-columns>
+					</sc-grid>
+	       	 	</div>
+	        </div>
+	        
+			<div class="vbox flex">
+				<sc-grid id="gridPanel" class="flex" data-provider="{{sensorList}}" use-selection="false" use-state="false" visible-count="true" use-context-menu="false">
+					<cc-grid-toolbar title-text="스마트태그 목록">
+						<sc-button text="필터해제" on-click="initFilter" auth-s></sc-button>
+					</cc-grid-toolbar>
+					<sc-grid-columns>
+						<sc-data-column data-field="sensor_id"  header-text="스마트태그 번호" width="150" text-align="center" ></sc-data-column>
+						<sc-data-column data-field="node_id"  header-text="스마트태그 ID" width="200" text-align="center" ></sc-data-column>
+						<sc-data-column data-field="mapping_status"  header-text="교부상태" width="180" text-align="center" ></sc-data-column>
+						<sc-data-column data-field="target_type"  header-text="스마트태그 유형" width="180" text-align="center" ></sc-data-column>
+						<sc-data-column data-field="vendor_name"  header-text="협력사" width="200" text-align="center" item-style-function="onStyleFontColor"></sc-data-column>
+						<sc-data-column data-field="target_name"  header-text="교부대상 명" width="200" text-align="center" item-style-function="onStyleFontColor"></sc-data-column>
+						<sc-data-column data-field="battery_status"  header-text="배터리 상태" width="200" text-align="center" ></sc-data-column>
+						<sc-data-column data-field="battery"  header-text="배터리 잔량" width="100" text-align="center"  data-type="number" ></sc-data-column>
+						<sc-data-column data-field="area_name"  header-text="영역" width="200" text-align="center" ></sc-data-column>
+						<sc-date-column 	width="180" 	text-align="center" 	header-text="최종수신시간" data-field="signalDt" display-format = "yyyy/MM/dd HH:mm:ss"></sc-date-column>
+					</sc-grid-columns>
+					<sc-grid-fields>
+	                    <sc-grid-field data-field="label_color"></sc-grid-field>
+	                </sc-grid-fields>
+				</sc-grid>
+			</div>
+		</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-site-table",
+            properties : {
+            	searchParam : {
+	            	type : Object,
+	            	value : function(){
+	            		return {
+		            		siteId : SCMdiManager.searchParam.site_id
+		            	};
+	            	}
+		        },
+            	workerParam : {
+	            	type : Object,
+	            	value : function(){
+	            		return {
+		            		siteId : SCMdiManager.searchParam.site_id,
+		            		targetType : 'worker'
+		            	};
+	            	}
+		        },
+            	vehicleParam : {
+	            	type : Object,
+	            	value : function(){
+	            		return {
+		            		siteId : SCMdiManager.searchParam.site_id,
+		            		targetType : 'vehicle'
+		            	};
+	            	}
+		        },
+		        mappingList: {	
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+                areaMappingWorkerList: {	
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+                areaMappingVehicleList: {	
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+            	sensorList: {	
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                }
+            },
+            initialized : function() {		// 초기화 완료 후 호출 함수
+                var me = this;
+                me.refresh();
+            },
+            completeGetSensorList : function(e,res){
+                var me = this;
+                me.sensorList = res.response;
+	            me.initFilter();
+            },
+            initFilter : function(){
+				var me = this;
+
+				me.$.gridPanel.setColumnFilters("mapping_status", [{name: "교부", expression: "value == '교부'"}, {name: "미교부", expression: "value == '미교부'"}]);
+				me.$.gridPanel.setColumnFilters("target_type", [{name: "작업자용 태그", expression: "value == '작업자용 태그'"}, {name: "이동장비용 태그", expression: "value == '이동장비용 태그'"}]);
+				me.$.gridPanel.setColumnFilters("battery_status", [{name: "전원정상", expression: "value == '전원정상'"}, {name: "미확인", expression: "value == '미확인'"}, {name: "충전필요", expression: "value == '충전필요'"}]);
+
+				var vendorFilter = [{name: " ", expression: "value == null"}];
+				var vendorDuplicateChk = [];
+
+				var areaFilter = [];
+				var areaDuplicateChk = [];
+
+				for(var i in me.sensorList){
+					if(typeof vendorDuplicateChk[me.sensorList[i].vendor_name] == "undefined"){
+						vendorDuplicateChk[me.sensorList[i].vendor_name] = 0;
+						var data = {};
+						data.name = me.sensorList[i].vendor_name; 
+						data.expression = "value == '"+me.sensorList[i].vendor_name+"'";
+						vendorFilter.push(data);
+                    }
+                    
+					if(typeof areaDuplicateChk[me.sensorList[i].area_name] == "undefined"){
+						areaDuplicateChk[me.sensorList[i].area_name] = 0;
+						var data = {};
+						data.name = me.sensorList[i].area_name; 
+						data.expression = "value == '"+me.sensorList[i].area_name+"'";
+						areaFilter.push(data);
+                    }
+				}
+
+				me.$.gridPanel.setColumnFilters("vendor_name", vendorFilter);
+				me.$.gridPanel.setColumnFilters("area_name", areaFilter);
+
+            },
+            refresh : function(){
+				var me = this;
+                UT.requestNoDefault(me.$.mappingList);
+                UT.requestNoDefault(me.$.areaWorkerMappingList);
+                UT.requestNoDefault(me.$.areaVehicleMappingList);
+                UT.requestNoDefault(me.$.sensorList);
+            },
+	         onStyleFontColor: function(data, item){
+            	 return (data.label_color)?{fontColor: data.label_color}:null;
+          	 }
+        });
+	</script>
+</dom-module>

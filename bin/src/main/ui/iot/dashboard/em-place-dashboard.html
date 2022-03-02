@@ -1,0 +1,21 @@
+<sc-link rel="import" href="es-place-dashboard.html"></sc-link>
+
+<dom-module id="em-place-dashboard">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<es-place-dashboard id="black" class="flex" on-move-white="onShowWhite"></es-place-dashboard>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-place-dashboard'
+		});
+	</script>
+
+
+</dom-module>

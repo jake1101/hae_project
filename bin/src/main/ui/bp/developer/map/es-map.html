@@ -1,0 +1,18 @@
+<dom-module id="es-map">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+	<template>
+		<sc-map id="map1" type="Google" longitude="129.577" latitude="38" zoom-level="6">
+		</sc-map>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'es-map'
+		});
+	</script>
+</dom-module>

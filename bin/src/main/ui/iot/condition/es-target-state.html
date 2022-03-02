@@ -1,0 +1,382 @@
+<sc-link rel="import" href="./es-target-state-all.html"></sc-link>
+<sc-link rel="import" href="./es-target-state-emergency.html"></sc-link>
+<sc-link rel="import" href="./es-target-state-danger.html"></sc-link>
+<sc-link rel="import" href="./es-target-state-no-activity.html"></sc-link>
+<sc-link rel="import" href="./es-target-state-no-signal.html"></sc-link>
+<sc-link rel="import" href="./es-target-state-shade.html"></sc-link>
+
+<sc-link rel="import" href="./ep-accumulate-step.html"></sc-link>
+<sc-link rel="import" href="./ep-sensor-state.html"></sc-link>
+<sc-link rel="import" href="./ep-heartbeat-chart.html"></sc-link>
+<!-- <sc-link rel="import" href="./ep-worker-today-history2.html"></sc-link> -->
+<sc-link rel="import" href="../shared/ep-target-history.html"></sc-link>
+
+
+<dom-module id="es-target-state">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<!-- 코드 조회-->
+		<sc-request-group id="codes" init on-response = "completeCodeReq">
+			<sc-code-group>
+				<sc-code id="findListCodeUseFlag" code="USEFLAG" value="{{codes.useFlag}}" ></sc-code> <!-- YN -->
+				<sc-code  code="IOT003" value="{{codes.targetList}}" ></sc-code> <!-- YN -->
+			</sc-code-group>
+			<!-- 고객사 조회 -->
+			<sc-ajax id="comboAllCustomerList" url="getComboCustomer.do" last-response="{{codes.customerList}}"></sc-ajax>
+			<sc-ajax url="findListSiteCombo.do" last-response="{{codes.siteList}}"></sc-ajax>
+		</sc-request-group>
+		
+		<!-- 고객사 현장 목록 조회 -->
+		<sc-ajax id="comboSiteByCustomerList" 
+			url="getComboSiteByCustomer.do" 
+			body="{{searchParam}}"
+			last-response="{{codes.siteList}}"
+			on-response = "completeSetComboSite">
+		</sc-ajax>
+		
+		<div style="position: absolute; top: 15px;right: 2px;margin-right: 5px; margin-bottom: 5px;">[[refresh]] : [[refreshSecond]][[secTime]]</div>
+		
+		<cc-page-title-bar>
+<!-- 		 	<sc-button text ="재조회" on-click ="onRefresh"></sc-button>  -->
+		</cc-page-title-bar>
+		<cc-search-container on-search="onSearch" validation-group = "checkInfo" auth-r>
+			<table validation-group="search">
+					<colgroup>
+						<col style="width:120px">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="표시 대상 유형"></sc-label></th>
+						<td>
+							<sc-combobox-field class="w-300" 
+		                        items="{{codes.targetList}}" display-field="label" value-field="data" 
+		                        value="{{searchParam.targetType}}"
+		                        required="true"
+		                        selected-index="0"
+		                        >
+		                    </sc-combobox-field>
+						</td>
+					</tr>
+				</table>
+		</cc-search-container>
+			<div style = "top : 60px ; position : absolute; z-index:100; pointer-events:none; right:100px;">
+		        <table class="tb-form" style = "width : 60%; float : right;">
+		            <colgroup>
+		                <col style ="width : 20%"></col> 
+		                <col style ="width : 20%"></col> 
+		                <col style ="width : 20%"></col> 
+		                <col style ="width : 20%"></col> 
+		                <col style ="width : 20%"></col> 
+		                <col style ="width : 20%"></col> 
+		                <col style ="width : 20%"></col> 
+		                <col style ="width : 20%"></col> 
+<!-- 		                <col style ="width : 20%"></col>  -->
+		            </colgroup>
+		            <tr>
+		                <td style = "text-align : center;">
+		                    <sc-label text="비콘"></sc-label>
+		                    <img src="/ui/assets/img/marker/3.ic_map_marker_beacon.png"  style ="margin-left:10px;width:20px; height : 20px"></img>
+		                </td>
+		               
+		                <td style = "text-align : center;">
+		                    <sc-label text="GPS"></sc-label>
+		                    <img src="/ui/assets/img/marker/5.ic_map_marker_gps_lock.png" style ="margin-left:10px;width:20px; height : 20px"></img>
+		                </td>
+		               
+		                <td style = "text-align : center;">
+		                    <sc-label text="GPS Unlock"></sc-label>
+		                    <img src="/ui/assets/img/marker/7.ic_map_marker_gps_unlock.png" style ="margin-left:10px;width:20px; height : 20px"></img>
+		                </td>
+		             
+		                <td style = "text-align : center;">
+		                    <sc-label text="signal Only"></sc-label>
+		                    <img src="/ui/assets/img/marker/9.ic_map_marker_only_signal.png" style ="margin-left:10px;width:20px; height : 20px"></img>
+		                </td>
+		                <td style = "text-align : center;">
+		                      <sc-label text="지연"></sc-label>
+		                    <img src="/ui/assets/img/marker/11.ic_map_marker_late_signal.png" style ="margin-left:10px;width:20px; height : 20px"></img>
+		                </td>
+		                <td style = "text-align : center;">
+		                      <sc-label text="긴급"></sc-label>
+		                    <img src="/ui/assets/img/marker/1.ic_map_marker_emergency.png" style ="margin-left:10px;width:20px; height : 20px"></img>
+		                </td>
+		                <td style = "text-align : center;">
+		                      <sc-label text="위험지역"></sc-label>
+		                    <img src="/ui/assets/img/marker/13.ic_map_marker_danger.png" style ="margin-left:10px;width:20px; height : 20px"></img>
+		                </td>
+		                <td style = "text-align : center;">
+		                      <sc-label text="신호없음"></sc-label>
+		                    <img src="/ui/assets/img/marker/no-symbol.png" style ="margin-left:10px;width:20px; height : 20px"></img>
+		                </td>
+<!-- 		                <td style = "text-align : center;"> -->
+<!-- 		                      <sc-label text="미교부"></sc-label> -->
+<!-- 		                    <img src="/ui/assets/img/marker/ic_action_cancel.png" style ="margin-left:10px;width:20px; height : 20px"></img> -->
+<!-- 		                </td> -->
+		            </tr>
+		        </table>
+	        </div>
+		<sc-tab-navigation id = "tab" 
+		                   class="flex"
+		                   on-item-select = "onItemSelected">
+			<es-target-state-all id = "all" 
+			                     title-text= "전체"
+			                     on-open-history-pop = "openWorkerHistoryPopup"
+			                     on-open-step-pop = "openStepCountPopup"
+			                     on-open-sensor-state-pop = "openSensorStatePopup"
+			                     on-open-heartbeat-pop = "openHeartBeatPopup"
+			                     >
+			</es-target-state-all>
+			<template>
+				<es-target-state-emergency id = "emergency" 
+				                           title-text= "긴급호출"
+				                           on-open-history-pop = "openWorkerHistoryPopup"
+				></es-target-state-emergency>
+			</template>
+			<template>
+				<es-target-state-danger id = "danger" 
+				                        title-text= "위험지역"
+				                        on-open-history-pop = "openWorkerHistoryPopup"
+				></es-target-state-danger>
+			</template>
+			<template>
+				<es-target-state-no-activity id = "noActivity" 
+				                             title-text= "비활동"
+				                             on-open-history-pop = "openWorkerHistoryPopup"
+				                             on-open-step-pop = "openStepCountPopup"
+				></es-target-state-no-activity>
+			</template>
+			<template>
+				<es-target-state-no-signal id = "noSignal" 
+				                           title-text= "신호없음"
+				                           on-open-history-pop = "openWorkerHistoryPopup"
+				></es-target-state-no-signal>
+			</template>
+			<template>
+				<es-target-state-shade id = "shade" 
+				                       title-text= "음영지역"
+				                       on-open-history-pop = "openWorkerHistoryPopup"
+				></es-target-state-shade>
+			</template>
+		</sc-tab-navigation>
+		
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'es-target-state',
+			properties : {
+				codes :{
+					type : Object,
+					value : function(){
+						return {
+							  customerList : []
+							, useFlag : []
+							, siteList : []
+						};
+					}
+				},
+				refresh: {
+                	type: Object,
+                    value: function(){
+                        return  this.translate("새로고침");
+                    }
+                },
+                
+                refreshSecond: {
+                	type: Object,
+                	value: function(){
+                		return 30;
+                	}
+                },
+                secTime: {
+                	type: Object,
+                    value: function(){
+                        return  this.translate("초");
+                    }
+                },
+				searchParam : {
+					type : Object,
+					value : function(){
+						return {
+							  siteId : SCSessionManager.getCurrentUser().site_id
+							  //여기서 siteId를 재조회 해서 넣어줘야함. 6/19
+						    , companyId : SCSessionManager.getCurrentUser().company_id
+						};
+					}
+				}
+			},
+			observers : [
+			    "checkSiteInfo(searchParam.siteId)"
+			],
+			checkSiteInfo : function(newVal){
+// 				if(UT.isNotEmpty(newVal))
+// 					this.onSearch();
+			},
+			initialized : function(){
+				var me = this;
+				me.refreshInterval = setInterval(function() {
+               		me.resetSecond();
+				}, 1000);
+				//UT.request(me.$.findSiteId); 		///////// 여기부터 다시!!
+				
+			},
+			
+			resetSecond: function(){
+            	var me = this;
+            	
+            	var refreshSecond = me.get("refreshSecond") || 0;
+            	
+            	if(refreshSecond <= 0){
+            		me.set("refreshSecond", 30);
+            		me.onSearch();
+            	}else{
+            		me.set("refreshSecond", --refreshSecond);
+            	}
+            },
+			
+			load : function(){
+				var me = this;
+			},
+			completeCodeReq : function(){
+				var me = this;
+// 				me.$.company_id_combo.selectedIndex = 0;
+// 				me.onSearch();
+			},
+			// 고객사 선택 시 현장 코드 조회
+            onSelectCustomer : function(){
+            	var me = this;
+				me.set("resultList",[]);
+//             	UT.request(me.$.comboSiteByCustomerList);
+            },
+            completeSetComboSite : function(e,res){
+            	var me = this;
+//             	me.$.site_id_combo.selectedIndex = 0;
+            	
+            },
+            onSearch : function(){
+				var me = this;
+				if(SCMdiManager.activatedWindow().id != 'CON0002') return;
+			//	UT.request(me.$.findSiteId); 	
+				
+				me.set("searchParam.siteId",me.get("searchParam.siteId"));
+				
+				me.set("refreshSecond", 30);
+				if(/* !me.validate('checkInfo') || */ UT.isEmpty(me.searchParam.siteId)){
+					UT.alert("IOT.E0001"); //UT.alert("고객사와 현장을 선택해주세요");
+					return;
+				}
+// 				console.log(me.$.tab.selectedIndex);
+				
+				if(me.$.tab.selectedIndex == 0) {
+					me.$.all.onSearch(me.get("searchParam"));
+				}
+				if(me.$.tab.selectedIndex == 1) {
+					me.$.emergency.onSearch(me.get("searchParam"));
+				}
+				if(me.$.tab.selectedIndex == 2) {
+					me.$.danger.onSearch(me.get("searchParam"));
+				}
+				if(me.$.tab.selectedIndex == 3) {
+					me.$.noActivity.onSearch(me.get("searchParam"));
+				}
+				if(me.$.tab.selectedIndex == 4) {
+					me.$.noSignal.onSearch(me.get("searchParam"));
+				}
+				if(me.$.tab.selectedIndex == 5) {
+					me.$.shade.onSearch(me.get("searchParam"));
+				}
+				
+			},
+			
+			onRefresh : function(param){
+				var me = this;
+				me.onSearch();				
+			},
+				
+				
+			onItemSelected : function(event){
+				var me = this;
+				if(/* !me.validate('checkInfo') || */ UT.isEmpty(me.searchParam.siteId)){
+					UT.alert("IOT.E0001"); // UT.alert("고객사와 현장을 선택해 주세요");
+					return;
+				}
+				
+				if(me.$.tab.selectedIndex == 0) {
+					me.$.all.load(me.get("searchParam"));
+				}
+				if(me.$.tab.selectedIndex == 1) {
+					me.$.emergency.load(me.get("searchParam"));
+				}
+				if(me.$.tab.selectedIndex == 2) {
+					me.$.danger.load(me.get("searchParam"));
+				}
+				if(me.$.tab.selectedIndex == 3) {
+					me.$.noActivity.load(me.get("searchParam"));
+				}
+				if(me.$.tab.selectedIndex == 4) {
+					me.$.noSignal.load(me.get("searchParam"));
+				}
+				if(me.$.tab.selectedIndex == 5) {
+					me.$.shade.load(me.get("searchParam"));
+				}
+			},
+			
+			
+			openWorkerHistoryPopup : function(event){
+				var param = event.detail;
+				var me= this;
+				var title ;
+				if(param.targetType == "worker"){
+					title="작업자";
+				}else if(param.targetType == "vehicle"){
+					title="이동장비";
+				}
+				me.historyPopup = UT.popup('ep-target-history', me, 1300, 700, {}, {titleText : me.translate(title+" 당일 이력 조회"), resizable:false});
+				me.historyPopup.show();
+				me.historyPopup.getWindowContent().load(title,param);
+			},
+			openStepCountPopup : function(event){
+				var me = this;
+				var param = event.detail;
+// 				if(UT.isEmpty(me.stepCount)){
+					me.stepCount = UT.popup("ep-accumulate-step", me, 900, 500,{
+					},{maximizable : true, titleText : "작업자 활동량"});
+// 				}
+				me.stepCount.show();
+				me.stepCount.getWindowContent().load(param);
+			},
+			openSensorStatePopup : function(event){
+				var param = event.detail;
+				var me = this;
+// 				if(UT.isEmpty(me.stepCount)){
+					me.sensorState = UT.popup("ep-sensor-state", me, 1300, 800,{
+					},{maximizable : true, titleText : "센서현황"});
+// 				}
+				me.sensorState.show();
+				me.sensorState.getWindowContent().load(param);
+			},
+			openHeartBeatPopup : function(event){
+				var param = event.detail;
+				var me = this;
+				me.heartbeatPop = UT.popup("ep-heartbeat-chart", me, 1300, 800,{
+					
+				},{maximizable : true, titleText : "시간대별 심박수"});
+				
+				me.heartbeatPop.show();
+				me.heartbeatPop.getWindowContent().load(param);
+			},
+			destroyed : function(popup, e) {
+                var me = this;
+            	clearInterval(me.refreshInterval);
+            },
+
+		});
+	</script>
+
+
+</dom-module>

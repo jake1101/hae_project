@@ -1,0 +1,38 @@
+<sc-link rel="import" href="es-project-info-list.html"></sc-link>
+<sc-link rel="import" href="es-project-info-detail.html"></sc-link>
+
+<dom-module id="em-project-info-management">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    	<cc-page-title-bar></cc-page-title-bar>
+    	<div class="hbox flex">
+	        <es-project-info-list id="projectInfoList" class="flex-3" on-find-projectinfo="onFindProjectInfo" on-complete-delete-project-list="resetProjectInfoDetail"></es-project-info-list>
+	        <div class="hspace-10"></div>
+	        <es-project-info-detail id="projectInfoDetail" class="flex-2" on-complete-save-project="findProjectInfoList" on-complete-delete-project="findProjectInfoList"></es-project-info-detail>
+    	</div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'em-project-info-management',
+            findProjectInfoList: function(){
+            	var me = this;
+                me.$.projectInfoList.onFindProjectList();
+            },
+            resetProjectInfoDetail: function(){
+            	var me = this;
+            	me.$.projectInfoDetail.reset();
+            },
+            onFindProjectInfo : function(e, data) {
+                var me = this;
+                me.$.projectInfoDetail.load(data);
+            }
+        });
+    </script>
+</dom-module>

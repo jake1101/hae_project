@@ -1,0 +1,166 @@
+<dom-module id="es-user-site-role">
+
+    <style>
+        :host {
+            @apply(--fit-layout);
+        }
+    </style>
+
+    <template>
+
+        <!-- 사용자 현황 조회 -->
+        <sc-ajax id="findListUserSiteRole"
+                 url="findListUserSiteRole.do"
+                 body="{{searchParam}}"
+                 last-response="{{resultList}}">
+        </sc-ajax>
+
+        <!-- 사용자 롤 저장 -->
+        <sc-ajax id="saveUserSiteRole"
+                 url="saveUserSiteRole.do"
+                 on-response="completeSaveUserSiteRole">
+        </sc-ajax>
+        
+        <!-- 사용자 정보 log 저장 -->
+        <sc-ajax id="saveUserLog"
+                 url="saveUserLog.do"
+                 on-response="completeSaveUserLog">
+        </sc-ajax>
+        
+        <cc-auth-checker check-list="auth-s"></cc-auth-checker>
+
+		<sc-grid id="gridPanel" data-provider="{{resultList}}" editable="true" class="fit" use-selection="false" use-state="true">
+			<cc-grid-toolbar title-text="[[searchParam.usr_nm]]" i18n-disabled>
+				<sc-button text="저장" on-click="onSave" auth-s></sc-button>
+			</cc-grid-toolbar>
+			
+			<sc-grid-columns>
+				<sc-checkbox-column data-field="granted" header-text="권한여부" width="80" text-align="center" editable="true" display-checkbox="true" 
+					checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+				<sc-data-column data-field="company_nm" header-text="회사명" width="200" text-align="left"></sc-data-column>
+				<sc-data-column data-field="site_nm" header-text="현장명" width="200" text-align="left"></sc-data-column>
+			</sc-grid-columns>
+			
+			<sc-grid-fields>
+				<sc-grid-field data-field="site_id" data-type="number"></sc-grid-field>
+			</sc-grid-fields>
+		</sc-grid>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'es-user-site-role',
+
+            properties : {
+                // 조회 조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                
+                // 조회 결과
+                resultList: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                }
+            },
+
+            formulas : {
+                // 수정 가능 상태
+                isEditable: function() {
+                   return !UT.isEmpty(this.searchParam.usr_id);
+                }
+            },
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            // 사용자 현황에서 사용자 아이디 선택 시 롤 현황 조회
+            load: function(data) {
+                var me = this;
+                me.set('searchParam', data);
+                me.applyFormula();
+                me.onSearch();
+            },
+
+            onSearch: function(){
+            	var me = this;
+            	
+            	UT.request(me.$.findListUserSiteRole);
+            },
+            
+            // 초기화
+            clear: function() {
+                var me = this;
+                me.reset();
+                me.applyFormula();
+            },
+
+            // 현장 권한 저장
+            onSave: function() {
+                var me = this;
+                
+                var grid = me.$.gridPanel;
+                var provider = grid.getDataProvider();
+                var itemList = provider.getItems();
+                
+                var siteIds = [];
+                
+                for(var idx in itemList){
+                	var item = itemList[idx];
+                	
+                	if(item.granted == "Y"){
+                		siteIds.push(item.site_id);
+                	}
+                }
+                
+                me.$.saveUserSiteRole.body = {
+                	usr_id: me.searchParam.usr_id
+                	,site_ids: JSON.stringify(siteIds)
+                };
+                
+                UT.confirm("STD.N1200", function() { 
+                	UT.request(me.$.saveUserSiteRole);
+                });
+                
+            },
+            
+            completeSaveUserSiteRole:function(e, res){
+            	 var me = this;
+            	 
+            	 var response = res.response;
+            	 
+	             if(response.result_status === 'S'){
+	            	 me.$.saveUserLog.body = {
+ 	            		usr_id: me.searchParam.usr_id
+ 	            		,operation: "update"
+ 	            	};
+ 	            	
+ 	            	// RAYCOM 수정 : log insert 로직 추가
+ 	            	UT.request(me.$.saveUserLog);
+	            	 
+	             } else {
+	                 message = response.result_message;
+	                 UT.alert(message);
+	             }
+            },
+            
+            
+            completeSaveUserLog: function(e, res){
+            	var me = this
+            	,result = res.response;
+            	
+            	// 저장하였습니다.
+                UT.alert("STD.N2400", function(){
+                	me.onSearch();
+                });
+            }
+            
+        });
+    </script>
+
+</dom-module>

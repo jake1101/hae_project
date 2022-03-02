@@ -1,0 +1,80 @@
+<dom-module id="es-radio-field-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+    	<sc-panel title-text="sc-radio-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th rowspan="3">
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<sc-radio-field label="햄" value="{{data.value_1}}" toggles="true" on-checkchange="onCheckchange"></sc-radio-field>
+	    				[[data.value_1]]
+    				</td>
+    			</tr>
+    			<tr>
+    				<td>
+    					<sc-radio-field label="치즈" value="{{data.value_2}}" toggles="true" on-checkchange="onCheckchange"></sc-radio-field>
+	    				[[data.value_2]]
+    				</td>
+    			</tr>
+    			<tr>
+    				<td>
+    					<sc-radio-field label="계란" value="{{data.value_3}}" toggles="true" on-checkchange="onCheckchange"></sc-radio-field>
+	    				[[data.value_3]]
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    	<sc-panel title-text="sc-radio-group-field" collapsible="true" i18n-disabled>
+    		<table class="tb-form">
+    			<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+		        </colgroup>
+    			<tr>
+    				<th rowspan="3">
+    					<sc-label text="기본예제"></sc-label>
+    				</th>
+    				<td>
+    					<sc-radio-group-field name="checkgroup" value="{{data.groupvalue_1}}" on-change="onCheckGroupChange">
+	    					<sc-radio-field label="햄" input-value="ham"></sc-radio-field>
+	    					<sc-radio-field label="치즈" input-value="cheese"></sc-radio-field>
+	    					<sc-radio-field label="계란" input-value="egg"></sc-radio-field>
+	    				</sc-radio-group-field>
+	    				[[data.groupvalue_1]]
+    				</td>
+    			</tr>
+    		</table>
+    	</sc-panel>
+    </template>
+    <script>
+    Polymer({
+    	is : "es-radio-field-sample",
+    	properties : {
+    		data : {
+    			type : Object,
+    			value : function() {
+    				return {}
+    			}
+    		}
+    	},
+    	onCheckchange : function(event) {
+    		var me = this, checked = event.detail;
+    		console.log("checkchange => " + event.target.label + " : " + event.target.value);
+    	},
+    	onCheckGroupChange : function(event) {
+    		var me = this;
+    		console.log("change => " + event.target.name + " : " + event.target.value);
+    	}
+    });
+    </script>
+</dom-module>

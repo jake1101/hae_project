@@ -1,0 +1,30 @@
+<sc-link rel="import" href="es-spacetime-history.html"></sc-link>
+
+<dom-module id="em-spacetime-history">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 시간/영역별 이력 조회
+        ** @Description		: 현장상황정보 > 시간/영역별 이력 조회
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.03.17
+        ** @History 		: 2020.03.17 jhkim 최초작성
+        ******************************************************************************************
+    -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<es-spacetime-history class="flex"></es-spacetime-history>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-spacetime-history'
+		});
+	</script>
+
+</dom-module>

@@ -1,0 +1,59 @@
+<dom-module id="es-popup-description">
+	<style>
+ 	table, th, td {
+ 		border:1px solid black;
+ 		border-collapse:collapse;
+ 		box-sizing: border-box;
+ 		padding: 3px;
+ 	}
+ 	th {
+ 		background-color:lightgray
+ 	}
+	</style>
+	<template>
+		<p>
+			<b>SCPopupManager</b><br/>
+			SCPopupManager를 통해 팝업생성 및 공통팝업 등록, 호출 등이 가능함<br/>
+			<table>
+				<tr>
+					<th>함수</th>
+					<th>설명</th>
+				</tr>
+				<tr>
+					<td>create</td>
+					<td>sc-window를 생성</td>
+				</tr>
+				<tr>
+					<td>load</td>
+					<td>sc-window의 컨텐츠를 동적로드하여 생성</td>
+				</tr>
+				<tr>
+					<td>popup</td>
+					<td>sc-window를 생성 (9.1 버전부터 create 함수를 대체하여 popup 함수를 사용)</td>
+				</tr>
+				<tr>
+					<td>register</td>
+					<td>재사용 가능한 sc-window 등록</td>
+				</tr>
+				<tr>
+					<td>unregister</td>
+					<td>재사용 가능한 sc-window 삭제</td>
+				</tr>
+				<tr>
+					<td>get</td>
+					<td>재사용 가능한 sc-window 반환</td>
+				</tr>
+			</table>
+		</p>
+		<br/>
+		<b>주의사항</b><br/>
+		1. 팝업의 tagName는 'ep'로 시작해야한다.<br/>
+		(em, es, ep로 시작해야 cc-module-behavior의 공통 로직 처리 및 initialized의 life cycle 등이 보장된다.)<br/>
+		2. sc-link 를 사용하여 팝업 리소스를 동적 load한다.
+	</template>
+	<script>
+	Polymer({
+		is: 'es-popup-description'
+	})
+	</script>
+</dom-module>

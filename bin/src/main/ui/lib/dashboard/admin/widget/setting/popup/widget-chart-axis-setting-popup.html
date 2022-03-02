@@ -1,0 +1,148 @@
+<dom-module id="widget-chart-axis-setting-popup">
+    <style>
+    </style>
+    
+   <template>
+   
+       <div class="container_lt"> 
+         <section class="option">
+       		<sc-panel title-text="{{xAxisLabelName}}"  collapsible="true">
+	         	<div class="p_innerbox" style="width:100%;padding-top: 10px">
+	         		<table style="width:100%">
+	                  <colgroup>
+	                      <col style="width:25%" />
+	                      <col style="width:75%" />
+	                  </colgroup>
+	                <tr hidden="[[formula('isAxisSetHidden')]]">
+		                <th><sc-label text="제목"></sc-label></th>
+		                <td>
+		               		<sc-textarea-field   value="{{fields.xAxis.title}}"></sc-textarea-field>
+		                </td>
+	               </tr>
+	               <tr>
+	                 <th><sc-label text="레이블"></sc-label></th>
+	                 <td>
+	                	<sc-grid  id="chartAxisGrid" editable="true" class="h-150" use-selection="false" use-state="false" use-stateful="false" >
+				           <sc-grid-columns>
+				                <sc-data-column  header-text="categories"  data-field="name"    width="180"  required="true" text-align="center"   editable="true" sortable="false"></sc-data-column>
+				           </sc-grid-columns>
+				           <sc-grid-fields>
+				                <sc-grid-field data-field="data"></sc-grid-field>
+				           </sc-grid-fields>
+				       </sc-grid>	
+	                 </td>
+	               </tr>
+	                 </table>
+	         	</div>
+        	</sc-panel>
+        	
+        	<sc-panel title-text="{{yAxisLabelName}}"  collapsible="true"  hidden="[[formula('isAxisSetHidden')]]">
+        		<div class="p_innerbox" style="width:100%;padding-top: 10px">
+		       		<table style="width:100%">
+			            <colgroup>
+	                      <col style="width:25%" />
+	                      <col style="width:75%" />
+	                 	</colgroup>
+			            <tr>
+			                <th><sc-label text="제목"></sc-label></th>
+			                <td>
+			                	<sc-textarea-field  max-length="60" value="{{fields.yAxis.title}}"></sc-textarea-field>
+		                    </td>
+		                </tr>
+		                <tr>
+			                <th><sc-label text="최소값"></sc-label></th>
+			                <td>
+			                	<sc-number-field value="{{fields.yAxis.min}}" ></sc-number-field>
+		                    </td>
+		                </tr>
+			        </table>
+		        </div>
+	       </sc-panel>	     
+         </section>
+      </div>
+      	
+      <sc-toolbar style="padding: 4px 0 4px 1px;">
+           <sc-spacer></sc-spacer>
+       	   <sc-button class="dashboard" style="width:80px;text-align:center;" text="저장" on-click="onApply"></sc-button>
+       	   <sc-spacer></sc-spacer>
+      </sc-toolbar>
+    </template>
+    
+    <script>
+        Polymer({
+            is : 'widget-chart-axis-setting-popup',
+            properties : {
+            	resultList: {
+            		type: Array,
+            		value: []
+            	},
+            	fields :{
+            		type: Object,
+            		value: function(){
+            			return {
+            				xAxis:{
+        						title:'',
+        					},
+        					yAxis:{
+        						min:0,
+        						title:'',
+        					}
+            			};
+            		}
+            	},
+            	xAxisLabelName:{
+            		type: String,
+            		value: '가로축'
+            	},
+            	yAxisLabelName:{
+            		type: String,
+            		value: '세로축'
+            	}
+            },
+            formulas : {
+                isAxisSetHidden: function() {
+                    return this.fields.type =='polar'
+                },
+
+              
+
+            },
+            attached : function(){
+            	var me = this;
+            },
+            
+            load: function(param){
+            	var me = this;
+            	//SCUtil.Object.assign(me.fields,param.fields);
+            	me.fields = param.fields;
+            	me.applyFormula();
+            	me.axisLabelSetting(me.fields.type)
+            	me.$.chartAxisGrid.setDataProvider(me.getTransformGridData(param.gridData));
+            },
+            axisLabelSetting: function(chartType){
+            	var me = this;
+            	if(chartType.indexOf('bar') > -1){
+            		me.xAxisLabelName = '세로축';
+            		me.yAxisLabelName = '가로축';
+            	}else{
+            		me.xAxisLabelName = '가로축';
+            		me.yAxisLabelName = '세로축';
+            	}
+            },
+            getTransformGridData: function(datas){
+            	return   datas.map(function(value){
+    				return {name:value}
+    			});
+            },
+    		onApply: function(){
+    			var me = this;
+   				
+    			me.fire('apply',{fields:me.fields, 
+    				             gridData : me.$.chartAxisGrid._gridView.getDataProvider().getFieldValues('name')})
+    		},
+    		
+    	
+    		
+        });
+    </script>
+</dom-module>

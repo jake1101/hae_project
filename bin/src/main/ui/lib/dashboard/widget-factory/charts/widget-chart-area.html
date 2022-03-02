@@ -1,0 +1,87 @@
+<dom-module id="widget-chart-area">
+    <script>
+      WidgetChartArea =  Polymer({
+            is: "widget-chart-area",
+            properties: {
+            	
+            },
+            
+            getTemplate : function(template,datas){
+            	var me = this, content = template.contents;
+            	
+            	var series = me.getSeriesData(datas,content.series);
+            	var chartTemplate = {
+        			    chart : {
+        			        type: content.type,
+        			        options3d: {
+            		            enabled : content.options3d.enabled,
+            		            alpha   : content.options3d.alpha,
+            		            beta    : content.options3d.beta 
+            		        },
+            		        plotBackgroundColor: null,
+            		        plotBorderWidth: null
+        			    },
+        			    exporting: {
+        		            enabled: false
+        		        },
+        			    title : {
+        			        text: content.title
+        			    },
+        			    legend : content.legend ||{},
+        			    xAxis : {
+       			    		categories:content.dataLabels,
+       			    		title:{
+       			    			text:content.xAxis.title
+       			    		}
+   			    		},
+        			    yAxis : {
+        			        min : content.yAxis.min,
+        			        title : {
+        			        	text:content.yAxis.title
+        			        }
+        			    }, 
+        			    tooltip:{
+        			    	enabled : false
+        			    },
+        			    legend : content.legend ||{},
+        			    plotOptions: content.plotOptions,
+        			    series: series
+        			}
+            	return chartTemplate;
+            },
+            
+    		getSeriesData : function(datas,series){
+    			var compressDatas = {},color;
+    			datas.forEach(function(data,index){
+    				for(var key in data){
+    					if(compressDatas[key]){
+    						compressDatas[key].push(data[key]);
+    					}else{
+    						compressDatas[key] = [data[key]];
+    					}
+    				}
+    			});
+    			var datas = [],index = 0;
+    			for(var key in compressDatas){
+    				var serie = {name:series[index].name, data :compressDatas[key] };
+    			 	if(color = series[index].color){
+    				    serie.color = color;
+    				}  
+    				datas.push(serie);
+    				
+    				index++;
+    			}
+    			return datas;
+    		},
+    		
+    		getCategories : function(datas){
+    			var axisDatas = [];
+    			datas.forEach(function(data,index){
+    				axisDatas[index] = {name:index}
+    			});
+    			return axisDatas;
+    		}
+    		
+    	});
+    </script>
+</dom-module>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="portal">
+
+	<!-- <resultMap id="portalMap" type="java.util.HashMap">
+		<result property="sys_id" column="SYS_ID"/>
+		<result property="page_id" column="PAGE_ID"/>
+    	<result property="layt_src" column="LAYT_SRC" jdbcType="CLOB" javaType="java.lang.String"/>
+	</resultMap> -->
+	
+	<resultMap id="portalType" type="java.util.HashMap">
+		<result property="id" column="ID" />
+		<result property="value" column="VALUE" />
+	</resultMap>
+	
+	<insert id="saveUserLayout">
+		/*  */
+		INSERT INTO ESWLAYU
+			(
+			      SYS_ID
+			    , USR_ID
+			    , PAGE_ID
+			    , LAYT_SRC
+			    , REG_ID
+			    , REG_DT
+			)
+	   VALUES
+			(
+			      #{g.tenant}
+			    , #{g.username}
+			    , #{p.page_id}
+		    	, #{p.layt_src, jdbcType=VARCHAR}
+			    , #{g.username}
+			    , #{g.now}
+			)
+	</insert>
+	
+	<!-- 사용자 별 설정된 레이아웃을 업데이트 -->
+	<update id="updateUserLayout">
+		/* portal.updateUserLayout */
+		UPDATE ESWLAYU 
+		   SET LAYT_SRC = #{p.layt_src}
+		   	 , COL_SIZE = #{p.col_size}
+		     , MOD_ID = #{g.username}
+		     , MOD_DT = #{g.now}
+		 WHERE SYS_ID = #{g.tenant}
+		   AND USR_ID = #{g.username}
+		   AND PAGE_ID = #{p.page_id}
+	</update>
+	
+	<delete id="deleteUserLayout">
+        DELETE
+          FROM ESWLAYU
+         WHERE SYS_ID = #{g.tenant}
+           AND USR_ID = #{g.username}
+           AND PAGE_ID = #{p.page_id}
+    </delete>
+
+	<select id="findUserLayout" resultType="map">
+		SELECT SYS_ID
+		     , PAGE_ID
+		     , LAYT_SRC
+		     , COL_SIZE
+		  FROM ESWLAYU
+		 WHERE SYS_ID = #{g.tenant}
+		   AND USR_ID = #{g.username}
+		   AND PAGE_ID = #{p.page_id}
+	</select>
+
+	<select id="findPortalCommonConfig" resultMap="portalType">
+		SELECT
+			*
+		FROM
+			ESCSTFL
+		WHERE
+			ID='SC-PORTAL'
+	</select>
+
+	<insert id="savePortalCommonConfig">
+		INSERT INTO ESCSTFL (
+			ID, VALUE
+		) VALUES (
+			'SC-PORTAL',
+			#{p.commonConfig}
+		)
+	</insert>
+	
+	<update id="updatePortalCommonConfig">
+		UPDATE 
+			ESCSTFL
+		SET
+			VALUE=#{p.commonConfig}
+		WHERE
+			ID='SC-PORTAL'
+	</update>
+
+	<select id="findComposableWidgetList" resultType="map"> 
+		SELECT SYS_ID
+             , PORTAL_CLS
+             , CLS_NM
+             , COMP_ORD
+             , BAS_ATTR 
+          FROM ESWINVT
+         WHERE SYS_ID = #{g.tenant}
+           AND USE_YN = 'Y'
+           AND CLS_NM IN ( SELECT WR.CLS_NM
+                             FROM ESWROLE WR 
+                            <choose>
+              					<when test="g.roles != null and g.roles.size() > 0">
+                            		WHERE WR.ROLE_CD IN 
+                 					<foreach collection="g.roles" item="role" open="(" close=")" separator=",">
+                 					#{role}
+                 					</foreach>
+              					</when>
+              					<otherwise>
+              						WHERE 0 = 1
+              					</otherwise>
+            				</choose> )
+           AND PORTAL_CLS=#{p.portal_cls}
+    </select>
+    
+</mapper>

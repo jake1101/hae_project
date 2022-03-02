@@ -1,0 +1,45 @@
+<!--
+
+## 날짜 
+
+sc-date-field를 이용한  기본 예제입니다. 자세한 설명은 [sc-component docs](/bower_components/starter-kit/index.html#!/docs/sc-component&sc-date-field)를 참고하시기 바랍니다. 
+
+
+### 날짜 Value를 String Type(Default: Date)으로 받기
+
+- sc-date-field 예제입니다. *string-date* 속성을 true로 줄 경우 value를 String으로 받을 수 있습니다. 
+
+ -->
+
+<dom-module id="es-date-ex-1">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+    <template>
+        <table class="tb-form">
+            <tr>
+                <td>
+                    <sc-date-field value="{{value}}"></sc-date-field>
+                </td>
+            </tr>
+        </table>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-date-ex-1',
+            properties:{
+				value: Object
+            },
+            
+            setValue: function() {
+            	var me = this;
+            	
+            	me.set("value", "20120608");
+            }
+		});
+	</script>
+</dom-module>

@@ -1,0 +1,158 @@
+<!--
+    @license
+    Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+    This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+    The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+    The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+    Code distributed by Google as part of the polymer project is also
+    subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="prettify-import.html">
+
+<!--
+Element wrapper for the `google-code-prettify` (https://code.google.com/p/google-code-prettify/) library.
+##### Example
+    <prettify-element text="def somefunc(param1='', param2=0):"></prettify-element>
+##### Example
+    <prettify-element text="def somefunc(param1='', param2=0):" language="html"></prettify-element>
+##### Example
+    <prettify-element>
+      <template>
+        <link rel="import" href="/components/polymer/polymer.html">
+        <polymer-element name="proto-element">
+        <template>
+          <span>I'm <b>proto-element</b>. Check out my prototype.</span>
+        </template>
+        <script>
+          Polymer({
+          });
+        </script>
+        </polymer-element>
+      </template>
+    </prettify-element>
+@class prettify-element
+@blurb Element wrapper for the highlightjs library.
+@status alpha
+@snap snap.png
+-->
+
+<dom-module id="prettify-element">
+  <style>
+    :host {
+      display: block;
+    }
+    code,pre {
+        color: #9f499b;
+        font-family: "Source Code Pro",Monaco,Menlo,Consolas,"Courier New",monospace;
+        @apply(--prettify-code-pre);
+    }
+    pre,.prettyprint {
+        background-color: #fafafa;
+        padding: 16px;
+        margin: 0px;
+        @apply(--prettify-pre);
+    }
+    pre .typ,pre .inline,.prettyprint .typ,.prettyprint .inline {
+        color: #6b499f;
+        @apply(--prettify-typ-inline);
+    }
+    pre .pun,.prettyprint .pun {
+        color: #5c6bc0;
+        @apply(--prettify-pun);
+    }
+    pre .str,pre .string,.prettyprint .str,.prettyprint .string {
+        color: #ff4081;
+        @apply(--prettify-str-string);
+    }
+    pre .pln,.prettyprint .pln {
+        color: #7986cb;
+        @apply(--prettify-pln);
+    }
+    pre .kwd,.prettyprint .kwd {
+        color: #d61a7f;
+        @apply(--prettify-kwd);
+    }
+    pre .atn,pre .attribute-name,.prettyprint .atn,.prettyprint .attribute-name {
+        color: #6b499f;
+        @apply(--prettify-atn-attribute-name);
+    }
+    pre .atv,pre .attribute-value,.prettyprint .atv,.prettyprint .attribute-value {
+        color: #7986cb;
+        @apply(--prettify-atv-attribute-value);
+    }
+    pre .com,pre .comment,.prettyprint .com,.prettyprint .comment {
+        color: #8a8a8a;
+        @apply(--prettify-com-comment);
+    }
+    
+    pre .tag,.prettyprint .tag{
+      @apply(--prettify-tag);
+    }
+    pre .lit,.prettyprint .lit{
+      @apply(--prettify-lit);
+    }
+    pre .opn,pre .clo,.prettyprint .opn,.prettyprint .clo {
+      @apply(--prettify-opn-clo);
+    }
+    pre .dec,pre .var,.prettyprint .dec,.prettyprint .var {
+      @apply(--prettify-dec-var);
+    }
+    pre .fun,.prettyprint .fun{
+      @apply(--prettify-fun);
+    }
+}
+    
+  </style>
+
+  <template>
+
+    <pre class="prettyprint" id="content">
+    </pre>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'prettify-element',
+      properties: {
+        text: {
+          type: String,
+          notify: true,
+          observer: 'textChanged'
+        },
+        language: {
+          type: String,
+          notify: true,
+          observer: 'languageChanged'
+        }
+      },
+      ready: function() {
+        if (!this.text) {
+          var firstElement = Polymer.dom(this).firstElementChild;
+          if (firstElement && firstElement.localName === 'template') {
+            this.text = Polymer.dom(firstElement).innerHTML;
+          } else {
+            this.text = Polymer.dom(this).innerHTML;
+          }
+          
+        }
+      },
+      textChanged: function() {
+        var prettyText = prettyPrintOne((this.text || '').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+        
+        Polymer.dom(this.$.content).innerHTML = prettyText;
+        
+      },
+      languageChanged: function() {
+        var prettyText = '';
+        if (!this.language || this.language =='--'){
+          prettyText = prettyPrintOne((this.text || '').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+        }else{
+          prettyText = prettyPrintOne((this.text || '').replace(/</g,'&lt;').replace(/>/g,'&gt;'),this.language.toLowerCase());
+        }
+        Polymer.dom(this.$.content).innerHTML = '<div>' + prettyText + '</div>';
+      }
+    });
+  </script>
+
+</dom-module>

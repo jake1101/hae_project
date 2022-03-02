@@ -1,0 +1,53 @@
+<dom-module id="es-common-popup-description">
+	<style>
+ 	table, th, td {
+ 		border:1px solid black;
+ 		border-collapse:collapse;
+ 		box-sizing: border-box;
+ 		padding: 3px;
+ 	}
+ 	th {
+ 		background-color:lightgray
+ 	}
+	</style>
+	<template>
+		<p>
+			<b>팝업 사용 예</b><br/>
+			1. sc-text-field에서 trigger를 사용하여 팝업 호출<br/>
+			- trigger가 click 되었을 때 trigger-click 이벤트 발생<br/>
+			- sc-link를 사용하여 팝업 리소스를 동적 load 한다. (팝업을 화면에 띄울때 자동 요청)<br/>
+			<br/>
+			2. 자동완성 필드 (cc-search)<br/>
+			<table>
+				<tr>
+					<th>부서</th>
+					<td>/ui/lib/custom/html/cc-dept-search.html</td>
+				</tr>
+				<tr>
+					<th>구매그룹</th>
+					<td>/ui/lib/custom/html/cc-job-search.html</td>
+				</tr>
+				<tr>
+					<th>사용자</th>
+					<td>/ui/lib/custom/html/cc-user-search.html</td>
+				</tr>
+				<tr>
+					<th>품목</th>
+					<td>/ui/lib/custom/html/cc-item-search.html</td>
+				</tr>
+				<tr>
+					<th>협력사</th>
+					<td>/ui/lib/custom/html/cc-vendor-search.html</td>
+				</tr>
+			</table>
+			<br/>
+			3. sc-image-column을 사용하여 sc-grid의 item-click 이벤트에서 팝업 호출<br/>
+		</p>
+		<br/>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-common-popup-description'
+	})
+	</script>
+</dom-module>

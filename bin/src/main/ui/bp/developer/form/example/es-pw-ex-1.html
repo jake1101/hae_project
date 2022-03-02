@@ -1,0 +1,59 @@
+<!-- 
+
+## 비밀번호 
+
+비밀 번호를 입력 및 검증하는 예제입니다. 
+ - validator.js의 UT.passwordRegExp()에 등록된 정규표현식을 이용하여 비밀번호를 검증합니다. 
+
+아래는 현재 9.0 솔루션의 Default **비밀번호 검증 조건**입니다. 수정은 validators.js에서 할 수 있습니다.
+ - 8자리 이상 20자리 이하
+ - 숫자, 영문자, 특수문자 조합
+ - 반복적인 문자 사용 금지
+ 
+-->
+
+<dom-module id="es-pw-ex-1">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+    <template>
+        <table class="tb-form">
+            <tr>
+                <td>
+                    <sc-text-field type="password" class="w-200" value="{{userInfo.password}}" placeholder="비밀번호를 입력하세요."></sc-text-field>
+                </td>
+            </tr>
+        </table>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-pw-ex-1',
+            properties:{
+            	userInfo: {
+            		type : Object,
+                    value : function(){
+                    	return {};
+                    }
+            	}
+            },
+
+            isValid: function() {
+            	var me = this;
+
+            	//Validation
+            	if(!me.validate()) {
+                    UT.alert("검증실패", null, true);
+                    return;
+                }
+
+                UT.alert("검증통과"), null, true);
+            }
+		});
+	</script>
+
+</dom-module>

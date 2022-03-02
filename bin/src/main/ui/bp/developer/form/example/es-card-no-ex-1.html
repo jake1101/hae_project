@@ -1,0 +1,45 @@
+<!-- 
+
+## 카드번호
+
+카드번호는 국/내외에서 모두 사용되는 포맷입니다. 
+
+## Validation
+
+- input-mask : "9999-9999-9999-9999"
+
+ -->
+<dom-module id="es-card-no-ex-1">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+    <template>
+        <table class="tb-form">
+            <tr>
+                <td>
+                    <sc-text-field class="w-200" input-mask="9999-9999-9999-9999" value="{{value}}" ></sc-text-field>
+                </td>
+            </tr>
+        </table>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-card-no-ex-1',
+            properties:{
+                value: String
+            },
+            
+            setValue: function() {
+            	var me = this;
+            	
+            	me.set("value", "1231-2312-3123-1231");
+            }
+		});
+	</script>
+
+</dom-module>

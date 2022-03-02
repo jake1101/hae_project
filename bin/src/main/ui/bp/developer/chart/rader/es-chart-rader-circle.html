@@ -1,0 +1,241 @@
+<dom-module id="es-chart-rader-circle">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-rader-circle',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "name": "rMateCharts:Radar Chart - Circle - Fill",
+			    "width": 400,
+			    "height": 500,
+			    "type": "polararea",
+			    "title": {
+			        "text": "2010~2013 연도별 가계 지출 품목 분석"
+			    },
+			    "plotArea": {
+			        "circular": true
+			    },
+			    "xAxes": {
+			        "tick": {
+			            "offset": 7
+			        },
+			        "styles": {
+			        }
+			    },
+			    "yAxes": {
+			        "tick": {
+			            "intervalWidth": 60,
+			            "styles": {
+			            }
+			        }
+			    },
+			    "series": [{
+			        "name": "2010 년",
+			        "items": "data_01",
+			        "labelField": "catName",
+			        "valueField": "year2010",
+			        "label": {
+			            "styles": {
+			                "fontSize": 12
+			            }
+			        },
+			        "styles": {
+			            "line": "#03a9f5,2px",
+			            "fill": "#2003a9f5",
+			            "shapeName": "circle",
+			            "shapeSize": 9,
+			            "marker": {
+			                "border": "#03a9f5,2px",
+			                "fill": "#fff"
+			            }
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }],
+			        "tooltip": {
+			            "text": "${series}<br>Category: ${label}<br>Value: ${value}",
+			            "styles": {
+			                "fill": "#fff",
+			                "color": "#333",
+			                "fontSize": 10,
+			                "shadow": null,
+			                "borderRadius": 0,
+			                "paddingTop": 2,
+			                "paddingBottom": 2,
+			                "paddingLeft": 5,
+			                "paddingRight": 5
+			            }
+			        }
+			    }, {
+			        "name": "2011 년",
+			        "items": "data_01",
+			        "labelField": "catName",
+			        "valueField": "year2011",
+			        "label": {
+			            "styles": {
+			                "fontSize": 12
+			            }
+			        },
+			        "styles": {
+			            "line": "#4352a5,2px",
+			            "fill": "#204352a5",
+			            "shapeName": "circle",
+			            "shapeSize": 9,
+			            "marker": {
+			                "border": "#4352a5,2px",
+			                "fill": "#fff"
+			            }
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }, {
+			        "name": "2012 년",
+			        "items": "data_01",
+			        "labelField": "catName",
+			        "valueField": "year2012",
+			        "label": {
+			            "styles": {
+			                "fontSize": 12
+			            }
+			        },
+			        "styles": {
+			            "line": "#f9c243,2px",
+			            "fill": "#20f9c243",
+			            "shapeName": "circle",
+			            "shapeSize": 9,
+			            "marker": {
+			                "border": "#f9c243,2px",
+			                "fill": "#fff"
+			            }
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }, {
+			        "name": "2013 년",
+			        "items": "data_01",
+			        "labelField": "catName",
+			        "valueField": "year2013",
+			        "label": {
+			            "styles": {
+			                "fontSize": 12
+			            }
+			        },
+			        "styles": {
+			            "line": "#21cbc0,2px",
+			            "fill": "#2021cbc0",
+			            "shapeName": "circle",
+			            "shapeSize": 9,
+			            "marker": {
+			                "border": "#21cbc0,2px",
+			                "fill": "#fff"
+			            }
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }],
+			    "legend": {
+			        "visible": true,
+			        "position": "bottom",
+			        "styles": {
+			            "border": "#333",
+			            "shadow": "#333",
+			            "paddingLeft": 11,
+			            "paddingRight": 11,
+			            "paddingTop": 5,
+			            "paddingBottom": 5,
+			            "background": null
+			        },
+			        "itemStyles": {
+			            "fontBold": true
+			        }
+			    },
+			    "data": [{
+			        "id": "data_01",
+			        "values": [
+			            {
+			                "catName" : "C",
+			                "year2010" : 140,
+			                "year2011" : 110,
+			                "year2012" : 90,
+			                "year2013" : 40
+			            },{
+			                "catName" : "D",
+			                "year2010" : 100,
+			                "year2011" : 115,
+			                "year2012" : 80,
+			                "year2013" : 50
+			            },{
+			                "catName" : "E",
+			                "year2010" : 170,
+			                "year2011" : 135,
+			                "year2012" : 100,
+			                "year2013" : 70
+			            },{
+			                "catName" : "F",
+			                "year2010" : 80,
+			                "year2011" : 115,
+			                "year2012" : 60,
+			                "year2013" : 40
+			            },{
+			                "catName" : "G",
+			                "year2010" : 160,
+			                "year2011" : 125,
+			                "year2012" : 95,
+			                "year2013" : 30
+			            },{
+			                "catName" : "H",
+			                "year2010" : 160,
+			                "year2011" : 125,
+			                "year2012" : 50,
+			                "year2013" : 100
+			            },{
+			                "catName" : "A",
+			                "year2010" : 150,
+			                "year2011" : 105,
+			                "year2012" : 85,
+			                "year2013" : 40
+			            },{
+			                "catName" : "B",
+			                "year2010" : 160,
+			                "year2011" : 135,
+			                "year2012" : 100,
+			                "year2013" : 60
+			            }
+			        ]
+			    }]
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

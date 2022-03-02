@@ -1,0 +1,342 @@
+<link rel="import" href="../../../../data/widget-data-provider.html">
+<dom-module id="widget-chart-bar-setting">
+    <style>
+	    :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    	<sc-ajax id="widgetDataProvider"  on-response="onDataChanged" on-error="onDataError" last-response="{{widgetData}}">
+		</sc-ajax>
+    
+           	<section class="option" style="border-top: 0px;margin-top:0px;">
+               	<div class="p_innerbox">
+                    <table>
+	                    <colgroup>
+	                        <col style="width:25%" />
+	                        <col style="width:75%" />
+	                    </colgroup>
+	                    <tr>
+		                    <th><sc-label text="데이터제공자" style="width:36px;"></sc-label></th>
+		                    <td>
+		                    	<sc-textarea-field value="{{dataUrl}}" style="height:80px;" required></sc-textarea-field>
+			                    <div class="inner_button">
+				                    <sc-button text="검색조건" on-click="onShowCondition"></sc-button>
+				                	<sc-button text="데이터확인" on-click="onDataConfirm"></sc-button>
+				                	<sc-button text="적용" on-click="onDataApply"></sc-button>
+			                    </div>
+		                    </td>
+	                    </tr>
+	                    <tr>
+			                <th><sc-label text="차트 제목"></sc-label></th>
+			                <td>
+			                	<sc-textarea-field   value="{{fields.title}}"></sc-textarea-field>
+		                    </td>
+			            </tr>
+                    </table>
+                   </div>
+                    <sc-panel title-text="Chart Options" collapsible="true">
+                    	<div class="p_innerbox">
+                   		<sc-checkbox-field label="3D 사용여부"  value="{{fields.options3d.enabled}}">
+	                    </sc-checkbox-field>
+                    	<table>
+	                    	<colgroup>
+		                        <col style="width:25%" />
+		                        <col style="width:25%" />
+		                        <col style="width:25%" />
+		                        <col style="width:25%" />
+	                    	</colgroup>
+		                    <tr>
+			                    <th><sc-label text="Alpha"></sc-label></th>
+			                    <td>
+			                    	<sc-number-field value="{{fields.options3d.alpha}}" readonly="{{!fields.options3d.enabled}}">
+			                    	</sc-number-field>
+			                    </td>
+			                    <th><sc-label text="Beta"></sc-label></th>
+			                    <td>
+			                    	<sc-number-field value="{{fields.options3d.beta}}" readonly="{{!fields.options3d.enabled}}">
+			                    	</sc-number-field>
+			                    </td>
+		                    </tr>
+	                    </table>
+                    </div>
+                    <div class="p_innerbox c_label">
+                    	<sc-checkbox-field label="범례 사용여부" value="{{fields.showInLegend}}">
+	                    </sc-checkbox-field>
+                    	<table>
+	                    	<colgroup>
+		                        <col style="width:25%" />
+		                        <col style="width:75%" />
+	                    	</colgroup>
+	                    	<tr>
+			                    <th><sc-label text="위치"></sc-label></th>
+			                    <td>
+			                    	<!-- 변경된값이 active-value 에 바인딩이 되지 않기 때문에 path를 추가해서 직접 set해준다 -->
+			                        <sc-button-group active-value="{{fields.legend.align}}" on-active-changed="onActiveChanged">
+				                    	<sc-button text="" class="lo_left"   value="left" path="fields.legend.align"></sc-button>
+				                    	<sc-button text="" class="lo_center" value="center" path="fields.legend.align"></sc-button>
+				                    	<sc-button text="" class="lo_right"  value="right" path="fields.legend.align"></sc-button>
+			                    	</sc-button-group>
+			                    </td>
+		                    </tr>
+		                    <tr>
+			                    <th><sc-label text="방향" ></sc-label></th>
+			                    <td>
+			                    	<sc-button-group active-value="{{fields.legend.layout}}"  on-active-changed="onActiveChanged">
+				                    	<sc-button text="" class="dir_ver" value="vertical" path="fields.legend.layout"></sc-button>
+				                    	<sc-button text="" class="dir_hor" value="horizontal" path="fields.legend.layout"></sc-button>
+				                    </sc-button-group>	
+			                    </td>
+		                    </tr>
+		                    <tr>
+			                    <th><sc-label text="수직정렬"></sc-label></th>
+			                    <td>
+			                    	<sc-button-group active-value="{{fields.legend.verticalAlign}}"  on-active-changed="onActiveChanged">
+				                    	<sc-button text="" class="al_top" value="top" path="fields.legend.verticalAlign"></sc-button>
+				                    	<sc-button text="" class="al_middle" value="middle" path="fields.legend.verticalAlign"></sc-button>
+				                    	<sc-button text="" class="al_bottom" value="bottom" path="fields.legend.verticalAlign"></sc-button>
+			                    	</sc-button-group>
+			                    </td>
+		                    </tr>
+	                    </table>
+                    </div>
+                    <div class="bt_button_small_padding">
+                    	<sc-button text="차트 Series 설정" on-click="onSeriesSettingPopup"></sc-button>
+	                    <sc-button text="차트 데이터 값 입력" on-click="onAxisSettingPopup"></sc-button>
+	                </div>
+                    </sc-panel>
+               </section>
+    </template>
+    <script>
+        Polymer({
+            is: "widget-chart-bar-setting",
+            behaviors  : [ WidgetDataProvider ],
+            properties : {
+            	contents:{
+            		type: Object,
+            		value: function(){
+            			return {}
+            		}
+            	},
+            	widgetData :{
+            		type : Array,
+            		value : []
+            	},
+            	dataUrl: {
+            		type: String,
+            		value: 'ui/lib/dashboard/resources/defaultData/chartColumn.json' 
+            	},
+            	state:{
+            		type:String,
+            		value:''
+            	},
+            	fields :{
+            		type: Object,
+            		value :function(){
+            			return {
+            				    title : 'default title',
+            				    type : 'bar',
+            					options3d:{
+            						enabled : false,
+            						alpha : 10,
+            						beta  : 10
+            					},
+            					xAxis:{
+            						title:'default title',
+            					},
+            					yAxis:{
+            						min:0,
+            						title:'default title',
+            					},
+            					showInLegend : true,
+            					legend:{
+            						layout : 'horizontal',
+            						align : 'center',
+            						verticalAlign : 'bottom'
+            					}
+            					
+            			};
+            		}
+            	},
+            	chartDatas :{
+            		type: Array,
+            		value :[]
+            	}
+            },
+            observers : [ 'onFieldsChanged(fields.*)' ],
+            
+    		attached : function(){
+    			var me = this;
+    			me.initialized = true;
+    		},
+    		onActiveChanged: function(event,activeItem){
+            	var me = this;
+            	var fieldPath = activeItem.getAttribute('path');
+            	me.set(fieldPath,activeItem.value);
+            },
+            onSeriesSettingPopup: function(){
+            	var me =  this;
+	   			var settingPopup = SCPopupManager.create('widget-chart-series-setting-popup', this, 460, 270, true,true,false,true);
+	   			var view = settingPopup.getWindowContent();
+	   			settingPopup.titleText = me.translate("차트  Series 설정");  
+	   			settingPopup.show();
+	   			view.load(me.contents.series);
+	   			view.addEventListener('apply',function(event){
+	   				me.contents.series = event.detail.data;
+	   				settingPopup.close();
+	   				me.widgetDraw();
+	   			});	
+            },
+            onAxisSettingPopup: function(){
+            	 var me =  this;
+	   			var settingPopup = SCPopupManager.create('widget-chart-axis-setting-popup', this, 400, 500, true,true,false,true);
+	   			var view = settingPopup.getWindowContent();
+	   			settingPopup.titleText = me.translate("차트 데이터 설정");  
+	   			settingPopup.show();
+	   			settingPopup.addEventListener('sc-window-showed',function(){
+		   			view.load({fields:me.fields,gridData:me.contents.dataLabels });
+	   			});   
+	   			view.addEventListener('apply',function(event){
+	   				me.contents.dataLabels = event.detail.gridData;
+	   				me.fields = event.detail.fields;
+	   				settingPopup.close();
+	   				me.widgetDraw();
+	   			});
+            },
+    		onFieldsChanged : function(){
+    			var me = this;
+    			if(me.dataLoadComplete  && me.state != 'closed'){
+    				me.fire('re-draw', me.getTemplateData());
+    			}
+            },
+            onDataConfirm : function(){
+    			var me = this;
+    			me.dataMode = 'confirm';
+    			me.dataLoad();
+    		},
+    		onDataApply : function(){
+    			var me = this;
+    			me.initSetting();
+    		},
+    		onShowCondition: function(){
+    			this.showConditions();
+    		},
+    		initSetting : function(){
+    			var me = this;
+    			me.dataMode = 'apply';
+    			me.settingMode = 'init';
+    			me.state = 'open';
+    			me.dataLoad(); 
+    		},
+    		setting : function(contents){
+    			var me = this, contents = contents.contents;
+    			me.state = 'open';
+    			me.settingMode = 'edit';
+    			me.dataUrl = contents.dataUrl;
+    			me.contents = contents;
+    			me.fields = contents;
+    			me.dataLoad(); 
+    		},
+    		setWidgetData : function(){
+    			var me = this;
+    			if(me.loadState == 'success'){
+    				me.dataLoadComplete = true;
+    			}
+    			if(me.settingMode == 'init'){
+	    			me.contents.series = me.getSeriesData(me.widgetData);
+	    			me.contents.dataLabels = me.getAxisData(me.widgetData);
+    			}
+   				me.widgetDraw();
+    			
+    		},
+    		widgetDraw : function(){
+    			this.fire('re-draw', this.getTemplateData());
+    		},
+    		
+    		getSeriesData : function(datas){
+    			var compressDatas = {};
+    			datas.forEach(function(data,index){
+    				for(var key in data){
+    					if(compressDatas[key]){
+    						compressDatas[key].push(data[key]);
+    					}else{
+    						compressDatas[key] = [data[key]];
+    					}
+    				}
+    			});
+    			var series = [];
+    			for(var key in compressDatas){
+    				series.push({fieldName :key, name:key, data :compressDatas[key] });	
+    			}
+    			return series;
+    		},
+    		getAxisData : function(datas){
+    			var axisDatas = [];
+    			datas.forEach(function(data,index){
+    				axisDatas[index] = index;
+    			});
+    			return axisDatas;
+    		},
+    		getTemplateData : function(){
+    			var me = this;
+    			var series = me.contents.series;
+    			me.fields.dataLabels = me.contents.dataLabels;
+    			me.fields.series = series;
+    			me.fields.dataUrl = me.dataUrl;
+    			me.fields.conditions = me.conditions;
+    			me.fields.plotOptions = {
+    					bar: {
+				            pointPadding: 0.2,
+				            borderWidth: 0,
+				            showInLegend : me.fields.showInLegend
+		        		}
+    			};
+    			var chartTemplate = {widget_type:'chart', contents: me.fields};
+    			return chartTemplate; 
+    		},
+    		//최초 생성시 차트의 색상은 자동으로 생성되기 때문에 차트가 그려진후에 차트에서 색상정보를 가져온다.
+    		widgetContentDrew: function(param){
+    			var me = this,
+				    chart = param.info,
+			        series = chart &&  chart.series;
+				if(series){
+					 series.forEach(function(data,index){
+						 me.contents.series[index].color = data.color;
+					}) 
+				}
+    		},
+    		resetData: function(){
+    			var me = this;
+    			me.dataUrl =  'ui/lib/dashboard/resources/defaultData/chartColumn.json';
+    			me.state = 'closed';
+    			me.fields = {
+            				    title : 'default title',
+            				    type : 'bar',
+            					options3d:{
+            						enabled : false,
+            						alpha : 10,
+            						beta  : 10
+            					},
+            					xAxis:{
+            						title:'default title',
+            					},
+            					yAxis:{
+            						min:0,
+            						title:'default title',
+            					},
+            					showInLegend : true,
+            					legend:{
+            						layout : 'horizontal',
+            						align : 'center',
+            						verticalAlign : 'bottom'
+            					}
+            					
+            			}
+            	me.chartDatas = [];
+    			me.contents ={};
+    		}
+    		
+    	});
+    </script>
+</dom-module>

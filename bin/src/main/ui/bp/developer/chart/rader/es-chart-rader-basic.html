@@ -1,0 +1,159 @@
+<dom-module id="es-chart-rader-basic">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-rader-basic',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "name": "FusionCharts:Radar Chart - Comparison of 2 software vendors",
+			    "width": 500,
+			    "type": "polararea",
+			    "title": {
+			        "text": "Comparison of Enterprise\n Level Antivirus Software"
+			    },
+			    "xAxes": {
+			        "categories": [
+			            {
+			                "label": "Centralized Deployability"
+			            },
+			            {
+			                "label": "Centralized Signature Updating"
+			            },
+			            {
+			                "label": "Active Firewall"
+			            },
+			            {
+			                "label": "Centralized Access & Firewall"
+			            },
+			            {
+			                "label": "Centralized Network Health Monitoring"
+			            },
+			            {
+			                "label": "Cost"
+			            },
+			            {
+			                "label": "Technical Support"
+			            }
+			        ]
+			    },
+			    "yAxes": {
+			    },
+			    "series": [{
+			        "name": "Kaspersky",
+			        "items": [
+			            {
+			                "value": "8"
+			            },
+			            {
+			                "value": "9"
+			            },
+			            {
+			                "value": "9"
+			            },
+			            {
+			                "value": "8"
+			            },
+			            {
+			                "value": "7"
+			            },
+			            {
+			                "value": "9"
+			            },
+			            {
+			                "value": "8"
+			            }
+			        ],
+			        "label": {
+			            "styles": {
+			                "fontSize": 12
+			            }
+			        },
+			        "styles": {
+			            "border": null,
+			            "fill": "#50008ee4"
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }, {
+			        "name": "Norton",
+			        "items": [
+			            {
+			                "value": "7"
+			            },
+			            {
+			                "value": "6"
+			            },
+			            {
+			                "value": "6"
+			            },
+			            {
+			                "value": "4"
+			            },
+			            {
+			                "value": "7"
+			            },
+			            {
+			                "value": "6"
+			            },
+			            {
+			                "value": "5"
+			            }
+			        ],
+			        "label": {
+			            "styles": {
+			                "fontSize": 12
+			            }
+			        },
+			        "styles": {
+			            "border": null,
+			            "fill": "#506baa01"
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }],
+			    "legend": {
+			        "visible": true,
+			        "position": "bottom",
+			        "styles": {
+			            "border": "#999",
+			            "paddingLeft": 11,
+			            "paddingRight": 11,
+			            "paddingTop": 5,
+			            "paddingBottom": 5,
+			            "background": null
+			        },
+			        "itemStyles": {
+			            "fontBold": true
+			        }
+			    }
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

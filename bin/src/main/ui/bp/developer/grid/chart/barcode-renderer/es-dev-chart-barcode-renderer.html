@@ -1,0 +1,266 @@
+<dom-module id="es-dev-chart-barcode-renderer">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--fit-layout);
+        }
+    </style>
+
+    <!--  화면 구성 시작-->
+    <template>
+    	<div id="grdMain" class="fit"></div>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-dev-chart-barcode-renderer',
+            
+            	attached: function(){
+                	this.exampleView().init();
+                },
+                
+                exampleView : function (strings) {
+                    var view;
+                    var dsMain;
+                    var grdMain;
+                    
+                    return view = {
+                        init: function () {
+                        	var fields = [{
+                                fieldName: "name",
+                            }, {
+                                fieldName: "id"
+                            }, {
+                                fieldName: "abbreviation"
+                            }, {
+                                fieldName: "league"
+                            }, {
+                                fieldName: "division"
+                            }, {
+                                fieldName: "url"
+                            }, {
+                                fieldName: "firstYear",
+                                dataType: "datetime",
+                                datetimeFormat: "yyyy"
+                            }, {
+                                fieldName: "wsTitles",
+                                dataType: "number"
+                            }, {
+                                fieldName: "stadium"
+                            }, {
+                                fieldName: "seatingCapacity",
+                                dataType: "number"
+                            }, {
+                                fieldName: "centerDistance",
+                                dataType: "number"
+                            }];
+                            dsMain = DataLudi.createGridDataSet();
+                            dsMain.setFields(fields);
+                            dsMain.onRowCountChanged = function (ds) {
+                				$("#rowCount").css("color", "blue").text(ds.rowCount().toLocaleString());
+                            };
+                        	$.ajax({
+                    			url: "http://localhost:8888/ui/bp/developer/grid/chart/mlbteams.json",
+                    			dataType: 'text',
+                    			success: function (data) {
+                    				new DataLudi.DataLoader(dsMain).load("json", data, {
+                    				});
+                    			},
+                    			error: function (xhr, status, error) {
+                    				var err = status + ', ' + error;
+                    				alert("jQuery getJSON() Failed: " + err);
+                    			}
+                        	});
+                            
+                            var columns = [{
+                                name: "Team",
+                                fieldName: "name",
+                                width: 80,
+                                styles: {
+                                    textWrap: "normal"
+                                },
+                                header: {
+                                    text: "Team"
+                                }
+                            }, {
+                                name: "Team128",
+                                fieldName: "name",
+                                width: 250,
+                                renderer: "code128",
+                                styles: {
+                                    "shapeColor": "#ff111111"
+                                },
+                                header: {
+                                    text: "Code128"
+                                }
+                            }, {
+                                name: "Abbr",
+                                fieldName: "abbreviation",
+                                width: 50,
+                                styles: {
+                                    textAlignment: "center"
+                                },
+                                header: {
+                                    text: "Abbr"
+                                }
+                            }, {
+                                name: "Abbr39",
+                                fieldName: "abbreviation",
+                                width: 100,
+                                renderer: "code39",
+                                styles: {
+                                    "shapeColor": "#ff000088"
+                                },
+                                header: {
+                                    text: "Code39"
+                                }
+                            }, {
+                                name: "Abbr128",
+                                fieldName: "abbreviation",
+                                width: 100,
+                                renderer: "code128",
+                                styles: {
+                                    "shapeColor": "#ff008800"
+                                },
+                                header: {
+                                    text: "Code128"
+                                }
+                            }, {
+                                name: "League",
+                                fieldName: "league",
+                                lookupDisplay: true,
+                                lookupValues: ["al", "nl"],
+                                lookupLabels: ["American", "National"],
+                                width: 70,
+                                styles: {
+                                },
+                                header: {
+                                    text: "League"
+                                }
+                            }, {
+                                name: "Division",
+                                fieldName: "division",
+                                width: 60,
+                                styles: {
+                                },
+                                header: {
+                                    text: "Division"
+                                }
+                            }, {
+                                name: "Url",
+                                fieldName: "url",
+                                width: 100,
+                                displayCallback: function (index, value) {
+                                    return value.substr(7);
+                                },
+                                styles: {
+                                    color: "#00f",
+                                    hoveredColor: "#008"
+                                },
+                                header: {
+                                    text: "Url"
+                                },
+                                renderer: {
+                                    type: "link",
+                                    showTooltip: true
+                                }
+                            }, {
+                                name: "FirstYear",
+                                fieldName: "firstYear",
+                                width: 60,
+                                styles: {
+                                    datetimeFormat: "yyyy",
+                                    textAlignment: "center"
+                                },
+                                header: {
+                                    text: "FirstYear"
+                                }
+                            }, {
+                                name: "WsTitles",
+                                fieldName: "wsTitles",
+                                width: 60,
+                                styles: {
+                                    textAlignment: "center"
+                                },
+                                header: {
+                                    text: "WsTitles"
+                                }
+                            }, {
+                                name: "Stadium",
+                                fieldName: "stadium",
+                                width: 110,
+                                styles: {
+                                },
+                                header: {
+                                    text: "Stadium"
+                                }
+                            }, {
+                                name: "SeatCap",
+                                fieldName: "seatingCapacity",
+                                width: 60,
+                                styles: {
+                                    textAlignment: "far"
+                                },
+                                header: {
+                                    text: "SeatingCap"
+                                }
+                            }, {
+                                name: "CenterDistance",
+                                fieldName: "centerDistance",
+                                width: 60,
+                                styles: {
+                                    textAlignment: "far"
+                                },
+                                header: {
+                                    text: "CenterDist"
+                                }
+                            }];
+                            grdMain = DataLudi.createGridView('grdMain', null);
+                            grdMain.setColumns(columns);
+                            grdMain.setDataSource(dsMain);
+
+                            grdMain.setOptions({
+                                vscrollBar: {
+                                    barWidth: 12
+                                },
+                                hscrollBar: {
+                                    barWidth: 12
+                                },
+                                checkBar: {
+                                    visible: false
+                                },
+                                header: {
+                                    height: 35,
+                                    head: {
+                                        popupMenu: {
+                                            label: 'DataLudi Grid Version',
+                                            callback: function () { alert(DataLudi.getVersion()); }
+                                        }
+                                    }
+                                },
+                                select: {
+                                    style: DataLudi.SelectionStyle.ROWS
+                                },
+                                display: {
+                                    rowHeight: 40,
+                                    rowResizable: true
+                                },
+                                autoFill: {
+                                    enabled: true
+                                }
+                            });
+
+                        }
+                    };  
+                }
+            
+            
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

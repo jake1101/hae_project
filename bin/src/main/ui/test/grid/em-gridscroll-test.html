@@ -1,0 +1,27 @@
+<dom-module id="em-gridscroll-test">
+
+<style>
+	:host { @apply (--layout-vertical); @apply (--layout-flex);
+		
+	}
+</style>
+
+
+<template>
+	<div class="page-flex">
+		<div class="page">
+			<div id="gridPanel5" flexible="false" style="height: 700px;-ms-flex: none; -webkit-flex: none; flex: none;" class="style-scope em-gridscroll-test fixed _fixed" aria-disabled="false" container="">
+			 </div>
+		</div>
+	</div>
+</template> 
+<script>
+		Polymer({
+			is : 'em-gridscroll-test',
+			attached : function(){
+				var gridView = new RealGridJS.GridView("gridPanel5");	
+			}
+		});
+</script> 
+
+</dom-module>

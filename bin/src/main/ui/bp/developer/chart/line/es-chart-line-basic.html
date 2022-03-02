@@ -1,0 +1,140 @@
+<dom-module id="es-chart-line-basic">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-line-basic',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "type": "line",
+			    "palettes":[{
+			        "name": "lines",
+			        "alpha": 1.0,
+			        "strokes": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }, {
+			        "name": "fills",
+			        "alpha": 1.0,
+			        "fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }],
+			    "title": "Solar Employment Growth by Sector, 2010-2016",
+			    "subtitle": "Source: thesolarfoundation.com",
+			    "xAxes": {
+			        "categories":[
+			            "2010",
+			            "2011",
+			            "2012",
+			            "2013",
+			            "2014",
+			            "2015",
+			            "2016",
+			            "2017"
+			        ]
+			    },
+			    "yAxes": {
+			        "title": "Number of Employees",
+			        "tick": {
+			            "styles": {
+			                "numberScale": 3
+			            }
+			        }
+			    },
+			    "series": [{
+			        "name": "Installation",
+			        "items": [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175],
+			        "label": false,
+			        "styles": {
+			            "line": "p(lines:0)",
+			            "fill": "p(fills:0)",
+			            "border":""
+			        },
+			        "animations": [{
+			        }],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }, {
+			        "name": "Manufacturing",
+			        "items": [24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434],
+			        "label": false,
+			        "styles": {
+			            "line": "p(lines:1)",
+			            "shapeName": "diamond",
+			            "fill": "p(fills:1)"
+			        },
+			        "animations": [],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }, {
+			        "name": "Sales & Distribution",
+			        "label": false,
+			        "items": [11744, 17722, 16005, 19771, 20185, 24377, 32147, 39387],
+			        "styles": {
+			            "line": "p(lines:2)",
+			            "shapeName": "rectangle",
+			            "fill": "p(fills:2)"
+			        },
+			        "animations": [],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }, {
+			        "name": "Project Development",
+			        "items": [null, null, 7988, 12169, 15112, 22452, 34400, 34227],
+			        "label": false,
+			        "styles": {
+			            "line": "p(lines:3)",
+			            "shapeName": "triangle",
+			            "fill": "p(fills:3)"
+			        },
+			        "animations": [],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }, {
+			        "name": "Other",
+			        "items": [12908, 5948, 8105, 11248, 8989, 11816, 18274, 18111],
+			        "label": false,
+			        "styles": {
+			            "shapeName": "itriangle",
+			            "line": "p(lines:4)",
+			            "fill": "p(fills:4)"
+			        },
+			        "animations": [],
+			        "itemAnimations": [{
+			            "property": "value"
+			        }]
+			    }],
+			    "legend": {
+			        "position": "right",
+			        "layout": "vertical",
+			        "itemStyles": {
+			            "fontBold": true
+			        }
+			    }
+			});
+			me.chartMain = me.chartContainer.chartView();
+		}
+	});
+	</script>
+</dom-module>

@@ -1,0 +1,69 @@
+<dom-module id="es-formatter-description">
+	<style>
+		table, th, td {
+	 		border:1px solid black;
+	 		border-collapse:collapse;
+	 		box-sizing: border-box;
+	 		padding: 3px;
+	 	}
+	 	th {
+	 		background-color:lightgray
+	 	}
+	</style>
+	<template>
+		<p>
+			<b>sc-formatter</b><br/>
+			SCFormatter는 다양한 데이터 유형의 포매터를 관리(등록,삭제)하고 등록된 포매터를 사용할 수 있는 기능을 제공한다.<br/>
+			기본적으로 date, month, number, phone 포매터가 SCFormatter에 등록되어있다.<br/>
+			그 외의 커스텀 포매터는 formatters.js에서 등록하고 있다.<br/>
+			<table>
+				<tr>
+					<th>mothod</th>
+					<th>description</th>
+				</tr>
+				<tr>
+					<td>factory(name, format, defaultFormat)</td>
+					<td>포매터를 생성하고 SCFormatter에 name 프로퍼티 명으로 포매터를 등록한다.</td>
+				</tr>
+				<tr>
+					<td>format(name, value)</td>
+					<td>SCFormatter에 등록된 유형의 포매터를 사용하여 포매팅된 값을 반환한다.</td>
+				</tr>
+				<tr>
+					<td>register(name, formatter)</td>
+					<td>SCFormatter에 포매터를 등록한다. 만약 동일한 이름으로 등록된 포매터가 존재한다면 기존 포매터는 삭제된다.</td>
+				</tr>
+				<tr>
+					<td>unregister(name)</td>
+					<td>SCFormatter에 등록된 포매터를 삭제한다.</td>
+				</tr>
+			</table>
+		</p><br/>
+		<p>
+			<b>sc-input-cover-behavior</b><br/>
+			SCInputCoverBehavior 는 SCFormatter에서 제공되는 다양한 유형의 Formatter를 이용하여<br/>필드의 value 프로퍼티 값을 포맷팅하여 표현해주는 기능을 제공한다.<br/>
+			<table>
+				<tr>
+					<th>properties</th>
+					<th>description</th>
+				</tr>
+				<tr>
+					<td>formatType</td>
+					<td>SCFormatter에 등록되어 있는 유형만 사용가능하며, 존재하지 않는 경우 inputCover가 비활성화 된다.<br/>
+					포매터가 등록되어 있는 경우 해당 포매터의 defaultFormat으로 포매팅된 값을 표현한다. 
+					</td>
+				</tr>
+				<tr>
+					<td>inputCover</td>
+					<td>true 값이면 inputCover가 활성화 되며 SCFormatter에 등록된 포매터를 이용하여 포매팅된 값을 표현한다.<br/>
+					false 값이면 inputCover가 비활성화 되어 포매팅하지 않는다.</td>
+				</tr>
+			</table>
+		</p><br/>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-formatter-description'
+	});
+	</script>
+</dom-module>

@@ -1,0 +1,52 @@
+<!-- 
+
+## 팝업 창 기본
+
+sc-text-field를 이용하여 팝업을 생성하는 예제입니다. 예제입니다. 
+
+팝업과 관련된 자세한 사항은 [JIRA NFCH-841](http://alm.emro.co.kr/browse/NFCH-841)를 참고하시기 바랍니다.
+
+ -->
+<sc-link rel="import" href="../../common/element/ep-base-element.html"></sc-link>
+
+<dom-module id="es-popup-ex-1">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+    <template>
+        <table class="tb-form">
+            <tr>
+                <td>
+                    <sc-text-field trigger-cls="search" on-trigger-click="onPopupCreate"></sc-text-field>
+                </td>
+            </tr>
+        </table>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-popup-ex-1',
+            properties:{
+				
+            },
+            
+            onPopupCreate: function() {
+            	var me = this;
+            	
+            	
+            	var baseElementPopup = UT.popup('ep-base-element', null, '80%', '80%', {
+                   'eventName' : function(popup, e) {
+                       //some working..
+                   }
+                },{modal : true, collapsible: true});
+            	
+            	baseElementPopup.show(); //팝업을 화면에 보여줍니다.
+            	
+            	baseElementPopup.getWindowContent().load();
+            }
+		});
+	</script>
+</dom-module>

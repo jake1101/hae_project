@@ -1,0 +1,135 @@
+@import url("dashboard.css");
+
+@charset "utf-8";
+
+.fullback{position:fixed;width:100%;	height:100%;	margin : 0px; border-radius:0px;}
+
+/* BACKGROUND */
+.operate-back-ground-color {background: #14203C; color: #FFFFFF;}
+.operate-sub-back-ground-color {background: #182747; margin:33px 33px 33px 33px; border-radius: 13px;}
+.nav-back-ground-color {background: #182747; color: #FFFFFF;}
+
+/* AREA */
+.operate-top-area {min-height:79px; border: 1px solid #2C4670; overflow: hidden !important; border-radius: 13px 13px 0px 0px;}
+.operate-middle-area{border-right: 1px solid #2C4670; border-bottom: 1px solid #2C4670; border-left: 1px solid #2C4670; border-radius: 0px 0px 13px 13px;}
+.operate-middle-left-area{min-width: 950px; min-height: 693px; padding: 0px 27px 33px 27px; }
+.operate-middle-right-area{min-width: 530px;}
+.operate-middle-right-top-area{max-width: 530px;max-height: 270px; min-height: 285px ; border-bottom: 1px solid #2C4670; padding: 0px 33px 43px 33px; border-left: 1px solid #2C4670;}
+.operate-middle-right-bottom-area{max-width: 530px; min-height: 364px; padding: 0px 33px 42px 33px; border-left: 1px solid #2C4670;}
+
+/* SUB TITLE */
+.operate-sub-title-area{min-height: 70px;}
+.operate-sub-title-area2{min-height: 70px;}
+.operate-sub-title {font-size: 22px; font-weight: 700; display: table-cell; vertical-align: bottom; padding-bottom: 10px;}
+
+/* BOX */
+.operate-sensor-boxes{/* min-height: 215px; */ text-align: center;}
+/* .operate-sensor-boxes > div:nth-child(1):hover{background: linear-gradient(135deg, #91E894, #70C371);} */
+/* .operate-sensor-boxes > div:nth-child(1):hover > div > div:nth-child(1){background: url(../icon/operate/battery1_green.png) no-repeat; background-position: center;} */
+/* .operate-sensor-boxes > div:nth-child(3):hover{background: linear-gradient(135deg, #EE7F7C, #E7574F);} */
+/* .operate-sensor-boxes > div:nth-child(3):hover > div > div:nth-child(1){background: url(../icon/operate/battery2_red.png) no-repeat; background-position: center;} */
+.operate-sensor-box{min-width:150px; background: #1E3155; border-radius: 18px; border: 1px solid #2C4670;}
+.operate-sensor-box2{min-width:150px; background: #1E3155; border-radius: 18px; border: 1px solid #2C4670; min-height:179px;}
+.operate-stats-box{min-width:469px; background: #1E3155; border-radius: 18px; text-align: center; border: 1px solid #2C4670;}
+.operate-stat-start-row{align-items: center; border-bottom: 1px solid #2C4670;}
+.operate-stat-row1{align-items: center; border-bottom: 1px solid #2C4670;}
+.operate-stat-row1 div:nth-child(2){color:#70C471}
+.operate-stat-row1 div:nth-child(3){color:#E7574F}
+.operate-stat-row1 div:nth-child(4){color:#94B8FF}
+.operate-stat-row2{align-items: center; border-bottom: 1px solid #2C4670; background: #223860;}
+.operate-stat-row2 div:nth-child(2){color:#70C471}
+.operate-stat-row2 div:nth-child(3){color:#E7574F}
+.operate-stat-row2 div:nth-child(4){color:#94B8FF}
+.operate-stat-end-row{align-items: center; background: #223860; border-radius: 0px 0px 18px 18px}
+.operate-stat-end-row div:nth-child(2){color:#70C471}
+.operate-stat-end-row div:nth-child(3){color:#E7574F}
+.operate-stat-end-row div:nth-child(4){color:#94B8FF}
+.operate-gateway-boxes{min-height: 274px; text-align: center;}
+.operate-gateway-box{min-width:140px; background: #1E3155; border-radius: 18px; border: 1px solid #2C4670;}
+/* .operate-gateway-check{background: linear-gradient(135deg, #A881E7, #7441C3);} */
+.operate-gateway-text1{color:#70C471}
+.operate-gateway-text2{color:#E7574F; min-height: 20px;}
+
+.operate-stats-box{color: #FFFFFF; font-size: 22px; }
+.area-list {
+	overflow: auto;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+.area-list::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera*/
+}
+.area-list>div{border-bottom: 1px solid #2C4670; height:50px; justify-content: center; align-items: center;}
+.area-list a{color:#FFFFFF;}
+.color_row{background: #223860;}
+.area-list>div:last-child{
+  border-radius: 0px 0px 18px 18px; border-bottom: 0px solid #2C4670;
+}
+
+/*tab*/
+em-operate-dashboard sc-tab-navigation .tabbar {
+	background: none !important;
+	border: none;
+}
+
+em-operate-dashboard sc-tabbar {
+	height: 46px;
+	margin-top :0px;
+}
+em-operate-dashboard sc-tab:first-child {
+	background: url(../icon/realtime/worker_inactive.png) no-repeat;
+	width: 125px;
+	border-left: 0px !important;
+	margin-left: 0px !important;
+	border: none;
+}
+em-operate-dashboard sc-tab:first-child[active] {
+	background: url(../icon/realtime/worker_active.png) no-repeat;
+}
+em-operate-dashboard sc-tab:last-child {
+	background: url(../icon/realtime/vehicle_inactive.png) no-repeat;
+	left: 125px !important;
+	width: 125px;
+	border-left: 0px !important;
+	margin-left: 0px !important;
+	border: none;
+}
+em-operate-dashboard sc-tab:last-child[active] {
+	background: url(../icon/realtime/vehicle_active.png) no-repeat;
+} 
+em-operate-dashboard .fit {
+	width :100% !important;
+	position:inherit !important;
+}
+em-operate-dashboard sc-tab-navigation .content-wrap {
+	/* height : auto !important; */
+	height : calc(100% - 46px) !important;
+	max-height:574px;
+}
+
+.text-h{color:#94b8ff; font-weigth:500;}
+.underline{border-bottom:solid 1px #2C4670;}
+.left-border{border-left:solid 1px #2C4670; height: 100% !important; line-height: 50px;}
+.table-header{height:110px; justify-content: center;}
+
+/* TOP */
+.operate-top-left-area {align-self: center; padding-left: 30px; padding-right: 29px;}
+.operate-top-site-text {font-size: 27px; font-weight: 900;}
+.operate-top-time-text {font-size: 18px; font-weight: 500; justify-content: flex-end;}
+.operate-top-right-area {align-self: center; padding-left: 29px; padding-right: 30px;}
+
+/* ICON */
+.operate-allcount-icon {background: url(../icon/operate/allcount1.png) no-repeat; background-position: center; background-size: 60px;}
+.operate-worker-icon {background: url(../icon/operate/worker.png) no-repeat; background-position: center; height:90px; background-size: 70px;}
+.operate-vehicle-icon {background: url(../icon/operate/vehicle.png) no-repeat; background-position: center; height:90px; background-size: 70px;}
+.operate-nosignal-icon {background: url(../icon/operate/nosignal.png) no-repeat; background-position: center; background-size: 40px;}
+.operate-battery1-icon {background: url(../icon/operate/battery1.png) no-repeat; background-position: center;}
+.operate-battery1-green-icon {background: url(../icon/operate/battery1_green.png) no-repeat; background-position: center;}
+.operate-battery2-icon {background: url(../icon/operate/battery2.png) no-repeat; background-position: center;}
+.operate-battery2-red-icon {background: url(../icon/operate/battery2_red.png) no-repeat; background-position: center;}
+.operate-battery3-icon {background: url(../icon/operate/battery3.png) no-repeat; background-position: center;}
+.operate-gateway1-icon {background: url(../icon/operate/gateway1.png) no-repeat; background-position: center;}
+.operate-gateway2-icon {background: url(../icon/operate/gateway2.png) no-repeat; background-position: center;}
+
+.operate-black-select-icon{min-width: 32px; height: 32px; background: url(../icon/black-select.png) no-repeat; background-position: center;}
+.operate-white-select-icon{min-width: 32px; height: 32px; background: url(../icon/white-no-select.png) no-repeat; background-position: center;}

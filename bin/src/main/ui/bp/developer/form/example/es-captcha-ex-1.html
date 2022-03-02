@@ -1,0 +1,83 @@
+<!--
+
+### 매크로 방지 기능 (Captcha)
+
+- 자동 매크로를 방지하기 위한 Captcha 컴포넌트입니다.
+- img-width와 img-height로 Captcha 이미지의 크기를 제어할 수 있습니다.
+
+### 서버 동작 방식
+- Captcha 문자 생성 및 세션에 저장
+- Captcha 문자를 바탕으로 Base64 이미지로 만들어 전송
+- 사용자 입력값이 들어오면 True/False 반환(SharedService.java 참고)
+- 한번 체크하면 세션의 Captcha값을 지워버림
+
+### 클라이언트 동작 방식
+- Captcha 이미지 요청
+- 사용자 입력값 서버에 전송 후 결과값에 따라 처리
+- 다시 사용하려면 무조건 다시 호출, 아니면 에러 발생
+- cc-captcha에 접근하여 load 함수를 호출하면 다시 captcha가 로드됨(예) me.$.captcha.load();
+
+-->
+
+<dom-module id="es-captcha-ex-1">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-ajax id="checkCaptcha"
+                 url="/checkCaptcha.do"
+                 body="{{param}}"
+                 last-response="{{isValid}}"
+                 on-response="completeCallback">
+        </sc-ajax>
+
+        <div>
+            <cc-captcha id="captcha" value="{{param.captcha}}" img-width="150" img-height="50"></cc-captcha>
+            <sc-button text="확인하기" on-click="submit"></sc-button>
+        </div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'es-captcha-ex-1',
+            properties: {
+                test: {
+                    type: String,
+                    observer: 'testF'
+                },
+                param: {
+                    type: Object,
+                    value: function () {
+                        return {
+                            captcha: ''
+                        };
+                    }
+                },
+            },
+
+            submit: function () {
+                this.$.checkCaptcha.request();
+            },
+
+            completeCallback: function (e, res) {
+                var me = this;
+
+                //한 번 captcha를 확인하면 서버에서 기존 Captcha String이 삭제되기 때문에
+                //다시 Catpcha를 사용하기 위해서는 load 함수를 반드시 다시 호출해야합니다.
+                me.$.captcha.load();
+                me.set("param.captcha", "");
+
+                if(!me.isValid) {
+                    //Some working..
+                    alert("일치 X");
+                } else {
+                    //Some working..
+                    alert("일치 O");
+                }
+            }
+        });
+    </script>
+</dom-module>

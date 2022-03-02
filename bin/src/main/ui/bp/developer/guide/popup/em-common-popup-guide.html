@@ -1,0 +1,41 @@
+<sc-link rel="import" href="es-common-popup-description.html"></sc-link>
+<sc-link rel="import" href="es-common-popup-sample.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-common-popup-guide">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-panel class="hbox flex" title-text="공통팝업">
+			<es-common-popup-description class="fit flex"></es-common-popup-description>
+			<es-common-popup-sample class="box flex"></es-common-popup-sample>
+		</sc-panel>
+		<es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-common-popup-guide',
+		properties : {
+			srcList : {
+				type : Array,
+				value : function() {
+					return [{
+						title        : "es-common-form-popup-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/popup/es-common-form-popup-sample.html"
+					}, {
+						title        : "es-common-grid-popup-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/popup/es-common-grid-popup-sample.html"
+					}]
+				}
+			}
+		},
+	});
+	</script>
+</dom-module>

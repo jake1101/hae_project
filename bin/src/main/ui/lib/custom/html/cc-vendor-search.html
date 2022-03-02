@@ -1,0 +1,215 @@
+<!-- 
+/**
+ * 협력사 검색 자동완성 text-field 커스텀 태그
+ *
+ *     <cc-vendor-search class="w-150" value="{{value값}}" oper-unit-cd="운영단위" search-result="{{결과Object}}" link-type="POEO" job-cls-cd="RX" result-field="fieldName" result-value="{{결과단건ValueBind}}" oper-org-cd="{{ArrayType or Object}}" item-cds="[]"></cc-vendor-search>
+ *
+ * @element cc-dept-search
+ *
+ *
+ * @attribute value 해당 텍스트 필드 input value binding <br>
+ * [string] [optional] 
+ *
+ *
+ * @attribute search-result  검색 결과 object값 <br>
+ * [string] [optional]
+ *
+ *
+ * @attribute result-field  단건으로 검색결과가 필요할 경우 검색 결과 object에 field <br>
+ * [string] [optional]
+ *
+ *
+ * @attribute result-value search-field에서 지정한 결과 object의 field의 value <br>
+ * [boolean] [optional]
+ *
+ *
+ * @attribute label-disabled label text가 보이지않도록 처리 <br>
+ * [boolean] [optional]
+ *
+  * @attribute purcGrpTyp 직무유형<br>
+ * [string] [optional]
+ *
+ * @attribute job-cls-cd 담당자 직무 코드 <br>
+ * [string] [optional] 
+ *
+  * @attribute item_cds 아이템코드들 <br>
+ * [string] [optional]
+ *
+ */
+-->
+<!-- 
+ author : Yeon-u Kim
+ Since 2016. 5. 03.
+ 변경이력 : [2016. 5. 03.] Yeon-u Kim 최초작성
+-->
+<sc-link rel="import" href="../../../bp/shared/ep-vendor-list.html" lazy></sc-link>
+<dom-module id="cc-vendor-search">
+    <style>
+        :host {
+            display : table;
+            width: 100%;
+        }
+        :host > * {
+            vertical-align : middle;        
+            display: table-cell;
+        }    
+    </style>
+    <template>
+       <sc-text-field class$="[[class]]" maxLength="200" value="{{value}}" placeholder$="[[placeholder]]" trigger-cls="search" on-trigger-click="onFind" on-enter="onFind" disabled="[[disabled]]" required="[[required]]" readonly="[[readonly]]"></sc-text-field>
+    </template>
+    <script>
+        Polymer({
+            is : 'cc-vendor-search',
+            properties : {
+                value : {
+                    type : Object,
+                    notify: true,
+                    observer : 'valueChanged'
+                },
+                autoComFlage : {
+                    type : Boolean,
+                    value : false
+                },
+                searchResult : {
+                    type : Object,
+                    value : function(){
+                        return {
+                            dept_cd : ''
+                        };
+                    },
+                    observer : 'searchResultChanged',
+                    notify: true
+                },
+                resultField : {
+                    type : String,
+                    value : 'value'
+                },
+                resultValue : {
+                    type : Object,
+                    notify: true
+                },
+                labelDisabled : {
+                    type : Object,
+                    value : function(){
+                        return false;    
+                    },
+                    observer : 'labelDisabledChanged'
+                },
+                linkTyp : {
+                	type : Object,
+                	value : function(){
+                		return {};
+                	}
+                },
+                jobClsCd : {
+                	type : Object,
+                	value : function(){
+                		return "";
+                	}
+                },
+                itemCds : {
+                	type : Array,
+                	value: []
+                },
+                operUnitCd : {
+                	type : Object,
+                	value : function(){
+                		return {};
+                	}
+                },
+                operOrgCd : {
+                	type : Object,
+                	value : function(){
+                		return {};
+                	}
+                },
+                disabled: {
+                    type: Object,
+                    value : function(){
+                        return false;
+                    }
+                },
+                required: {
+                    type: Object,
+                    value : function(){
+                        return false;
+                    }
+                },
+                readonly: {
+                    type: Object,
+                    value : function(){
+                        return false;
+                    }
+                }
+            },
+            //최초 호출
+            attached : function(){
+            },
+    
+            //label 표시 처리
+            labelDisabledChanged : function(newValue, oldValue){
+                var me = this;
+                if(!newValue){
+                    var module = document.createElement('sc-label');
+                    module.i18nDisabled = true;
+                    Polymer.dom(this.root).appendChild(module);
+                }
+            },
+            
+            //결과  변경시 label표시 처리
+            searchResultChanged: function(newValue, oldValue) {
+                if(this.children[1]){
+                    this.children[1].text=newValue.erp_vd_cd || "";
+                }
+            },
+            
+            //값 변경시 result값 clear처리
+            valueChanged : function(newValue, oldValue) {
+                if(!this.autoComFlage){
+                    this.set("searchResult",{});
+                    this.set("resultValue",'');
+                }
+                this.set("autoComFlage",false);
+            },
+            
+            onFind : function(){
+                var me = this;
+                if(!me.linkTyp){
+                	UT.alert("STD.ADM1027");
+                	return false;
+                }
+                var defaultParam = {
+                		comp_cd : SCSessionManager.currentUser.comp_cd,
+            			link_typ : me.linkTyp,
+            			job_cls_cd : me.jobClsCd,
+            			item_cds : me.itemCds,
+            			oper_unit_cd : me.get("operUnitCd") || 'PO'
+        		};
+                //운영조직이 array형
+                if(UT.isArray(me.operOrgCd)){
+                	defaultParam.oper_org_cds = me.operOrgCd;
+                }else{
+                	defaultParam.oper_org_cd = me.operOrgCd;
+                }
+				//협력사 검색 팝업을 호출한다.
+				var vendorPopup = UT.popup("ep-vendor-list", me, 1000, 500,{
+		            "selected-items": function(popup, e) {
+		            	var result = e.detail[0];
+		            	//결과값 처리하는 callback
+	                    me.set("autoComFlage",true);
+	                    if(me.resultField){
+	                        me.set("resultValue",result[me.resultField]);
+	                    }
+	                    me.set("searchResult",result);
+	                    me.set("value",result.vd_nm);
+	                    me.fire("result",result);
+	                    me.set("autoComFlage",false);
+	                    popup.close();
+		            }
+				},{titleText : "협력사 검색",maximizable : true});
+				vendorPopup.show();
+				vendorPopup.getWindowContent().load({singleSelect : true,defaultParam : defaultParam});
+            }
+        });
+    </script>
+</dom-module>

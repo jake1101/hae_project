@@ -1,0 +1,40 @@
+<dom-module id="es-amt-unit-search-ex-1">
+
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<table class="tb-form">
+			<tr>
+				<td>
+					<cc-amt-unit-search value="{{unitInfo.bas_unit_cd}}" result-nm="{{unitInfo.bas_unit_nm}}" disabled="[[uiBind.formDisableState]]"></cc-amt-unit-search>
+				</td>
+			</tr>
+		</table>
+	</template>
+
+	<script>
+		Polymer({
+			is: 'es-amt-unit-search-ex-1',
+			properties: {
+				unitInfo: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				}
+			},
+			
+			setValue: function() {
+            	var me = this;
+            	
+            	me.set("unitInfo.bas_unit_cd", "22S");
+            	me.set("unitInfo.bas_unit_nm", "평방 밀리미터/초");
+            }
+		});
+	</script>
+
+</dom-module>

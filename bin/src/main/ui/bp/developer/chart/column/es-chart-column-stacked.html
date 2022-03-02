@@ -1,0 +1,142 @@
+<dom-module id="es-chart-column-stacked">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-column-stacked',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			DLChart.setDebug(true);
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+				"name": "Highcharts:Stacked column",
+				"type": "column",
+				"palettes":[{
+					"name": "color1",
+					"alpha": 1.0,
+					"fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+						'#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+				}],
+			    "title": {
+				  	"text": "Stacked column chart"
+			    },
+			    "xAxes": {
+			        "categories":['Apples', 'Oranges', 'Pears', 'Grapes', 'Bananas']
+			    },
+			    "yAxes": {
+			        "title": "Total fruit consumption"
+			    },
+			    "seriesGroups" : {
+					"name" : "group1",
+					"stackMode": "normal",
+					"itemWidth": 0.7,
+					"styles": {
+					},
+			        "separatorStyles": {
+			            "line": "#fff"
+			        }
+				},
+			    "series": [{
+			        "name": "John",
+			    	"group" : "group1",
+			        "items": [5, 3, 4, 7, 2],
+			        "styles": {
+			            "fill": "p(color1:0)",
+			            "border": null
+			        },
+					"label": {
+						"position": "center",
+						"styles": {
+							"color": "#fff",
+							"textShadow": "#000"
+						}
+					},
+			        "animations": [{
+			            "property": "mask",
+						"start": "ellipse",
+						"duration": 1000
+			        }],
+					"itemAnimations": [{
+						"property": "value"
+					}]
+			    }, {
+			        "name": "Jane",
+			    	"group" : "group1",
+			        "items": [2, 2, 3, 2, 1],
+			        "styles": {
+			            "fill": "p(color1:1)",
+			            "border": null
+			        },
+					"label": {
+						"position": "center",
+						"styles": {
+							"color": "#fff",
+							"textShadow": "#000"
+						}
+					},
+			        "animations": [{
+			            "property": "mask",
+						"start": "ellipse",
+						"duration": 1000
+			        }],
+					"itemAnimations": [{
+						"property": "value"
+					}]
+			    }, {
+			        "name": "zinc",
+					"group" : "group1",
+			        "items": [3, 4, 4, 2, 5],
+			        "styles": {
+			            "fill": "p(color1:2)",
+			            "border": null
+			        },
+					"label": {
+						"position": "center",
+						"styles": {
+							"color": "#fff",
+							"textShadow": "#000"
+						}
+					},
+			        "animations": [{
+			            "property": "mask",
+						"start": "ellipse",
+						"duration": 1000
+			        }],
+					"itemAnimations": [{
+						"property": "value"
+					}]
+			    }],
+			    "legend": {
+					"position": "floating",
+					"right": 10,
+			        "top": 20,
+					"styles": {
+						"border": "#aaa"
+					},
+			        "itemStyles": {
+			            "border": null
+			        }
+				}
+			});
+			me.chartMain = me.chartContainer.chartView();
+			
+		}
+	})
+	</script>
+</dom-module>

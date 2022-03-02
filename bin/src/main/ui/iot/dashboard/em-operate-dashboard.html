@@ -1,0 +1,34 @@
+<sc-link rel="import" href="es-operate-dashboard.html"></sc-link>
+
+<dom-module id="em-operate-dashboard">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<sc-pages id="pages" selected="0" class="vbox flex">
+			<es-operate-dashboard class="vbox flex"></es-operate-dashboard>
+			
+<!-- 			<template> -->
+<!-- 				<es-operate-dashboard id="operateWhite" class="vbox flex"></es-operate-dashboard> -->
+<!-- 			</template> -->
+		</sc-pages>
+		
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-operate-dashboard',
+			
+			onShowMain: function(e, data){
+                var me = this;
+                
+//                 me.$.pages.selectItem(me.$.operateWhite);
+			}
+		});
+	</script>
+
+
+</dom-module>

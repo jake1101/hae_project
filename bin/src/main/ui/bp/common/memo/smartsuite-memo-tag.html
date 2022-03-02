@@ -1,0 +1,343 @@
+<link rel="import" href="smartsuite-memo-tag-mgt.html">
+
+<dom-module id="smartsuite-memo-tag">
+<!--
+	******************************************************************************************
+	** @Program-name 	: 메모 태그 추가 팝업
+	** @Description		: 
+	** @Author 			: jHuh
+	** @Create Date 	: 2017.02.09
+	** @History 		: 2017.02.09 jHuh 최초작성
+	******************************************************************************************
+-->
+	<style>
+		:host {     
+			@apply(--vbox-layout);
+		}
+	</style>
+	    
+	<template>	
+<!-- 
+	************************************************************************************************************
+	* Service Area
+	************************************************************************************************************
+-->
+		<!-- 전체 태그 조회 -->
+    	<sc-ajax id="findListTag"
+    		 url="findListTag.do"
+    		 body="{{findList.param}}" 
+             last-response="{{findTagInfo}}"
+             on-response="completeFindTag">
+		</sc-ajax>
+		
+		<!-- 현재 메모 태그 조회 -->
+		<sc-ajax id="findListMemoTag"
+    		 url="findListMemoTag.do"
+    		 body="{{memoIDInfo}}"
+             last-response="{{findMemoTagInfo}}"
+             on-response="completeFindMemoTag">
+		</sc-ajax>
+		
+		<!-- 메모 태그 정보 수정 -->
+		<sc-ajax id="updateTag"
+    		 url="updateTag.do"
+    		 body="{{updateTagParam}}"
+    		 on-response="completeUpdateTag">
+		</sc-ajax>
+		
+		<!-- 메모 태그 삭제 -->
+		<sc-ajax id="deleteTag"
+    		 url="deleteTag.do"
+             body="{{deleteTagParam}}"
+             on-response="completeDeleteTag">
+		</sc-ajax>
+<!--  
+	************************************************************************************************************
+	* UI Area
+	************************************************************************************************************
+-->
+
+		<!-- 태그 추가 및 삭제 -->
+		<table width="100%" class="smartsuite-memo-table">
+	        <colgroup>
+	            <col style="width:100px">
+	        </colgroup>
+		    <tr>
+  				<th class="tag-label"><sc-label text="태그 검색"></sc-label></th>
+	  			<td class="smartsuite-memo-tableTagList"><sc-filter-multi-combobox-field items="{{tagList}}" value="{{registeredTagMod}}" placeholder="등록된 태그 없음"></sc-filter-combobox-field>
+  				<td class="smartsuite-memo-tableTagBtn"><sc-button text="태그 관리" class="smartsuite-memo-sharing-mgt-btn" on-click="onClickTagMgt"></sc-button></td>
+  			</tr>
+	    </table>
+	    <div class="smartsuite-memo-blank-area">
+	    </div>
+	    <div class="smartsuite-memo-share-toolbar">
+			<sc-button text="완료" class="smartsuite-memo-complete-btn" on-click="onClickComplete"></sc-button>
+			<sc-button text="취소" class="smartsuite-memo-complete-btn" on-click="onClickCancel"></sc-button>
+		</div>
+	    
+	</template>
+	
+<!--  
+	************************************************************************************************************
+	* Script Area
+	************************************************************************************************************
+-->	
+	<script>
+		Polymer({
+			is : 'smartsuite-memo-tag',
+			
+			properties : {
+				memoInfo :{
+					type: Object,
+					value: function(){
+						return {};
+					}
+				},
+			
+				findList: {
+                    type: Object,
+                    value: function(){
+                        return {
+                            param: {}
+                        };
+                    }
+                },
+                
+	            /**
+				 * ESAMTAG 테이블에서 조회해온 데이터 (등록되어 있는 모든 태그 데이터를 담고 있음)
+				 * @type {Object}
+				 */
+				findTagInfo: {
+					type: Object,
+					value: function() {
+						return {
+							tag_id: null,
+							tag_nm: null
+						};
+					}
+	            },
+	            
+	            /**
+				 * 현재 메모의 태그 데이터 (findListMemoTag.do 로 조회해온 데이터)
+				 * @type {Object}
+				 */
+	            findMemoTagInfo: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+	            },
+	            
+	            /**
+				 * 현재 메모 태그 조회 (findListMemoTag.do 파라미터)
+				 * @type {Object}
+				 */
+	            memoIDInfo: {
+					type: Object,
+					value: function() {
+						return {
+							memo_id: null
+						};
+					}
+	            },
+	            
+	            /**
+				 * updateTag.do 의 파라미터로 해당 메모 정보와 수정될 태그 정보를 담고 있음
+				 * @type {Object}
+				 */
+	            updateTagParam : {
+	            	type: Object,
+					value: function() {
+						return {
+							memo_id: null,							
+							tag_nm: []
+						};
+					}
+	            },
+	            
+	            /**
+				 * 모든 메모에 등록된 태그 전체 목록
+				 * @type {Array}
+				 */
+	            tagList : {
+	            	type: Array,
+	            	value: []
+	            },
+	            
+	            /**
+				 * 메모에 등록된 태그 (사용자 수정 후)
+				 * @type {Array}
+				 */
+	            registeredTagMod : {
+	            	type: Array,
+	            	value : function() {
+	            		return [];
+	            	}
+	            },
+	           
+	            /**
+				 * 메모에 등록된 태그 (사용자 수정 전)
+				 * @type {Array}
+				 */
+	            registeredTagOrg : {
+	            	type: Array,
+	            	value : function() {
+	            		return [];
+	            	}
+	            }
+			},
+			
+			attached : function() {
+				memoUtil.request(this.$.findListTag);
+				this.fire("load-completed");
+			},
+
+			/**
+			* 전달 받은 파라미터 세팅
+			* @param {Object} param 메모 데이터
+			*/
+			setParam : function(param) {
+				if(param) {
+	                this.set("memoInfo", memoUtil.copy(param));
+					this.memoIDInfo.memo_id = this.memoInfo.memo_id;
+				}
+			},
+			
+			/**
+			* 완료 버튼 클릭 시 호출. 메모 태그 추가 및 수정
+			*/
+			onClickComplete : function() {
+				var me = this,
+					isChanged;
+				
+				// 전체 선택 해제 클릭 시 null로 변경됨. 빈 값으로 초기화
+				if(this.registeredTagMod === null){
+					this.registeredTagMod = [];
+				} 
+				
+				// 메모 태그의 수정 여부 판단
+				isChanged = this.compareTagData();
+				
+				if(isChanged){
+					memoUtil.confirm(me.translate("저장하시겠습니까?"), function(btn) {
+						me.updateTag();
+					});
+				}		
+				else {
+					memoUtil.alert(this.translate("변경된 내용이 없습니다."));
+				}
+				
+			}, 
+			
+			/**
+			* 태그 관리 버튼 클릭 시 호출
+			*/
+			onClickTagMgt : function() {
+				var me = this;
+				
+				var memoPopup = memoUtil.popup("smartsuite-memo-tag-mgt", me, 420, 420, {
+		   	        "close": function(popup, e) {
+		   	        	memoUtil.request(me.$.findListTag);
+		   	        	memoPopup.classList.remove('smartsuite-memo-popup');
+		            }
+		   	    }, {title: me.translate("태그 관리"),
+		   	    	resizable : false});
+				
+				memoPopup.classList.add('smartsuite-memo-popup');
+				memoPopup.show();
+			},
+			
+			/*
+			* 태그 삭제
+			*/
+			onDeleteTag : function() {
+				var me = this;
+				
+				memoUtil.confirm(me.translate("이 태그를 삭제하고 모든 메모에서 삭제합니다. 메모는 삭제되지 않습니다."), function(btn) {
+					me.deleteTagParam.tag_nm = me.tagInfo.tag_nm;
+					
+                    memoUtil.request(me.$.deleteTag);
+               	});
+			},
+			
+			/**
+			* 메모 태그  수정 여부 판단을 위해 수정 전 태그 목록과 수정 후 태그 목록 비교
+			*/
+			compareTagData : function() {
+				if(this.registeredTagOrg.length !== this.registeredTagMod.length){
+					return true;
+				}
+				var idx = 0;
+				for(var i = 0, oLen = this.registeredTagOrg.length; i < oLen; i++){
+					for(var j = 0, mLen = this.registeredTagMod.length; j < mLen; j++){
+						if(this.registeredTagOrg[i] === this.registeredTagMod[j] && ++idx === mLen){
+							break;
+						}
+					}
+				}
+				if(idx !== this.registeredTagMod.length){
+					return true;
+				}
+				else {
+					return false;
+				}
+			},
+			
+			/**
+			* 메모 태그  수정
+			*/
+			updateTag : function() {
+				this.set("updateTagParam.memo_id", this.memoInfo.memo_id);
+				this.set("updateTagParam.tag_nm", this.registeredTagMod);
+				
+				memoUtil.request(this.$.updateTag);
+			},
+            
+            /**
+             * 태그 수정 취소
+             */
+			onClickCancel : function(){
+				this.fire("close");
+			},
+			
+			/**
+			* 메모 태그 조회 성공 시 호출
+			*/
+			completeFindMemoTag : function(e, res){
+				var tag = [];
+				
+				for(var i = 0, len = this.findMemoTagInfo.length; i < len; i++){
+					tag[i] = this.findMemoTagInfo[i].tag_nm;
+				}
+				
+				this.registeredTagOrg = tag;
+				this.registeredTagMod = tag;
+			},
+			
+			/**
+			* 메모에 등록된 모든 태그 정보 조회 성공 시 호출
+			*/
+			completeFindTag : function(e, res){
+				var tags = [];
+				for(var i = 0, len = this.findTagInfo.length; i < len; i++){
+					tags.push({text : this.findTagInfo[i].tag_nm, value : this.findTagInfo[i].tag_nm});
+				}
+				this.tagList = tags;
+
+				memoUtil.request(this.$.findListMemoTag);
+	        },
+	        
+	        /**
+	        * 완료 버튼 클릭 후 메모 태그 수정 완료 시 팝업 창 닫음
+	        */
+	        completeUpdateTag : function(e, res){
+	        	memoUtil.alert(this.translate("저장되었습니다."));
+	        	this.fire("close");
+	        },
+	        
+	    	_destroy : function() {
+				this.fire('close');
+	        } 
+		});
+	</script>
+</dom-module>

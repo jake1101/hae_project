@@ -1,0 +1,153 @@
+<sc-link rel="import" href="sliding-listbox-example.html"></sc-link>
+
+<dom-module id="es-sliding-listbox2">
+	<style>
+		:host {
+			@apply(--fit-layout);
+			width: 100%;
+			height: 100%;
+			display: flex;
+		}
+	</style>
+	<template>
+		<div class="vbox flex">
+			<table style="border:1px solid silver;background-color:#efefef;width:100%;">
+				<tr>
+					<th><sc-label text="버튼 타입"></sc-label></th>
+					<td><sc-combobox-field items="[[comboboxData.buttonType]]" value="{{buttonType}}" selected-index="0" display-field="label" value-field="value"></sc-combobox-field></td>
+					<th><sc-label text="버튼 위치"></sc-label></th> 
+					<td><sc-combobox-field items="[[comboboxData.buttonLoc]]" value="{{buttonPosition}}" selected-index="0" display-field="label" value-field="value"></sc-combobox-field></td>
+				</tr>
+				<tr>
+					<th><sc-label text="스크롤바 숨김 여부"></sc-label></th>
+					<td><sc-combobox-field items="[[comboboxData.displayScroll]]" value="{{hideScrollbar}}" selected-index="0" display-field="label" value-field="value"></sc-combobox-field></td>
+					<th><sc-label text="스크롤 타입"></sc-label></th>
+					<td><sc-combobox-field items="[[comboboxData.scrollType]]" selected-index="0" display-field="label" value-field="value"></sc-combobox-field></td>
+				</tr>
+				<tr>
+					<th><sc-label text="선택 표시"></sc-label></th>
+					<td><sc-combobox-field items="[[comboboxData.displayMarker]]" value="{{displayMarker}}" selected-index="0" display-field="label" value-field="value"></sc-combobox-field></td>
+					<th></th>
+					<td></td>
+				</tr>
+			</table>
+			<div class="hbox flex">
+				<div class="vbox flex">
+					<span style="font-weight:bold;font-size:16px;">예제</span>
+					<sliding-listbox-example 
+						data="{{data}}" 
+						sliding-type="horizontal"
+						button-type="{{buttonType}}"
+						button-position="{{buttonPosition}}"
+						hide-scrollbar="{{hideScrollbar}}"
+						scroll-type="{{scrollType}}"
+						scroll-size="{{scrollSize}}"
+						display-marker="{{displayMarker}}"
+						scroll-speed="{{scrollSpeed}}"
+						style="margin:2px;width:200px;height:calc(100% - 24px);border:1px solid silver;margin:auto;">
+					</sliding-listbox-example>
+				</div>
+				
+				<div class="vbox flex-2">
+					<span style="font-weight:bold;font-size:16px;">이벤트 안내</span>
+					<div id="console" style="padding:2px;border:1px solid silver;width:calc(100% - 9px);height:100px;overflow:auto;"></div>
+				
+					<span style="font-weight:bold;font-size:16px;">코드 예제</span>
+					<es-source-viewer 
+						id="code" 
+						style="padding:2px;border:1px solid silver;width:calc(100% - 9px);height:400px;overflow:auto;"
+						url="/ui/bp/developer/imagelist/sliding-listbox-example.html">
+					</es-source-viewer>
+				</div>
+			</div>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is: 'es-sliding-listbox2',
+			
+			properties: {
+				buttonType: {
+					type: Object,
+					value: function() {
+						return 'alwaysOn';
+					}
+				},
+				buttonPosition: {
+					type: Object,
+					value: function() {
+						return 'relative';
+					}
+				},
+				scrollType: {
+					type: Object,
+					value: function() {
+						return 'smooth';
+					}
+				},
+				scrollSize: {
+					type: Object,
+					value: function() {
+						return 10;
+					}
+				},
+				hideScrollbar:{
+					type: Object,
+					value: function() {
+						return true;
+					}
+				},
+				scrollSpeed: {
+					type: Object,
+					value: function() {
+						return 10;
+					}
+				},
+				displayMarker: {
+					type: Object,
+					value: function() {
+						return true;
+					}
+				},
+				comboboxData : {
+					type: Object,
+					value: function() {
+						return {
+							buttonType: [
+								{label: '항상 보임', value: 'alwaysOn'}, 
+								{label: '항상 안보임', value: 'alwaysOff'},
+								{label: '마우스가 위에 있을때만', value: 'overMouse'}
+							],
+							buttonLoc: [
+								{label: '안 겹침', value: 'relative'},
+								{label: '겹침', value: 'overlapped'},
+							],
+							displayScroll: [
+								{label: '숨김', value: true},
+								{label: '보임', value: false}
+							],
+							scrollType: [
+								{label: '부드럽게', value: 'smooth' },
+								{label: '단계적으로', value: 'stepwise'}
+							],
+							displayMarker: [
+								{label: '마킹 표시', value: true},
+								{label: '마킹 미 표시', value: false}
+							]
+						};
+					}
+				},
+				data: {
+					type: Object
+				}				
+			},
+			
+			initialized: function() {
+				 var me = this;
+				 me.$.code.setData(JSON.stringify(me.data, null, "\t"));
+				 me.querySelector('sliding-listbox-example').consoleDiv = me.$.console;
+			}
+		});
+	</script>
+</dom-module>

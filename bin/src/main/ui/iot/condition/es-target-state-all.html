@@ -1,0 +1,489 @@
+<dom-module id="es-target-state-all">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 현장 작업자 현황 [전체 탭(한라건설용)]
+        ** @Description		: 현장상황정보 > 현장 작업자 현황 [전체 탭(한라건설용)]
+        ** @Author 			: 
+        ** @Create Date 	: 2019.10.04
+        ** @History 		: es-target-state-all.html 복사 후 생성
+        ******************************************************************************************
+    -->
+    
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		
+		<!--선원상태 조회 : 전체 -->
+		<sc-ajax
+				id="findLocationWorkerNow"
+				url="findLocationWorkerNow.do"
+				body="{{searchParam}}"
+				on-response = "completeFindLocationWorkerNow">
+		</sc-ajax>
+
+        <cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+
+		    
+		<div class="vbox flex">
+			<div class = "vspace-10"></div>
+			<div id = "iconDiv" >
+				<table class="tb-form" style="width:40%;float:right;">
+		                <colgroup>
+			                <col style ="width : 15%"></col> 
+			                <col style ="width : 20%"></col> 
+			                <col style ="width : 20%"></col> 
+			                <col style ="width : 20%"></col> 
+			                <col style ="width : 20%"></col> 
+		                </colgroup>
+		                <tr>
+		                    <th style = "text-align : center;">
+			                    <sc-label text="아이콘" ></sc-label>
+		                    </th>
+		                    <td style = "text-align : center;">
+			                    <sc-label text="High" ></sc-label>
+			                    <img src="/ui/assets/img/worker/activeHigh.png" style ="margin-left:10px;width:20px; height : 20px"></img>
+		                    </td>
+		                    <td style = "text-align : center;">
+			                    <sc-label text="Middle"></sc-label>
+			                    <img src="/ui/assets/img/worker/activeMiddle.png" style ="margin-left:10px;width:20px; height : 20px"></img>
+		                    </td>
+		                    <td style = "text-align : center;">
+			                    <sc-label text="Low"></sc-label>
+			                    <img src="/ui/assets/img/worker/activeLow.png" style ="margin-left:10px;width:20px; height : 20px"></img>
+		                    </td>
+		                    <td style = "text-align : center;">
+			                    <sc-label text="Zero"></sc-label>
+			                    <img src="/ui/assets/img/worker/activeZero.png" style ="margin-left:10px;width:20px; height : 20px"></img>
+		                    </td>
+	                    </tr>
+		                <tr>
+		                	<th style = "text-align : center;">
+			                    <sc-label text="분당 스텝수" ></sc-label>
+		                    </th>
+		                    <td style = "text-align : center;">
+		                    	<sc-label text="10스텝 이상"></sc-label>
+		                    </td>
+		                    <td style = "text-align : center;">
+		                    	<sc-label text="6스텝  ~ 10스텝 "></sc-label>
+		                    </td>
+		                    <td style = "text-align : center;">
+		                    	<sc-label text="1스텝  ~ 6스텝 "></sc-label>
+		                    </td>
+		                    <td style = "text-align : center;">
+		                    	<sc-label text="0스텝"></sc-label>
+		                    </td>
+	                    </tr>
+	                </table>
+			</div>
+	        <sc-grid id="gridPanel" 
+                     data-provider="{{resultList}}" 
+                     on-item-click="onItemClick"
+                     use-selection = "false"
+                     use-state = "false"
+                     use-dummy = "false"
+                     column-fit-style = "evenFill"
+                     show-tooltip="true"
+                     class = "flex"
+                     >
+                <cc-grid-toolbar title-text="{{gridText}}"></cc-grid-toolbar>
+                <sc-grid-columns>
+                    <sc-image-column	width="50"	header-text="수신상태"	 data-field="icon" image-change-function="onImageChange" style-name = "link"	image-display ="auto" ></sc-image-column>
+                    <sc-data-column		width="70"	header-text="누적스텝수"	data-field="limitTimeStepCount" style-name = "link" data-type="number" format-type="integer" text-align="center"></sc-data-column>
+                    <sc-image-column	width="60"	header-text="분당 활동량"	data-field = "imageAct"            image-change-function = "onImageChangeAct" image-display ="auto" ></sc-image-column>
+                    <sc-data-column width="60" text-align="center" header-text="최근심박수"  style-name = "link"    data-field="heartbeat" visible ="{{isBusan}}"></sc-data-column>
+                    <sc-data-column	width="60" text-align="left"   header-text="협력사"     data-field="vendorName"         item-style-function="onStyleFontColor"></sc-data-column>
+                    <sc-data-column width="80" text-align="center" header-text="직종"       data-field="targetJobName"            item-style-function="onStyleFontColor"></sc-data-column>
+                    <sc-data-column width="100" text-align="left"   header-text="작업자이름" data-field="targetName"        style-name = "link"  item-style-function="onStyleFontColor"></sc-data-column>
+                    <sc-date-column width="100" text-align="center" header-text="수신시간"   data-field="updatedDt"      format-type = "datetime"></sc-date-column>
+                    <sc-data-column width="100" text-align="center" header-text="위치"     data-field="areaName"           ></sc-data-column>
+                    <sc-data-column width="100" text-align="center" header-text="배터리"     data-field="battery"            renderer-options="{{rendererOptions}}" item-style-function="onItemStyleFunction"></sc-data-column>
+                </sc-grid-columns>
+                <sc-grid-fields>
+                    <sc-grid-field data-field = "status"></sc-grid-field>
+                    <sc-grid-field data-field = "emergency"></sc-grid-field>
+                    <sc-grid-field data-field = "timeAgo"></sc-grid-field>
+                    <sc-grid-field data-field = "beaconSignal"></sc-grid-field>
+                    <sc-grid-field data-field = "gpsLock"></sc-grid-field>
+                    <sc-grid-field data-field = "labelColor"></sc-grid-field>
+                </sc-grid-fields>
+            </sc-grid>
+            
+            <sc-grid id="gridPanelVehicle" 
+                     data-provider="{{resultList}}" 
+                     on-item-click="onItemClick"
+                     use-selection = "false"
+                     use-state = "false"
+                     class = "flex"
+                     >
+                <cc-grid-toolbar title-text="{{gridText}}"></cc-grid-toolbar>
+                <sc-grid-columns>
+                    <sc-image-column	width="100"	header-text="수신상태"		data-field = "icon"	image-change-function="onImageChange"	image-display ="auto" ></sc-image-column>
+                    <sc-data-column	width="150" text-align="left"   header-text="협력사"     data-field="vendorName"         item-style-function="onStyleFontColor"></sc-data-column>
+                    <sc-data-column width="150" text-align="center" header-text="유형"       data-field="targetJobName"            item-style-function="onStyleFontColor"></sc-data-column>
+                    <sc-data-column width="150" text-align="left"   header-text="이동장비명" data-field="targetName"        style-name = "link"  item-style-function="onStyleFontColor"></sc-data-column>
+                    <sc-data-column width="150" text-align="center" header-text="운전자명"   data-field="driverName"    ></sc-data-column>
+                    <sc-data-column width="200" text-align="center" header-text="위치"     data-field="areaName"     ></sc-data-column>
+                    <sc-data-column width="150" text-align="center" header-text="배터리"     data-field="battery"            renderer-options="{{rendererOptions}}" item-style-function="onItemStyleFunction"></sc-data-column>
+                </sc-grid-columns>
+                <sc-grid-fields>
+                    <sc-grid-field data-field = "status"></sc-grid-field>
+                    <sc-grid-field data-field = "emergency"></sc-grid-field>
+                    <sc-grid-field data-field = "timeAgo"></sc-grid-field>
+                    <sc-grid-field data-field = "beaconSignal"></sc-grid-field>
+                    <sc-grid-field data-field = "gpsLock"></sc-grid-field>
+ 					<sc-grid-field data-field = "labelColor"></sc-grid-field>
+                </sc-grid-fields>
+            </sc-grid>
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'es-target-state-all',
+			properties : {
+				searchParam : {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				},
+				searchParam2 : {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				},
+				gridText : {
+					type : Object,
+					value : function(){
+						return "전체";
+					}
+				},
+                rendererOptions: {
+                    type:Object,
+                    value: function(){
+                        return {
+                            type: "signal",
+                            maximum: 100,
+                            barCount: 8,
+                            detailed: true,
+                            startRate: 0.5,
+                            endRate: 1
+                        }
+                    }
+                },
+                
+                isBusan: {
+                    type: Boolean,
+                    value : function() {
+                        return true;
+                    }
+                }
+			},
+			
+			initialized : function(){
+				var me = this;
+				if(SCMdiManager.searchParam.site_name.indexOf("부산") != -1) {
+           			me.isBusan = true;
+          		}else {
+          			me.isBusan = false;
+          		}
+			},
+			
+			load : function(param){
+				var me = this;
+				me.onSearch(param);
+			},
+
+	        onStyleFontColor: function(data, item){
+                var me = this;
+				var color = data.labelColor;		
+				if(UT.isEmpty(color)){
+					color : "black";
+				}
+                return {
+                    fontColor: color
+                };
+            },
+			
+			onSearch : function(param){
+				var me = this;
+				me.set("searchParam.siteId", param.siteId);
+				me.set("searchParam.jobTypes", ["*"]); 
+				me.set("searchParam.legendType", "site"); 
+				me.set("searchParam.options", []);
+				me.set("searchParam.standardType", "beacon");
+				me.set("searchParam.limitTimeMinute", null);
+				if(UT.isEmpty(param.targetType)){
+					param.targetType="worker";
+				}
+				me.set("searchParam.targetType", param.targetType);
+				
+				if(param.targetType == "worker"){
+					$("#iconDiv").show();
+					me.$.gridPanel.hidden= false;
+					me.$.gridPanelVehicle.hidden= true;
+					
+				}else if(param.targetType == "vehicle"){
+					$("#iconDiv").hide();
+					me.$.gridPanel.hidden= true;
+					me.$.gridPanelVehicle.hidden= false;
+				}else{
+					$("#iconDiv").show();
+					me.$.gridPanel.hidden= false;
+					me.$.gridPanelVehicle.hidden= true;
+				}
+				UT.request(me.$.findLocationWorkerNow);
+				
+			},
+			
+			completeFindLocationWorkerNow : function(e, res){
+				var me = this;
+				var result = res.response;
+				
+				if(result){
+					for(var i = 0 ; i< res.response.length; i ++){
+						if(!result[i].areaName){
+							if(res.response[i].geoJson){
+// 								result[i].areaName = "lat :" +res.response[i].geoJson.coordinates[1] + ", lon :"+ res.response[i].geoJson.coordinates[0];
+								result[i].areaName = "영역외";
+							}else{
+								result[i].areaName = "위치정보가 없습니다";
+							}
+						}
+						if(result[i].heartbeat == -1){
+							result[i].heartbeat = "측정정보없음"
+						}
+					}
+				}
+				me.set("resultList", result);
+				
+				if(res.response == null) {
+					me.$.gridPanel.getDataProvider().removeAll();
+				}
+				
+				me.$.gridPanel.getDataProvider().setItemAtBatch(true,function(index, data){
+					if(UT.isEmpty(data.battery))
+						return {status : me.chkSensorState(data), battery : 0 };
+					return {status : me.chkSensorState(data)};
+				});
+				me.$.gridPanel.refresh();
+			},
+			
+			onItemClick : function(event){
+				var me = this;
+				var data = event.detail.data;
+				var dataField = event.detail.item.dataField;
+				
+				switch(dataField){
+				case "targetName" :
+					me.fire("open-history-pop", data);
+					break;
+				case "limitTimeStepCount":
+					me.fire("open-step-pop", data);
+					break;
+				case "icon" :
+					me.fire("open-sensor-state-pop", data);
+					break;
+				case "heartbeat" :
+					me.fire("open-heartbeat-pop", data);
+					break;
+				default :
+					break;
+				}
+			},
+			
+			// '수신상태' image-change-function
+			onImageChange: function(data, item){
+				// 정상 gps 신호일 때, 협력사+공종에 따른 이미지 구분
+				return '/ui/assets/img/marker/' + data.iconImage;
+			},
+			
+			// 'marker' 이미지
+			onMarkerImageChange: function(color){
+				if(UT.isEmpty(color)) {
+					return '';
+				}
+				
+				// 협력사+직종 에 대한 4가지 color 분류
+				// purple : 삼호개발 목공
+				// green : 삼호개발 철근
+				// orange : 유니버스 목공
+				// blue: 나머지
+				
+				return '/ui/assets/img/marker/icon/' +'marker_gps_' + color + '.png';
+			},
+			
+			// '분당 활동량' image-change-function
+			onImageChangeAct: function(data, item){
+				switch (data.activityQty){
+					case "high":
+						return "/ui/assets/img/worker/activeHigh.png";
+					case "middle":
+						return "/ui/assets/img/worker/activeMiddle.png";
+					case "low":
+						return "/ui/assets/img/worker/activeLow.png";
+					case "zero":
+						return "/ui/assets/img/worker/activeZero.png";
+					default :
+						return "/ui/assets/img/worker/activeZero.png";
+							
+				}
+			},
+			
+			// '안전모' image-change-function
+			onImageChangeHelmet: function(data, item){
+				var sts = "";
+				
+				if(item.dataField == "sts1") {
+					sts = data.helmetSts1;
+				} else if(item.dataField == "sts2") {
+					sts = data.helmetSts2;
+				} else if(item.dataField == "sts3") {
+					sts = data.helmetSts3;
+				} else {
+					sts = "";
+				}
+				
+				switch (sts){
+					case "wearing":	//착용
+						return "/ui/assets/img/marker/icon/helmet_wearing.png";
+					case "shock":		//충격
+						return "/ui/assets/img/marker/icon/helmet_shock.png";
+					case "fall":			//쓰러짐
+						return "/ui/assets/img/marker/icon/helmet_fall.png";
+					case "notworn":	//벗음
+						return "/ui/assets/img/marker/icon/helmet_notworn.png";
+					case "throw":		//던짐
+						return "/ui/assets/img/marker/icon/helmet_throw.png";
+					case "resting":	//휴식
+						return "/ui/assets/img/marker/icon/helmet_resting.png";
+					case "nosignal":	//신호없음
+						return "/ui/assets/img/marker/icon/helmet_nosignal.png";
+				}
+				
+				return "";
+			},
+			
+			onItemStyleFunction : function(data, item){
+				if(data["battery"] < 31){
+			        return {
+			                 shapeColor : "#ff1111",
+			                };
+			    }else{
+			    	return {
+			             shapeColor : "#00BB00"
+			        };
+			    }
+			},
+			
+			chkSensorState : function(tg) {
+	        	var stateCode ='';
+				if(tg.sensorId=="0"){
+					stateCode = 12;
+					return stateCode;
+				}
+	        	var bool_emergency =(tg.emergency == "true"); 
+	        	if(bool_emergency){
+	        		if(Number(tg.battery) > 31){
+	        			stateCode = 0;
+	        		}else{
+	        			stateCode = 1	
+	        		}
+	        	}else if(UT.isEmpty(tg.timeAgo) || Number(tg.timeAgo) > 30){
+	        		stateCode=11;
+	        	}else if(UT.isNotEmpty(tg.beaconSignal)){
+	        		if(Number(tg.battery) > 31){
+	        			stateCode = 2;
+	        		}else{
+	        			stateCode = 3	
+	        		}
+	        	}else if(UT.isNotEmpty(tg.gpsLock)){
+	        		if(tg.gpsLock.toUpperCase() === 'LOCK' ){
+		        		if(Number(tg.battery) > 31){
+		        			stateCode = 4;
+		        		}else{
+		        			stateCode = 5;	
+		        		}        	
+		        	}else if(tg.gpsLock.toUpperCase() === 'UNLOCK'){
+		        		if(Number(tg.battery) > 31){
+		        			stateCode = 6;
+		        		}else{
+		        			stateCode = 7;	
+		        		}        	
+		        	}
+	        	}else if(UT.isEmpty(tg.beaconSignal) && UT.isEmpty(tg.gpsLock)){
+	        		if(Number(tg.battery) > 31){
+	        			stateCode = 8;
+	        		}else{
+	        			stateCode = 9;	
+	        		}
+	        	}
+	        	// 그 외의 경우?
+	        	return stateCode;
+	        },
+	        
+	        // '안전모' 컬럼 툴팁
+	        contentCallBack: function(rowIndex, value, dataFieldName, rowData) {
+	        	var me = this;
+	        	
+	        	if(value) {
+	        		// 툴팁 메세지 생성
+	        		var tooltipMsg = "";
+	        		tooltipMsg = me.makeTootipMsg(rowData.helmetSts1, rowData.helmetCommDt1);
+	        		
+	        		if(rowData.helmetDataLen == 3) {
+	        			tooltipMsg += '</br>' + me.makeTootipMsg(rowData.helmetSts2, rowData.helmetCommDt2);
+	        			tooltipMsg += '</br>' + me.makeTootipMsg(rowData.helmetSts3, rowData.helmetCommDt3);
+	        		}
+	        		
+	        		if(rowData.helmetDataLen == 2) {
+	        			tooltipMsg += '</br>' + me.makeTootipMsg(rowData.helmetSts2, rowData.helmetCommDt2);
+	        		}
+	        		
+	        		return tooltipMsg;	
+	        	}
+	        },
+	        
+	        // 툴팁 메세지 생성
+	        makeTootipMsg: function(sts, commDt) {
+	        	var me = this;
+	        	var msg = "";
+	        	var strSt = "";
+	        	
+	        	if (sts == "wearing") {
+	        		stsStr = "착용";
+	        	} else if (sts == "notworn") {
+	        		stsStr = "벗음";
+	        	} else if (sts == "fall") {
+	        		stsStr = "쓰러짐";
+	        	} else if (sts == "shock") {
+	        		stsStr = "충격";
+	        	} else if (sts == "throw") {
+	        		stsStr = "던짐";
+	        	} else if (sts == "resting") {
+	        		stsStr = "휴식";
+	        	} else if (sts == "nosignal") {
+	        		stsStr = "신호없음";
+	        	}
+        		
+        		if(sts == "wearing") {
+        			msg = '<span style="color:green;">(' + UT.formatDate(new Date(Number(commDt)),"yyyy/MM/dd HH:mm:ss") + ') ' + stsStr + '</span>';
+        		} else if (sts == "resting") {
+        			msg = '<span style="color:orange;">(' + UT.formatDate(new Date(Number(commDt)),"yyyy/MM/dd HH:mm:ss") + ') ' + stsStr + '</span>';
+    			} else if (sts == "nosignal") {
+    				msg = '<span style="color:grey;">(' + UT.formatDate(new Date(Number(commDt)),"yyyy/MM/dd HH:mm:ss") + ') ' + stsStr + '</span>';
+        		} else {
+        			msg = '<span style="color:red;">(' + UT.formatDate(new Date(Number(commDt)),"yyyy/MM/dd HH:mm:ss") + ') ' + stsStr + '</span>';
+        		}
+	        	
+        		return msg;
+	        }
+		});
+	</script>
+
+</dom-module>

@@ -1,0 +1,54 @@
+<!--
+ * @Desc 좌표와 bounding box 관련 behavior
+ * @Author patrick.sung
+ * @Created 2016-03-28
+ -->
+
+<script>
+    BehaviorCoordinates = {
+        properties: {
+            local: {
+                type: Object,
+                value: {x: 0, y: 0},
+                readonly: true
+            },
+        },
+
+        attached: function() {
+            this.updateLocalBound();
+        },
+
+        updateLocalBound: function() {
+            var rectBound = this.getBoundingClientRect();
+            this.local = {x: rectBound.left, y: rectBound.top};
+        },
+
+        globalToLocal: function(global) {
+            var x = global.x - this.local.x;
+            var y = global.y - this.local.y;
+
+            return {x: x, y: y};
+        },
+
+        localToGlobal: function(local) {
+            var x = local.x + this.local.x;
+            var y = local.y + this.local.y;
+
+            return {x: x, y: y};
+        },
+
+        hitTestTo: function(target) {
+            var boundary = target.getBoundingClientRect();
+            var global = this.localToGlobal(this);
+
+            if (global.x > boundary.left &&
+                global.x < boundary.right &&
+                global.y > boundary.top &&
+                global.y < boundary.bottom) {
+                return true;
+            }else {
+                return false;
+            }
+        }
+    }
+</script>

@@ -1,0 +1,85 @@
+<link rel="import" href="widget-data-confirm.html">
+<link rel="import" href="widget-data-condition.html">
+<script src="../resources/js/jsoneditor/jsoneditor.js"></script>
+<dom-module id="widget-data-provider">
+	<template>
+		 <style include="jsoneditor-style"></style>
+	</template>
+    <script>
+    	WidgetDataProvider  = {
+            is : 'widget-data-provider',
+            properties : {
+            	dataUrl : {
+            		type : String
+            	},
+            	dataMode : {
+            		type : String,  //apply,confirm
+            		value : 'apply'
+            	},
+            	widgetData :{
+            		type: Object
+            	},
+            	loadState :{
+            		type : String,
+            		value : 'none'  // success,fail,none
+            	},
+            	conditions:{
+            		type: Object
+            	}
+            },
+            dataLoad : function(){
+            	var me = this;
+            		me.store = new SCAjax();
+                	me.store.addEventListener('response',  me.onDataChanged.bind(me));
+                	me.store.addEventListener('error',  me.onDataError.bind(me));
+            	me.store.url = me.dataUrl;
+            	me.store.body = me.conditions || {};
+            	me.store.generateRequest();
+            	
+            },
+            onDataChanged : function(e, res){
+	   			var me = this;
+	   			var lastResponse = e.detail.response || [];
+	   			me.widgetData = lastResponse;
+	   			if(me.widgetData.length == 0){
+	   				me.loadState = 'none';
+	   			}
+	   			me.loadState = 'success';
+	   			if(me.dataMode === 'confirm'){
+		   			var dataPopup = SCPopupManager.create('widget-data-confirm', this, 500, 500, true,true,false,true);
+		   			dataPopup.titleText = me.translate("data");  
+		   			dataPopup.show();
+					var view = dataPopup.getWindowContent();
+					view.setData(lastResponse);
+	   			}else if(me.dataMode === 'apply'){
+	   				me.setWidgetData();
+	   			}
+	   		},
+	   		onDataError : function(e){
+		   		var me =  this;
+		   		me.loadState = 'fail';
+		   		SCAlert.show('알림','정상적인 url이 아닙니다. 다시 입력해주세요.');
+		   		e.preventDefault();
+	   		},
+	   		
+	   		//구현체에서 사용.
+	   		setWidgetData: function(){
+	   			
+	   		},
+	   		showConditions: function(){
+	   			var me =  this;
+	   			var conditionPopup = SCPopupManager.create('widget-data-condition', this, 350, 300, true,true,false,true);
+	   			var view = conditionPopup.getWindowContent();
+	   			conditionPopup.titleText = me.translate("condition"); 
+	   			conditionPopup.addEventListener('sc-window-showed',function(){
+		   			view.setData(me.conditions);
+	   			}); 
+	   			conditionPopup.show();
+	   			view.addEventListener('condition-close',function(event){
+	   				me.conditions = event.detail.conditions;
+	   				conditionPopup.close();
+	   			});
+	   		}
+    	}
+    </script>
+</dom-module>

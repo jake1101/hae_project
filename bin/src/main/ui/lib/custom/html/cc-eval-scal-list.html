@@ -1,0 +1,771 @@
+<dom-module id="cc-eval-scal-list">
+<!-- 
+/**
+ *
+ *	@description : 평가 항목 생성 컨포넌트
+ *  <pre>
+ * </pre>
+ * @author : Yeon-u Kim
+ * @FileName : 
+ * @Since 2016. 7. 22.
+ * @변경이력 : [2016. 7. 22.] Yeon-u Kim 최초작성
+ */
+-->
+	<style>
+		:host {
+/* 			padding:5px; */
+		}
+		.attach-button {
+			width: 10px;
+			margin-top : 1px;
+		    background: rgba(0,0,0,.4);
+		    height: 18px;
+		    border-radius: 15px;
+		    padding: 3px 15px 2px 18px;
+		    color: #ffffff;
+		    font-weight: normal;
+		}
+		.fact-box {
+			margin: 1px;
+			border:1px solid #cdcdcd;
+		}
+		.fact-header {
+			padding: 5px;
+			background: #fafafa;
+			border-bottom: dotted 1px #ccc;
+		}
+		.fact-header sc-button {
+			margin: 0;
+		    height: 18px;
+		    border-radius: 15px;
+		    color: #ffffff;
+		    font-weight: normal;
+		    font-size: 9px;
+		}
+		.attachEmptyBtn{
+		    padding: 4px 2px 1px 6px;
+		    background: rgba(0,0,0,.4);
+		}
+		.attachBtn{
+		    padding: 4px 2px 1px 6px;
+		    background: #ff7800;
+		}
+		.helpBtn{
+		    padding: 4px 1px 1px 7px;
+		    background: rgba(0,0,0,.4);
+		}										
+		
+		.fact-title {
+			font-weight: bold;
+			font-size: 14px;
+		}
+		.fact-body {
+			padding-left: 20px; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; line-height:20px;
+		}
+		
+		.tb-form th {background-color:#e6ecef;}
+        .tb-form th, .tb-form td {height:20px; color:#000; padding:3px 5px; border:1px solid #ccc;}
+        .tb-form th:first-child, .tb-form td:first-child  {border-left:0;}
+        .tb-form th:last-child, .tb-form td:last-child {border-right:0;}
+        
+	    .tb-data {
+	        width : 100%;
+	        border-collapse:collapse; 
+	        border-spacing:0;    
+	        table-layout:fixed;        
+	    }
+    
+		.tb-data td {
+		    padding: 5px;
+		    height:28px; vertical-align:middle; text-align:left;
+		    border-bottom:1px solid #C2C2C2; 
+		    border-left:1px solid #ccc; 
+		}
+		.tb-data td:first-child  {border-left:0;}
+    
+        .tb-data td > * {vertical-align : middle}
+    </style>
+    <template>
+        <template id="factList" is="dom-repeat" items="{{factList}}" as="fact">
+        <!--  fact Area -->
+            <a name="{{fact.ef_res_id}}"></a>
+            <div class="vspace-5"></div>
+            <div class="fact-box" id="{{fact.ef_res_id}}">
+                <!--  fact Area Header 항목-->
+                <div class="hbox fact-header">
+                    <sc-label class="fact-title" text="{{fact.ef_nm}}" i18n-disabled></sc-label>
+                    <sc-spacer></sc-spacer>
+                    <template is="dom-if" if="{{!isQttSrvClsR(fact.qtt_srv_cls)}}">
+                        <!-- 항목제외 계산 logic 구현 시점까지 주석처리 -->
+<!--                         <sc-checkbox-field label="항목제외" style="padding-top:4px"  -->
+<!--                                             data="{{fact}}" disabled="[[readOnly]]" -->
+<!--                                             checked-value="Y" un-checked-value="N"    -->
+<!--                                             input-value="{{factExtValue(fact.apply_yn)}}" on-checkchange="onExceptCheckChange"> -->
+<!--                         </sc-checkbox-field> -->
+<!--                         <div class="hspace-10"></div> -->
+                        <sc-button class$="[[hasAttFile(fact.att_cnt)]]" icon-cls="btn attach" data="[[fact]]" on-click="onOpenAttPopup"></sc-button>
+                        <div class="hspace-5"></div>
+                        <sc-button class="helpBtn" icon-cls="btn help"	data="[[fact]]" on-click="onOpenRemarkPopup"></sc-button>
+                    </template>
+                </div>
+                
+                <!--  fact Area Scale 스케일 -->
+                <div class="fact-body">
+                    <!-- 정량항목  -->
+                    <template is="dom-if" if="{{isQttSrvClsR(fact.qtt_srv_cls)}}">
+                        <div clss="vbox" style="border:1px solid #cfdbe2;">
+                            <div style="padding: 5px;" class="vbox">
+                                <table class="tb-form">
+                                    <colgroup>
+                                        <col style="width:120px;">
+                                        <col>
+                                        <col style="width:120px;">
+                                        <col>
+                                    </colgroup>
+                                    <tr>
+                                        <th><sc-label text="계산식"></sc-label></th>
+                                        <td colspan="3">
+                                            <sc-textarea-field class="h-50" value="{{fact.calc_txt}}" maxLength="1200" readonly="true" i18n-disabled></sc-textarea-field>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th><sc-label text="무실적여부"></sc-label></th>
+                                        <td>{{getYnCodeName(fact.nd_yn)}}</td>
+                                        <th><sc-label text="무실적처리"></sc-label></th>
+                                        <td>{{getNdHndlCodeName(fact)}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><sc-label text="실측값대입"></sc-label></th>
+                                        <td>{{getCalculus(fact)}}</td>
+                                        <th><sc-label text="계산식결과"></sc-label></th>
+                                        <td>{{getStringDefault(fact.calc_val)}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><sc-label text="가감점"></th>
+                                        <td>{{getEfKindCodeName(fact.ef_kind_cd)}}</td>
+                                        <th><sc-label text="가중치(그룹/항목)"></th>
+                                        <td>{{getWeight(fact)}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><sc-label text="Scale점수"></th>
+                                        <td>{{getStringDefault(fact.scal_sco)}}</td>
+                                        <th><sc-label text="평가항목점수"></th>
+                                        <td>{{getStringDefault(fact.ef_sco)}}</td>
+                                    </tr>
+                                </table>
+                            
+                                <div class="vspace-5"></div>
+                            
+                                <table class="tb-form">
+                                    <colgroup>
+                                        <col style="width:150px;"></col>
+                                        <col style="width:80px;"></col>
+                                        <col style="width:40px;"></col>
+                                        <col style="width:40px;"></col>
+                                        <col style="width:80px;"></col>
+                                    </colgroup>
+                                    <tr>
+                                        <th style="text-align:center;"><sc-label text="실적항목명"></sc-label></th>
+                                        <th style="text-align:center;"><sc-label text="실측값"></sc-label></th>
+                                        <th style="text-align:center;"><sc-label text="분자/분모"></sc-label></th>
+                                        <th style="text-align:center;"><sc-label text="무실적여부"></sc-label></th>
+                                        <th style="text-align:center;"><sc-label text="무실적처리"></sc-label></th>
+                                    </tr>
+                                </table>
+                                <template id="recResList" is="dom-repeat" items="{{fact.recResList}}" as="recRes">
+                                    <table class="tb-data">
+                                        <tr>
+                                            <td style="text-align:left;   width:150px;">[[recRes.rec_fact_nm]]</td>
+                                            <td style="text-align:right;  width:80px;" >{{getStringDefault(recRes.rec_val)}}</td>
+                                            <td style="text-align:center; width:40px;" >{{getNmrtDnmntCodeName(recRes.nmrt_dnmnt_cd)}}</td>
+                                            <td style="text-align:center; width:40px;" >{{getYnCodeName(recRes.nd_yn)}}</td>
+                                            <td style="text-align:center; width:80px;" >{{getNmrtNdHndlCodeName(recRes.nd_hndl)}}</td>
+                                        </tr>
+                                    </table>
+                                </template>
+                            </div>
+                        </div>
+                        <template is="dom-if" if="{{hasQttScale(fact)}}">
+                            <div clss="vbox" style="padding: 5px; border:1px solid #cfdbe2;">
+                                <div class="hbox" style="padding: 5px; background-color:#e6ecef; font-weight: bold;">
+                                    <sc-label text="◈ [[translate('정량 Scale')]]" i18n-disabled></sc-label>
+                                    <sc-spacer></sc-spacer>
+                                </div>
+                                <div style="padding-left: 20px; padding-top: 5px; padding-right: 5px; padding-bottom: 5px;">
+                                    <sc-radio-group-field items="{{createRadioScales(fact)}}" class="s-block"
+                                                        value-field="scal_id" label-field="label"
+                                                        value="{{fact.select_scale_id}}" disabled="true" i18n-disabled>
+                                    </sc-radio-group-field>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                    
+                    <!--  라디오 형식의 단일 선택 scale fact -->
+                    <template is="dom-if" if="{{isQttSrvClsS(fact.qtt_srv_cls)}}">
+                        <sc-radio-group-field items="{{createRadioScales(fact)}}" class="s-block"
+                                                value-field="scal_id" label-field="label" on-change="onChangeSingleCheck"
+                                                value="{{fact.select_scale_id}}" disabled="{{fact.scaleDisabled}}" i18n-disabled>
+                        </sc-radio-group-field>
+                    </template>
+                    
+                    <!--  다중 선택 방식의 fact -->
+                    <template is="dom-if" if="{{isQttSrvClsM(fact.qtt_srv_cls)}}">
+                        <sc-checkbox-group-field class="s-block" items="{{createCheckScales(fact)}}" data="{{fact}}" 
+                                                 value-field="scal_id" label-field="label" value="{{fact.select_scale_id}}" 
+                                                 on-change="onChangeMultiCheck"  disabled="{{fact.scaleDisabled}}" i18n-disalbed>
+                        </sc-checkbox-group-field>
+                    </template>
+                    
+                    <!--  직접 입력 -->
+                    <template is="dom-if" if="{{isQttSrvClsD(fact.qtt_srv_cls)}}">
+                        <template is="dom-repeat" items="{{fact.qltScaleList}}" as="scale">
+                            <div class="hbox">
+                                <sc-text-field class="w-100 align-right"  disabled="{{fact.scaleDisabled}}" 
+                                                regex="/^-?(\d{1,3}([.]\d{0,2})?)?$/" data="{{fact.ef_id}}" on-blur="onChangeDirInput"
+                                                maxlength="6" value="{{scale.scal_sco}}"></sc-text-field>
+                                <sc-spacer></sc-spacer>
+                                <sc-label text="{{makeMessage(fact)}}"	i18n-disabled></sc-label>
+                            </div>
+                        </template>
+                        <div class="vspace-5"></div>
+                    </template>
+                    
+                    <template is="dom-if" if="{{isINVE(fact.scal_prop_cls)}}">
+                        <div class="hbox">
+                            <sc-spacer></sc-spacer>
+                            <sc-label text="{{makeINVEMessage(fact)}}"	i18n-disabled></sc-label>
+                        </div>
+                    </template>
+                </div>
+                
+                <template is="dom-if" if="{{isRemInputY(fact)}}">
+                    <div clss="vbox" style="margin: 5px; border:1px solid #cfdbe2;">
+                        <div class="hbox" style="padding: 5px;">
+                            <sc-label text="※ [[translate('항목의견')]]" i18n-disabled></sc-label>
+                            <sc-spacer></sc-spacer>
+                        </div>
+                        <div style="padding-left: 20px; padding-top: 5px; padding-right: 5px; padding-bottom: 5px;">
+                            <sc-textarea-field value="{{fact.rem}}" maxLength="1200" readonly="{{fact.scaleDisabled}}" disabled="{{fact.remDisabled}}"></sc-textarea-field>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+        
+        <sc-dialog id="dialog" title-text="평가항목설명" style="width:500px; height:270px" modal="true">
+            <table class="tb-form">
+                <tr>
+                    <td>
+                        <sc-textarea-field value="{{descrFact}}" class="h-200" readonly="true"></sc-textarea-field>
+                    </td>
+                </tr>
+            </table>
+        </sc-dialog>
+    </template>
+    <script>
+        Polymer({
+			is : 'cc-eval-scal-list',
+			properties : {
+				readOnly : {
+					type : Object,
+					value : function(){
+						return false;
+					},
+				},
+				codes : {
+					type : Object,
+					notify: true,
+					value : function(){
+						return {
+							C022 : [],
+							R006 : [],
+							R805 : [],
+							R806 : [],
+							EVKD : []
+						};
+					}
+				},
+				factList : {
+					type : Array,
+					notify: true,
+					value : function(){
+						return new Array();
+					},
+				},
+				descrFact : {
+					type : String,
+					value : ""
+				}
+			},
+			//최초 호출
+			load : function(){
+				var me = this;
+				var factList = me.get("factList");
+				var readOnly = me.get("readOnly");
+				
+				if(UT.isNotEmpty(factList)){
+					for(var i =0 ; i < factList.length ; i++){
+						me.set("factList."+i+".scaleDisabled", readOnly);
+					}
+				}
+			},
+			/************************* qtt_srv_cls 타입에 따라 표시*************************/
+			hasAttFile : function(cnt){
+				return (cnt > 0) ? "attachBtn" : "attachEmptyBtn";
+			},
+			//정량 항목
+			isQttSrvClsR : function(qtt_srv_cls){
+				return (qtt_srv_cls === "R");
+			},
+			//단일선택
+			isQttSrvClsS : function(qtt_srv_cls){
+				return (qtt_srv_cls === "S");
+			},
+			//멀티선택
+			isQttSrvClsM : function(qtt_srv_cls){
+				return (qtt_srv_cls === "M");
+			},
+			//직접입력
+			isQttSrvClsD : function(qtt_srv_cls){
+				return (qtt_srv_cls === "D");
+			},
+			//의견입력여부
+			isRemInputY : function(fact){
+				var me = this;
+                if(!UT.isEmpty(fact) && fact.rem_input_yn == "Y"){   // 항목의견 입력 가능하고, 멀티선택인 경우
+                    var factList = me.get("factList");
+                    var efId = fact.ef_id;
+                    for(var i = 0 ;i<factList.length;i++){
+                        var factObj = factList[i];
+                        if(factObj.ef_id === efId){
+                            var disabled = false;
+                            if(factObj.qtt_srv_cls == "M"){
+                                var cnt = 0
+                                for(var j = 0;j< factObj.qltScaleList.length ; j++){
+                                    var scale = factObj.qltScaleList[j];
+                                    if(scale.select_yn != "Y"){
+                                        cnt++;
+                                    }
+                                    if(cnt == factObj.qltScaleList.length -1){
+                                        disabled = true;
+                                    }
+                                }
+                            }else if(factObj.qtt_srv_cls == "D" && UT.isEmpty(factObj.qltScaleList[0].scal_sco)){
+                                disabled = true;
+                            }
+                            me.set("factList."+i+".remDisabled", disabled);
+                        }
+                    }
+                }
+                return (fact.rem_input_yn === "Y");
+			},
+			// 정비레(DIRE), 반비레(INVE)
+			isINVE : function(scal_prop_cls){
+				return (scal_prop_cls == "INVE");
+			},
+			/********************************* Scale 영역 fn ******************************/
+			makeINVEMessage : function(fact){
+				var me = this;
+				return " " + me.translate("STD.SRM1138",null, fact.ef_nm);
+			},
+			makeMessage : function(fact){
+				var me = this;
+				 var max_sco = fact.max_sco;
+                 var min_sco = fact.min_sco;
+                 var str = "";
+                 
+				if(fact.ef_kind_cd == "DE"){
+                    str = me.translate("감점");
+                }else if(fact.ef_kind_cd == "PM"){
+                	str = me.translate("가감점");
+                }else{
+                	str = me.translate("일반/가점");
+                }
+				return me.translate("STD.SRM1137", null, str, min_sco, max_sco);
+			},
+			// 정량 실측항목 Grid ID 생성
+            getStringDefault : function(obj){
+                var me = this;
+                var str = "-";
+                if(UT.isNotEmpty(obj)){
+                    str = obj.toString();
+                }
+                return str;
+            },
+            // 정량 스케일 존재 여부
+            hasQttScale: function(fact){
+                var me = this;
+                var scaleList = fact.qltScaleList;
+                return UT.isNotEmpty(scaleList);
+            },
+            // 여부 코드 명 선택
+            getYnCodeName: function(cd){
+                var me = this;
+                var code = me.get("codes.C022");
+                var codeName = me.translate("아니오");
+                var filtered = code.filter(function(item) {
+                    if (item.data === cd) {
+                        return item;
+                    }
+                });
+                if(UT.isNotEmpty(filtered)){
+                    codeName = filtered[0].label;
+                }
+                return codeName;
+            },
+            // 평가항목 종류 (가감점)코드 명 선택
+            getEfKindCodeName: function(cd){
+                var me = this;
+                var code = me.get("codes.EVKD");
+                var codeName = "-";
+                var filtered = code.filter(function(item) {
+                    if (item.data === cd) {
+                        return item;
+                    }
+                });
+                if(UT.isNotEmpty(filtered)){
+                    codeName = filtered[0].label;
+                }
+                return codeName;
+            },
+            // 분자/분모 코드 명 조회
+            getNmrtDnmntCodeName: function(cd){
+                var me = this;
+                var code = me.get("codes.R805");
+                var codeName = "-";
+                var filtered = code.filter(function(item) {
+                    if (item.data === cd) {
+                        return item;
+                    }
+                });
+                if(UT.isNotEmpty(filtered)){
+                    codeName = filtered[0].label;
+                }
+                return codeName;
+            },
+            // 무실적 처리 코드 명 조회
+            getNdHndlCodeName: function(fact){
+                var me = this;
+                var code = me.get("codes.R006");
+                var codeName = "-";
+                var cd = fact.nd_hndl;
+                var filtered = code.filter(function(item) {
+                    if (item.data === cd) {
+                        return item;
+                    }
+                });
+                if(UT.isNotEmpty(filtered)){
+                    codeName = filtered[0].label;
+                    if(filtered[0].data == "BS"){
+                        codeName += " ( " + fact.bas_sco + " )";
+                    }
+                }
+                return codeName;
+            },
+            // 분자 무실적 처리 코드 명 조회
+            getNmrtNdHndlCodeName: function(cd){
+                var me = this;
+                var code = me.get("codes.R806");
+                var codeName = "-";
+                var filtered = code.filter(function(item) {
+                    if (item.data === cd) {
+                        return item;
+                    }
+                });
+                if(UT.isNotEmpty(filtered)){
+                    codeName = filtered[0].label;
+                }
+                return codeName;
+            },
+            // 가중치
+            getWeight : function(fact){
+                var me = this;
+                var efKindCd = fact.ef_kind_cd,
+                    grpWgt = fact.grp_wgt || "-",
+                    wgt = fact.wgt || "-";
+                var realWgt = "-";
+                
+                if(UT.isNumber(grpWgt) && UT.isNumber(wgt)){
+                    realWgt = grpWgt/100*wgt/100*100;
+                }
+                var retVal = realWgt + "% ( " +grpWgt + "% / " + wgt + "% )";
+                return efKindCd == "EV" ? retVal : wgt; 
+            },
+            // 계산식
+            getCalculus: function(fact){
+                var me = this;
+                var retVal = fact.calc || "";
+                var recFactList = fact.recResList;
+                // 실적항목 아이디가 정규식 범위를 넘어 replaceAll 함수 구현
+                var replaceAllFunc = function(str, searchVal, newVal){
+                    var str = str || "";
+                    str = str.replace(searchVal, newVal);
+                    if(str.indexOf(searchVal) > -1){
+                        return replaceAllFunc(str, searchVal, newVal)
+                    }
+                    return str;
+                } 
+                
+                for(var i=0; i<recFactList.length; i++){
+                    var recFact = recFactList[i];
+                    var sVal = recFact.rec_fact_id;
+                    var nVal = UT.isNotEmpty(recFact.rec_val) ? recFact.rec_val : "N/A";
+                    
+                    retVal = replaceAllFunc(retVal, sVal, nVal);
+                }
+                // 구분자'^' 공백 치환
+                retVal = retVal.replace(new RegExp("\\^", "gi"), " ");
+                return retVal;
+            },
+			//라디오 scale 생성
+			createRadioScales : function(fact){
+				var me = this;
+				var selectValue = "";
+				var qltScaleList = fact.qltScaleList;
+				
+				if(UT.isNotEmpty(qltScaleList)){
+					for(var i =0 ; i<qltScaleList.length;i++){
+						var scale = qltScaleList[i];
+						scale.label = scale.scal_nm + " [" + scale.alt2 + me.translate("점") + "]";
+						if(scale.select_yn == "Y"){
+	                        selectValue = scale.scal_id;
+	                    }
+					}
+					
+					if(UT.isEmpty(fact.select_scale_id)){
+						if(UT.isNotEmpty(selectValue)){
+							fact.select_scale_id = selectValue;
+		                }else{
+		                	fact.select_scale_id = "unselected";
+		                }
+					}
+				}
+				if(fact.qtt_srv_cls == "S" && (!fact.select_scale_id || fact.select_scale_id == "unselected")){
+					qltScaleList.splice( 0, 0, {scal_nm:"평가가 진행되지 않은 항목입니다.", scal_id:"unselected", alt:0} );
+				}
+				
+				return qltScaleList;
+			},
+			//라디오 scale 생성
+			createCheckScales : function(fact){
+				var me = this;
+				var selectValue = "";
+				var qltScaleList = fact.qltScaleList;
+				
+				if(UT.isNotEmpty(qltScaleList)){
+					for(var i =0 ; i<qltScaleList.length;i++){
+						var scale = qltScaleList[i];
+						scale.label = scale.scal_nm + " [" + scale.alt2 + me.translate("점") + "]";
+					}
+				}
+				
+				return qltScaleList;
+			},
+            //
+            onChangeSingleCheck : function(e){
+                var me = this;
+                var targetId = e.currentTarget.id;
+                var radioGrp = document.getElementById(targetId);
+                
+                if(!radioGrp) return;
+                
+                var radioBtns = radioGrp.querySelectorAll('sc-radio-field');
+                if(UT.isNotEmpty(radioBtns)){
+                    for(var i=0; i<radioBtns.length; i++){
+                        var btn = radioBtns[i];
+                        if(btn && btn.inputValue == "unselected"){
+                            btn.hidden = true;
+                        }
+                    }
+                }
+            },
+            //직접입력 항목 변경
+            onChangeDirInput : function(e) {
+                var me = this;
+                var value = e.target.value;
+                var efId = e.target.data;
+                var factList = me.get("factList");
+                
+                for(var i = 0 ;i<factList.length;i++){
+                    var factTem = factList[i];
+                    if(factTem.ef_id === efId){
+                        if(UT.isEmpty(value)){
+                            me.set("factList."+i+".qltScaleList.0.scal_sco", null);
+                            me.set("factList."+i+".qltScaleList.0.rem", "");
+                            me.set("factList."+i+".rem", "");
+                            me.set("factList."+i+".remDisabled", true);
+                        }else{
+                            me.set("factList."+i+".qltScaleList.0.scal_sco", Number(value));
+                            me.set("factList."+i+".remDisabled", false);
+                        }
+                    }
+                }
+            },
+			//항목 제외 값
+			factExtValue : function(apply_yn){
+				var inputValue = "N";
+				if(apply_yn == "N"){
+                   inputValue = "Y";
+                }
+				return inputValue;
+			},
+			/**
+             * 평가제외 check 변경
+             */
+            onExceptCheckChange : function(e){
+                var me = this;
+                var fact = e.target.data;
+                var target = {};
+                
+                if(!UT.isEmpty(fact)){
+                	var efId = fact.ef_id;
+                    var checked = e.detail;
+                    
+                    //직접입력
+                    if(fact.qtt_srv_cls == "D"){
+                    	fact.scaleDisabled = checked;
+                        if(checked){
+                        	fact.qltScaleList[0].scal_sco = null;
+                        }
+                     //라디오입력
+                    }else if(fact.qtt_srv_cls == "S"){
+                        fact.scaleDisabled = checked;
+                        if(checked){
+                        	fact.select_scale_id = "";
+                        }
+                     //체크박스 입력
+                    }else if(fact.qtt_srv_cls == "M"){
+                    	fact.scaleDisabled = checked;
+                    	if(checked){
+                    		var factList = me.get("factList");
+                    		for(var i = 0 ;i<factList.length;i++){
+                            	var factOrz = factList[i];
+                            	if(factOrz.ef_id === efId){
+                            		for(var j = 0;j< factOrz.qltScaleList.length ; j++){
+                                		var scale = factOrz.qltScaleList[j];
+                                		me.set("factList."+i+".qltScaleList."+j+".select_yn","N");
+                                	}
+                            	}
+                            }
+                    	}
+                    }
+                    
+                    if(fact.rem_input_yn == "Y"){
+                    	fact.scaleDisabled = checked;
+                        if(checked){
+                        	fact.rem = null;
+                        }
+                    }
+                    
+                  //강제 render
+                    var factList = me.get("factList");
+                    for(var i = 0 ;i<factList.length;i++){
+                    	var factTem = factList[i];
+                    	if(factTem.ef_id === efId){
+                    		if(checked){
+                    			me.set("factList."+i+".select_scale_id",fact.select_scale_id);
+                        		me.set("factList."+i+".rem",fact.rem);
+                        		me.set("factList."+i+".qltScaleList.0.scal_sco","0");
+                            	me.set("factList."+i+".apply_yn","N");
+                            }else{
+                            	me.set("factList."+i+".apply_yn","Y");
+                            }
+                    		me.set("factList."+i+".scaleDisabled",checked);
+                    	}
+                    }
+                }
+            },
+            onChangeMultiCheck: function(e){
+                var me = this;
+                var target = e.currentTarget;
+                var fact = target.data,
+                    selected = target.getSelectedValues();
+                
+                if(!UT.isEmpty(fact) && fact.rem_input_yn == "Y" && UT.isArray(selected)){
+                    var factList = me.get("factList");
+                    var efId = fact.ef_id;
+                    if(selected.length < 1){
+                        for(var i = 0 ;i<factList.length;i++){
+                            var factObj = factList[i];
+                            if(factObj.ef_id === efId){
+                                for(var j = 0;j< factObj.qltScaleList.length ; j++){
+                                    var scale = factObj.qltScaleList[j];
+                                    me.set("factList."+i+".qltScaleList."+j+".rem", "");
+                                }
+                                me.set("factList."+i+".rem", "");
+                                me.set("factList."+i+".remDisabled", true);
+                            }
+                        }
+                    }else{
+                        for(var i = 0 ;i<factList.length;i++){
+                            var factObj = factList[i];
+                            if(factObj.ef_id === efId){
+                                me.set("factList."+i+".remDisabled", false);
+                            }
+                        }
+                    }
+                }
+            },
+            /**
+             * 평가항목 설명 팝업 호출
+             */
+            onOpenRemarkPopup : function(e){
+                var me = this;
+                var fact = e.target.data;
+                
+                if(UT.isEmpty(fact)){
+                    fact = e.target.parentElement.data;
+                    if(UT.isEmpty(fact)){
+                        fact = e.target.parentElement.parentElement.data;
+                    }
+                }
+                
+                me.set("descrFact", fact.descr)
+                me.$.dialog.show();
+            },
+            
+            /**
+             * 평가항목별 첨부파일 팝업 호출
+             */
+            onOpenAttPopup : function(e){
+                var me = this;
+                var btnId = e.currentTarget.id;
+                var fact = e.target.data;
+                var readOnly = me.get("readOnly");
+                
+                if(UT.isEmpty(fact)){
+                	fact = e.target.parentElement.data;
+                	if(UT.isEmpty(fact)){
+                		fact = e.target.parentElement.parentElement.data;
+                	}
+                }
+                
+                var setAttGrpCd = function(grpCd, cnt){
+                    var factList = me.get("factList");
+                    var efId = fact.ef_id;
+                    for(var i = 0 ;i<factList.length;i++){
+                        var factObj = factList[i];
+                        if(factObj.ef_id === efId){
+                            me.set("factList."+i+".att_grp_cd", grpCd);
+                            me.set("factList."+i+".att_cnt", cnt);
+                        }
+                    }
+                    
+                    var btn = document.getElementById(btnId);
+                    if(cnt > 0){
+                        btn.classList.remove("attachEmptyBtn");
+                        btn.classList.add("attachBtn");
+                    }else{
+                        btn.classList.remove("attachBtn");
+                        btn.classList.add("attachEmptyBtn");
+                    }
+                };
+                
+                UT.popupAttach(me, fact.att_grp_cd, function(result) {
+                    setAttGrpCd(result.grp_cd, result.file_count);
+                }, {editable : !readOnly});
+            }
+        });
+    </script>
+</dom-module>

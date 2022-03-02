@@ -1,0 +1,23 @@
+<dom-module id="cc-sejong">
+	<template>
+		<div id="container" class="canvasDiv"></div>
+	</template>
+	<script >
+		Polymer({
+			is: "cc-sejong",
+	        properties : {
+	        	rayThree : {
+	        		type: Object,
+	                value: function(){
+	                	return;
+                	}
+            	}, 
+	         },
+	         initThree : function(rayThree){
+		         var me = this;
+		         me.rayThree = rayThree;
+		         this.rayThree.setCameraPosition(170, 55, 80);
+		     }
+	    });
+	</script>
+</dom-module>

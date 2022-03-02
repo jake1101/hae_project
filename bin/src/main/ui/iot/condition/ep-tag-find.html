@@ -1,0 +1,113 @@
+<dom-module id="ep-tag-find">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 스마트태그 조회 팝업
+        ** @Description		: 스마트태그 조회 팝업
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.06.02
+        ** @History 		: 2020.06.02 jhkim 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+	</style>
+	<template>
+		<sc-ajax id ="findSiteTagList" 
+			url="findSiteTagList.do" 
+			body="{{searchParam}}" 
+			last-response="{{tagList}}">
+		</sc-ajax>
+		<cc-search-container on-search="onSearch" auth-r>
+			<table>
+			<colgroup>
+				<col style="width:110px">
+				<col style="width:120px">
+				<col style="width:60px">
+				<col style="width:200px">
+				<col>
+			</colgroup>
+				<tr>
+					<th><sc-label text="스마트태그 유형"></sc-label></th>
+					<td>
+						<sc-combobox-field id="tagTypeCombo" class="w-100" placeholder="전체선택" 
+								items="{{tagType}}" display-field="label" value-field="data" input-clear="false"
+								value="{{searchParam.type}}" on-select="changeTargetList">
+	                    </sc-combobox-field>
+					</td>
+					<th><sc-label text="태그ID"></sc-label></th>
+					<td>
+						<sc-text-field value="{{searchParam.nodeId}}" class="w-180" on-enter="onSearch"></sc-text-field>
+					</td>
+					<td>
+						<sc-checkbox-field label="사용중지 포함" on-checkchange="changeTargetList" id="includeNotUse" input-value="{{searchParam.includeNotUse}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+					</td>
+				</tr>
+			</table>
+		</cc-search-container>
+			<sc-grid id="gridPanel" data-provider="{{tagList}}" editable="false" class="flex" on-item-click="onItemClick" selection-style="block" use-selection="false" use-state="false">
+				<sc-grid-columns>
+					<sc-data-column header-text="태그유형" data-field="type" width="140" text-align="center" ></sc-data-column>						
+					<sc-data-column header-text="스마트태그번호" data-field="name" width="140" text-align="center"></sc-data-column>						
+					<sc-data-column header-text="스마트태그ID" data-field="nodeId" width="300" text-align="center" style-name="link"></sc-data-column>						
+				</sc-grid-columns>
+				<sc-grid-fields>
+					<sc-grid-field data-field="id" data-type="number"></sc-grid-field>
+				</sc-grid-fields>
+			</sc-grid>
+	</template>
+	
+	<script>
+		Polymer({
+			is : "ep-tag-find",
+			
+			properties : {
+				searchParam: {
+					type : Object,
+					value : function(){
+						return {
+							siteId : SCMdiManager.searchParam.site_id
+						};
+					}
+				},
+				tagType :{ 				
+	            	type : Array,
+	            	value : function(){
+	            		return []
+	            	}
+	            },
+	            tagList :{ 				
+	            	type : Array,
+	            	value : function(){
+	            		return []
+	            	}
+	            }
+			},
+			load:function(tagTypeList, tagType, includeNotUse){
+ 				var me = this;
+ 				me.tagType = tagTypeList;
+ 				me.$.tagTypeCombo.value = tagType;
+ 				me.$.includeNotUse.value = includeNotUse;
+ 				me.onSearch();
+			},
+			onSearch : function(){
+				var me = this;
+ 				UT.requestNotUseLoading(me.$.findSiteTagList);	
+			},
+			changeTargetList : function(){
+				if(!this.isInitialized) return;
+				var me = this;
+				me.onSearch();
+			},
+			onItemClick : function(event) {
+				var me = this,
+				item = event.detail.item;
+				if(item.dataField === "nodeId") {
+					me.searchParam.id = event.detail.data.id;
+					me.fire("close");
+				}
+            }
+		})
+	</script>
+</dom-module>

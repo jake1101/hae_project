@@ -1,0 +1,39 @@
+<sc-link rel="import" href="es-sc-upload-sample.html"></sc-link>
+<sc-link rel="import" href="es-sc-upload-description.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-sc-upload-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="hbox flex" title-text="sc-upload 첨부파일">
+            <es-sc-upload-description class="fit flex"></es-sc-upload-description>
+            <es-sc-upload-sample id="sample" class="box flex"></es-sc-upload-sample>
+        </sc-panel>
+        <es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-sc-upload-guide',
+		properties : {
+			srcList : {
+                type : Array,
+                value : function() {
+                    return [{
+                        title        : "es-sc-upload-sample.html",
+                        i18nDisabled : true,
+                        extension    : "html",
+                        url          : "/ui/bp/developer/guide/upload/es-sc-upload-sample.html"
+                    }]
+                }
+			}
+		},
+		initialized : function() {
+			
+		}
+	});
+	</script>
+</dom-module>

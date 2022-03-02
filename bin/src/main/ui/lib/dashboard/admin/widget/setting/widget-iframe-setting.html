@@ -1,0 +1,70 @@
+<dom-module id="widget-iframe-setting">
+    <style>
+	    :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+     	<sc-ajax id="widgetDataProvider"  on-response="onDataChanged" on-error="onDataError" last-response="{{widgetData}}"></sc-ajax>
+        <!-- 설정 -->
+           	<section class="option">
+               	<h5>Iframe</h5>
+               	<div class="p_innerbox">
+                    <table>
+                    <colgroup>
+                        <col style="width:25%" />
+                        <col style="width:75%" />
+                    </colgroup>
+                    <tr>
+                    <th><sc-label text="iframe" style="width:36px;"></sc-label></th>
+                    <td>
+                    	<sc-textarea-field value="{{fields.iframeUrl}}" style="height:80px;" required></sc-textarea-field>
+	                    <div class="inner_button">
+		                	<sc-button text="적용" on-click="onApply"></sc-button>
+	                    </div>
+                    </td>
+                    </tr>
+                    </table>
+                   </div>
+               </section>
+    </template>
+    <script>
+        Polymer({
+            is: "widget-iframe-setting",
+
+            properties: {
+            	fields :{
+            		type : Object,
+            		value : function(){
+            			return {
+            				iframeUrl : 'http://www.daum.net'
+            			}
+            		}
+            	}
+            },
+            initSetting : function(){
+            	this.widgetDraw();
+            },
+            getTemplateData : function(){
+            
+            	return {widget_type:'iframe',contents : this.fields,mode:'setting'};
+            },
+            widgetDraw : function(){
+            	this.fire('re-draw',this.getTemplateData());
+            },
+            setting: function(contents){
+           	   this.fields.iframeUrl = contents.iframeUrl;
+           		me.widgetDraw();
+          	},
+          	onApply: function(){
+            	var me = this;
+            	me.widgetDraw();
+            },
+            resetData: function(){
+            	
+            }
+            
+    	});
+    </script>
+</dom-module>

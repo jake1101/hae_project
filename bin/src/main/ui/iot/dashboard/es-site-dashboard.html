@@ -1,0 +1,1621 @@
+<sc-link rel="stylesheet" type="text/css" href="./css/site-dashboard.css"></sc-link>
+<sc-link rel="import" href="ep-safedate-setting.html"></sc-link>
+
+<dom-module id="es-site-dashboard">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+			
+			font-family:'Noto Sans KR';
+		}
+	</style>
+
+	<template>
+<!--
+   ************************************************************************************************************
+   * Service Area
+   ************************************************************************************************************
+-->
+		<!-- 조회 -->
+		<sc-ajax id="getAllSiteDashboard"
+			url="getAllSiteDashboard.do"
+			body="{{searchParam}}"
+			on-response="completeGetAllSiteDashboard">
+		</sc-ajax>
+		
+		<!-- 조회 -->
+		<sc-ajax id="getSiteDashboard"
+			url="getSiteDashboard.do"
+			body="{{searchParam}}"
+			on-response="completeGetSiteDashboard">
+		</sc-ajax>
+		
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+<!--
+    ************************************************************************************************************
+    * UI Area
+    ************************************************************************************************************
+-->
+		<!-- 바깥 배경 -->
+		<div class="vbox flex site-back-ground-color">
+			<!-- 안쪽 배경 -->
+			<div class="vbox flex site-sub-back-ground-color">
+				<!-- 상단 타이틀 -->
+				<div class="hbox site-top-area">
+					<div class="vbox site-top-left-area">
+						<div class="hbox">
+							<div class="vbox site-top-site-text">현장 대시보드</div>
+							<div class="hspace-50"></div>
+							<div class="vbox site-top-time-text">[[currentDate]] [[dayOfWeek]] [[currentTime]]</div>
+							<div class="vbox safeday-text"><sc-label text="무재해 달성 {{safeDate}}일차" on-click="changeSafeDate"></sc-label></div>
+						</div>
+					</div>
+					<div class="vbox flex site-top-right-area">
+						<div class="hbox a-flex-end">
+							<div class="vbox site-top-time-text">새로고침 : [[refreshSecond]]</div>
+							<div class="hspace-30"></div>
+							<div class="hbox">
+								<div class="vbox font-15 a-center">UI컬러</div>
+								<div class="hspace-10"></div>
+								<div class="vbox flex site-black-select-icon" data-args="black" on-click="changeTone"></div>
+								<div class="hspace-10"></div>
+								<div class="vbox flex site-white-select-icon" data-args="white" on-click="changeTone"></div>
+							</div>
+							<div class="hspace-30"></div>
+							<div id="windowmax" class="site-window-max" on-click="onWindowMax"></div>
+						</div>
+					</div>
+				</div>
+				
+				<!-- 하단 내용 -->
+				<div class="hbox flex site-middle-area scroll-none">
+					<!-- 왼쪽 -->
+					<div class="vbox flex-6 site-left-area scroll-none">
+						<div class="vbox site-sub-title-area j-flex-end">
+							<p class="site-sub-title">영역별 투입 현황</p>
+						</div>
+						
+						<div class="hbox flex site-area-input-box">
+							<!-- 작업자 현황 -->
+							<div class="vbox flex">
+								<div class="vbox flex">
+									<!-- 육상작업자 BOX -->
+									<div class="vbox flex site-condition-box">
+										<!-- 타이틀 -->
+										<p class="site-condition-title">육상 작업자</p>
+										<!-- 파이 차트 -->
+										<div id="landWorkerChart" class="vbox flex site-landWorker-background j-center ai-center"></div>
+										<!-- 프로그래스 bar -->
+										<div class="_landWorker-progress vbox flex a-center" style="width:100%;">
+											<div class="vspace-20"></div>
+											<div class="_landWorker-progress-area1 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[landWorker1.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_landWorkerbar1 site-progressbar1"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[landWorker1.count]]명</div>
+											</div>
+											<div class="_landWorker-progress-area2 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[landWorker2.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_landWorkerbar2 site-progressbar2"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[landWorker2.count]]명</div>
+											</div>
+											<div class="_landWorker-progress-area3 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[landWorker3.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_landWorkerbar3 site-progressbar3"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[landWorker3.count]]명</div>
+											</div>
+											<div class="_landWorker-progress-area4 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[landWorker4.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_landWorkerbar4 site-progressbar4"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[landWorker4.count]]명</div>
+											</div>
+											<div class="vspace-20"></div>
+										</div> <!-- progress bar 끝 -->
+										<div class="_landWorker-nonetext vbox flex a-center font-15-500 site-none-text" style="display:none;">육상 작업중인 작업자가 없습니다.</div>
+									</div>
+									
+									<div class="vspace-20"></div>
+									
+									<!-- 해상작업자 BOX -->
+									<div class="vbox flex site-condition-box">
+										<!-- 타이틀 -->
+										<p class="site-condition-title">해상 작업자</p>
+										<!-- 파이 차트 -->
+										<div id="marineWorkerChart" class="vbox flex site-marineWorker-background j-center ai-center"></div>
+										<!-- 프로그래스 bar -->
+										<div class="_marineWorker-progress vbox flex a-center" style="width:100%;">
+											<div class="vspace-20"></div>
+											<div class="_marineWorker-progress-area1 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[marineWorker1.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_marineWorkerbar1 site-progressbar1"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[marineWorker1.count]]명</div>
+											</div>
+											<div class="_marineWorker-progress-area2 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[marineWorker2.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_marineWorkerbar2 site-progressbar2"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[marineWorker2.count]]명</div>
+											</div>
+											<div class="_marineWorker-progress-area3 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[marineWorker3.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_marineWorkerbar3 site-progressbar3"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[marineWorker3.count]]명</div>
+											</div>
+											<div class="_marineWorker-progress-area4 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[marineWorker4.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_marineWorkerbar4 site-progressbar4"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[marineWorker4.count]]명</div>
+											</div>
+											<div class="vspace-20"></div>
+										</div> <!-- progress bar 끝 -->
+										<div class="_marineWorker-nonetext vbox flex a-center font-15-500 site-none-text" style="display:none;">해상 작업중인 작업자가 없습니다.</div>
+									</div>
+								</div>
+							</div>
+							
+							<div class="vbox hspace-17"></div>
+							
+							<!-- 이동장비 현황 -->
+							<div class="vbox flex">
+								<div class="vbox flex">
+									<div class="vbox flex site-condition-box">
+										<!-- 타이틀 -->
+										<p class="site-condition-title">육상 이동장비</p>
+										<!-- 파이차트 -->
+										<div id="landMachineChart" class="vbox flex site-landMachine-background j-center ai-center"></div>
+										<!-- 프로그래스 bar -->
+										<div class="_landMachine-progress vbox flex a-center" style="width:100%;">
+											<div class="vspace-20"></div>
+											<div class="_landMachine-progress-area1 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[landMachine1.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_landMachinebar1 site-progressbar1"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[landMachine1.count]]대</div>
+											</div>
+											<div class="_landMachine-progress-area2 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[landMachine2.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_landMachinebar2 site-progressbar2"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[landMachine2.count]]대</div>
+											</div>
+											<div class="_landMachine-progress-area3 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[landMachine3.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_landMachinebar3 site-progressbar3"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[landMachine3.count]]대</div>
+											</div>
+											<div class="_landMachine-progress-area4 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[landMachine4.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_landMachinebar4 site-progressbar4"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[landMachine4.count]]대</div>
+											</div>
+											<div class="vspace-20"></div>
+										</div> <!-- progress bar 끝 -->
+										<div class="_landMachine-nonetext vbox flex a-center font-15-500 site-none-text" style="display:none;">육상 작업중인 이동장비가 없습니다.</div>
+									</div>
+									<div class="vspace-20"></div>
+									<div class="vbox flex site-condition-box">
+										<!-- 타이틀 -->
+										<p class="site-condition-title">해상 이동장비</p>
+										<!-- 파이 차트 -->
+										<div id="marineMachineChart" class="vbox flex site-marineMachine-background j-center ai-center"></div> <!-- work-none-background -->
+										<!-- 프로그래스 bar -->
+										<div class="_marineMachine-progress vbox flex a-center" style="width:100%;">
+											<div class="vspace-20"></div>
+											<div class="_marineMachine-progress-area1 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[marineMachine1.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_marineMachinebar1 site-progressbar1"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[marineMachine1.count]]대</div>
+											</div>
+											<div class="_marineMachine-progress-area2 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[marineMachine2.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_marineMachinebar2 site-progressbar2"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[marineMachine2.count]]대</div>
+											</div>
+											<div class="_marineMachine-progress-area3 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[marineMachine3.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_marineMachinebar3 site-progressbar3"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[marineMachine3.count]]대</div>
+											</div>
+											<div class="_marineMachine-progress-area4 hbox flex ai-center">
+												<div class="vbox flex site-prog-left-text">[[marineMachine4.targetName]]</div>
+												<div class="vbox flex site-progress-background">
+													<span class="_marineMachinebar4 site-progressbar4"></span>
+												</div>
+												<div class="vbox flex site-prog-right-text">[[marineMachine4.count]]대</div>
+											</div>
+											<div class="vspace-20"></div>
+										</div> <!-- progress bar 끝 -->
+										<div class="_marineMachine-nonetext vbox flex a-center font-15-500 site-none-text" style="display:none;">해상 작업중인 이동장비가 없습니다.</div>
+									</div>
+								</div>
+							</div>
+							
+						</div>
+					</div>
+					
+					<!-- 오른쪽 -->
+					<div class="vbox flex-4 site-right-area scroll-none">
+						<div class="vbox site-sub-title-area j-flex-end">
+							<p class="site-sub-title">현장 기후 정보</p>
+						</div>
+						
+						<div class="vbox flex"> <!-- style="padding-bottom: 39px;" -->
+							<!-- 현재 기상 정보 BOX -->
+							<div class="hbox site-now-weather-box">
+								<div class="vbox flex" style="padding:10px 10px 10px 15px;">
+									<!-- 센터 위치 -->
+									<div class="hbox">
+										<div class="site-now-position-icon"></div>
+										<div class="hspace-5"></div>
+										<p class="font-16 site-now-weather-text">[[siteInfo.address]]</p>
+									</div>
+									
+									<div class="vspace-10"></div>
+									
+									<!-- 현재 기상정보 -->
+									<div class="hbox flex a-center">
+										<!-- 온도 -->
+										<div class="hbox site-now-div-line">
+											<p class="a-flex-end font-12-blue site-now-weather-text" style="padding-left:10px; padding-bottom: 15px; width: 30px;">온도</p>
+											<p class="a-flex-end font-55-500" style="padding-left:10px;">[[weatherInfoNow.temperature]]</p>
+											<p class="font-30" style="padding-top: 20px;"> ℃</p>
+											<!-- 최고/최저 온도 -->
+											<div class="vbox a-flex-end" style="padding-left:10px; padding-bottom: 10px;">
+												<div class="hbox" style="padding-bottom: 5px;">
+													<div class="site-now-maxtemp-icon"></div>
+													<p class="font-12" style="padding-left: 5px;">[[weatherInfoNow.highestTemperature]] ℃</p>
+												</div>
+												<div class="hbox">
+													<div class="site-now-mintemp-icon"></div>
+													<p class="font-12" style="padding-left: 5px;">[[weatherInfoNow.lowestTemperature]] ℃</p>
+												</div>
+											</div>
+										</div>
+										
+										<!-- 습도 -->
+										<div class="hbox" style="padding-left:15px;">
+											<p class="a-flex-end font-12-blue site-now-weather-text" style="padding-right: 10px; padding-bottom: 15px; width: 30px;">습도</p>
+											<p class="a-flex-end font-40">[[weatherInfoNow.humidity]]</p>
+											<p class="a-flex-end font-30" style="padding-left: 5px; padding-bottom: 5px;">%</p>
+										</div>
+									</div>
+								</div>
+								
+								<!-- 현재기상 아이콘 -->
+								<div class="vbox site-now-weather-icon-area">
+									<div class="_nowWeatherIcon flex"></div>
+									<p style="font-size:17px; font-weight:500; text-align: right;">[[weatherInfoNow.weatherText]]</p>
+								</div>
+							</div>
+							
+							<div class="vbox vspace-15"></div>
+							
+							<!-- 오늘 기상 정보(시간별) -->
+							<div class="_todayWeatherBox hbox flex site-today-weather-box" style="position: relative; overflow: hidden;">
+								<!-- 기온 라인 가트 -->
+								<div id="tempLineChart" class="vbox flex" 
+									style="position: absolute; top: 77.5px; transform: scale(1.1); width: 100%; height:140px;"></div>
+										
+								<div class="vbox flex site-today-weather-title-box font-14">
+									<div class="vbox flex"><p>시각</p></div>
+									<div class="vbox flex"><p>날씨</p></div>
+									<div class="vbox flex"><p>기온</p></div>
+									<div class="vbox flex"><p>강수확률</p></div>
+									<div class="vbox flex"><p>풍향</p></div>
+									<div class="vbox flex"><p>풍량</p></div>
+								</div>
+								<div class="vbox flex site-today-weather-content-box1 font-14">
+									<div class="vbox flex"><p>[[weatherInfoToday1.title]]</p></div>
+									<div class="vbox flex"><div class="_todayWeatherIcon vbox flex"></div></div>
+									<div class="vbox flex"></div>
+									<div class="vbox flex">[[weatherInfoToday1.precipitationProbability]]%</div>
+									<div class="vbox flex"><div class="_todayWindIcon a-center"></div></div>
+									<div class="vbox flex">[[weatherInfoToday1.windSpeed]]m/s</div>
+								</div>
+								<div class="vbox flex site-today-weather-content-box2 font-14">
+									<div class="vbox flex"><p>[[weatherInfoToday2.title]]</p></div>
+									<div class="vbox flex"><div class="_todayWeatherIcon vbox flex"></div></div>
+									<div class="vbox flex"></div>
+									<div class="vbox flex">[[weatherInfoToday2.precipitationProbability]]%</div>
+									<div class="vbox flex"><div class="_todayWindIcon a-center"></div></div>
+									<div class="vbox flex">[[weatherInfoToday2.windSpeed]]m/s</div>
+								</div>
+								<div class="vbox flex site-today-weather-content-box1 font-14">
+									<div class="vbox flex"><p>[[weatherInfoToday3.title]]</p></div>
+									<div class="vbox flex"><div class="_todayWeatherIcon vbox flex"></div></div>
+									<div class="vbox flex"></div>
+									<div class="vbox flex">[[weatherInfoToday3.precipitationProbability]]%</div>
+									<div class="vbox flex"><div class="_todayWindIcon a-center"></div></div>
+									<div class="vbox flex">[[weatherInfoToday3.windSpeed]]m/s</div>
+								</div>
+								<div class="vbox flex site-today-weather-content-box2 font-14">
+									<div class="vbox flex"><p>[[weatherInfoToday4.title]]</p></div>
+									<div class="vbox flex"><div class="_todayWeatherIcon vbox flex"></div></div>
+									<div class="vbox flex"></div>
+									<div class="vbox flex">[[weatherInfoToday4.precipitationProbability]]%</div>
+									<div class="vbox flex"><div class="_todayWindIcon a-center"></div></div>
+									<div class="vbox flex">[[weatherInfoToday4.windSpeed]]m/s</div>
+								</div>
+								<div class="vbox flex site-today-weather-content-box1 font-14">
+									<div class="vbox flex"><p>[[weatherInfoToday5.title]]</p></div>
+									<div class="vbox flex"><div class="_todayWeatherIcon vbox flex"></div></div>
+									<div class="vbox flex"></div>
+									<div class="vbox flex">[[weatherInfoToday5.precipitationProbability]]%</div>
+									<div class="vbox flex"><div class="_todayWindIcon a-center"></div></div>
+									<div class="vbox flex">[[weatherInfoToday5.windSpeed]]m/s</div>
+								</div>
+								<div class="vbox flex site-today-weather-content-box2 font-14">
+									<div class="vbox flex"><p>[[weatherInfoToday6.title]]</p></div>
+									<div class="vbox flex"><div class="_todayWeatherIcon vbox flex"></div></div>
+									<div class="vbox flex"></div>
+									<div class="vbox flex">[[weatherInfoToday6.precipitationProbability]]%</div>
+									<div class="vbox flex"><div class="_todayWindIcon a-center"></div></div>
+									<div class="vbox flex">[[weatherInfoToday6.windSpeed]]m/s</div>
+								</div>
+								<div class="vbox flex site-today-weather-content-box1 font-14">
+									<div class="vbox flex"><p>[[weatherInfoToday7.title]]</p></div>
+									<div class="vbox flex"><div class="_todayWeatherIcon vbox flex"></div></div>
+									<div class="vbox flex"></div>
+									<div class="vbox flex">[[weatherInfoToday7.precipitationProbability]]%</div>
+									<div class="vbox flex"><div class="_todayWindIcon a-center"></div></div>
+									<div class="vbox flex">[[weatherInfoToday7.windSpeed]]m/s</div>
+								</div>
+							</div>
+							
+							<div class="vbox vspace-15"></div>
+							
+							<!-- 주간 기상 정보 -->
+							<div class="hbox site-week-weather-box">
+								<div class="vbox flex site-week-weather-content-box">
+									<div class="vbox flex font-14">월요일</div>
+									<div class="_weekWeatherIcon vbox flex"></div>
+									<div class="vbox flex font-11">[[weatherInfoWeek1.highestTemperature]]℃</div>
+									<div class="site-week-weather-line"></div>
+									<div class="vbox flex font-11">[[weatherInfoWeek1.lowestTemperature]]℃</div>
+								</div>
+								<div class="hspace-12"></div>
+								<div class="vbox flex site-week-weather-content-box">
+									<div class="vbox flex font-14">화요일</div>
+									<div class="_weekWeatherIcon vbox flex"></div>
+									<div class="vbox flex font-11">[[weatherInfoWeek2.highestTemperature]]℃</div>
+									<div class="site-week-weather-line"></div>
+									<div class="vbox flex font-11">[[weatherInfoWeek2.lowestTemperature]]℃</div>
+								</div>
+								<div class="hspace-12"></div>
+								<div class="vbox flex site-week-weather-content-box">
+									<div class="vbox flex font-14">수요일</div>
+									<div class="_weekWeatherIcon vbox flex"></div>
+									<div class="vbox flex font-11">[[weatherInfoWeek3.highestTemperature]]℃</div>
+									<div class="site-week-weather-line"></div>
+									<div class="vbox flex font-11">[[weatherInfoWeek3.lowestTemperature]]℃</div>
+								</div>
+								<div class="hspace-12"></div>
+								<div class="vbox flex site-week-weather-content-box">
+									<div class="vbox flex font-14">목요일</div>
+									<div class="_weekWeatherIcon vbox flex"></div>
+									<div class="vbox flex font-11">[[weatherInfoWeek4.highestTemperature]]℃</div>
+									<div class="site-week-weather-line"></div>
+									<div class="vbox flex font-11">[[weatherInfoWeek4.lowestTemperature]]℃</div>
+								</div>
+								<div class="hspace-12"></div>
+								<div class="vbox flex site-week-weather-content-box">
+									<div class="vbox flex font-14">금요일</div>
+									<div class="_weekWeatherIcon vbox flex"></div>
+									<div class="vbox flex font-11">[[weatherInfoWeek5.highestTemperature]]℃</div>
+									<div class="site-week-weather-line"></div>
+									<div class="vbox flex font-11">[[weatherInfoWeek5.lowestTemperature]]℃</div>
+								</div>
+								<div class="hspace-12"></div>
+								<div class="vbox flex site-week-weather-content-box">
+									<div class="vbox flex font-14">토요일</div>
+									<div class="_weekWeatherIcon vbox flex"></div>
+									<div class="vbox flex font-11">[[weatherInfoWeek6.highestTemperature]]℃</div>
+									<div class="site-week-weather-line"></div>
+									<div class="vbox flex font-11">[[weatherInfoWeek6.lowestTemperature]]℃</div>
+								</div>
+								<div class="hspace-12"></div>
+								<div class="vbox flex site-week-weather-content-box">
+									<div class="vbox flex font-14">일요일</div>
+									<div class="_weekWeatherIcon vbox flex"></div>
+									<div class="vbox flex font-11">[[weatherInfoWeek7.highestTemperature]]℃</div>
+									<div class="site-week-weather-line"></div>
+									<div class="vbox flex font-11">[[weatherInfoWeek7.lowestTemperature]]℃</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</template>
+
+<!--
+    ************************************************************************************************************
+    * Script Area
+    ************************************************************************************************************
+-->
+	<script>
+        Polymer({
+            is: "es-site-dashboard",
+            
+            // 리사이즈
+            behaviors:[
+    			Polymer.SCResizableBehavior
+    		],
+    		
+    		listeners:{
+    			'sc-resize':'doContentElementResize'
+    		},
+    		
+    		doContentElementResize: function(){
+    			var me = this;
+    			
+    			// 리사이즈
+				var _todayWeatherBox = $('._todayWeatherBox');
+				var boxHeight = _todayWeatherBox[0].offsetHeight;
+				var boxDivHeight = boxHeight / 6;
+				
+				var calcTop = 0;
+				calcTop = boxDivHeight + (boxDivHeight - (70-(boxDivHeight/2)) ) + 10;
+				
+				var boxDivWidth = _todayWeatherBox[0].offsetWidth / 8;
+				var calcLeft = 0;
+				calcLeft = (boxDivWidth / 14.5);
+				
+				me.$.tempLineChart.style.top = calcTop + "px";
+				me.$.tempLineChart.style.left = calcLeft + "%";
+				
+				me.lineChart.resize();
+    		},
+            
+            properties : {
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                
+                currentDate: {
+                    type: Object,
+                    value: function(){
+                        return "";
+                    }
+                },
+                
+                dayOfWeek: {
+                    type: Object,
+                    value: function(){
+                        return "";
+                    }
+                },
+                
+                currentTime: {
+                    type: Object,
+                    value: function(){
+                        return "";
+                    }
+                },
+
+                safeDay: {
+                    type: Object,
+                    value: function(){
+                        return new Date();
+                    }
+                },
+                
+                safeDate: {
+                    type: Object,
+                    value: function(){
+                        return 1;
+                    }
+                },    
+                
+                refreshSecond: {
+                	type: Object,
+                	value: function(){
+                		return 60;
+                	}
+                },
+                
+                siteInfo: {
+                	type: Object,
+                	value: function(){
+                		return {};
+                	}
+                },
+                
+                colorTone: {
+                	type: Object,
+                	value: function(){
+                		return 'black';
+                	}
+                },
+                
+                // 육상작업자 (프로그래스 text 표시)
+                landWorker1: { type: Object, value: function(){ return {}; } },
+                landWorker2: { type: Object, value: function(){ return {}; } },
+                landWorker3: { type: Object, value: function(){ return {}; } },
+                landWorker4: { type: Object, value: function(){ return {}; } },
+                
+             	// 해상작업자 (프로그래스 text 표시)
+                marineWorker1: { type: Object, value: function(){ return {}; } },
+                marineWorker2: { type: Object, value: function(){ return {}; } },
+                marineWorker3: { type: Object, value: function(){ return {}; } },
+                marineWorker4: { type: Object, value: function(){ return {}; } },
+                
+             	// 육상 이동장비 (프로그래스 text 표시)
+                landMachine1: { type: Object, value: function(){ return {}; } },
+                landMachine2: { type: Object, value: function(){ return {}; } },
+                landMachine3: { type: Object, value: function(){ return {}; } },
+                landMachine4: { type: Object, value: function(){ return {}; } },
+                
+             	// 해상 이동장비 (프로그래스 text 표시)
+                marineMachine1: { type: Object, value: function(){ return {}; } },
+                marineMachine2: { type: Object, value: function(){ return {}; } },
+                marineMachine3: { type: Object, value: function(){ return {}; } },
+                marineMachine4: { type: Object, value: function(){ return {}; } },
+                
+                // 현재기상정보
+                weatherInfoNow: {type: Object, value: function(){ return {}; } },
+                
+                weatherListToday: {type: Object, value: function(){ return []; } },
+                
+                // 오늘기상정보
+                weatherInfoToday1: {type: Object, value: function(){ return {}; } },
+                weatherInfoToday2: {type: Object, value: function(){ return {}; } },
+                weatherInfoToday3: {type: Object, value: function(){ return {}; } },
+                weatherInfoToday4: {type: Object, value: function(){ return {}; } },
+                weatherInfoToday5: {type: Object, value: function(){ return {}; } },
+                weatherInfoToday6: {type: Object, value: function(){ return {}; } },
+                weatherInfoToday7: {type: Object, value: function(){ return {}; } },
+                
+             	// 주간기상정보
+                weatherInfoWeek1: {type: Object, value: function(){ return {}; } },
+                weatherInfoWeek2: {type: Object, value: function(){ return {}; } },
+                weatherInfoWeek3: {type: Object, value: function(){ return {}; } },
+                weatherInfoWeek4: {type: Object, value: function(){ return {}; } },
+                weatherInfoWeek5: {type: Object, value: function(){ return {}; } },
+                weatherInfoWeek6: {type: Object, value: function(){ return {}; } },
+                weatherInfoWeek7: {type: Object, value: function(){ return {}; } }
+            },
+            
+            // 초기화 완료 후 호출 함수
+            initialized : function() {
+                var me = this;
+                
+                var d = new Date();
+                var currentDate = d.getFullYear() + "년 " + ( d.getMonth() + 1 ) + "월 " + d.getDate() + "일";
+                
+                // 현재일자
+                me.set("currentDate", currentDate);
+                
+                // 요일
+                var week = ['일', '월', '화', '수', '목', '금', '토'];
+                var dayOfWeek = week[d.getDay()];
+                
+                me.set("dayOfWeek", dayOfWeek + "요일");
+                
+                var weekBoxList = $('.site-week-weather-content-box');
+                
+                for(var idx in weekBoxList){
+               		var item = weekBoxList[idx];
+               		
+               		var index = Number(idx) + 1;
+               		
+               		if(item.classList){
+               			item.classList.remove('site-week-selected');
+               			
+               			// 일요일(0)이면, 7로 변경
+               			var numberDay = d.getDay() == 0 ? 7 : d.getDay();
+               			
+               			// 오늘 요일 값 = box 순서
+               			if(numberDay == index){
+                   			item.classList.add('site-week-selected');
+                   		}
+               		}
+               		
+               	}
+                
+                // 현재시간
+                me.timeInterval = setInterval(function() {
+               		me.setTimeText();
+				}, 1000); // 1초
+                
+                me.searchDataAll();
+				
+                me.onWindowMax();
+				
+            },
+            
+            setTimeText: function(){
+            	var me = this;
+            	
+            	var d = new Date();
+            	var hours = d.getHours();
+            	var minutes = d.getMinutes();
+            	
+            	if(hours < 10){
+            		hours = "0" + hours;
+            	}
+            	if(minutes < 10){
+            		minutes = "0" + minutes;
+            	}
+            	
+            	var currentTime = hours + ":" + minutes;
+            	me.set("currentTime", currentTime);
+            	
+            	// refresh 초
+				var refreshSecond = me.get("refreshSecond") || 0;
+            	
+            	if(refreshSecond <= 0){
+            		me.set("refreshSecond", 60);
+            		
+            		if(minutes == "00"){
+            			me.searchDataAll();
+            		}else{
+            			me.searchData();
+            		}
+            		
+            	}else{
+            		me.set("refreshSecond", --refreshSecond);
+            	}
+            },
+            
+            // 대시보드 데이터 조회
+            searchDataAll: function(){
+            	var me = this;
+            	
+            	UT.requestNotUseLoading(me.$.getAllSiteDashboard);
+            },
+            
+            searchData: function(){
+            	var me = this;
+            	
+            	UT.requestNotUseLoading(me.$.getSiteDashboard);
+            },
+            
+            completeGetSiteDashboard: function(e, res){
+            	var me = this;
+            	
+            	// 대시보드 데이터
+            	var result = res.response.data.body || {};
+            	
+            	var landWorkerList = result.landWorkerList || [];
+            	var landVehicleList = result.landVehicleList || [];
+            	var seaWorkerList = result.seaWorkerList || [];
+            	var seaVehicleList = result.seaVehicleList || [];
+            	
+            	me.set("landWorkerList", landWorkerList);
+            	me.set("landVehicleList", landVehicleList);
+            	me.set("seaWorkerList", seaWorkerList);
+            	me.set("seaVehicleList", seaVehicleList);
+            	
+            	// 차트 생성
+                me.initChart();
+            },
+            
+            // 조회 완료
+            completeGetAllSiteDashboard: function(e, res){
+            	var me = this;
+            	
+            	// 현장 정보
+            	var siteInfo = res.response.siteInfo.body || {};
+            	me.set("siteInfo", siteInfo);
+
+            	me.set("safeDay", siteInfo.safeDay);
+            	me.set("safeDate", siteInfo.safeDayCount);
+            	
+            	// 대시보드 데이터
+            	var result = res.response.data.body || {};
+            	
+            	var landWorkerList = result.landWorkerList || [];
+            	var landVehicleList = result.landVehicleList || [];
+            	var seaWorkerList = result.seaWorkerList || [];
+            	var seaVehicleList = result.seaVehicleList || [];
+            	
+            	me.set("landWorkerList", landWorkerList);
+            	me.set("landVehicleList", landVehicleList);
+            	me.set("seaWorkerList", seaWorkerList);
+            	me.set("seaVehicleList", seaVehicleList);
+            	
+            	// 기상정보 데이터
+            	var weatherInfo = res.response.weatherInfo.body || {};
+            	
+            	// 기상정보 세팅
+            	me.setWeatherInfo(weatherInfo);
+            	
+            	// 차트 생성
+                me.initChart();
+            },
+            
+            /**
+             * 기존 날씨 아이콘 초기화
+             */
+            initWeatherIcon: function(){
+            	var me = this;
+            	
+            	// 현재 : 기존 등록된 아이콘 삭제
+               	var nowWeatherIconDom = $('._nowWeatherIcon')[0];
+               	var classList = $('._nowWeatherIcon')[0].classList;
+               	
+               	for(var idx in classList){
+               		var item = classList[idx] + "";
+               		
+               		if(item.indexOf("now-weather") >= 0){
+               			nowWeatherIconDom.classList.remove(item);
+               		}
+               	}
+               	
+             	// 오늘 : 기존 등록된 아이콘 삭제
+               	var todayWeatherIconDomList = $('._todayWeatherIcon');
+           		
+           		for(var idx in todayWeatherIconDomList){
+           			var todayDom = todayWeatherIconDomList[idx];
+           			
+           			var classList = todayDom.classList;
+           			
+           			for(var idx in classList){
+                   		var item = classList[idx] + "";
+                   		
+                   		if(item.indexOf("site-today-weather") >= 0){
+                   			todayDom.classList.remove(item);
+                   		}
+                   	}
+           		}
+           		
+           		// 오늘 : 기존 등록된 풍향 아이콘 삭제
+           		var todayWindIconDomList = $('._todayWindIcon');
+           		
+           		for(var idx in todayWindIconDomList){
+           			var todayDom = todayWindIconDomList[idx];
+           			
+           			var classList = todayDom.classList;
+           			
+           			for(var idx in classList){
+                   		var item = classList[idx] + "";
+                   		
+                   		if(item.indexOf("site-today-weather") >= 0){
+                   			todayDom.classList.remove(item);
+                   		}
+                   	}
+           		}
+           		
+           		// 주간 : 기존 등록된 아이콘 삭제
+           		var weekIconDomList = $('._weekWeatherIcon');
+           		
+           		for(var idx in weekIconDomList){
+           			var weekDom = weekIconDomList[idx];
+           			
+           			var classList = weekDom.classList;
+           			
+           			for(var idx in classList){
+                   		var item = classList[idx] + "";
+                   		
+                   		if(item.indexOf("site-today-weather") >= 0){
+                   			weekDom.classList.remove(item);
+                   		}
+                   	}
+           		}
+           		
+            },
+            
+            setWeatherInfo: function(param){
+            	var me = this;
+            	
+            	// 기존 날씨 아이콘 초기화
+            	me.initWeatherIcon();
+            	
+            	// 현재기상정보
+            	var weatherInfoNow = param.now || {};
+            	
+               	// 기상정보 아이콘 정보 획득
+               	var iconInfo = me.getWeatherIconInfo(weatherInfoNow, "site-now");
+            	
+               	// 현재 기상정보 아이콘 등록
+               	var nowWeatherIconDom = $('._nowWeatherIcon')[0];
+               	nowWeatherIconDom.classList.add(iconInfo.icon);
+           		weatherInfoNow.weatherText = iconInfo.text;
+           		
+           		// 오늘 기상정보 값 & 아이콘 세팅(3시간)
+           		var weatherListToday = param.short || [];
+           		me.set("weatherListToday", weatherListToday);
+           		
+           		var todayWeatherIconDomList = $('._todayWeatherIcon');
+           		
+           		var todayWindIconDomList = $('._todayWindIcon');
+           		
+           		for(var idx in weatherListToday){
+           			var item = weatherListToday[idx];
+           			
+           			var index = Number(idx) + 1;
+           			
+           			me.set("weatherInfoToday"+index, item);
+           			
+           			// 날씨 아이콘 정보 획득
+                   	var iconInfo = me.getWeatherIconInfo(item, "site-today");
+                	
+           			var todayDom = todayWeatherIconDomList[idx];
+           			
+           			// 오늘 날씨 아이콘 등록
+                   	todayDom.classList.add(iconInfo.icon);
+           			
+                 	// 기상정보 풍향 아이콘 정보 획득
+                   	var windIconInfo = me.getWindIconInfo(item);
+                	
+           			var windDom = todayWindIconDomList[idx];
+           			
+           			// 오늘 풍향 아이콘 등록
+                   	windDom.classList.add(windIconInfo.icon);
+           		}
+           		
+           		// 주간 기상정보
+            	var weatherListLong = param.long || [];
+               	
+            	var weekIconDomList = $('._weekWeatherIcon');
+            	
+            	for(var idx in weatherListLong){
+           			var item = weatherListLong[idx];
+           			
+           			var index = Number(idx) + 1;
+           			
+           			me.set("weatherInfoWeek"+index, item);
+           			
+           			// 날씨 아이콘 정보 획득
+                   	var iconInfo = me.getWeatherIconInfo(item, "site-today");
+                	
+           			var weekDom = weekIconDomList[idx];
+           			
+           			// 오늘 날씨 아이콘 등록
+                   	weekDom.classList.add(iconInfo.icon);
+           		}
+           		
+               	me.set("weatherInfoNow", weatherInfoNow);
+               	
+               	/* 기온 차트 */
+				me.createLineChart();
+				
+				// 라인차트 왼쪽 위치 설정
+				var _todayWeatherBox = $('._todayWeatherBox');
+				var boxDivWidth = _todayWeatherBox[0].offsetWidth / 8;
+				var calcLeft = 0;
+				calcLeft = (boxDivWidth / 14.5);
+				me.$.tempLineChart.style.left = calcLeft + "%";
+				
+            },
+            
+            getWeatherIconInfo: function(param, prefix){
+            	var pty = param.ptyCode; // 강수형태(PTY) 코드 : 없음(0), 비(1), 비/눈(2), 눈(3), 소나기(4) 여기서 비/눈은 비와 눈이 섞여 오는 것을 의미 (진눈개비)
+               	var sky = param.skyCode; // 맑음 0 ～ 5 , 구름많음 6 ～ 8 ,  흐림  9 ～ 10
+               	
+               	/**
+               	 * icon
+               	 * 05_비, 09_눈비, 07_눈, 05_비
+               	 * 01_낮_맑음, 10_밤_맑음, 04_구름많음, 03_흐림 
+               	 * 12_정보없음
+               	 */ 
+               	var icon = prefix + "-weather-icon12";
+               	var text = "정보없음";
+               	
+               	if(pty == 0){ // 없음
+               		if(sky <= 5){ // 맑음
+               			// 낮 or 밤(1or10)
+               			icon = prefix + '-weather-icon1';
+               			text = "맑음";
+               			
+               		}else if(sky >= 9){ // 흐림
+               			icon = prefix + '-weather-icon3';
+               			text = "흐림";
+               			
+               		}else{ // 구름많음
+               			icon = prefix + '-weather-icon4';
+               			text = "구름많음";
+               		}
+               	
+               	}else{
+               		if(pty == 1){ // 비
+               			icon = prefix + '-weather-icon5';
+               			text = "비";
+               			
+               		}else if(pty == 2){ // 비/눈
+               			icon = prefix + '-weather-icon9';
+               			text = "비/눈";
+               			
+               		}else if(pty == 3){ // 눈
+               			icon = prefix + '-weather-icon7';
+               			text = "눈";
+               			
+               		}else if(pty == 4){ // 소나기
+               			icon = prefix + '-weather-icon5';
+               			text = "소나기";
+               			
+               		}
+               	}
+               	
+               	return {
+               		icon: icon
+               		,text: text
+               	};
+            },
+            
+            getWindIconInfo: function(param){
+            	var icon = "site-today-weather-small-wind";
+            	
+            	/** 풍향 값 
+            	  0 – 45 N-NE
+            	  45 – 90 NE-E
+            	  90 – 135 E-SE
+            	  135 – 180 SE-S
+            	  180 – 225 S-SW
+            	  225 – 270 SW-W
+            	  270 – 315 W-NW
+            	  315 – 360 NW-N
+            	 */ 
+            	var windDirectionName = param.windDirectionName;
+            	
+            	if(windDirectionName == "N-NE"){
+            		icon = icon + "1";
+            	}else if(windDirectionName == "NE-E"){
+            		icon = icon + "2";
+            	}else if(windDirectionName == "E-SE"){
+            		icon = icon + "3";
+            	}else if(windDirectionName == "SE-S"){
+            		icon = icon + "4";
+            	}else if(windDirectionName == "S-SW"){
+            		icon = icon + "5";
+            	}else if(windDirectionName == "SW-W"){
+            		icon = icon + "6";
+            	}else if(windDirectionName == "W-NW"){
+            		icon = icon + "7";
+            	}else if(windDirectionName == "NW-N"){
+            		icon = icon + "8";
+            	}
+            	
+            	return {
+               		icon: icon
+               	};
+            },
+            
+            getWeekWeatherIconInfo: function(param, prefix){
+            	// 맑음 - 구름많음, 구름많고 비, 구름많고 눈, 구름많고 비/눈, 구름많고 눈/비 - 흐림, 흐리고 비 흐리고 눈, 흐리고 비/눈, 흐리고 눈/비
+            	var skyAndPtyCode = param.skyAndPtyCode; 
+            	
+               	var icon = prefix + "-weather-icon12";
+               	
+               	if(skyAndPtyCode <= 5){ // 맑음
+               		icon = prefix + '-weather-icon1';
+               			
+               	}else if(skyAndPtyCode >= 9){ // 흐림
+               		icon = prefix + '-weather-icon3';
+               	}
+               	
+               	return {
+               		icon: icon
+               	};
+            },
+            
+            initChart: function(){
+            	var me = this;
+            	
+            	// 육상작업자
+            	var dataList1 = me.get("landWorkerList");
+            	
+            	// 해상작업자
+            	var dataList2 = me.get("seaWorkerList"); 
+            	
+            	// 육상이동장비
+            	var dataList3 = me.get("landVehicleList"); 
+            	
+            	// 해상 이동장비
+            	var dataList4 = me.get("seaVehicleList");
+            	
+            	// 데이터 생성(없으면 4개로 맞춤)
+            	var makeLength1 = 4 - dataList1.length;
+            	var makeLength2 = 4 - dataList2.length;
+            	var makeLength3 = 4 - dataList3.length;
+            	var makeLength4 = 4 - dataList4.length;
+            	
+            	for(var i=0; i<makeLength1; i++){
+            		dataList1.push({targetName:"",count:0,percent:0});
+            	}
+            	for(var i=0; i<makeLength2; i++){
+            		dataList2.push({targetName:"",count:0,percent:0});
+            	}
+            	for(var i=0; i<makeLength3; i++){
+            		dataList3.push({targetName:"",count:0,percent:0});
+            	}
+            	for(var i=0; i<makeLength4; i++){
+            		dataList4.push({targetName:"",count:0,percent:0});
+            	}
+            	
+            	// clear : chart legend dom
+            	for(var i=1; i<=4; i++){
+            		$('.site-marker' + i).remove();
+            		$('.site-markertext' + i).remove();
+            	}
+            	
+            	/* 육상작업자 차트 */
+           		me.createPieChart('landWorker', dataList1);
+				
+				/* 해상작업자 차트 */
+				me.createPieChart('marineWorker', dataList2);
+				
+				/* 육상 이동장비 차트 */
+				me.createPieChart('landMachine', dataList3);
+				
+				/* 해상 이동장비 차트 */
+				me.createPieChart('marineMachine', dataList4);
+            },
+            
+            createLineChart: function(){
+            	var me = this;
+            	
+            	var chart = null;
+            	var tempLineChart = me.$.tempLineChart;
+            	chart = echarts.init(tempLineChart);
+            	
+            	var dataList = [];
+            	
+            	var weatherListToday = me.get("weatherListToday") || [];
+            	for(var idx in weatherListToday){
+            		var item = weatherListToday[idx];
+            		dataList.push(item.temperature);            		
+            	}
+            	
+            	var colorTone = me.get("colorTone");
+            	
+            	// 차트 옵션
+            	var option = {
+            		xAxis: {
+            			type: 'category',
+           		        data: dataList,
+           		        show: false
+           		    },
+           		    yAxis: {
+           		        type: 'value',
+           		        show: false
+           		    },
+           		    series: [{
+           		        data: dataList,
+           		        type: 'line',
+           		        label: {
+           		        	normal: {
+           		        		show: true,
+           		        		position: 'top',
+           		                color: '#fff',
+           		             	fontFamily: 'Noto Sans KR',
+            		        	fontWeight: '400',
+            		        	fontSize: 15
+           		        	}
+           		    	},
+           		    	lineStyle: {
+           		            color: (colorTone == "black" ? "#44884F" : "#4477ED"),
+           		            width: 3
+           		        },
+           		        symbol: 'circle',
+           		        symbolSize : 10,
+           		        itemStyle: {
+           		        	color: (colorTone == "black" ? "#44884F" : "#4477ED")
+           		        }
+           		    }]
+           		};
+            	
+            	chart.setOption(option);
+            	
+            	me.set("lineChart", chart);
+            },
+            
+            /**
+             * 파이차트 생성
+             * - background 설정, 파이차트생성, 파이차트 범례 생성
+             */
+            createPieChart: function(div, dataList){
+            	var me = this;
+            	
+            	/*** Background 설정 ***/
+            	me.setInputBackground(div, dataList);
+            	
+            	/*** 파이 차트 생성 ***/
+            	var legendList = [];
+            	var chartDataList = [];
+            	
+            	for(var idx in dataList){
+            		var item = dataList[idx];
+        			
+        			var itemStyleConfig = {};
+        			if(idx == "0"){
+        				itemStyleConfig = {color:'#4477ED'}; // 파랑
+        				
+        			}else if(idx == "1"){
+        				itemStyleConfig = {color:'#9559EA'}; // 보라
+        				
+        			}else if(idx == "2"){
+        				itemStyleConfig = {color:'#E7574F'}; // 빨강
+        				
+        			}else if(idx == "3"){
+        				var colorTone = me.get("colorTone");
+        				
+        				if(colorTone == "black"){
+        					itemStyleConfig = {color:'#70C471'}; // 녹색
+        				}else{
+        					itemStyleConfig = {color:'#4CCC4C'}; // 녹색
+        				}
+        				
+        			}
+		            	
+        			// 차트 데이터
+        			chartDataList.push({
+        				itemStyle: itemStyleConfig
+        				,value: item.count
+        				,name: item.targetName
+        			});
+        			
+        			// 범례명
+        			legendList.push(item.targetName);
+        		}
+            	
+            	var chartDom = null;
+            	var chart = null;
+            	var option = {};
+            	
+            	// 육상 작업자
+            	if(div == "landWorker"){
+            		chartDom = me.$.landWorkerChart;
+	            	
+	            // 해상 작업자
+            	}else if(div == "marineWorker"){
+            		chartDom = me.$.marineWorkerChart;
+	            	
+	            // 육상 이동장비
+            	}else if(div == "landMachine"){
+            		chartDom = me.$.landMachineChart;
+	            	
+	            // 해상 이동장비
+            	}else if(div == "marineMachine"){
+            		chartDom = me.$.marineMachineChart;
+            	}
+            	
+            	chart = echarts.init(chartDom);
+            	
+            	// 데이터 존재여부에 따라, 배경 변경
+            	var isEmpty = true;
+        		
+        		for(var i=0; i<dataList.length; i++){
+        			if(dataList[i].targetName){
+        				isEmpty = false;
+        				break;
+        			}
+            	}
+        		
+        		var option = {};
+        		
+        		if(!isEmpty){
+        			// 차트 옵션
+                	option = {
+                		tooltip: {
+               		        trigger: 'item',
+               		        formatter: '{b}: {c} ({d}%)'
+               		    },
+               		    legend: {
+               		    	show: false,
+               		    	orient: 'vertical',
+               		        left: 10,
+               		     	textStyle: {
+               		    		color: "#fff"
+               		     	},
+               		        data: legendList
+               		    },
+               		    series: [
+               		        {
+               		            type: 'pie',
+               		            radius: ['60%', '90%'],
+               		            label: {
+               		                normal: {
+               		                    show: false
+               		                },
+               		                emphasis: {
+               		                    show: false
+               		                }
+               		            },
+               		            labelLine: {
+               		                normal: {
+               		                    show: false
+               		                }
+               		            },
+               		            data: chartDataList
+               		        }
+               		    ]
+    				};
+        		}else{
+        			option = {
+        				series: [
+        					{
+        						type: 'pie',
+        						data: []
+        					}
+        				]
+        			};
+        		}
+        		
+            	chart.setOption(option);
+            	
+            	// 파이 차트 범례 생성
+            	me.appendMarkerText(chartDom, dataList);
+            	
+            	// progress bar 값 설정
+            	me.setProgressBarValue(div, dataList);
+            	
+            	me.set(div, chart);
+            },
+            
+            /**
+             * Background 설정
+             * - 데이터 유무에 따라 아이콘 변경 및 텍스트 처리
+             */
+            setInputBackground: function(div, dataList){
+            	var me = this;
+            	
+            	var chartDom = null;
+            	
+            	if(div == "landWorker"){
+            		chartDom = me.$.landWorkerChart;
+            		
+            	}else if(div == "marineWorker"){
+            		chartDom = me.$.marineWorkerChart;
+            		
+            	}else if(div == "landMachine"){
+            		chartDom = me.$.landMachineChart;
+            		
+            	}else if(div == "marineMachine"){
+            		chartDom = me.$.marineMachineChart;
+            		
+            	}
+            	
+            	// 데이터 존재여부에 따라, 배경 변경
+            	var isEmpty = true;
+        		
+        		for(var i=0; i<dataList.length; i++){
+        			if(dataList[i].targetName){
+        				isEmpty = false;
+        				break;
+        			}
+            	}
+        		
+            	if(isEmpty){
+            		chartDom.classList.remove(div + '-background');
+            		
+            		// 작업자
+            		if(div == "landWorker" || div == "marineWorker"){
+                		chartDom.classList.add('site-worker-none-background');
+                	}else{
+                		chartDom.classList.add('site-machine-none-background');
+                	}
+            		
+            		$('.' + '_' + div + '-progress')[0].style.display = "none";
+            		$('.' + '_' + div + '-nonetext')[0].style.display = "flex";
+            		
+            	}else{
+            		// 작업자
+            		if(div == "landWorker" || div == "marineWorker"){
+                		chartDom.classList.remove('site-worker-none-background');
+                	}else{
+                		chartDom.classList.remove('site-machine-none-background');
+                	}
+            		chartDom.classList.add(div + '-background');
+            		
+            		$('.' + '_' + div + '-progress')[0].style.display = "flex";
+            		$('.' + '_' + div + '-nonetext')[0].style.display = "none";
+            	}
+            	
+            },
+            
+            /**
+             * 차트 범례 생성
+             */
+            appendMarkerText: function(chartDom, dataList){
+            	var me = this;
+            	
+            	for(var idx in dataList){
+            		var item = dataList[idx];
+            		
+            		if(item.targetName){
+	            		var index = Number(idx)+1;
+	            		
+	            		// create dom
+	            		var markertext = document.createElement('div');
+	            		markertext.classList.add('site-markertext'+index);
+	            		markertext.classList.add('font-14-500');
+	            		markertext.innerHTML = item.targetName + " " + item.percent + "%";
+	            		
+		   				var marker = document.createElement('div');
+		   				marker.classList.add('site-marker'+index);
+		   				
+		   				// append
+		   				Polymer.dom(chartDom).appendChild(markertext);
+		   				Polymer.dom(chartDom).appendChild(marker);
+            		}
+            	}
+            	
+            },
+            
+            /**
+             * 프로그래스 바
+             */
+            setProgressBarValue: function(div, dataList){
+            	var me = this;
+            	
+           		for(var idx in dataList){
+           			var item = dataList[idx];
+           			
+           			var index = Number(idx) + 1;
+           			
+           			me.set(div+index, item);
+           			
+           			$("." + "_" + div + "bar" + index).css("width", item.percent + '%' );
+           			
+           			if(item.targetName){
+           				$("." + "_" + div + "-progress-area" + index).css("visibility", "");
+           			}else{
+           				$("." + "_" + div + "-progress-area" + index).css("visibility", "hidden");
+           			}
+           		}
+            	
+            },
+            
+            onWindowMax: function(){
+            	var me = this;
+            	
+            	// 확대 축소 버튼
+            	var windowMax = me.$.windowmax;
+            	
+            	// 탑메뉴
+            	var topmenu = $('#headWrap');
+            	// 탭바
+            	var mdiTabbar = $('#mdiTabbar');
+            	// 메뉴경로
+            	var mdiBreadCrumb = $('#mdiBreadCrumb');
+            	// 왼쪽 메뉴
+            	var mdiLeftMenu = $('#mdiLeftMenu');
+            	
+                // 원래 사이즈 상태
+            	if( windowMax.classList.contains('site-window-max') ){
+            		windowMax.classList.remove('site-window-max');
+            		windowMax.classList.add('site-window-return');
+            		
+            		// 탑메뉴 숨김
+                	topmenu.css("display", "none");
+                	// 탭바 숨김
+                	mdiTabbar.css("display", "none");
+                	// 메뉴경로 숨김
+                	mdiBreadCrumb.css("display", "none");
+                	// 왼쪽 사이드 바 숨김
+                	mdiLeftMenu.css("display", "none");
+                	
+                	$('.mdiTabsDiv')[0].style.display='none';
+                	
+                	// sc-mdi-window (padding 제거)
+                	var domList = document.querySelectorAll('sc-mdi-window');
+                	
+                	for(var i=0; i<domList.length; i++){
+                		var domElem = domList[i];
+                		domElem.classList.add("padding-none");
+                	}
+                	
+                	// 전체화면 실행
+                	me.openFullscreen();
+                	
+                	setTimeout(function(){
+                		var domList = document.querySelectorAll('sc-mdi-window');
+                    	
+                    	for(var i=0; i<domList.length; i++){
+                    		var domElem = domList[i];
+                    		domElem.style.width = "100%";
+                    		domElem.style.height = "100%";
+                    	}
+                	}, 700);
+                	
+                // 확대 사이즈 상태
+            	}else{
+            		windowMax.classList.remove('site-window-return');
+            		windowMax.classList.add('site-window-max');
+            		
+            		// 탑메뉴 보임
+					topmenu.css("display", "");
+					// 탭바 보임
+                	mdiTabbar.css("display", "");
+                	// 메뉴경로 보임
+                	mdiBreadCrumb.css("display", "");
+                	// 왼쪽 사이드 바 보임
+                	mdiLeftMenu.css("display", "");
+                	
+                	$('.mdiTabsDiv')[0].style.display='block';
+                	
+                	// 전체화면 취소
+                	me.closeFullscreen();
+                	
+                	// sc-mdi-window (padding 제거)
+					var domList = document.querySelectorAll('sc-mdi-window');
+                	
+                	for(var i=0; i<domList.length; i++){
+                		var domElem = domList[i];
+                		domElem.classList.remove("padding-none");
+                	}
+            	}
+                
+                // SC-MDI : RESIZE FUNCTION
+               	$('sc-mdi')[0]._onUtilAreaResize();
+            },
+            
+            /* View in fullscreen */
+            openFullscreen: function() {
+            	var elem = document.documentElement;
+            	
+            	if (elem.mozRequestFullScreen) { /* Firefox */
+            		elem.mozRequestFullScreen();
+            	} else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+            		elem.webkitRequestFullscreen();
+            	} else if (elem.msRequestFullscreen) { /* IE/Edge */
+            		elem.msRequestFullscreen();
+            	}
+            },
+            
+            closeFullscreen: function() {
+            	if (document.mozCancelFullScreen) { /* Firefox */
+            		document.mozCancelFullScreen();
+            	} else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+            		document.webkitExitFullscreen();
+            	} else if (document.msExitFullscreen) { /* IE/Edge */
+            		document.msExitFullscreen();
+            	}
+            },
+            
+            changeTone: function(e){
+            	var me = this;
+            	
+            	var args = e.target.dataset.args;
+            	me.set("colorTone", args);
+            	
+            	var elements = this.getElementsByTagName('link');
+            	
+            	// black
+            	if(args == 'black'){
+            		if(elements.length > 0 ){
+            			var ele = elements.item(0);
+            			ele.parentNode.removeChild(ele);
+            		}
+                	
+            		me.setChartColor();
+                	
+            	// white
+            	}else{
+            		if(elements.length == 0 ){
+                		var link = document.createElement('link');
+                    	link.rel = 'stylesheet';
+                        link.type = 'text/css';
+                        link.href = './ui/iot/dashboard/css/site-dashboard-white.css';
+                        this.appendChild(link);
+                	}
+            		
+            		me.setChartColor();
+            	}
+            	
+            },
+            
+            /**
+             * 선택된 톤(블랙/화이트)에 따라, 차트 색 변경
+             */
+            setChartColor: function(){
+            	var me = this;
+            	
+            	var lineChart = me.get("lineChart");
+            	
+            	var colorTone = me.get("colorTone");
+            	
+            	if(colorTone == "black"){
+            		// 차트 옵션
+                	var option = {
+               		    series: [{
+               		    	label: {
+               		        	normal: {
+               		        		show: true,
+               		        		position: 'top',
+               		                color: '#fff',
+               		             	fontFamily: 'Noto Sans KR',
+                		        	fontWeight: '400',
+                		        	fontSize: 15
+               		        	}
+               		    	},
+               		    	lineStyle: {
+               		            color: "#44884F",
+               		            width: 3
+               		        },
+               		        symbol: 'circle',
+               		        symbolSize : 10,
+               		        itemStyle: {
+               		        	color: "#44884F"
+               		        }
+               		    }]
+               		};
+                	
+                	lineChart.setOption(option);
+                	
+                	me.initChart();
+            	}else{
+            		// 차트 옵션
+                	var option = {
+               		    series: [{
+               		        label: {
+               		        	normal: {
+               		        		show: true,
+               		        		position: 'top',
+               		                color: '#000',
+               		             	fontFamily: 'Noto Sans KR',
+                		        	fontWeight: '400',
+                		        	fontSize: 15
+               		        	}
+               		    	},
+               		    	lineStyle: {
+               		            color: "#4477ED",
+               		            width: 3
+               		        },
+               		        symbol: 'circle',
+               		        symbolSize : 10,
+               		        itemStyle: {
+               		        	color: "#4477ED"
+               		        }
+               		    }]
+               		};
+                	
+                	lineChart.setOption(option);
+                	
+                	me.initChart();
+            	}
+            	
+            },
+            
+            destroyed : function(popup, e) {
+                var me = this;
+            	clearInterval(me.timeInterval);
+            	clearInterval(me.searchInterval);
+            	window.onresize = null;
+            },
+            changeSafeDate : function(){
+		        var me = this;
+	        	var safePopup = UT.popup('ep-safedate-setting', me, 300, 200, {
+				}, {titleText : "", resizable:false});
+	        	safePopup.show();
+	        	safePopup.getWindowContent().load(me.safeDay, me.safeDate);
+		    }
+            
+        });
+	</script>
+
+</dom-module>

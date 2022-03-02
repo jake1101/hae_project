@@ -1,0 +1,167 @@
+<dom-module id="es-element-control-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-ajax id="findOrderInfo" url="json/order-info.json" on-response="completeFindOrderInfo"></sc-ajax>
+				 
+	
+		<sc-panel title-text="주문" collapsible="true">
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+	        	</colgroup>
+	        	<tr>
+	        		<td colspan="2">
+	        			<sc-label text="{{greetings}}" i18n-disabled></sc-label>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="수령방법"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-combobox-field class="w-100" value="{{orderInfo.rcv_typ}}" disabled="[[!formula('editable')]]"
+	        					items="[[codes.rcvTypCds]]" display-field="label" value-field="data" selected-index="0" placeholder="선택하세요" input-clear="false"
+	        					on-select="onRcvTypSelect">
+	        			</sc-combobox-field>
+	        		</td>
+	        	</tr>
+	        	<tr hidden="[[formula('isDirect')]]">
+	        		<th>
+	        			<sc-label text="배송요청사항"></sc-label>
+	        		</th>
+	        		<td>
+	        			<div class="field-box" style="width:100%">
+		        			<sc-text-field class="w-200" value="{{orderInfo.req_txt}}" hidden="[[!formula('isKeyIn')]]" readonly="[[!formula('editable')]]"></sc-text-field>
+		        			<sc-combobox-field class="w-200" value="{{orderInfo.req_sel}}" hidden="[[formula('isKeyIn')]]" disabled="[[!formula('editable')]]"
+      								items="[[codes.reqSelCds]]" display-field="label" value-field="data" selected-index="0" placeholder="선택하세요" input-clear="false">
+      						</sc-combobox-field>
+		        			<span style="margin-right:2px"></span>
+      						<sc-checkbox-field label="직접입력" input-value="{{orderInfo.key_in_yn}}" readonly="[[!formula('editable')]]"
+       								checked-value="Y" un-checked-value="N" on-checkchange="onKeyInYnChange"></sc-checkbox-field>
+						</div>
+	        		</td>
+	        	</tr>
+	        	<tr hidden="[[formula('isDirect')]]">
+	        		<th>
+	        			<sc-label text="배송예정일"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-label text="[[formatFn(orderInfo.dely_dt, 'date')]]" i18n-disabled></sc-label>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="주문총액"></sc-label>
+	        		</th>
+	        		<td>
+	        			<div class="field-box" style="width:100%">
+	        				<sc-label text="[[formatFn(orderInfo.tot_amt, 'amt')]] 원" i18n-disabled></sc-label>
+	        				<sc-label text="(+ 배송비 [[formatFn(orderInfo.dely_amt, 'amt')]] 원)" hidden="[[formula('isDirect')]]" style="margin-left:2px" i18n-disabled></sc-label>
+	        			</div>
+	        		</td>
+	        	</tr>
+	        	<tr>
+	        		<th>
+	        			<sc-label text="결제금액"></sc-label>
+	        		</th>
+	        		<td>
+	        			<sc-label text="[[computeTotPayAmt(orderInfo.tot_amt, orderInfo.dely_amt)]] 원" i18n-disabled></sc-label>
+	        		</td>
+	        	</tr>
+			</table>
+		</sc-panel>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-element-control-sample',
+		properties : {
+			codes : {
+				type : Object,
+				value : function() {
+					return {
+						rcvTypCds : [
+							{data:"A01", label:"택배배송", price:2500},
+							{data:"A02", label:"퀵서비스", price:30000},
+							{data:"B01", label:"직접수령", price:0}
+						],
+						reqSelCds : [
+							{data:"A", label:"부재시 경비실에 맡겨주세요."},
+							{data:"B", label:"배송전 연락바랍니다."}
+						]
+					}
+				}
+			},
+			orderInfo : {
+				type : Object,
+				value : function() {
+					return {}
+				}
+			},
+			greetings : {
+				type : String,
+				computed : "computeMessage(orderInfo.usr_nm)"
+			}
+		},
+		formulas : {
+			editable : function() {
+				return (this.orderInfo.prog_sts === "T");
+			},
+			isDirect : function() {
+				return (this.orderInfo.rcv_typ === "B01");
+			},
+			isKeyIn : function() {
+				return (this.orderInfo.key_in_yn === "Y");
+			}
+		},
+		computeMessage : function(name) {
+			return UT.formatString("{0}님 안녕하세요!", name);
+		},
+		computeTotPayAmt : function(totAmt, delyAmt) {
+			return this.formatFn(totAmt + delyAmt, 'amt');
+		},
+		formatFn : function(value, type) {
+			if(value) {
+				return SCFormatter.format(type, value);
+			}
+			return null;
+		},
+		initialized : function() {
+			this.findData();
+		},
+		// 데이터 조회
+		findData : function() {
+			UT.request(this.$.findOrderInfo);
+		},
+		// 조회 후 데이터 셋팅 및 formula 적용
+		completeFindOrderInfo : function(e, res) {
+			var me = this, result = res.response;
+			
+			me.set("orderInfo", result);
+			
+			// 전체 formula 적용
+			me.applyFormula();
+		},
+		// 직접입력 checkbox 변경 시
+		onKeyInYnChange : function(event) {
+			var me = this, checked = event.detail;
+        	
+			// isKeyIn formula 적용
+        	me.applyFormula("isKeyIn");
+		},
+		// 배송방법 combobox 선택 시
+		onRcvTypSelect : function(event) {
+			var me = this, selectedItem = event.detail.selectedItem;
+			
+			me.set("orderInfo.dely_amt", selectedItem.price);
+			
+			// isDirect formula 적용
+			me.applyFormula("isDirect");
+		}
+	});
+	</script>
+</dom-module>

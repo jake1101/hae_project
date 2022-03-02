@@ -1,0 +1,140 @@
+<dom-module id="es-chart-area-percent">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-area-percent',
+		properties: {
+			
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer, {
+			    "name": "Highcharts:Percentage area",
+			    "type": "area",
+			    "palettes":[{
+			        "name": "lines",
+			        "alpha": 1.0,
+			        "strokes": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }, {
+			        "name": "fills",
+			        "alpha": 0.7,
+			        "fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }, {
+			        "name": "fills2",
+			        "fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }],
+			    "title": "Historic and Estimated Worldwide Population Distribution by Region",
+			    "subtitle": "Source: Wikipedia.org",
+			    "plotArea": {
+			        "animations": [{
+			            "property": "seriesMask"
+			        }]
+			    },
+			    "xAxes": {
+			        "categories": [
+			            '1750', '1800', '1850', '1900', '1950', '1999', '2050'
+			        ]
+			    },
+			    "yAxes": {
+			        "title": "Billions",
+			        "maxPadding": 0,
+			        "tick": {
+			            "styles": {
+			                "numberScale": 3,
+			                "numberSymbols": null
+			            }
+			        }
+			    },
+			    "seriesGroups": [{
+			        "name": "group1",
+			        "reversed": true,
+			        "stackMode": "fill"
+			    }],
+			    "series": [{
+			        "name": "Asia",
+			        "group": "group1",
+			        "lineType": "curved",
+			        "items": [502, 635, 809, 947, 1402, 3634, 5268],
+			        "label": false,
+			        "styles": {
+			            "line": "#fff",
+			            "fill": "p(fills:0)",
+			            "marker": {
+			                "shapeName": "circle",
+			                "border": "#666",
+			                "fill": "p(fills2:0)",
+			            }
+			        }
+			    }, {
+			        "name": "Africa",
+			        "group": "group1",
+			        "items": [106, 107, 111, 133, 221, 767, 1766],
+			        "label": false,
+			        "styles": {
+			            "line": "#fff",
+			            "fill": "p(fills:1)",
+			            "marker": {
+			                "shapeName": "diamond",
+			                "border": "#666",
+			                "fill": "p(fills2:1)",
+			            }
+			        }
+			    }, {
+			        "name": "Europe",
+			        "group": "group1",
+			        "items": [163, 203, 276, 408, 547, 729, 628],
+			        "label": false,
+			        "styles": {
+			            "line": "#fff",
+			            "fill": "p(fills:2)",
+			            "marker": {
+			                "shapeName": "rect",
+			                "border": "#666",
+			                "fill": "p(fills2:2)",
+			            }
+			        }
+			    }, {
+			        "name": "America",
+			        "group": "group1",
+			        "items": [18, 31, 54, 156, 339, 818, 1201],
+			        "label": false,
+			        "styles": {
+			            "line": "#fff",
+			            "fill": "p(fills:3)",
+			            "marker": {
+			                "shapeName": "triangle",
+			                "border": "#666",
+			                "fill": "p(fills2:3)",
+			            }
+			        }
+			    }, {
+			        "name": "Oceania",
+			        "group": "group1",
+			        "items": [2, 2, 2, 6, 13, 30, 46],
+			        "label": false,
+			        "styles": {
+			            "line": "#fff",
+			            "fill": "p(fills:4)",
+			            "marker": {
+			                "shapeName": "itriangle",
+			                "border": "#666",
+			                "fill": "p(fills2:4)",
+			            }
+			        }
+			    }],
+			    "legend": {
+			        "itemStyles": {
+			            "fontBold": true
+			        }
+			    }
+			} );
+			me.chartMain = me.chartContainer.chartView();
+		}
+	})
+	</script>
+</dom-module>

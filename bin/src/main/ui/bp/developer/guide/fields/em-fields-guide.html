@@ -1,0 +1,62 @@
+<sc-link rel="import" href="es-fields-description.html"></sc-link>
+<sc-link rel="import" href="es-fields-sample.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-fields-guide">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+    	<sc-panel class="hbox flex" title-text="Fields">
+			<es-fields-description class="fit flex"></es-fields-description>
+			<es-fields-sample id="sample" class="box flex"></es-fields-sample>
+		</sc-panel>
+		<es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+    </template>
+    <script>
+    Polymer({
+    	is : "em-fields-guide",
+    	properties : {
+    		srcList : {
+				type : Array,
+				value : function() {
+					return [{
+						title        : "es-text-field-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/fields/es-text-field-sample.html"
+					}, {
+						title        : "es-number-field-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/fields/es-number-field-sample.html"
+					}, {
+						title        : "es-date-field-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/fields/es-date-field-sample.html"
+					}, {
+						title        : "es-combobox-field-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/fields/es-combobox-field-sample.html"
+					}, {
+						title        : "es-checkbox-field-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/fields/es-checkbox-field-sample.html"
+					}, {
+						title        : "es-radio-field-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/fields/es-radio-field-sample.html"
+					}]
+				}
+    		}
+    	}
+    });
+    </script>
+    
+</dom-module>

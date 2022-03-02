@@ -1,0 +1,41 @@
+<sc-link rel="import" href="es-approval-popup-description.html"></sc-link>
+<sc-link rel="import" href="es-approval-popup-sample.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-source-viewer.html"></sc-link>
+
+<dom-module id="em-approval-popup-guide">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-panel class="hbox flex" title-text="결재 팝업">
+			<es-approval-popup-description class="fit flex"></es-approval-popup-description>
+			<es-approval-popup-sample id="approvalPopupSample" class="box flex"></es-approval-popup-sample>
+		</sc-panel>
+		<es-source-viewer id="viewer" url="/ui/bp/developer/guide/approval/es-approval-popup-sample.html" class="flex"></es-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-approval-popup-guide',
+		properties : {
+			data : {
+				type : Object,
+				value : function() {
+					return {
+						"pr_id"  : UT.generateUUID(),
+						"pr_no"  : "PR99999999",
+						"pr_tit" : "개발자 구매요청"
+					}
+				}
+			}
+		},
+		initialized : function() {
+			var me = this;
+			
+			me.$.approvalPopupSample.prData = me.data;
+			me.$.viewer.setData(JSON.stringify(me.data, null, "\t"));
+		}
+	});
+	</script>
+</dom-module>

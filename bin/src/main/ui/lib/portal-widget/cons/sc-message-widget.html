@@ -1,0 +1,25 @@
+<!--
+ * @Desc 메시지 위젯
+ * @Author jhkim
+ * @Created 2020-09-23
+ -->
+<sc-link rel="stylesheet" type="text/css" href="../css/style_portlet.css"/>
+
+<dom-module id="sc-message-widget">
+    <template>
+        <style>
+            :host {
+                @apply(--vbox-layout);
+            }
+        </style>
+        <div>
+			CN[목공] 홍길동이 긴급 구조신호를 보냈습니다. 위치 Lat : 37.51465 Lon : 127.10195 위치보기    
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: "sc-message-widget",
+          
+        });
+    </script>
+</dom-module>

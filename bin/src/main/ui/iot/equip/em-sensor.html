@@ -1,0 +1,26 @@
+<sc-link rel="import" href="es-sensor-list.html"></sc-link>
+
+<dom-module id="em-sensor">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<es-sensor-list id="sensorList" class="flex"></es-sensor-list>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-sensor',
+			load: function(param){
+				var me = this;
+				me.$.sensorList.onSearch(param);
+			}
+		});
+	</script>
+
+
+</dom-module>

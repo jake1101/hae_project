@@ -1,0 +1,278 @@
+<dom-module id="ep-accumulate-step">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+        
+        <!-- 4.18 작업자 당일 활동량 -->
+		<sc-ajax id="findWorkerActivity" 
+			url="findWorkerActivity.do" 
+			body="{{searchParam1}}"
+			on-response="workerActivity"
+			>
+		</sc-ajax>
+		
+		<!-- 4.94. 현장 건물 시간대별 통계 -->
+		<sc-ajax id="findActivitySite" 
+			url="findActivitySite.do" 
+			body="{{searchParam2}}"
+			on-response="areaActivity"
+			>
+		</sc-ajax>
+		
+		<div id = "accimulate_step" class = "flex"> <!-- 차트영역 -->
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'ep-accumulate-step',
+			
+			properties:{
+				searchParam1 :{
+	            	type : Object,
+	            	value : function(){
+	            		return {};
+	            	}
+	            },
+	            searchParam2 :{
+	            	type : Object,
+	            	value : function(){
+	            		return {};
+	            	}
+	            },
+	            totalList :{
+	            	type : Object,
+	            	value : function(){
+	            		return [];
+	            	}
+	            },
+	            workerList :{
+	            	type : Object,
+	            	value : function(){
+	            		return [];
+	            	}
+	            },
+	            curDate : {
+	            	type : Object,
+	            	value : function(){
+	            		return new Date();
+	            	}
+	            }
+			},
+			initialized : function(){
+			},
+			load: function(param){
+				var me= this;
+				var cur = me.get("curDate");
+				me.set("searchParam1.workerId", param.targetId);
+				me.set("searchParam1.siteId", param.siteId);
+				me.set("searchParam2.siteId", param.siteId);
+				me.set("searchParam2.tzDate", StringUtil.setDateFormat(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate()), 'd'));
+ 				UT.request(me.$.findActivitySite);
+			},
+			areaActivity : function(e, res){
+				var me= this;
+				var cur = me.get("curDate");
+				var list = res.response;
+				var totalList = [];
+				var workerList = [];
+				if(UT.isEmpty(list)){
+					UT.alert("IOT.WORKERCONDITIONS.E0001"); //현장 건물 시간대별 통계를 찾을수 없습니다.
+					me.fire("close");
+					return;
+				}
+				
+                for(var i=0; i<list.length; i++){
+                	var time = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(), list[i].hour, (list[i].minute==30) ? 60 : 30);
+                	var avgStep =  (UT.isEmpty(list[i].stepAvg) ? 0 : list[i].stepAvg)
+                	var currentTime = Number(StringUtil.setDateFormat(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(),cur.getHours(), cur.getMinutes(), cur.getSeconds()),"d"));
+        			if(currentTime < time)
+        				continue;
+            		totalList.push([Number(StringUtil.setDateFormat(time,"d")), avgStep]);
+            		workerList.push([Number(StringUtil.setDateFormat(time,"d")), 0]);
+                }
+                me.set("totalList", totalList);
+                me.set("workerList", workerList);
+				 
+				UT.request(me.$.findWorkerActivity); 
+			},
+			workerActivity: function(e, res){
+				var me= this;
+				var list = res.response;
+				var cur = me.get("curDate");
+				if(UT.isEmpty(list)){
+ 					UT.alert("IOT.WORKERCONDITIONS.E0002");//작업자 당일 활동량 정보를 찾을 수 없습니다."
+					me.fire("close");
+					return;
+				}
+				var workerList = me.get("workerList");
+				for(var i=0; i<list.length; i++){
+					var currentTime = Number(StringUtil.setDateFormat(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(),cur.getHours(), cur.getMinutes(), cur.getSeconds()),"d")); // 현재 시간
+					var time = Date.parse(list[i].time); // 받아온 시간 신호의 수신 시간
+        			if(currentTime < time)
+        				continue;
+					/*
+					for 신호 수신시간이 간격 시간으로 step에 추가 하여 j 평균냄
+					j // 같은 간격 : 30분 구간안에 있는지 확인하기 위한 idx
+					standardTime // 간격 시간(30분간격)
+					*/
+					var t_date = new Date(time);
+					var standard1 = Number(StringUtil.setDateFormat(new Date(t_date.getFullYear(), t_date.getMonth(), t_date.getDate(), t_date.getHours(), 30),"d"));
+					var standard2 = Number(StringUtil.setDateFormat(new Date(t_date.getFullYear(), t_date.getMonth(), t_date.getDate(), t_date.getHours(), 0),"d"));
+					var standard3 = Number(StringUtil.setDateFormat(new Date(t_date.getFullYear(), t_date.getMonth(), t_date.getDate(), Number(t_date.getHours()) +1),"d"));
+					
+					var startSection = 0, endSection = 0;
+					
+					if(time <= standard1){
+						startSection = standard2;
+						endSection = standard1;
+					}
+					else{
+						startSection = standard1;
+						endSection = standard3;
+					}
+					
+					var step = UT.isEmpty(list[i].step) ? 0 : list[i].step;
+					for(var j = 1 ; j + i < list.length ; j++){
+						if(list[i+j].time <= startSection)
+							break;
+						if(list[i+j].time > endSection)
+							break;
+						step = step + (UT.isEmpty(list[i+j].step) ? 0 : list[i+j].step);
+					}
+					i = i + j ;
+					workerList.forEach(function(item ,idx){
+						if(item[0] == endSection){
+							item[1] = step/ (j+1);
+							return;
+						}
+					});
+
+				}
+				me.set("workerList", workerList); // 30 분 단위로 작업자 활동량 평균내서 집어 넣을까?
+				me.clearChart();
+				me.drawChart();
+			},
+			clearChart : function() {
+				var me = this;
+				if(me.$.accimulate_step.firstElementChild) {
+					me.$.accimulate_step.removeChild(me.$.accimulate_step.firstElementChild);
+				}
+			}, 
+			drawChart : function()
+			{
+				var me = this;
+				var colors = ['#7cb5ec', '#434348'];
+				
+				var chartObj =
+				{
+					"type": "line",
+					
+					"palettes":[{
+						"name": "color1",
+				        "alpha": 1.0,
+				        "fills": colors,
+						"tick" : true
+					}],
+				    "title": me.translate("활동량"),
+				    "plotArea": {
+		    	        "styles": {
+		    	            "border": "#eee"
+		    	        },
+		    	        "animations": {
+		    	            "property": "seriesMask"
+		    	        },
+		    	        "crosshair": {
+		    	            "enabled": true,
+		    	            "orientation": "vertical",
+		    	            "styles": {
+				                "line": "#ff0f00,1px",
+				            }
+		    	        }
+		    	    },
+				    "xAxes": {  // 30분씩 나눈 하루 배열 넣어줘야함
+				    	"visible" : true,
+				    	"name": "axis2",
+				    	"type": "datetime",
+			    		"tick": {
+			    			styles : {
+			    				"datetimeFormat" : "HH:mm:ss",
+			    				"fontSize" : 10,
+			    			}
+			    		},
+			    	},
+			    	"yAxes": {
+			    		"visible": true,
+			    		"name": "axis1",
+			    		"grid": {"visible": false},
+			    	    "tick": {
+			    			styles : {
+			    				numberFormat : "#,##0.0",
+			    				"fontSize" : 10,
+			    	            "fontBold": true,
+			    	            "marginLeft" : 30,
+					            "select":{
+					            	"fill" :"#ff0f00",
+					            	"color":"#fff"
+					            }
+			    			}
+			    		},
+			    	},
+					"series": [{
+					    "name": me.translate("활동량 평균"),
+					    "label" :false,
+					    "type": "area",
+						"itemWidth": 0.7,
+						"dataField": "value",
+					    "items": me.get("totalList"), // 작업자의 활동량 평균 배열
+				        tooltip : {
+				        	text : " ${label: HH:mm:ss} : 작업자들의 평균 : ${value}"
+						},
+					    "styles": {
+					    	"line": "#FFF8E485",
+					        "fill": "#88e4d354",
+					    },
+					    "animations": [{
+					         "property": "mask"
+					    }],
+					},
+					{
+					    "name": me.translate("작업자 활동량"),
+					    "label" :false,
+					    "type": "area",
+						"itemWidth": 0.7,
+						"dataField": "value",
+					    "items": me.get("workerList"), // 작업자의 활동량 배열
+				        tooltip : {
+				        	text : " ${label: HH:mm:ss} : 작업자 활동량 : ${value}"
+						},
+					    "styles": {
+					    	"fill": "#A091e8e1",
+// 					    	 "shapeName": "circle"
+					    	
+					    },
+					    "animations": [{
+					         "property": "mask"
+					    }],
+					}
+					],
+					"legend": {
+						"visible" : true,
+						"position": "right",
+				        "layout": "vertical",
+				        "itemStyles": {
+				            "fontBold": true
+				        }
+					}
+			    };
+			    me.accimulate_step = new DLChart.ChartComponent(false, me.$.accimulate_step, chartObj);
+			    me.chartMain = me.accimulate_step.chartView();	
+			},
+			
+		});
+	</script>
+
+</dom-module>

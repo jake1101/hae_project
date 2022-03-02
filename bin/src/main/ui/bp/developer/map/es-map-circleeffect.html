@@ -1,0 +1,31 @@
+<dom-module id="es-map-circleeffect">
+	<style>
+        :host {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+
+	<template>
+		<sc-map id="map1" type="Google" longitude="129.577" latitude="38" zoom-level="6">
+			<sc-map-marker id="marker1" longitude="129.577" latitude="38" on-click-marker="onClickMarker"></sc-map-marker>
+		</sc-map>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'es-map-circleeffect',
+			
+			onClickMarker : function(event, data) {
+				data.element.showCircleEffect(100);
+			},
+			
+			load: function(doEffect) {
+				var me = this;
+				me.$.map1.resize();
+				if(doEffect)
+					me.$.marker1.showCircleEffect(100);
+			}
+		});
+	</script>
+</dom-module>

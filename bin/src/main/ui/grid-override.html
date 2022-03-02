@@ -1,0 +1,38 @@
+<script>
+	SCGrid.prototype.$$_initialized = SCGrid.prototype._initialized;
+	SCGrid.prototype._initialized = function() {
+	    var me = this;
+	    if(typeof SmartsuiteTheme != "undefined") { // [SMARTNINE-2551] smartsuite-theme.html을 사용하는 경우에만 적용 (MDI로 띄우지 않는 경우 사용하지 않음)
+	    	var theme = SmartsuiteTheme;
+	    	var themeName = theme.getThemeStyleName();
+
+		    if(typeof theme.getGridDefaultTheme() === "undefined") {
+	            theme.setGridDefaultTheme(blueSkySkin);
+		    }
+
+		    if(themeName && !theme.getGridReflect()) {
+		        blueSkySkin = theme.getGridTheme(themeName);
+		    }	    	
+	    }
+
+	    SCGrid.prototype.$$_initialized.call(me);
+	}
+	Polymer.SCGridBehaviorImpl.properties.rowHeight ={
+		    value: 42 //높이 지정
+		}
+
+	Polymer.SCGridBehaviorImpl.properties.headerHeight ={
+		    value: 42 //높이 지정
+		}
+	//yshong
+	// 그리드 기본 contextMenu 의 대부분은 날리고  
+	// 찾기,정렬 일괄취소  만 남기도록한다.
+// 	Polymer.SCGridBehaviorImpl.properties._contextMenuList.value = [
+// 		Polymer.SCGridBehaviorImpl.properties._contextMenuList.value[13], // 찾기
+// 		Polymer.SCGridBehaviorImpl.properties._contextMenuList.value[15], // 정렬 일괄취소
+// 	];
+		
+		
+		
+	
+</script>

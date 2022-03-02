@@ -1,0 +1,58 @@
+<dom-module id="widget-data-confirm">
+    <style>
+    .columnlist{
+    		display : block;
+			width : 100%;
+			height : 100%;
+            overflow:auto;
+     }
+    </style>
+    
+   <template>
+        <sc-grid  id="widgetConfirmGrid" class="columnlist"  editable="false"
+                   use-selection="false" use-state="false" stateful="false">
+               <sc-grid-columns>
+               </sc-grid-columns>
+        </sc-grid>
+    </template>
+    
+    <script>
+        Polymer({
+            is : 'widget-data-confirm',
+            properties : {
+            	resultList: {
+            		type: Array,
+            		value: []
+            	},
+            	headerText:{
+            		type: String,
+            		value:''
+            	}
+            },
+            attached : function(){
+            	var me = this;
+            },
+            setData : function(datas){
+            	var me = this;
+            	var grid = me.$.widgetConfirmGrid;
+            	me.cofirmGridSetting(datas[0]);
+            	grid.setDataProvider(datas);
+            },
+            cofirmGridSetting : function(fields){
+            	var me = this;
+    			var grid = me.$.widgetConfirmGrid;
+    			var columns = [];
+    			for(var key in fields){
+    				var col = document.createElement('sc-data-column');
+                    col.dataField =key;
+                    col.headerText = key;
+                    col.textAlign = 'center';
+                    col.dataType = 'text';
+                    col.width = 100;
+                    columns.push(col);
+    			}
+    			grid.setColumns(columns);
+            }
+        });
+    </script>
+</dom-module>

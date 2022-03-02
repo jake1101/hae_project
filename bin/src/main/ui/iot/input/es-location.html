@@ -1,0 +1,68 @@
+<dom-module id="es-location">
+
+    <style>
+        :host {
+            @apply(--fit-layout);
+        }
+    </style>
+
+    <template>
+	<sc-ajax id="findLocationLog"
+		url="json/vehicle/location.json"
+		last-response="{{resultList}}">
+	</sc-ajax>
+
+	<sc-grid id="gridPanel" data-provider="{{resultList}}" class="fit"  use-selection="false" >
+          <sc-grid-columns>
+ 			<sc-date-column data-field="baseDt" header-text="일시" required="true"  width="200" text-align="center"   display-format="yyyy/MM/dd hh:mm:ss"></sc-date-column>
+            <sc-data-column data-field="contents" header-text="내용"  width="200" text-align="center" ></sc-data-column>
+            <sc-data-column data-field="cmmt" header-text="비고" width="200" max-length="1000" text-align="center" ></sc-data-column>
+          </sc-grid-columns>
+   	</sc-grid>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'es-location',
+
+            properties : {
+                // 조회 조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                // 조회 결과
+                resultList: {
+                    type: Array,
+                    value: function() {
+                        return [];
+                    }
+                }
+            },
+
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+            // 사용자 현황에서 사용자 아이디 선택 시 롤 현황 조회
+            load: function(data) {
+                var me = this;
+                me.set('searchParam', data);
+//                 UT.request(me.$.findLocationLog);
+            },
+
+            // 초기화
+            clear: function() {
+                var me = this;
+                me.reset();
+                me.applyFormula();
+            },
+
+
+
+        });
+    </script>
+
+</dom-module>

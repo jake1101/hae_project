@@ -11,7 +11,12 @@
         <wb-resource deploy-path="/" source-path="src/main/webapp"/>
         		
         <wb-resource deploy-path="/ui" source-path="/src/main/ui"/>
+<<<<<<< HEAD
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/"/>
+=======
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+>>>>>>> snapshot
         	
     </wb-module>
     

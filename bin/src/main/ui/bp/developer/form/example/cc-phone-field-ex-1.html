@@ -1,0 +1,63 @@
+<!-- 
+
+## 전화번호 
+
+국내에서 사용되는 휴대폰번호 양식입니다. 
+
+## Validation 
+
+- 내부적으로 2,3 입력 칸의 maxlength가 최대 4로 설정되어 있습니다. 
+- 010-1234-1234 등의 형식으로 값을 입력할 수 있습니다.
+
+ -->
+
+<dom-module id="cc-phone-field-ex-1">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+    <template>
+		<cc-phone-field value={{baseInfo.phone}}></cc-phone-field>
+        
+        <sc-button on-click='isValid' text="Valid"></sc-button>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'cc-phone-field-ex-1',
+            properties:{
+            	baseInfo: {
+            		type: Object,
+            		value: function() {
+            			return {
+            				phone: ""
+            			};
+            		}
+            	}
+            },
+            
+            setValue: function() {
+            	var me = this;
+            	
+            	me.set("baseInfo.phone", "010-1234-1235");
+            },
+            
+            isValid: function() {
+            	var me = this;
+            	
+            	var validator = [];
+                validator.push({ text: me.translate("전화번호"), fieldName: "phone", check: ["required"], maxLength:50, regexType:"mobile" });
+                
+                if (UT.invalidData(this.baseInfo, validator)) {
+                    return;
+                }
+                
+                UT.alert("검증통과", null, true);
+            }
+            
+		});
+	</script>
+
+</dom-module>

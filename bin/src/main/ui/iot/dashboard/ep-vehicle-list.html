@@ -1,0 +1,112 @@
+<dom-module id="ep-vehicle-list">
+	<!--
+        ******************************************************************************************
+        ** @Program-name    : vehicleList
+        ** @Description     :
+        ** @Author          : jhkim
+        ** @Create Date     : 2020.05.26
+        ** @History         : 2020.05.26 jhkim
+        ******************************************************************************************
+    -->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<sc-request-group init></sc-request-group>
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+
+		<div class="vbox flex">
+	        <sc-grid id="gridVehiclePanel" visible-count="true" data-provider="{{vehicleList}}" title-text="이동장비" use-state ="false" use-selection="false" selection-style="singleRow" show-selection-header="false">
+		        <cc-grid-toolbar>
+	            </cc-grid-toolbar>
+		        <sc-grid-columns>
+		            <sc-image-column   width="100"   header-text="수신상태"  image-change-function="onImageChange"   image-display ="auto" ></sc-image-column>
+		            <sc-data-column 	width="100" 	text-align="center" 		header-text="교부여부"   data-field="isMapping" visible="{{showIsMapping}}" ></sc-data-column>
+		            <sc-data-column 	width="120" 	text-align="center" 	header-text="협력사"   data-field="vendorName" item-style-function="onStyleFontColor"></sc-data-column>
+		            <sc-data-column 	width="120" 	text-align="center" 	header-text="유형"   data-field="targetJobName" item-style-function="onStyleFontColor"></sc-data-column>
+		            <sc-data-column 	width="120" 	text-align="center" 	header-text="이동장비명"   data-field="targetName" item-style-function="onStyleFontColor"></sc-data-column>
+		            <sc-data-column 	width="90" 	text-align="center" 		header-text="배터리 상태"   data-field="batteryState" visible="{{showIsMapping}}" ></sc-data-column>
+		            <sc-data-column 	width="120" 	text-align="center" 	header-text="위치"   data-field="areaName"></sc-data-column>
+		            <sc-date-column 	width="130" 	text-align="center" 	header-text="수신시간" data-field="updatedDt" display-format = "yyyy/MM/dd HH:mm:ss"></sc-date-column>
+		        </sc-grid-columns>
+		        <sc-grid-fields>
+		        	<sc-grid-field data-field="iconImage"></sc-grid-field>
+                    <sc-grid-field data-field="sensorId"></sc-grid-field>
+                    <sc-grid-field data-field="targetId"></sc-grid-field>
+                    <sc-grid-field data-field="labelColor"></sc-grid-field>
+                </sc-grid-fields>
+	        </sc-grid>
+		</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "ep-vehicle-list",
+            properties:{
+            	titleText:{
+	                type: String,
+					value: "이동장비 목록"
+				},
+				showIsMapping : {
+					type :Boolean,
+					value : function(){
+						return false;
+					}
+				},
+				vehicleList : {
+					type : Array,
+					value : function(){
+						return[];
+					}
+				}
+			},
+
+            /******************************
+             * 초기화 설정
+             ******************************/
+			initialized : function(){
+				var me = this;
+			},
+			load: function(vehicleList, showIsMapping, mappingFilter, areaFilter, batteryFilter){
+				var me= this;
+
+				var showIsMapping = showIsMapping||false;
+				var batteryFilter = batteryFilter||"";
+				
+				me.set('vehicleList', vehicleList);
+				me.set('showIsMapping', showIsMapping);
+
+				if(showIsMapping){
+					me.$.gridVehiclePanel.setColumnFilters("isMapping", [{name: "교부", expression: "value == '교부'", active: (mappingFilter=="교부")}, {name: "미교부", expression: "value == '미교부'", active: (mappingFilter=="미교부")}]);
+				}
+
+				if(areaFilter != ""){
+					me.$.gridVehiclePanel.setColumnFilters("areaName", [{name: areaFilter, expression: "value == '"+areaFilter+"'", active: true}]);
+				}
+
+				if(showIsMapping){
+					me.$.gridVehiclePanel.setColumnFilters("batteryState", [{name: "충전필요", expression: "value == '충전필요'", active: (batteryFilter!="")}]);
+				}
+			},
+			onImageChange: function(data, item){
+	            return '/ui/assets/img/marker/' +data.iconImage;
+	         },
+	         onStyleFontColor: function(data, item){
+	        	 return (data.labelColor)?{fontColor: data.labelColor}:null;
+           	 }
+        });
+	</script>
+
+</dom-module>

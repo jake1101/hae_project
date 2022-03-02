@@ -1,0 +1,46 @@
+<sc-link rel="import" href="es-pages-description.html"></sc-link>
+<sc-link rel="import" href="em-pages-sample.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-pages-guide">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+    	<sc-panel class="hbox flex" title-text="sc-pages">
+			<es-pages-description class="fit flex"></es-pages-description>
+			<em-pages-sample class="box flex"></em-pages-sample>
+		</sc-panel>
+		<es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+    </template>
+    <script>
+    Polymer({
+    	is : "em-pages-guide",
+    	properties : {
+    		srcList : {
+				type : Array,
+				value : function() {
+					return [{
+						title        : "em-pages-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/module/em-pages-sample.html"
+					}, {
+						title        : "es-list-page-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/module/es-list-page-sample.html"
+					}, {
+						title        : "es-detail-page-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/module/es-detail-page-sample.html"
+					}]
+				}
+			}
+    	}
+    });
+    </script>
+</dom-module>

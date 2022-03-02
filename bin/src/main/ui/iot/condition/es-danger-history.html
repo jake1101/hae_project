@@ -1,0 +1,284 @@
+<sc-link rel="import" href="ep-danger-map.html"></sc-link>
+
+<dom-module id="es-danger-history">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	: 위험 지역 이력
+        ** @Description		: 현장상황정보 > 위험 지역 이력
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.03.03
+        ** @History 		: 2020.03.03 jhkim 최초작성
+        ******************************************************************************************
+    -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+            overflow:hidden !important;
+        }
+        .cc-search-container{
+        	padding-right : 15px;
+        }
+    </style>
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+  		-->
+  		<sc-request-group id="codes" init>
+			<!-- 위험지역 조회 -->
+			<sc-ajax id="findDangerHistory" url="findDangerHistory.do" on-response="completeFindDangerHistory" body="{{searchParam}}"></sc-ajax>
+		</sc-request-group>
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<cc-search-container on-search="onSearch" auth-r>
+			<table validation-group="search">
+				<colgroup>
+					<col style="width:60px">
+					<col>
+				</colgroup>
+				<tr>
+					<th><sc-label text="생성일"></sc-label></th>
+					<td>
+						<sc-date-field value="{{searchParam.startDt}}" display-format="yyyy-MM-dd" style="width : 140px;" max-date="{{searchParam.endDt}}"></sc-date-field>
+						~
+						<sc-date-field value="{{searchParam.endDt}}" display-format="yyyy-MM-dd" style="width : 140px;" min-date="{{searchParam.startDt}}"></sc-date-field>
+					</td>
+				</tr>
+			</table>
+		</cc-search-container>
+		<div class="vspace-5"></div>
+		<div class="hbox flex-9" >
+			<div class = "vbox flex">
+				<cc-ol-map-container id="mapContainer" danger-hidden="false" show-view-marker="true" show-view-label="true" on-danger-popup-close="onSearch"></cc-ol-map-container>
+			</div>
+			<div class="hspace-10"></div>
+			<sc-grid id="gridDangerPanel" class="w-790" data-provider="{{historyList}}"
+				use-state ="false" use-selection="false" on-item-click="onItemClick" selection-style="singleRow">
+		        <cc-grid-toolbar>
+	            </cc-grid-toolbar>
+		        <sc-grid-columns>
+		            <sc-data-column width="120" 	header-text="위험지역명"	data-field="name"			text-align="center"></sc-data-column>
+		            <sc-data-column width="140" 	header-text="설명"			data-field="description"	text-align="center"></sc-data-column>
+		            <sc-date-column width="130" 	header-text="시작시간" 		data-field="startDt" 		text-align="center" 	display-format = "yyyy/MM/dd HH:mm:ss" string-date="false"></sc-date-column>
+		            <sc-date-column width="130"  header-text="종료시간" 		data-field="endDt" 			text-align="center" 	display-format = "yyyy/MM/dd HH:mm:ss" string-date="false"></sc-date-column>
+		            <sc-data-column width="80" 	header-text="생성자"			data-field="writerId"		text-align="center"></sc-data-column>
+		            <sc-date-column width="130"  header-text="생성일" 		data-field="createdDt" 	text-align="center" 	display-format = "yyyy/MM/dd HH:mm:ss" string-date="false"></sc-date-column>
+		        </sc-grid-columns>
+		        <sc-grid-fields>
+		        	<sc-grid-field data-field="id" data-type="number"></sc-grid-field>
+		        	<sc-grid-field data-field="geoJson" data-type="object"></sc-grid-field>
+		        	<sc-grid-field data-field="polygon" data-type="object"></sc-grid-field>
+		        	<sc-grid-field data-field="adjunction" data-type="object"></sc-grid-field>
+		        	<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+                </sc-grid-fields>
+	        </sc-grid>
+		</div>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+		Polymer({
+			is : 'es-danger-history',
+			properties:{
+	            searchParam : {
+	            	type : Object,
+	            	value : function(){
+	            		var date = new Date();
+	            		date.setFullYear(date.getFullYear() - 1);
+	            		var edate = new Date();
+	            		return {
+		            		siteId : SCMdiManager.searchParam.site_id,	
+		            		startDt : date,
+		            		endDt : edate           		
+		            	};
+	            	}
+		        },
+		        historyList : {
+					type : Array,
+					value : function(){
+						return [];					
+					}
+			    },
+		    	// 지도
+                map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+                dangerLayer: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+                dangerStyle  :{
+					type : Object,
+					value : function(){
+						return{
+							pointRadius: 3,
+							fillColor: "#ff0000",
+							fillOpacity: 0.2,
+							stroke: true,
+							strokeWidth: 1,
+							strokeColor: "#ff0000",
+							cursor : "pointer"
+						};
+					}
+       			},
+			},
+			initialized : function(){
+				var me = this;
+				me.isEventPrevent = false;
+				// 지도 객체 추가
+            	me.set("map", me.$.mapContainer.map);
+            	
+				var dangerSource = new ol.source.Vector({});
+ 				
+ 				var dangerLayer = new ol.layer.Vector({
+ 					source: dangerSource,
+ 					zIndex : 100
+ 				});
+ 			
+		    	me.map.addLayer(dangerLayer);
+		    	me.map.set('dangerSource', dangerSource);
+		    	
+// 		    	var dangerStyleMap = new OpenLayers.StyleMap({	
+// 					"default": me.get('dangerStyle')
+// 				});
+
+				me.map.on('pointermove', function(e) {
+					var selected = null;
+					
+					$('*').css('cursor','');
+  			  		if (selected !== null) {
+		  		    	selected = null;
+		  		  	}
+  			  		me.map.forEachFeatureAtPixel(e.pixel, function(f) {
+		  		    	selected = f;
+		  		    	return true;
+		  		  	});
+  			  		if (selected) {
+  			  			$('*').css('cursor','pointer');
+  			  		}
+  			  		
+				});
+
+		    	me.map.on('click', function(e) {			// 지도 클릭 이벤트
+					var selected = null;
+
+			    	me.map.forEachFeatureAtPixel(e.pixel, function(f) {
+		  		    	selected = f;
+		  		    	return true;
+		  		  	});
+
+			    	if (selected) {
+			    		if(selected.get('type') == 'targetFeature'){
+   			  		  		var object = selected.get('targetInfo');
+							var feature= me.map.get("dangerSource").getFeatures()[0];
+							var data = geoJson.writeFeature(feature);
+							var dangerPopup = UT.popup("ep-danger-map", this, 1400, 800,{
+								'close' : function(popup) {
+									popup.close();
+									me.onSearch();
+								}
+							},{resizable:false});
+							dangerPopup.show();
+							dangerPopup.getWindowContent().load(data);
+							
+	   			  		}
+			    	}
+			    });
+
+			},
+			onSearch : function(){
+				var me = this;
+				UT.request(me.$.findDangerHistory);
+			},
+			completeFindDangerHistory : function(e, res){
+				var me = this;
+            	me.set('historyList', res.response);
+            	if(!me.isInitialized) return;
+            	me.map.get("dangerSource").clear();
+            	moveToTarget(me.map);
+            	me.$.mapContainer.dangerLayerRedraw();
+			},
+			onItemClick : function(e){
+				var me = this;
+				me.map.get("dangerSource").clear();
+				
+				var lineColor = "#ff0000";
+            	var backgroundColor = "#ff0000";
+				
+            	if(e.detail.data.property){
+            		lineColor = e.detail.data.property.lineColor ?  e.detail.data.property.lineColor : "#ff0000";
+            		backgroundColor = e.detail.data.property.backgroundColor ? e.detail.data.property.backgroundColor : "#ff0000";
+            	}
+	        	
+            	var date;
+
+				for(var i in me.historyList){
+					if(me.historyList[i].id == e.detail.data.id){
+						date = me.historyList[i];
+						break;
+					}
+				}
+	        	var feature =  geoJson.readFeature(e.detail.data.geoJson);
+
+	        	feature.setStyle(new ol.style.Style({
+	        		stroke: new ol.style.Stroke({
+	                    color: lineColor,
+	                    width: 2
+	                }),
+	                
+	                fill: new ol.style.Fill({
+   	       		      color: me.hexToRgbA(backgroundColor)
+   	       		    }),
+					
+	    	    }));
+	        	feature.set('type', 'targetFeature');
+	        	feature.set('targetInfo', e.detail.data);
+	        	
+	        	feature.get("targetInfo").startHH = date.startDt.HH();
+	        	feature.get("targetInfo").startmm = date.startDt.mm();
+	        	feature.get("targetInfo").endHH = date.endDt.HH();
+	        	feature.get("targetInfo").endmm = date.endDt.mm();
+				var dangerSource = me.map.get('dangerSource');
+
+				dangerSource.addFeature(feature);
+				
+	    		me.map.getView().fit(feature.getGeometry().getExtent(), {padding : [50,50,50,50]});
+			},
+			
+			hexToRgbA : function (hex){
+			    var c;
+			    if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
+			        c= hex.substring(1).split('');
+			        if(c.length== 3){
+			            c= [c[0], c[0], c[1], c[1], c[2], c[2]];
+			        }
+			        c= '0x'+c.join('');
+			        return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',0.2)';
+			    }
+			    throw new Error('Bad Hex');
+			},
+			
+		});
+		Date.prototype.HH = function(f) {
+			var hh = this.getHours().toString();
+		    return hh[1] ? hh : "0" + hh[0];
+		};
+		Date.prototype.mm = function(f) {
+		    var mm = this.getMinutes().toString();
+		    return mm[1] ? mm : "0" + mm[0];
+		};
+	</script>
+</dom-module>

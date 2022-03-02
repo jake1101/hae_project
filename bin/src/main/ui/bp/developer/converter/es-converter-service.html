@@ -1,0 +1,163 @@
+<script src="/ui/lib/ace/ace.js"></script>
+<script src="/ui/lib/converter/ejs/ejs.js"></script>
+<script src="/ui/lib/converter/js-beautify/js/lib/beautify-html.js"></script>
+<script src="/ui/lib/converter/js-beautify/js/lib/beautify.js"></script>
+<script src="/ui/lib/converter/as3js/lib/as3.js"></script>
+<script src="/ui/lib/converter/as3js/runtime.js"></script>
+<script src="/ui/lib/converter/source-convert-server.js"></script>
+
+
+<dom-module id="es-converter-service">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }        
+        #oldServerEditor { 
+	        border:1px solid #dedede;
+	    }
+        #newEditorController { 
+	        border:1px solid #dedede;
+	    }
+	    #newEditorService { 
+	        border:1px solid #dedede;
+	    }              
+	    
+    </style>
+    
+    <template>
+		<div class="hbox flex">
+			<sc-panel title="SMARTsuite7 (service xml)" class="vbox flex-5">
+				<sc-toolbar>
+					<sc-spacer></sc-spacer>
+					<sc-combobox-field items="[[sampleList]]" value="{{selectedSample}}" placeholder="삽입할 샘플을 선택하세요" style="width:200px;"></sc-combobox-field>
+					<sc-button text="Insert Sample" on-click="doInputSample"></sc-button>
+				</sc-toolbar>
+				<sc-container id="oldServerEditor" flexible="true" class="flex"></sc-container>
+			</sc-panel>
+			<sc-splitter split-type="vertical"></sc-splitter>
+            <div class="vbox flex-5">
+            	<sc-toolbar>
+					<sc-spacer></sc-spacer>
+					<sc-button text="Convert" on-click="doConvert"></sc-button>
+				</sc-toolbar>
+    			<sc-panel title="SMARTsuite9 (controller)" class="vbox flex-5">
+    				<sc-container id="newEditorController" flexible="true" class="flex"></sc-container>
+    			</sc-panel>
+    			<sc-splitter split-type="horizontal"></sc-splitter>
+                <sc-panel title="SMARTsuite9 (service)" class="vbox flex-5">
+                    <sc-container id="newEditorService" flexible="true" class="flex"></sc-container>
+                </sc-panel>
+            </div>
+		</div>
+		
+    </template>
+    
+    <script>
+        Polymer({
+            is: "es-converter-service",
+            
+            properties: {
+            	oldServerEditor : {
+                    type : Object,
+                    value : null
+                },
+                newEditorController : {
+                    type : Object,
+                    value : null
+                },
+                newEditorService : {
+                    type : Object,
+                    value : null
+                },
+                domName : {
+                	type: Object,
+                	value: function() {
+                		return "es-sample";
+                	}
+                },
+                selectedSample : {
+                	type : Object,
+                },
+                sampleList : {
+                	type : Object,
+                	value : function(){
+                		return [{
+                			text : 'PR Service',
+                			value : '/ui/lib/converter/samples/service/service_pr.xml'
+               			}];
+                	}
+                }
+            },
+            
+            attached: function() {                
+                var me = this;
+                
+            	var oldServerEditor = ace.edit(this.$.oldServerEditor._contentEl);
+            	me.oldServerEditor = oldServerEditor; 
+            	oldServerEditor.setTheme("ace/theme/crimson_editor");
+            	oldServerEditor.getSession().setMode("ace/mode/xml");
+            	oldServerEditor.setValue("");
+            	
+            	var newEditorController = ace.edit(this.$.newEditorController._contentEl);
+            	me.newEditorController = newEditorController; 
+            	newEditorController.setTheme("ace/theme/crimson_editor");
+            	newEditorController.getSession().setMode("ace/mode/java");
+            	newEditorController.setValue("");
+
+                var newEditorService = ace.edit(this.$.newEditorService._contentEl);
+                me.newEditorService = newEditorService; 
+                newEditorService.setTheme("ace/theme/crimson_editor");
+                newEditorService.getSession().setMode("ace/mode/java");
+                newEditorService.setValue("");
+                
+            },
+            
+            onClose: function(){
+            	this.fire("close-remove");
+            },
+            
+            doConvert: function() {
+            	var me = this;
+            	var content = me.oldServerEditor.getValue();
+            	var domName = me.domName;
+            	var result;
+            	
+            	try {
+	            	result = convertServer(content, domName);            		
+            	} catch (e) {
+            		result = e.message;
+            	}
+           		me.newEditorController.setValue(result.controller);
+                me.newEditorService.setValue(result.service);
+            },
+            
+            doInputSample: function(){
+            	if(!this.selectedSample){
+            		UT.alert("샘플을 선택해주세요!",null,true);
+            		return;
+            	}
+            	
+            	var me = this;
+            	var request = new XMLHttpRequest();
+            	request.onreadystatechange = function(){
+            		if(request.readyState == 4){
+            			if(request.status == 200){
+            				me.oldServerEditor.setValue(request.responseText);	
+            			}else{
+            				UT.alert("샘플 소스를 찾을 수 없습니다.",null,true);
+            			}
+            				
+            			
+            		}
+            	};
+            	
+            	request.open("GET", this.selectedSample, true);
+            	request.send(null);
+
+            },
+                        
+        });
+    </script>
+
+</dom-module>

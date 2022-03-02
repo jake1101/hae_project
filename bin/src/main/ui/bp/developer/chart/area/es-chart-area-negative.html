@@ -1,0 +1,105 @@
+<dom-module id="es-chart-area-negative">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-area-negative',
+		properties: {
+			
+		},
+		initialized: function(){
+			var me = this;
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "name": "Highcharts:Area with negative values",
+			    "type": "area",
+			    "palettes":[{
+			        "name": "lines",
+			        "alpha": 1.0,
+			        "strokes": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }, {
+			        "name": "fills",
+			        "alpha": 0.7,
+			        "fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }, {
+			        "name": "fills2",
+			        "fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+			            '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+			    }],
+			    "title": "Area chart with negative values",
+			    "plotArea": {
+			        "animations": [{
+			            "property": "seriesMask"
+			        }]
+			    },
+			    "xAxes": {
+			        categories: [
+			            'Apples', 'Oranges', 'Pears', 'Grapes', 'Bananas'
+			        ]
+			    },
+			    "yAxes": {
+			        "title": "Values",
+			        "tick": {
+			            "styles": {
+			            }
+			        }
+			    },
+			    "series": [{
+			        "name": "John",
+			        "lineType": "curved",
+			        "items": [
+			            5, 3, 4, 7, 2
+			        ],
+			        "label": false,
+			        "styles": {
+			            "line": "p(lines:0)",
+			            "fill": "p(fills:0)",
+			            "marker": {
+			                "shapeName": "circle",
+			                "border": "p(lines:0)",
+			                "fill": "p(fills2:0)",
+			            }
+			        }
+			    }, {
+			        "name": "Jane",
+			        "items": [
+			            2, -2, -3, 2, 1
+			        ],
+			        "label": false,
+			        "styles": {
+			            "line": "p(lines:1)",
+			            "fill": "p(fills:1)",
+			            "marker": {
+			                "shapeName": "diamond",
+			                "border": "p(lines:1)",
+			                "fill": "p(fills2:1)",
+			            }
+			        }
+			    }, {
+			        "name": "Joe",
+			        "items": [
+			            3, 4, 4, -2, 5
+			        ],
+			        "label": false,
+			        "styles": {
+			            "line": "p(lines:2)",
+			            "fill": "p(fills:2)",
+			            "marker": {
+			                "shapeName": "rect",
+			                "border": "p(lines:2)",
+			                "fill": "p(fills2:2)",
+			            }
+			        }
+			    }],
+			    "legend": {
+			        "itemStyles": {
+			            "fontBold": true
+			        }
+			    }
+			});
+		}
+	});
+	</script>
+</dom-module>

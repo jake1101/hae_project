@@ -1,0 +1,670 @@
+<sc-link rel="import" href="ep-beacon-map.html"></sc-link>
+<dom-module id="es-beacon-list">
+	<!--
+        ******************************************************************************************
+        ** @Program-name    : 위치 식별기 관리
+        ** @Description     :
+        ** @Author          : mskim
+        ** @Create Date     : 2019.04.10
+        ** @History         : 2019.04.10 mskim 최초작성
+        ******************************************************************************************
+    -->
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+         -->
+		<!-- 코드 조회-->
+		<sc-request-group init>
+			<sc-code-group>
+				<sc-code id="findListCodeMajor" code="MAJOR" value="{{codes.major}}" ></sc-code> <!-- Major -->
+				<sc-code code="IOT013" value="{{codes.type}}" ></sc-code> <!-- BEACON 타입 -->
+				<sc-code code="IOT014" value="{{codes.useYn}}" ></sc-code> <!-- YN -->
+				<sc-code code="IOT025" value="{{extFuncList}}" ></sc-code> <!-- YN -->
+			</sc-code-group>
+			<sc-ajax url="findSiteInfoForBeacon.do" body="{{searchParam}}" last-response="{{siteInfo}}" on-response="findSiteInfo"></sc-ajax>
+		</sc-request-group>
+		
+		<!-- 조회 -->
+		<sc-ajax id="findBeaconList"
+			url="findBeaconList.do"
+			body="{{searchParam}}"
+			on-response="completeFindBeaconList">
+		</sc-ajax>
+		
+		<!-- 저장 -->
+		<sc-ajax id="upsertBeaconArray"
+			url="upsertBeaconArray.do"
+			on-response="completeUpsertBeaconArray">
+		</sc-ajax>
+		
+		<!-- 삭제 -->
+		<sc-ajax id="deleteBeaconArray"
+			url="deleteBeaconArray.do"
+			on-response="completeDeleteBeaconArray">
+		</sc-ajax>
+		
+		<sc-ajax
+				id="findListBeaconCell"
+				url="findListBeaconCell.do"
+				last-response="{{resultCellList}}">
+		</sc-ajax>
+		
+		<!--
+			2021-08-11 jh.Park
+			content : 비콘 위험 리스트 불러오기
+		-->
+		<sc-ajax id="findListRiskIdx"
+				url="findListRiskIdx.do"
+				body="{{searchParam}}"
+				last-response="{{riskIdxList}}">
+		</sc-ajax>
+
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+		
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<div class="vbox flex">
+			<cc-search-container on-search="onSearch" on-enter="onSearch" auth-r>
+				<table validation-group="search">
+					<colgroup>
+						<col style="width:120px"></col>
+						<col></col>
+						<col style="width:120px"></col>
+						<col></col>
+						<col style="width:120px"></col>
+						<col></col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="표시명"></sc-label></th>
+						<td>
+							<sc-text-field value="{{searchParam.displayName}}" on-enter="onSearch" max-length="16"></sc-text-field>
+						</td>
+						<th><sc-label text="타입"></sc-label></th>
+						<td>
+							<sc-combobox-field value="{{searchParam.type}}" items="{{codes.type}}" display-field="label" value-field="data" placeholder="전체">
+	                    	</sc-combobox-field>
+						</td>
+						<th><sc-label text="사용중지 포함"></sc-label></th>
+						<td>
+							<sc-checkbox-field input-value="{{searchParam.includeNotUse}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+						</td>
+					</tr>
+				</table>
+			</cc-search-container>
+
+<!-- selection-mode = "radio" -->
+<!-- on-selection-checked = "onBeaconSelectionChecked" -->
+			<sc-grid id="gridPanel" 
+			         data-provider="{{resultBeaconList}}"
+			         use-selection ="true" 
+			         editable="true" 
+			         class="flex" 
+			         on-item-click="onBeaconItemClick"
+			         on-item-edit-end="onItemEditEnd"
+					 validation-group="save"
+					 on-item-edit-end="onItemEditEnd">
+					 
+				<cc-grid-toolbar>
+					<sc-button text="추가" on-click="onAddBeacon" auth-s></sc-button>
+					<sc-button text="삭제" on-click="onDeleteBeacon" auth-s></sc-button>
+					<sc-button text="저장" on-click="onSaveBeacon" auth-s></sc-button>
+				</cc-grid-toolbar>
+				
+				<sc-grid-columns>
+					<sc-data-column data-field="id"   data-type="number"   header-text="ID" width="0" text-align="center" editable="false"></sc-data-column>
+					<sc-combobox-column data-field="major"        header-text="Major" width="80" text-align="center" editable="true" 
+						display-field="label" value-field="data" items="{{codes.major}}"></sc-combobox-column>
+					<sc-data-column data-field="minor"            header-text="Minor" width="80" text-align="right" editable="true" data-type="number"  ></sc-data-column>
+<!-- 					<sc-data-column data-field="extFunc" header-text="추가기능" width="150" text-align="left" editable="true" max-length="60"></sc-data-column> -->
+<!-- 					<sc-combobox-column data-field="isVirtual"    header-text="가상기기" width="100" text-align="center" editable="true" display-field="label" value-field="data" items="{{codes.yn}}"></sc-combobox-column> -->
+					<sc-data-column data-field="displayName1"     header-text="표시명1" width="130" text-align="center" editable="true" required="true" ></sc-data-column>
+					<sc-data-column data-field="displayName2"     header-text="표시명2" width="130" text-align="center" editable="true"></sc-data-column>
+					<sc-data-column data-field="displayName3"     header-text="표시명3" width="130" text-align="center" editable="true"></sc-data-column>
+					<sc-data-column data-field="empty"      	  header-text="" 	  width="10"  editable="false"></sc-data-column>
+					<sc-combobox-column data-field="beaconType" 		  header-text="설치유형" width="100" text-align="center" editable="true" 
+						display-field="label" value-field="data" items="{{codes.type}}" required="true" domain-only-or-empty="true"></sc-combobox-column>
+					<sc-data-column data-field="lat"              header-text="위도" width="150" text-align="center" editable="true" item-editable-function="isFixLocation"></sc-data-column>
+					<sc-data-column data-field="lon"              header-text="경도" width="150" text-align="center" editable="true" item-editable-function="isFixLocation"></sc-data-column>
+					<sc-image-column data-field="button_point"    image-cls="search" width="30" text-align="center" editable="false"></sc-image-column>
+<!-- 					<sc-combobox-column data-field="isDangerZone" header-text="위험지역" width="100" text-align="center" editable="true" display-field="label" value-field="data" items="{{codes.yn}}"></sc-combobox-column> -->
+					<sc-combobox-column data-field="areaId" header-text="영역" width="100" text-align="center" editable="true" item-editable-function="isFixLocation" 
+						display-field="name" value-field="id" items="{{areaList}}"  domain-only-or-empty="true"></sc-combobox-column>
+<!-- 					<sc-data-column data-field="sensorName"              header-text="부착대상" width="140" text-align="center" editable="false" item-editable-function="isMovingLocation"></sc-data-column> -->
+					<sc-data-column data-field="attachTarget"              header-text="부착대상" width="140" text-align="center" editable="false" item-editable-function="isMovingLocation"></sc-data-column>
+<!-- 					<sc-image-column data-field="button_point2"    image-cls="search" width="30" text-align="center" editable="false"></sc-image-column> -->
+<!-- 					<sc-data-column data-field="areaName"     header-text="영역" width="100" text-align="center" editable="false" required="false" ></sc-data-column> -->
+					<sc-data-column data-field="battery"    data-type="number"    header-text="배터리" width="80" text-align="right" editable="false"></sc-data-column>
+<!-- 					<sc-combobox-column data-field="useFlag"     header-text="사용여부" text-align="center" editable="true"  -->
+<!-- 						display-field="label" value-field="data" items="{{codes.useYn}}" required="true" domain-only-or-empty="true"></sc-combobox-column> -->
+					<sc-checkbox-column data-field="useFlag" header-text="사용여부" width="100" text-align="center" editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+					<sc-group-column hide-child-headers="true" header-text="추가기능" width="140" text-align="center" editable="false">
+						<sc-data-column data-field="extFunc" width="220" text-align="left" editable="false" ></sc-data-column>
+						<sc-image-column data-field="buttonExtFunc" image-cls="search" width="30" text-align="center" editable="false"></sc-image-column>
+					</sc-group-column>
+					
+					<sc-combobox-column data-field="riskId"		  header-text="위험지수" width="100" text-align="center" editable="true" 
+						display-field="riskDisplay" value-field="riskId" items="{{riskIdxList}}" domain-only-or-empty="true"></sc-combobox-column>
+					<sc-combobox-column data-field="pryType" 		  header-text="우선순위" width="100" text-align="center" editable="true" 
+						display-field="name" value-field="code" items="{{pryType}}" domain-only-or-empty="true"></sc-combobox-column>
+				</sc-grid-columns>
+				
+				<sc-grid-fields>
+<!-- 					<sc-grid-field data-field="id" data-type="number"></sc-grid-field> -->
+					<sc-grid-field data-field="siteId"></sc-grid-field>
+					<sc-grid-field data-field="version" data-type="object"></sc-grid-field>
+<!-- 					<sc-grid-field data-field="areaId" data-type="number"></sc-grid-field> -->
+				</sc-grid-fields>
+			</sc-grid>
+			<!-- 추가기능 dialog -->
+			<sc-dialog id="dialogExtFunc" title="추가기능" title-align="left" style="width:300px; top:300px;" modal="true">
+				<sc-grid id="gridExtFunc" class="h-250" data-provider="{{extFuncList}}" use-state="false">
+					<cc-grid-toolbar>
+						<sc-button text="선택" on-click="onSelectedExtFunc" auth-s></sc-button>
+					</cc-grid-toolbar>
+					<sc-grid-columns>
+						<sc-data-column data-field="label" header-text="추가기능" width="180" text-align="center" editable="false"></sc-data-column>
+					</sc-grid-columns>
+				</sc-grid>
+	        </sc-dialog>
+		</div>
+
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "es-beacon-list",
+            properties : {
+                codes: {
+                    type : Object,
+                    reset : false,
+                    value : function() {
+                        return {};
+                    }
+                },
+                
+                pryType : {
+                	type : Object,
+                	value : function() {
+						return [
+							{
+								name : "비콘",
+								code : "B"
+							},
+							{
+								name : "GPS",
+								code : "G"
+							}
+						]
+					}
+                },
+                
+                currentRowIndex:Number,
+                
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {
+                        	siteId : SCMdiManager.searchParam.site_id,
+                        	//2021-09-08 jh.Park 위험지수 유형 beacon으로 검색 위해 추가
+                        	riskType : "beacon"
+                        };
+                    }
+                },
+                
+                siteInfo: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                
+                // 조회 결과 리스트
+                resultBeaconList: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+                
+                resultCellList: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+                
+                areaList: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                }
+            },
+            /** 시작 및 검색 start **/
+			// 초기화 완료 후 호출 함수
+            initialized : function() {
+                var me = this;
+                
+                me.onSearch();
+            },
+            // 조회
+            onSearch : function() {
+                var me = this;
+                
+                if(!me.validate('search')){
+                    UT.alert("STD.E0000");
+                    return false;
+                }
+
+                me.set("resultBeaconList", []);
+
+                // beacon 현황 조회
+                UT.request(me.$.findBeaconList);
+                UT.request(me.$.findListRiskIdx);
+            },
+            // 엔터키 조회
+            onEnterSearch: function(){
+                var me = this;
+                
+                me.onSearch();
+            },
+            /** 시작 및 검색 end **/
+
+            /** API start **/
+         	// 저장 완료
+            completeUpsertBeaconArray: function(e, res){
+                var me = this; 
+                
+                if(res.response.result_status === 'S'){
+                	// 저장하였습니다.
+                    UT.alert("STD.N2400", function(){
+                        me.onSearch();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+
+            },
+            completeDeleteBeaconArray: function(e, res){
+            	var me = this
+            	,message = "STD.N2500"; // 삭제하였습니다.
+            	
+            	if(res.response.result_status === 'S'){
+                	UT.alert(message, function(){
+                    	me.onSearch();
+                	});
+            	} else {
+                	message = res.response.result_message;
+                	UT.alert(message);
+            	}
+            	
+            },
+            // double check!!!
+            findSiteInfo : function(){
+                var me = this;
+                var buildingArea = me.siteInfo.filter(function(e){    
+                	  return e.type === "building" || e.type === "area";
+                });  
+                me.set("areaList", buildingArea);
+            },
+            // 조회 완료
+            completeFindBeaconList: function(e, res){
+            	var me = this;
+            	var resultList = res.response || [];
+            	for(var i in resultList){
+            		if(resultList[i].riskId == 0){
+            			resultList[i].riskId = null;
+            		}
+            	}
+            	me.set("resultBeaconList", resultList);
+            },
+            /** API end **/
+
+            /** Btn Event start **/
+         	// Beacon 추가
+            onAddBeacon : function(){
+                var me = this,
+                    searchParam = this.get("searchParam"),
+                    provider = me.$.gridPanel.getDataProvider(),
+                    currCell = me.$.gridPanel.getCurrentCell();
+
+                if(!me.validate('search')){
+                    UT.alert("STD.E0000");
+                    return false;
+                }
+
+                // 그리드 신규행 추가
+                var row = {
+                    siteId: searchParam.siteId  // 회사
+                    ,useFlag: "Y"               // 사용여부
+//                    ,property : {}
+//                     isVirtual : false,
+//                     isDangerZone : false
+                };
+                
+                if(currCell == null){
+                	provider.addItemAt(0,row);
+                }else{
+                	provider.addItemAt(currCell.rowIndex+1, row);
+                }
+                
+            },
+            // 문서번호 현황 저장
+            onSaveBeacon : function(){
+                var me = this;
+
+                // 저장 유효성 체크
+                if(!me.validation()) {
+                    return;
+                }
+
+                var provider = me.$.gridPanel.getDataProvider(),
+                    created = provider.getNewItems(),
+                    updated = provider.getUpdateItems();
+
+                if(created.length + updated.length === 0) {
+                    UT.alert("STD.N1700"); // "변경된 내용이 없습니다"
+                    return;
+                }
+
+                UT.confirm("STD.N1200", function() { // 저장 하시겠습니까?
+                	for(var i = 0; i < created.length; i++){
+                		var create = created[i];
+                		create.version = {
+                			major : create.major
+                			, minor : create.minor
+                		};
+                		
+/*                 		if(create.property){
+                			var property = create.property;
+                			property.type = create.type;
+                			create.property = property;
+                		} */
+                		
+                	}
+                	for(var i = 0; i < updated.length; i++){
+                		var update = updated[i];
+                		update.version = {
+                			major : update.major
+                			, minor : update.minor
+                		};
+                		
+//                 		if(update.property){
+//                 			var property = update.property;
+//                 			property.type = update.type;
+//                 			update.property = property;
+//                 		}
+                	}
+                    me.$.upsertBeaconArray.body = {
+                        insertList: created,
+                        updateList: updated
+                    };
+                    
+                    UT.request(me.$.upsertBeaconArray);
+                });
+            },
+            onDeleteBeacon: function(){
+            	var me = this;
+            	var provider = me.$.gridPanel.getDataProvider();
+            	var checked = provider.selectionCheckedIndexes();
+            	
+            	if (checked.length === 0) {
+                    UT.alert("STD.N1600");
+                    return;
+                }
+            	
+                UT.confirm("STD.N1300", function() { // "삭제 하시겠습니까?"
+                    var deleted = provider.removeItems();
+                    if(deleted.length > 0){
+                        me.$.deleteBeaconArray.body = {
+                            deleteList: deleted
+                        };
+                        UT.request(me.$.deleteBeaconArray);
+                    }
+                });
+                
+            },
+            // 추가기능 팝업 - 선택
+            onSelectedExtFunc: function(){
+            	var me = this;
+            	var extFuncProvider = me.$.gridExtFunc.getDataProvider();
+            	
+            	var checkedList = extFuncProvider.selectionCheckedItems();
+            	
+            	// 선택된 항목이 없습니다.
+//             	if (checkedList.length === 0) {
+//                     UT.alert("STD.N1600");
+//                     return;
+//                 }
+            	
+            	var dataList = [];
+            	var labelList = [];
+            	var data = {
+            		extFunc: ""
+            		,isDanger: "N"
+            		,isReturn: "N"
+            	};
+            	
+            	for(var idx in checkedList){
+            		var item = checkedList[idx];
+            		
+            		dataList.push(item.data);
+            		labelList.push(item.label);
+            		
+            		if(item.data == "1"){
+            			data.isDanger = "Y";
+            		}else if(item.data == "2"){
+            			data.isReturn = "Y";
+            		}
+            	}
+            	
+            	var provider = me.$.gridPanel.getDataProvider();
+            	var curItem = provider.getItemAt(me.currentRowIndex);
+//            	var property = curItem.property || {};
+            	
+            	curItem.isDanger = data.isDanger;
+            	curItem.isReturn = data.isReturn;
+            	
+            	provider.setItemAt(me.currentRowIndex, {
+            		isDanger: data.isDanger
+            		, isReturn: data.isReturn
+            		,extFunc: labelList.toString()
+            	});
+            	
+/*             	property.extFunc = labelList.toString();
+            	property.isDanger = data.isDanger;
+            	property.isReturn = data.isReturn;
+            	
+            	provider.setItemAt(me.currentRowIndex, {
+            		property: property
+            		,extFunc: property.extFunc
+            	});
+*/
+            	me.$.dialogExtFunc.close();
+            },
+            /** Btn Event end **/
+            
+            /** Grid Event start **/
+			// grid item click 이벤트
+			onBeaconItemClick : function(event) {
+				var me = this
+				,data = event.detail.data
+				,item = event.detail.item
+				,provider = event.detail.provider;
+				
+				me.currentRowIndex = item.rowIndex;
+                
+				// 위도,경도(지도)
+				if(item.dataField === "button_point") {
+// 					var lat = data.lat;
+// 					var lon = data.lon;
+// 					var areaId = data.areaId;
+					if(data.beaconType != "F"){
+						UT.alert("해당 비콘의 설치유형이 고정좌표일 때만 위경도 값을 설정할 수 있습니다.");
+						return 
+					}
+					var allList = provider.getItems();
+					me.showMapPopup(data,allList);
+					
+				}
+				// 부착대상 팝업
+				else if(item.dataField ==="button_point2"){
+					UT.alert("시스템 준비중입니다.");
+					return;
+// 					if(data.type!="moving_location"){
+// 						UT.alert("해당 비콘의 설치유형이 이동좌표일 때만 부착대상을 설정할 수 있습니다.");
+// 						return; 
+// 					}
+//					//TODO 
+//					// yshong
+//					// 부착대상을 어떤것에 둘지 필요함. 현재 팝업 없음.
+// 					me.showMapPopup(data,allList);
+					
+				}
+				
+				// 추가기능
+				else if(item.dataField === "buttonExtFunc"){
+					me.showExtFuncPopup(data);
+				}
+// 				else{
+// 					me.onBeaconCellSearch(data.id);
+// 				}
+            },
+            onItemEditEnd : function(e){
+            	var me = this, e = event.detail,
+ 				data     = e.data,			// 해당 row의 데이터
+ 				item     = e.item,			// item.dataField, item.columnIndex, item.rowIndex (tree인 경우 item.nodeIndex)
+ 				provider = e.provider,		// 해당 sc-grid의 provider
+ 				oldValue = e.oldValue,		// 수정 전 데이터
+ 				newValue = e.newValue,		// 수정 후 데이터
+ 				grid     = e.grid;			// 해당 grid instance
+ 				
+            	if (item.dataField === "type"){
+            		grid.refresh();
+            	}
+            },
+			/** Grid Event end **/
+
+            /** Grid Function start **/
+            isFixLocation : function(e1, e2){
+            	if(e1.type=="fix_location")
+            		return true;
+            	else
+            		return false;
+            },
+            isMovingLocation : function(e1, e2){
+            	if(e1.type=="moving_location")
+            		return true;
+            	else
+            		return false;
+            },
+            /** Grid Function end **/
+
+            /** 기타 start **/
+            // 추가기능 팝업
+            showExtFuncPopup: function(data){
+            	var me = this;
+
+            	me.$.gridExtFunc.selectionCheckAll(false);  // 체크 초기화
+
+            	if(data.isDanger =="Y"){
+            		me.$.gridExtFunc.selectionCheck(0,true,false);
+                }
+            	if(data.isReturn =="Y"){
+            		me.$.gridExtFunc.selectionCheck(1,true,false);
+                }
+                
+            	me.$.dialogExtFunc.show();
+            },
+            // 지도 생성 팝업
+            showMapPopup : function(dataInfo, allList) {
+            	var me = this;
+            	
+           		var mapPopup = UT.popup("ep-beacon-map", me, 1000, 600,{
+           			'apply-point' :  function(popup, e){
+           				var provider = me.$.gridPanel.getDataProvider(),
+           					result = e.detail;
+   	   					provider.setItemAt(me.currentRowIndex, {
+   	   						'lat': result.lat,
+   	   						'lon': result.lon,
+   	   						'areaId': result.areaId
+   	   					});
+                 		popup.close();
+           			}
+           		},{resizable:false});
+           		mapPopup.show();
+           		mapPopup.getWindowContent().load(dataInfo, allList);
+            },
+            // 저장 유효성 체크
+            validation: function() {
+                var me = this;
+
+                // 기본 validate
+                if(!me.validate('save')) {
+                    UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                    return false;
+                }
+
+                // 중복 체크
+                var provider = me.$.gridPanel.getDataProvider(),
+                    rows = provider.getItems();
+                var unique_check = {};
+                for (var i=0, len = rows.length; i<len; i++) {
+                    if(typeof unique_check[rows[i].serialNumber] == "undefined"){
+                        unique_check[rows[i].serialNumber] = 0;
+                    } else {
+                        //UT.alert(me.translate("STD.E1000",null, me.translate('사업자번호')),null,true); // "'{0}'에 동일한 값이 존재합니다"
+                        //return false;
+                    }
+                }
+
+                return true;
+            },
+            
+            /** 기타 end **/
+            
+            /** Unuse Function start **/
+            onBeaconSelectionChecked : function(event){
+            	var me = this;
+            	var data = event.detail.data;
+            	if(UT.isNotEmpty(data.id))
+            		me.onBeaconCellSearch(data.id);
+            },
+            
+            onBeaconCellSearch : function(beaconId){
+                var me = this;
+                
+                me.set("resultCellList", []);
+                me.$.findListBeaconCell.body = {
+                		siteId : me.get('searchParam.siteId'),
+                		beaconId : beaconId,
+                		publishId : null,
+                		onlyPublish : me.get('searchParam.onlyPublish')
+                }
+               
+                // beacon 현황 조회
+                UT.request(me.$.findListBeaconCell);
+            },
+            /** Unuse Function end **/
+        });
+	</script>
+
+</dom-module>

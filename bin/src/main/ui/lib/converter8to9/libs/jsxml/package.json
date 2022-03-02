@@ -1,0 +1,98 @@
+{
+  "_args": [
+    [
+      "jsxml",
+      "D:\\polymer\\workspace\\smartx9-webapp\\src\\main\\ui\\lib"
+    ]
+  ],
+  "_from": "jsxml@*",
+  "_id": "jsxml@0.0.2",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/jsxml",
+  "_npmUser": {
+    "email": "npmjs@solsort.com",
+    "name": "rasmuserik"
+  },
+  "_npmVersion": "1.2.14",
+  "_phantomChildren": {},
+  "_requested": {
+    "name": "jsxml",
+    "raw": "jsxml",
+    "rawSpec": "",
+    "scope": null,
+    "spec": "*",
+    "type": "range"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/jsxml/-/jsxml-0.0.2.tgz",
+  "_shasum": "53985e8321169de5bd0d8b57ec15e2726f25b626",
+  "_shrinkwrap": null,
+  "_spec": "jsxml",
+  "_where": "D:\\polymer\\workspace\\smartx9-webapp\\src\\main\\ui\\lib",
+  "author": {
+    "name": "Rasmus Erik Voel Jensen",
+    "url": "rasmuserik.com"
+  },
+  "bugs": {
+    "url": "https://github.com/rasmuserik/jsxml/issues"
+  },
+  "contributors": [
+    {
+      "name": "Rasmus Erik Voel Jensen",
+      "url": "http://solsort.dk"
+    }
+  ],
+  "dependencies": {},
+  "description": "javascript utilities for working xml, mainly in jsonml in array form",
+  "devDependencies": {},
+  "directories": {},
+  "dist": {
+    "shasum": "53985e8321169de5bd0d8b57ec15e2726f25b626",
+    "tarball": "https://registry.npmjs.org/jsxml/-/jsxml-0.0.2.tgz"
+  },
+  "ender": "lib/jsxml.js",
+  "homepage": "http://github.com/rasmuserik/jsxml/",
+  "keywords": [
+    "entities",
+    "escape",
+    "html",
+    "json",
+    "jsonml",
+    "xml"
+  ],
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://www.opensource.org/licenses/MIT"
+    }
+  ],
+  "main": "lib/jsxml.js",
+  "maintainers": [
+    {
+      "name": "rasmuserik",
+      "email": "rasmuserik-npm@solsort.dk"
+    }
+  ],
+  "name": "jsxml",
+  "optionalDependencies": {},
+  "readme": "# ![logo](https://ssl.solsort.com/_logo.png) Jsxml\nJavaScript utilities for parsing and working xml, mainly in jsonml in array form.\n\nMore info on JsonML at [jsonml.org](http://jsonml.org/) and [wikipedia](http://en.wikipedia.org/wiki/JsonML)\n\nThis module implements the following functions:\n\n- `jsxml.fromXml(xml_string)` converts a string containing xml to jsonml in array form\n- `jsxml.toXml(jsxml_array)` converts jsonml in array form to xml\n- `jsxml.toObject(jsxml_array)` converts jsonml in array form to an easier subscriptable object\n- `jsxml.childReduce(jsxml_array, callback_function(accumulator, child_element), initial_value)` applies the callback function to each child element of the jsonml array\n- `jsxml.getAttr(jsxml_array, attribute)` retrieves the value of a given attribute of the jsonml array or undefined if no attributes, or no attributes defined\n\nReleased under open source / MIT license\n",
+  "readmeFilename": "README.md",
+  "repositories": [
+    {
+      "type": "git",
+      "url": "git+ssh://git@github.com/rasmuserik/jsxml.git"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/rasmuserik/jsxml.git"
+  },
+  "scripts": {
+    "doc": "docco lib/jsxml.js",
+    "test": "node test/test.js"
+  },
+  "version": "0.0.2"
+}

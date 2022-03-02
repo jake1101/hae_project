@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+ESAATTH: 첨부파일
+ -->
+
+<mapper namespace="attach">
+
+    <insert id="insertAttach">
+    /* attach.insertAttach: 첨부파일 등록 */
+    INSERT 
+      INTO ESAATTH (
+           SYS_ID
+         , ATT_ID
+         , GRP_CD
+         , ORGN_FILE_NM
+         , ATT_FILE_NM
+         , ATT_FILE_PATH
+         , ATT_FILE_SIZ
+         , FILE_CONT
+         , REM
+         , SORT_ORD
+         , STS
+         , REG_ID
+         , REG_DT
+         , MOD_ID
+         , MOD_DT
+    ) VALUES (
+           #{g.tenant}
+         , #{p.att_id}
+         , #{p.grp_cd}
+         , #{p.orgn_file_nm}
+         , #{p.att_file_nm}
+         , #{p.att_file_path}
+         , CAST(#{p.att_file_siz} AS INTEGER)
+         , #{p.file_cont}
+         , #{p.rem}
+         , CAST(#{p.sort_ord} AS INTEGER)
+         , 'C'
+         , #{g.username}
+         , #{g.now}
+         , #{g.username}
+         , #{g.now}
+    )
+    </insert>
+    
+    <insert id="copyAttach">
+    /* attach.copyAttach: 첨부파일 복사 */
+    INSERT INTO ESAATTH
+         ( SYS_ID
+         , ATT_ID
+         , GRP_CD
+         , ORGN_FILE_NM
+         , ATT_FILE_NM
+         , ATT_FILE_PATH
+         , ATT_FILE_SIZ
+         , FILE_CONT
+         , REM
+         , SORT_ORD
+         , STS
+         , REG_ID
+         , REG_DT
+         , MOD_ID
+         , MOD_DT
+         )
+    SELECT SYS_ID
+         , #{p.new_att_id}
+         , #{p.new_grp_cd}
+         , ORGN_FILE_NM
+         , ATT_FILE_NM
+         , ATT_FILE_PATH
+         , ATT_FILE_SIZ
+         , FILE_CONT
+         , REM
+         , #{p.sort_ord,jdbcType=INTEGER}
+         , 'C'
+         , #{g.username}
+         , #{g.now}
+         , #{g.username}
+         , #{g.now}
+      FROM ESAATTH
+     WHERE SYS_ID = #{g.tenant}
+       AND ATT_ID = #{p.att_id}
+       AND GRP_CD = #{p.grp_cd}
+    </insert>
+
+    <update id="deleteAttach">
+    /* attach.deleteAttach: 첨부파일 삭제 */
+    UPDATE ESAATTH
+       SET STS = 'D'
+         , MOD_DT = #{g.now}
+         , MOD_ID = #{g.username}
+     WHERE SYS_ID = #{g.tenant}
+       AND ATT_ID = #{p.att_id}
+    </update>
+
+    <select id="findListAttach" resultType="map">
+    /* attach.findListAttach: 첨부파일 목록 조회 */
+    SELECT ATT_ID
+    	 , ORGN_FILE_NM
+         , ATT_FILE_PATH
+         , ATT_FILE_SIZ
+      FROM ESAATTH
+     WHERE SYS_ID = #{g.tenant}
+       AND GRP_CD = #{p.grp_cd}
+       AND STS != 'D'
+     ORDER BY SORT_ORD ASC
+    </select>
+    
+    <select id="findAttach" resultType="map">
+    /* attach.findAttach: 첨부파일 상세 조회 */
+    SELECT SYS_ID
+         , ATT_ID
+         , GRP_CD
+         , ORGN_FILE_NM
+         , ATT_FILE_NM
+         , ATT_FILE_PATH
+         , ATT_FILE_SIZ
+         , REM
+         , SORT_ORD
+         , STS
+         , REG_ID
+         , REG_DT
+         , MOD_ID
+         , MOD_DT
+      FROM ESAATTH
+     WHERE ATT_ID = #{p.att_id}
+    </select>
+    
+    <resultMap id="resultMap-findAttachByFilePath" type="map">
+        <result property="file_cont" column="FILE_CONT" jdbcType="BLOB" javaType="[B" /> <!-- byte[] -->
+    </resultMap>
+    <select id="findAttachByFilePath" resultMap="resultMap-findAttachByFilePath">
+    /* attach.findAttachByFilePath: 첨부파일 상세 조회 */
+    SELECT SYS_ID
+         , ATT_ID
+         , GRP_CD
+         , ORGN_FILE_NM
+         , ATT_FILE_NM
+         , ATT_FILE_PATH
+         , ATT_FILE_SIZ
+         , FILE_CONT
+         , REM
+         , SORT_ORD
+         , STS
+         , REG_ID
+         , REG_DT
+         , MOD_ID
+         , MOD_DT
+      FROM ESAATTH
+     WHERE ATT_FILE_PATH = #{p.att_file_path}
+    </select>
+    
+</mapper>

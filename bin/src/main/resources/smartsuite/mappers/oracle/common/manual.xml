@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="manual">
+
+	<!-- ESAUMNL(메뉴얼 관리) INSERT -->
+	<insert id="insertEsaumnl">
+	/* manual.insertEsaumnl */
+	      INSERT INTO ESAUMNL
+	      (
+            SYS_ID	    /*시스템 아이디 */
+           ,MENU_CD	    /*메뉴 코드 */
+           ,MNL_REV	    /*매뉴얼 차수 */
+           ,MNL_TYP	    /*매뉴얼 유형 */
+           ,RLS_REV	    /*게시 차수 */
+           ,MNL_ATT_NO	/*매뉴얼 첨부 번호 */
+<!--            ,ORGN_MNL_ATT_NO  /*원본파일첨부 번호 */ -->
+           ,MNL_CONT	/*매뉴얼 내용 */
+           ,REG_ID	    /*등록자 아이디 */
+           ,REG_DT	    /*등록 일시 */
+	      )
+	      VALUES
+	      (
+            #{g.tenant}         /*시스템 아이디 */
+           ,#{p.menu_cd}	    /*메뉴 코드 */
+           ,(
+             SELECT CASE WHEN MAX(MNL_REV) IS NULL THEN 1 ELSE MAX(MNL_REV)+1 END
+               FROM ESAUMNL
+              WHERE SYS_ID  = #{g.tenant}
+                AND MENU_CD = #{p.menu_cd}
+            )               
+           ,#{p.mnl_typ}	    /*매뉴얼 유형 */
+           ,CAST(NULLIF(#{p.rls_rev},'') AS INT)   		/*게시 차수 */
+           ,#{p.mnl_att_no}	    /*매뉴얼 첨부 번호 */
+<!--            ,#{p.orgn_mnl_att_no}	    /*원본 매뉴얼 첨부 번호 */ -->
+           ,#{p.mnl_cont}	    /*매뉴얼 내용 */
+           ,#{g.username}	    /*등록자 아이디 */
+           ,#{g.now}	        /*등록 일시 */
+	      )
+	</insert>
+	
+	<!-- ESAUMNL(메뉴얼 관리) UPDATE -->
+	<update id="updateEsaumnl">
+	/* manual.updateEsaumnl */
+	       UPDATE ESAUMNL
+	          SET MOD_ID = #{g.username}
+	             ,MOD_DT = #{g.now}
+			     ,MNL_TYP = #{p.mnl_typ}	    /*매뉴얼 유형 */   
+	             ,RLS_REV = CAST(NULLIF(#{p.rls_rev},'') AS INT) 	    /*게시 차수 */
+                 ,MNL_ATT_NO = #{p.mnl_att_no}	/*매뉴얼 첨부 번호 */
+<!--                  ,ORGN_MNL_ATT_NO = #{p.orgn_mnl_att_no}	/*원본파일 첨부 번호 */ -->
+                 ,MNL_CONT = #{p.mnl_cont}	    /*매뉴얼 내용 */
+            WHERE SYS_ID  = #{g.tenant}
+              AND MENU_CD = #{p.menu_cd}
+              AND MNL_REV = #{p.mnl_rev}
+	</update>
+	
+	<!-- ESAUMNL(메뉴얼 관리) 조회 -->
+<!-- 	<resultMap type="map" id="resultMap-findInfoManual"> -->
+<!--         <result property="mnl_cont" column="MNL_CONT" jdbcType="CLOB" javaType="string" /> -->
+<!--     </resultMap> -->
+	<select id="findInfoManual" resultType="map"> <!-- resultMap="resultMap-findInfoManual"> -->
+	/* manual.findInfoManual */
+           SELECT SYS_ID	  /*시스템 아이디 */
+                 ,MENU_CD	  /*메뉴 코드 */
+                 ,MNL_REV	  /*매뉴얼 차수 */
+                 ,MNL_TYP	  /*매뉴얼 유형 */
+                 ,RLS_REV	  /*게시 차수 */
+                 ,MNL_ATT_NO  /*매뉴얼 첨부 번호 */
+<!--                  ,ORGN_MNL_ATT_NO   /*원본 매뉴얼 첨부 번호 */ -->
+                 ,MNL_CONT	  /*매뉴얼 내용 */
+                 ,REG_ID	  /*등록자 아이디 */
+                 ,REG_DT	  /*등록 일시 */
+                 ,MOD_ID	  /*수정자 아이디 */
+                 ,MOD_DT	  /*수정 일시 */
+             FROM ESAUMNL
+            WHERE SYS_ID  = #{g.tenant}
+              AND MENU_CD = #{p.menu_cd}
+		<choose>
+			<when test='p.mnl_rev != null and p.mnl_rev != ""'>
+              AND MNL_REV = #{p.mnl_rev} 
+			</when>
+			<otherwise>
+			  AND MNL_REV = (SELECT MAX(MNL_REV)
+			                   FROM ESAUMNL
+			                  WHERE SYS_ID = #{g.tenant}
+			                    AND MENU_CD = #{p.menu_cd}
+			                )
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- ESAUMNL(메뉴얼 관리) 메뉴얼 차수 콤보 데이터 조회 -->
+	<select id="findListMnlRevCombo" resultType="map">
+	/* manual.findListMnlRevCombo */
+           SELECT MNL_REV AS DATA
+                 ,MNL_REV AS LABEL
+             FROM ESAUMNL
+            WHERE SYS_ID  = #{g.tenant}
+              AND MENU_CD = #{p.menu_cd}
+         ORDER BY MNL_REV DESC
+	</select>
+	
+</mapper>

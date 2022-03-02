@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="pr">
+	<select id="comparePrHdSts" resultType="map">
+	/* pr.comparePrHdSts */
+	SELECT PRHD.PR_ID
+	     , PRHD.PR_NO
+	     , PRHD.PR_REV
+	     , PRHD.PR_APRV_STS
+	     , CASE WHEN PRHD.PR_APRV_STS = #{p.pr_aprv_sts}
+	                 THEN 'Y'
+	            ELSE 'N'
+	       END  AS VALID_YN  /* 화면에서 조회한 시점의 pr_aprv_sts 값이
+	                            현재 DB에서의 PRHD.PR_APRV_STS 값과 동일한지의 여부를 Y/N으로 설정 */
+	  FROM ESPPRHD PRHD
+	 WHERE PRHD.SYS_ID = #{g.tenant}
+	   AND PRHD.PR_ID  = #{p.pr_id}
+	</select>
+</mapper>

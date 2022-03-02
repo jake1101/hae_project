@@ -1,0 +1,75 @@
+
+<dom-module id="em-cachebust">
+    <style>
+        :host {
+            @apply(--fit-layout);
+        }
+    </style>
+
+	<template>
+	
+		<!-- 캐시 버스트 조회 -->
+        <sc-ajax id="getCacheBust"
+            url="stateful/getCacheBust.do"
+            last-response="{{result}}"
+            >
+        </sc-ajax>
+        
+        <!-- 캐시 버스트 업데이트 -->
+        <sc-ajax id="updateCacheBust"
+            url="stateful/updateCacheBust.do"
+            last-response="{{result}}"
+            >
+        </sc-ajax>
+        
+        <!-- page title toolbar -->
+		<cc-page-title-bar></cc-page-title-bar>
+        
+        <sc-panel>
+        	<table class="tb-form" style="width:350px;">
+				<tr>
+					<th style="width:100px;text-align:right;">
+						<sc-label text="캐시 버스트" ></sc-label></th>
+					<td>
+						<sc-text-field  value="{{result}}" style="width:150px;" readonly="true"></sc-text-field>
+						<sc-button text="업데이트" on-click="onUpdateCacheBust"></sc-button>
+					</td>
+				</tr>
+			</table>
+        </sc-panel>
+		
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-cachebust',
+			
+			properties : {
+            	result : { 
+					type  : Object,
+					value : function() {
+						return {};
+					}
+				}
+			},
+
+			// 타 모듈에서 mdi.createWindow 를 통해 화면 open 하는 경우
+			initialized: function() {
+				this.searchCacheBust();
+			},
+			
+			// 캐시 버스트 조회
+			searchCacheBust: function(){
+				this.$.getCacheBust.generateRequest();
+			},
+			
+			// 캐시 버스트 업데이트
+			onUpdateCacheBust: function(e, data){
+                this.$.updateCacheBust.generateRequest();
+			}
+
+		});
+	</script>
+
+
+</dom-module>

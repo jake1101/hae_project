@@ -1,0 +1,96 @@
+<link rel="import" href="../widget-factory/widget-chart-factory.html"/>
+<dom-module id="widget-chart">
+    <style>
+    </style>
+    <template>
+   		<div class="chartContainer" id="{{chartDomId}}"></div>
+    </template>
+    <script>
+        WidgetChart = Polymer({
+            is: "widget-chart",
+            behaviors: [
+        		WidgetDataProvider           
+            ],
+            properties: {
+            	chartDomId:{
+    				type:Object,
+            		value:function(){
+            			return UT.generateUUID();
+            		}
+    			}
+            }, 
+            listeners : {
+    		},
+    		get chartContainer(){
+				if(!this._chartContainer){
+					this._chartContainer = this.querySelector('.chartContainer');
+					this._chartContainer.id = this.chartDomId; 
+				}
+				return this._chartContainer;
+			},
+			getContent : function(){
+				return this.chartContainer;
+			},
+			ready : function(){
+				var me = this;
+				me.chartDomId = UT.generateUUID();
+			},
+    		attached : function(){
+    			var me = this;
+    			me.initialized = true;
+    		},
+    		showPreview :  function(template){
+    			this.createChart(template);
+    		},
+    		createContent : function(template){
+				var me = this, 
+				contents = template.contents ;
+				me.contentData = contents;
+				me.template = template;
+				me.dataUrl = contents.dataUrl;
+				me.conditions = contents.conditions;
+				me.dataLoad();
+			},
+			setWidgetData : function(){
+    			var me = this,type = me.template.contents.type;
+    			var widgetChartFactory = new WidgetChartFactory(type);
+				var template = widgetChartFactory.getTemplate(me.template,me.widgetData);
+				if(me.initialized && me.parentElement){
+					if(me.chart){
+						me.chart = null;
+					}
+					template.chart.events= {
+						load: function(event){
+							me.fire('widget-content-draw',{type: me.template.type, info:event.target});
+						}						
+					}
+					template.navigation =  {
+				        buttonOptions: {
+				            enabled: false
+				        }
+				    }
+					me.chart = new Highcharts.Chart(me.chartContainer.id,template);
+					me.chart.reflow();
+				}
+    		},
+    		getWidgetTempalte : function(){
+    			var me = this;
+    			return me.template;
+    		},
+    		refresh: function(){
+    			this.dataLoad();
+    		},
+    		resize: function(widget_content){
+    			var me = this,
+    			    headable = widget_content.headable ;
+    			var container = this.getContent(),
+	   			widgetHeaderHeight = widget_content.headerHeight;
+	   			if(container){
+	   				container.style.height = (widget_content.widget_height - widgetHeaderHeight)+'px';
+	   			}
+	   			me.chart && me.chart.reflow();
+	    	 }
+    		
+    	});
+    </script>
+</dom-module>

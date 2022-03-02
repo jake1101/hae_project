@@ -1,0 +1,103 @@
+<link rel="import" href="../../widgets/widget-grid.html"/>
+<link rel="import" href="../../widgets/widget-chart.html"/>
+<link rel="import" href="../../widgets/widget-iframe.html"/>
+<link rel="import" href="../../widgets/widget-component.html"/>
+<dom-module id="widget-previewer">
+    <style>
+   </style>
+
+    <template>
+    	<div class="widgetContainer" id="{{containerId}}">
+    		<content></content>
+    	</div>
+    </template>
+    <script>
+        WidgetPreviewer = Polymer({
+            is: "widget-previewer",
+
+            properties: {
+            	containerId:{
+    				type:Object,
+            		value:function(){
+            			var uuid = UT.generateUUID();
+            			return uuid.replace(/-/gi,'');
+            		}
+    			},
+    			widgetPrefix :{
+    				type : String,
+    				value : 'widget-'
+    			}
+            }, 
+            listeners : {
+            	
+    		},
+    		get container(){
+				if(!this._container){
+					this._container = this.querySelector('.widgetContainer');
+				}
+				return this._container;
+			},
+			
+    		attached : function(){
+    			var me = this;
+    		},
+    		
+    		showPreview :  function(template){
+    			var me = this;
+    			me.template = template;
+    			me.initContent();
+    			me.content = me.getContent(template.widget_type);
+    			me.createContent(template);
+    			me.contentReSize(template);
+    		},
+    		
+    		getContent : function(type){
+    			var me = this , 
+    			    viewName = '',
+    			    content;
+    			viewName = me.widgetPrefix + type;
+    			content = document.createElement(viewName);
+    			return  content;
+    		},
+    		
+    		contentReSize : function(template){
+    			var me = this;
+    			var content = me.content.getContent();
+   				var rec = me.getBoundingClientRect();
+       			content.style.width =   "400px";
+       			content.style.height =  "400px";
+       		 	content.style.top = '50%';
+       			content.style.left = '50%';
+       			content.style.marginLeft = '-200px';
+       			content.style.marginTop = '-200px';
+       			content.style.border = "1px solid #c8c8c8";
+       			if(template.widget_type == 'grid'){
+	       			content._doContentElementResize();
+       			}
+    		},
+    		
+    		initContent : function(){
+    			var me = this;
+    			if(me.content && me.container.children.length > 0){
+    				me.container.removeChild(me.container.firstElementChild)
+    			}
+    		},
+    		createContent : function(template){
+    			var me = this;
+    			Polymer.dom(me.container).appendChild(me.content);
+    			Polymer.dom.flush();
+				me.content.createContent(template);
+    		},
+    		getWidgetType : function(){
+    			return this.template.type;
+    		},
+    		getTemplate : function(){
+    			return this.template;
+    		},
+    		resetData: function(){
+    			this.initContent();
+    		}
+    		
+    	});
+    </script>
+</dom-module>

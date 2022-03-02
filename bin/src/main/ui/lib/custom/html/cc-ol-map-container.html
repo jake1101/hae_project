@@ -1,0 +1,1029 @@
+<sc-link rel="import" href="../../../iot/condition/ep-danger-map.html"></sc-link>
+<sc-link rel="import" href="../../../iot/shared/ep-three-list.html"></sc-link>
+<sc-link rel="import" href="../../../iot/shared/ep-three-view.html"></sc-link>
+<!--
+    ******************************************************************************************
+    ** Description    : cc-ol-map-container
+    ** Author          : jhkim 
+    ** Create Date   : 2020.04.16
+    ** History          : 2020.04.16 jhkim 최초작성
+    ******************************************************************************************
+-->
+<dom-module id="cc-ol-map-container">
+    <style>
+    	:host {
+            @apply(--vbox-layout);
+            font-family:'Noto Sans KR';
+        }
+        
+        .threeTd {
+			text-align:center; 
+		}
+        .threeTd:hover {
+			background:#017DC3;
+			color:white;
+			cursor: pointer;
+		}
+		
+		.customTooltip:before{
+			content: attr(tooltip-text); /* here's the magic */
+		    position:absolute;
+			/* basic styles */
+ 			width:-webkit-max-content; 
+ 		  	width:-moz-max-content; 
+ 		  	width:-ms-max-content; 
+ 		  	width:max-content;		  	 
+			min-width : 96px;
+		  	border-radius: 3px;
+		  	border: solid 1px #4a4f4b;
+		  	background-color: #555555;
+		  	text-align:center;
+		  	font-family: MalgunGothic;
+		  	font-size: 12px;
+		  	font-weight: normal;
+		  	font-stretch: normal;
+		  	font-style: normal;
+		  	line-height: 3.08;
+		  	letter-spacing: 0.42px;
+		  	text-align: center;
+		  	color: #ffffff;
+		  	padding: 0px 7px;
+		  	display:none; 
+		  	/* hide by default */
+		}
+		
+		.customTooltip:before {
+		    top: 100%;
+		    right: 50%;
+		    -webkit-transform: translateX(50%);
+		        -ms-transform: translateX(50%);
+		            transform: translateX(50%);
+		    margin-top: 15px;
+		}
+		.customTooltip:after {
+		    left: 50%;
+		    margin-top: 10px;
+		    -webkit-transform: translateX(-50%);
+		        -ms-transform: translateX(-50%);
+		            transform: translateX(-50%);
+		    border-color: transparent transparent #555555 transparent;
+		  	content: "";
+		  	position:absolute;
+			
+			border:10px solid #000;
+		  	display:none; 
+ 
+		  	margin-top: 34px;
+		  	border-color: transparent transparent #555555 transparent;
+		}
+		
+		.customTooltip:hover:before, .customTooltip:hover:after {
+		  	display:block;
+		}
+		
+		/**
+		 버튼의 왼쪽으로 생기는 툴팁
+		*/
+		.customTooltip.left:before{
+		  /* vertically center */
+		  top: 50%;
+		  right: 100%;
+		  -webkit-transform: translateY(-50%);
+		      -ms-transform: translateY(-50%);
+		          transform: translateY(-50%);
+		  margin-right: 14px;
+		  margin-top : 0px;
+		}
+		
+		.customTooltip.left:after {
+		  /* the arrow */
+		  left: -7px;
+		  top: 50%;
+		  -webkit-transform: translate(-50%, -50%);
+		      -ms-transform: translate(-50%, -50%);
+		          transform: translate(-50%, -50%);
+		  border-color: transparent transparent transparent #555555;
+		  margin-top : 0px;
+		}
+		
+        #threeBtn{
+		    top: 173px;
+		    left: 4px;
+		}
+    </style>
+    <template>
+		<sc-ajax id="findThreeList" url="findThreeList.do" body="{{threeSearchParam}}"  on-response="completeFindThreeList"></sc-ajax>
+		<sc-ajax id="findBeaconPolygon" url="findBeaconPolygon.do" body="{{threeSearchParam}}"  on-response="completeFindBeaconPolygon"></sc-ajax>
+<!-- 		<sc-ajax id="findThreeList" url="findThreeList.do" body="{{threeSearchParam}}"  last-response="{{threeList}}"></sc-ajax> -->
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+        <div class="map vbox flex-5" style="z-index:100">
+        	<sc-button id="baseMap" class="baseMapControl road" on-click="changeBaseMap"></sc-button>
+	        <sc-button class="targetBtn customTooltip left" on-click="moveToTarget" hidden="[[moveToTargetHidden]]" tooltip-text="현장으로 이동"></sc-button>
+	        <div class="areaDraw" hidden="{{drawToolHidden}}">
+	        	<sc-button id="areaDrawBtn" class="areaDrawBtn customTooltip left" on-click="areaDrawBtnClick" toggles="true" tooltip-text="자유형 영역 그리기"></sc-button>
+        	</div>
+        	<div class="circleDraw" hidden="{{drawToolHidden}}">
+	        	<sc-button id="circleDrawBtn" class="circleDrawBtn customTooltip left" on-click="circleDrawBtnClick" toggles="true" tooltip-text="원형 영역 그리기"></sc-button>
+        	</div>
+	        <sc-button id="wmsBtn" class="wmsBtn customTooltip" on-click="wmsBtnClick" hidden="[[wmsHidden]]" toggles="true" tooltip-text="드론뷰 보이기"></sc-button>
+	        <sc-button id="dangerBtn" class="dangerBtn customTooltip" on-click="dangerBtnClick" hidden="[[dangerHidden]]" toggles="true" tooltip-text="위험지역 보이기"></sc-button>
+	        <sc-button id="dangerDrawBtn" class="dangerDrawBtn customTooltip" on-click="dangerDrawBtnClick" hidden="[[dangerHidden]]" toggles="true" tooltip-text="위험지역 생성"></sc-button>
+	        <sc-button id="gridBtn" class="gridBtn customTooltip" on-click="gridBtnClick" hidden="[[gridHidden]]" toggles="true" tooltip-text="목록 보이기"></sc-button>
+	        <sc-button id="filterBtn" class="filterBtn customTooltip" on-click="filterBtnClick" hidden="[[filterHidden]]" toggles="true" tooltip-text="검색조건 보이기"></sc-button>
+	        <sc-button id="three" class="filterBtn customTooltip" on-click="filterBtnClick" hidden="[[filterHidden]]" toggles="true" tooltip-text="검색조건 보이기"></sc-button>
+	        <sc-button id="threeBtn" class="customBtn tooltip tooltip-right" on-click="threeBtnClick" hidden="[[threeHidden]]" tooltip-text="3D 보기" text="3D"></sc-button>
+        	<div class="viewControl" id="viewControl" hidden="[[viewDisplayHidden]]"on-mouseover="showViewPanel"  on-mouseleave="hideViewPanel">
+		        <sc-button class="viewBtn" id ="viewBtn" on-click="viewBtnClick" hidden="[[viewDisplayHidden]]" toggles="true"></sc-button>
+				<div class="viewPanel" hidden={{viewPanelHidden}}>
+					<table id="viewTable">
+						<tr>
+							<th><sc-label text="현장" on-click="labelClick" for="site" className="site" id="siteLabel"></sc-label></th>
+							<td>
+								<sc-checkbox-group-field id="site" value="{{display.site}}" on-checkchange="changeViewDisplay"  items="{{display.mode}}"></sc-checkbox-group-field>
+							</td>
+						</tr>
+						<tr>
+							<th><sc-label text="앵커" on-click="labelClick" for="anchor" id="anchorLabel"></sc-label></th>
+							<td>
+								<sc-checkbox-group-field id="anchor" value="{{display.anchor}}" on-checkchange="changeViewDisplay" items="{{display.mode}}"></sc-checkbox-group-field>
+							</td>
+						</tr>
+						<tr>
+							<th><sc-label text="영역" on-click="labelClick" for="area" id="areaLabel"></sc-label></th>
+							<td>
+								<sc-checkbox-group-field id="area" value="{{display.area}}" on-checkchange="changeViewDisplay" items="{{display.mode}}"></sc-checkbox-group-field>
+							</td>
+						</tr>
+						<tr>
+							<th><sc-label text="건물" on-click="labelClick" for="building" id="buildingLabel"></sc-label></th>
+							<td>
+								<sc-checkbox-group-field id="building" value="{{display.building}}" on-checkchange="changeViewDisplay" items="{{display.mode}}"></sc-checkbox-group-field>
+							</td>
+						</tr>
+						<tr style="border-top:1px solid black">
+							<th><sc-label text="비콘" on-click="beaconLabelClick" for="beacon" id="beaconLabel"></sc-label></th>
+							<td>
+								<!-- <sc-checkbox-group-field name="beacon" id="beacon" value="{{beaconMode}}" on-checkchange="changeBeaconMode" items="{{beaconModeList}}"></sc-checkbox-group-field> -->
+								<sc-checkbox-group-field name="beacon" id="beacon" value="{{display.beaconMode}}" on-checkchange="changeBeaconMode" items="{{beaconModeList}}"></sc-checkbox-group-field>
+							</td>
+						</tr>
+					</table>
+				</div>				
+			</div>
+		</div>
+		<div id="clickPopup" class="clickPopup" hidden>
+			<ul id="clickList">
+			</ul>
+		</div>
+    </template>
+    <script>
+        Polymer({
+            is: "cc-ol-map-container",
+			properties : {
+				moveToTargetHidden : false,
+                viewDisplayHidden :{
+                    type: Boolean,
+                    value: function(){
+                        return false;
+                    }
+                },
+                viewPanelHidden :{
+                    type: Boolean,
+                    value: function(){
+                        return true;
+                    }
+                },
+                threeHidden :{
+                    type: Boolean,
+                    value: function(){
+                        return false;
+                    }
+                },
+                dangerHidden :{
+                    type: Object,
+                    value: function(){
+                        return true;
+                    }
+                },
+                gridHidden :{
+                    type: Object,
+                    value: function(){
+                        return true;
+                    }
+                },
+                filterHidden :{
+                    type: Object,
+                    value: function(){
+                        return true;
+                    }
+                },
+                autoStart :{
+                    type: Object,
+                    value: function(){
+                        return true;
+                    }
+                },
+                wmsHidden : false,
+                wmsDefaultActive : {
+                	type : Boolean,
+                	value : function(){
+                		return false;
+                	}
+                },
+                drawToolHidden :{
+                    type: Object,
+                    value: function(){
+                        return true;
+                    }
+                },
+                siteId : {
+                    value : function(){
+						return {};
+                    }
+                },
+				searchParam : {
+	            	type : Object,
+	            	value : function(){
+	            		return {
+		            		siteId : SCMdiManager.searchParam.site_id		            		
+		            	}
+	            	}
+		        },
+				threeSearchParam : {
+	            	type : Object,
+	            	value : function(){
+	            		return {
+		            		siteId : SCMdiManager.searchParam.site_id,
+		            		onlyHavingModelYn : "Y"
+		            	}
+	            	}
+		        },
+				threeInfo: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+				wmsInfo: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+	            areaList :{ 								
+	            	type : Array,
+	            	value : function(){
+	            		return []
+	            	}
+	            },
+	            beaconPolygonList :{ 								
+	            	type : Array,
+	            	value : function(){
+	            		return []
+	            	}
+	            },
+	            dangerList :{ 								
+	            	type : Array,
+	            	value : function(){
+	            		return []
+	            	}
+	            },
+	            beaconModeList :{ 								
+	            	type : Array,
+	            	value : function(){
+	            		return [
+// 	            			{value : "showLabel", label : "라벨 표시"},
+               				{value : "normal", label : "일반 비콘"},
+               				{value : "danger", label : "위험 비콘"}
+	            		]
+	            	}
+	            },
+                display : {
+					type : Object,
+					value : function(){
+						return {
+							site : [],
+							anchor : [],
+							area : [],
+							building : [],
+							beaconMode : [],
+							areaTypes : ['site', 'anchor', 'area', 'building'],
+							mode : [	
+                   				{value : "showLine", label : "라인 표시"},
+                   				{value : "showBackground", label : "배경 표시"},
+                   				{value : "showMarker", label : "이름 표시"}
+                       		]
+						};
+					}
+				},
+                map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+                lon:Number,
+	            lat:Number,
+                threeHidden :{
+                    type: Object,
+                    value: function(){
+                        return true;
+                    }
+                },
+			},
+			attached : function(){
+				var me = this;
+// 				if(me.threeHidden){
+// 					UT.request(me.$.findThreeList);
+// 				}
+				UT.request(me.$.findThreeList);
+				
+				if(this.autoStart){
+					this.start();
+				}
+	        },
+	        start : function(){
+		        var me = this;
+				
+		        if(!UT.isEmpty(me.siteId)) me.set("searchParam.siteId", me.siteId);
+				if(!me.wmsHidden) me.request("findWmsInfo.do", "wmsInfo");
+				if(!me.viewDisplayHidden) me.request("findSiteArea.do", "areaList");
+				if(!this.dangerHidden) this.request("findDangerArea.do", "dangerList");
+				me.$.viewControl.addEventListener('mouseover',me.showViewPanel(e));
+				me.map = loadOlMap(me);
+				
+				if(me.areaList[0].adjunction.zoomLevel){
+					me.set("defaultInfo", {
+						zoomLevel : me.areaList[0].adjunction.zoomLevel,
+						center : me.changeCoordinates(me.areaList[0].adjunction.center), 
+						rotation: me.areaList[0].adjunction.rotation*Math.PI/180
+					});					
+				}
+
+				me.map.getView().setRotation(me.areaList[0].adjunction.rotation*Math.PI/180);
+
+				var controls = me.map.getControls().getArray();
+				for(var i in controls){
+					if(controls[i] instanceof ol.control.Rotate){
+						controls[i].resetNorth_ = function(){me.map.getView().setRotation(rotation);};
+					}
+				}
+
+			 	if(!me.wmsHidden && me.wmsInfo){
+					if(me.wmsDefaultActive && me.$.wmsBtn){
+						me.$.wmsBtn.setAttribute("active");
+						me.$.wmsBtn.classList.add("ItemActive");
+						me.$.wmsBtn.setAttribute("tooltip-text", "드론뷰 숨기기");
+					}
+					me.createWmsLayer();
+				}
+
+		        if(!me.viewDisplayHidden && me.areaList){
+		        	me.createViewLayer();
+		        	me.hideViewPanel();
+				}
+		    },
+		    request : function(url, object){
+			   var me = this;
+		    	$.ajax({
+			    	type:'post',
+			      	url : "/ui/lib/custom/html/"+url,
+			      	data : JSON.stringify(me.searchParam),
+			      	dataType: "json",
+			      	async : false,
+			      	timeout: 100000,
+			      	beforeSend : function(xhr){
+			        	xhr.setRequestHeader("Content-Type","application/json;charset=UTF-8");
+			            xhr.setRequestHeader("x-csrf-token", SCPreloader.csrf().csrf);
+			        },
+			        success : function(data) {
+			        	me.set(object, data);
+			        },
+			        fail : function(){
+						UT.alert("STD.E9999");
+				    }
+			   	});
+			},
+		    createWmsLayer : function(){
+			    var me = this;
+		    	if(me.wmsInfo.resultCode == "SUCCESS"){
+					var srid = me.wmsInfo.SRS;
+					var wmsLayer = new ol.layer.Tile({
+						source: new ol.source.TileWMS({
+							cacheSize : 200,
+							url: me.wmsInfo.layerUrl,
+							crossOrigin: 'anonymous',
+						    params : {
+						    	"LAYERS": me.wmsInfo.LAYERS,
+								"exceptions": 'application/vnd.ogc.se_inimage',
+								"format": 'image/png',
+								"width" : 1920,
+								"height" : 1080,
+								"TRANSPARENT": true
+							},
+							projection : srid,
+							className :'wmsLayer'
+						}),
+						visible : me.wmsDefaultActive
+					});
+					me.map.addLayer(wmsLayer);
+					me.map.set('wmsLayer', wmsLayer);
+				}else{
+					me.wmsHidden = true;
+				}
+			},
+		    createViewLayer : function(){
+			    var me = this;
+			    var features = [];
+			    var markers = [];
+
+		    	for(var i in me.areaList){
+			    	var object = me.areaList[i];
+			    	var feature = geoJson.readFeature(object.geoJson);
+			    	feature.set('id', object.id);
+			    	feature.set('areaType', object.type);
+			    	feature.set('type', 'polygon');
+			    	feature.set('fill', object.adjunction.backgroundColor);
+			    	feature.set('stroke', object.adjunction.lineColor);
+		    		features.push(feature);
+		    		
+	    	      	var marker = new ol.Feature({
+						geometry : new ol.geom.Point(ol.proj.fromLonLat([object.pinCircle.lon, object.pinCircle.lat]))
+			    	}); 
+			    	
+			    	var text = new ol.style.Text({
+    	       		    font: '600 13px Noto Sans KR',
+    	       		    overflow: true,
+    	       		    text: object.name,
+    	       		 	offsetY: 15,
+	    	       		fill: new ol.style.Fill({
+	   	       		      color: '#6c6c6c'
+	   	       		    }),
+    	       		    stroke: new ol.style.Stroke({
+    	       		      color: '#f3f3f3',
+    	       		      width: 2
+    	       		    })
+    	       		});
+    	       		
+	    	      	marker.setStyle(new ol.style.Style({
+	    	      		image : new ol.style.Icon({
+	    	      		    crossOrigin: 'anonymous',
+	    	      		    size: [45, 45],
+	    	      		    scale : 0.5,
+	    	      		    src: './ui/lib/openlayers/img/'+object.type+'.png',
+	    	      		  	anchor : [0.5, 0.8]
+	    	      		  }),
+	    	      		  text : text,
+		    	    }));
+		    	    
+	    	      	marker.set('id', object.id);
+	    	      	marker.set('name', object.name);
+	    	      	marker.set('areaType', object.type);
+	    	      	marker.set('type', 'marker');
+	    	      	marker.set('modelName', object.modelName);
+	    	      	marker.set('areaInfo', object);
+	    	      	markers.push(marker);
+			   	}	
+
+		    	var viewSource = new ol.source.Vector({
+	    			features: features
+	    		});
+	    		
+		    	var viewLayer = new ol.layer.Vector({
+		    		source: viewSource
+		    	});
+
+		    	me.map.addLayer(viewLayer);
+		    	me.map.set('viewFeatures', features);
+		    	me.map.set('viewMarkers', markers);
+		    	me.map.set('viewSource', viewSource);
+		    	me.map.set('viewLayer', viewLayer);
+		    	var extent = viewSource.getExtent();
+		    	me.map.set('extent', extent);
+
+				if(me.get("defaultInfo")){
+					me.map.getView().setZoom(me.get("defaultInfo").zoomLevel);
+					me.map.getView().setCenter(me.get("defaultInfo").center);
+				} else {
+			    	me.map.getView().fit(extent, {padding : [50,50,50,50]});
+				}
+		    	viewSource.clear();
+		    	
+		    	
+		    	// 비콘 레이어 추가
+		    	
+		    	createVectorSourceLayer(me.map,"normalBeacon");		    	
+		    	createVectorSourceLayer(me.map,"dangerBeacon");	  
+
+		    	me.map.get("normalBeacon_layer").setStyle(me.beaconStyle);
+		    	me.map.get("dangerBeacon_layer").setStyle(me.beaconStyle);
+		    },
+		    beaconStyle : function(feature){
+		    	var text = new ol.style.Text({
+	       		    font: '600 13px Noto Sans KR',
+	       		    overflow: true,
+	       		    text: feature.get("name"),
+	       		 	offsetY: 15,
+    	       		fill: new ol.style.Fill({
+   	       		      color: '#6c6c6c'
+   	       		    }),
+	       		    stroke: new ol.style.Stroke({
+	       		      color: '#f3f3f3',
+	       		      width: 2
+	       		    })
+	       		});
+		    	var style = new ol.style.Style({
+		    	   fill: new ol.style.Fill({color: feature.get('color')}),
+	    	       stroke: new ol.style.Stroke({
+		    	       			color: feature.get('color')
+		    	       		  , width:2
+		    	       		  
+		    	       		  }),
+		    	   text : text
+	    	    });
+		    	
+		    	return style;
+		    },
+			changeBaseMap : function(e){
+				if(e.target.classList.contains("road")){
+					this.map.getLayers().array_[0].setVisible(false);
+					this.map.getLayers().array_[1].setVisible(true);
+					this.map.getLayers().array_[2].setVisible(true);
+					e.target.classList.add('sky');
+					e.target.classList.remove('road');
+					this.changeFontColor("#f3f3f3", "#3c3c3c");
+				}else{
+					this.map.getLayers().array_[0].setVisible(true);
+					this.map.getLayers().array_[1].setVisible(false);
+					this.map.getLayers().array_[2].setVisible(false);
+					e.target.classList.add('road');
+					e.target.classList.remove('sky');
+					this.changeFontColor("#6c6c6c","#f3f3f3");
+				}
+			},
+			changeFontColor : function(fillColor, strokeColor){
+				var me = this;
+				var markers = me.map.get('viewMarkers');
+				for(var i in markers){
+					var e  = markers[i];
+					e.getStyle().getText().getFill().setColor(fillColor);
+					e.getStyle().getText().getStroke().setColor(strokeColor);
+				}
+
+				me.map.get('viewSource').changed();
+			},
+			
+			hexToRgbA : function (hex){
+			    var c;
+			    if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
+			        c= hex.substring(1).split('');
+			        if(c.length== 3){
+			            c= [c[0], c[0], c[1], c[1], c[2], c[2]];
+			        }
+			        c= '0x'+c.join('');
+			        return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',0.2)';
+			    }
+			    throw new Error('Bad Hex');
+			},
+
+			createDangerLayer : function(){
+				var me = this;
+				var features = [];
+
+			    for(var i in me.dangerList){
+				    var object = me.dangerList[i];
+				    var color = '#ff0000';
+				    if(object.property){
+				    	color = object.property.lineColor;
+				    }
+			    	var feature = geoJson.readFeature(object.geoJson);
+			    	feature.set('id', object.id);
+			    	feature.set('areaType', 'danger');
+			    	
+			    	
+			    	var fill = new ol.style.Fill();
+					var canvas = document.createElement('canvas');
+					var context = canvas.getContext('2d');
+					var pixelRatio = ol.has.DEVICE_PIXEL_RATIO;
+					
+			    	var pattern = (function() {
+						canvas.width = 8 * pixelRatio;
+					  	canvas.height = 8 * pixelRatio;
+					  	var rgbaVal = me.hexToRgbA(object.property.backgroundColor ? object.property.backgroundColor  : "#ff0000");
+					  	context.fillStyle = rgbaVal;
+					  	context.fillRect(0, 0, canvas.width, canvas.height);
+					  	context.fillStyle = object.property.backgroundColor ? object.property.backgroundColor  : "#ff0000";
+					  	context.beginPath();
+					  	context.arc(4 * pixelRatio, 4 * pixelRatio, 1.5 * pixelRatio, 0, 2 * Math.PI);
+					  	context.fill();
+					  	return context.createPattern(canvas, 'repeat');
+					}());
+					fill.setColor(pattern);
+			    	
+			    	
+			    	var style = new ol.style.Style({
+		    	       fill : fill,
+		    	       stroke: new ol.style.Stroke({
+			    	       			color: color
+			    	       		  , width:2
+			    	       		  })
+		    	    });
+		    	    feature.setStyle(style);
+		    		features.push(feature);
+			   	}
+
+		    	var dangerSource = new ol.source.Vector({
+	    			features: features
+	    		});
+	    		
+		    	var dangerLayer = new ol.layer.Vector({
+		    		source: dangerSource
+		    	});
+
+		    	me.map.addLayer(dangerLayer);
+		    	me.map.set('dangerLayer', dangerLayer);
+			},
+			createDrawLayer : function(){
+				var me = this;
+				createVectorSourceLayer(me.map, 'draw');
+			},
+			moveToTarget : function(e){
+				var me = this;
+				
+				var defaultInfo = me.get("defaultInfo");
+				
+				if(defaultInfo){
+			    	me.map.getView().setRotation(defaultInfo.rotation);
+					me.map.getView().setZoom(defaultInfo.zoomLevel);
+			    	me.map.getView().setCenter(defaultInfo.center);
+				}else if(UT.isEmpty(me.map.get('extent'))){
+					me.map.getView().setZoom(17);
+					me.map.getView().setCenter(me.map.get('center'));
+				}else{
+ 					me.map.getView().fit(me.map.get('extent'), {padding : [50,50,50,50]});
+				}
+			},
+			showViewPanel : function(e){
+				this.viewPanelHidden = false;
+			},
+			hideViewPanel : function(e){
+				this.viewPanelHidden = true;
+			},
+			//beacon 영향 받지 않게 막음
+			viewBtnClick : function(e){
+				(e.target.active)?e.target.classList.add('ItemActive'):e.target.classList.remove('ItemActive');
+				var value = (e.target.active)?['showLine', 'showBackground', 'showMarker',"normal","danger"]:[];
+				var fields = this.querySelectorAll('sc-checkbox-group-field');
+				for(var i in fields){
+					if(i != fields.length - 1){
+						var a = fields[i];
+						a.value = value;						
+					}
+				}
+			},
+			wmsBtnClick : function(e){
+				this.map.get('wmsLayer').setVisible(e.target.active);
+				(e.target.active)?e.target.classList.add('ItemActive'):e.target.classList.remove('ItemActive');
+				e.target.setAttribute("tooltip-text", (e.target.active)?"드론뷰 숨기기":"드론뷰 보이기");
+			},
+			dangerBtnClick : function(e){
+				(e.target.active)?e.target.classList.add('ItemActive'):e.target.classList.remove('ItemActive');
+				e.target.setAttribute("tooltip-text", (e.target.active)?"위험지역 숨기기":"위험지역 보이기");
+				this.dangerLayerRedraw(); 
+			},
+			dangerLayerRedraw : function(e){
+				if(this.$.dangerBtn.active){
+					this.map.removeLayer(this.map.get('dangerLayer'));
+					this.request("findDangerArea.do", "dangerList");
+					this.createDangerLayer();
+				}else{
+					this.map.removeLayer(this.map.get('dangerLayer'));
+				}
+			},
+			dangerDrawBtnClick : function(e){
+				(e.target.active)?e.target.classList.add('ItemActive'):e.target.classList.remove('ItemActive');
+				var me = this;
+				me.drawToolHidden = !e.target.active;
+				if(!me.drawToolHidden){
+					me.areaDrawBtnClick();
+				}else{
+					me.map.removeLayer(me.map.get('draw_layer'));
+					me.map.removeInteraction(me.map.get('drawInteraction'));
+				}
+			},
+			addDangerDrawEvent : function(){
+				var me = this;
+				me.map.get('drawInteraction').on('drawend', function(e){
+				    var data;
+				    if(me.$.areaDrawBtn.classList.contains('ItemActive')){
+						data = geoJson.writeFeature(e.feature);
+					}else{
+						var geometry = ol.geom.Polygon.fromCircle(e.feature.getGeometry(),50);
+						data = geoJson.writeGeometry(geometry);
+					}
+			    	var dangerPopup = UT.popup("ep-danger-map", this, 1400, 800,{
+						'close' : function(popup) {
+							popup.close();
+							me.dangerLayerRedraw();
+							me.fire("danger-popup-close");
+							me.$.dangerDrawBtn.active = false;
+							me.$.dangerDrawBtn.classList.remove('ItemActive');
+							me.map.removeLayer(me.map.get('draw_layer'));
+							me.map.get('draw_source').clear();
+							me.map.removeInteraction(me.map.get('drawInteraction'));
+							me.drawToolHidden = true;
+						}
+					},{resizable:false, closable:false});
+					dangerPopup.show();
+					dangerPopup.getWindowContent().load(data);
+			    });
+			},
+			areaDrawBtnClick : function(e){
+				var me = this;
+				if(me.$.circleDrawBtn.classList.contains('ItemActive')){
+					me.$.circleDrawBtn.classList.remove('ItemActive');
+			    }
+			
+               	me.$.areaDrawBtn.classList.add('ItemActive');
+				me.addDrawInteraction("Polygon");
+			},
+			circleDrawBtnClick : function(e){
+				var me = this;
+				if(me.$.areaDrawBtn.classList.contains('ItemActive')){
+					me.$.areaDrawBtn.classList.remove('ItemActive');
+			    }
+
+               	me.$.circleDrawBtn.classList.add('ItemActive');
+				me.addDrawInteraction("Circle");
+			},
+			addDrawInteraction : function(type) {
+				var me = this;
+
+				if(UT.isNotEmpty(me.map.get('draw_layer'))){
+					if(me.map.get('draw_source').getFeatures().length == 0){
+						me.map.removeLayer(me.map.get('draw_layer'));
+      					me.initDrawInteraction(type);
+					}else{
+						UT.confirm("이미 생성된 영역이 있습니다.\n영역을 다시 생성 하시겠습니까?", 
+    	           		function(){
+							me.map.removeLayer(me.map.get('draw_layer'));
+           					me.fire("init-area");
+           					me.initDrawInteraction(type);
+   	          			}, function(){
+							me.$.areaDrawBtn.classList.remove('ItemActive'); 
+							me.$.circleDrawBtn.classList.remove('ItemActive');
+   	   	          		});
+					}
+				}else{
+					me.initDrawInteraction(type);
+				}
+			},
+			initDrawInteraction : function(type){
+				var me = this;
+				me.createDrawLayer();
+
+				var drawInteraction = me.map.get('drawInteraction');
+
+			    if(UT.isNotEmpty(drawInteraction)){
+					me.map.removeInteraction(drawInteraction);
+				}
+
+			    drawInteraction = new ol.interaction.Draw({
+			    	source: me.map.get('draw_source'),
+			      	type: type
+			    });
+
+			    me.map.set('drawInteraction' , drawInteraction);
+			    me.map.addInteraction(drawInteraction);
+
+			    if(!me.dangerHidden){
+			    	me.addDangerDrawEvent();
+				}
+
+			    this.fire("change-draw-interaction", drawInteraction);
+			},
+			gridBtnClick : function(e){
+				(e.target.active)?e.target.classList.add('ItemActive'):e.target.classList.remove('ItemActive');
+				e.target.setAttribute("tooltip-text", (e.target.active)?"목록 숨기기":"목록 보이기");
+				this.domHost.$.gridDiv.hidden= !e.target.active;
+				this.map.updateSize();
+				if(e.target.active){
+					this.domHost.$.gridWorkerPanel.refresh();
+					this.domHost.$.gridVehiclePanel.refresh();
+					this.domHost.$.tabNavi.doContentElementResize();
+				}
+			},
+			filterBtnClick : function(e){
+				(e.target.active)?e.target.classList.add('ItemActive'):e.target.classList.remove('ItemActive');
+				e.target.setAttribute("tooltip-text", (e.target.active)?"검색조건 숨기기":"검색조건 보이기");
+				this.domHost.$.filterDiv.hidden= !e.target.active;
+				this.map.updateSize();
+				this.domHost.$.tabNavi.doContentElementResize();
+			},
+			changeViewDisplay : function(e){		// 영역 표시 변경
+				var me = this;
+				var type = e.target.parentNode.parentNode.id;
+				var displayMode = me.display[type];
+				var viewSource = me.map.get('viewSource');
+				var features = me.map.get('viewFeatures').filter(function(f){return (f.get('areaType') == type);});
+				var markers = me.map.get('viewMarkers').filter(function(f){return (f.get('areaType') == type);});
+
+				for(var i in features){
+					var e = features[i];
+					if(displayMode.length > 0){	// 표시
+						if(!viewSource.hasFeature(e))
+							viewSource.addFeature(e);
+						setFeatureStyle(e, (displayMode.indexOf("showLine")>=0), (displayMode.indexOf("showBackground")>=0));
+					}else{
+						if(viewSource.hasFeature(e))
+							viewSource.removeFeature(e);
+					}
+				}
+
+		        for(var i in markers){
+					var e = markers[i];
+					if(displayMode.indexOf("showMarker")>=0){
+						if(!viewSource.hasFeature(e))
+							viewSource.addFeature(e);
+					}else{
+						if(viewSource.hasFeature(e))
+							viewSource.removeFeature(e);
+					}
+				}
+
+				this.chkAllView();
+				this.fire("change-view-display", e); 
+			},
+			chkAllView : function(){
+				var classList = this.$.viewBtn.classList;
+				var chkCnt = 0;
+				var boxCnt = 0;
+				var fields = this.querySelectorAll('sc-checkbox-group-field');
+				Array.prototype.forEach.call(fields, function (a) {
+					chkCnt = chkCnt + a.value.length;
+				});
+				
+				if(chkCnt == 0){
+					this.$.viewBtn.active = false;
+					classList.remove('ItemActive');
+				}else{
+					this.$.viewBtn.active = true;
+					classList.add('ItemActive');
+				}
+			},
+			changeBeaconMode : function(e){
+				var me = this;
+				this.chkAllView();
+				UT.requestNotUseLoading(me.$.findBeaconPolygon);
+			},
+			completeFindBeaconPolygon : function(e,res){
+				var me = this;
+				
+				var normalList = res.response.normal;
+				var dangerList = res.response.danger;
+				
+				me.map.get("normalBeacon_source").clear();
+				me.map.get("dangerBeacon_source").clear();
+				for(var i = 0 ; i < me.display.beaconMode.length; i++){
+					if(me.display.beaconMode[i] == "normal"){
+						me.addBeaconFeature(normalList,"normal","#05fc37");
+					}
+					if(me.display.beaconMode[i] == "danger"){
+						me.addBeaconFeature(dangerList,"danger","#ff0000");
+					}
+				}
+			},
+			addBeaconFeature : function(list,param,color){
+				var me =this;
+				var features = [];
+				for(var j = 0 ; j< list.length; j++){
+					var object = list[j];
+			    	var feature = geoJson.readFeature(object.geoJson);
+			    	feature.set('id', object.id);
+			    	feature.set('name', object.name);
+			    	feature.set('color', color);
+			    	feature.set('beaconType', object.type);
+		    		features.push(feature);
+				}
+				me.map.get(param+"Beacon_source").addFeatures(features);
+			},
+			labelClick: function(e){
+				var type = e.currentTarget.for;
+				var scgf = this.querySelector("#"+type);
+				scgf.value = (this.display[type].length == this.display.mode.length)?[]:['showLine', 'showBackground', 'showMarker'];
+			},
+			beaconLabelClick: function(e){
+				var me = this;
+				var type = e.currentTarget.for;
+				var scgf = this.querySelector("#"+type);
+				scgf.value = (scgf.getSelectedValues().length == me.beaconModeList.length)?[]:['showLabel', 'normal', 'danger'];
+			},
+			completeFindThreeList: function(e,res){
+				var me = this;
+				var resultList =res.response;
+				me.set("threeList",resultList);
+				if(resultList){
+					for( var i = 0 ; i < resultList.length; i++){
+						var obj = document.createElement('tr');
+						obj.setAttribute("class","threeTr");
+						var tdObj = document.createElement('td');
+						tdObj.innerHTML = resultList[i].name;
+						tdObj.setAttribute("class", "threeTd");
+						tdObj.setAttribute("data-value",resultList[i].id);
+						me.listen(obj, "tap", "onClickThree");
+						
+						if(i==0){
+							tdObj.setAttribute("style", "border-top:1px solid black; cursor: pointer;");
+							var thObj = document.createElement('th');
+							thObj.innerHTML ="3D";
+							thObj.setAttribute("style", "border-top:1px solid black");
+							
+						}else{
+							tdObj.setAttribute("style", "cursor: pointer;");
+							var thObj = document.createElement('th');
+							thObj.innerHTML ="";
+						}
+						obj.appendChild(thObj);
+						obj.appendChild(tdObj);
+// 						Polymer.dom(me.$.viewTable).appendChild(obj);
+					}
+					
+				}
+			},
+			onClickThree : function(e){
+				var me = this;
+				var target = e.target;
+				var area_id = Number(target.getAttribute("data-value"));
+				var object;
+				if(me.threeList){
+					for(var i = 0 ; i<me.threeList.length ; i++){
+						if(me.threeList[i].id == area_id){
+							object = me.threeList[i];
+						}
+					}
+
+					if(UT.isNotEmpty(object)){
+						me.threePopup = UT.popup("ep-three-view", me, window.innerWidth-10, window.innerHeight-10,{
+		            	},{resizable:false, destroyOnHided: false, titleText :object.name+" 3D 보기"});
+						me.threePopup.getWindowContent().load(object.id, object.modelName);
+						me.threePopup.name=modelInfo.id;
+					}else{
+						me.threePopup.getWindowContent().start();
+					}
+					
+					me.threePopup.show();
+					
+// 					if(UT.isNotEmpty(object)){
+// 						var shipPopup = UT.popup("ep-ship-model", me, window.innerWidth, window.innerHeight,{
+// 		               		'close' : function(popup) {
+// 		                  	popup.close();
+// 		               		}
+// 		            	},{resizable:false});
+// 		            	shipPopup.show();
+// 		            	shipPopup.getWindowContent().load(object);
+// 					}
+				}
+			},
+			//좌표계 변환
+			changeCoordinates : function(coordinate){
+				return ol.proj.transform(coordinate, 'EPSG:4326', "EPSG:900913");
+			},
+			//2021-10-28 3D 고도화
+			threeBtnClick : function(e){
+				var me = this;
+				if(me.threeList.length == 1){
+					me.showThreeModel(me.threeList[0]);
+				}else{
+					if(UT.isEmpty(me.threeListPopup)){
+						me.threeListPopup = UT.popup("ep-three-List", me, 250, me.threeList.length*80,{
+							'close' : function(popup, event) {
+								me.showThreeModel(event.detail);
+							}
+		            	},{resizable:false, destroyOnHided: false, titleText : "3D 보기"});
+						me.threeListPopup.getWindowContent().load(me.threeList);
+					}
+
+					me.threeListPopup.show();
+				}
+			},
+			showThreeModel : function(modelInfo){
+				var me = this;
+
+				if(UT.isEmpty(me.threePopup) || me.threePopup.id != modelInfo.id){
+					me.threePopup = UT.popup("ep-three-view", me, window.innerWidth-10, window.innerHeight-10,{}
+										,{resizable:false, destroyOnHided: false, titleText :modelInfo.name+" 3D 보기"});
+					me.threePopup.getWindowContent().load(modelInfo.id, modelInfo.modelName);
+					me.threePopup.name=modelInfo.id;
+				}else{
+					me.threePopup.getWindowContent().start();
+				}
+				
+				me.threePopup.show();
+			},
+		});
+	</script>
+</dom-module>

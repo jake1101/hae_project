@@ -1,0 +1,136 @@
+<dom-module id="ep-alarm-setting">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-code-group>
+			<sc-code id="time" code="TIME" value="{{codes.time}}" ></sc-code> <!-- YN -->
+		</sc-code-group>
+        
+		<cc-page-title-bar>
+			<sc-button text="저장" on-click="onSaveBtnClick"></sc-button>
+		</cc-page-title-bar>
+		<table class="tb-form" validation-group = "save">
+			<colgroup>
+				<col style="width:140px;">
+				<col>
+				<col style="width:69px;">
+			</colgroup>
+			<tr>
+				<th><sc-label text="알림 동작 시간대"></sc-label></th>
+				<td><sc-label text="시 작" class="w-80"></sc-label>
+					<sc-combobox-field value="{{alarm.checkStartTime}}" selected-index="-1"
+								       items="{{codes.time}}" display-field="label" value-field="data" 
+								       placeholder="선택" style="width:150px;">
+                    </sc-combobox-field>
+					<div class="hspace-10" style="display: inline-block;"></div>
+				    <sc-label text="종 료" class="w-80"></sc-label>
+				    <sc-combobox-field value="{{alarm.checkEndTime}}" selected-index="-1" 
+								       items="{{codes.time}}" display-field="label" value-field="data" 
+								       placeholder="선택" style="width:150px;">
+                    </sc-combobox-field>
+				</td>
+				<td>
+					<sc-button text="초기화" on-click="onInit"  data-args="time"></sc-button>
+				</td>
+			</tr>
+			<tr>
+				<th><sc-label text="Battery"></sc-label></th>
+				<td><sc-label text="최소잔량(분)" class="w-100"></sc-label><sc-number-field id="lat" value="{{alarm.batteryMinValue}}" style = "width : 130px;"></sc-number-field>
+					<div class="hspace-10" style="display: inline-block;"></div>
+				    <sc-label text="재발송간격(분)" class="w-100"></sc-label><sc-number-field id="lon" value="{{alarm.batteryTermMin}}" style = "width : 130px;"></sc-number-field>
+				</td>
+				<td>
+					<sc-button text="초기화" on-click="onInit"  data-args="battery"></sc-button>
+				</td>
+			</tr>
+			<tr>
+				<th><sc-label text="통신지연"></sc-label></th>
+				<td><sc-label text="지연기준시간(분)" class="w-100"></sc-label><sc-number-field id="lat" value="{{alarm.delayMinValue}}" style = "width : 130px;"></sc-number-field>
+					<div class="hspace-10" style="display: inline-block;"></div>
+				    <sc-label text="재발송간격(분)" class="w-100"></sc-label><sc-number-field id="lon" value="{{alarm.delayTermMin}}" style = "width : 130px;"></sc-number-field>
+				</td>
+				<td>
+					<sc-button text="초기화" on-click="onInit"  data-args="delay"></sc-button>
+				</td>
+			</tr>
+			<tr>
+				<th><sc-label text="현장과 이격거리(m)"></sc-label></th>
+				<td><sc-number-field id="lat" value="{{alarm.farWay}}" style="width:470px;"></sc-number-field></td>
+				<td>
+					<sc-button text="초기화" on-click="onInit" data-args="farWay"></sc-button>
+				</td>
+			</tr>
+		</table>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'ep-alarm-setting',
+			
+			properties:{
+				//팝업 타이틀 지정
+				titleText: {
+					type: String,
+					value: function () {
+						return "스마트태그 알림 설정";
+					}
+				},
+				sensorId:String,
+				codes : {
+	               	type : Object,
+	               	value : function(){
+		               	return	{
+	               		};
+	               	},
+	               	reset: false
+	            },
+	            alarm : {
+	            	type : Object,
+	            	valur : function(){
+	            		return{
+	            			
+	            		};
+	            	},
+	            	reset : false
+	            }
+			},
+			
+			load: function(alarm){
+				var me = this;
+				me.set('alarm', alarm);
+			},
+			
+            onSaveBtnClick: function(){
+            	var me = this;
+            	if(!me.validate('save')){
+            		 UT.alert("STD.E0000");
+            		return;
+            	}
+            	this.fire("apply-setting", me.get('alarm'));
+            },
+            
+            onInit : function(e){
+            	var me = this;
+            	var type = e.target.dataset.args;
+            	if(type === 'time'){
+            		me.set('alarm.checkStartTime', '');
+            		me.set('alarm.checkEndTime', '');
+            	}else if(type === 'battery'){
+            		me.set('alarm.batteryMinValue', '');
+            		me.set('alarm.batteryTermMin', '');
+            	}else if(type === 'delay'){
+            		me.set('alarm.delayMinValue', '');
+            		me.set('alarm.delayTermMin', '');
+            	}else if(type === 'farWay'){
+            		me.set('alarm.farWay', 0);
+            	}
+            }
+            
+		});
+	</script>
+
+
+</dom-module>

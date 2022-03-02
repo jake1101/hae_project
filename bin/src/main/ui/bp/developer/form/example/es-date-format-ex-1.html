@@ -1,0 +1,44 @@
+<!--
+
+## 날짜 
+
+**sc-date-field**를 이용한  기본 예제입니다. 
+
+- 기본 포맷은 "YYYY/MM/DD" 로 지정되어있습니다. 
+- format property를 변경하여 해당 날짜의 포맷을 변경할 수 있습니다. 
+
+ -->
+
+<dom-module id="es-date-format-ex-1">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+		<table class="tb-form">
+			<tr>
+				<td>
+					<sc-date-field value="{{value}}" format="YYYY-MM-DD"></sc-date-field>
+				</td>
+			</tr>
+		</table>
+	</template>
+
+	<script>
+		Polymer({
+			is: 'es-date-format-ex-1',
+			properties: {
+				value: Object
+			},
+
+			setValue: function () {
+				var me = this;
+            	
+            	me.set("value", "20120608");
+			}
+		});
+	</script>
+
+</dom-module>

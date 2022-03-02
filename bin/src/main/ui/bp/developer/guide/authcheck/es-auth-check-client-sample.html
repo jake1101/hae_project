@@ -1,0 +1,63 @@
+<dom-module id="es-auth-check-client-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		
+		<!-- 
+		  auth-r : DEF.READ=R
+		  auth-s : DEF.SAVE=S
+		  auth-a : DEF.APPROVAL=A
+		  -->
+		<cc-auth-checker check-list="auth-r,auth-s,auth-a"></cc-auth-checker><!-- 범위 : template 전체 -->
+		
+		<sc-toolbar>
+			<sc-button text="버튼1"	></sc-button>
+			<sc-button text="버튼2"	auth-r></sc-button>
+			<sc-button text="버튼3"	auth-s></sc-button>
+			<sc-button text="버튼4"	auth-a></sc-button>
+		</sc-toolbar>
+		
+		<sc-panel title-text="패널1" collapsible="true">
+			<table class="tb-form">
+				<tr>
+					<td>
+						<sc-label text="권한 체크하지 않는 패널입니다."></sc-label>
+					</td>
+				</tr>
+			</table>
+		</sc-panel>
+		<sc-panel title-text="패널2" collapsible="true"	auth-r>
+			<table class="tb-form">
+				<tr>
+					<td>
+						<sc-label text="auth-r 속성의 패널입니다."></sc-label>
+					</td>
+				</tr>
+			</table>
+		</sc-panel>
+		<sc-panel title-text="패널3" collapsible="true"	auth-s>
+			<table class="tb-form">
+				<tr>
+					<td>
+						<sc-label text="auth-s 속성의 패널입니다."></sc-label>
+					</td>
+				</tr>
+			</table>
+		</sc-panel>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-auth-check-client-sample',
+		properties : {
+			
+		},
+		initialized : function() {
+			var menuId = UT.getMenuId(this.domHost);
+			console.log("userFuncs", SCRoleManager.getUserFuncs(menuId));
+		}
+	});
+	</script>
+</dom-module>

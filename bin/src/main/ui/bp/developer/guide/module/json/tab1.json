@@ -1,0 +1,13 @@
+{
+	"oper_org_nm"        : "엠로 서울",
+	"tradsts_nm"         : "거래",
+	"reg_typ_nm"         : "정규업체",
+	"trad_start_date"    : "19930731",
+	"fst_trad_start_date": "19950822",
+	"erp_vd_cd"          : "VD9999",
+	"vd_nm"              : "와이키키상사",
+	"biz_reg_no"         : "112-33456-7890",
+	"post_no"            : "07217",
+	"dtl_addr_1"         : "서울특별시 영등포구 당산로 41길 11",
+	"dtl_addr_2"         : "당산 SK V1 센터 E동 55층"
+}

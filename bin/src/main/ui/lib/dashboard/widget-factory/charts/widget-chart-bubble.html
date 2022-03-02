@@ -1,0 +1,52 @@
+<dom-module id="widget-chart-bubble">
+    <script>
+      WidgetChartBubble =  Polymer({
+            is: "widget-chart-bubble",
+            properties: {
+            	
+            },
+            
+            getTemplate : function(template,datas){
+            	var me = this, content = template.contents;
+            	var series = me.getSeriesData(datas,content);
+            	var chartTemplate = {
+        			    chart: {
+        			        type: content.type,
+        			        plotBorderWidth: 1
+        			    },
+        			    exporting: {
+        		            enabled: false
+        		        },
+        			    title: {
+        			        text: content.title
+        			    },
+        			    legend: false,
+        			    xAxis: content.xAxis,
+        			    yAxis: content.yAxis,
+        			    tooltip: {
+        			    	enabled : false
+        			    },
+        			    plotOptions: content.plotOptions,
+        			    series: [{data:series}]
+        			}
+            	return chartTemplate;
+            },
+            getSeriesData: function(datas,content){
+    			var me = this, list = [],temp;
+    			for(var i  = 0,len= datas.length; i < len; i++){
+    				temp = {};
+					var data = datas[i];
+					temp.x = data[content.xFieldName];
+					temp.y = data[content.yFieldName];
+					temp.z = data[content.pointsizeFieldName];
+					temp[content.labelFieldName] = data[content.labelFieldName];
+					list[i] = temp;
+    			}
+    			return list;
+    		}
+            
+    		
+    		
+    	});
+    </script>
+</dom-module>

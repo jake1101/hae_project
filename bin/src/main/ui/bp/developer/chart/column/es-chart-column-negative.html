@@ -1,0 +1,113 @@
+<dom-module id="es-chart-column-negative">
+	<template>
+		<div id="chartContainer" style="height:100%;width:100%"></div>
+	</template>
+	<script>
+	Polymer({
+		is: 'es-chart-column-negative',
+		behaviors:[
+					Polymer.SCResizableBehavior
+				],
+		properties: {
+			
+		},
+		listeners:{
+			'sc-resize':'doContentElementResize'
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		doContentElementResize: function(){
+			var me = this;
+			if(!me.chartMain && !me.isVisible(true)){
+				return;
+			}
+			me.chartMain.resize();
+		},
+		initialized: function(){
+			var me = this;
+			DLChart.setDebug(true);
+			me.chartContainer = new DLChart.ChartComponent(false, me.$.chartContainer,{
+			    "type": "column",
+				"palettes":[{
+					"name": "color1",
+			        "alpha": 1.0,
+					"fills": ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+						'#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+				}],
+				"styles": {
+					//"fill": "#10ffff00",
+					//"border": "#888800"
+				},
+			    "title": {
+			        "text": "Column chart with negative values",
+			        "styles" : {
+					},
+			    },
+			    "xAxes": {
+			        "title": "",
+					"paddingNear": 0.10,
+					"paddingFar": 0.10,
+			        "categories":['Apples', 'Oranges', 'Pears', 'Grapes', 'Bananas']
+			    },
+			    "yAxes": {
+			        "title": "Values"
+			    },
+			    "series": [{
+			        "name": "John",
+			        "items": [5, 3, 4, 7, 2],
+			        "label": false,
+			        "styles": {
+			            "fill": "p(color1:0)",
+			            "border": null
+			       	},
+					"animations": [{
+					}],
+					"itemAnimations": [{
+						"property": "value"
+					}]
+				}, {
+			        "name": "Jane",
+			        "items": [2, -2, -3, 2, 1],
+			        "label": false,
+			        "styles": {
+						"fill": "p(color1:1)",
+			            "border": null
+					},
+					"animations": [{
+					}],
+					"itemAnimations": [{
+						"property": "value"
+					}]
+				}, {
+					"name": "Joe",
+					"items": [3, 4, 4, -2, 5],
+			        "label": false,
+					"styles": {
+						"fill": "p(color1:2)",
+			            "border": null
+					},
+					"animations": [{
+					}],
+					"itemAnimations": [{
+						"property": "value"
+					}]
+				}],
+			    "legend": {
+					"styles": {
+						"marginTop": 4,
+						"fill": "#ffffffff",
+						"shadowStyle": "normal"
+					}
+			    }
+			} );
+			me.chartMain = me.chartContainer.chartView();
+			
+		}
+	})
+	</script>
+</dom-module>

@@ -1,0 +1,385 @@
+<dom-module id="ep-danger-map">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+        
+         <sc-request-group init>
+			<sc-code-group>
+				<sc-code code="IOT032" value="{{typeList}}"></sc-code>
+			</sc-code-group>
+			
+		</sc-request-group>
+		<!-- 영역 저장 -->
+		<sc-ajax id="saveDangerInfo"
+			url="saveDangerInfo.do"
+			body="{{dangerInfo}}"
+			on-response="completeSaveDangerInfo">
+		</sc-ajax>
+		
+		<!-- 권한체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+		
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<div class="hbox flex">
+			<!-- 지도 영역 -->
+			<div  class="vbox flex-5">
+				<cc-map-container id="mapContainer" show-view-label="true" draw-tool-hidden="false" on-featureadded="featureAdded"></cc-map-container>
+			</div>
+			<!-- 지도 영역 끝 -->
+			<div class="hspace-5"></div>
+			<!-- 테이블 영역 -->
+	        <div class="w-350">
+				<table class="tb-form" validation-group="areaValid">
+		            <colgroup>
+		                <col style="width:100px">
+		                <col>
+		            </colgroup>
+		            <tr>
+		            	<th><sc-label text="이름"></sc-label></th>
+		            	<td><sc-text-field value="{{dangerInfo.name}}" required="true" readonly$="[[!formula('editableYN')]]"></sc-text-field></td>
+		            </tr>
+		            <tr>
+		            	<th><sc-label text="생성자"></sc-label></th>
+		            	<td><sc-text-field value="{{dangerInfo.writerId}}" readonly="true"></sc-text-field></td>
+		            </tr>
+		            <tr>
+		            	<th><sc-label text="타입"></sc-label></th>
+		            	<td>
+<!-- 		            	<sc-text-field value="{{dangerInfo.type}}" readonly="true"></sc-text-field> -->
+		            	 <sc-combobox-field required="true" id="type" items="{{typeList}}" display-field="label" value-field="data" value="{{dangerInfo.type}}" placeholder="선택"  readonly$="[[!formula('editableYN')]]"></sc-combobox-field>
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><sc-label text="설명"></sc-label></th>
+		            	<td><sc-textarea-field value="{{dangerInfo.description}}" required="true" readonly$="[[!formula('editableYN')]]"></sc-textarea-field></td>
+		            </tr>
+		            <tr>
+		            	<th><sc-label text="시작시간"></sc-label></th>
+		            	<td>
+		            		<sc-date-field value="{{dangerInfo.startDt}}" display-format="yyyy-MM-dd" style="width : 100px;" max-date="{{dangerInfo.endDt}}" readonly$="[[!formula('editableYN')]]"></sc-date-field>
+	    					<span style="margin:0 4px"></span>
+		            		<sc-number-field style="width : 52px;" value="{{dangerInfo.startHH}}" min-value="0" max-value="23" readonly$="[[!formula('editableYN')]]" default-value="0"></sc-number-field>
+	    					<span style="margin:0 2px"> : </span>
+	    					<sc-number-field style="width : 52px;" value="{{dangerInfo.startmm}}" min-value="0" max-value="59" readonly$="[[!formula('editableYN')]]" default-value="0"></sc-number-field>
+		            	</td>
+		            </tr>
+		            <tr>
+		            	<th><sc-label text="종료시간"></sc-label></th>
+		            	<td>
+		            		<sc-date-field value="{{dangerInfo.endDt}}" display-format="yyyy-MM-dd" style="width : 100px;" min-date="{{dangerInfo.startDt}}" readonly$="[[!formula('editableYN')]]"></sc-date-field>
+	    					<span style="margin:0 4px"></span>
+		            		<sc-number-field style="width : 52px;" value="{{dangerInfo.endHH}}" min-value="0" max-value="23" readonly$="[[!formula('editableYN')]]" default-value="23"></sc-number-field>
+	    					<span style="margin:0 2px"> : </span>
+	    					<sc-number-field style="width : 52px;" value="{{dangerInfo.endmm}}" min-value="0" max-value="59" readonly$="[[!formula('editableYN')]]" default-value="59"></sc-number-field>
+		            	</td>
+		            </tr>
+		            <tr>
+						<th><sc-label text="선색"></sc-label></th>
+						<td>
+							<sc-text-field value="{{dangerInfo.lineColor}}" class="w-200" id="line_color" regex="/^#?([a-f0-9]{6}|[a-f0-9]{3})$/" readonly$="[[!formula('editableYN')]]"></sc-text-field>
+		                    <div class="colorpicker-circle-anchor__color" data-color id="line_color_anchor"></div>
+						</td>
+					</tr>
+					<tr>
+						<th><sc-label text="배경색"></sc-label></th>
+						<td>
+							<sc-text-field value="{{dangerInfo.backgroundColor}}" class="w-200" id="bg_color" regex="/^#?([a-f0-9]{6}|[a-f0-9]{3})$/" readonly$="[[!formula('editableYN')]]"></sc-text-field>
+		                    <div class="colorpicker-circle-anchor__color" data-color id="bg_color_anchor"></div>
+						</td>
+					</tr>
+		        </table>
+				<div class="vspace-5"></div>
+				<cc-sub-title-bar>
+					<sc-button text="저장" on-click="onSaveClick" hidden$="[[!formula('editableYN')]]"></sc-button>
+					<sc-button text="닫기" on-click="onCloseClick"></sc-button>
+				</cc-sub-title-bar>
+			</div>
+			<!-- 테이블 영역 끝-->
+		</div>
+	</template>
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+	<script>
+        Polymer({
+            is: "ep-danger-map",
+            properties : {
+            	titleText:{
+	                type: String,
+					value: "위험지역 설정"
+				},
+                dangerInfo: {
+                    type : Object,
+                    value : function() {
+                        return {
+							editableYn : "Y",
+							startDt : new Date(),
+							endDt : new Date()
+                        };
+                    }
+                },
+                // 지도
+                map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+                vectorLayer:{
+					type : Object,
+					value : function(){
+						return{};
+					}
+                },
+                dangerStyle  :{
+					type : Object,
+					value : function(){
+						return{
+							pointRadius: 3,
+							fillColor: "#ff0000",
+							fillOpacity: 0.2,
+							pattern: "hash",
+							patternColor: "#ff0000",
+							stroke: true,
+							strokeWidth: 1,
+							strokeColor: "#ff0000",
+							cursor : "pointer"
+						};
+					}
+       			},
+       			vStyle :{
+					type : Object,
+					value : function(){
+						return{
+			       		    strokeColor: "#ff0000",
+			       		    fillColor: "#ffffff",
+			       		    strokeOpacity: 1,
+			       		    strokeWidth: 3,
+			       		    pointRadius: 5,
+			       		    graphicName: "circle"
+		       			};
+					}
+                },
+       			pStyle :{
+					type : Object,
+					value : function(){
+						return{
+		       			    strokeColor:"#ff0000",
+		       			    fillColor: "#ff0000",
+		       			    strokeOpacity:1,
+		       			    strokeWidth: 3,
+		       			    fillOpacity:0.5
+		       			};
+					}
+                },
+       			virtualStyle  :{
+					type : Object,
+					value : function(){
+						return{
+		       				strokeColor: "#ff0000",
+			       		    fillColor: "#ff0000",
+		       			    strokeOpacity: 0.6,
+		       			    fillOpacity: 0.5,
+		       			    strokeWidth: 3,
+		       			    pointRadius: 4,
+		       			    graphicName: "circle"
+						};
+					}
+       			}
+            },
+            formulas : {
+                editableYN: function() {
+                    return (this.get("dangerInfo.editableYn") === "Y");
+                }
+            },
+            load: function(feature){
+            	var me = this;
+            	setTimeout(function(){
+
+            		// 지도 객체 추가
+	            	me.map = me.$.mapContainer.map;
+	
+					var dangerStyleMap = new OpenLayers.StyleMap({
+		        	    "default": me.get('dangerStyle'),
+		        	    "vertex": me.get('vStyle'),
+		        	    "temporary" : me.get('pStyle'),
+		        	    "select": me.get('dangerStyle')
+		        	}, {extendDefault: false});
+					
+	            	me.vectorLayer = me.map.drawLayer;
+			       	me.vectorLayer.styleMap = dangerStyleMap;
+
+			       	var lineColor = "#ff0000";
+	            	var backgroundColor = "#ff0000";
+	            	if(!UT.isEmpty(feature)){		// 영역 객체가 있을경우
+						var data = feature;
+		            	if(typeof feature != "string"){
+					       	data =feature.attributes.data.geoJson;
+			            	me.dangerInfo = feature.attributes.data;
+				        	// 폴리곤 객체 생성
+			            	
+			            	if(feature.attributes.data.property){
+			            		lineColor = feature.attributes.data.property.lineColor ?  feature.attributes.data.property.lineColor : "#ff0000";
+			            		backgroundColor = feature.attributes.data.property.backgroundColor ? feature.attributes.data.property.backgroundColor : "#ff0000";
+			            		type = feature.attributes.data.property.type;
+			            		
+			            		me.set("dangerInfo.lineColor" , lineColor);
+			            		me.set("dangerInfo.backgroundColor" , backgroundColor);
+			            		me.set("dangerInfo.type" , type);
+			            	}
+
+		            	}
+			        	me.vectorLayer.addFeatures(geoJsonToFeature(data));
+			        	
+			        	if(UT.isNotEmpty(geoJsonToFeature(data).data)){
+			        		me.dangerInfo =  geoJsonToFeature(data).data.targetInfo;
+			        		var rStartDt =new Date(geoJsonToFeature(data).data.targetInfo.startDt);
+			        		var rEndDt =new Date(geoJsonToFeature(data).data.targetInfo.endDt);
+			        		
+			        		me.set("dangerInfo.startDt",rStartDt);
+			        		me.set("dangerInfo.endDt",rEndDt);
+			        		
+			        		if( geoJsonToFeature(data).data.targetInfo.property){
+			            		lineColor =  geoJsonToFeature(data).data.targetInfo.property.lineColor ?   geoJsonToFeature(data).data.targetInfo.property.lineColor : "#ff0000";
+			            		backgroundColor =  geoJsonToFeature(data).data.targetInfo.property.backgroundColor ?  geoJsonToFeature(data).data.targetInfo.property.backgroundColor : "#ff0000";
+			            		type = geoJsonToFeature(data).data.targetInfo.property.type;
+			            		
+			            		me.set("dangerInfo.lineColor" , lineColor);
+			            		me.set("dangerInfo.backgroundColor" , backgroundColor);
+			            		me.set("dangerInfo.type" , type);
+			            	}
+			        	}
+			        	// 지도 위치 이동
+			        	me.map.zoomToExtent(me.vectorLayer.getDataExtent());
+			        	me.map.zoomTo(15);
+		        	}
+	            	else {
+	            		console.log("기초 데이터 부족");
+	            	}
+
+	            	// colorpicker 추가
+	            	var lineColorPic = new ColorPic('#line_color', lineColor, '#line_color_anchor');
+	            	lineColorPic.on('change', function() {
+	            		$('#line_color_anchor').css('background-color', this.getColor());
+	            		me.changeLineColor( this.getColor());
+	                });
+	            	var bgColorPic = new ColorPic('#bg_color', backgroundColor, '#bg_color_anchor');
+	            	bgColorPic.on('change', function() {
+	            		$('#bg_color_anchor').css('background-color', this.getColor());
+	            		me.changeBgColor( this.getColor());
+	                });
+	            	
+	            	me.vectorLayer.onFeatureInsert = function(e){
+	            		this.map.target = this.getDataExtent();
+	        			editControl.selectFeature(this.getFeatureById(e.id));
+		        	};
+
+		        	// 편집 컨트롤 추가
+			       	editControl = addEditControl(me.map, me.vectorLayer);
+			       	editControl.virtualStyle = me.virtualStyle;
+			       	
+			       	me.changeLineColor(lineColor);
+		        	me.changeBgColor(backgroundColor);
+			    	
+	            	me.applyFormula();
+         		},100);
+            	
+            },
+            
+            changeLineColor : function(color){
+                var me = this;
+            	me.dangerStyle.strokeColor = color;
+            	me.vStyle.strokeColor = color;
+            	me.pStyle.strokeColor = color;
+            	me.virtualStyle.strokeColor = color;
+            	me.virtualStyle.fillColor = color;
+            	me.set('dangerInfo.lineColor', color);
+            	me.vectorLayer.redraw();
+            },
+            changeBgColor : function(color){
+                var me = this;
+                me.dangerStyle.fillColor = color;
+                me.dangerStyle.patternColor = color;
+            	me.pStyle.fillColor = color;
+            	me.set('dangerInfo.backgroundColor', color);
+            	me.vectorLayer.redraw();
+            },
+            featureAdded : function(event, e){
+                var me = this;
+                var feature = e.feature;
+                feature.attributes = {"type":"polygon"};
+           },
+           onCloseClick : function(){
+            	var me = this;
+            	me.fire("close");
+           },
+           onSaveClick : function(){
+            	var me = this;
+            	if(me.vectorLayer.features.length > 0){	// 저장전 폴리곤 갯수 확인
+            		if(!me.validate("areaValid")){
+                		UT.alert("STD.E0000"); // 입력하신 정보를 다시 확인하여 주세요.
+                        return;
+                	}
+                	
+            		var polygon = me.vectorLayer.getFeaturesByAttribute("type","polygon")[0].clone();
+            		polygon.geometry.transform(projection900913, projection4326);
+                 	me.set('dangerInfo.polygon', featureToPolygonArr(polygon));
+            		var geojson_format = new OpenLayers.Format.GeoJSON();
+	            	var geoJson = JSON.parse(geojson_format.write(polygon.geometry));
+                 	me.set('dangerInfo.geoJson', geoJson);
+
+                 	var startDt = me.dangerInfo.startDt.yyyymmdd()+" "+me.dangerInfo.startHH+":"+me.dangerInfo.startmm+":00";
+                 	var endDt = me.dangerInfo.endDt.yyyymmdd()+" "+me.dangerInfo.endHH+":"+me.dangerInfo.endmm+":00";
+
+                 	me.dangerInfo.startDt = startDt;
+                 	me.dangerInfo.endDt = endDt;
+                 	
+                 	me.dangerInfo.property = {};
+                 	me.dangerInfo.property.type = me.dangerInfo.type;
+                 	me.dangerInfo.property.lineColor = me.dangerInfo.lineColor;
+                 	me.dangerInfo.property.backgroundColor = me.dangerInfo.backgroundColor;
+                 	
+                	UT.confirm("STD.N1200", function(){ // 저장하시겠습니까?
+                		UT.request(me.$.saveDangerInfo);
+                	});
+                }else{
+           			UT.alert("영역을 지정해 주세요");//폴리곤을 구성해주세요.
+           			return;
+                }
+            },
+            completeSaveDangerInfo: function(e, res){
+            	var me = this
+            	,result = res.response;
+
+	            if(result.result_status === 'S'){
+	                UT.alert("STD.N2400"); // 저장하였습니다.
+	                me.fire("close");
+	            }else {
+                    UT.alert(result.result_message);
+                }
+            }
+        });
+        Date.prototype.yyyymmdd = function()
+        {
+            var yyyy = this.getFullYear().toString();
+            var mm = (this.getMonth() + 1).toString();
+            var dd = this.getDate().toString();
+         
+            return yyyy +'-'+ (mm[1] ? mm : '0'+mm[0]) +'-'+ (dd[1] ? dd : '0'+dd[0]);
+        }
+	</script>
+</dom-module>

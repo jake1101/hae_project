@@ -1,0 +1,56 @@
+<!-- 
+	sc-group-column 은 그룹형태로 컬럼을 만들 수 있습니다.
+	hide-child-headers, display-header 프로퍼티를 이용하여 자식 혹은 자신에 header를 표현 할 수있고,
+	orientation을 이용하여 컬럼을 수직으로 배치할 수 있습니다.
+-->
+
+<dom-module id="es-sp-group">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+        <sc-grid  id="gridPanel" data-provider="{{resultList}}" editable="true" >
+        	<cc-grid-toolbar>
+        		<sc-button text="조회" on-click="onSearch"></sc-button>
+        	</cc-grid-toolbar> 
+            <sc-grid-columns>
+            	<sc-data-column data-field="colunm_1"   header-text="colunm_1"  width="150" text-align="left"   editable="true" ></sc-data-column>
+                <sc-group-column header-text="group_1" width="300">
+                    <sc-data-column data-field="colunm_1"   header-text="colunm_1"  width="150" text-align="left"   editable="false" ></sc-data-column>
+                    <sc-data-column data-field="colunm_2"   header-text="colunm_2"  width="150" text-align="left"   editable="false"    style-name="link"   ></sc-data-column>
+                </sc-group-column>
+                
+                <sc-group-column header-text="group_2(hideChildHeaders)" width="300" hide-child-headers="true">
+                    <sc-data-column data-field="colunm_3"   header-text="colunm_3"  width="150" text-align="left"   editable="false"    format-type="amt"   data-type="number"></sc-data-column>
+                    <sc-data-column data-field="colunm_4"   header-text="colunm_4"  width="150" text-align="left"   editable="true" ></sc-data-column>
+                </sc-group-column>
+            </sc-grid-columns>
+        </sc-grid>
+    </template>
+    <!--  화면 구성 끝-->
+    
+    <!--  Polymer script 시작 -->
+    <script>
+        
+        Polymer({
+            is: 'es-sp-group',
+            
+            properties : {
+                resultList: {
+                    type:Array
+                }
+            },
+            onSearch : function(){
+            	this.fire('search');
+            }
+        	
+            
+        });
+    </script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

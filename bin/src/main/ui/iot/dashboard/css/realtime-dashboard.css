@@ -1,0 +1,174 @@
+@import url("dashboard.css");
+
+@charset "utf-8";
+
+/* BACKGROUND */
+.realtime-back-ground-color {background: #14203C; color: white;}
+.realtime-sub-back-ground-color {background: #182747; margin:33px 33px 33px 33px; border-radius: 13px;}
+
+.realtime-black-select-icon{min-width: 32px; height:33px; background: url(../icon/black-select.png) no-repeat; background-position: center;}
+.realtime-white-select-icon{min-width: 32px; height:33px; background: url(../icon/white-no-select.png) no-repeat; background-position: center;}
+
+/* AREA */
+.realtime-top-area {min-height:79px; border-bottom: 1px solid #2C4770; overflow: hidden !important; border: 1px solid #2C4670; border-radius: 13px 13px 0px 0px;}
+.realtime-top-left-area {align-self: center; padding-left: 30px; padding-right: 29px;}
+.realtime-top-site-text {font-size: 27px; font-weight: 900;}
+.realtime-top-time-text {font-size: 18px; font-weight: 500; justify-content: flex-end;}
+.realtime-top-right-area {align-self: center; padding-left: 29px; padding-right: 30px;}
+
+.realtime-content{
+	border-left: 1px solid #2C4670;
+	border-right: 1px solid #2C4670;
+	border-bottom: 1px solid #2C4670;
+}
+
+em-realtime-dashboard #gridWorkerPanel, em-realtime-dashboard #gridVehiclePanel, em-realtime-dashboard #gridIdBeaconPanel{
+	background: #182747;
+}
+
+.realtime-middle-area{padding:33px 33px 33px 33px}
+.realtime-middle-content{min-height: 647px; background: #1E3155; border-radius: 10px;}
+
+.fullback{position:fixed;width:100%;	height:100%;	margin : 0px; border-radius:0px;}
+
+.alarmMsg{
+	padding-top: 3px; font-size : 15px; color:#94B8FF;
+}
+
+em-realtime-dashboard cc-search-container .sc-wrap-srch {
+	background: rgb(31, 51, 89);
+	border-top: 0px solid #2C4670;
+	border-left: 1px solid #2C4670;
+	border-right: 1px solid #2C4670;
+	border-bottom: 1px solid #2C4670;
+}
+
+em-realtime-dashboard cc-search-container #_searchBtn {
+	background: url(../icon/realtime/search_btn.png) no-repeat !important;
+	text-indent: -10000px;
+	background-size: 150px 40px !important;
+}
+
+em-realtime-dashboard cc-search-container #_buttonContainer {
+	width: 150px;
+}
+
+em-realtime-dashboard cc-search-container .wrap-srch-btn {
+	margin-top: 7px !important;
+}
+
+em-realtime-dashboard cc-search-container th {
+	color: #fff !important;
+	font-family: 'Noto Sans KR';
+	font-size: 18px !important;
+	font-weight: 500 !important;
+}
+
+em-realtime-dashboard sc-tab-navigation .tabbar {
+	background: none !important;
+	border: none;
+}
+
+em-realtime-dashboard sc-tabbar {
+	height: 46px;
+}
+em-realtime-dashboard sc-tab:nth-child(1) {
+	background: url(../icon/realtime/worker_inactive.png) no-repeat;
+	width: 125px;
+	border-left: 0px !important;
+	margin-left: 0px !important;
+	border: none;
+}
+em-realtime-dashboard sc-tab:nth-child(1)[active] {
+	background: url(../icon/realtime/worker_active.png) no-repeat;
+}
+em-realtime-dashboard sc-tab:nth-child(2){
+	background: url(../icon/realtime/vehicle_inactive.png) no-repeat;
+	left: 125px !important;
+	width: 125px;
+	border-left: 0px !important;
+	margin-left: 0px !important;
+	border: none;
+}
+em-realtime-dashboard sc-tab:nth-child(2)[active] {
+	background: url(../icon/realtime/vehicle_active.png) no-repeat;
+}
+em-realtime-dashboard sc-tab:nth-child(3){
+	background: url(../icon/realtime/idBeacon_inactive.png) no-repeat;
+	left: 250px !important;
+	width: 125px;
+	border-left: 0px !important;
+	margin-left: 0px !important;
+	border: none;
+}
+em-realtime-dashboard sc-tab:nth-child(3)[active] {
+	background: url(../icon/realtime/idBeacon_active.png) no-repeat;
+}
+
+em-realtime-dashboard cc-grid-toolbar {
+	margin-top: 0px;
+	height: 35px;
+}
+
+em-realtime-dashboard cc-grid-toolbar .wrap_result {
+	margin-top : 5px !important;
+	font-size: 15px !important;
+	font-weight: 500 !important;
+}
+
+em-realtime-dashboard #columnList {
+	background: url(../icon/realtime/column_list.png) no-repeat !important;
+	border: none !important;
+	width: 38px !important;
+	height: 38px !important;
+	margin-right: 4px;
+}
+em-realtime-dashboard #columnList:hover {
+	background: url(../icon/realtime/column_list_hover.png) no-repeat !important;
+}
+em-realtime-dashboard .excel-download {
+	background: url(../icon/realtime/excel.png) no-repeat !important;
+	border: none !important;
+	width: 38px !important;
+	height: 38px !important;
+	margin-right: 4px;
+}
+em-realtime-dashboard .excel-download:hover{
+	background: url(../icon/realtime/excel_hover.png) no-repeat !important;
+}
+em-realtime-dashboard .personalized-save {
+	background: url(../icon/realtime/personalized_save.png) no-repeat !important;
+	border: none !important;
+	width: 38px !important;
+	height: 38px !important;
+	margin-right: 4px;
+}
+em-realtime-dashboard .personalized-save:hover{
+	background: url(../icon/realtime/personalized_save_hover.png) no-repeat !important;
+}
+em-realtime-dashboard .personalized-init {
+	background: url(../icon/realtime/personalized_init.png) no-repeat !important;
+	border: none !important;
+	width: 38px !important;
+	height: 38px !important;
+	margin-right: 10px;
+}
+em-realtime-dashboard .personalized-init:hover {
+	background: url(../icon/realtime/personalized_init_hover.png) no-repeat !important;
+}
+em-realtime-dashboard .grid-container {
+	border: 0px solid #314E7B;
+	-ms-overflow-style: none !important; /* IE에서 스크롤바 감춤 */
+}
+
+em-realtime-dashboard .grid-container::-webkit-scrollbar {
+	display: none !important; /* Chrome, Safari, Opera*/
+}
+
+em-realtime-dashboard .grid-container >div> canvas {
+	background: #182747 !important;
+}
+
+em-realtime-dashboard .scroll-none::-webkit-scrollbar {
+	display: none; /* Chrome, Safari, Opera*/
+}

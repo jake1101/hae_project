@@ -1,0 +1,44 @@
+<sc-link rel="import" href="es-element-control-sample.html"></sc-link>
+<sc-link rel="import" href="es-element-control-description.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-element-control-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-panel class="hbox flex" title-text="동적 화면 제어">
+            <es-element-control-description class="fit flex"></es-element-control-description>
+            <es-element-control-sample id="sample" class="box flex"></es-element-control-sample>
+        </sc-panel>
+        <es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-element-control-guide',
+		properties : {
+			srcList : {
+                type : Array,
+                value : function() {
+                    return [{
+                        title        : "es-element-control-sample.html",
+                        i18nDisabled : true,
+                        extension    : "html",
+                        url          : "/ui/bp/developer/guide/elementcontrol/es-element-control-sample.html"
+                    }, {
+                    	title        : "order-info.json",
+                        i18nDisabled : true,
+                        extension    : "json",
+                        url          : "/ui/bp/developer/guide/elementcontrol/json/order-info.json"
+                    }]
+                }
+			}
+		},
+		initialized : function() {
+			
+		}
+	});
+	</script>
+</dom-module>

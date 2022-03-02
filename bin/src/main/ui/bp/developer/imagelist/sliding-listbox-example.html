@@ -1,0 +1,100 @@
+\<dom-module id="sliding-listbox-example">
+	<style>
+	</style>
+	
+	<template>
+		<sc-sliding-listbox
+					direction="{{slidingType}}"
+					button-type="{{buttonType}}"
+					button-position="{{buttonPosition}}"
+					hide-scrollbar="{{hideScrollbar}}"
+					scroll-type="{{scrollType}}"
+					scroll-size="{{scrollSize}}"
+					scroll-speed="{{scrollSpeed}}"
+					display-marker="{{displayMarker}}"
+					on-click-item="onClickItem"
+					on-move-start="onMoveStart"
+					on-move-end="onMoveEnd"
+					items="{{data}}">
+			<template>
+				<div style="width:150px;height:155px;margin:2px;border:1px dotted silver;display:flex;flex-direction:column;">
+					<img src="{{data}}" style="height:90px;width:100px;margin:auto;">
+					<div style="width:100%;font-weight:bold;text-align:center;">[[name]]</div>
+					<div style="width:100%;text-align:left;">[[desc]]</div>
+					<div style="width:100%;text-align:left;font-style:italic;">[[hashTag]]</div>
+				</div>
+			</template>
+		</sc-sliding-listbox>
+	</template>
+	
+	<script>
+		Polymer({
+			is: 'sliding-listbox-example',
+			
+			properties: {
+				data: {
+					type: Object
+				},
+				slidingType: {
+					type: Object
+				},
+				buttonType: {
+					type: Object,
+				},
+				buttonPosition: {
+					type: Object,
+				},
+				displayMarker: {
+					type:Object
+				},
+				scrollType: {
+					type: Object,
+				},
+				scrollSize: {
+					type: Object,
+				},
+				hideScrollbar:{
+					type: Object,
+				},
+				scrollSpeed: {
+					type: Object,
+				},
+				consoleDiv: {
+					type: Object
+				}
+			},
+			
+			onMoveStart: function() {
+				var me = this;
+			},
+			
+			onMoveStart: function(event) {
+				var me = this;
+				me.consoleDiv.innerHTML = '[event: move-start] ' + JSON.stringify(event.detail) + '<br>' + me.consoleDiv.innerHTML;   
+			},
+			
+			onMoveEnd: function(event) {
+				var me = this;
+				me.consoleDiv.innerHTML = '[event: move-end] ' + JSON.stringify(event.detail) + '<br>' + me.consoleDiv.innerHTML;
+			},
+			
+			onClickItem: function(event, detail) {
+				var me = this;
+				me.consoleDiv.innerHTML = '[event: click-item] ' + JSON.stringify(event.detail) + '<br>' + me.consoleDiv.innerHTML;
+				
+				/* popup을 통하여 호출하는 경우
+				var popup = UT.popup('sc-image-viewer', me, 600, 500, {}, {});
+				popup.show();
+				var popupContent = popup.getWindowContent()
+				popupContent.infoField = 'desc';
+				popupContent.initData(me.data, detail.index);
+				*/
+				
+				UT.showImageViewerPopup({
+					index: detail.index,
+					items: me.data
+				});
+			}
+		});
+	</script>
+</dom-module>

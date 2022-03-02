@@ -1,0 +1,391 @@
+<sc-link rel="import" href="ep-alarm-list.html"></sc-link>
+
+<dom-module id="es-alarm-list">
+
+	<style>
+		:host{
+			@apply(--vbox-layout);
+		}
+	</style>
+	
+	<template>
+	
+	<sc-request-group init>
+		<sc-code-group>
+			<sc-code code="C102" value="{{typValue}}"></sc-code>
+		</sc-code-group>
+		<sc-code-group>
+			<sc-code code="ALARMTYPE" value="{{alarmValue}}"></sc-code>
+		</sc-code-group>
+		
+		<sc-ajax url="findListSiteCombo.do" last-response="{{siteList}}"></sc-ajax>
+	</sc-request-group>
+	
+	<sc-ajax id="findListAlarmHistory"
+				 url="findListAlarmHistory.do"
+				 body="{{searchParam}}"
+				 on-response="completeFind">		
+	</sc-ajax>
+	
+	<sc-ajax id="updateHiddenVal"
+				 url="updateHiddenVal.do"
+				 on-response="completeSave">		
+	</sc-ajax>
+	
+	<sc-ajax id="updateOpenVal"
+				 url="updateOpenVal.do"
+				 on-response="completeSave">		
+	</sc-ajax>
+	<sc-ajax id="onSave"
+				 url="onSave.do"
+				 on-response="completeOnSave">		
+	</sc-ajax>
+	
+	
+	<sc-ajax id="insertAlarmCheck"
+				 url="insertAlarmCheck.do"
+				 on-response="completeinsertAlarmCheck">		
+	</sc-ajax>
+	
+		<cc-page-title-bar></cc-page-title-bar>
+	
+		<cc-search-container on-search="onFindList" auth-r >
+			<table  validation-group="search">
+			<colgroup>
+				<col style="width:80px">
+				<col />
+				<col style="width:80px">
+				<col />
+			</colgroup>
+				<tr>
+					<th><sc-label text="Site"></sc-label></th>
+					<td>
+					<sc-combobox-field id="combo" items="[[siteList]]" value="{{searchParam.siteName}}" placeholder="선택"
+    									display-field="label" value-field="data"  required="true" selected-index="0">
+    				</sc-combobox-field>			
+					</td>
+					<th><sc-label text="기간"></sc-label></th>
+					<td>
+    					<div class="field-box" >
+    						<sc-date-field  value="{{data.value1}}" string-date="true" default-value="-3d" class="w-100"></sc-date-field> 
+	    					<sc-number-field class="w-50" value="{{data.value2}}" min-value="0" max-value="23" default-value="00" max-length="2"></sc-number-field>
+	    					<span style="margin:0 2px"> : </span>
+	    					<sc-number-field class="w-50" value="{{data.value3}}" min-value="0" max-value="59" default-value="00" max-length="2"></sc-number-field>
+	    					 ~
+	    					<sc-date-field value="{{data.value4}}" string-date="true" default-value="0d" class="w-100"></sc-date-field>
+	    					<sc-number-field class="w-50" value="{{data.value5}}" min-value="0" max-value="23" default-value="23" max-length="2"></sc-number-field>
+	    					<span style="margin:0 2px"> : </span>
+	    					<sc-number-field class="w-50" value="{{data.value6}}" min-value="0" max-value="59" default-value="59" max-length="2"></sc-number-field>
+	    				</div>
+    				</td>
+    				
+				</tr>	
+				
+				
+			</table>
+			
+		</cc-search-container>
+
+		<sc-grid id="gridPanel1" data-provider="{{resultList}}" on-item-click="onItemClick" use-state=false editable="true">
+			<cc-grid-toolbar>
+				<sc-button text="저장"  on-click="onSave" auth-s></sc-button>
+				<sc-button text="일괄 열람"  on-click="onOpen" auth-s></sc-button>
+				<sc-button text="일괄 숨김"  on-click="onHidden" auth-s></sc-button>
+			</cc-grid-toolbar>
+			
+			<sc-grid-columns>
+				<sc-data-column header-text="No" data-field="seq" width="80" text-align="center" data-type="number" 
+				style-name="link" ></sc-data-column>
+				<sc-date-column header-text="발생시간" data-field="send_dt" width="150" text-align="left" display-format="yyyy/MM/dd HH:mm:ss" ></sc-date-column>
+				<sc-combobox-column	data-field="node_typ"	header-text="구분"	width="150"		
+									display-field="label"	value-field="data"	items="[[typValue]]"></sc-combobox-column>
+				<sc-combobox-column	data-field="category"	header-text="유형"	width="100"		
+					display-field="label"	value-field="data"	items="[[alarmValue]]"></sc-combobox-column>
+					
+				<sc-image-column header-text="유형 표시" image-change-function="onImageChange" width=0></sc-image-column> 					
+					
+				<sc-data-column header-text="대상" data-field="catal_name" width="150" text-align="left" ></sc-data-column>
+				<sc-data-column header-text="내용" data-field="cmmt" width="500" text-align="left" ></sc-data-column>
+				<sc-data-column header-text="알림대상" data-field="target_cnt" width="120" text-align="center" ></sc-data-column>
+				<sc-data-column header-text="읽음확인" data-field="read_dt" width="150" text-align="center"></sc-data-column>
+				<sc-data-column header-text="숨김확인" data-field="hidden_val" width="0" text-align="left" ></sc-data-column>
+				
+				<sc-data-column header-text="작성자" data-field="writer" width="150" text-align="left" editable="true" ></sc-data-column>
+				
+				<sc-data-column header-text="조치내용" data-field="remarks" width="150" text-align="left" editable="true" ></sc-data-column>
+				
+			</sc-grid-columns>
+		</sc-grid>	
+	</template>
+	
+	
+	<script>
+		Polymer({
+			is: "es-alarm-list" ,
+			
+			properties :{
+				//조회조건
+				searchParam : {
+					type : Object,
+					value : function(){
+						return {};
+					}
+				},
+				
+				//조회 결과
+				 resultList: {
+					 type : Array,
+					 value : function(){
+						 return [];
+					 }
+				},
+				 
+				siteList: {
+					 type : Array,
+					 value : function(){
+						 return [];
+					 }
+				 },
+				 
+				 updateParam : {
+						type : Object,
+						value : function(){
+							return {};
+						}
+				 },
+				 saveParam : {
+						type : Object,
+						value : function(){
+							return {};
+						}
+				 },
+				 data: {
+					 type : Object,
+					 value : function(){
+						 return {};
+					 }
+				 },
+				typValue :{
+						type: Array,
+						value : function(){
+							return [];
+						}
+				},
+				alarmValue :{
+						type: Array,
+						value : function(){
+							return [];
+						}
+				},
+				 
+			},
+			
+			initialized : function() {
+                var me = this;
+                // 게이트웨이 현황 조회
+                me.onFindList();
+            },
+			
+			onFindList : function(){
+				var me = this;
+				
+				var year =me.data.value1.substring(0,4);
+				var month =me.data.value1.substring(4,6);
+				var day =me.data.value1.substring(6,8);
+				var hour = me.data.value2;
+				var minute = me.data.value3;
+				
+				var startTime = new Date(year, month-1, day, hour, minute);
+				
+				var year2 =me.data.value4.substring(0,4);
+				var month2 =me.data.value4.substring(4,6);
+				var day2 =me.data.value4.substring(6,8);
+				var hour2 = me.data.value5;
+				var minute2 = me.data.value6;
+				
+				var finishTime = new Date(year2, month2-1, day2, hour2, minute2);
+			
+				me.searchParam.startTime = startTime;
+				me.searchParam.finishTime = finishTime;
+				
+				if(!me.validate('search')) {
+                	UT.alert("STD.E0000");
+         	    	return;
+                }
+				
+				UT.request(this.$.findListAlarmHistory);	
+				
+			},
+			
+			onImageChange: function(data, item){
+				//console.log("!!@@"+JSON.stringify(data));
+				 
+		        if(data["category"] == "battery"){
+		            return "../img/gridIcon/sgnl_bettery.png";
+		        }else if(data["category"] == "temperature"){
+		            return "../img/gridIcon/sgnl_tempera.png";
+		        }else if(data["category"] == "humidity"){
+		            return "../img/gridIcon/sgnl_huminity.png";
+		        }else if(data["category"] == "delay"){
+		            return "../img/gridIcon/sgnl_delay.png";
+		        }                    
+		    }, 
+			
+			onItemClick : function(){
+				var me = this;
+				
+				var data = event.detail.data,
+					item = event.detail.item;
+				
+				/* console.log("data : "+ JSON.stringify(data));
+				console.log("item : "+ JSON.stringify(item)); */
+				
+				if(item.dataField ==='seq'){
+					var nodePopup = UT.popup("ep-alarm-list", me,  500, 400, {
+	                    "show-list": function(popup, e) {
+		                   	me.onFindList();
+		                   	popup.close();
+	                    }
+	                });
+					nodePopup.show();
+					nodePopup.getWindowContent().load(data);
+					
+					me.$.insertAlarmCheck.body = {
+							data
+					};
+					
+					if(data.read_dt == "미열람"){
+					 	UT.request(me.$.insertAlarmCheck);
+					}
+					
+				}
+				
+			},
+			
+			completeinsertAlarmCheck : function(e, res){
+				var me = this;
+				me.onFindList();
+			},
+			
+			completeFind : function(e, res){
+				var data = res.response;
+				this.set("resultList", data);
+				
+				
+				//console.log("!!!"+JSON.stringify(data));
+				
+			},
+			
+			onHidden : function(){
+				var me = this;
+				
+				var provider = me.$.gridPanel1.getDataProvider();
+				var selectionItems = provider.selectionCheckedItems();
+				
+				if(selectionItems.length != 0){
+					
+					me.set("updateParam",{selectionItems: selectionItems});
+					
+					me.$.updateHiddenVal.body = {
+							rows: me.get("updateParam.selectionItems"),
+					};
+					
+ 					UT.confirm("STD.N1200",function(){	//저장하시겠습니까?
+ 						UT.request(me.$.updateHiddenVal);
+					});
+					
+				}else {
+					UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+				}
+				
+			},
+			
+			onOpen : function(){
+				var me = this;
+				
+				var provider = me.$.gridPanel1.getDataProvider();
+				var selectionItems = provider.selectionCheckedItems();
+				
+				if(selectionItems.length != 0){
+					
+					me.set("updateParam",{selectionItems: selectionItems});
+					
+					me.$.updateOpenVal.body = {
+							rows: me.get("updateParam.selectionItems"),
+					};
+					
+ 					UT.confirm("STD.N1200",function(){	//저장하시겠습니까?
+ 						UT.request(me.$.updateOpenVal);
+					});
+					
+				}else {
+					UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+				}
+				
+			},
+			
+			
+		 
+			
+			completeSave: function(e, res){
+                var me = this,
+                    message = "STD.N2400"; // 저장하였습니다.
+
+                if(res.response.result_status === 'S'){
+                    UT.alert(message, function(){
+                    	me.onFindList();
+                    });
+                } else {
+                    message = res.response.result_message;
+                    UT.alert(message);
+                }
+          	},
+			
+			
+			onSave : function(){
+				var me = this;
+				
+				var provider = me.$.gridPanel1.getDataProvider();
+				var selectionItems = provider.getUpdateItems();
+				
+				
+				if(selectionItems.length != 0){
+					
+					me.set("saveParam",{selectionItems: selectionItems});
+					
+					me.$.onSave.body = {
+							rows: me.get("saveParam.selectionItems"),
+					};
+					
+ 					UT.confirm("STD.N1200",function(){	//저장하시겠습니까?
+ 						UT.request(me.$.onSave);
+					});
+					
+				}else {
+					UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+				}
+				
+			},
+			
+			completeOnSave: function(e, res){
+                var me = this,
+                message = "STD.N2400"; // 저장하였습니다.
+
+                console.log(res.response);
+	           if(res.response.result_status === 'S'){
+	                UT.alert(message, function(){
+	                	me.onFindList();
+	                });
+	            } else {
+	                message = res.response.result_message;
+	                UT.alert(message);
+	            } 
+	      	}
+				
+		})
+		
+		
+	</script>
+
+
+</dom-module>

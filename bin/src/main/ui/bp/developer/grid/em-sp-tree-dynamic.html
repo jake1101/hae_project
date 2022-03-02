@@ -1,0 +1,109 @@
+<script src="/ui/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<sc-link rel="import" href="es-sp-tree-dynamic.html"></sc-link>
+<sc-link rel="import" href="shared/es-source-viewer.html"></sc-link>
+<dom-module id="em-sp-tree-dynamic">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <!--  화면 구성 시작-->
+    <template>
+
+      <sc-panel class="vbox flex-5" collapsible="false" title-text="sc-grid 조회 샘플">
+
+          <es-sp-tree-dynamic id="esTree" data={{data}} dy-data={{dyData}}></es-sp-tree-dynamic>
+      </sc-panel>	
+      <div class="vbox flex-5">
+       <es-source-viewer id="viewer" url="/ui/bp/developer/grid/es-sp-tree-dynamic.html"></es-source-viewer>
+   </div>
+</template>
+<!--  화면 구성 끝-->
+
+<!--  Polymer script 시작 -->
+<script>
+
+    Polymer({
+        is: 'em-sp-tree-dynamic',
+
+        properties : {
+			data : {
+				type : Object,
+				value : function(){
+					return [  
+					        {  
+					            "path":"C:\\",
+					            "sort_ord":0,
+					            "hasChild":true,
+					            "display_name":"로컬 디스크 (C:)",
+					            "up_path":"ROOT"
+					         },
+					         {  
+					            "path":"D:\\",
+					            "sort_ord":1,
+					            "hasChild":true,
+					            "display_name":"DATA (D:)",
+					            "up_path":"ROOT"
+					         }
+					      ];
+				}
+			},
+			dyData : {
+				type : Object,
+				value : function(){
+					return [  
+							{  
+							    "path":"dynamic data1",
+							    "sort_ord":0,
+							    "hasChild":false,
+							    "display_name":"dynamic data1",
+							 },
+							 {  
+							    "path":"dynamic data2",
+							    "sort_ord":1,
+							    "hasChild":false,
+							    "display_name":"dynamic data2",
+							 },
+							 {  
+							    "path":"dynamic data3",
+							    "sort_ord":2,
+							    "hasChild":false,
+							    "display_name":"dynamic data3",
+							 },
+							 {  
+							    "path":"dynamic data4",
+							    "sort_ord":3,
+							    "hasChild":false,
+							    "display_name":"dynamic data4",
+							 },			
+							 {  
+							    "path":"dynamic data5",
+							    "sort_ord":4,
+							    "hasChild":false,
+							    "display_name":"dynamic data5",
+							 },
+							 {  
+							    "path":"dynamic data6",
+							    "sort_ord":5,
+							    "hasChild":false,
+							    "display_name":"dynamic data6",
+							 },							 
+					      ];
+				}
+			},
+        },
+
+           // 화면 생성 완료
+           initialized: function() {
+            var me = this;
+            this.$.viewer.setData(JSON.stringify(me.data, null, "\t"));
+        }
+
+
+    });
+</script>
+<!--  Polymer script 끝 -->
+
+</dom-module>

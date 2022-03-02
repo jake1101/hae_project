@@ -1,0 +1,39 @@
+<sc-link rel="import" href="es-grid-columns-sample.html"></sc-link>
+<!-- <sc-link rel="import" href="es-grid-columns-description.html"></sc-link> -->
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-grid-columns-guide">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+        <sc-panel class="hbox flex" title-text="그리드 컬럼">
+		<!-- <es-grid-columns-description class="fit flex"></es-grid-columns-description> -->
+            <es-grid-columns-sample id="sample" class="box flex"></es-grid-columns-sample>
+        </sc-panel>
+        <es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-grid-columns-guide',
+		properties : {
+			srcList : {
+                type : Array,
+                value : function() {
+                    return [{
+                        title        : "es-grid-columns-sample.html",
+                        i18nDisabled : true,
+                        extension    : "html",
+                        url          : "/ui/bp/developer/guide/grid/es-grid-columns-sample.html"
+                    }]
+                }
+            }
+		},
+		initialized : function() {
+			 
+		}
+	});
+	</script>
+</dom-module>

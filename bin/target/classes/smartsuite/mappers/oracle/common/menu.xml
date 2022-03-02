@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="menu">
+	<sql id="Base_Column_List">
+		SYS_ID, MENU_CD, UP_MENU_CD, LINK_URL, USR_CLS, MENU_TYP,
+		MD_CLS, SORT_ORD,
+		USE_YN,
+		REM, STS, REG_ID, REG_DT, MOD_ID, MOD_DT
+	</sql>
+
+	<select id="findListMenu" resultType="java.util.Map">
+	/*findListMenu */
+		SELECT
+			MM.UP_MENU_CD,
+			MM.SYS_ID,
+			MM.MENU_CD,
+			MM.LINK_URL,
+			MM.USR_CLS,
+			MM.MENU_TYP,
+			MM.MD_CLS,
+			MM.SORT_ORD,
+			MM.USE_YN,
+			MM.REM,
+			MM.STS,
+			MM.MOD_ID,
+			MM.MOD_DT,
+			MM.SITE_ID,
+			ML.MENU_NM,
+			#{g.locale}                      AS LANG_CD,
+			ML.MENU_CD                       AS ML_MENU_CD,
+			ML2.MENU_NM                      AS MENU_NM2,
+			COALESCE(#{p.lang_cd}, '')  AS LANG_CD2,
+			ML2.MENU_CD                      AS ML_MENU_CD2
+		FROM ESAAUMM MM
+		LEFT OUTER JOIN ESAAUML ML
+		ON (
+			MM.SYS_ID = ML.SYS_ID
+			AND MM.MENU_CD = ML.MENU_CD
+			AND ML.LANG_CD =  #{g.locale}
+		)
+		LEFT OUTER JOIN ESAAUML ML2
+		ON ( 
+			MM.SYS_ID = ML2.SYS_ID
+			AND MM.MENU_CD = ML2.MENU_CD
+			AND ML2.LANG_CD = COALESCE(#{p.lang_cd}, '')
+		)
+		WHERE MM.SYS_ID = #{g.tenant}
+		<if test="p.menu_cd != null and p.menu_cd != ''">
+		AND MM.MENU_CD = #{p.menu_cd}
+		</if>
+		AND MM.STS != 'D'
+		<if test="p.usr_cls != null and p.usr_cls != ''">
+		AND MM.USR_CLS = #{p.usr_cls}
+		</if>
+		ORDER BY MM.SORT_ORD
+	</select>
+
+	<delete id="deleteMenu">
+		DELETE FROM ESAAUMM
+		WHERE SYS_ID = #{g.tenant}
+		AND	MENU_CD = #{p.menu_cd}
+	</delete>
+
+	<insert id="insertMenu">
+		INSERT INTO ESAAUMM
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			SYS_ID,
+			MENU_CD,
+				UP_MENU_CD,
+				LINK_URL,
+				USR_CLS,
+				MENU_TYP,
+				MD_CLS,
+				SORT_ORD,
+			USE_YN,
+				REM,
+			STS,
+			REG_ID,
+			REG_DT,
+				MOD_ID,
+				MOD_DT,
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{g.tenant},
+			trim(#{p.menu_cd}),
+				#{p.up_menu_cd},
+				#{p.link_url},
+				#{p.usr_cls},
+				#{p.menu_typ},
+				#{p.md_cls},
+				#{p.sort_ord},
+			#{p.use_yn},
+				#{p.rem},
+			'C',
+			#{g.username},
+			#{g.now},
+				#{p.mod_id},
+				#{p.mod_dt},
+		</trim>
+	</insert>
+	
+	<insert id="insertMenuName">
+		INSERT INTO ESAAUML
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			SYS_ID,
+			MENU_CD,
+			MENU_NM,
+			LANG_CD,
+				REM,
+			STS,
+			REG_ID,
+			REG_DT,
+			MOD_ID,
+			MOD_DT,
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{g.tenant},
+			trim(#{p.menu_cd}),
+			#{p.menu_nm},
+			#{p.lang_cd},
+				#{p.rem},
+			'C',
+			#{g.username},
+			#{g.now},
+			#{g.username},
+			#{g.now},
+		</trim>
+	</insert>
+
+	<update id="updateMenu" parameterType="Map">
+		UPDATE ESAAUMM
+		<set>
+				UP_MENU_CD = #{p.up_menu_cd},
+				LINK_URL = #{p.link_url},
+				USR_CLS = #{p.usr_cls},
+				MENU_TYP = #{p.menu_typ},
+				MD_CLS = #{p.md_cls},
+				SORT_ORD = #{p.sort_ord,jdbcType=INTEGER},
+				USE_YN = #{p.use_yn},
+				REM = #{p.rem},
+			STS = 'U',
+			SITE_ID = #{p.site_id},
+			MOD_ID = #{g.username},
+			MOD_DT = #{g.now}
+		</set>
+		where SYS_ID = #{g.tenant}
+		and MENU_CD = #{p.menu_cd}
+	</update>
+	
+	<update id="updateMenuName">
+		UPDATE ESAAUML
+		<set>
+			MENU_NM = #{p.menu_nm},
+			STS = 'U',
+			MOD_ID = #{g.username},
+			MOD_DT = #{g.now}
+		</set>
+		<where>
+			SYS_ID = #{g.tenant}
+			AND MENU_CD = #{p.menu_cd}
+			AND LANG_CD = #{g.locale}
+		</where>
+	</update>
+	
+	<update id="updateMenuNameLang">
+		UPDATE ESAAUML
+		<set>
+			MENU_NM = #{p.menu_nm},
+			STS = 'U',
+			MOD_ID = #{g.username},
+			MOD_DT = #{g.now}
+		</set>
+		<where>
+			SYS_ID = #{g.tenant}
+			AND MENU_CD = #{p.menu_cd}
+			AND LANG_CD = #{p.lang_cd}
+		</where>
+	</update>
+
+	<delete id="deleteMenuName">
+		DELETE FROM ESAAUML
+		WHERE SYS_ID = #{g.tenant}
+		AND MENU_CD = #{p.menu_cd}
+	</delete>
+
+	<select id="findMenuByCode" resultType="java.util.Map">
+		SELECT 
+			MM.SYS_ID,
+			MM.MENU_CD
+		FROM ESAAUMM MM
+		<where>
+			SYS_ID = #{g.tenant}
+			AND MENU_CD = #{p}
+		</where>
+	</select>
+	
+	<delete id="deleteRoleMenuByMenu">
+		DELETE
+		FROM ESAAURM
+		WHERE
+		      SYS_ID = #{g.tenant}
+ 		  AND MENU_CD = #{p.menu_cd}
+	</delete>
+	
+	<insert id="insertMenuFuncs">
+	       INSERT INTO ESAAUMF
+	       SELECT #{g.tenant}   AS SYS_ID
+	             ,#{p.menu_cd}  AS MENU_CD
+	             ,'R'           AS FUNC_CD
+	             ,'조회'        AS FUNC_NM
+	             ,#{g.username} AS REG_ID
+	             ,now()         AS REG_DT
+	             ,#{g.username} AS MOD_ID
+	             ,now()         AS MOD_DT
+	        UNION
+	       SELECT #{g.tenant}   AS SYS_ID
+	             ,#{p.menu_cd}  AS MENU_CD
+	             ,'S'           AS FUNC_CD
+	             ,'저장'        AS FUNC_NM
+	             ,#{g.username} AS REG_ID
+	             ,now()         AS REG_DT
+	             ,#{g.username} AS MOD_ID
+	             ,now()         AS MOD_DT
+	       UNION
+	       SELECT #{g.tenant}    AS SYS_ID
+	             ,#{p.menu_cd}   AS MENU_CD
+	             ,'E'            AS FUNC_CD
+	             ,'엑셀다운로드' AS FUNC_NM
+	             ,#{g.username} AS REG_ID
+	             ,now()         AS REG_DT
+	             ,#{g.username} AS MOD_ID
+	             ,now()         AS MOD_DT
+	       UNION
+	       SELECT #{g.tenant}   AS SYS_ID
+	             ,#{p.menu_cd}  AS MENU_CD
+	             ,'P'           AS FUNC_CD
+	             ,'프린트'      AS FUNC_NM
+	             ,#{g.username} AS REG_ID
+	             ,now()         AS REG_DT
+	             ,#{g.username} AS MOD_ID
+	             ,now()         AS MOD_DT
+	</insert>
+	
+	<delete id="deleteMenuFuncs">
+	       DELETE 
+	         FROM ESAAUMF
+	        WHERE SYS_ID  = #{g.tenant}
+	          AND MENU_CD = #{p.menu_cd} 
+	</delete>
+</mapper>

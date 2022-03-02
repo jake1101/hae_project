@@ -1,0 +1,83 @@
+package smartsuite.app.bp.pro.rfx;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import smartsuite.app.bp.pro.rfx.factory.RfxFactory;
+import smartsuite.app.bp.pro.rfx.scheduler.RfxSchedulerService;
+import smartsuite.app.bp.pro.rfx.strategy.RfxStrategy;
+import smartsuite.app.common.shared.Const;
+
+@SuppressWarnings ({ "rawtypes", "unchecked" })
+@Service
+@Transactional
+public class RfxService {
+	
+	/** The rfq schduler service. */
+	@Inject
+	RfxSchedulerService rfxSchedulerService;
+	
+	/** The factory. */
+	@Inject
+	RfxFactory factory;
+	
+	/**
+	 * RFx 업체전송
+	 *
+	 * @param param
+	 * @return resultMap
+	 */
+	public Map<String, Object> directRfx(Map<String, Object> param) throws Exception {
+		// 저장로직 수행
+		updateRfx(param);
+		
+		//견적요청 스케쥴러 등록
+		rfxSchedulerService.noticeRfx(param);
+				
+		//resultData 셋팅 
+		Map<String, Object> resultDataMap = new HashMap<String, Object>();
+		resultDataMap.put("rfx_id", param.get("rfx_id"));
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap.put(Const.RESULT_DATA  , resultDataMap);
+		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
+		return resultMap;
+	}
+	
+	/**
+	 * RFX 시작 스케쥴러 수행 서비스
+	 *
+	 * @param param {rfx_typ, rfx_id}
+	 */
+	public void startRfx(HashMap<String,Object> param) {
+		Map<String, Object> rfxInfo = findRfx(param);
+		
+		String rfxTyp = (String)param.get("rfx_typ");
+		RfxStrategy strategy = factory.getRfxStrategy(rfxTyp);
+		if(strategy != null) {
+			strategy.startRfx(param);
+		}
+	}
+	
+	/**
+	 * RFX 마감 스케쥴러 수행 서비스
+	 *
+	 * @param param {rfx_typ, rfx_id}
+	 */
+	public void closeRfx(HashMap<String, Object> param) throws Exception {
+		Map<String, Object> rfxInfo = findRfx(param);
+		
+		if(rfxInfo != null) {
+			String rfxTyp = (String)param.get("rfx_typ");
+			RfxStrategy strategy = factory.getRfxStrategy(rfxTyp);
+			if (strategy != null) {
+				strategy.closeRfx(rfxInfo);
+			}
+		}
+	}
+}

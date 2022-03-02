@@ -1,0 +1,960 @@
+<!--
+ * @Desc grid column behavior
+ * @Author kirious
+ * @Created 2016-04-07
+ -->
+<script>
+    Polymer.GPGridColumnBehavior = {
+            properties : {
+                tag : {
+                    type : String
+                },
+                dataField: {
+                    type: String,
+                    value: "",
+                    reflectToAttribute : true
+                },
+                headerText: {
+                    type: String,
+                    value: ""
+                },
+                type: {
+                    type: String,
+                    value: "text"
+                },
+                width: {
+                    type: String,
+                    value: ""
+                },
+                fillWidth : {
+                    type : Boolean,
+                    value : false
+                },
+                movable : {
+                    type : Boolean,
+                    value : false
+                },
+                resizable : {
+                    type : Boolean,
+                    value : false
+                },
+                sortable : {
+                    type : Boolean,
+                    value : false
+                },
+                iconIndex : {
+                    type : Number
+                },
+                iconLocation : {
+                    type: String
+                },
+                iconOffset : {
+                    type : Number
+                },
+                iconPadding : {
+                    type : Number
+                },
+                hideIcon : {
+                	type : Boolean,
+                	value : false,
+                    reflectToAttribute : true
+                },
+                textAlign: {
+                    type: String,
+                    value: "left"
+                },
+                editable: {
+                    type: Boolean,
+                    value: false,
+                    reflectToAttribute : true
+                },
+                dynamicStyles : {
+                	type : Array
+                },
+                editButtonVisibility : {
+                    type : String
+                },
+                editorOption : {
+                    type : Object
+                },
+                validCriteria : {
+                	type : String
+                },
+                dataType: {
+                    type: String,
+                    value: ""
+                },
+                numberFormat: {
+                    type: String,
+                    value: ""
+                },
+                datetimeFormat: {
+                    type: String
+                },
+                _defaultDatetimeFormat:{
+                    type : String,
+                    value : "yyyy/MM/dd"
+                },
+                footerText: {
+                    type: String,
+                    value: ""
+                },
+                footerTextAlign: {
+                    type: String,
+                    value: "center"
+                },
+                footerFont: {
+                    type: String,
+                    value: "Arial,12"
+                },
+                footerExpression: {
+                    type: String,
+                    value: ""
+                },
+                comboValue: {
+                    type: String,
+                    value: ""
+                },
+                comboLabel: {
+                    type: String,
+                    value: ""
+                },
+                comboText: {
+                    type: String,
+                    value: ""
+                },
+                baseField: {
+                    type: String,
+                    value: ""
+                },
+                cursor: {
+                    type: String,
+                    value: ""
+                },
+                actionable : {
+                    type : Boolean,
+                    value : false
+                },
+                codeList : {
+                    type : Array,
+                    reflectToAttribute : true
+                },
+                valueKey : {
+                    type : String,
+                    value : "data"
+                },
+                labelKey : {
+                    type : String,
+                    value : "label"
+                },
+                defaultLabel : {
+                    type : String
+                },
+                hide : {
+                    type : Boolean,
+                    value : false,
+                    reflectToAttribute : true
+                },
+                _lastDisplayIndex : {
+                    type : Number
+                },
+                unique : {
+                    type : Boolean,
+                    value : false
+                },
+                required : {
+                    type : Boolean,
+                    value : false,
+                    reflectToAttribute : true
+                },
+                selected : {
+                    type : Boolean,
+                    value : false
+                },
+                nospace : {
+                    type : Boolean,
+                    value : false
+                },
+                alphabet : {
+                    type : Boolean,
+                    value : false
+                },
+                number : {
+                    type : Boolean,
+                    value : false
+                },
+                hideExport : {
+                    type : Boolean,
+                    value : false
+                },
+                minLength: {
+                    type: Number
+                },
+                maxLength: {
+                    type: Number
+                },
+                fixLength: {
+                    type: Number
+                },
+                gtValue: {
+                    type: Number
+                },
+                geValue: {
+                    type: Number
+                },
+                ltValue: {
+                    type: Number
+                },
+                leValue: {
+                    type: Number
+                },
+                gtDate: {
+                    type: String
+                },
+                geDate: {
+                    type: String
+                },
+                ltDate: {
+                    type: String
+                },
+                leDate: {
+                    type: String
+                },
+                mergeRule: {
+                    type: String,
+                    value: ""
+                },
+                actionableRule: {
+                    type: String,
+                    value: ""
+                },
+                equalBlank: {
+                    type: Boolean,
+                    value: false
+                }
+            },
+            ready : function()
+            {
+                /*
+                var obj = this.parentElement;
+                while(obj)
+                {
+                    if(obj.nodeName == "GP-DATAGRID" || obj.nodeName == "GP-TREE-GRID")
+                    {
+                        this._gridElement = obj;
+                        break;
+                    }
+                    obj = obj.parentElement;
+                }
+                */
+            },
+            attributeChanged : function(name, type)
+            {
+                var func = null;
+                switch(name)
+                {
+                    case "editable" :
+                        func = this.__setEditable;
+                        break;
+                    case "required" :
+                        func = this.__updateStyles;
+                        break;
+                    case "code-list" :
+                        func = this.__setCodeList;
+                        break;
+                    case "hide" :
+                        func = this.__setVisible;
+                        break;
+                    case "hide-icon" :
+                    	func = this.__setIcon;
+                    	break;
+                }
+                if(func)
+                {
+                    this.fire("column-changed", {name : name, value : this.get(name), func : func});
+                }
+            },
+            __setFieldName : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                obj.name = me.dataField;
+                obj.fieldName = me.dataField;
+            },
+            __setHeaderName : function(obj, e)
+            {
+            	
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(typeof obj["header"] === "undefined")
+                {
+                    obj.header = {};
+                }
+               
+                if(me.headerText == "headerCheckBox"){
+       
+                	 obj.header.text = " ";
+                	 obj.header.checkLocation = "left";
+                	 
+                }else{
+                	 obj.header.text = me.headerText;
+                }
+               
+            },
+            __setEditable : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                obj.editable = me.editable;
+            },
+            __setEditButtonVisibility : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(typeof obj["editButtonVisibility"] !== "undefined")
+                {
+                    obj["editButtonVisibility"] = undefined;
+                }
+                if(me.editButtonVisibility)
+                {
+                    obj["editButtonVisibility"] = me.editButtonVisibility;
+                }
+
+            },
+            __setEditorOption : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(me.editorOption)
+                {
+                    if(typeof obj["editor"] === "undefined")
+                    {
+                        obj["editor"] = {};
+                    }
+                    for (var key in me.editorOption) {
+                        if (me.editorOption.hasOwnProperty(key))
+                        {
+                            obj["editor"][key] = me.editorOption[key];
+                        }
+                    }
+                }
+            },
+            __setStyles : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(typeof obj["styles"] === "undefined")
+                {
+                    obj.styles = {};
+                }
+            },
+            __setActionable : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(typeof obj["styles"]["id"] !== "undefined")
+                {
+                    obj["styles"]["id"] = undefined;
+                    obj["styles"]["fontBold"] = undefined;
+                    obj["styles"]["foreground"] = undefined;
+                }
+
+                if(me.actionable == true)
+                {
+                    obj.styles = {
+                        id: "actionable",
+                        fontBold: true,
+                        foreground: "#0e006f"
+                    };
+                }
+            },
+            __setAlign : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(typeof obj["styles"]["textAlignment"] !== "undefined")
+                {
+                    obj["styles"]["textAlignment"] = undefined;
+                }
+                var align;
+                if (me.textAlign == "left") {
+                    align = "near";
+                } else if (me.textAlign == "right") {
+                    align = "far";
+                } else {
+                    align = "center";
+                }
+                obj.styles.textAlignment = align;
+            },
+            __setWidth : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(typeof obj["width"] !== "undefined")
+                {
+                    obj["width"] = undefined;
+                }
+                if (me.width != "") {
+                    obj.width = me.width;
+                }
+            },
+            __setFillWidth : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(me.fillWidth == true)
+                {
+                    obj.fillWidth = 1;
+                }
+            },
+            __setMovable : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                obj["movable"] = me.movable;
+            },
+            __setResizable : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                obj["resizable"] = me.resizable;
+            },
+            __setSortable : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                obj["sortable"] = me.sortable;
+            },
+            __clearIcon : function(obj,e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(me.type != "checkbox")
+                {
+                    obj["renderer"] = undefined;
+                }
+                if(typeof obj["imageList"] !== "undefined")
+                {
+                    obj["imageList"] = undefined;
+                }
+				
+                if(typeof obj["styles"] !== "undefined")
+               	{
+	                if(typeof obj["styles"]["iconIndex"] !== "undefined")
+	                {
+	                    obj["styles"]["iconIndex"] = undefined;
+	                }
+	                if(typeof obj["styles"]["iconLocation"] !== "undefined")
+	                {
+	                    obj["styles"]["iconLocation"] = undefined;
+	                }
+	                if(typeof obj["styles"]["iconOffset"] !== "undefined")
+	                {
+	                    obj["styles"]["iconOffset"] = undefined;
+	                }
+	                if(typeof obj["styles"]["iconPadding"] !== "undefined")
+	                {
+	                    obj["styles"]["iconPadding"] = undefined;
+	                }
+                }
+            },
+            __setIcon : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                me.__clearIcon(obj, e);
+                if(me.iconIndex > -1)
+                {
+                    
+                	obj["imageList"] = "_userImages"; // 사용자가 등록한 이미지 ID
+                    obj["renderer"] = {type : "icon"};
+                    if(typeof obj["styles"] !== "undefined")
+                   	{
+	                    obj.styles.iconIndex = me.iconIndex;
+	                    obj.styles.iconLocation = me.iconLocation;
+	                    obj.styles.iconOffset = me.iconOffset;
+	                    obj.styles.iconPadding = me.iconPadding;
+	                    if(me.hideIcon == true)
+	                   	{
+	                    	obj.styles.iconIndex = -1;
+	                   	}
+                   	}
+                    else
+                   	{
+                   		obj.styles = {
+                   				iconIndex : me.hideIcon == true ? -1 : me.iconIndex,
+                   				iconLocation : me.iconLocation,
+                   				iconOffset : me.iconOffset,
+                   				iconPadding : me.iconPadding
+                   		};
+                   	}
+                }
+            },
+            __setNumberFormat : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(typeof obj["styles"]["numberFormat"] !== "undefined")
+                {
+                    obj["styles"]["numberFormat"] = undefined;
+                }
+                if (me.numberFormat != "") {
+                    obj.styles.numberFormat = me.numberFormat;
+                }
+            },
+            __setDateFormat : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(typeof obj["styles"]["datetimeFormat"] !== "undefined")
+                {
+                    obj["styles"]["datetimeFormat"] = undefined;
+                }
+                if (me.datetimeFormat) {
+                     obj.styles.datetimeFormat = me.datetimeFormat;
+                 }
+            },
+            __setCursor : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(typeof obj["cursor"] !== "undefined")
+                {
+                    obj["cursor"] = undefined;
+                }
+                if (!WebUtil.isNull(me.cursor)) {
+                    obj.cursor = me.cursor;
+                }
+            },
+            __setFooter : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+
+                if (typeof obj["footer"] !== "undefined") {
+                    obj["footer"] = undefined;
+                }
+
+                obj.footer = { styles: {} };
+
+                if (WebUtil.isNotNull(me.footerText)) {
+                    obj.footer.text = me.footerText;
+                }
+
+                if (WebUtil.isNotNull(me.footerTextAlign)) {
+                    // 푸터 텍스트 정렬
+                    var footerAlign;
+                    if (me.footerTextAlign == "left") {
+                        footerAlign = "near";
+                    } else if (me.footerTextAlign == "right") {
+                        footerAlign = "far";
+                    } else {
+                        footerAlign = "center";
+                    }
+
+                    obj.footer.styles.textAlignment = footerAlign;
+                }
+
+                if (WebUtil.isNotNull(me.footerFont)) {
+                    obj.footer.styles.font = me.footerFont;
+                }
+
+                if (WebUtil.isNotNull(me.numberFormat)) {
+                    obj.footer.styles.numberFormat = me.numberFormat;
+                }
+
+                // 표현식
+                if (WebUtil.isNotNull(me.footerExpression)) {
+                    obj.footer.expression = me.footerExpression
+                }
+            },
+
+            __setType : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(me.type == "checkbox" || me.type == "combo")
+                {
+                    if(typeof obj["renderer"] !== "undefined")
+                    {
+                        obj["renderer"] = undefined;
+                    }
+                    if(typeof obj["editor"] !== "undefined")
+                    {
+                        obj["editor"] = undefined;
+                    }
+                    // 체크박스
+                    if (me.type == "checkbox") {
+                        obj.styles.booleanFormat = "Y:N";
+                        obj.styles.editable = true;
+                        obj.renderer = {
+                            id: "checkboxYn",
+                            type: "check",
+                            shape: "box",
+                            editable: true,
+                            startEditOnClick: true,
+                            trueValues: "Y",
+                            falseValues: "N",
+                            labelPosition: "center"
+                        };
+                    }
+
+                    // 셀렉트박스
+                    if (me.type == "combo") {
+                        /*
+                        var comboValueList = me.comboValue.split(",");
+                        var comboLabelList = me.comboLabel.split(",");
+
+                        // 제목 추가
+                        if (!WebUtil.isNull(me.comboText)) {
+                            comboValueList.unshift("");
+                            comboLabelList.unshift(me.comboText);
+                        }
+
+                        obj.lookupDisplay = true;
+                        obj.values = comboValueList;
+                        obj.labels = comboLabelList;
+                        */
+                        obj.editor = {
+                            type: "dropDown",
+                            dropDownCount: 5,
+                            textReadOnly: true,
+                            domainOnly: true
+                        };
+                    }
+
+                // 링크
+                } else if (me.type == "link") {
+                    if (WebUtil.isNull(obj.renderer)) {
+                        obj.renderer = {};
+                    }
+                    obj.renderer.type = "link";
+                    obj.renderer.showUrl = false;
+                    obj.cursor = "pointer";
+                }
+            },
+
+            __setRequired : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(me.iconIndex < 0)
+                {
+                    me.__clearIcon(obj, e);
+                }
+
+                if(me.required == true)
+                {
+                    obj.renderer = {type: "icon"};
+                    obj.imageList = DEF.icons.id;
+                    obj.styles.iconIndex = 3;
+                    obj.styles.iconLocation = "left";
+                    obj.styles.iconOffset = -2;
+                    obj.styles.iconPadding = 1;
+                }
+            },
+            __setVisible : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(me.hide == true)
+                {
+                    if(obj["displayIndex"] !== "undefined")
+                    {
+                        me._lastDisplayIndex = obj["displayIndex"];
+                    }
+                }
+                else
+                {
+                    if(me._lastDisplayIndex != -1)
+                    {
+                        obj["displayIndex"] = me._lastDisplayIndex;
+                    }
+                }
+                obj.visible = me.hide == true ? false : true;
+            },
+            __setCodeList : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(me.codeList && me.codeList.length > 0)
+                {
+                    var values = [], labels = [];
+                    if (me.defaultLabel) {
+                            values.push(undefined);
+                            labels.push(me.defaultLabel);
+                    }
+                    // value, label 값을 추출한다.
+                    for (var i in me.codeList) {
+                        values.push(me.codeList[i][me.valueKey]);
+                        labels.push(me.codeList[i][me.labelKey]);
+                    }
+                    obj.values = values;
+                    obj.labels = labels;
+                    obj.lookupDisplay = true; // 컬럼셀에 values 목록 중 셀의 값에 해당하는 위치에 있는 labels 항목의 값의 표시 여부를 지정한다.
+                }
+            },
+
+            __updateStyles : function(obj, e)
+            {
+                var me = typeof e !== "undefined" ? e.target : this;
+                if(me)
+                {
+                    if(me.type != "checkbox")
+                    {
+                        obj.renderer = {type:"text"};
+                    }
+
+                    if(typeof obj["imageList"] !== "undefined")
+                    {
+                        obj.imageList = undefined;
+                    }
+                    var returnObj = me.getColumnObject();
+                    
+                    obj.styles = returnObj.styles;
+                    if(typeof returnObj["renderer"] !== "undefined")
+                    {
+                        obj.renderer = returnObj.renderer;
+                    }
+
+                    if(typeof returnObj["imageList"] !== "undefined")
+                    {
+                        obj.imageList = returnObj.imageList;
+                    }
+                }
+            },
+
+            /**
+             * 병합 설정
+             */
+            __setMergeRule: function(obj, e) {
+                var me = typeof e !== "undefined" ? e.target : this;
+
+                if (WebUtil.isNotNull(me.mergeRule)) {
+                    obj.mergeRule = { criteria: me.mergeRule };
+                }
+            },
+            
+            __setDynamicStyles : function(obj, e)
+            {
+            	var me = typeof e !== "undefined" ? e.target : this;
+            	if(typeof obj["dynamicStyles"] !== "undefined")
+           		{
+            		obj.dynamicStyles == undefined;	
+           		}
+            	if(me.dynamicStyles)
+           		{
+            		obj.dynamicStyles = me.dynamicStyles;
+           		}
+            },
+
+            /**
+             * 동적 Actionable
+             */
+            __setActionableRule: function(obj, e) {
+                var me = typeof e !== "undefined" ? e.target : this;
+
+                if (WebUtil.isNotNull(me.actionableRule)) {
+                    obj.dynamicStyles = [{
+                        criteria: me.actionableRule,
+                        styles: "fontBold=true;foreground=#0e006f"
+                    }];
+                }
+            },
+
+            /**
+             * 같은값 병합
+             */
+            __setEqualBlank: function(obj, e) {
+                var me = typeof e !== "undefined" ? e.target : this;
+
+                if (me.equalBlank == true) {
+                    obj.equalBlank = true;
+                }
+            },
+            
+            __setValidCriteria : function(obj, e)
+            {
+            	var me = typeof e !== "undefined" ? e.target : this;
+            	if(typeof obj["validations"] !== "undefined")
+           		{
+            		obj["validations"] = undefined;
+           		}
+            	if(me.validCriteria)
+           		{
+           			obj.validations = [{
+           				criteria : me.validCriteria
+           			}];
+           		}
+            },
+
+            getColumnObject: function() {
+
+                var returnObj = {tag : this.tag};
+                this.__setFieldName(returnObj);
+                this.__setHeaderName(returnObj);
+                this.__setEditable(returnObj);
+                this.__setEditButtonVisibility(returnObj);
+                this.__setEditorOption(returnObj);
+                this.__setStyles(returnObj);
+
+                this.__setActionable(returnObj);
+                this.__setAlign(returnObj);
+                this.__setWidth(returnObj);
+                this.__setFillWidth(returnObj);
+                this.__setMovable(returnObj);
+                this.__setResizable(returnObj);
+                this.__setSortable(returnObj);
+                this.__setIcon(returnObj);
+
+                this.__setNumberFormat(returnObj);
+                this.__setDateFormat(returnObj);
+
+                this.__setFooter(returnObj);
+
+                this.__setCursor(returnObj);
+                this.__setType(returnObj);
+                this.__setCodeList(returnObj);
+                this.__setRequired(returnObj);
+                this.__setVisible(returnObj);
+                this.__setValidCriteria(returnObj);
+
+                // 병합 설정
+                this.__setMergeRule(returnObj);
+                
+                this.__setDynamicStyles(returnObj);
+
+                // 동적 Actionable
+                this.__setActionableRule(returnObj);
+
+                // 같은값 병합
+                this.__setEqualBlank(returnObj);
+
+                return returnObj;
+            },
+
+            getFieldObject: function(){
+                // 필드 데이터타임 포맷 - 특수문자 제거
+                var fieldDatetimeFormat = this.datetimeFormat;
+//                 if (!WebUtil.isNull(this.datetimeFormat)) {
+//                     fieldDatetimeFormat = WebUtil.replaceAll(this.datetimeFormat, " ", "");
+//                     fieldDatetimeFormat = WebUtil.replaceAll(fieldDatetimeFormat, "/", "");
+//                     fieldDatetimeFormat = WebUtil.replaceAll(fieldDatetimeFormat, "-", "");
+//                     fieldDatetimeFormat = WebUtil.replaceAll(fieldDatetimeFormat, ":", "");
+//                 }
+
+                var returnObj = {
+                    fieldName: this.dataField
+                };
+
+                if (!WebUtil.isNull(this.dataType)) {
+                    if(this.type == "checkbox")
+                    {
+                        this.dataType = "boolean";
+                    }
+                    returnObj.dataType = this.dataType;
+
+                    if( returnObj.dataType == "datetime" && WebUtil.isNull(this.datetimeFormat) ){
+                        fieldDatetimeFormat = this._defaultDatetimeFormat;
+                    }
+
+                }
+
+                if (fieldDatetimeFormat != "") {
+                    returnObj.datetimeFormat = fieldDatetimeFormat;
+                }
+
+                if (!WebUtil.isNull(this.baseField)) {
+                    returnObj.baseField = this.baseField;
+                }
+
+                return returnObj;
+            },
+            getValidObject : function(){
+                var hasValid = false;
+                var returnObj = {};
+                var check = [];
+                if(this.unique == true)
+                {
+                    check.push("unique");
+                }
+                if(this.required == true)
+                {
+                    check.push("required");
+                }
+                if(this.selected == true)
+                {
+                    check.push("selected");
+                }
+                if(this.nospace == true)
+                {
+                    check.push("!space");
+                }
+                if(this.alphabet == true)
+                {
+                    check.push("alphabet");
+                }
+                if(this.number == true)
+                {
+                    check.push("number");
+                }
+
+                if(check.length > 0)
+                {
+                    returnObj.check = check;
+                }
+
+                if(this.minLength)
+                {
+                    returnObj.minLength = this.minLength;
+                }
+
+                if(this.maxLength)
+                {
+                    returnObj.maxLength = this.maxLength;
+                }
+
+                if(this.fixLength)
+                {
+                    returnObj.fixLength = this.fixLength;
+                }
+
+                if(this.gtValue)
+                {
+                    returnObj.gtValue = this.gtValue;
+                }
+
+                if(this.geValue)
+                {
+                    returnObj.geValue = this.geValue;
+                }
+
+                if(this.ltValue)
+                {
+                    returnObj.ltValue = this.ltValue;
+                }
+
+                if(this.leValue)
+                {
+                    returnObj.leValue = this.leValue;
+                }
+
+                if(this.gtDate)
+                {
+                    returnObj.gtDate = this.gtDate;
+                }
+
+                if(this.geDate)
+                {
+                    returnObj.geDate = this.geDate;
+                }
+
+                if(this.ltDate)
+                {
+                    returnObj.ltDate = this.ltDate;
+                }
+
+                if(this.leDate)
+                {
+                    returnObj.leDate = this.leDate;
+                }
+                var size = 0, key;
+                for (key in returnObj) {
+                    if (returnObj.hasOwnProperty(key)) size++;
+                }
+                if(size == 0)
+                {
+                    return null;
+                }
+                else
+                {
+                    returnObj.fieldName = this.dataField;
+                }
+                return returnObj;
+            },
+
+            /**
+             * 컬럼 유형 구하기
+             */
+            getColumnType: function() {
+                return this.type;
+            }
+    };
+</script>

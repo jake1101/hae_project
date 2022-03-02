@@ -1,0 +1,178 @@
+<script type="text/javascript" src="/ui/lib/map/mapController.js"></script>
+<dom-module id="ep-map-point2">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+        
+		<cc-page-title-bar>
+			<!-- <sc-button text="초기화" on-click="onResetBtnClick"></sc-button> -->
+			<sc-button text="마크지정" on-click="onPointBtnClick"></sc-button>
+			<sc-button text="적용" on-click="onApplyBtnClick"></sc-button>
+		</cc-page-title-bar>
+		<table class="tb-form">
+			<colgroup>
+				<col style="width:120px;">
+				<col>
+				<col style="width:120px;">
+				<col>
+			</colgroup>
+			<tr>
+				<th><sc-label text="위도"></sc-label></th>
+				<td><sc-text-field id="lat" value="{{lat}}" required="true"></sc-text-field></td>
+				<th><sc-label text="경도"></sc-label></th>
+				<td><sc-text-field id="lon" value="{{lon}}" required="true"></sc-text-field></td>
+			</tr>
+		</table>
+		<div id="map" style="width:620px; height:480px;">
+		</div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'ep-map-point2',
+			
+			properties:{
+				//팝업 타이틀 지정
+				titleText: {
+					type: String,
+					value: function () {
+						return "위치지정";
+					}
+				},
+				lat:Number,
+				lon:Number,
+				codes : {
+	               	type : Object,
+	               	value : function(){
+		               	return	{
+	               		};
+	               	},
+	               	reset: false
+	            }
+			},
+			
+			load: function(lat, lon,polygon){
+				var me = this;
+setTimeout(function(){
+				var loadPin = true;
+	            var mapLat, mapLng;
+	            markers = [];
+	            mapLat = lat;
+	            mapLng = lon;
+	            me.set("lat", lat);
+				me.set("lon", lon);
+	            
+	            if(UT.isEmpty(mapLat) && UT.isEmpty(mapLng)){
+		            mapLat = siteInfo.pinPoint.lat;
+		            mapLng = siteInfo.pinPoint.lon;
+		            loadPin = false;
+	            }
+
+	            
+	            var container = me.$.map;
+	            var overlayController = {
+	        		mapTypeControl:false
+	        		,zoomControl:false
+	        		,scaleControl:false
+	        	};
+
+	            setDefaultMap(container, parseFloat(mapLat), parseFloat(mapLng), 3, overlayController);
+	            
+	            
+	         	// drawManager 사용
+	            var styleOption = {
+		        		strokeColor:'#39f'
+		                ,fillColor:'#cce6ff'
+		                ,fillOpacity:0.5
+		                ,hintStrokeStyle:'dash'
+		            };
+	            mapDrawingManager(styleOption, viewFlag=false, position="B");
+	            
+	            // if(!UT.isEmpty(lat) && !UT.isEmpty(lon)){
+	            //	addMarker(mapLat,mapLng);
+	        	//}  
+	            
+	            var polygons = [];
+	            var polygonOption = {
+            		options : {
+            			fillColor: "#cce6ff",
+            			fillOpacity:0.1,
+            			strokeColor:"#39f",
+            			strokeOpacity:0.5,
+            			strokeStyle:"solid",
+            			strokeWeight:2,
+            		},
+            		points:geoToPoints(polygon),
+            		type:'site'
+            	}
+	            polygons.push(polygonOption);
+	            var drawOverlays = {site:[],area:[],building:[],anchor:[]};
+	            drawPolygon(polygons, drawOverlays, null);
+	            
+	            var list = drawOverlays['site'];
+	            if(!list)return;
+	            for(var i = 0 ; i < list.length ; i++){
+	                list[i].setMap(map)
+	            } 
+	            
+	             if(loadPin){
+	            	var option = {
+		            		lat:parseFloat(mapLat),
+		            		lng:parseFloat(mapLng),
+		            		draggable:true
+		            	}
+		        	var marker = addDefaultMarker(marker, option);
+		        	//marker.setMap(map);
+
+		        	var evFc = function(event) {
+		            	var latLng = getEventLatlng(marker, "marker"); // (33.45067375096625, 126.5706721005115)
+		            	var lat = latLng.lat;
+		            	var lng = latLng.lng;
+		            	me.set("lat", lat);
+		 				me.set("lon", lng);
+		            }
+		            addListener(marker, 'dragend', evFc, null);
+		        	markers.push(marker);
+	            } 
+},100);
+            },
+            onApplyBtnClick: function(){
+            	this.fire("apply-point", {'point':{'lat':this.lat, 'lon':this.lon}, lat:this.lat, lon:this.lon});
+            },
+            
+            onPointBtnClick: function(){
+            	var me = this;
+            	var center = getCenter();
+        		addMarker(center.lat, center.lng);
+	            me.set('lat', center.lat);
+	            me.set('lon', center.lng);
+	            markers[markers.length-1].setVisible(false);
+        		var option = {
+	            		lat:parseFloat(center.lat),
+	            		lng:parseFloat(center.lng),
+	            		draggable:true
+	            	}
+        		
+	        	var marker = addDefaultMarker(marker, option);
+	        	//marker.setMap(map);
+
+	        	var evFc = function(event) {
+	            	var latLng = getEventLatlng(marker, "marker"); // (33.45067375096625, 126.5706721005115)
+	            	var lat = latLng.lat;
+	            	var lng = latLng.lng;
+	            	me.set("lat", lat);
+	 				me.set("lon", lng);
+	            }
+	            addListener(marker, 'dragend', evFc, null);
+	        	markers.push(marker); 
+            }
+            
+            
+		});
+	</script>
+
+
+</dom-module>

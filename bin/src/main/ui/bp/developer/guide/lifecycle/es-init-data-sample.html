@@ -1,0 +1,250 @@
+<dom-module id="es-init-data-sample">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<!-- codes1 -->
+        <sc-request-group id="requestGroup1" on-response="onResponse">
+			<!-- company list -->
+	        <sc-ajax url="getAllCompanyList.do"
+	        		 last-response="{{codes1.company}}">
+	        </sc-ajax>
+	        <!-- 공통코드 -->
+	        <sc-code-group>
+	        	<!-- 직위 -->
+		        <sc-code code="C005" value="{{codes1.position}}"></sc-code>
+		        <!-- 결재자종류 -->
+	            <sc-code code="G005" value="{{codes1.aprvEmpTyp}}"></sc-code>
+	    	</sc-code-group>
+	    </sc-request-group>
+	    
+	    <!-- codes2 -->
+	    <sc-request-group id="requestGroup2" on-response="onResponse" init>
+	    	<!-- 사용자 구매 운영조직 조회 -->
+			<sc-ajax id="findListOperOrgByUser"
+	            	 url="findListOperOrgByUser.do"
+	            	 body="PO"
+	            	 content-type="text/plain"
+	            	 last-response="{{codes2.operOrgCd}}">
+	        </sc-ajax>
+	        <!-- 공통코드 -->
+	        <sc-code-group>
+	        	<!-- 통화 -->
+		        <sc-code code="C004" value="{{codes2.cur}}"></sc-code>
+		        <!-- 단위 -->
+	            <sc-code code="C007" value="{{codes2.unitCd}}"></sc-code>
+	    	</sc-code-group>
+	    </sc-request-group>
+	    
+	    <!-- codes3 -->
+	    <sc-code-group id="codeGroup3" on-response="onResponse">
+	    	<!-- 구매유형 -->
+	        <sc-code code="P045" value="{{codes3.purcTyp}}"></sc-code>
+	        <!-- RFx 유형 -->
+            <sc-code code="P033" value="{{codes3.rfxTyp}}"></sc-code>
+            <!-- 협력사선정방식(총액별/품목별) -->
+            <sc-code code="P002" value="{{codes3.vdStlTyp}}"></sc-code>
+	    </sc-code-group>
+	    
+		<sc-panel title-text="codes1" i18n-disabled>
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+	        	</colgroup>
+				<tr>
+					<th>
+						<sc-label text="Company"></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-combobox-field class="w-150" value="{{data.comp_cd}}" items="{{codes1.company}}" display-field="comp_nm" value-field="comp_cd" selected-index="0" placeholder="선택"></sc-combobox-field>
+							<span style="margin-left:5px">[[data.comp_cd]]</span>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<sc-label text="직위"></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-combobox-field class="w-100" value="{{data.position_cd}}" items="{{codes1.position}}" display-field="label" value-field="data" selected-index="0" placeholder="선택"></sc-combobox-field>
+							<span style="margin-left:5px">[[data.position_cd]]</span>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<sc-label text="결재자 종류"></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-combobox-field class="w-100" value="{{data.aprvemp_typecd}}" items="{{codes1.aprvEmpTyp}}" display-field="label" value-field="data" selected-index="0" placeholder="선택"></sc-combobox-field>
+							<span style="margin-left:5px">[[data.aprvemp_typecd]]</span>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</sc-panel>
+		
+		<sc-panel title-text="codes2" i18n-disabled>
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+	        	</colgroup>
+				<tr>
+					<th>
+						<sc-label text="구매운영단위"></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-combobox-field class="w-150" value="{{data.oper_org_cd}}" items="{{codes2.operOrgCd}}" display-field="org_nm" value-field="oper_org_cd" selected-index="0" placeholder="선택"></sc-combobox-field>
+							<span style="margin-left:5px">[[data.oper_org_cd]]</span>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<sc-label text="통화"></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-combobox-field class="w-100" value="{{data.currency}}" items="{{codes2.cur}}" display-field="label" value-field="data" selected-index="0" placeholder="선택"></sc-combobox-field>
+							<span style="margin-left:5px">[[data.currency]]</span>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<sc-label text="단위"></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-combobox-field class="w-100" value="{{data.unit}}" items="{{codes2.unitCd}}" display-field="label" value-field="data" selected-index="0" placeholder="선택"></sc-combobox-field>
+							<span style="margin-left:5px">[[data.unit]]</span>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</sc-panel>
+		
+		<sc-panel title-text="codes3" i18n-disabled>
+			<table class="tb-form">
+				<colgroup>
+	        		<col style="width:120px"/>
+	        		<col/>
+	        	</colgroup>
+				<tr>
+					<th>
+						<sc-label text="구매유형"></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-combobox-field class="w-150" value="{{data.purc_typ}}" items="{{codes3.purcTyp}}" display-field="label" value-field="data" selected-index="0" placeholder="선택"></sc-combobox-field>
+							<span style="margin-left:5px">[[data.purc_typ]]</span>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<sc-label text="RFx유형"></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-combobox-field class="w-100" value="{{data.rfx_typ}}" items="{{codes3.rfxTyp}}" display-field="label" value-field="data" selected-index="0" placeholder="선택"></sc-combobox-field>
+							<span style="margin-left:5px">[[data.rfx_typy]]</span>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<sc-label text="선정방식"></sc-label>
+					</th>
+					<td>
+						<div class="field-box" style="width:100%">
+							<sc-combobox-field class="w-100" value="{{data.vd_stl_typ}}" items="{{codes3.vdStlTyp}}" display-field="label" value-field="data" selected-index="0" placeholder="선택"></sc-combobox-field>
+							<span style="margin-left:5px">[[data.vd_stl_typ]]</span>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</sc-panel>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'es-init-data-sample',
+			properties : {
+				data : {
+					type  : Object,
+                	value : function() {
+                		return {}
+                	}
+				},
+				codes1 : {
+                	type  : Object,
+                	value : function() {
+                		return {
+                			company    : [],
+                			position   : [],
+                			aprvEmpTyp : []
+                		}
+                	}
+                },
+				codes2 : {
+                	type  : Object,
+                	value : function() {
+                		return {
+                			operOrgCd  : [],
+                			cur        : [],
+                			unitCd     : []
+                		}
+                	}
+                },
+                codes3 : {
+                	type : Object,
+                	value : function() {
+                		return {
+                			purcTyp  : [],
+                			rfxTyp   : [],
+                			vdStlTyp : []
+                		}
+                	}
+                }
+			},
+			created : function() {
+				console.log(this.tagName.toLowerCase() + ' created');
+			},
+			ready : function() {
+				console.log(this.tagName.toLowerCase() + ' ready');
+			},
+			attached : function() {
+				console.log(this.tagName.toLowerCase() + ' attached');
+			},
+			// 공통코드 및 init 속성을 가진 tag들의 모든 요청이 완료된 시점에 호출되는 함수
+			initialized : function() {
+				// requestGroup1을 요청한다.
+				this.$.requestGroup1.request();
+				console.log(this.tagName.toLowerCase() + ' initialized');
+			},
+			destroy : function() {
+				console.log(this.tagName.toLowerCase() + ' destroy');
+			},
+			detached : function() {
+				console.log(this.tagName.toLowerCase() + ' detached');
+			},
+			attributeChanged : function(name, type) {
+				console.log(this.tagName.toLowerCase() + ' attribute ' + name + ' was changed to ' + this.getAttribute(name));
+			},
+			onResponse : function(el, res) {
+				this.fire('complete-find', {codes1 : this.codes1, codes2 : this.codes2, codes3 : this.codes3});
+				console.log(this.tagName.toLowerCase() + '# on-response for the ' + el.target.id);
+			}
+		});
+	</script>
+</dom-module>

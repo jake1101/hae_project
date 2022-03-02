@@ -1,0 +1,1463 @@
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 운영 현황 표
+    ** @Description     : 
+    ** @Author          : jhPark
+    ** @Create Date     : 2021.08.10
+    ** @History         : 2021.08.10 jhPark 최초작성
+    ******************************************************************************************
+-->
+<sc-link rel="stylesheet" type="text/css" href="./css/realtime-dashboard.css"></sc-link>
+<sc-link rel="import" href="../shared/ep-target-history.html"></sc-link>
+<sc-link rel="import" href="../input/es-vehicle-management.html"></sc-link>
+<sc-link rel="import" href="ep-safedate-setting.html"></sc-link>
+
+<dom-module id="es-dashboard-test">
+	<style>
+	:host { 
+		@apply (--vbox-layout);
+		font-family: 'Noto Sans KR';
+		font-size: 13px;
+	}
+	
+	/** 상단 부분 **/
+	.test-top-area {
+		min-height: 65px;
+		border-bottom: 1px solid #2C4770;
+		overflow: hidden;
+		border: 1px solid #2C4670;
+		border-radius: 13px 13px 0px 0px;
+	}
+	
+	.test-top-site-text {
+		font-size: 27px;
+		font-weight: 900;
+		line-height: 48px;
+	}
+	
+	.test-top-time-text {
+		font-size: 18px;
+		font-weight: 500;
+		line-height: 48px;
+	}
+	
+	.weather-text {
+		font-size: 18px;
+		line-height: 27px;
+	}
+	
+	.weather-icon {
+		font-size: 27px;
+		line-height: 54px;
+	}
+	/** 상단 부분 **/
+	
+	/** 탭 부분 **/
+	.tab-box-parent {
+		position: relative;
+		overflow: hidden;
+	}
+	
+	.tab-btn {
+		background-color: #1e3155;
+		color: white;
+		width: 50%;
+		height: 32px;
+		font-size: 20px;
+		font-weight: 500;
+		font-family: 'Noto Sans KR' !important;
+	}
+	
+	.tab-btn:not(.btn-selected) {
+		color: #797979;
+		background: #223860;
+		font-size: 16px;
+		font-weight: 400;
+		border: 1px solid #2C4670;
+	}
+	
+	.tab-box {
+		height: calc(100% - 35px);
+		width: 100%;
+		position: absolute;
+		top: 35px;
+	}
+	/** 탭 부분 **/
+	
+	/** 스마트 태그 테이블 **/
+	.tSmartTag > tbody > tr {
+		border-bottom: solid 1px #2C4670;
+	}
+	.tSmartTag > tbody > tr:nth-child(2) {
+		background: #223860;
+	}
+	.tSmartTag > tbody > tr > td:not(:last-child) {
+		border-right: solid 1px #2C4670;
+	}
+	/** 스마트 태그 테이블 **/
+	
+	/** 구성요소 **/
+	.box-title {
+		text-align: center;
+		font-size: 18px;
+		background-color: tomato;
+	}
+	/** 구성요소 **/
+	
+	/* ICON */
+	.operate-battery1-icon {background: url(./icon/operate/battery1.png) no-repeat; background-position: center;}
+	.operate-battery1-green-icon {background: url(./icon/operate/battery1_green.png) no-repeat; background-position: center;}
+	.operate-battery2-icon {background: url(./icon/operate/battery2.png) no-repeat; background-position: center;}
+	.operate-battery2-red-icon {background: url(./icon/operate/battery2_red.png) no-repeat; background-position: center;}
+	.operate-battery3-icon {background: url(./icon/operate/battery3.png) no-repeat; background-position: center;}
+	.operate-gateway1-icon {background: url(./icon/operate/gateway1.png) no-repeat; background-position: center;}
+	.operate-gateway2-icon {background: url(./icon/operate/gateway2.png) no-repeat; background-position: center;}
+	/* ICON */
+	
+	.operate-gateway-boxes{height:80%; text-align: center;}
+	.operate-gateway-box{min-width:140px; background: #1E3155; border-radius: 18px; border: 1px solid #2C4670;}
+	
+	.operate-sensor-boxes{height:95%; text-align: center;}
+	.operate-sensor-box{min-width:150px; background: #1E3155; border-radius: 18px; border: 1px solid #2C4670;}
+	</style>
+
+<template>
+<!--
+   ************************************************************************************************************
+   * Service Area
+   ************************************************************************************************************
+-->
+	<sc-request-group id="codes" init>
+		<sc-code-group>
+			<sc-code code="IOT003" value="{{codes.targetType}}"></sc-code>
+			<sc-code code="IOT004" value="{{codes.vehicleJobList}}"></sc-code>
+		</sc-code-group>
+		<!-- 협력사 조회 -->
+		<sc-ajax url="findListVendor.do" last-response="{{codes.vendorList}}" body="{{searchParam}}"></sc-ajax>
+		<sc-ajax url="findListJobType.do" last-response="{{codes.jobTypeList}}" body="{{searchParam}}"></sc-ajax>
+	</sc-request-group>
+	
+	<!-- 인원 현황 조회 -->
+	<sc-ajax id="workerAggregation" url="workerAggregation.do" body="{{searchParam}}" on-response="completeWorkerAggregation"></sc-ajax>
+	<!-- 작업 허가서 조회 -->
+	<sc-ajax id="low4Dashboard" url="low4Dashboard.do" body="{{searchParam}}" last-response="{{ptwReqList}}"></sc-ajax>
+	<!-- 알림 조회 -->
+	<sc-ajax id="getAlarmDashboard" url="getAlarmDashboard.do" body="{{searchParam}}" last-response="{{alarmList}}"></sc-ajax>
+	<!-- 날씨 정보 조회 -->
+	<sc-ajax id="getWeatherInfo" url="getWeatherInfo.do" body="{{searchParam}}" on-response="completeGetWeatherInfo"></sc-ajax>
+	<!-- 취약 근로자 조회 -->
+	<sc-ajax id="findListWeakWorker" url="findListWeakWorker.do" body="{{weakParam}}" last-response={{weakWorkerList2}}></sc-ajax>
+	<!-- 위험 지역 출입 이력 조회 -->
+	<sc-ajax id="dangerLocationWorker" url="dangerLocationWorker.do" body="{{dangerParam}}" last-response="{{dangerLocationWorker}}"></sc-ajax>
+	
+	<!-- 스마트 태그 교부 조회 -->
+	<sc-ajax id="getPlaceDashboard" url="getPlaceDashboard.do" body="{{searchParam}}" on-response="completeGetPlaceDashboard"></sc-ajax>
+	<!-- 게이트 웨이, 비콘 조회 -->
+	<sc-ajax id="getOperateDashboard" url="getOperateDashboard.do" body="{{searchParam}}" on-response="completeGetOperateDashboard"></sc-ajax>
+
+	<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+<!--
+    ************************************************************************************************************
+    * UI Area
+    ************************************************************************************************************
+-->
+	<!-- 바깥 배경 Start -->
+	<div class="vbox flex realtime-back-ground-color" id="back">
+		<!-- 안쪽 배경 -->
+		<div class="vbox flex realtime-sub-back-ground-color" id="backsub" style="margin: 10px;">
+			<!-- 상단 타이틀 -->
+			<div class="hbox test-top-area">
+				<div class="vbox realtime-top-left-area">
+					<div class="hbox">
+						<!-- 사이트 이름 -->
+						<div class="vbox test-top-site-text">{{siteName}}</div>
+						<div class="hspace-50"></div>
+						<!-- 시간정보 -->
+						<div class="vbox test-top-time-text">[[currentDate]] [[dayOfWeek]] [[currentTime]]</div>
+						<div class="hspace-50"></div>
+						<!-- 날씨 정보 Start -->
+						<div id="weatherInfoBox1" class="vbox">
+							<div class="hbox">
+								<i id="weatherIcon" class="weather-icon"></i>
+							</div>
+						</div>
+						<div class="hspace-15"></div>
+						<div id="" class="vbox">
+							<div class="hbox weather-icon">{{weatherText}}</div>
+						</div>
+						<div class="hspace-20"></div>
+						<div id="weatherInfoBox2" class="vbox">
+							<div class="hbox weather-text">
+								<span style="width: 30px;">
+									<i class="ri-temp-hot-line weather-text"></i>
+								</span>
+								{{weatherInfo.skinTemp}}
+								<i class="ri-celsius-line weather-text"></i>
+							</div>
+							<div class="hbox weather-text">
+								<span style="width: 30px;">
+									<i class="ri-windy-line weather-text"></i>
+								</span>
+								{{weatherInfo.wsd}} m/s
+							</div>
+						</div>
+						<div class="hspace-10"></div>
+						<div id="weatherInfoBox3" class="vbox">
+							<div class="hbox weather-text">
+								<span style="width: 90px;">초미세먼지 </span>
+								{{weatherInfo.pm25Value}} ㎍/㎥
+							</div>
+							<div class="hbox weather-text">
+								<span style="width: 90px;">미세먼지 </span>
+								{{weatherInfo.pm10Value}} ㎍/㎥
+							</div>
+						</div>
+						<!-- 날씨 정보 End -->
+					</div>
+				</div>
+
+				<!-- 새로고침 -->
+				<div class="vbox flex realtime-top-right-area">
+					<div class="hbox a-flex-end">
+						<div class="vbox realtime-top-time-text" on-click="refresh">새로고침 : [[refreshSecond]]</div>
+						<div class="hspace-30"></div>
+						<div id="windowmax" class="window-max" on-click="onWindowMax"></div>
+					</div>
+				</div>
+			</div>
+			<!-- 상단 타이틀 END -->
+			
+			<!-- 메인 Content Start -->
+			<div class="vbox flex-8">
+				<!-- 상단 현황표 Start -->
+				<div class="hbox flex">
+					<!-- 1.전체 관제 현황 Strat -->
+					<div class="flex" style="border: 1px solid #85a7e9">
+						<p class="box-title">전체 관제 현황</p>
+						<div id="testControllChart" class="vbox flex chartDiv" style="width: 100%; height: 75%;"></div>
+						<div class="_control-nonetext vbox flex a-center font-15-500 place-none-text" style="display: none; line-height: 150px; text-align: center;">
+							투입 작업자가 없습니다.
+						</div>
+						<p style="text-align: center; font-size: 15px";">전체인원 ({{wholeWorkerCnt}}명)</p>
+					</div>
+					<!-- 1.전체 관제 현황 End -->
+					<!-- 2.관제인원 상세 현황 Strat -->
+					<div class="flex" style="border: 1px solid #85a7e9">
+						<p class="box-title">관제인원 상세 현황</p>
+						<div id="testManagedChart" class="vbox flex chartDiv" style="width: 100%; height: 75%;"></div>
+						<div class="_manage-nonetext vbox flex a-center font-15-500 place-none-text" style="display: none; line-height: 150px; text-align: center;">
+							투입 작업자가 없습니다.
+						</div>
+						<p style="text-align: center; font-size: 15px";">관제인원 ({{wholeWorkerCnt}}명)</p>
+					</div>
+					<!-- 2.관제인원 상세 현황 End -->
+					<!-- 3.스마트 태그 교부 현황 Strat -->
+					<div class="flex" style="border: 1px solid #85a7e9">
+						<table style="height: 100%; width:100%; text-align:center;" class="tSmartTag font-22-600">
+							<colgroup>
+								<col style="width:30%"></col>
+								<col style="width:25%"></col>
+								<col style="width:25%"></col>
+								<col style="width:20%"></col>
+							</colgroup>
+							<tr>
+								<td></td>
+								<td>교부</td>
+								<td>미교부</td>
+								<td>계</td>
+							</tr>
+							<tr>
+								<td>스마트 태그<br><span style="font-size: 15px;">(작업자,이동장비)</span></td>
+								<td>[[deliverTagInfo.cnt1]]</td>
+								<td>[[deliverTagInfo.cnt2]]</td>
+								<td>[[deliverTagInfo.cnt3]]</td>
+							</tr>
+							<tr style="border-bottom : none;">
+								<td>모바일<br><span style="font-size: 15px;">(작업자,이동장비)</span></td>
+								<td>[[deliverTagInfo.cnt4]]</td>
+								<td>[[deliverTagInfo.cnt5]]</td>
+								<td>[[deliverTagInfo.cnt6]]</td>
+							</tr>
+						</table>
+					</div>
+					<!-- 3.스마트 태그 교부 현황 End -->
+				</div>
+				<!-- 상단 현황표 End -->
+				
+				<!-- 중단 현황표 Start -->
+				<div class="hbox flex">
+					<!-- 4.협력사 별 근로자 Strat -->
+					<div class="flex" style="border: 1px solid #85a7e9">
+						<p class="box-title">협력사별  근로자</p>
+						<div id="testJobChart" class="vbox flex chartDiv" style="width: 100%; height: 75%"></div>
+						<div class="_job-nonetext vbox flex a-center font-15-500 place-none-text" style="display: none; line-height: 150px; text-align: center;">투입 작업자가 없습니다.</div>
+						<p class="" style="text-align: center; font-size: 15px">작업자 ({{wholeWorkerCnt}}명)</p>
+					</div>
+					<!-- 4.협력사 별 근로자 End -->
+					<!-- 5.위치별 인원 현황 Strat -->
+					<div class="flex" style="border: 1px solid #85a7e9">
+						<p class="box-title">위치별 인원 현황</p>
+					</div>
+					<!-- 5.위치별 인원 현황 End -->
+					<!-- 6.직종별 인원 현황 Strat -->
+					<div class="flex" style="border: 1px solid #85a7e9">
+						<p class="box-title">직종별 인원 현황</p>
+					</div>
+					<!-- 6.직종별 인원 현황 End -->
+				</div>
+				<!-- 중단 현황표 End -->
+				
+				<!-- 하단 현황표 Start -->
+				<div class="hbox flex">
+					<!-- 7.알림 / 작업허가서 Strat -->
+					<div class="flex vbox tab-box-parent" style="border: 1px solid #85a7e9;">
+						<p>
+							<!-- 버튼 이벤트 만들기 -->
+							<button class="tab-btn btn-selected left-btn fst-btn" on-click="tabChange">알림</button>
+							<button class="tab-btn right-btn" on-click="tabChange">작업허가서</button>
+						</p>
+						<!-- 알림 tab -->
+						<div id="testAlarmGridDiv" class="tab-box">
+							<sc-grid id="testAlarmGrid" data-provider="{{alarmList}}" use-state="false" use-selection="false" focus-visible="false"
+								show-number-line="false" row-height="50" header-height="35"
+								use-dummy="false" column-fit-style="evenFill">
+								<sc-grid-columns>
+									<sc-date-column data-field="sendDt" header-text="시간" width="40" text-align="center" display-format="HH:mm:ss"></sc-date-column>
+									<sc-data-column data-field="alarmTypeName" header-text="유형" width="60" text-align="center" editable="false" max-length="60"></sc-data-column>
+									<sc-data-column data-field="content" header-text="내용" text-align="left" fill-width="280" editable="false" max-length="300" text-wrap="normal"></sc-data-column>
+								</sc-grid-columns>
+								<sc-grid-fields>
+									<sc-grid-field data-field="seq" data-type="number"></sc-grid-field>
+									<sc-grid-field data-field="popup" data-type="object"></sc-grid-field>
+									<sc-grid-field data-field="marker" data-type="object"></sc-grid-field>
+									<sc-grid-field data-field="geoJson" data-type="object"></sc-grid-field>
+									<sc-grid-field data-field="id"></sc-grid-field>
+									<sc-grid-field data-field="recipient"></sc-grid-field>
+									<sc-grid-field data-field="answerer"></sc-grid-field>
+									<sc-grid-field data-field="siteId" data-type="number"></sc-grid-field>
+									<sc-grid-field data-field="property" data-type="object"></sc-grid-field>
+									<sc-grid-field data-field="targetInfo" data-type="object"></sc-grid-field>
+									<sc-grid-field data-field="location" data-type="object"></sc-grid-field>
+								</sc-grid-fields>
+							</sc-grid>
+						</div>
+						<!-- 작업허가서 tab -->
+						<div id="testDangetGridDiv" class="tab-box" style="left: 100%">
+							<sc-grid id="testDangetGrid" data-provider="{{ptwReqList}}" use-state="false" use-selection="false" focus-visible="false" show-number-line="false" row-height="50" header-height="35"
+								use-dummy="false" column-fit-style="evenFill">
+								<sc-grid-columns>
+									<sc-data-column width="40" text-align="center" header-text="승인" data-field="status_nm"></sc-data-column>
+									<sc-data-column fill-width="80" text-align="center" header-text="작업명" data-field="ptw_nm" text-wrap="normal"></sc-data-column>
+									<sc-data-column width="70" text-align="center" header-text="신청업체" data-field="vendor_nm"></sc-data-column> 
+									<sc-data-column width="80" text-align="center" header-text="신청일" data-field="appr_dt"></sc-data-column> 
+									<sc-data-column width="90" text-align="center" header-text="작업기간" data-field="dur"text-wrap="normal"></sc-data-column>
+								</sc-grid-columns> 
+							</sc-grid>
+						</div>
+					</div>
+					<!-- 7.알림 / 작업허가서 End -->
+					<!-- 8.취약근로자 / 위험지역 출입이력 Strat -->
+					<div class="flex vbox tab-box-parent" style="border: 1px solid #85a7e9;">
+						<p>
+							<!-- 버튼 이벤트 만들기 -->
+							<button class="tab-btn btn-selected left-btn fst-btn" on-click="tabChange" data-worker = "{{weakWorkerList}}">취약근로자</button>
+							<button class="tab-btn right-btn" on-click="tabChange">위험지역 출입이력</button>
+						</p>
+						<!-- 취약 근로자 tab -->
+						<div id="testWeakGridDiv" class="tab-box">
+							<sc-grid id="testWeakGrid" data-provider="{{weakWorkerList}}" title-text="취약 근로자" use-state="false" use-selection="false"
+								focus-visible="false" show-number-line="true" row-height="25" header-height="35" select-mode="none"
+								use-dummy="false" column-fit-style="evenFill"
+								on-item-click="seachWeakWorker">
+								<sc-grid-columns>
+									<sc-data-column data-field="vendorName" header-text="협력사" width="100" text-align="center" editable="false"></sc-data-column>
+									<sc-data-column data-field="workerName" header-text="이름" width="100" text-align="center" editable="false"></sc-data-column>
+									<sc-data-column data-field="weakType" header-text="유형" text-align="center" width="200" editable="false""></sc-data-column>
+								</sc-grid-columns>
+								<sc-grid-fields>
+							        <sc-grid-field data-field="workerId"></sc-grid-field>
+									<sc-grid-field data-field="isMobileYn"></sc-grid-field>
+									<sc-grid-field data-field="condition"></sc-grid-field>
+								</sc-grid-fields>
+							</sc-grid>
+						</div>
+						<!-- 위험 지역 출입이력 tab -->
+						<div id="testDangerLogGridDiv" class="tab-box" style="left: 100%">
+							<sc-grid id="testDangerLogGrid" data-provider="{{dangerLocationWorker}}" title-text="위험지역 출입이력" use-state="false" use-selection="false" focus-visible="false"
+								show-number-line="false" row-height="50" header-height="35"
+								use-dummy="false" column-fit-style="evenFill">
+								<sc-grid-columns>
+									<sc-date-column data-field="signalDt" header-text="시간" width="60" text-align="center" display-format="HH:mm:ss"></sc-date-column>
+									<sc-data-column data-field="dangerName" header-text="위험지역" fill-width="90" text-align="center" text-wrap="normal"></sc-data-column> 
+									<sc-data-column data-field="vendorName" header-text="협력사" width="70" text-align="center" editable="false"></sc-data-column>
+									<sc-data-column data-field="targetName" header-text="이름" width="70" text-align="center" editable="false"></sc-data-column>
+								</sc-grid-columns>
+							</sc-grid>
+						</div>
+					</div>
+					<!-- 8.취약근로자 / 위험지역 출입이력 End -->
+					<!-- 9.게이트 웨이 / 비콘 Strat -->
+					<div class="flex vbox tab-box-parent" style="border: 1px solid #85a7e9;">
+						<p>
+							<!-- 버튼 이벤트 만들기 -->
+							<button class="tab-btn btn-selected left-btn fst-btn" on-click="tabChange" data-worker = "{{weakWorkerList}}">게이트 웨이</button>
+							<button class="tab-btn right-btn" on-click="tabChange">비콘</button>
+						</p>
+						<!-- 게이트 웨이 -->
+						<div class="tab-box">
+							<div class="hbox flex operate-gateway-boxes">
+								<div class="vbox flex operate-gateway-box"></div>
+								<div class="hspace-5"></div>
+								<div class="vbox flex operate-gateway-box"></div>
+								<div class="hspace-5"></div>
+								<div class="vbox flex operate-gateway-box"></div>
+							</div>
+						</div>
+						<!-- 비콘 -->
+						<div class="tab-box" style="left: 100%">
+							<div class="hbox flex operate-sensor-boxes">
+								<div class="hbox flex operate-sensor-box">
+									<div class="hbox flex j-center">
+										<div class="flex"></div>
+										<div class="vbox operate-battery1-icon" style="min-width:80px;"></div>
+										<div class="vbox j-center a-center flex"  style="min-width:120px;">
+											<div class="font-25">정상</div>
+											<div class="font-32-500">[[beaconStat.normalCount]]</div>
+										</div>
+										<div class="flex"></div>
+									</div>
+								</div>
+								
+								<div class="hspace-10"></div>
+								
+								<div class="hbox flex operate-sensor-box">
+									<div class="hbox flex j-center">
+										<div class="flex"></div>
+										<div class="vbox operate-battery2-icon" style="min-width:80px;"></div>
+										<div class="vbox j-center a-center flex"  style="min-width:120px;">
+											<div class="font-25">전원교체</div>
+											<div class="font-32-500">[[beaconStat.chargeNeedCount]]</div>
+										</div>
+										<div class="flex"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- 9.게이트 웨이 / 비콘 End -->
+				</div>
+				<!-- 하단 현황표 End -->
+			</div>
+			<!-- 메인 Content End -->
+		</div>
+		<!-- 안쪽 배경 END -->
+	</div>
+	<!-- 바깥 배경 END -->
+	
+	<!-- 3D 팝업 알림용 div -->
+<!-- 	<div id="shipPopupInfoDiv" class="shipPopup" style="display:none;"> -->
+<!-- 		<div id="ship_arrow"></div><div>3D 화면을 보려면 클릭하세요</div> -->
+<!-- 	</div> -->
+</template>
+
+<!--
+    ************************************************************************************************************
+    * Script Area
+    ************************************************************************************************************
+-->
+<script>
+	Polymer({
+		is : "es-dashboard-test",
+
+		properties : {
+			codes : {
+				type : Object,
+				value : function() {
+					return {
+						vendorList : [] // 협력사 목록
+						,
+						targetType : [] // 표시 유형
+						,
+						workerJobList : [] // 작업자 유형
+						,
+						vehicleJobList : []
+					// 이동장비 유형
+					};
+				},
+				reset : false
+			},
+			
+			siteCondition : { // 현장 정보
+				type : Object,
+				value : function() {
+					return {}
+				}
+			},
+			
+			searchCondition : {
+				type : Object,
+				value : function() {
+					return {};
+				}
+			},
+			
+			searchParam : {
+				type : Object,
+				value : function() {
+					return {
+						siteId : SCMdiManager.searchParam.site_id
+					};
+				}
+			},
+			
+			// 메시지
+			resultInfo : {
+				type : Object,
+				value : function() {
+					return {
+						alarmMsg : this.translate("IOT.E0008"), // 조회된 실시간 위치 정보가 없습니다.
+						newSensorId : ""
+					};
+				}
+			},
+			
+			display : {
+				type : Object,
+				value : function() {
+					return {};
+				}
+			},
+
+			workerMarkerLayer : {
+				type : Object,
+				value : function() {
+					return {};
+				}
+			},
+			
+			vehicleMarkerLayer : {
+				type : Object,
+				value : function() {
+					return {};
+				}
+			},
+			
+			currentDate : {
+				type : Object,
+				value : function() {
+					return "";
+				}
+			},
+
+			dayOfWeek : {
+				type : Object,
+				value : function() {
+					return "";
+				}
+			},
+
+			currentTime : {
+				type : Object,
+				value : function() {
+					return "";
+				}
+			},
+
+			safeDay : {
+				type : Object,
+				value : function() {
+					return new Date();
+				}
+			},
+			
+			safeDate : {
+				type : Object,
+				value : function() {
+					return 1;
+				}
+			},
+			
+			refreshSecond : {
+				type : Object,
+				value : function() {
+					return 180;
+				}
+			},
+			
+			smsInfo : {
+				type : Object,
+				value : function() {
+					return {};
+				}
+			},
+			
+			colorTone : {
+				type : Object,
+				value : function() {
+					return 'black';
+				}
+			},
+			
+			titleColor : {
+				type : Object,
+				value : function() {
+					return '#1E3155';
+				}
+			},
+			
+			weakParam : {
+				type : Object,
+				value : function() {
+					var toDay = new Date();
+
+					return {
+						siteId : SCMdiManager.searchParam.site_id,
+						onlyWeakWorker : "Y",
+						attendDt : moment(toDay).format("YYYY-MM-DD")
+					};
+				}
+			},
+
+			dangerParam : {
+				type : Object,
+				value : function() {
+					return {
+						siteId : SCMdiManager.searchParam.site_id,
+						targetType : "worker"
+					};
+				}
+			},
+
+			oriOption : {
+				type : Object,
+				value : function() {
+					return {
+						tooltip: {
+				            trigger: 'item',
+				            formatter: '클릭하여 상세인원 확인'
+				        },
+						legend : {
+							bottom : '0%',
+							show : false,
+							itemWidth : 8,
+							textStyle : {
+								fontSize : 17,
+								color : "#fff",
+								fontFamily : "Noto Sans KR",
+							},
+							formatter : function(name) {
+								return name;
+							}
+						},
+						series : [ {
+							type : 'pie',
+							radius : '80%',
+							label : {
+								color : "#fff",
+								fontFamily : "Noto Sans KR",
+								show : true,
+								position : 'outside',
+								formatter : "{b}({c})"
+							},
+							height : "auto",
+							center: ["50%", "55%"]
+						} ]
+					};
+				},
+			},
+			
+			barOption : {
+				type : Object,
+				value : function() {
+					return {
+						tooltip: {
+				            trigger: 'item',
+				            formatter: '클릭하여 상세인원 확인'
+				        },
+						grid : {
+							height : "80%",
+							top : "10%"
+						},
+						xAxis : {
+							type : 'value'
+						},
+						yAxis : {
+							type : 'category',
+							inverse : true
+						},
+						series : [ {
+							type : 'bar',
+							barWidth : "60%",
+							label : {
+								show : true,
+								position : 'insideLeft',
+								formatter : "{b}({c})"
+							}
+						} ]
+					}
+				}
+			},
+			
+			threeSearchParam : {
+            	type : Object,
+            	value : function(){
+            		return {
+	            		siteId : SCMdiManager.searchParam.site_id,
+	            		onlyHavingModelYn : "Y"
+	            	}
+            	}
+	        },
+	        
+	        conditions : {
+            	type : Object,
+            	value : function(){
+            		return {
+            			"active" : "앱 작업중", 
+            			"inactive" : "작업종료",
+            			"unknown" : "알수없음"
+            		}
+            	}
+            }
+		},
+
+		/***** 초기화 완료 후 호출 함수 *****/
+		initialized : function() {
+			var me = this;
+			//상단 정보 설정
+			me.initHeaderInfo();
+			//Grid 설정
+			me.initGrid();
+			//시작시 필요한 ajax 호출
+			me.onSearch();
+			//시작시 확대 화면
+// 			me.onWindowMax();
+		},
+		
+		/***** 초기 호출 함수 Start *****/
+		/* 상단 정보 */
+		initHeaderInfo : function(){
+			var me = this;
+			
+			var d = new Date();
+			var currentDate = d.getFullYear() + "년 " + (d.getMonth() + 1) + "월 " + d.getDate() + "일";
+
+			// 현재일자
+			me.set("currentDate", currentDate);
+
+			// 요일
+			var week = [ '일', '월', '화', '수', '목', '금', '토' ];
+			var dayOfWeek = week[d.getDay()];
+			me.set("dayOfWeek", "(" + dayOfWeek + ")");
+			
+
+			// 현재시간
+			me.timeInterval = setInterval(function() {
+				me.setTimeText();
+			}, 1000); // 1초
+
+			//사이트 이름
+			me.set("siteName", SCMdiManager.searchParam.site_name);
+		},
+		/* 그리드 설정 */
+		initGrid : function() { // 그리드 초기화
+			var me = this;
+		
+			var fontStyle = {
+				"default" : {
+					"fontSize" : "12",
+					"fontName" : "Noto Sans KR"
+				},
+	
+				header : {
+					fontSize : "16",
+					fontBold : false
+				}
+			}
+			
+			var testDashboardColor = "#2c4670,1px";
+			var testDashboardColor2 = "#3b5386";
+			var testDashboardColor3 = "#1E3155";
+			var white = "#FFF"
+	
+			var testDashboardStyles = {
+				"default" : {
+					"background" : testDashboardColor3,
+					"color" : white,
+					"borderLeft" : testDashboardColor,
+					"borderRight" : testDashboardColor,
+					"borderTop" : testDashboardColor,
+					"borderBottom" : testDashboardColor
+				},
+				grid : {
+					background : testDashboardColor3,
+				},
+				header : {
+					background : testDashboardColor2,
+					color : white,
+					selectedColor : white,
+					selectedBackground : testDashboardColor2,
+					hoveredColor : white,
+					hoveredBackground : testDashboardColor2,
+					borderLeft : testDashboardColor,
+					borderRight : testDashboardColor,
+					borderTop : testDashboardColor,
+					borderBottom : testDashboardColor
+				},
+				body : {
+					background : white,
+					color : white,
+					cell : {
+						borderLeft : testDashboardColor,
+						borderRight : testDashboardColor,
+						borderTop : testDashboardColor,
+						borderBottom : testDashboardColor
+					}
+				},
+				rowIndicator : {
+					background : testDashboardColor3,
+					borderLeft : testDashboardColor,
+					borderRight : testDashboardColor,
+					borderTop : testDashboardColor,
+					borderBottom : testDashboardColor,
+					color : white
+				}
+			};
+	
+			me.set("fontStyle", fontStyle);
+			me.set("testDashboardStyles", testDashboardStyles);
+			
+			me.$.testDangerLogGrid.loadStyles(fontStyle);
+			me.$.testWeakGrid.loadStyles(fontStyle);
+			me.$.testDangetGrid.loadStyles(fontStyle);
+			me.$.testAlarmGrid.loadStyles(fontStyle);
+	
+			me.$.testDangerLogGrid.loadStyles(testDashboardStyles);
+			me.$.testWeakGrid.loadStyles(testDashboardStyles);
+			me.$.testDangetGrid.loadStyles(testDashboardStyles);
+			me.$.testAlarmGrid.loadStyles(testDashboardStyles);
+			
+			$(".es-dashboard-test .sc-grid").css("background-color", testDashboardColor);
+			$(".es-dashboard-test .grid-container").css("margin", "5px");
+			$(".es-dashboard-test .grid-container").css("border", "none");
+			$(".es-dashboard-test .grid-container").children().css("height", "94%");
+	
+		},
+		/***** 초기 호출 함수 End *****/
+		
+		/***** onSearch 함수 Start *****/
+		onSearch : function() {
+			if (!this.isInitialized) return;
+			var me = this;
+			
+			me.set("byJobType", null);
+			me.set("byLocation", null);
+
+			me.searchParam.vendorIds = me.searchCondition.vendorIds;
+			me.searchParam.jobTypeIds = me.searchCondition.jobTypeIds;
+			me.searchParam.vehicleTypes = me.searchCondition.vehicleTypes;
+			me.set("resultInfo.alarmMsg", me.translate("IOT.E0008"));
+			me.resultInfo.newSensorId = "";
+			UT.request(me.$.workerAggregation);
+			UT.request(me.$.getAlarmDashboard);
+			UT.request(me.$.low4Dashboard);
+			UT.request(me.$.dangerLocationWorker);
+			UT.request(me.$.findListWeakWorker);
+			UT.request(me.$.getWeatherInfo);
+			UT.request(me.$.getOperateDashboard);
+			UT.request(me.$.getPlaceDashboard);
+
+		},
+		/* 날씨 정보 */
+		completeGetWeatherInfo : function(e, res) {
+			var me = this;
+
+			var result = res.response || {};
+
+			var weatherInfo = result.body || [];
+
+			//데이터 저장
+			me.set("weatherInfo", weatherInfo);
+
+			me.getWeatherIconInfo(weatherInfo, "ri");
+		},
+		/* 출력 인원 */
+		completeWorkerAggregation: function(e, res){
+			var me = this;
+			var result = res.response;
+
+			//관제 상태 지정
+			var wholeList = result.byLocation.wholeList;
+			
+			if(wholeList){
+				var weakWorkerList = wholeList.filter(worker => worker.weakType);				
+			}
+
+			me.set("wholeList", wholeList);
+			me.set("byLocation" ,result.byLocation);
+			me.set("byJobType" ,result.byJobType);
+			me.set("weakWorkerList" ,weakWorkerList);
+
+			me.resetChart();
+			
+			//윈도우 크기 변경 이벤트, 차트 다시 그리기 -> canvas 크기가 고정이기 때문에
+			//지도나 3D 모델의 해상도도 흐려진다. 다시 그려줘야 할까?
+			window.addEventListener('resize', function(event) {
+			    me.resetChart();
+			}, true);
+
+		},
+		completeGetPlaceDashboard : function(e, res){
+			var me = this;
+        	
+        	var result = res.response || {};
+        	
+        	var deliverTagInfo = result.deliverTagInfo || {};
+        	
+        	me.set("deliverTagInfo", deliverTagInfo);
+		},
+        //게이트 웨이, 비콘 조회
+        completeGetOperateDashboard: function(e, res){
+        	var me = this;
+        	
+        	var result = res.response.data.body || {};
+        	console.log(result);
+        	
+        	// 스마트 태그 현황
+        	me.set("sensorStat", result.sensorStat || {});
+        	
+        	// 스마트 태그 구역별 현황
+        	me.set("sensorAreaStatList", result.sensorAreaStatList || []);
+        	
+        	// 비콘 현황
+        	me.set("beaconStat", result.beaconStat || {});
+        	
+        	// 게이트 웨이 현황
+        	me.set("gatewayStatList", result.gatewayStatList || []);
+
+        	// 게이트 웨이 : 세팅
+        	me.setGatewayList();
+        },
+		/***** onSearch 함수 End *****/
+		
+		/***** Chrat 함수 Start *****/
+		/* 차트 시작 */
+		drawChart : function() {
+			var me = this;
+
+			var windowMax = me.$.windowmax;
+			
+			//전체 작업자
+			var wholeList = me.get("wholeList");
+			
+			if(!wholeList) return;
+			
+			//직종, 협력사, 관제인원 분류
+			var jobList = me.topListArray(wholeList, "jobTypeName", 4);
+			var vendorList = me.topListArray(wholeList, "vendorName", 4);
+			var controlList = me.topListArray(wholeList, "col1", 2);
+			
+			//관제인원만 추출, 교부현황
+			var managedWorkerList = wholeList.filter(e=>e.col1=="관제인원");
+			var managedList = me.topListArray(managedWorkerList, "workStatus", 4);
+			//인원수 저장
+			me.set("wholeWorkerCnt", wholeList.length);
+			me.set("managedWorkerCnt", managedList.length);
+
+			me.createChart('worker', jobList);
+			me.createChart('vendor', vendorList);
+			me.createChart('control', controlList);
+			me.createChart('managed', managedList);
+		},
+		/* 상위 리스트 불러오기 */
+		topListArray : function(data, colName, topCnt){
+			var wholeList = data;
+			//컬럼을 set으로 저장
+			var colSet = new Set();
+			
+			wholeList.forEach(function(el){
+				colSet.add(el[colName]);
+			});
+			
+			//컬럼, 인원수, 그에 맞는 인원 정보를 저장
+			var groupList = [];
+			
+			colSet.forEach(function(col){
+				var workerList = []
+				wholeList.forEach(function(el){
+					if(el[colName] == col){
+						workerList.push(el);
+					}
+				});
+				
+				groupList.push({target_name: col, cnt: workerList.length, dataList: workerList});
+			})
+			//인원순으로 정렬
+			groupList = groupList.sort(function (a, b) {
+			    return b.cnt - a.cnt;
+			});
+			
+			//차트데이터로 저장(기타는 따로 묶어서)
+			var chartList = [];
+			var etcList = [];
+			var cnt = 0
+			for(var i in groupList){
+				var workerList = []
+				if(i < topCnt){
+					chartList.push(groupList[i]);
+				}
+				else {
+					cnt = cnt + groupList[i].cnt;
+					etcList = etcList.concat(groupList[i].dataList);
+				}
+			}
+			chartList.push({target_name: "기타", cnt: cnt, dataList: etcList});
+			return chartList;
+		},
+		/* 차트 생성 */
+		createChart : function(div, dataList) {
+			var me = this;
+
+			//차트 설정
+			var chartDataList = [];
+
+			for (var idx in dataList) {
+				var item = dataList[idx];
+				var colorArry = ['#4477ED', '#9559EA', '#FF00FF', '#c23531'];
+				// 차트 데이터
+				if(item.cnt > 0){
+					chartDataList.push({
+						itemStyle : { color : colorArry[idx] },
+						value : item.cnt,
+						name : item.target_name
+					});					
+				}
+			}
+			
+			var chartDom = null;
+			var chart = null;
+			var option = {};
+
+			if (div == "control") {
+				chartDom = me.$.testControllChart;
+				option = me.get("oriOption");
+			} else if(div == "managed"){
+				chartDom = me.$.testManagedChart;
+				option = me.get("oriOption");
+			} else if(div == "job"){
+				chartDom = me.$.testJobChart;
+				option = me.get("barOption");
+			}
+
+			chart = echarts.init(chartDom);
+			
+			if (dataList[0].cnt > 0) {
+				//차트에 데이터 저장
+				option.series[0].data = chartDataList;
+				if(chartDataList.length == 1 && option.series[0].type == 'pie'){
+					option.series[0].labelLayout = function () {
+						return {
+							x: 300,
+							y: 50
+						};
+			        }
+				}
+			} else {
+				option = {
+					series : [ {
+						type : 'pie',
+						data : []
+					} ]
+				};
+
+				$("._" + div + "-nonetext").css("display", "block");
+				$("._" + div + "-nonetext").prev().css("display", "none");
+			}
+			chart.setOption(option);
+			//차트 팝업 이벤트 추가
+			chart.on('click', function(param){
+				var value = param.data.name;
+				var workerList = dataList.filter(el => el.target_name == value)[0].dataList;
+				
+				me.openWorkerListPopup(workerList, value);
+			});
+			me.set(div, chart);
+		},
+		
+		/* 차트 재시작 */
+		resetChart : function() {
+			var me = this;
+
+			//차트 제거
+			echarts.dispose(me.$.testControllChart);
+			echarts.dispose(me.$.testManagedChart);
+			echarts.dispose(me.$.testJobChart);
+			
+			me.drawChart();
+		},
+		/***** Chrat 함수 End *****/
+		
+		/***** 시간 & 날짜 & 윈도우 함수 Strat *****/
+		/* 시간 지정 */
+		setTimeText : function() {
+			var me = this;
+
+			var d = new Date();
+			var hours = d.getHours();
+			var minutes = d.getMinutes();
+			//var seconds = d.getSeconds();
+
+			if (hours < 10) {
+				hours = "0" + hours;
+			}
+			if (minutes < 10) {
+				minutes = "0" + minutes;
+			}
+			/* if(seconds < 10){
+				seconds = "0" + seconds;
+			} */
+
+			var currentTime = hours + ":" + minutes /* +":" + seconds */;
+			me.set("currentTime", currentTime);
+
+			// refresh 초
+			var refreshSecond = me.get("refreshSecond") || 0;
+
+			if (refreshSecond <= 0) {
+				me.set("refreshSecond", 180);
+				//             		me.searchData();
+// 				me.refresh();
+			} else {
+				me.set("refreshSecond", --refreshSecond);
+			} 
+		},
+		/* 날씨 아이콘 */
+		getWeatherIconInfo : function(param, prefix) {
+			var me = this;
+			var pty = param.pty; // 강수형태(PTY) 코드 : 없음(0), 비(1), 비/눈(2), 눈(3), 소나기(4) 여기서 비/눈은 비와 눈이 섞여 오는 것을 의미 (진눈개비)
+			var sky = param.sky; // 맑음 0 ～ 5 , 구름많음 6 ～ 8 ,  흐림  9 ～ 10
+			
+			/**
+			 * icon
+			 * 05_비, 09_눈비, 07_눈, 05_비
+			 * 01_낮_맑음, 10_밤_맑음, 04_구름많음, 03_흐림 
+			 * 12_정보없음
+			 */
+			var icon;
+			var weatherText;
+
+			if (pty == 0) { // 없음
+				if (sky <= 5) { // 맑음
+					// 낮 or 밤(1or10)
+					icon = prefix + '-sun-line';
+					weatherText = "맑음";
+
+				} else if (sky >= 9) { // 흐림
+					icon = prefix + '-sun-cloudy-line';
+					weatherText = "흐림";
+
+				} else { // 구름많음
+					icon = prefix + '-foggy-line';
+					weatherText = "구름많음";
+				}
+
+			} else {
+				if (pty == 1) { // 비
+					icon = prefix + '-drizzle-line';
+					weatherText = "비";
+
+				} else if (pty == 2) { // 비/눈
+					icon = prefix + '-hail-line';
+					weatherText = "비/눈";
+
+				} else if (pty == 3) { // 눈
+					icon = prefix + '-snowy-line';
+					weatherText = "눈";
+
+				} else if (pty == 4) { // 소나기
+					icon = prefix + '-heavy-showers-line';
+					weatherText = "소나기";
+				}
+			}
+
+			me.set("weatherText", weatherText);
+			$(me.$.weatherIcon).addClass(icon);
+		},
+		/* 윈도우 확대 축소 */
+		onWindowMax : function() {
+			var me = this;
+
+			// 확대 축소 버튼
+			var windowMax = me.$.windowmax;
+
+			// 탑메뉴
+			var topmenu = $('#headWrap');
+			// 탭바
+			var mdiTabbar = $('#mdiTabbar');
+			// 메뉴경로
+			var mdiBreadCrumb = $('#mdiBreadCrumb');
+			// 왼쪽 메뉴
+			var mdiLeftMenu = $('#mdiLeftMenu');
+
+			//전체 div
+			var pages = $('#mdiPages');
+
+			// 원래 사이즈 상태
+			if (windowMax.classList.contains('window-max')) {
+				windowMax.classList.remove('window-max');
+				windowMax.classList.add('window-return');
+
+				// 탑메뉴 숨김
+				topmenu.css("display", "none");
+				// 탭바 숨김
+				mdiTabbar.css("display", "none");
+				// 메뉴경로 숨김
+				mdiBreadCrumb.css("display", "none");
+				// 왼쪽 사이드 바 숨김
+				mdiLeftMenu.css("display", "none");
+
+				$('#backsub').addClass('fullback');
+
+				$('.mdiTabsDiv')[0].style.display = 'none';
+
+				// sc-mdi-window (padding 제거)
+				var domList = document.querySelectorAll('sc-mdi-window');
+
+				for (var i = 0; i < domList.length; i++) {
+					var domElem = domList[i];
+					domElem.classList.add("padding-none");
+				}
+
+				// 전체화면 실행
+				me.openFullscreen();
+
+				setTimeout(function() {
+					var domList = document.querySelectorAll('sc-mdi-window');
+
+					for (var i = 0; i < domList.length; i++) {
+						var domElem = domList[i];
+						domElem.style.width = "100%";
+						domElem.style.height = "100%";
+					}
+				}, 700);
+
+				// 확대 사이즈 상태
+			} else {
+				windowMax.classList.remove('window-return');
+				windowMax.classList.add('window-max');
+
+				// 탑메뉴 보임
+				topmenu.css("display", "");
+				// 탭바 보임
+				mdiTabbar.css("display", "");
+				// 메뉴경로 보임
+				mdiBreadCrumb.css("display", "");
+				// 왼쪽 사이드 바 보임
+				mdiLeftMenu.css("display", "");
+
+				pages.css("position", "");
+				$('#backsub').removeClass('fullback');
+
+				$('.mdiTabsDiv')[0].style.display = 'block';
+
+				// 전체화면 취소
+				me.closeFullscreen();
+
+				// sc-mdi-window (padding 제거)
+				var domList = document.querySelectorAll('sc-mdi-window');
+
+				for (var i = 0; i < domList.length; i++) {
+					var domElem = domList[i];
+					domElem.classList.remove("padding-none");
+				}
+			}
+
+			// SC-MDI : RESIZE FUNCTION
+			$('sc-mdi')[0]._onUtilAreaResize();
+		},
+		/* 확대 */
+		openFullscreen : function() {
+			var me = this;
+
+			var elem = document.documentElement;
+
+			if (elem.mozRequestFullScreen) { /* Firefox */
+				elem.mozRequestFullScreen();
+			} else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+				elem.webkitRequestFullscreen();
+			} else if (elem.msRequestFullscreen) { /* IE/Edge */
+				elem.msRequestFullscreen();
+			}
+
+			this.$.lowBoxContainer.style.height = "350px";
+			this.$.backsub.style.margin = "0px";
+			$(".test-top-area").css("min-height", "79px");
+			$(".place-none-text").css("line-height", "250px");
+		},
+		/* 축소 */
+		closeFullscreen : function() {
+			var me = this;
+
+			if (document.mozCancelFullScreen) { /* Firefox */
+				document.mozCancelFullScreen();
+			} else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+				document.webkitExitFullscreen();
+			} else if (document.msExitFullscreen) { /* IE/Edge */
+				document.msExitFullscreen();
+			}
+
+			this.$.lowBoxContainer.style.height = "250px";
+			this.$.backsub.style.margin = "10px";
+			$(".test-top-area").css("min-height", "65px");
+			$(".place-none-text").css("line-height", "150px");
+		},
+		/***** 시간 & 날짜 & 윈도우 함수 End *****/
+		
+		/***** 화면 전환 함수 Strat*****/
+		/* 탭 전환 */
+		tabChange : function(e) {
+			var me = this;
+
+			var $btn = $(e.target);
+
+			if ($btn.hasClass("btn-selected")) {
+				if(e.target.dataWorker){
+					console.log(e.target);
+					e.target.dataValue = "취약 근로자";
+					me.workerPopup(e);					
+				}
+				return;
+			}
+
+			$btn.toggleClass("btn-selected");
+			$btn.next().toggleClass("btn-selected");
+			$btn.prev().toggleClass("btn-selected");
+
+			if ($btn.hasClass("fst-btn")) {
+				$btn.parent().nextAll().eq(1).css("left", "100%");
+				$btn.parent().nextAll().eq(0).css("left", "0");
+			} else {
+				$btn.parent().nextAll().eq(1).css("left", "0");
+				$btn.parent().nextAll().eq(0).css("left", "100%");
+			}
+		},
+		/***** 화면 전환 함수 End*****/
+		
+		/***** 팝업 호출 및 검색 함수 Start *****/
+		/***** 팝업 호출 및 검색 함수 End *****/
+		
+		
+		/***** 기타 함수 Start *****/
+		//새로고침
+		refresh : function() {
+			var me = this;
+			me.set("refreshSecond", 180);
+// 			me.onSearch();
+		},
+		/***** 기타 함수 End *****/
+		
+		/**** 추가 ****/
+		// 게이트 웨이 : 세팅
+       	setGatewayList: function(){
+       		var me = this;
+       		
+       		// 게이트 웨이 목록 초기화
+       		$('.operate-gateway-boxes').empty();
+       		
+       		// 게이트웨이 박스 영역
+       		var gatewayBoxes = $('.operate-gateway-boxes')[0];
+       		
+       		// 박스 dom 목록
+       		var boxDomList = [];
+       		
+       		// 게이트웨이 데이터 목록
+       		var gatewayStatList = me.get("gatewayStatList") || [];
+       		
+       		// 게이트 웨이 box 세팅(데이터 개수 만큼)
+       		for(var idx in gatewayStatList){
+       			var item = gatewayStatList[idx];
+       			
+       			var box = document.createElement("div");
+       			box.classList.add("vbox");
+       			box.classList.add("flex");
+       			box.classList.add("operate-gateway-box");
+       			
+       			var sub = document.createElement("div");
+       			sub.classList.add("vbox");
+       			sub.classList.add("flex");
+
+       			var row0 = document.createElement("div"); 
+       			row0.classList.add("flex");
+       			var row6 = document.createElement("div"); 
+       			row6.classList.add("flex");
+       			
+       			var row1 = document.createElement("div");
+       			row1.classList.add("vbox");
+       			row1.classList.add("font-13");
+       			row1.setAttribute("title", item.gatewayName);
+       			row1.innerHTML = "<p style=\"overflow:hidden; text-overflow: ellipsis; display: block;\">"+item.gatewayName+"</p>";
+       			
+       			var row2 = document.createElement("div");
+       			row2.classList.add("vbox");
+       			row2.style.minHeight = "120px";
+       			row2.classList.add("flex-6");
+       			// 정상
+       			if(item.status == "ready"){
+       				row2.classList.add("operate-gateway1-icon");
+       			}else{
+       				row2.classList.add("operate-gateway2-icon");
+       			}
+       			
+       			var row3 = document.createElement("div"); 
+       			row3.classList.add("vbox");
+       			row3.classList.add("font-15");
+       			
+       			var row4 = document.createElement("div"); 
+       			row4.classList.add("vbox");
+       			row4.innerHTML = item.signalDt + " [" + item.signalTime + "]";
+       			
+       			if(item.status == "ready"){
+       				row3.classList.add("operate-gateway-text1");
+       				row4.classList.add("operate-gateway-text1");
+       				row3.innerHTML = "정상";
+       			}else{
+       				row3.classList.add("operate-gateway-text2");
+       				row4.classList.add("operate-gateway-text2");
+       				row3.innerHTML = "확인필요";
+       			}
+       			
+       			
+       			// dom append
+           		Polymer.dom(sub).appendChild(row0);
+           		Polymer.dom(sub).appendChild(row1);
+           		Polymer.dom(sub).appendChild(row2);
+           		Polymer.dom(sub).appendChild(row3);
+           		Polymer.dom(sub).appendChild(row4);
+           		Polymer.dom(sub).appendChild(row6);
+           		Polymer.dom(box).appendChild(sub);
+           		
+           		boxDomList.push(box);
+       		}
+       		
+       		// 게이트 웨이 박스 추가(없으면 빈박스로 생성 - 3개까지 채움)
+       		for(var i=0; i<=2; i++){
+       			var box = boxDomList[i];
+       			
+       			if(!box){
+       				box = document.createElement("div");
+           			box.classList.add("vbox");
+           			box.classList.add("flex");
+           			box.classList.add("operate-gateway-box");
+       			}
+       			
+       			Polymer.dom(gatewayBoxes).appendChild(box);
+       			
+       			if(i<2){
+       				var hspace = document.createElement("div");
+       				hspace.classList.add("hspace-14");
+       				Polymer.dom(gatewayBoxes).appendChild(hspace);
+       			}
+       		}
+       		
+       	},
+	});
+</script></dom-module>

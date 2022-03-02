@@ -1,0 +1,51 @@
+<dom-module id="es-currency-ex-1">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+    
+    <template>
+  	    <!-- 코드 -->
+        <sc-code-group auto>
+            <sc-code code="C004" value="{{codes.cur}}" ></sc-code>
+        </sc-code-group>
+
+		<table class="tb-form">
+			<tr>
+				<td>
+					<sc-combobox-field class="w-110" value="{{baseInfo.cur}}" items="{{codes.cur}}" display-field="label" value-field="data" placeholder="선택"></sc-combobox-field>
+				</td>
+			</tr>
+		</table>
+    </template>
+    
+    <script>
+        Polymer({
+            is: 'es-currency-ex-1',
+            properties:{
+				value: Number,
+				codes: {
+                    type: Object,
+                    value: function() {
+                        return {};
+                    }
+                },
+
+				baseInfo: {
+				    type: Object,
+					value: function () {
+						return {};
+                    }
+				}
+            },
+            
+            setValue: function() {
+            	var me = this;
+
+            	me.set("baseInfo.cur", "USD");
+            }
+		});
+	</script>
+
+</dom-module>

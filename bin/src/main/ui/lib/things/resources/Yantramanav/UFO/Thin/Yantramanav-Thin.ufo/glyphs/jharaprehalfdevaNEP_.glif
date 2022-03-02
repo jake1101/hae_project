@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glyph name="jharaprehalfdevaNEP" format="1">
+  <advance width="1210"/>
+  <outline>
+    <contour>
+      <point x="813" y="586" type="line"/>
+      <point x="249" y="-1" type="line"/>
+      <point x="214" y="34" type="line"/>
+      <point x="783" y="622" type="line"/>
+    </contour>
+    <component base="jhaprehalfdevaNEP"/>
+  </outline>
+  <lib>
+    <dict>
+      <key>com.typemytype.robofont.layerData</key>
+      <dict>
+      </dict>
+      <key>org.robofab.fontlab.mark</key>
+      <integer>0</integer>
+    </dict>
+  </lib>
+</glyph>

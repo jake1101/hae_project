@@ -1,0 +1,42 @@
+<dom-module id="color-picker-box">
+	<style>
+		.colorBox {
+			width : 100%;
+			height : 100%;
+		}
+	</style>
+
+	<template>
+		<div id="colorBox" class="colorBox"></div>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'color-picker-box',
+			
+			// 컬러박스가 가지는 컬러 정보
+			properties : {
+				// 
+				colorInfo : {
+					type : Object
+				}
+			},
+			
+			attahced : function() {
+				var me = this;
+				me.fillColor();
+			},
+			
+			fillColor : function() {
+				var me = this;
+				me.$.colorBox.style.backgroundColor = me.colorInfo.eventColor;
+			},
+			
+			initBox : function(colorInfo) {
+				var me = this;
+				me.colorInfo = colorInfo;
+				me.fillColor();
+			}
+		});
+	</script>
+</dom-module>

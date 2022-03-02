@@ -1,0 +1,1232 @@
+<!--
+    ******************************************************************************************
+	** @Program-name 	: 세종 대시보드 3D 모델
+    ** @Description		: 
+	** @Author          : jhPark
+    ** @Create Date     : 2021.07.13
+    ** @History         : 2021.07.13 jhPark 최초작성
+    ******************************************************************************************
+-->
+<dom-module id="es-sejong-model">
+
+	<style type="text/css">
+		:host{
+			@apply(--vbox-layout);
+		}
+  		 html, body { height:100%; overflow:hidden } .row {height:96% ; margin:1% 1% 1% 1%;} 
+  		 
+  		 
+  		.ftrt {float: left;display: inline-block;}
+  		.casen {
+  			top : 30px;
+			position: absolute;
+			border-radius : 3px;
+			transition: none;
+			z-index: 999;
+			right: 30px;
+			background: white;
+		}
+  		.gridBtn {
+  			top : 15px;
+			left: 30px;
+			width: 24px;
+			height: 35px;
+			position: absolute;
+			display: inline-block;
+			background: url(../../lib/openlayers/img/grid_inactive.png) no-repeat;
+			transition: none;
+			z-index: 999;
+			
+		}
+		
+		.gridBtn:hover {
+			background: url(../../lib/openlayers/img/grid_hover.png) no-repeat;
+		}
+		
+		.gridBtn.ItemActive, .map .gridBtn.ItemActive:hover {
+			background: url(../../lib/openlayers/img/grid_active.png) no-repeat;
+		}
+		
+		
+		.filterBtn {
+			top: 15px;
+			left: 80px;
+			width: 24px;
+			height: 35px;
+			position: absolute;
+			display: block;
+			background: url(../../lib/openlayers/img/filter_inactive.png) no-repeat;
+			transition: none;
+			z-index: 999;
+		}
+		
+		.filterBtn:hover {
+			background: url(../../lib/openlayers/img/filter_hover.png) no-repeat;
+		}
+		
+		.filterBtn.ItemActive, .map .filterBtn.ItemActive:hover {
+			background: url(../../lib/openlayers/img/filter_active.png) no-repeat;
+		}
+		
+		.changeBtn {
+			top : 30px;
+			position: absolute;
+			display: inline-block;
+			transition: none;
+			z-index: 999;
+			right: 30px;
+/* 			background : #385a8c; */
+		}
+		
+		.tree-combo-box{
+			position: absolute;
+		    left: 60px;
+		    top: 15px;
+		    z-index: 2;
+		}
+		
+		.camera-rollback-btn{
+			width: 30px;
+		    height: 30px;
+		    position: absolute;
+			right: 20px;
+    		top: 20px;
+		    border-radius: 5px;
+		    background-color: white;
+		    color: #385a8c;
+		    z-index: 4;
+		    padding: 0;
+    		font-size: 22px;
+    		line-height: 30px;
+			border: 1px solid gray;
+			box-shadow: 1px 1px 1px 0px #000;
+    	}
+    	
+		.customTooltip:before{
+			content: attr(tooltip-text); /* here's the magic */
+		    position:absolute;
+			/* basic styles */
+ 			width:-webkit-max-content; 
+ 		  	width:-moz-max-content; 
+ 		  	width:-ms-max-content; 
+ 		  	width:max-content;		  	 
+			min-width : 96px;
+		  	border-radius: 3px;
+		  	border: solid 1px #4a4f4b;
+		  	background-color: #555555;
+		  	text-align:center;
+		  	font-family: MalgunGothic;
+		  	font-size: 12px;
+		  	font-weight: normal;
+		  	font-stretch: normal;
+		  	font-style: normal;
+		  	line-height: 3.08;
+		  	letter-spacing: 0.42px;
+		  	text-align: center;
+		  	color: #ffffff;
+		  	padding: 0px 7px;
+		  	display:none; 
+		  	/* hide by default */
+		}
+		
+		.customTooltip:before {
+		    top: 100%;
+		    right: 185%;
+		    -webkit-transform: translateX(50%);
+		        -ms-transform: translateX(50%);
+		            transform: translateX(50%);
+		    margin-top: 15px;
+		}
+		.customTooltip:after {
+		    left: 50%;
+		    top: -20%;
+		    margin-top: 10px;
+		    -webkit-transform: translateX(-50%);
+		        -ms-transform: translateX(-50%);
+		            transform: translateX(-50%);
+		    border-color: transparent transparent #555555 transparent;
+		  	content: "";
+		  	position:absolute;
+			
+			border:10px solid #000;
+		  	display:none; 
+ 
+		  	margin-top: 34px;
+		  	border-color: transparent transparent #555555 transparent;
+		}
+		
+		.customTooltip:hover:before, .customTooltip:hover:after {
+		  	display:block;
+		}
+		
+  	</style>
+	
+	<template>
+		<!--
+            ************************************************************************************************************
+            * Service Area
+            ************************************************************************************************************
+        -->
+	
+		<sc-request-group init>
+		
+			<sc-code-group>
+				<sc-code code="IOT003" value="{{codes.targetType}}"></sc-code>
+				<sc-code code="IOT004" value="{{codes.vehicleJobList}}"></sc-code>
+			</sc-code-group>
+			<!-- 협력사 조회 -->
+			<sc-ajax 
+				url="findListVendor.do"  
+				last-response="{{codes.vendorList}}" 
+				body="{{searchParam}}">
+			</sc-ajax>
+			<sc-ajax 
+				url="findListJobType.do"  
+				last-response="{{codes.jobTypeList}}" 
+				body="{{searchParam}}">
+			</sc-ajax>
+		</sc-request-group>
+		
+		<!-- 그룹 콤보 조회 -->
+		<sc-ajax id="findGroupInfo"
+			url="findShipGroupList.do"
+			body="{{searchParam}}"
+			on-response="completeFind">
+		</sc-ajax>
+		
+		<sc-ajax id="findListBeacon"
+			url="findListBeacon.do"
+			body="{{searchParam}}"
+			on-response="completeFindListBeacon">
+		</sc-ajax>
+		
+		<sc-ajax
+				id="findGridPositionList"
+				url="findGridPositionList.do"
+				body="{{searchCondition}}"
+				on-response="completefindGridPositionList">
+		</sc-ajax>
+		
+		<sc-ajax id="saveCasenInfo"
+			url="saveCasenInfo.do"
+			on-response="completeSaveCasen">
+		</sc-ajax>
+		
+		
+		<!--
+            ************************************************************************************************************
+            * UI Area
+            ************************************************************************************************************
+        -->
+		<div id="fullDiv" class="flex hbox">
+			<div id="sejong3DDiv" class="flex-7 vbox" style="position: relative; overflow: hidden;">
+				<button class="camera-rollback-btn customTooltip" on-click="camreaRollback" tooltip-text="카메라 시점 되돌리기"><i class="ri-refresh-line"></i></i></button>
+				<div class="tree-combo-box">
+					<sc-tree-combobox-field id="groupCombo" items="{{hierachGroupInfoList}}" 
+						enable-check-box-only-childs="false" value="{{searchCondition.layerGroupIds}}" 
+						display-field="name" value-field="id"  on-change="onSelectGroup">
+					</sc-tree-combobox-field>				
+				</div>
+				<div id="sejong_canvas" class="canvasDiv" style="width: 100%; height: 100%;">
+				</div>
+				<div id="textBoxDivforMapping" style="position: absolute;"></div>		
+			</div>
+		</div>
+		
+		<div id="listTooltip_sejong" class="listTooltip" hidden>
+			<div id="tooltipClose" class="close" on-click="tooltipClose">x</div>
+			<ul id="tooltip"></ul>
+		</div>
+		
+		<sc-grid title="작업자" id="gridWorkerPanel" data-provider="{{gridWorkerList}}" use-state ="false" use-selection="false" selection-style="singleRow" show-selection-header="false" on-item-click="onItemClick" 
+					  focus-visible="false" column-fillstyle="fill" row-style-function="onRowStyle" hidden>
+				        <cc-grid-toolbar>
+				        	<sc-button id="beaconBtn" text="비콘위치 보기" on-click="onShowBeacon" auth-s></sc-button>
+			            </cc-grid-toolbar>
+				        <sc-grid-columns>
+<!-- 				            <sc-image-column   width="70"   header-text="수신상태"      data-field = "image"   image-change-function="onImageChange"   image-display ="auto" ></sc-image-column> -->
+				            <sc-data-column 	width="70" 	text-align="center" 	header-text="협력사"   data-field="vendorName" ></sc-data-column>
+				            <sc-data-column 	width="90" 	text-align="center" 	header-text="직종"   data-field="targetJobName" ></sc-data-column>
+				            <sc-data-column 	fill-width="100" 	text-align="center" 	header-text="작업자명"   data-field="targetName" ></sc-data-column>
+				            <sc-data-column 	width="180" 	text-align="center" 	header-text="위치"   data-field="areaName"></sc-data-column>
+				            <sc-date-column 	width="80" 	text-align="center" 	header-text="수신시간" data-field="updatedDt" display-format = "HH:mm:ss"></sc-date-column>
+				            <sc-data-column 	width="80" 	text-align="left" 		header-text="특이사항"   data-field="weakType" ></sc-data-column>
+<!-- 				            <sc-image-column 	width="50" 	header-text="SMS" data-field="sms" singular-source="ui/assets/img/grid/icon_sms_new.png" image-display ="auto"></sc-image-column> -->
+				        </sc-grid-columns>
+				        <sc-grid-fields>
+		                    <sc-grid-field data-field="emergency" ></sc-grid-field>
+		                    <sc-grid-field data-field="sensorId" data-type="number"></sc-grid-field>
+		                    <sc-grid-field data-field="iconImage"></sc-grid-field>
+		                    <sc-grid-field data-field="labelColor"></sc-grid-field>
+		                    <sc-grid-field data-field="popup" data-type="object"></sc-grid-field>
+		                    <sc-grid-field data-field="marker" data-type="object"></sc-grid-field>
+		                    <sc-grid-field data-field="geoJson" data-type="object"></sc-grid-field>
+		                </sc-grid-fields>
+			        </sc-grid>
+	</template>
+
+	<!--
+        ************************************************************************************************************
+        * Script Area
+        ************************************************************************************************************
+    -->
+		
+	<script>
+		Polymer({
+			is: "es-sejong-model",			
+			properties : {
+				codes : {
+	               	type : Object,
+	               	value : function(){
+		               	return	{
+			               	 vendorList : []				// 협력사 목록
+		               	    ,targetType : []				// 표시 유형
+		               		,workerJobList : []			// 작업자 유형
+	               			,vehicleJobList : [] 			// 이동장비 유형
+		               	};
+	               	},
+	               	reset: false
+	            },
+	            searchCondition : {
+                	type : Object,
+                	value : function(){
+                		return {
+                			"limitTimeMinute" : 30
+                		}
+                	}
+                },
+	            timeList : {
+                	type : Array,
+                	value : function(){
+                		return [
+                			{data : 30, label : "30분 이내"},
+               				{data : 60, label : "60분 이내"},
+               				{data : 1440, label : "당일"}
+                		]
+                	}
+                },
+				 positionInfoList : {
+					 type : Array,
+					 value : function(){
+						 return [];
+					 }
+				 },
+				 areaInfo : {
+					 type : Object,
+					 value : function(){
+						 return {};
+					 }
+				 },
+				 casenInfo : {
+					 type : Object,
+					 value : function(){
+						 return {};
+					 }
+				 },
+				 searchParam: {
+                	type : Object,
+                	value: function(){
+                		return {
+                			siteId : SCMdiManager.searchParam.site_id
+                		};
+                	}
+                },
+	             groupInfoList:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+	             },
+	             beaconList:  {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+	             },
+	             groupName :{
+	            	 type : Object,
+					 value : function(){
+						 return {};
+					 }
+	             },
+	             layerGroupId:{
+	            	 type : Object,
+					 value : function(){
+						 return {};
+					 }
+	             },
+	             mouse: {
+	            	 type:Object,
+	            	 value : function(){
+	            		 return {
+	            			 "clientClickX" : 0,
+	            			 "clientClickY" : 0
+	            		 };
+	            	 }
+	             },
+	             voxelInterval: {
+	            	 type: Object,
+	            	 value: function(){
+	            		 return null;
+	            	 }
+	             },
+	             setTimeInfo: {
+	            	 type: Object,
+	            	 value: function(){
+	            		 return {};
+	            	 }
+	             },
+	             setTimeInfo1: {
+	            	 type: Object,
+	            	 value: function(){
+	            		 return {};
+	            	 }
+	             },
+	             emergencyInfo: {
+	            	 type: Object,
+	            	 value: function(){
+	            		 return {};
+	            	 }
+	             },
+	             isdangerAlarm: {
+	            	type : Boolean,
+					value : function(){
+						return false;
+					}
+	             },
+	             shaderCvalue: {
+	            	type : Number,
+					value : function(){
+						return 0.1;
+					}
+	             },
+	             beaconFlag :{
+	            	 type: Boolean,
+	            	 value : false
+	             },
+	             pageName : {
+	            	 type:String,
+	            	 value : "es-sejong-model"
+	             },
+	             changeBtnName :{
+	            	 type: String,
+	            	 value : "내부 보기"
+	             },
+	             isInside : {
+	            	 type : Boolean,
+	            	 value : false
+	             }
+            },
+			
+            /******************************
+             * 초기화 설정
+             ******************************/
+            initialized : function() {
+                 var me = this;
+                 
+                 me.connectSocketServer();
+            },
+            
+            load : function(areaInfo) {
+                var me = this;
+
+				if(!me.get("areaInfo") || me.get("areaInfo").id != areaInfo.id){
+					setTimeout(function(){
+						var camera = me.player.parsedCamera;
+						me.set("positionX", camera.position.x);
+						me.set("positionY", camera.position.y);
+						me.set("positionZ", camera.position.z);
+						me.set("controls", me.player.getControls());
+					}, 2000);
+				}
+				
+                me.set("areaInfo",areaInfo);
+            	me.set("searchParam.areaId", areaInfo.id);
+            	
+            	if(areaInfo.adjunction.casen){
+            		me.set("casenInfo",areaInfo.adjunction.casen);
+            	}            	
+
+	            UT.request(me.$.findGroupInfo);
+				UT.request(me.$.findListBeacon);        		 
+                me.onSearch();
+                
+                SCLoadMask.show();
+                
+                var animate = function () {
+					// 프레임 처리
+					 me.requestAnimate = requestAnimationFrame(animate);
+					
+					if(me.isdangerAlarm) {
+						if(me.player && me.player.getScene() && me.player.getScene().getObjectByName("workerGroup")
+								&& me.player.getScene().getObjectByName("workerGroup").children){
+							for(var i=0; i<me.player.getScene().getObjectByName("workerGroup").children.length; i++) {
+								danger = me.player.getScene().getObjectByName("workerGroup").children[i];
+								if(danger.material){
+									if(danger.material.uniforms['c'].value >= 1) {
+										me.shaderCvalue = -0.06;
+									} else if(danger.material.uniforms['c'].value <= 0.5) {
+										me.shaderCvalue = 0.06;
+									}
+									danger.material.uniforms['c'].value = danger.material.uniforms['c'].value + me.shaderCvalue;
+								}
+							}
+						}
+					}
+				};
+				animate();
+				
+            },
+            
+            stop : function(){
+            	var me = this;
+            	me.player.stop();
+                me.player.dispose();
+            },
+            
+            onSearch : function(){
+                var me = this;
+                me.set("searchCondition.areaId", me.searchParam.areaId);
+                UT.request(me.$.findGridPositionList);
+
+                if(me.player) {
+                    if(UT.isNotEmpty(me.player.getScene().getObjectByName("workerGroup"))) {
+                        var workerList = me.player.getScene().getObjectByName("workerGroup").children;
+                        for(var i = 0; i < workerList.length; i++) {
+                            var len = workerList[i].children.length;
+
+                            for(var k = len - 1; k >= 0; k--) {
+                                workerList[i].remove(workerList[i].children[k]);
+                            }
+                        }
+                    }
+                    me.player.getScene().remove(me.player.getScene().getObjectByName("workerGroup"));
+                }
+            },
+            
+            completefindGridPositionList : function(e, res){
+                var me = this;
+                var resultInfo = res.response;
+                
+                //검색할 목록 저장
+                me.set("workerList", resultInfo.positions);
+
+                var callbackFunc = function callbackFunc() {
+                    //긴급신호 온 곳으로 시점이동
+                    var item = me.emergencyInfo;
+
+                    if(UT.isNotEmpty(item)) {
+                        var count = 0;
+                        var interval = setInterval(function() {
+                            count++;
+
+                            if(count > 10) {
+                                clearInterval(interval);
+                            }
+
+                            if(me.player.getScene().getObjectByName("workerGroup") &&
+                                me.player.getScene().getObjectByName("workerGroup").children.some(function(param) {
+                                    return param.children.some(function(param2) {
+                                        return param2.element != undefined;
+                                    });
+                                })
+                            ) {
+                                me.player.changeLabelColorGroup(item.positionId, "rgba(192,0,0, 0.8)");
+                                var xPos = 0;
+                                var yPos = 0;
+                                var zPos = 0;
+
+                                for(var j = 0; j < resultInfo.positions.length; j++) {
+                                    if(resultInfo.positions[j].positionId == item.positionId) {
+                                        xPos = resultInfo.positions[j].x;
+                                        yPos = resultInfo.positions[j].y;
+                                        zPos = resultInfo.positions[j].z;
+                                        break;
+                                    }
+                                }
+
+                                me.player.setCameraPosition(me.player.getCamera().position.x + (Number(xPos) - me.player.getControls().target.x), me.player.getCamera().position.y + (Number(yPos) - me.player.getControls().target.y), me.player.getCamera().position.z + (Number(zPos) - me.player.getControls().target.z));
+//                                 me.player.setControlsTarget(Number(xPos), Number(yPos), Number(zPos));
+                                clearInterval(interval);
+                            }
+                        }, 300);
+                    }
+                };
+
+                if(UT.isNotEmpty(resultInfo)) {
+                    me.set("gridWorkerList", resultInfo.gridData.workerList ? resultInfo.gridData.workerList : []); //최근 긴급신호로 시점이동하기위한 emergencyInfo에 positionId 세팅
+
+                    var positionId;
+
+                    if(me.get("gridWorkerList").filter(function(w) {
+                            return w.emergency == 1;
+                        }).length == 0) {
+                        positionId = null;
+                    } else {
+                        positionId = me.get("gridWorkerList").filter(function(w) {
+                            return w.emergency == 1;
+                        })[0].positionId;
+                    }
+
+                    me.set("emergencyInfo", {
+                        positionId: positionId
+                    });
+                    me.set("positionInfoList", resultInfo.positions ? resultInfo.positions : []);
+
+                    if(me.player && resultInfo.positions && resultInfo.positions.length > 0) {
+                        me.createSensorModel(resultInfo.positions, "worker", callbackFunc);
+                    }
+                }
+            },
+            
+         	// 마우스 이벤트 설정
+            initMouseEvent: function(){
+                var me = this;
+                
+            },
+
+			initKeyEvent: function(){
+			    var me = this;
+			    me.$.sejong_canvas.addEventListener('keydown', function(e) {}, false);
+			},
+            
+            // 그룹 콤보 조회 완료
+            completeFind : function(e, res){
+                var me = this;
+                var data = res.response;
+                SCLoadMask.show();
+
+                for(var i = 0; i < data.length; i++) {
+                    data[i].layerGroupId = data[i].layerGroupId + "";
+                }
+
+                if(data == null) {
+                    UT.request(me.$.findGroupInfo);
+                }
+
+
+                //2021-03-30 yshong 수정. 기본 선택 구역 관련
+                var selectedId = 0;
+                data.filter(function (e) {
+            	  return e.property && e.property.selected == "Y";
+            	}).forEach(function (e) {
+            	  return selectedId = e.id;
+            	});
+                me.groupInfoList = null;
+                me.set("groupInfoList", data);
+                var hier = new CCHierachicalData();
+                var hierachiDatas = hier.HierachyTransformByKey(data, "id", "parentId", "children", 0, null, true);
+                hierachiDatas.name = "전체";
+                me.set("hierachGroupInfoList", [hierachiDatas]);
+                //2021-03-30 yshong 수정. 기본 선택 구역 관련
+                if(me.get("searchCondition.layerGroupId")){
+	                me.set("searchCondition.layerGroupIds", [me.get("searchCondition.layerGroupId")]);
+	                $("#groupCombo").val([me.get("searchCondition.layerGroupId")]).trigger("change");
+                }else{
+	                me.set("searchCondition.layerGroupIds", [selectedId]);
+	                $("#groupCombo").val([selectedId]).trigger("change");
+                }
+
+                while(this.$.textBoxDivforMapping.hasChildNodes()) {
+                    this.$.textBoxDivforMapping.removeChild(this.$.textBoxDivforMapping.firstChild);
+                }
+
+                if(!UT.isEmpty(me.player)) {
+                    me.player.stop();
+                    me.player.dispose();
+                    clearInterval(me.voxelInterval);
+                    me.player = null;
+                }
+
+                var jsonFile = "";
+
+                if(me.areaInfo) {
+                    jsonFile = me.areaInfo.modelName;
+                }
+
+                if(UT.isEmpty(jsonFile)) {
+                    UT.alert("3D 모델링 파일이 없습니다.");
+                    return;
+                }
+
+                try {
+                    var threejs_json = {}; // 전역변수 THREEJS_MODEL_ARR에서 해당 json 모델 존재 여부 확인 
+
+                    for(var idx in THREEJS_MODEL_ARR) {
+                        if(THREEJS_MODEL_ARR[idx].name == jsonFile) {
+                            threejs_json = THREEJS_MODEL_ARR[idx].json;
+                            break;
+                        }
+                    } // 해당 json 모델 미존재시 json압축파일 압축해제 및 전역변수에 push
+
+                    if(UT.isEmpty(threejs_json)) {
+                        ZipLoader.install({
+                            THREE: THREE
+                        });
+                        var loader = new ZipLoader('/ui/lib/threejs/json/' + jsonFile + '.zip');
+                        loader.on('progress', function(e) {
+                            console.log('loading', e.loaded / e.total * 100 + '%');
+                        });
+                        loader.on('load', function(e) {
+                            var threejs_json = loader.loadThreeJSON(jsonFile + '.json');
+                            THREEJS_MODEL_ARR.push({
+                                name: jsonFile,
+                                json: threejs_json
+                            });
+                            me.loadThreeJs(threejs_json, jsonFile); // json에 대한 threeJs 생성
+                        });
+                        loader.load();
+                    } else {
+                        me.loadThreeJs(threejs_json, jsonFile); // json에 대한 threeJs 생성
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+            },
+			
+			// json에 대한 threeJs 생성
+			loadThreeJs: function(threejs_json, model_name){
+			    var me = this;
+			    me.player = new APP.Player();
+			    me.player.load(threejs_json);
+			    me.player.setSize(document.querySelector(me.pageName).querySelector(".flex-7").offsetWidth, document.querySelector(me.pageName).querySelector(".flex-7").offsetHeight); //		me.player.setSize( document.getElementById("sejong3DDiv").offsetWidth, document.getElementById("sejong3DDiv").offsetHeight );
+
+			    me.player.play();
+			    document.getElementById("sejong_canvas").appendChild(me.player.dom);
+			    me.initMouseEvent(); // 마우스 이벤트 설정
+
+			    window.addEventListener('resize', function() {
+			        me.player.setSize(document.querySelector(me.pageName).querySelector(".flex-7").offsetWidth, document.querySelector(me.pageName).querySelector(".flex-7").offsetHeight); //			me.player.setSize( document.getElementById("sejong3DDiv").offsetWidth, document.getElementById("sejong3DDiv").offsetHeight );
+			    });
+
+			    if(model_name == "fd") {
+			        me.onSetting();
+			        me.player.setControlsTarget(0, 15, 10);
+			    }
+
+			    SCLoadMask.hide();
+			    me.onSearch();
+			},
+			
+			// 위험표시
+			dangerAlarm: function(workerX, workerY, workerZ){
+			    var me = this;
+			    var sphereGeom = new THREE.SphereGeometry(3, 20, 16);
+			    var customMaterial = new THREE.ShaderMaterial({
+			        uniforms: {
+			            "c": {
+			                type: "f",
+			                value: 1.0
+			            },
+			            "p": {
+			                type: "f",
+			                value: 0
+			            },
+			            glowColor: {
+			                type: "c",
+			                value: new THREE.Color(0xff0000)
+			            },
+			            viewVector: {
+			                type: "v3",
+			                value: me.player.getCamera().position
+			            }
+			        },
+			        vertexShader: me.vertexShader(),
+			        fragmentShader: me.fragmentShader(),
+			        side: THREE.FrontSide,
+			        blending: THREE.AdditiveBlending,
+			        transparent: true
+			    });
+			    var moonGlow = new THREE.Mesh(sphereGeom.clone(), customMaterial.clone());
+			    moonGlow.name = "dangerGroup";
+			    moonGlow.position.x = workerX;
+			    moonGlow.position.y = workerY + 1.3;
+			    moonGlow.position.z = workerZ;
+			    me.player.getScene().getObjectByName("workerGroup").add(moonGlow);
+			    me.isdangerAlarm = true;
+			},
+			
+			vertexShader: function(){
+				return "uniform vec3 viewVector;" + "uniform float c;" + "uniform float p;" + "varying float intensity;" + "void main() {" + "vec3 vNormal = normalize( normalMatrix * normal );" + "vec3 vNormel = normalize( normalMatrix * viewVector );" + "intensity = pow( c - dot(vNormal, vNormel), p );" + "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );" + "}";
+			}, 
+			
+			fragmentShader: function(){
+				return "uniform vec3 glowColor;" + "varying float intensity;" + "void main() {" + "vec3 glow = glowColor * intensity;" + "gl_FragColor = vec4( glow, 1.0 );" + "}";
+			}, 
+			
+			//라벨 생성 부분
+			createSensorModel: function(targetList, tag, callback){
+			    var me = this;
+			    var targetList = targetList;
+			    var color;
+
+		        if(me.player.getScene().getObjectByName("workerGroup")){		        	
+					me.player.getScene().getObjectByName("workerGroup").clear();
+					me.player.dom.children[1].innerHTML = "";
+		        }
+			    for(var idx in targetList) {
+			        var item = targetList[idx];
+			        if(UT.isEmpty(item.workerCnt)) continue;
+			        
+			        var targetCnt = item.workerCnt;
+			        
+			        var param = {
+			            displayName: item.displayName, 
+			            x: item.x,
+			            y: item.y,
+			            z: item.z,
+			            message: targetCnt,
+			            positionId: item.positionId 	//layerId : item.layerGroupId,
+			            ,emergency:(item.emergency && item.emergency == 1)
+			        }; // sensor 모델 생성
+			        me.player.addTargetObj(param, function(div, positionId){
+			        	div.appendChild(me.getTooltipList(me, positionId));
+			        }); //긴급신호가 있는 위치에 여러군데라도 다 표시되도록
+
+			        if(item.emergency && item.emergency == 1) {
+			            me.dangerAlarm(Number(item.x), Number(item.y), Number(item.z));
+			        }
+			    }
+
+			    callback();
+			},
+			
+			onSetting : function(){
+			    var me = this;
+
+			    if(me.player.getScene().getObjectByName("siteGroup").getObjectByName("casenGroup")) {
+			        me.player.getScene().getObjectByName("siteGroup").remove(me.player.getScene().getObjectByName("casenGroup"));
+			    }
+
+			    var casenList = [];
+			    var xInit = -40;
+			    var xVar = 25.951;
+
+			    for(var i = 0; i < me.casenInfo.casen4; i++) {
+			        var temp = {};
+			        temp.x = xInit;
+			        temp.y = i * 0.9;
+			        temp.z = 0;
+			        casenList.push(temp);
+			    }
+
+			    for(var i = 0; i < me.casenInfo.casen3; i++) {
+			        var temp = {};
+			        temp.x = xInit + xVar;
+			        temp.y = i * 0.9;
+			        temp.z = 0;
+			        casenList.push(temp);
+			    }
+
+			    for(var i = 0; i < me.casenInfo.casen2; i++) {
+			        var temp = {};
+			        temp.x = xInit + xVar * 2;
+			        temp.y = i * 0.9;
+			        temp.z = 0;
+			        casenList.push(temp);
+			    }
+
+			    for(var i = 0; i < me.casenInfo.casen1; i++) {
+			        var temp = {};
+			        temp.x = xInit + xVar * 3;
+			        temp.y = i * 0.9;
+			        temp.z = 0;
+			        casenList.push(temp);
+			    }
+
+			    me.createCasenModel(casenList);
+			}, 
+			
+			completeSaveCasen: function(e, res){
+			    var me = this,
+		        message = "STD.N2400"; // 저장하였습니다.
+
+		    	if(res.response.result_status === 'S') {
+		        	me.onSearch();
+		    	}
+			}, 
+			
+			 /**
+			 * casen 3D MODEL 생성
+			 */
+			createCasenModel: function(casenList){
+			    var me = this;
+			    var casenList = casenList;
+
+			    for(var idx in casenList) {
+			        var item = casenList[idx];
+			        var param = {
+			            x: item.x,
+			            y: item.y,
+			            z: item.z
+			        }; // sensor 모델 생성
+
+			        me.player.addCasen(param);
+			    }
+			}, 
+			
+            connectSocketServer: function(){
+                var me = this;
+
+                if(me.ws) {
+                    me.ws.close();
+                }
+
+                var userInfo = SCSessionManager.currentUser;
+
+                if(UT.isEmpty(userInfo)) {
+                    userInfo = {
+                        ws_use: "Y",
+                        ws_from_hr: 0,
+                        ws_to_hr: 24
+                    };
+                }
+
+                if(userInfo.ws_use == "Y") {
+                    var support = "MozWebSocket" in window ? 'MozWebSocket' : "WebSocket" in window ? 'WebSocket' : null;
+
+                    if(support == null) {
+                        alert(noSupportMessage);
+                        return;
+                    }
+
+                    console.log("* [Notify] ws Connecting to server... : " + SCMdiManager.searchParam.site_id); //     	ws = new window[support](conf.ws);
+
+                    me.ws = new WebSocket(conf.ws + SCMdiManager.searchParam.site_id); // when data is comming from the server, this metod is called
+
+                    me.ws.onmessage = function(evt) {
+                        //         	console.log("# [Notify] onmessage : " + evt.data); //con.raycloud.co.kr
+                        if(evt && evt.data && _typeof(evt.data) == "object") {
+                            var socketData = JSON.parse(evt.data).body; // 현재시간
+
+                            var nowDt = new Date();
+                            var hour = nowDt.getHours(); // 수신시간
+
+                            var startHr = Number(userInfo.ws_from_hr || 0);
+                            var endHr = Number(userInfo.ws_to_hr || 23); // 사용자 정보에 설정된 수신시간에만 수행 
+
+                            if(hour >= startHr && hour <= endHr) {
+                                // 알람 수신 아이콘(빨간동그라미) 표시
+                                var notiIconEl = $('#notiIcon')[0]; // 알람 타입 추가
+
+                                var data = JSON.parse(evt.data);
+                                var eventType = data.eventType;
+                                var content = data.body;
+                                var alarmType = content.type; // alarm key
+
+                                var msg = content.body;
+
+                                if(eventType != "Alarm") {
+                                    return;
+                                } else {
+                                    if(UT.isNotEmpty(notiIconEl)) {
+                                        notiIconEl.style.visibility = 'visible';
+                                    }
+                                } // 긴급호출 : 메시지(error) 표시 및 경고음
+
+
+                                if(alarmType == "emergency") {
+                                    me.set("searchCondition.layerGroupIds", [0]);
+
+                                    if(me.gridWorkerList) {
+                                        for(var i = 0; i < me.gridWorkerList.length; i++) {
+                                            if(socketData.targetInfo.workerId == me.gridWorkerList[i].targetId) {
+                                                var grid = me.$.gridWorkerPanel;
+                                                var provider = grid.getDataProvider();
+                                                var index = grid.searchItem("targetId", socketData.targetInfo.workerId, 0);
+                                                provider.setItemAt(index.itemIndex, {
+                                                    emergency: '1'
+                                                });
+
+                                                try {
+                                                    var value = me.gridWorkerList[i].positionId;
+                                                    var workerId = me.gridWorkerList[i].targetId;
+                                                    me.player.initializeGroupLabel("workerGroup");
+                                                    var data = me.gridWorkerList[i];
+
+                                                    for(var j = 0; j < me.positionInfoList.length; j++) {
+                                                        if(me.positionInfoList[j].positionId == value) {
+                                                            data.x = me.positionInfoList[j].x;
+                                                            data.y = me.positionInfoList[j].y;
+                                                            data.z = me.positionInfoList[j].z;
+                                                        }
+                                                    }
+
+                                                    me.set("emergencyInfo", me.gridWorkerList[i]);
+
+                                                    if(value == "null") {
+
+                                                    } else {
+                                                        xPos = data.x || 0;
+                                                        yPos = data.y || 0;
+                                                        zPos = data.z || 0;
+                                                        
+                                                    }
+                                                } catch (e) {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+
+
+                    me.ws.onopen = function() {
+                        console.log('* [Notify] ws Connection open...');
+                        var param = {
+                            "eventType": "UserCommand",
+                            "body": {
+                                "command": "login",
+                                "parameter": SCSessionManager && SCSessionManager.currentUser && SCSessionManager.currentUser.usr_id ? SCSessionManager.currentUser.usr_id : "ADMIN"
+                            }
+                        };
+                        me.ws.send(JSON.stringify(param)); //             console.log('open');
+                        //             {"eventType":"UserCommand", "body":{"command":"login", "parameter":"ADMIN"} }
+                    };
+
+                    me.ws.onerror = function(error) {
+                        console.log('*[Notify] ws Connection err ' + error + '<br/>');
+                    }; // when the connection is closed, this method is called
+
+
+                    me.ws.onclose = function() {
+                        console.log('*[Notify] ws Connection closed...');
+                    };
+                } //me.set("ws", ws);
+
+
+                me.startInterval();
+            }, 
+            
+            /**
+			 * 알람을 위한 주기적 요청을 시작한다.
+			 */
+			startInterval: function(){
+			    var me = this;
+			    var date = new Date();
+			    me.timerId = setTimeout(function() {
+			        me.intervalId = setInterval(function() {
+			            // 네트워크 끊겼을 때, WebSocket 연결 해제
+			            if(!navigator.onLine) {
+			                //console.log("You are Offline");
+			                me.ws.close();
+			            } // Ready State Constants
+			            // 0: 연결이 수립되지 않은 상태
+			            // 1: 연결이 수립되어 데이터가 오고갈 수 있는 상태
+			            // 2: 연결이 닫히는 중
+			            // 3: 연결이 종료되었거나, 연결에 실패한 경우
+
+
+			            if(UT.isEmpty(me.ws)) {
+			                clearInterval(me.timerId);
+			                return;
+			            }
+
+			            if(navigator.onLine && me.ws.readyState >= 2) {
+			                clearInterval(me.timerId);
+			                me.connectSocketServer();
+			            }
+			        }, 60 * 1000);
+			    }, 0);
+			}, 
+			
+			completeFindListBeacon : function(e, res){
+			    var me = this;
+			    var resultList = res.response;
+			    me.set("beaconList", resultList);
+			},
+			
+			onSelectGroup : function(event){
+			    var me = this; //	var layerGroupId = "";
+			    //	var groupName = "";
+
+			    var selectedItem = event.target.selectedItems[0];
+
+			    if(UT.isNotEmpty(selectedItem)) { //선택됐는데,
+			        if(selectedItem.id == 0) {
+			            //id = 0 인경우는 전체..
+			            clearInterval(me.threeGroupInterval);
+			            me.threeGroupInterval = setInterval(function() {
+			                if(UT.isNotEmpty(me.player)) {
+			                    me.player.getScene().getObjectByName("siteGroup").children.forEach(function(e) {
+			                        if(me.isInside == false || e.name.indexOf("_OUT") == -1) {
+			                            e.visible = true;
+			                        } else {
+			                            e.visible = false;
+			                        }
+			                    });
+			                    clearInterval(me.threeGroupInterval);
+			                }
+			            }, 200);
+
+			            me.set("searchCondition.layerGroupId", null);
+			            me.set("selectedLayerGroup", null);
+			        } else {
+			            //id !=0 인 경우는 그놈만..
+			            if(selectedItem.property && selectedItem.property.modelNames) {
+			                var groupNames = selectedItem.property.modelNames;
+			                clearInterval(me.threeGroupInterval);
+			                me.threeGroupInterval = setInterval(function() {
+			                    if(me.player) {
+			                        me.player.getScene().getObjectByName("siteGroup").children.forEach(function(e) {
+			                            if(groupNames.indexOf(e.name) != -1) {
+			                                if(me.isInside == false || e.name.indexOf("_OUT") == -1) {
+			                                    e.visible = true;
+			                                } else {
+			                                    e.visible = false;
+			                                }
+			                            } else {
+			                                e.visible = false;
+			                            }
+			                        });
+			                        clearInterval(me.threeGroupInterval);
+			                    }
+
+			                }, 200);
+			            }
+
+			            me.layerGroupId.value = selectedItem.id;
+			            me.groupName.value = selectedItem.name;
+			            me.set("searchCondition.layerGroupId", me.layerGroupId.value);
+			            me.set("selectedLayerGroup", selectedItem);
+			        }
+			        // player 가 있을 때(3D가 로드 되었을 때)만 onSearch를 진행한다. 초기에 너무 많이 호출함. 
+			        if(me.player) {
+			            me.onSearch();
+			        }
+			    }
+			},
+
+			layerChange : function(areaInfo, layerId){
+				var me = this;
+				var time = 0;
+				if(layerId == null) return;
+				
+				if(me.get("areaInfo").id != areaInfo.id){
+					me.load(areaInfo);				
+					me.threeInterval = setInterval(function(){
+						try{
+							me.layerChangeCallback(layerId);
+							clearInterval(me.threeInterval);								
+						}catch(e){
+							
+						}
+					},100);
+				}else{
+					me.layerChangeCallback(layerId);
+				}
+			},
+			
+			layerChangeCallback : function(layerId){
+				var me = this;
+				
+				var item;
+				var groupInfoList = me.get("groupInfoList");
+				
+				groupInfoList.forEach(function(el){
+					if(el.id == layerId){
+						item = el;
+						return;
+					}
+				})
+				me.player.setCameraPosition(0, 211, 0);
+				me.player.setControlsTarget(0, 0, 0);
+				me.$.groupCombo.set("selectedItems",[item]);
+				
+			},
+			
+			camreaRollback : function(){
+				var me = this;
+				var x = me.get("positionX");
+				var y = me.get("positionY");
+				var z = me.get("positionZ");
+
+				me.player.setCameraPosition(x, y, z);
+				me.player.setControlsTarget(0, 0, 0);
+// 				me.onSearch();
+			},
+			
+			checkPosition : function(){
+				var me = this;
+				UT.request(me.$.findGridPositionList);
+			},
+			
+			getTooltipList : function(me, id){
+				var div = me.$.listTooltip_sejong;
+				div.hidden = false;
+
+				div.addEventListener("wheel", function(event){
+					event.stopPropagation();
+				})
+				
+				var tooltip = me.$.tooltip;
+				tooltip.innerHTML = '';	// 초기화
+				
+				me.$.tooltipClose.data = 'countTooltip_'+id;
+
+				var list = me.$.gridWorkerPanel.getDataProvider().filterItems({positionId:id});
+				
+				for(var i in list){
+					var item = list[i];
+
+					var li = document.createElement("li");
+					if(item.emergency == "1") li.className = 'emergency';
+					li.innerHTML = item.vendorName +" [" + item.targetJobName + "] "+item.targetName;
+					li.data = item.targetId;
+					
+					li.onclick = function(e){
+						$(e.target.parentElement).find('li.selected').removeClass('selected');
+						e.target.classList.add('selected');
+						$(me).closest("es-sejong-dashboard")[0].searchWorkerPopup(e.target.data);
+						//label 창 닫아주기 위해 trigger 사용
+						$(me.$.tooltipClose).trigger($.Event("click"));
+						e.stopPropagation();
+					}
+					
+					tooltip.appendChild(li);
+				}
+				
+				return div;
+			},
+			
+            tooltipClose : function(e) {
+				$('#'+e.target.data).removeClass('active');
+				$('#'+e.target.data+' .countLabel').removeClass('active');
+				e.target.parentElement.remove();
+				e.stopPropagation();
+            },
+            //3D 검색
+            searchWorkerList3D : function(target) {
+            	var me = this;
+				//현 레이어에 존재하는 dom을 가져옴
+            	var workerList = me.get("workerList");
+            	var id = target.positionId;
+            	workerList.forEach(function(el){
+	            	if(el.positionId == id){
+	            		var check = setInterval(function(){
+			            	var tag = $("#countTooltip_"+id);
+		            		if(tag.length > 0){
+		            			var cnt = 0;
+		            			function animate(){
+		            				cnt ++;
+			            			tag.find(".countLabel")
+				            			.animate({'background-color' : '#ff0000c7'}, 400)
+				            			.animate({'background-color' : '#333333c7'}, 400, animate)
+				            		if(cnt > 10){
+				            			tag.find(".countLabel").stop(true, true);
+				            			tag.find(".countLabel").css('background-color', '');
+				            			return;
+				            		}
+		            			}
+		            			animate();
+					            clearInterval(check);
+		            		}            			
+		            	},100)
+	            	}
+         		})
+            }
+		});
+	</script>
+
+</dom-module>

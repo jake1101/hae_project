@@ -1,0 +1,44 @@
+<dom-module id="es-validation-description">
+	<style>
+	</style>
+	<template>
+		<p>
+			<b>Field Validation 설정</b><br/>
+			1. property을 지정하여 validation (minLength, maxLength, minValue, maxValue, minDate, maxDate, required 등)<br/>
+			2. validatorType을 지정하여 validation<br/>
+			3. validator로 커스텀 validator 함수 설정<br/>
+		</p><br/>
+		<p>
+			<b>Field Validation 수행</b><br/>
+			field.validate() 호출<br/>
+		</p><br/>
+		<p>
+			<b>Grid Validation 설정</b><br/>
+			1. property을 지정하여 validation (minLength, maxLength, minValue, maxValue, minDate, maxDate, required 등)<br/>
+			2. validatorType을 지정하여 validation<br/>
+			3. validatorFunction으로 커스텀 validator 함수 설정<br/>
+		</p><br/>
+		<p>
+			<b>Grid Validation 수행</b><br/>
+			grid.validate() 호출<br/>
+		</p><br/>
+		<p>
+			<b>cc-module-behavior를 통한 validation 일괄 수행</b><br/>
+			validate()를 호출하여 dom module 내에 존재하는 field 및 grid의 전체 validation을 수행할 수 있다.<br/>
+			특정 field 혹은 container component의 자식 element들을 validation 대상으로 하려면 validation-group 프로퍼티로 지정하고 validate(validationGroupName) 을 호출한다.<br/>
+		</p><br/>
+
+		<p>
+			<b>데이터 붙여넣기 시 주의사항</b><br/>
+			컬럼의 format-type과 validator-type과는 상관없이 사용자가 붙여넣기한 값은 엑셀에 입력된다.<br/>
+			시스템은 사용자가 복사한 값을 임의로 변경하지 않는다. 개발자는 이 상황을 인지해야하고 검증이 필요한 사항에 대해 validator-type을 등록함으로써 validate()호출 시 검증되도록 해야한다.<br><br>
+			예) 연봉은 format-type="amt"가 적용되어 있고 소수점 둘째 자리까지 표시된다.<br/>
+			12.123123123 값을 연봉에 복사 붙여넣기 할 경우 표시는 format-type으로 인해 보이는 값은 12.12이지만 컬럼을 편집모드로 변경할 경우 원래의 값인 12.123123123이 있는 것을 확인할 수 있다.<br/>
+		</p><br/>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-validation-description'
+	});
+	</script>
+</dom-module>

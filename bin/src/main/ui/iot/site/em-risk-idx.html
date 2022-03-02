@@ -1,0 +1,55 @@
+<!--
+    ******************************************************************************************
+    ** @Program-name    : 위험 지수 관리
+    ** @Description     : 
+    ** @Author          : jh.Park
+    ** @Create Date     : 2021-09-08
+    ** @History         : 2021-09-08 jh.Park 최초작성
+    ******************************************************************************************
+-->
+
+<sc-link rel="import" href="es-risk-idx.html"></sc-link>
+
+<dom-module id="em-risk-idx">
+
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    	<cc-page-title-bar></cc-page-title-bar>
+    	
+    	<div class="hbox flex">
+	        <es-risk-idx id="menuList" on-selected-menu="onSelectedMenu" class="flex"></es-risk-idx>
+    	</div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'em-risk-idx',
+            properties: {
+            	menuInfo : {
+	            	type: Object,
+	            	value: function(){
+	            		return {};
+	            	}
+            	}
+            },
+            // 메뉴가 선택됨
+            onSelectedMenu: function(e, data) {
+                var me = this;
+                me.set("menuInfo",data);
+            },
+            //기능이 수정됨
+            onSavedFunc: function(){
+            	var me = this;
+            	var menuInfo = me.get("menuInfo");
+            	 me.$.menufuncList.load(menuInfo);
+            }
+
+        });
+    </script>
+
+</dom-module>

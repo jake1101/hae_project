@@ -1,0 +1,636 @@
+<sc-link rel="import" href="../../bp/shared/ep-user-list.html"></sc-link>
+<sc-link rel="import" href="ep-ptw-board.html"></sc-link>
+
+<dom-module id="es-ptw-management-list">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+
+	<template>
+<!--
+   ************************************************************************************************************
+   * Service Area
+   ************************************************************************************************************
+-->
+		<!-- 목록 조회 -->
+		<sc-ajax id="findPtwList"
+			url="findPtwList.do"
+			body="{{searchParam}}"
+			on-response="completeFindPtwList">
+		</sc-ajax>
+		
+		<!-- 기본정보 조회 -->
+		<sc-ajax id="findPtwInfo"
+			url="findPtwInfo.do"
+			body="{{searchDetailParam}}"
+			on-response="completeFindPtwInfo">
+		</sc-ajax>
+		
+		<!-- 저장 -->
+		<sc-ajax id="upsertPtw"
+			url="upsertPtw.do"
+			on-response="completeUpsertPtw">
+		</sc-ajax>
+		
+		<!-- 삭제 -->
+		<sc-ajax id="deletePtwList"
+			url="deletePtwList.do"
+			on-response="completeDeletePtwList">
+		</sc-ajax>
+		
+		<!-- 메뉴 권한 체크 -->
+		<cc-auth-checker check-list="auth-r, auth-s"></cc-auth-checker>
+<!--
+    ************************************************************************************************************
+    * UI Area
+    ************************************************************************************************************
+-->
+		<div class="vbox flex">
+			<cc-search-container on-search="onSearch" auth-r>
+				<table>
+					<colgroup>
+						<col style="width:120px">
+						<col>
+						<col style="width:120px">
+						<col>
+					</colgroup>
+					<tr>
+						<th><sc-label text="작업허가명"></sc-label></th>
+						<td>
+							<sc-text-field value="{{searchParam.name}}" on-enter="onEnterSearch"></sc-text-field>
+						</td>
+						<th><sc-label text="사용중지포함"></sc-label></th>
+						<td><sc-checkbox-field input-value="{{searchParam.includeNotUse}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field></td>
+					</tr>
+				</table>
+			</cc-search-container>
+
+			<div class="hbox flex">
+				<div class="vbox flex-5">
+					<sc-grid id="gridPanel" data-provider="{{resultList}}" class="flex" use-state="false" on-item-click="onItemClick">
+						
+						<cc-grid-toolbar>
+							<sc-button text="추가" on-click="onAddPtw" auth-s></sc-button>
+							<sc-button text="삭제" on-click="onDeletePtw" auth-s></sc-button>
+						</cc-grid-toolbar>
+						
+						<sc-grid-columns>
+							<sc-data-column data-field="name" header-text="작업허가명" width="500" text-align="left" style-name="link"></sc-data-column>
+							<sc-checkbox-column data-field="useFlag" header-text="사용여부" width="80" text-align="center" editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+						</sc-grid-columns>
+						
+						<sc-grid-fields>
+							<sc-grid-field data-field="id" data-type="number"></sc-grid-field>
+						</sc-grid-fields>
+					</sc-grid>
+				</div>
+				
+				<div class="hspace-5"></div>
+				
+				<div class="vbox flex-5">
+					<sc-tab-navigation id="tab" class="vbox flex">
+				        <div title-text="기본정보" class="vbox flex">
+							<cc-sub-title-bar title-text=" ">
+								<sc-button text="저장" on-click="onSavePtw" disabled="[[formula('isInit')]]" auth-s></sc-button>
+							</cc-sub-title-bar>
+							
+							<div class="vspace-5"></div>
+							
+							<table class="tb-form" validation-group="saveForm">
+					            <colgroup>
+					                <col style="width:200px"/>
+					                <col/>
+					                <col style="width:200px"/>
+					                <col/>
+					            </colgroup>
+					            
+					            <tr>
+					                <th><sc-label text="작업허가명"></sc-label></th>
+					                <td colspan="3">
+					                    <sc-text-field value="{{ptwInfo.name}}" disabled="[[formula('isInit')]]" required="true"></sc-text-field>
+					                </td>
+					            </tr>
+					            
+					            <tr>
+					                <th><sc-label text="사용여부"></sc-label></th>
+					                <td colspan="3">
+					                    <sc-checkbox-field input-value="{{ptwInfo.useFlag}}" checked-value="Y" un-checked-value="N" disabled="[[formula('isInit')]]"></sc-checkbox-field>
+					                </td>
+					            </tr>
+					            
+								<tr>
+					                <th><sc-label text="위치 지정 사용 여부"></sc-label></th>
+					                <td >
+					                    <sc-checkbox-field input-value="{{ptwInfo.locYn}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+					                </td>
+									<th><sc-label text="인원 지정 사용 여부"></sc-label></th>
+					                <td >
+					                    <sc-checkbox-field input-value="{{ptwInfo.workerCntYn}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+					                </td>
+					            </tr>
+					            
+								<tr>
+									<th><sc-label text="최소 인원 사용 여부"></sc-label></th>
+					                <td >
+					                    <sc-checkbox-field input-value="{{ptwInfo.minWorkerYn}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+					                </td>
+<!-- 					                <th><sc-label text="필수 직종 사용 여부"></sc-label></th> -->
+<!-- 					                <td> -->
+<!-- 					                    <sc-checkbox-field input-value="{{ptwInfo.essJobTypeYn}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field> -->
+<!-- 					                </td> -->
+					                <th><sc-label text="필수 인력-직종 사용 여부"></sc-label></th>
+					                <td >
+					                    <sc-checkbox-field input-value="{{ptwInfo.essWorkerYn}}" checked-value="Y" un-checked-value="N"></sc-checkbox-field>
+					                </td>
+					            </tr>
+							</table>
+							
+							<sc-grid id="gridPanel2" data-provider="{{resultList2}}" editable="true" class="vbox flex" validation-group="save2">
+								<cc-grid-toolbar title-text="승인자">
+									<sc-button text="추가" on-click="onAddAppr" disabled="[[formula('isInit')]]" auth-s></sc-button>
+									<sc-button text="삭제" on-click="onDeleteAppr" disabled="[[formula('isInit')]]" auth-s></sc-button>
+								</cc-grid-toolbar>
+								
+								<sc-grid-columns>
+									<sc-data-column data-field="userId" header-text="아이디" width="200" text-align="center"></sc-data-column>
+									<sc-data-column data-field="userName" header-text="이름" width="100" text-align="center"></sc-data-column>
+								</sc-grid-columns>
+								
+								<sc-grid-fields>
+									<sc-grid-field data-field="id" data-type="number"></sc-grid-field>
+									<sc-grid-field data-field="useFlag"></sc-grid-field>
+								</sc-grid-fields>
+							</sc-grid>
+							
+							<sc-grid id="gridPanel3" data-provider="{{resultList3}}" editable="true" class="vbox flex" validation-group="save3" on-item-click="onItemClick2">
+								<cc-grid-toolbar title-text="안전조치 요구사항">
+									<sc-button text="추가" on-click="onAddForm" disabled="[[formula('isInit')]]" auth-s></sc-button>
+									<sc-button text="삭제" on-click="onDeleteForm" disabled="[[formula('isInit')]]" auth-s></sc-button>
+								</cc-grid-toolbar>
+								
+								<sc-grid-columns>
+									<sc-data-column data-field="name" header-text="요구사항명" width="500" text-align="left" editable="true" required="true"></sc-data-column>
+									<sc-image-column data-field="button_point" image-cls="search" width="40" text-align="center" editable="false"></sc-image-column>
+									<sc-checkbox-column data-field="checkYn" header-text="확인" width="80" text-align="center" editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+									<sc-checkbox-column data-field="textYn" header-text="기록" width="80" text-align="center" editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+									<sc-checkbox-column data-field="pictureYn" header-text="사진" width="80" text-align="center" editable="true" display-checkbox="false" checked-value="Y" un-checked-value="N"></sc-checkbox-column>
+									<sc-data-column	data-field="sortOrder"	header-text="정렬"	width="60" editable="true"	max-length="2" data-type="number" required="true"></sc-data-column>
+								</sc-grid-columns>
+								
+								<sc-grid-fields>
+									<sc-grid-field data-field="id" data-type="number"></sc-grid-field>
+									<sc-grid-field data-field="content" ></sc-grid-field>
+									<sc-grid-field data-field="useFlag"></sc-grid-field>
+								</sc-grid-fields>
+							</sc-grid>
+							
+						</div>
+						
+					</sc-tab-navigation>
+				</div>
+				
+			</div>
+		</div>
+
+	</template>
+
+<!--
+    ************************************************************************************************************
+    * Script Area
+    ************************************************************************************************************
+-->
+	<script>
+        Polymer({
+            is: "es-ptw-management-list",
+            properties : {
+                codes: {
+                    type : Object,
+                    reset : false,
+                    value : function() {
+                        return {};
+                    }
+                },
+                
+                bInit: {
+                	type: Object,
+                	value: function(){
+                		return false;
+                	}
+                },
+                
+                // 조회조건
+                searchParam: {
+                    type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                
+                // 조회 결과 리스트
+                resultList: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+                
+                searchDetailParam: {
+                	type: Object,
+                    value: function(){
+                        return {};
+                    }
+                },
+                
+                ptwInfo: {
+                	type: Object,
+                	value: function(){
+                		return {};
+                	}
+                },
+                
+                resultList2: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                },
+                
+                resultList3: {
+                    type: Array,
+                    value : function() {
+                        return [];
+                    }
+                }
+            },
+            
+            formulas:{
+                isInit: function(){
+                    return this.bInit;
+				}
+			},
+            
+			/** 시작 및 검색 start **/
+			initialized : function() {
+                var me = this;
+                
+             	// formula 적용
+                me.set("bInit", true);
+               	me.applyFormula();
+                
+                me.onSearch();
+            },
+            // 목록 조회
+            onSearch : function() {
+                var me = this;
+                
+                if(!me.validate('search')){
+                    UT.alert("STD.E0000");
+                    return false;
+                }
+                
+                // 기본정보 clear
+                me.set("ptwInfo", {});
+                me.set("resultList2", []);
+                me.set("resultList3", []);
+                
+                // 목록 조회
+                UT.request(me.$.findPtwList);
+            },
+			/** 시작 및 검색 end **/
+
+			/** API start **/
+            // 목록 조회 완료
+            completeFindPtwList: function(e, res){
+            	var me = this;
+            	var result = res.response || [];
+            	
+            	me.set("resultList", result);
+            	
+            	// formula 적용
+                me.set("bInit", true);
+               	me.applyFormula();
+            },
+            completeDeletePtwList: function(e, res){
+            	var me = this;
+            	var result = res.response || [];
+            	
+            	if(res.response.result_status === 'S'){
+            		UT.alert("STD.N2500", function(){ // 삭제하였습니다.
+            			me.onSearch();
+            		});
+            	}else{
+            		message = res.response.result_message;
+            		UT.alert(message);
+            	}
+            },
+            // 상세 조회 완료
+            completeFindPtwInfo: function(e, res){
+            	var me = this;
+            	
+            	var result = res.response || {};
+            	var resultList2 = result.apprArray || [];
+            	var resultList3 = result.formArray || [];
+            	
+            	me.set("ptwInfo", result);
+            	me.set("resultList2", resultList2);
+            	me.set("resultList3", resultList3);
+            	
+            	// formula 적용
+            	me.set("bInit", false);
+               	me.applyFormula();
+            },
+            completeUpsertPtw: function(e, res){
+            	var me = this;
+
+	            if(res.response.result_status === 'S'){
+	                UT.alert("STD.N2400", function(){ // 저장하였습니다.
+	                	me.onSearch();
+	                });
+	                
+	            }else{
+	                message = res.response.message;
+	                UT.alert(message);
+	            }
+            },
+			/** API end **/
+
+			/** Btn Event start **/
+        	// 엔터키 조회
+            onEnterSearch: function(){
+                var me = this;
+
+                me.onSearch();
+            },
+            onAddPtw: function(){
+            	var me = this;
+            	
+            	me.set("ptwInfo", {useFlag:"Y"});
+            	me.set("resultList2", []);
+            	me.set("resultList3", []);
+            	
+            	// formula 적용
+            	me.set("bInit", false);
+               	me.applyFormula();
+            },
+            onDeletePtw: function(){
+            	var me = this;
+            	var provider = me.$.gridPanel.getDataProvider();
+				var checked = provider.selectionCheckedIndexes();
+				
+	            if(checked.length === 0){
+	            	UT.alert("STD.N1600");
+	                return;
+	            }
+	            
+	            // "삭제 하시겠습니까?"
+	            UT.confirm("STD.N1300", function() {
+	            	var deleted = provider.removeItems();
+	            	
+	            	me.$.deletePtwList.body = {
+	            		deleteList : deleted
+	            	};
+	            	
+	            	UT.request(me.$.deletePtwList);
+	            });
+            },
+            onAddAppr : function(){
+            	var me = this;
+            	
+            	var userPopup = UT.popup("ep-user-list", me, 650, 500,{
+					'selected-items' : function(popup, e) {
+						// 선택 처리
+						me.addApprList(e.detail);
+						popup.close();
+					}
+				},{maximizable : true, titleText : "사용자검색"});
+				userPopup.show();
+				userPopup.getWindowContent().load({autoComplete:false});
+            },
+			onDeleteAppr: function(){
+				var me = this
+				,provider = me.$.gridPanel2.getDataProvider()
+				,checked = provider.selectionCheckedIndexes();
+				
+	            if(checked.length === 0){
+	            	UT.alert("STD.N1600");
+	                return;
+	            }
+	            
+	            // "삭제 하시겠습니까?"
+	            UT.confirm("STD.N1300", function() {
+	            	var deleted = provider.removeItems(true);
+	            });
+				
+			},
+            onSavePtw : function(){
+                var me = this;
+
+                if(!me.validate()){
+                	UT.alert("STD.E0000");
+                	return false;
+                }
+                
+                var provider2 = me.$.gridPanel2.getDataProvider();
+                var created2 = provider2.getNewItems();
+                var updated2 = provider2.getUpdateItems();
+                var deleted2 = provider2.getRemoveItems();
+                
+//                 for(var idx in created2){
+//                 	var item = created2[idx];
+                	
+//                 	item.property = {
+//                 		"checkYn": item.checkYn
+//                 		,"textYn": item.textYn
+//                 		,"pictureYn": item.pictureYn
+//                 	}
+//                 }
+                
+//                 for(var idx in updated2){
+//                 	var item = updated2[idx];
+                	
+//                 	item.property = {
+//                 		"checkYn": item.checkYn
+//                 		,"textYn": item.textYn
+//                 		,"pictureYn": item.pictureYn
+//                 	}
+//                 }
+                
+                var provider3 = me.$.gridPanel3.getDataProvider();
+                var created3 = provider3.getNewItems();
+                var updated3 = provider3.getUpdateItems();
+                var deleted3 = provider3.getRemoveItems();
+                
+//                 for(var idx in created3){
+//                 	var item = created3[idx];
+                	
+//                 	item.property = {
+//                 		"checkYn": item.checkYn
+//                 		,"textYn": item.textYn
+//                 		,"pictureYn": item.pictureYn
+//                 	}
+//                 }
+                
+//                 for(var idx in updated3){
+//                 	var item = updated3[idx];
+                	
+//                 	item.property = {
+//                 		"checkYn": item.checkYn
+//                 		,"textYn": item.textYn
+//                 		,"pictureYn": item.pictureYn
+//                 	}
+//                 }
+                
+             	// 저장 하시겠습니까?
+                UT.confirm("STD.N1200", function() {
+                    me.$.upsertPtw.body = {
+                		ptwInfo : me.get("ptwInfo")
+                		,insertList2: created2
+                		,updateList2: updated2
+                		,deleteList2: deleted2
+                		,insertList3: created3
+                		,updateList3: updated3
+                		,deleteList3: deleted3
+                    };
+                
+                    UT.request(me.$.upsertPtw);
+                });
+             	
+            },
+            onAddForm: function(){
+            	var me = this;
+            	var provider = me.$.gridPanel3.getDataProvider();
+            	
+            	// 그리드 신규행 추가
+                var row = {
+            		useFlag: "Y"
+            	};
+                provider.addItemAt(0, row);
+            },
+            onDeleteForm: function(){
+				var me = this
+				,provider = me.$.gridPanel3.getDataProvider()
+				,checked = provider.selectionCheckedIndexes();
+				
+	            if(checked.length === 0){
+	            	UT.alert("STD.N1600");
+	                return;
+	            }
+	            
+	            // "삭제 하시겠습니까?"
+	            UT.confirm("STD.N1300", function() {
+	            	var deleted = provider.removeItems(true);
+	            });
+			},
+			/** Btn Event end **/
+
+			/** Grid Event start **/
+			onItemClick : function(event) {
+				var me = this
+				,data = event.detail.data
+				,item = event.detail.item
+				,provider = event.detail.provider;
+				
+				me.currentRowIndex = item.rowIndex;
+				
+				// 허가형식
+				if(item.dataField === "name") {
+					me.set("searchDetailParam.ptwId", data.id);
+					
+					UT.request(me.$.findPtwInfo);
+				}
+            },
+			onItemClick2 : function(event) {
+				var me = this
+				,data = event.detail.data
+				,item = event.detail.item
+				,provider = event.detail.provider;
+				
+				me.currentRowIndex = item.rowIndex;
+				
+				console.log(data);
+				// 허가형식
+				if(item.dataField === "button_point") {
+					var picPopup = UT.popup("ep-ptw-board", me, 700, 600, {
+		                   "save-content": function(popup, e) {
+							var result=e.detail;
+							provider.setItemAt(me.currentRowIndex,{content : result});
+
+		                   	popup.close();
+		                   	me.onSavePtw();
+		                   }
+		               },{titleText: ""});
+					picPopup.show();
+					picPopup.getWindowContent().load(data.id);
+				}
+            },
+			/** Grid Event end **/
+
+			/** Grid Function start **/
+			itemEditableFunction : function(data,item){
+            	var me = this;
+            	
+            	if(me.$.gridPanel3.getDataProvider().getItemState(item.rowIndex) != "created"){
+            		return false;
+            	}else{
+            		return true;
+            	} 
+            },
+			/** Grid Function end **/
+
+			/** 기타 start **/
+			addApprList : function(selected) {
+				var me = this;
+				var provider = me.$.gridPanel2.getDataProvider();
+				
+				var rows = provider.getItems(); // 전체 데이터
+				
+				var dupCnt = 0;
+				var ccCnt = 0;
+				var exceptItems = [];
+				
+				if(selected.length > 0 ){
+					for(var i = 0; i < selected.length; i++){
+						
+						var exist = false;
+						var currentUsrExist = false;
+						
+						for(var j = 0; j < rows.length; j++){
+							var userId = rows[j].userId;
+							
+							// 코드 비교해서 데이터 중복 확인
+							if(userId === selected[i].usr_id){
+								exist = true;
+								dupCnt++;
+								exceptItems.push({user_id:selected[i].usr_id, cause:'중복'});
+								break;
+							}
+						}
+						
+						// 기존에 존재한 item이 아니면 신규 행 추가
+						if(!exist){
+							var row = {
+								userId : selected[i].usr_id
+								,userName : selected[i].usr_nm
+// 								,dept_cd: selected[i].dept_cd
+// 								,dept_name : selected[i].dept_nm
+							};
+							provider.addItem(row);
+						}
+					}
+					
+					if(exceptItems.length > 0){
+						UT.alert(me.translate("STD.N2010",null,dupCnt),null,true); // 중복 데이터 {0}건 제외 후 추가하였습니다
+					}
+					
+				}else {
+					UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+                }
+			},
+			/** 기타 end **/
+
+        });
+	</script>
+
+</dom-module>

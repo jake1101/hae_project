@@ -1,0 +1,196 @@
+<link rel="import" href="slider-layout-config-behavior.html">
+
+<!--
+ * @Desc 포탈 엘리먼트
+ * @Author patrick.sung
+ * @Created 2016-03-28
+ -->
+
+<link rel="import" href="../../sc-portal-id-generator.html" />
+<link rel="import" href="../../portal-widget/sc-widget/sc-widget.html" />
+<link rel="import" href="../../sc-portal-slider.html" />
+
+<style>
+:host {
+	margin: 0 1em 1em 0;
+}
+
+.con-33 {
+	width: 100%;
+	position: relative;
+	float: left;
+}
+</style>
+
+<dom-module id="slider-layout-config2"> 
+	<template> 
+		<sc-ajax
+			id="protocolSaveLayout" 
+			url="portlet/saveDefaultLayout.do"
+			body='{{_widgetLayout}}' handle-as="json" method="post"
+			contentType="application/json">
+		</sc-ajax> 
+		
+		<sc-ajax
+			id="protocolLoadLayout" 
+			url="portlet/findDefaultLayout.do"
+			handle-as="json" last-response="{{layout}}" on-response="_loadLayout"
+			debounce-duration="300">
+		</sc-ajax> 
+		
+		<sc-ajax
+			id="protocolDeleteWidgetProperty"
+			url="deleteWidgetProperties.do" contentType="application/json"
+			handle-as="json" method="post">
+		</sc-ajax>
+
+
+		<div id="managerHandle" on-tap="_toggleTools"></div>
+
+		<sc-portal-manager id="manager" portal-cls="B" on-widget-loaded="_onWidgetLoaded"
+			style="position:absolute;z-index:3;display:none;">
+		</sc-portal-manager>
+		
+		<div id="contentContainer">
+			<div id="contentContainer-cell" style="overflow: hidden; height: 100%">
+				<sc-portal-slider id="slider" style="display:none;"></sc-portal-slider>
+				<content></content>
+			</div>
+		</div>
+		
+		<sc-toolbar id="portalToolbar" class="portal-toolbar vertical v-bottom">
+			<sc-button text="위젯 추가" icon-cls="btn add-widget"
+				class="portal-tool-button" on-tap="_toggleManager">
+			</sc-button> 
+			<sc-button
+				text="열 추가" icon-cls="btn add-col" class="portal-tool-button"
+				on-tap="_addColumn"></sc-button> <sc-button text="열 삭제"
+				icon-cls="btn remove-col" class="portal-tool-button"
+				on-tap="_removeColumn">
+			</sc-button>
+			<sc-button text="열 너비"
+				icon-cls="btn resize-col" class="portal-tool-button"
+				on-tap="_toggleSilder">
+			</sc-button> 
+		</sc-toolbar> 
+	</template> 
+	<script>
+        Polymer({
+            is: 'slider-layout-config2',
+
+            behaviors: [
+				Polymer.SCInteractDraggableBehavior,
+				BehaviorIDGenerator,
+				Polymer.SliderLayoutConfigBehavior
+			],
+
+            properties: {
+    			layoutTarget: {
+    				type: Object
+    			}
+            },
+            
+
+            _onWidgetLoaded: function(){
+            	this.$.protocolLoadLayout.body = {
+            		'page_id' : this.getAttribute('page-id') + this.layoutTarget
+            	};
+                this.$.protocolLoadLayout.generateRequest();
+                var btnHide = this.$.manager.querySelector('.hideBtn');
+                this.listen(btnHide, 'tap', 'closeManager');
+            },
+            
+            _loadLayout: function () {
+                this.layout = typeof this.layout == "string" ? JSON.parse(this.layout) : this.layout;
+                var useWidgets = [];
+                
+                if(this.layout){
+                    this.pageId = this.layout.page_id;
+                    this.colSize = this.layout.col_size;
+                    var laytSrc = JSON.parse(this.layout.layt_src);
+                    this.layout = laytSrc[0];
+                    this.createColumn(laytSrc[1]);
+					
+                    for (var i = 0; i < this.layout.length; i++) {
+                        this.addWidget(this.layout[i]);
+                        useWidgets.push(this.layout[i]);
+                    }
+                }
+                
+                this.$.manager.setUseWidgets(useWidgets);
+                this.interactDraggableIgnoreFrom = '.content, .handle';
+            },
+            
+            _saveLayout: function () {
+            	var data = [];
+            	var colSize = [];
+            	var laytSrc = [];
+            	
+            	var portlets = Polymer.dom(this.root).querySelectorAll(".portlet");
+            	var columns = Polymer.dom(this.root).querySelectorAll(".column");
+    			for(var i=0; i<portlets.length; ++i){
+    				portlet = portlets[i];
+    				
+    				var widgets = portlet.querySelectorAll("sc-widget");
+    				
+    				for(var j=0; j< widgets.length; ++j ){
+    					var widget = widgets[j];
+    					var widgetData = Object();
+    					
+    					widgetData['title'] = widget.getAttribute('title');
+                        widgetData['closeable'] = widget.getAttribute('disable-close') == '' ? false : true;
+                        widgetData['headable'] = widget.getAttribute('disable-head') == '' ? false : true;
+                        widgetData['UUID'] = widget.getAttribute('id');
+                        widgetData['type'] = widget.getAttribute('type');
+                        widgetData['height'] = widget.style.height;
+                        widgetData['param'] = widget.children[2].portletParam;
+                        widgetData['portletIdx'] = i;
+                        widgetData['widgetIdx'] = j;
+                        data.push(widgetData);
+    				}
+    			}
+    			for(var i=0; i<columns.length; ++i){
+    				colSize.push(columns[i].style.width);
+    			}
+    			
+    			laytSrc.push(data);
+    			laytSrc.push(colSize);
+                this._widgetLayout = {
+                    layt_src: JSON.stringify(laytSrc),
+                    page_id: this.pageId,
+                    col_size: portlets.length,
+                    col_width : colSize
+                };
+
+                this.$.protocolSaveLayout.generateRequest();
+
+                if (this._toLayoutId)
+                    this._onGotoPage();
+                
+                this._layoutChange = false;
+            },       
+            
+            _onGotoPage: function(e, detail) {
+                if (!this._toLayoutId) {
+                    this._toLayoutId = detail;
+                    this._saveLayout();
+                }else {
+                    var pageId = this._toLayoutId;
+                    this._toLayoutId = null;
+
+                    this._closeLayout();
+                    this._initVars();
+
+                    this.$.protocolLoadLayout.params = {
+                        page_id: pageId + this.layoutTarget
+                    };
+
+                    this.pageId = pageId;
+
+                    this.$.protocolLoadLayout.generateRequest();
+                }
+
+            }
+        })
+    </script> 
+</dom-module>

@@ -1,0 +1,392 @@
+<sc-link rel="import" href="ep-project-chr-list-popup.html"></sc-link>
+
+<dom-module id="es-project-info-detail">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+	
+	<template>
+		<!-- 코드 조회 -->
+		<sc-code-group>
+			<sc-code code="#010" value="{{codes.modules}}" ></sc-code> <!-- 프로젝트코드 -->
+            <sc-code code="#020" value="{{codes.pjtCd}}" ></sc-code> <!-- 프로젝트코드 -->
+            <sc-code code="#040" value="{{codes.dbmsCd}}" ></sc-code> <!-- DBMS코드 -->
+            <sc-code code="C009" value="{{codes.useYn}}" ></sc-code> <!-- 사용여부 -->
+        </sc-code-group>
+        
+		<!-- Project 조회 ajax -->
+		<sc-ajax
+			id="findProject"
+	        url="findProject.do"
+	        body="{{searchParam}}"
+	        on-response="completeFindProject">
+	    </sc-ajax>
+	        
+		<!-- 저장 ajax -->
+        <sc-ajax 
+            id="saveProject"
+            url="saveProject.do"
+            on-response="completeSaveProject">
+        </sc-ajax> 
+		
+		<!-- 삭제 ajax -->
+		<sc-ajax 
+            id="deleteProject"
+            url="deleteProject.do"
+            on-response="completeDeleteProject">
+        </sc-ajax>
+        
+        <cc-auth-checker check-list="auth-s, auth-r"></cc-auth-checker>
+        
+        <cc-sub-title-bar title-text="기본정보">
+			<sc-button text="저장"		on-click="onSaveProject"	auth-s></sc-button>
+			<sc-button text="삭제"		on-click="onDeleteProject"	auth-s></sc-button>
+        </cc-sub-title-bar>
+		
+		<table class="tb-form">
+			<colgroup>
+        		<col style="width:150px"></col>
+        		<col></col>
+        	</colgroup>
+			<tr>
+				<th>
+					<sc-label text="프로젝트"></sc-label>
+				</th>
+				<td>
+					<sc-combobox-field display-field="label" value-field="data" items="{{codes.pjtCd}}" value="{{projectInfo.pjt_cd}}" required="true" on-select="_onPjtCdChanged"></sc-combobox-field>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="담당PM"></sc-label>
+				</th>
+				<td>
+					<cc-user-search id="pm_nm" popup-url="[[pjtPopupUrl]]" value="{{projectInfo.pm_nm}}" result-value="{{projectInfo.pm_cd}}" result-field="chr_cd" value-field="chr_nm" disabled="[[!formula('editable')]]"></cc-user-search>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="DBMS담당"></sc-label>
+				</th>
+				<td>
+					<cc-user-search id="dbms_chr_nm" popup-url="[[pjtPopupUrl]]" value="{{projectInfo.dbms_chr_nm}}" result-value="{{projectInfo.dbms_chr_cd}}" result-field="chr_cd" value-field="chr_nm" disabled="[[!formula('editable')]]"></cc-user-search>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="DBMS"></sc-label>
+				</th>
+				<td>
+					<sc-combobox-field display-field="label" value-field="data" items="{{codes.dbmsCd}}" value="{{projectInfo.dbms_cd}}" readonly="[[!formula('editable')]]"></sc-combobox-field>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="Ver."></sc-label>
+				</th>
+				<td>
+					<sc-text-field  value="{{projectInfo.dbms_ver}}" max-length="50" readonly="[[!formula('editable')]]"></sc-text-field>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="공지여부"></sc-label>
+				</th>
+				<td>
+					<sc-checkbox-field input-value="{{projectInfo.dbms_noti_yn}}" checked-value="Y" un-checked-value="N" readonly="[[!formula('editable')]]"></sc-checkbox-field>
+				</td>
+			</tr>
+		</table>
+		<sc-grid id="gridPanel" class="flex" use-dummy="false" use-selection="false"
+				 editable="[[formula('editable')]]"
+				 on-item-click="onItemClick" on-item-edit-end="onItemEditEnd">
+			<cc-grid-toolbar title-text="모듈정보">
+<!-- 				<sc-button text="삭제"		on-click="onDeleteModule"			hidden="[[!formula('editable')]]"	auth-s></sc-button> -->
+			</cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-checkbox-column	data-field="mdl_use_yn"	header-text="모듈사용여부"	width="60"	display-checkbox="false" editable="[[formula('editable')]]"></sc-checkbox-column>
+				<sc-data-column		data-field="mdl_nm"			header-text="모듈"				width="80"	text-align="center"	editable="false"></sc-data-column>
+				<sc-group-column	hide-child-headers="true"	header-text="모듈담당자"		width="280"	text-align="center"	>
+					<sc-data-column	data-field="mdl_chr_nm"										width="100"	text-align="center"	editable="[[formula('editable')]]"></sc-data-column>
+					<sc-data-column	data-field="mdl_chr_cd"										width="150"	text-align="center"	editable="false"	required="true"></sc-data-column>
+					<sc-image-column	image-cls="search"
+									data-field="button_mdl_chr"									width="30"	text-align="center" ></sc-image-column>
+				</sc-group-column>
+				<sc-checkbox-column	data-field="mdl_noti_yn"	header-text="공지여부"	width="60"	display-checkbox="false" editable="[[formula('editable')]]"></sc-checkbox-column>
+				<sc-date-column	data-field="rd_date" header-text="최종적용일" width="100"	text-align="center"	editable="false"></sc-date-column>
+				<sc-date-column	data-field="rd_date" header-text="최종DBMS변경일" width="100"	text-align="center"	editable="false"></sc-date-column>
+			</sc-grid-columns>
+			<sc-grid-fields>
+			</sc-grid-fields>
+		</sc-grid>
+		
+	</template>
+	
+	<!--  Polymer script 시작 -->
+	<script>
+		Polymer({
+			is: 'es-project-info-detail',
+			/***
+			 * Object, Array 타입에 default 값을 셋팅할 때는
+			 * 반드시 function() return {} 을 사용해야 함.
+			 ***/
+			properties : {
+				codes : {
+                	type : Object,
+                	value : function(){
+                		return {
+	                		pjtCd    : [],
+	                		dbmsCd  : [],
+	        				useYn  : [],
+	        				modules: []
+                		};
+                	},
+                	reset: false	//초기화 대상에서 제외할 경우
+                },
+				searchParam : {
+                	type : Object,
+                	value : function() {
+                		return {};
+                	}
+                },
+                prePjtCd:{
+                	type: String,
+                	value:''
+                },
+				projectInfo : {
+					type : Object,
+					value : function() {
+						return {
+						}; 
+					}
+				},
+				pjtPopupUrl: {
+					type: String,
+					value : "ep-project-chr-list-popup"
+				},
+				deleteModuleInfos:{
+					type: Array,
+					value: function(){
+						return [];
+					}
+				},
+				currentUser : {
+					type : Object,
+					value : function() {
+						return SCSessionManager.currentUser;
+					}
+				}
+			},
+			formulas : {
+				//수정 가능 상태
+				editable : function() {
+					return (this.projectInfo && this.projectInfo.pjt_cd != "");
+				}
+			},
+		    /**************************************************
+			 * 화면 바인딩 처리
+			 **************************************************/
+			/************************************************** 
+			 * 초기화 설정
+			 **************************************************/
+			// 1. 화면 로딩시 최초 호출
+			initialized : function() {
+				var me = this;
+				
+			},
+			// 2. 화면 load
+			load : function(data) {
+				var me = this;
+				
+				me.searchParam = {
+					pjt_cd : data.pjt_cd
+                };
+				
+				me.findProject();
+			},
+			/************************************************** 
+			 * observers
+			 **************************************************/
+			_onPjtCdChanged: function(e){
+				var me = this,
+					pjtCd = e.currentTarget.value;
+				
+				if(me.prePjtCd !== pjtCd){
+					UT.confirm("STD.ADM1037", function(){
+				        me.searchParam = {
+							pjt_cd : pjtCd
+		                };
+				        me.set("prePjtCd", pjtCd);
+						 
+						me.findProject();
+				    }, function(){
+				    	me.set("projectInfo.pjt_cd", me.prePjtCd);
+				    });
+				}
+			},
+			
+			/************************************************** 
+			 * validation 설정
+			 **************************************************/
+
+            /************************************************** 
+			 * 그리드 이벤트
+			 **************************************************/
+			// grid item click 이벤트
+			onItemClick : function(event) {
+				var me = this;
+				var data = event.detail.data,
+					item = event.detail.item,
+                	provider = event.detail.provider;
+				
+				me.rowIndex = item.rowIndex;
+				
+				if(item.dataField === "button_mdl_chr") {			//모듈 담당자
+					me.showMdlChrPopup();
+				}
+            },
+         	// grid item edit end 이벤트
+			onItemEditEnd : function(event) {
+				var me = this, e = event.detail,
+					data = e.data,
+					item = e.item,
+					newValue = e.newValue,
+					oldValue = e.oldValue,
+					provider = e.provider;
+				
+            	me.rowIndex = item.rowIndex;
+            	
+            	if(item.dataField === 'mdl_chr_nm') {							//구매요청의뢰자 일경우
+            		provider.setItemAt(item.rowIndex, {'mdl_chr_cd' : ''});
+            		
+            		me.showMdlChrPopup({'chr_nm' : newValue});
+            	}
+			},
+            // 사용자 팝업 호출
+            showMdlChrPopup : function(param) {
+            	var me = this;
+            	
+            	var mdlChrPopup = UT.popup(me.pjtPopupUrl, me, 650, 500, {
+   					'selected-items' : function(popup, e) {
+   						var result   = e.detail,
+							selected = result[0];
+						
+						var provider = me.$.gridPanel.getDataProvider();
+						provider.setItemAt(me.rowIndex, {'mdl_chr_cd' : selected.chr_itn_mail, 'mdl_chr_nm' : selected.chr_nm});
+						
+						popup.close();
+   					}
+   				}, {titleText : "모듈담당자검색"});
+				mdlChrPopup.show();
+				mdlChrPopup.getWindowContent().load({singleSelect : true, defaultParam : param, autoComplete : true});
+            },
+            
+            /************************************************** 
+			 * 버튼 이벤트
+			 **************************************************/
+			// Project 상세 조회
+			findProject: function() {
+				var me = this;
+				
+				UT.request(me.$.findProject);
+			},
+			completeFindProject : function(e, res) {
+				var me = this;
+				var lastResponse = res.response;
+				
+				me.set("projectInfo", lastResponse.projectInfo);
+				me.$.gridPanel.setDataProvider(lastResponse.projectModules);
+				
+				me.applyFormula();
+			},
+			// 저장
+			onSaveProject : function() {
+				var me = this,
+					provider = me.$.gridPanel.getDataProvider();
+				
+				if(!me.validate()){
+					UT.alert("STD.E0000");			
+					return;
+				}
+				
+				UT.confirm("STD.N1200", function(){
+					me.$.saveProject.body = {
+	                		projectInfo   : me.projectInfo,
+	                    	updateModuleInfos : provider.getUpdateItems(),
+	                    	deleteModuleInfos : me.deleteModuleInfos
+	                };
+		            UT.request(me.$.saveProject);
+			    });
+			},
+			// 저장완료
+			completeSaveProject : function(e,res) {
+				var me = this;
+				
+				UT.alert("STD.N1500");			//"요청을 완료 하였습니다"
+				me.fire("complete-save-project");
+				me.findProject();				//Pr상세조회
+			},
+			onDeleteProject: function(){
+				var me = this;
+				
+				UT.confirm("STD.N1300", function() {	// "삭제 하시겠습니까?"
+					me.$.deleteProject.body = me.projectInfo;
+                    UT.request(me.$.deleteProject);
+				});
+			},
+			
+			completeDeleteProject : function(e,res) {
+                var me = this,
+                    message = "STD.N2500"; // 삭제하였습니다.
+                    
+                UT.alert(message, function(){
+                	me.reset();
+                	me.fire("complete-delete-project");
+                });
+            },
+			
+			// 삭제 버튼 클릭 시
+			onDeleteModule : function() {
+				var me = this;
+				
+				var provider = me.$.gridPanel.getDataProvider();
+				var checked = provider.selectionCheckedItems();
+				
+				if(checked.length === 0) {
+					UT.alert("STD.N1600"); // 선택된 항목이 없습니다
+				} else {
+					UT.confirm("STD.N1300", function() {	// "삭제 하시겠습니까?"
+						var deleted = provider.removeItems();	// 그리드에서 체크된 데이터를 지워주고, db에서 삭제해야 할 데이터 목록을 리턴한다.
+						
+						if(deleted.length > 0) {
+							var oldDeleted = me.deleteModuleInfos;
+		                   	//기존 deleted 리스트와 합친다.
+		                   	me.set('deleteModuleInfos', oldDeleted.concat(deleted));
+						}
+					});
+				}
+			},
+
+            /************************************************** 
+			 * 그리드 toolbar 버튼 이벤트
+			 **************************************************/
+			_resetModules: function(){
+				var me = this,
+				    modules = me.codes.modules,
+				    modulesArray = [];
+				
+				for(var i=0; i<modules.length; i++) {
+					var module = {mdl_cd:modules[i].data, mdl_nm:modules[i].label};
+					modulesArray.push(module);
+				}
+				
+				me.$.gridPanel.setDataProvider(modulesArray);
+			},
+
+			
+		});
+	</script>
+
+</dom-module>

@@ -1,0 +1,400 @@
+<dom-module id="ep-vehicle-history">
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+	
+		<!-- 대상 출근일 조회 -->
+		<sc-ajax id ="findTargetSignalDate" url="findTargetSignalDate.do" body="{{searchParam}}" on-response="completeFindTargetSignalDate" ></sc-ajax>
+		<!-- 대상 목록 이력 조회 -->
+		<sc-ajax id ="findTargetHistory" url="findTargetHistory.do" last-response="{{targetHistory}}" body="{{searchParam}}" on-response="completeFindTargetHistory"></sc-ajax>
+		
+		
+		<table class="tb-form">
+			<tr>
+				<td>이동장비명</td>
+				<td>{{data.name}}</td>
+				<td>협력사</td>
+				<td>{{data.vendorName}}</td>
+				<td>유형</td>
+				<td>{{data.type}}</td>
+				<td>검색일</td>
+				<td style="width:200px">
+					<sc-month-field value="{{searchParam.ym}}" string-format="YYYY-MM" style="width : 80px;" string-date ="true" on-select="searchTargetSignalDate"></sc-month-field>
+					<sc-combobox-field  id="dateCombo"  style="width:70px; margin-left:3px;" input-clear="false"
+						items="{{locDateList}}" display-field="label" value-field="value"  on-select="searchTargetHistory" title="대상 선택 후 대상의 위치 기록이 있는 날짜만 선택가능 합니다." 
+						value="{{searchParam.date}}" required = "true">
+					</sc-combobox-field>
+				</td>
+				<td style="text-align: center;">
+					<sc-button text="search"></sc-button>
+				</td>
+			</tr>
+		</table>
+		<div class="vspace-5"></div>
+		<div class="hbox flex-9" >
+			<div class = "vbox flex">
+				<cc-ol-map-container id="popupMapContainer" site-id="{{mapId}}" auto-start="false"></cc-ol-map-container>
+			</div>
+			<div class="hspace-10"></div>
+			<sc-grid id="gridHistoryPanel" class="w-500" sortable="false" data-provider="{{historyList}}"
+				use-state ="false" use-selection="true" selection-style="singleRow" selection-able-function="isSelection"
+				show-selection-header="true" on-item-click="onItemClick" on-selection-checked="onSelectionChk" on-item-all-checked ="itemAllChecked">
+		        <cc-grid-toolbar>
+	            </cc-grid-toolbar>
+		        <sc-grid-columns>
+		            <sc-image-column  width="70"    header-text="수신상태"   image-change-function="onImageChange"   image-display ="auto" ></sc-image-column>
+		            <sc-date-column 	width="130"  	header-text="수신시간" 	data-field="signalDt" 	 	text-align="center" 	display-format = "yyyy/MM/dd HH:mm:ss"></sc-date-column>
+		            <sc-data-column 	width="130" 	header-text="위치"   		data-field="areaName"		text-align="center"></sc-data-column>
+		       		<sc-data-column 	width="90" 	header-text="배터리(%)"   		data-field="battery"		text-align="center"></sc-data-column>
+		        </sc-grid-columns>
+		        <sc-grid-fields>
+		       	 	<sc-grid-field data-field="iconImage"></sc-grid-field>
+                    <sc-grid-field data-field="index" 		data-type="number"></sc-grid-field>
+                    <sc-grid-field data-field="selected" 	data-type="boolean"></sc-grid-field>
+                    <sc-grid-field data-field="marker" 	data-type="object"></sc-grid-field>
+                    <sc-grid-field data-field="popup" 		data-type="object"></sc-grid-field>
+                    <sc-grid-field data-field="geoJson"	data-type="object"></sc-grid-field>
+                </sc-grid-fields>
+	        </sc-grid>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is : 'ep-vehicle-history',
+			properties:{
+				titleText: {	//팝업 타이틀 지정
+					type: String,
+					value: function () {
+						return "이동장비 당일 이력 조회";
+					}
+				},
+	            map: {
+                    type: Object,
+                    value : function() {
+                    	return{};
+                    }
+                },
+                siteId : {
+                    type : Object,
+                    value : function(){
+						return {};
+                    }
+                },
+	            searchParam : {
+	            	type : Object,
+	            	value : function(){
+	            		var startDt = new Date();
+		            	startDt.setHours(0,0,0,0);
+		            	var endDt = new Date();
+		            	endDt.setHours(23,59,59,999);
+	            		return {
+		            		siteId : SCMdiManager.searchParam.site_id,
+		            		startDt : startDt,
+		            		ym : startDt,
+		            		endDt : endDt   
+		            	}
+	            	}
+		        },
+                vectorLayer:{
+					type : Object,
+					value : function(){
+						return{};
+					}
+                },
+                drawControl:{
+					type : Object,
+					value : function(){
+						return{};
+					}
+                },
+                vStyle :{
+					type : Object,
+					value : function(){
+						return{
+			       		    strokeColor: "#ff0000",
+			       		    fillColor: "#ffffff",
+			       		    strokeOpacity: 1,
+			       		    strokeWidth: 3,
+			       		    pointRadius: 5,
+			       		    graphicName: "circle"
+		       			};
+					}
+                },
+	       		pStyle :{
+					type : Object,
+					value : function(){
+						return{
+		       			    strokeColor:"#ff0000",
+		       			    fillColor: "#ff0000",
+		       			    strokeOpacity:1,
+		       			    strokeWidth: 3,
+		       			    fillOpacity:0.2
+		       			};
+					}
+                }
+			},
+			load: function(data){
+				var me = this;
+				console.log(data);
+				setTimeout(function(){
+					me.set("data", data);
+					me.set("mapId", data.siteId);
+					//맵 초기 설정
+					me.initMap();
+				}, 100);
+			},
+			initMap: function(){
+				var me = this;
+				
+				me.$.popupMapContainer.start();
+				me.set("map", me.$.popupMapContainer.map);
+				createVectorSourceLayer(me.map, 'route');
+				createVectorSourceLayer(me.map, 'marker');
+				createVectorSourceLayer(me.map, 'highlight');
+				createVectorSourceLayer(me.map, 'selected');
+				
+				// 눈 모양 아이콘 default 설정.
+				me.$.popupMapContainer.querySelector("#anchorLabel").fire('click', event); // anchor 영역 선택 처리
+				me.$.popupMapContainer.querySelector("#siteLabel").fire('click', event); // site 현장 선택 처리
+				me.$.popupMapContainer.querySelector("#areaLabel").fire('click', event); // area 영역 선택 처리
+				me.$.popupMapContainer.querySelector("#buildingLabel").fire('click', event); // building 영역 선택 처리
+			},
+			
+			completeFindTargetSignalDate : function(e,res){
+				var me = this;
+				var dayArray = res.response;
+				// dayArray= [1,2,3,4,5];
+				var dayObjectArray = [];
+				var selectedVal;
+				if(dayArray!=null && dayArray.length > 0){
+					dayArray.forEach(function(el, index){
+						var dayObject = {};
+						el += "";
+						if(el.length==1) el = "0"+el;
+						dayObject.value = el;
+						var week = ['(일)', '(월)', '(화)', '(수)', '(목)', '(금)', '(토)'];
+						dayObject.label = el + week[new Date(me.searchParam.ym + "-" + el).getDay()];
+						dayObjectArray.push(dayObject);
+						if(index==dayArray.length-1) selectedVal = el; 
+					})					
+				}
+				me.set("locDateList", dayObjectArray);
+				me.set("searchParam.date", selectedVal);
+			},
+			
+			searchTargetSignalDate: function(e){
+				var me = this;
+				var data = me.get("data");
+				me.set("searchParam.targetId", data.id);
+				me.set("searchParam.includeNotMapping", "N");
+				me.set("searchParam.includeNotUse", "N");
+				me.set("searchParam.targetType", "vehicle");
+				UT.request(me.$.findTargetSignalDate);
+			},
+			
+			searchTargetHistory: function(e){
+				var me = this;				
+				me.searchParam.startDt = new Date(me.searchParam.ym + "-" + me.searchParam.date);
+				me.searchParam.startDt.setHours(0,0,0,0);
+				me.searchParam.endDt = new Date(me.searchParam.startDt.getTime());
+				me.searchParam.endDt.setHours(23,59,0,0);
+				
+				console.log(me.get("searchParam"));
+				UT.requestNoDefault(me.$.findTargetHistory);
+			},
+			
+			completeFindTargetHistory : function(){
+				var me = this;
+				me.map.set('lastGeo', null);
+				var color = targetColor[me.searchParam.targetType];
+				var routeStyle = [
+   					new ol.style.Style({stroke: new ol.style.Stroke({ color: "#ffffff", width: 10})}),
+   					new ol.style.Style({stroke: new ol.style.Stroke({ color: color, width: 6})}),
+   					new ol.style.Style({stroke: new ol.style.Stroke({ color: '#ffffff', width: 1, lineDash: [4,4]})})
+   				];
+   				me.map.get('route_layer').setStyle(routeStyle);
+				if(me.targetHistory){
+					var historyList = me.targetHistory;
+					console.log(historyList);
+					for(var i in historyList){
+						historyList[i].index = i; 
+						historyList[i].selected = false; 
+						if(historyList[i].geoJson){
+							if(!historyList[i].areaName){
+								historyList[i].areaName = "영역외";
+							}
+							if(UT.isEmpty(me.map.get('lastGeo'))){			// 마지막 위치 표시
+								var feature = geoJson.readFeature(historyList[i].geoJson);
+								
+								feature.setId(parseInt(i)+1);
+				    	   		feature.set('targetInfo', historyList[i]);
+
+				    	   		var center = ol.proj.fromLonLat(historyList[i].geoJson.coordinates);
+								me.map.getView().setCenter(center);
+
+		   			  			me.map.get('selected_source').addFeature(feature);
+		   			  			
+					       		me.map.set('lastGeo', parseInt(i));
+					       	}
+						}else{
+							historyList[i].areaName = "위치정보 없음";
+						}
+					}
+					me.historyList = historyList;
+
+					setTimeout(function() {
+						me.$.gridHistoryPanel.searchItem("index", me.map.get('lastGeo'));
+					}, 400);
+				}else{
+					me.historyList = [];
+				}
+			},
+            
+			onImageChange: function(data, item){
+	            return '/ui/assets/img/marker/' +data.iconImage;
+	        },
+	        
+			isSelection : function(data){
+				return (data.geoJson);
+			},
+			
+			onItemClick : function(e){
+				var me = this,
+				data = e.detail.data;
+
+				me.map.get('selected_source').clear();
+				
+				if(UT.isEmpty(data.geoJson)){return;}
+
+				var center = ol.proj.fromLonLat(data.geoJson.coordinates);
+				me.map.getView().setCenter(center);
+
+				feature = geoJson.readFeature(data.geoJson);
+				feature.setId(data.index+1);
+				feature.set('targetInfo', data);
+				
+				me.map.get('selected_source').addFeature(feature);
+			},
+			
+			onSelectionChk : function(e){
+				var me = this;
+				if(me.isEventPrevent) return;
+				me.isEventPrevent = true;
+
+				var data = e.detail.data;  
+
+				var idx = data.index * 1;
+				
+				var startNo = me.startRowNum;
+				var endNo = me.endRowNum;
+				
+				if(UT.isEmpty(startNo)){		//start 없을때
+					startNo = idx;
+					endNo = idx;				    
+				}else{
+					if(UT.isEmpty(endNo)){
+						if(startNo <= idx){
+							endNo = idx;
+						}else{
+							endNo = startNo;
+							startNo = idx;
+						}
+					}else{
+						if(idx == startNo || idx == endNo){
+							startNo = null;
+							endNo = null;
+							me.historyList[idx].selected = false;
+						}else if(idx < startNo){
+							startNo = idx;
+						}else{
+							endNo = idx;
+						}
+					}
+				}
+
+				var last = me.$.gridHistoryPanel.getDataProvider().getItemSize()-1;
+				if(startNo==0 && endNo ==last){
+					me.redrawGrid(startNo, endNo, false);
+				}else{
+					me.redrawGrid(startNo, endNo, true);
+				}
+
+				me.isEventPrevent = false;
+			},
+			
+			itemAllChecked : function(e){
+				var me = this;
+				if(me.isEventPrevent) return;
+				me.isEventPrevent = true;
+				var check = e.detail.checked;
+				if(check){
+					me.redrawGrid(0,me.$.gridHistoryPanel.getDataProvider().getItemSize()-1 , false);
+				}else{
+					me.redrawGrid(null, null, false);
+				}
+				me.isEventPrevent = false;
+			},
+			
+			redrawGrid : function(startNo, endNo, flag){
+				var me = this;
+
+				if(!UT.isEmpty(me.startRowNum)){
+					for(var i=me.startRowNum; i<=me.endRowNum; i++){
+						me.historyList[i].selected = false;
+						if(flag){
+					    	me.$.gridHistoryPanel.selectionCheck(i, false);
+						}
+					}
+				}
+				me.clearMap();
+				
+				me.startRowNum = startNo;
+				me.endRowNum = endNo;
+				
+				if(!UT.isEmpty(me.startRowNum) && !UT.isEmpty(me.endRowNum)){
+					var provider = me.$.gridHistoryPanel.getDataProvider();
+					var routes = [];
+					var markers = [];
+					
+					for(var i = me.startRowNum; i <= me.endRowNum; i++){
+						me.historyList[i].selected = true;
+						if(provider.getItemAt(i).geoJson){
+							me.$.gridHistoryPanel.selectionCheck(i, true);
+							var route = ol.proj.fromLonLat(provider.getItemAt(i).geoJson.coordinates);
+							routes.push(route);
+							var marker = geoJson.readFeature(provider.getItemAt(i).geoJson);
+							marker.setId(provider.getItemAt(i).index+1);
+							marker.set('targetInfo', provider.getItemAt(i));
+							if(me.get('type') == 'unmapping'){
+								marker.get('targetInfo').targetType = 'unmapping';
+							}
+							marker.set('icon', true);
+							markers.push(marker);
+						}
+					}
+
+					if(UT.isNotEmpty(markers)){
+						me.map.get('marker_source').addFeatures(markers);
+					}
+					if(UT.isNotEmpty(routes)){
+						var routeFeature = new ol.Feature({
+						    geometry: new ol.geom.LineString(routes),
+						});
+						me.map.get('route_source').addFeature(routeFeature);
+					}
+				}
+			},
+			
+			clearMap : function(){
+				if(!this.isInitialized) return;
+				var me = this;
+				me.map.get('route_source').clear();
+				me.map.get('marker_source').clear();
+				me.map.get('selected_source').clear();
+			},
+		});
+	</script>
+</dom-module>

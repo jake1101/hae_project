@@ -1,0 +1,46 @@
+/**
+ * CASE 2. 문서채번과 같이 각 비즈니스 로직에서 호출 될 때 마다 변경된 정보가 갱신 되어야 하는 경우
+ *  조건 1) 여러 비즈니스 로직에서 문서채번을 한다.
+ *       2) 호출될 때 마다 변경된 정보가 반영되어 채번이 이루어져야 한다.
+ */
+
+@Service
+@Transactional
+public class PrService {
+	
+	...
+	
+	@Inject
+	SharedService sharedService;
+	
+	public void savePr() {
+	
+		...
+		
+		// PR 번호 채번
+		String prNo = sharedService.generateDocNo("PR");
+		
+		prData.put("pr_no", prNo);
+		
+		....
+	}
+}
+
+@Service
+@Transactional
+public class SharedService {
+
+	...
+	
+	// 
+	@Transactional (propagation = Propagation.REQUIRES_NEW)
+	public String generateDocNo(String docNoCd) {
+		Map<String, Object> docInfo = sqlSession.selectOne("shared.getDocInfo", docNoCd);
+		
+		// 문서채번 로직
+		
+		...
+		
+		return docNo;
+	}
+}

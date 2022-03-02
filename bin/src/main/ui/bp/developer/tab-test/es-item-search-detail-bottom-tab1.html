@@ -1,0 +1,76 @@
+<dom-module id="es-item-search-detail-bottom-tab1">
+<!-- 
+/**
+ *
+ *	@description : tab-navigation 팝업예제파일
+ *  <pre>
+ * </pre>
+ * @FileName : 
+ * @Since 2018. 10. 26.
+ */
+-->
+	<style>
+		:host {
+            @apply(--fit-layout);
+        }
+	</style>
+	
+	<template>
+<!--  
+	************************************************************************************************************
+	* UI Area
+	************************************************************************************************************
+-->			
+		<cc-auth-checker check-list="auth-r,auth-s"></cc-auth-checker>
+		<div class="vspace-10"></div>
+		<div class="vbox flex">
+			<table class="item-search-form" id="infoTb">
+				<colgroup>
+					<col style="width:200px"></col>
+					<col></col>
+				</colgroup>
+				<tr>
+					<th>
+						<sc-label text="구분"></sc-label>
+					</th>
+					<th>
+						<sc-label text="내용"></sc-label>
+					</th>
+				</tr>
+				<tr>
+					<th>
+						<sc-label text="상품설명"></sc-label>
+					</th>
+					<td>
+						<sc-textarea-field value="{{searchParam.dtl_img_desc}}" style="width:100%;height:150px" readonly="true"></sc-textarea-field>
+					</td>
+				<tr>
+				
+			</table>
+		</div>
+ 
+	</template>
+	
+	<script>
+	Polymer({
+			is : 'es-item-search-detail-bottom-tab1',
+			properties : {
+			},
+			/************************************************** 
+			 * 초기화 설정
+			 **************************************************/
+			// 1. 화면 로딩시 최초 호출
+			initialized : function(){
+			},
+			load: function(){
+				
+			}
+			/************************************************** 
+			 * 그리드 이벤트
+			 **************************************************/
+			/************************************************** 
+			 * 버튼 이벤트
+			 **************************************************/
+		});
+	</script>
+</dom-module>

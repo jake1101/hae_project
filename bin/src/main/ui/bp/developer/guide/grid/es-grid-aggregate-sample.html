@@ -1,0 +1,109 @@
+<dom-module id="es-grid-aggregate-sample">
+	<style>
+		:host {
+			@apply(--vbox-layout)
+		}
+	</style>
+	<template>
+		<sc-ajax id="findList" init
+				 url="json/item-cntr-list.json"
+				 last-response="{{resultList}}">
+	    </sc-ajax>
+	    
+		<sc-grid id="gridPanel"
+				 editable="true"
+				 data-provider="{{resultList}}"
+				 aggregate="{{aggregate}}"
+				 aggregate-group="{{aggregateGroup}}"
+				 aggregate-group-columns='["vd_nm", "cntr_date"]'
+				 >
+			<cc-grid-toolbar>
+				<sc-button text="aggregate 변경"		on-click="onChangeAggregate"></sc-button>
+				<sc-button text="aggregateGroup 변경"	on-click="onChangeAggregateGroup"></sc-button>
+				<sc-button text="getSummary"			on-click="onSummary"></sc-button>
+			</cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-data-column	data-field="vd_nm"		header-text="협력사 명"	width="100"	text-align="left"></sc-data-column>
+				<sc-date-column	data-field="cntr_date"	header-text="계약일자"	width="100"	text-align="center"></sc-date-column>
+				<sc-data-column	data-field="cntr_lno"	header-text="항번"		width="100"	text-align="center"
+								aggregate-title="품목 수 ==> "		aggregate-text-align="right"></sc-data-column>
+				<sc-data-column	data-field="item_cd"	header-text="품목코드"	width="100"	text-align="center"
+								aggregate-kind="count"	aggregate-format="qty"	aggregate-text-align="left"></sc-data-column>
+				<sc-data-column	data-field="item_nm"	header-text="품목명"	width="100"	text-align="left"
+								aggregate-title="전체 수량 ==> "	aggregate-text-align="right"></sc-data-column>
+				<sc-data-column	data-field="item_qty"	header-text="수량"		width="100"	text-align="right"	editable="true"		data-type="number"	format-type="qty"
+								aggregate-kind="sum"	aggregate-format="qty"	aggregate-text-align="right"></sc-data-column>
+				<sc-data-column	data-field="item_price"	header-text="단가"		width="100"	text-align="right"	editable="true"		data-type="number"	format-type="amt"
+								aggregate-title="합계 ==> "			aggregate-text-align="right"></sc-data-column>
+				<sc-data-column	data-field="item_amt"	header-text="금액"		width="100"	text-align="right"	data-type="number"	format-type="amt"	converter="itemAmtConverter"
+								aggregate-format="amt"	aggregate-function="aggregateFn"	aggregate-text-align="right"></sc-data-column>
+			</sc-grid-columns>
+		</sc-grid>
+	</template>
+	<script>
+	Polymer({
+		is : 'es-grid-aggregate-sample',
+		properties : {
+			resultList : {
+				type : Array,
+				value : function() {
+					return []
+				}
+			},
+			aggregate : {
+				type : Boolean,
+				value : function() {
+					return true
+				}
+			},
+			aggregateGroup : {
+				type : Boolean,
+				value : function() {
+					return true
+				}
+			}
+		},
+		initialized : function() {
+			
+		},
+		// aggregate 변경 버튼 클릭 시
+		onChangeAggregate : function() {
+			var me = this;
+			me.set("aggregate", !me.aggregate);
+		},
+		// aggregateGroup 변경 버튼 클릭 시
+		onChangeAggregateGroup : function() {
+			var me = this;
+			me.set("aggregateGroup", !me.aggregateGroup);
+		},
+		// getSummary 버튼 클릭 시
+		onSummary : function() {
+			var me = this;
+			
+			var provider = me.$.gridPanel.getDataProvider();
+			
+			UT.alert("all amount : " + provider.getSummary("item_amt", "sum"), null, true);
+		},
+		// aggregate-function
+		aggregateFn : function(dataField, datas) {
+        	var result = new BigNumber('0');
+        	
+        	for(var i=0; i<datas.length; ++i){
+        		var data = datas[i];
+        		var qty   = new BigNumber(data["item_qty"] || 0),
+        			price = new BigNumber(data["item_price"] || 0);
+        		
+        		result = result.plus(qty.mul(price));
+        	}
+        	return result.toFixed();
+		},
+		// converter
+		itemAmtConverter : function(rowIndex, fieldName, data) {
+			var qty   = new BigNumber(data["item_qty"] || 0),
+				price = new BigNumber(data["item_price"] || 0);
+		
+			return qty.mul(price).toFixed();
+		},
+	});
+	</script>
+</dom-module>

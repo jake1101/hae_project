@@ -1,0 +1,82 @@
+<dom-module id="widget-chart-polar">
+    <script>
+      WidgetChartPolar =  Polymer({
+            is: "widget-chart-polar",
+            properties: {
+            	
+            },
+            
+            getTemplate : function(template,datas){
+            	var me = this, content = template.contents;
+            	
+            	var series = me.getSeriesData(datas,content.series);
+            	var chartTemplate = {
+        			    chart : {
+        			        type: 'line',
+        			        polar:true
+        			    },
+        			    exporting: {
+        		            enabled: false
+        		        },
+        			    title : {
+        			        text: content.title
+        			    },
+        			    pane: {
+        			        size: '80%'
+        			    },
+        			    legend : content.legend ||{},
+        			    xAxis : {
+        			       categories:content.dataLabels,
+       			    	   tickmarkPlacement: 'on',
+       			           lineWidth: 0
+        			    	
+        			    },
+        			    yAxis : {
+        			        min : 0,
+        			        gridLineInterpolation: 'polygon',
+       			        	lineWidth: 0
+        			    }, 
+        			    tooltip:{
+        			    	enabled : false
+        			    },
+        			    legend : content.legend ||{},
+        			    series: series
+        			}
+            	return chartTemplate;
+            },
+            
+    		getSeriesData : function(datas,series){
+    			var compressDatas = {},color;
+    			datas.forEach(function(data,index){
+    				for(var key in data){
+    					if(compressDatas[key]){
+    						compressDatas[key].push(data[key]);
+    					}else{
+    						compressDatas[key] = [data[key]];
+    					}
+    				}
+    			});
+    			var datas = [],index = 0;
+    			for(var key in compressDatas){
+    				var serie = {name:series[index].name, data :compressDatas[key] };
+    			 	if(color = series[index].color){
+    				    serie.color = color;
+    				}  
+    				datas.push(serie);
+    				
+    				index++;
+    			}
+    			return datas;
+    		},
+    		
+    		getCategories : function(datas){
+    			var axisDatas = [];
+    			datas.forEach(function(data,index){
+    				axisDatas[index] = {name:index}
+    			});
+    			return axisDatas;
+    		}
+    		
+    	});
+    </script>
+</dom-module>

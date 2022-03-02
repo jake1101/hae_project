@@ -1,0 +1,61 @@
+<link rel="import" href="./es-map-circleeffect.html">
+
+<dom-module id="es-map-popup">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+	<template>
+		<sc-map id="map1" type="Google" longitude="129.577" latitude="38" zoom-level="6" on-click-marker="onClickMarker" on-click-map="onClickMap">
+			<sc-map-info-popup>
+				<template>
+					<div>
+						<div>환경 : {{item.detailInfo.name}}</div>
+					</div>
+				</template>
+			</sc-map-info-popup>
+			
+			<sc-map-marker longitude="129.577" latitude="39" on-click-marker="onClickMarker" detail-info="{{data2}}"></sc-map-marker>
+			<sc-map-marker longitude="129.577" latitude="38" on-click-marker="onClickMarker" detail-info="{{data}}"></sc-map-marker>
+		</sc-map>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'es-map-popup',
+			
+			properties: {
+				data: {
+					type: Object,
+					value: function() {
+						return {
+							name: 'test1'
+						};
+					}
+				},
+				
+				data2: {
+					type: Object,
+					value: function() {
+						return {
+							name: 'test2'
+						};
+					}
+				}
+			},
+			
+			onClickMap: function() {
+				var me = this;
+				me.$.map1.removeAllPopup();
+			},
+			
+			onClickMarker : function(event, data) {
+				// 실제 클릭 위치와 보이는 위치가 다름
+				var element = data.element;
+				data.element.showInfoPopup(element.longitude, element.latitude, element);
+			}
+		});
+	</script>
+</dom-module>

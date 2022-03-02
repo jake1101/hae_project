@@ -1,0 +1,30 @@
+<sc-link rel="import" href="es-site-realtime.html"></sc-link>
+
+<dom-module id="em-site-realtime">
+	<!--
+        ******************************************************************************************
+        ** @Program-name 	:  실시간 위치정보
+        ** @Description		: 현장상황정보 > 실시간 위치정보
+        ** @Author 			: jhkim
+        ** @Create Date 	: 2020.02.19
+        ** @History 		: 2020.02.19 jhkim 최초작성
+        ******************************************************************************************
+    -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<es-site-realtime class="flex"></es-site-realtime>
+	</template>
+	
+	<script>
+		Polymer({
+			is : 'em-site-realtime'
+		});
+	</script>
+
+</dom-module>

@@ -1,0 +1,36 @@
+<sc-link rel="import" href="es-dialog-description.html"></sc-link>
+<sc-link rel="import" href="es-dialog-sample.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-dialog-guide">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-panel class="hbox flex" title-text="sc-dialog 사용예제">
+			<es-dialog-description class="fit flex"></es-dialog-description>
+			<es-dialog-sample class="box flex"></es-dialog-sample>
+		</sc-panel>
+		<es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is : 'em-dialog-guide',
+		properties : {
+			srcList : {
+				type : Array,
+				value : function() {
+					return [{
+						title        : "es-dialog-sample.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/popup/es-dialog-sample.html"
+					}]
+				}
+			}
+		}
+	});
+	</script>
+</dom-module>

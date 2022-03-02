@@ -1,0 +1,51 @@
+<sc-link rel="import" href="es-data-search-description.html"></sc-link>
+<sc-link rel="import" href="es-data-search-sample.html"></sc-link>
+<sc-link rel="import" href="../../shared/es-dynamic-source-viewer.html"></sc-link>
+
+<dom-module id="em-data-search-guide">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<sc-panel class="hbox flex" title-text="데이터 조회">
+			<es-data-search-description class="fit flex"></es-data-search-description>
+			<es-data-search-sample class="box flex" on-complete-find="onCompleteFind"></es-data-search-sample>
+		</sc-panel>
+		<es-dynamic-source-viewer class="flex" src-list="{{srcList}}"></es-dynamic-source-viewer>
+	</template>
+	<script>
+	Polymer({
+		is: 'em-data-search-guide',
+		properties : {
+			srcList : {
+				type : Array,
+				value : function() {
+					return [{
+						title        : "es-data-search.html",
+						i18nDisabled : true,
+						extension    : "html",
+						url          : "/ui/bp/developer/guide/datahandling/source/data-search-html.txt"
+					}, {
+						title        : "SampleController.java",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/datahandling/source/data-search-controller-java.txt"
+					}, {
+						title        : "SampleService.java",
+						i18nDisabled : true,
+						extension    : "java",
+						url          : "/ui/bp/developer/guide/datahandling/source/data-search-service-java.txt"
+					}, {
+						title        : "sample.xml",
+						i18nDisabled : true,
+						extension    : "xml",
+						url          : "/ui/bp/developer/guide/datahandling/source/data-search-xml.txt"
+					}]
+				}
+			}
+		}
+	});
+	</script>
+</dom-module>

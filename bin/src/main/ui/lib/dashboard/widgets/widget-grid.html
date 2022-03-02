@@ -1,0 +1,141 @@
+<link rel="import" href="../data/widget-data-provider.html"></link>
+<dom-module id="widget-grid">
+    <style>
+    </style>
+
+    <template>
+    	<sc-grid  id="{{gridId}}" name="widgetGrid" use-dummy="false" column-fit-style="even"
+    	 use-selection="false" show-number-line="false" header-height="38" row-height="35">
+    		<sc-grid-columns></sc-grid-columns>
+    	</sc-grid>
+    </template>
+    <script>
+    WidgetGrid = Polymer({
+            is: "widget-grid",
+            behaviors: [
+				WidgetDataProvider           
+            ],
+            properties: {
+            	 gridId:{
+     				type: Object,
+             		value: function(){
+             			var uuid = UT.generateUUID();
+             			return uuid.replace(/-/gi,'');
+             		}
+     			},
+     			gridStyle:{
+     				type: Object,
+     				value: function(){
+     					return{
+     		                	"header":{
+     		                 		"background" : "#295171",
+     		                 		"borderRight": "#295171,0px",
+     		                 		"hoveredBackground" : "#537896",
+     		                 		"selectedBackground" : "#537896",
+     		                 		"fontBold":"false"
+     		                 	},
+     		                 	"body":{
+     		                 		"fontBold":"true",
+     		                 		"row":{
+     		                 			"selectedBackground":""
+     		                 		},
+     		                 		"cell":{
+     		                 			"fontBold":"true",
+     		                 			"border" : "#fffffff,0px",
+     		                 			"borderRight": "#fffffff,0px"
+     		                 		}
+     		                 		
+     		                 	}
+     		                 }
+     					}
+     				
+     			}
+            }, 
+            listeners : {
+    		},
+    		getContent : function(){
+    		    if(!this._widgetGrid){
+    		    	this._widgetGrid = this.querySelector('[name=widgetGrid]');
+    		    }
+    		    return this._widgetGrid;
+    		},
+    		createContent : function(template){
+    			var me = this, contents = template.contents;
+    			me.template = template;
+    			me.contentData = contents;
+    			me.dataUrl = contents.dataUrl;
+    			me.conditions = contents.conditions || {};
+    			var gridProperties = contents.properties;
+    			var scGrid = me.getContent();
+    			
+   				scGrid.stateful = false;
+       			scGrid.useState = false;
+       			scGrid.useSelection = false;
+       			var columns = [];
+       			for(var i  = 0,len = gridProperties.length; i < len; i++){
+       				var propertie = gridProperties[i];
+       				var col = document.createElement('sc-data-column');
+                       col.dataField = propertie.field;
+                       col.headerText = propertie.header_text;
+                       col.textAlign = propertie.align;
+                       col.dataType = propertie.type;
+                       col.width = propertie.width;
+                       columns.push(col);
+       			}
+       			scGrid.setColumns(columns);
+       			
+				var grid = scGrid._gridView;
+				me.deferGridLoad();
+       			
+       			//dataLoad후에 setWidgetData실행됨
+       			me.dataLoad();
+    		},
+    		
+    		deferGridLoad: function(){
+    			var me = this,
+    			    scGrid = me.getContent();
+    			function excuter(){
+		 			if(!scGrid._gridView){
+    		 			setTimeout(function(){
+    		 				if(scGrid._gridView){
+    		 					scGrid._gridView.loadStyles(me.gridStyle);
+    		 				}else{
+    		 					excuter();       		 					
+    		 				}
+    		 			},100);
+		 			}else{
+		 				scGrid._gridView.loadStyles(me.gridStyle);
+		 			}
+		 		}
+    			excuter();
+    		},
+    		
+    		setWidgetData : function(){
+    			var me = this;
+    			var scGrid = me.getContent();
+    			scGrid.setDataProvider(me.widgetData);
+    		},
+    		getWidgetTempalte : function(){
+    			var me = this;
+    			return me.template;
+    		},
+    		resize: function(widget_content){
+    			var me = this , 
+    			    headable = widget_content.headable,
+    			    scGrid = me.getContent();
+    			widgetHeaderHeight = headable == 'Y'? widget_content.headerHeight : 0;
+    			scGrid.style.width = widget_content.widget_width +'px';
+    			scGrid.style.height = (widget_content.widget_height - widgetHeaderHeight)+'px';
+    			scGrid._doContentElementResize();
+    		},
+    		refresh: function(){
+    			this.dataLoad();
+    		},
+    		resetData: function(){
+    			var me = this;
+    			var scGrid = me.getContent();
+    			scGrid.resetColumns();
+    		}
+    	});
+    </script>
+</dom-module>

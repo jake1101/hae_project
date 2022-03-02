@@ -1,0 +1,194 @@
+<dom-module id="es-dev-chart-circle-gauge-renderer-tag">
+    <!-- layout Style -->
+    <style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+
+    <template>
+    
+    	<sc-grid id="gridChartPanel" class="flex" 
+    			 editable="false" use-dummy="true"
+    			 use-state="false" row-height="80"
+				 >
+
+			<!-- 
+				[Circle Gauge value 범위별 색상 정의] 자세한 내용은 하단의 setCellDynamicStyles 펑션 참고.
+				1. value < 200 : #FF0000
+				2. value < 400 : #FF5E00
+				3. value < 600 : #FFE400
+				4. value < 800 : #1DDB16
+				5. value < 1000 : #0100FF
+			 -->
+
+			<sc-grid-columns>
+			
+				<!-- [차트 컬럼] 
+					sc-chart-column의 styles속성을 통해, 기본 스타일을 정의하였지만 하단의 setCellDynamicStyles를 통해 value값을 기준으로 동적 스타일 변경이 가능.
+				-->
+				<sc-chart-column data-field="factory1"   header-text="UnitPrice1"  width="120" text-align="center"   editable="false"
+								 styles="{{chartStyles}}"
+								 animations="{{circleAnimation}}" >
+					<!-- [Cell Renderer] 차트 컬럼 렌더러(차트컬럼에서만 동작) : circleGauge 
+						type이 circleGauge인 경우, min-value와 max-value만 존재함.
+						
+					-->
+					<chart-cell-renderer type="circleGauge" 
+										 min-value="0" 
+										 max-value="1000"> <!-- min-value:최소값, max-value:최대값 -->
+					</chart-cell-renderer>
+				</sc-chart-column>
+				
+				<sc-chart-column data-field="factory2"   header-text="UnitPrice2"  width="120" text-align="center"   editable="false"
+								 styles="{{chartStyles}}" 
+								 animations="{{circleAnimation}}" >
+					<chart-cell-renderer type="circleGauge" 
+										 min-value="0" 
+										 max-value="1000">
+					</chart-cell-renderer>
+				</sc-chart-column>
+				
+				<sc-chart-column data-field="factory3"   header-text="UnitPrice3"  width="120" text-align="center"   editable="false"
+								 styles="{{chartStyles}}"
+								 animations="{{circleAnimation}}" >
+					<chart-cell-renderer type="circleGauge" 
+										 min-value="0" 
+										 max-value="1000">
+					</chart-cell-renderer>
+				</sc-chart-column>
+				
+				<sc-chart-column data-field="factory4"   header-text="UnitPrice4"  width="120" text-align="center"   editable="false"
+								 styles="{{chartStyles}}"
+								 animations="{{circleAnimation}}" >
+					<chart-cell-renderer type="circleGauge" 
+										 min-value="0" 
+										 max-value="1000">
+					</chart-cell-renderer>
+				</sc-chart-column>
+			
+			</sc-grid-columns>
+		</sc-grid>
+		
+		
+    	
+    </template>
+    
+    <script>
+        
+        Polymer({
+            is: 'es-dev-chart-circle-gauge-renderer-tag',
+            
+            properties: {
+            	
+            	/** 차트컬럼 기본 스타일 속성 */
+            	chartStyles: {
+            		type: Object,
+            		value: {
+                     "textAlignment": "far",
+                     "fontSize": 18,
+                     "color": "#080", // 폰트 색상
+                     "shapeInactiveColor": "#10000000", // 셀에 표시되는 차트가 비활성화 상태일 때 색상
+                     "shapeColor": "#80008800", // 차트 색상
+                     "padding": 4,
+                     "numberFormat": "#,##0.0"
+            		}
+            	},
+            	
+            	/** Linear Gauge 애니메이션 속성 */
+            	circleAnimation: {
+            		type: Array,
+            		value: [{
+                        "property": "value",
+                        "duration": 1000
+                    }] 
+            	},
+
+            },
+            
+            attached: function(){
+            	this.loadData();
+            },
+            
+            loadData: function () {
+                var rows = [];
+                
+                /** 데이터 생성 */
+                for(var i=0; i<1000; i++){
+                	rows.push({
+                		'check_id':i, 
+                		'factory1':(i*100)%1000, 
+                		'factory2': Math.floor((50+Math.random()*900)%1000, 3),
+                		'factory3': Math.floor((50+Math.random()*900)%1000, 3),
+                		'factory4': Math.floor((50+Math.random()*900)%1000, 3)
+                	});
+                }
+
+                /** gridView가 생성되지 않은 경우 */
+                this.async(function(_rows){
+                	if(!this.$.gridChartPanel._gridView){
+                		arguments.callee();
+                	}else{
+                		this.completefindListPr(_rows);
+                		this.destroyArray(_rows);
+                	}
+				}.bind(this, rows), 1);
+            },
+            
+            completefindListPr: function(rows){
+            	
+            	/** Animation Enabled */
+            	this.$.gridChartPanel._gridView.effectOptions().setAnimationEnabled(true);
+            	
+            	/** Source Viewer의 data값 set */
+            	this.domHost.$.viewer.setData(JSON.stringify(rows, null, "\t"));
+            	
+            	/** Value별 동적 스타일 변경 */
+            	this.$.gridChartPanel._gridView.body().setCellDynamicStyles([{
+            		expression: "value < 1000", // 표현식
+            		styles: {
+            			color: "#0100FF", // 폰트 색상
+            			shapeColor: "#0100FF" // 차트 색상
+            		}
+            	},{
+            		expression: "value < 800",
+            		styles: {
+            			color: "#1DDB16",
+            			shapeColor: "#1DDB16"
+            		}
+            	},{
+            		expression: "value < 600",
+            		styles: {
+            			color: "#FFE400",
+            			shapeColor: "#FFE400"
+            		}
+            	},{
+            		expression: "value < 400",
+            		styles: {
+            			color: "#FF5E00",
+            			shapeColor: "#FF5E00"
+            		}
+            	},{
+            		expression: "value < 200",
+            		styles: {
+            			color: "#ff0000",
+            			shapeColor: "#ff0000"
+            		}
+            	}]);
+            	
+            	/** Set Data */
+            	this.$.gridChartPanel.setDataProvider(rows);
+            },
+            
+            destroyArray: function(arr){
+                for(var i=0; i<arr.length; i++){
+                	arr[i] = null;
+                }
+                arr = null;
+            }
+            
+        });
+    </script>
+<!--  Polymer script �� -->
+
+</dom-module>

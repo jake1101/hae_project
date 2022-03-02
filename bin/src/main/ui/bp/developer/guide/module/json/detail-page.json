@@ -1,0 +1,47 @@
+{
+	"rfxData": {
+		"rfx_id"              : "1111-2222-3333-4444",
+		"rfx_no"              : "RFX10001",
+		"rev"                 : 1,
+		"rfx_tit"             : "입찰 테스트",
+		"rfx_prog_sts"        : "임시저장",
+		"reg_nm"              : "홍길동",
+		"ot_exec_yn"          : "N",
+		"ot_vd_attend_mgt_yn" : "N",
+		"rfpann_exec_yn"      : "Y",
+		"rfpann_loc"          : "서울 영등포구 당산로41길",
+		"rfpann_chr_nm"       : "홍길동"
+	},
+	"rfxItemList": [
+		{
+			"rfx_item_id" : "2222-3333-4444-5555",
+			"rfx_id"      : "1111-2222-3333-4444",
+			"rfx_no"      : "RFX10001",
+			"rfx_rev"     : 1,
+			"rfx_lno"     : "10",
+			"item_cd"     : "ITEM_CD_001",
+			"item_nm"     : "품목 001",
+			"item_qty"    : 3
+		},
+		{
+			"rfx_item_id" : "3333-4444-5555-6666",
+			"rfx_id"      : "1111-2222-3333-4444",
+			"rfx_no"      : "RFX10001",
+			"rfx_rev"     : 1,
+			"rfx_lno"     : "20",
+			"item_cd"     : "ITEM_CD_002",
+			"item_nm"     : "품목 002",
+			"item_qty"    : 5
+		},
+		{
+			"rfx_item_id" : "4444-5555-6666-7777",
+			"rfx_id"      : "1111-2222-3333-4444",
+			"rfx_no"      : "RFX10001",
+			"rfx_rev"     : 1,
+			"rfx_lno"     : "30",
+			"item_cd"     : "ITEM_CD_003",
+			"item_nm"     : "품목 003",
+			"item_qty"    : 2
+		}
+	]
+}
