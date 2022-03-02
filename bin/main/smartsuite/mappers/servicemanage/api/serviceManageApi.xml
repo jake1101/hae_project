@@ -37,6 +37,14 @@
     </select>
     
     
+    <!-- 사용여부(SVC_CTL.SVC_USE_YN)을 수정한다. -->
+	<update id="updateServerUseYn">
+		/* updateServerUseYn */
+		UPDATE SVC_CTL 
+		SET SVC_USE_YN = #{p.svc_use_yn}
+		WHERE SVC_CTL_ID = #{p.svc_ctl_id}
+	</update>
+    
     <select id="findListUserByLevel" resultType="map">
     /* user.findListUserByLevel: 내부 사용자 목록 조회 */	
            -- 운영사 관리자
