@@ -13,7 +13,7 @@
 	<select id="findRegSafetyServiceList" parameterType="map" resultType="map">
 		/* serviceManageApi.findRegSafetyServiceList: 등록 서비스 리스트 조회 */
 		select
-			(ROW_NUMBER() OVER()) AS ROWNUM,
+			(ROW_NUMBER() OVER(order by svc_ctl_nm)) AS ROWNUM,
 			tb2.svc_grp_id,
 			tb2.svc_grp_nm,
 			tb1.svc_ctl_id,
@@ -23,7 +23,7 @@
 			join corners.svc_grp tb2 on tb1.svc_grp_id = tb2.svc_grp_id
 		<where>
 			<if test="p.svc_grp_id != null and p.svc_grp_id != ''">
-				and tb3.svc_grp_id = #{p.svc_grp_id}
+				and tb2.svc_grp_id = #{p.svc_grp_id}
 			</if>
 	
 			<if test="p.svc_ctl_nm != null">
@@ -37,7 +37,7 @@
     <!-- 사용여부(SVC_CTL.SVC_USE_YN)을 수정한다. -->
 	<update id="updateServiceUseYn">
 		/* updateServiceUseYn */
-		UPDATE SVC_CTL 
+		UPDATE CORNERS.SVC_CTL 
 		SET SVC_USE_YN = #{p.svc_use_yn}
 		WHERE SVC_CTL_ID = #{p.svc_ctl_id}
 	</update>

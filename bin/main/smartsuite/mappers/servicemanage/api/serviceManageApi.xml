@@ -13,20 +13,17 @@
 	<select id="findRegSafetyServiceList" parameterType="map" resultType="map">
 		/* serviceManageApi.findRegSafetyServiceList: 등록 서비스 리스트 조회 */
 		select
-		(ROW_NUMBER() OVER()) AS ROWNUM,
-		tb3.svc_grp_nm,
-		tb2.svc_ctl_nm,
-		tb1.stt_cd
-		from
-		corners.svc_req tb1
-		, corners.svc_ctl tb2
-		, corners.svc_grp tb3
+			(ROW_NUMBER() OVER(order by svc_ctl_nm)) AS ROWNUM,
+			tb2.svc_grp_id,
+			tb2.svc_grp_nm,
+			tb1.svc_ctl_id,
+			tb1.svc_ctl_nm,
+			tb1.svc_use_yn
+		from corners.svc_ctl tb1
+			join corners.svc_grp tb2 on tb1.svc_grp_id = tb2.svc_grp_id
 		<where>
-			and tb1.svc_ctl_id = tb2.svc_ctl_id
-			and tb2.svc_grp_id = tb3.svc_grp_id
-	
 			<if test="p.svc_grp_id != null and p.svc_grp_id != ''">
-				and tb3.svc_grp_id = #{p.svc_grp_id}
+				and tb2.svc_grp_id = #{p.svc_grp_id}
 			</if>
 	
 			<if test="p.svc_ctl_nm != null">
@@ -38,9 +35,9 @@
     
     
     <!-- 사용여부(SVC_CTL.SVC_USE_YN)을 수정한다. -->
-	<update id="updateServerUseYn">
-		/* updateServerUseYn */
-		UPDATE SVC_CTL 
+	<update id="updateServiceUseYn">
+		/* updateServiceUseYn */
+		UPDATE CORNERS.SVC_CTL 
 		SET SVC_USE_YN = #{p.svc_use_yn}
 		WHERE SVC_CTL_ID = #{p.svc_ctl_id}
 	</update>
