@@ -1,13 +1,30 @@
 <sc-link rel="import" href="es-search-service-list.html"></sc-link>	
+<sc-link rel="import" href="ep-search-service-detail.html"></sc-link>
 
 <dom-module id="em-search-service">
 	<template>
 		<cc-page-title-bar></cc-page-title-bar>
-    	<es-search-service-list></es-search-service-list>
+    	<es-search-service-list
+			on-open-service-detail-pop="openServiceDetailPop"
+    	></es-search-service-list>
     </template>
     <script>
     	Polymer({
-    		is: "em-search-service"
+    		is: "em-search-service",
+    		openServiceDetailPop: function(event) {
+    			const param = event.detail;
+    			const me = this;
+    			me.popup = UT.popup(
+    					"ep-search-service-detail", 
+    					me,
+    					1300,
+    					800,
+    					{},
+    					{ maximizable: true, titleText: "서비스 디테일"}
+    			);
+    			me.popup.show();
+    			me.popup.getWindowContent().load(param)
+    		}
     	})
     </script>
 </dom-module>

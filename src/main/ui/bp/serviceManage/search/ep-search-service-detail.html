@@ -1,0 +1,33 @@
+<dom-module id="ep-search-service-detail">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+	<template>
+		<cc-sub-title-bar
+			id="subTitle"
+			title-text="서비스 이름"
+		></cc-sub-title-bar>
+		<div class="vspace-10"></div>
+		<div class="hbox flex-5">
+			<div class="vbox flex-5">
+				this is popup
+			</div>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is: "ep-search-service-detail",
+			properties: {
+				
+			},
+			initialized: function() {
+				
+			},
+			load: function(param) {
+				console.log(param)
+			}
+		})
+	</script>
+</dom-module>
