@@ -1,0 +1,178 @@
+<dom-module id="es-catalog-service-list">
+	<template>
+		<sc-request-group init>
+			<sc-ajax 
+				id="regSafetyServiceGroupList" 
+				url="regSafetyServiceGroupList.do" 
+				last-response="{{svcGrpObj}}"
+			></sc-ajax>
+			<sc-ajax 
+				id="findRegSafetyServiceList"
+				url="findRegSafetyServiceList.do"
+				body="{{searchParam}}"
+				last-response="{{serviceList}}"
+			></sc-ajax>
+		</sc-request-group>
+		
+		<sc-ajax
+			id="updateServiceUseYn"
+			url="updateServiceUseYn.do"
+			body="{{useYnObj}}"
+		></sc-ajax>
+		
+		<cc-sub-title-bar title-text="서비스 목록"></cc-sub-title-bar>
+		<cc-search-container on-search="onFindRegSafetyServiceList">
+			<table>
+				<colgroup>
+					<col style="width: 100px">
+					<col>
+					<col style="width: 100px">
+					<col>
+				</colgroup>
+				<tr style="height: 50px">
+					<th>
+						<sc-label text="서비스 그룹"></sc-label>
+					</th>
+                	<td>
+                		<sc-combobox-field 
+                			id="grpCbBox"
+                			value="{{searchParam.svc_grp_id}}" 
+                			items="{{groupList}}"
+                			display-field="svc_grp_nm"
+                			value-field="svc_grp_id"
+                			placeholder="그룹명"
+                		></sc-combobox-field>
+                	</td>
+					<th>
+						<sc-label text="키워드 검색"></sc-label>
+					</th>
+					<td>
+						<sc-text-field value="{{searchParam.search}}"></sc-text-field>
+					</td>
+				</tr>
+				<tr></tr>
+			</table>
+		</cc-search-container>
+		<sc-grid 
+			id="gridPanel" 
+			data-provider="{{serviceList}}" 
+			on-item-click="onItemClick"
+			use-selection="false"
+			use-state="false"
+			editable="true"
+		>
+			<cc-grid-toolbar></cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-data-column 
+					data-field="svc_grp_nm" 
+					header-text="서비스 그룹" 
+					width="500" 
+					text-align="center"
+				></sc-data-column>
+				<sc-data-column 
+					data-field="svc_ctl_nm" 
+					header-text="서비스 명" 
+					width="600" 
+					text-align="center"
+				></sc-data-column>
+				<sc-image-column 
+					data-field="magnifying_glass" 
+					header-text="자세히" 
+					singular-source="/ui/assets/img/serviceManage/icon_magnifying_glass.png" 
+					image-display="auto"
+				></sc-image-column>
+				<sc-checkbox-column 
+					data-field="svc_use_yn" 
+					header-text="사용상태" 
+					text-align="center" 
+					display-checkbox="false" 
+					editable="true"
+				></sc-checkbox-column>
+				<sc-button-column
+					data-field="apply_btn"
+					header-text="신청"
+					text="신청"
+				>
+				</sc-button-column>
+			</sc-grid-columns>
+		</sc-grid>
+    </template>
+    <script>
+    	Polymer({
+    		is: "es-catalog-service-list",
+    		properties: {
+    			searchParam: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			},
+    			groupList: {
+    				type: Array,
+    				value: function() {
+    					return []
+    				}
+    			},
+    			serviceList:  {
+    				type: Array,
+    				value: function() {
+    					return [];
+    				}
+    			},
+    			svcGrpObj: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			},
+    			useYnObj: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			}
+    		},
+    		initialized: function() {
+    			UT.request(this.$.regSafetyServiceGroupList)
+    			
+                const me = this;               
+    			const groupObj = me.get("svcGrpObj") || {};
+                me.set("groupList", groupObj.result_data);
+                
+                const list = me.get("groupList") || [];
+                list.unshift({svc_grp_id: "", svc_grp_nm: "전체"})
+                
+    			me.onFindRegSafetyServiceList();
+            },
+    		onFindRegSafetyServiceList: function() {
+                console.log(this.get("searchParam"))
+    			UT.request(this.$.findRegSafetyServiceList);
+                console.log(this.get("serviceList"))
+    		},
+    		onItemClick: function() {
+    			const me = this,
+	                  data = event.detail.data,
+	                  item = event.detail.item,
+	                  yn = data[item.columnName] == "Y" ? "N" : "Y";
+    			
+    			switch(item.columnName){
+    			case "svc_use_yn":
+    				me.set("useYnObj", {
+    					"svc_ctl_id": data["svc_ctl_id"],
+    					"svc_use_yn": yn
+   					})
+    				UT.request(this.$.updateServiceUseYn);
+    				break;
+    			case "magnifying_glass":
+    				me.fire("open-service-detail-pop", data);
+    				break;
+    			case "apply_btn":
+    				me.fire("open-serivce-apply-pop", data);
+    				break;
+    			default:
+    				break;
+    			}
+    		}
+    	})
+    </script>
+</dom-module>

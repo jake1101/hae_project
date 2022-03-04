@@ -1,0 +1,55 @@
+<sc-link rel="import" href="es-catalog-service-list.html"></sc-link>
+<sc-link rel="import" href="ep-catalog-service-detail.html"></sc-link>
+<sc-link rel="import" href="ep-catalog-service-apply.html"></sc-link>
+
+
+<dom-module id="em-catalog-service">
+	<template>
+		<cc-page-title-bar></cc-page-title-bar>
+		<es-catalog-service-list
+			on-open-service-detail-pop="openServiceDetailPop"
+			on-open-service-apply-pop="openServiceApplyPop"
+		></es-catalog-service-list>
+    </template>
+    <script>
+    	Polymer({
+    		is: "em-catalog-service",
+    		openServiceDetailPop: function(event) {
+    			const param = event.detail;
+    			const me = this;
+    			const { svc_ctl_nm } = param;
+    			me.popup = UT.popup(
+    					"ep-catalog-service-detail", 
+    					me,
+    					1300,
+    					800,
+    					{},
+    					{ 
+    						maximizable: true, 
+    						titleText: `${svc_ctl_nm} 자세히 보기`
+    					}
+    			);
+    			me.popup.show();
+    			me.popup.getWindowContent().load(param)
+    		},
+    		openServiceApplyPop: function(event) {
+    			const param = event.detail;
+    			const me = this;
+    			const { svc_ctl_nm } = param;
+    			me.popup = UT.popup(
+    					"ep-catalog-service-apply", 
+    					me,
+    					1300,
+    					800,
+    					{},
+    					{ 
+    						maximizable: true, 
+    						titleText: `${svc_ctl_nm} 자세히 보기`
+    					}
+    			);
+    			me.popup.show();
+    			me.popup.getWindowContent().load(param)
+    		}
+    	})
+    </script>
+</dom-module>

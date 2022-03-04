@@ -1,0 +1,29 @@
+<dom-module id="ep-catalog-service-apply">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+	<template>
+		<cc-sub-title-bar
+			id="subTitle"
+			title-text="자세히"
+		></cc-sub-title-bar>
+		<div class="vspace-10"></div>
+		<div class="hbox flex-5">
+			<div class="vbox flex-5">
+				this is popup
+			</div>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is: "ep-catalog-service-apply",
+			load: function(param) {
+				const {svc_ctl_nm} = param
+				const me = this;
+				me.$.subTitle.titleText = svc_ctl_nm;
+			}
+		})
+	</script>
+</dom-module>
