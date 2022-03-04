@@ -14,13 +14,17 @@
     		openServiceDetailPop: function(event) {
     			const param = event.detail;
     			const me = this;
+    			const { svc_ctl_nm } = param;
     			me.popup = UT.popup(
     					"ep-search-service-detail", 
     					me,
     					1300,
     					800,
     					{},
-    					{ maximizable: true, titleText: "서비스 디테일"}
+    					{ 
+    						maximizable: true, 
+    						titleText: `${svc_ctl_nm} 자세히 보기`
+    					}
     			);
     			me.popup.show();
     			me.popup.getWindowContent().load(param)

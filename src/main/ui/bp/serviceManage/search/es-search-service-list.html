@@ -35,7 +35,7 @@
 					<col style="width: 100px">
 					<col>
 				</colgroup>
-				<tr>
+				<tr style="height: 50px">
 					<th>
 						<sc-label text="서비스 그룹"></sc-label>
 					</th>
@@ -50,12 +50,13 @@
                 		></sc-combobox-field>
                 	</td>
 					<th>
-						<sc-label text="서비스 이름"></sc-label>
+						<sc-label text="키워드 검색"></sc-label>
 					</th>
 					<td>
-						<sc-text-field value="{{searchParam.svc_ctl_nm}}"></sc-text-field>
+						<sc-text-field value="{{searchParam.search}}"></sc-text-field>
 					</td>
 				</tr>
+				<tr></tr>
 			</table>
 		</cc-search-container>
 		<sc-grid 
@@ -66,6 +67,7 @@
 			use-state="false"
 			editable="true"
 		>
+			<cc-grid-toolbar></cc-grid-toolbar>
 			<sc-grid-columns>
 				<sc-data-column 
 					data-field="svc_grp_nm" 
@@ -142,7 +144,9 @@
     			me.onFindRegSafetyServiceList();
             },
     		onFindRegSafetyServiceList: function() {
+                console.log(this.get("searchParam"))
     			UT.request(this.$.findRegSafetyServiceList);
+                console.log(this.get("serviceList"))
     		},
     		onItemClick: function() {
     			const me = this,

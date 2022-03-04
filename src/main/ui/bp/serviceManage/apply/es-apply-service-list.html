@@ -10,29 +10,45 @@
 		<cc-search-container>
 			<table>
 				<colgroup>
+					<col style="width: 50px">
+					<col>
+					<col style="width: 50px">
+					<col>
+					<col style="width: 50px">
+					<col>
 					<col style="width: 100px">
-					<col style="width: 300px">
-					<col style="width: 300px">
-					<col style="width: 500px">
+					<col style="width: 400px">
 					<col style="width: 100px">
 					<col>
 				</colgroup>
-				<tr>
+				<tr style="height: 50px">
+					<th>
+						<sc-label text="구분"></sc-label>
+					</th>
                 	<td>
                 		<sc-combobox-field 
                 			placeholder="구분"
                 		></sc-combobox-field>
                 	</td>
+                	<th>
+						<sc-label text="계열사"></sc-label>
+					</th>
                 	<td>
                 		<sc-combobox-field 
                 			placeholder="계열사"
                 		></sc-combobox-field>
                 	</td>
+                	<th>
+						<sc-label text="사업장"></sc-label>
+					</th>
                 	<td>
                 		<sc-combobox-field 
                 			placeholder="사업장"
                 		></sc-combobox-field>
                 	</td>
+                	<th>
+						<sc-label text="신청서비스"></sc-label>
+					</th>
                 	<td>
                 		<sc-combobox-field 
                 			placeholder="신청 서비스"
@@ -45,9 +61,16 @@
 						<sc-text-field></sc-text-field>
 					</td>
 				</tr>
+				<tr></tr>
 			</table>
 		</cc-search-container>
-		<sc-grid>
+		<sc-grid
+			id="gridPanel"
+			use-selection="false"
+			use-state="false"
+			editable="true"
+		>
+			<cc-grid-toolbar></cc-grid-toolbar>
 			<sc-grid-columns >
 				<sc-data-column data-field="a" header-text="구분" width="100" text-align="center"></sc-data-column>
 				<sc-data-column data-field="b" header-text="계열사" width="300" text-align="center"></sc-data-column>

@@ -26,9 +26,9 @@
 				and tb2.svc_grp_id = #{p.svc_grp_id}
 			</if>
 	
-			<if test="p.svc_ctl_nm != null">
+			<if test="p.search != null">
 				<!-- bind name="svcCtlNmPattern" value="'%' + p.svc_ctl_nm + '%'" /-->
-				and tb1.svc_ctl_nm like '%' || #{p.svc_ctl_nm} || '%'
+				and (tb1.svc_ctl_nm like '%' || #{p.search} || '%' or tb2.svc_grp_nm like '%' || #{p.search} || '%')
 			</if>
 		</where>
     </select>

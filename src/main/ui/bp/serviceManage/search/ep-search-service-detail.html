@@ -7,7 +7,7 @@
 	<template>
 		<cc-sub-title-bar
 			id="subTitle"
-			title-text="서비스 이름"
+			title-text="자세히"
 		></cc-sub-title-bar>
 		<div class="vspace-10"></div>
 		<div class="hbox flex-5">
@@ -19,14 +19,10 @@
 	<script>
 		Polymer({
 			is: "ep-search-service-detail",
-			properties: {
-				
-			},
-			initialized: function() {
-				
-			},
 			load: function(param) {
-				console.log(param)
+				const {svc_ctl_nm} = param
+				const me = this;
+				me.$.subTitle.titleText = svc_ctl_nm;
 			}
 		})
 	</script>

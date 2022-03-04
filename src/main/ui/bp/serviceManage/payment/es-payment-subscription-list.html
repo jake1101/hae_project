@@ -1,0 +1,99 @@
+<dom-module id="es-payment-subscription-list">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+    <template>
+   		<cc-sub-title-bar title-text="구독료 관리 목록"></cc-sub-title-bar>
+   		<cc-search-container>
+			<table>
+				<colgroup>
+					<col style="width: 50px">
+					<col style="width: 150px">
+					<col style="width: 50px">
+					<col style="width: 150px">
+					<col style="width: 100px">
+					<col style="width: 300px">
+
+					<col style="width: 100px">
+					<col style="width: 200px">
+				</colgroup>
+				<tr style="height: 50px">
+					<th>
+						<sc-label text="계열사"></sc-label>
+					</th>
+                	<td>
+                		<sc-combobox-field 
+                			placeholder="계열사"
+                		></sc-combobox-field>
+                	</td>
+                	<th>
+						<sc-label text="사업장"></sc-label>
+					</th>
+                	<td>
+                		<sc-combobox-field 
+                			placeholder="사업장"
+                		></sc-combobox-field>
+                	</td>
+                	<th>
+						<sc-label text="신청 서비스"></sc-label>
+					</th>
+                	<td>
+                		<sc-combobox-field 
+                			placeholder="신청 서비스"
+                		></sc-combobox-field>
+                	</td>
+                	<th rowspan=2>
+						<sc-label text="키워드 검색"></sc-label>
+					</th>
+					<td rowspan=2>
+						<sc-text-field></sc-text-field>
+					</td>
+   	            </tr>
+               	<tr>
+				</tr>
+			</table>
+		</cc-search-container>
+		<sc-grid
+			id="gridPanel"
+			use-selection="false"
+			use-state="false"
+			editable="true"
+		>
+			<cc-grid-toolbar></cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-data-column data-field="b" header-text="계열사" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="c" header-text="사업장" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="d" header-text="신청 서비스" width="400" text-align="center"></sc-data-column>
+				<sc-data-column data-field="e" header-text="서비스 게시일" width="200" text-align="center"></sc-data-column>
+				<sc-data-column data-field="a" header-text="서비스 만료일" width="200" text-align="center"></sc-data-column>
+				<sc-data-column data-field="a" header-text="구독 기간" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="a" header-text="월 구독료" width="150" text-align="center"></sc-data-column>	
+			</sc-grid-columns>
+		</sc-grid>
+		<div class="vspace-10"></div>
+		<sc-grid
+			id="detailGridPanel"
+			use-selection="false"
+			use-state="false"
+			editable="true"
+		>
+			<cc-grid-toolbar title-text="구독료 납부 상세 내역"></cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-data-column data-field="b" header-text="계열사" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="c" header-text="사업장" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="d" header-text="신청 서비스" width="400" text-align="center"></sc-data-column>
+				<sc-data-column data-field="e" header-text="서비스 게시일" width="200" text-align="center"></sc-data-column>
+				<sc-data-column data-field="a" header-text="서비스 만료일" width="200" text-align="center"></sc-data-column>
+				<sc-data-column data-field="a" header-text="구독 기간" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="a" header-text="월 구독료" width="150" text-align="center"></sc-data-column>	
+			</sc-grid-columns>
+		</sc-grid>
+    </template>
+    <script>
+    	Polymer({
+    		is: "es-payment-subscription-list"
+    	})
+    </script>
+</dom-module>
