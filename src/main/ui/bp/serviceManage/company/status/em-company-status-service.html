@@ -1,6 +1,7 @@
 <sc-link rel="import" href="es-company-status-service-list.html"></sc-link>
 <sc-link rel="import" href="ep-company-status-service-update.html"></sc-link>
 <sc-link rel="import" href="ep-company-status-service-apply.html"></sc-link>
+<sc-link rel="import" href="ep-company-status-service-detail.html"></sc-link>
 
 <dom-module id="em-company-status-service">
 	<template>
@@ -8,6 +9,7 @@
 		<es-company-status-service-list
 			on-open-service-update-pop="openServiceUpdatePop"
 			on-open-service-apply-pop="openServiceApplyPop"
+			on-open-service-detail-pop="openServiceDetailPop"
 		></es-company-status-service-list>
     </template>
     <script>
@@ -42,6 +44,23 @@
     					{ 
     						maximizable: true, 
     						titleText: `서비스 변경 신청`
+    					}
+    			);
+    			me.popup.show();
+    			me.popup.getWindowContent().load(param)
+    		},
+    		openServiceDetailPop: function(event){
+    			const param = event.detail;
+    			const me = this;
+    			me.popup = UT.popup(
+    					"ep-company-status-service-detail", 
+    					me,
+    					800,
+    					800,
+    					{},
+    					{ 
+    						maximizable: true, 
+    						titleText: `서비스 이용 상세 내역`
     					}
     			);
     			me.popup.show();
