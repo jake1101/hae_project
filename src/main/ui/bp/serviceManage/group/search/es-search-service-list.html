@@ -74,23 +74,29 @@
 					header-text="서비스 그룹" width="500" 
 					text-align="center"
 				></sc-data-column>
-				<sc-data-column 
-					data-field="svc_ctl_nm" 
-					header-text="서비스 명" 
-					width="800" 
-					text-align="center"
-				></sc-data-column>
-				<sc-image-column 
-					data-field="magnifying_glass" 
-					header-text="자세히" 
-					singular-source="/ui/assets/img/serviceManage/icon_magnifying_glass.png" 
-					image-display="auto"
-				></sc-image-column>
+				<sc-group-column 
+					hide-child-headers="true" 
+					header-text="서비스 명"  
+					width="600"
+				>
+					<sc-data-column
+						data-field="svc_ctl_nm"  
+						width="600" 
+						text-align="center"
+					></sc-data-column>
+					<sc-image-column 
+						data-field="magnifying_glass" 
+						singular-source="/ui/assets/img/serviceManage/icon_magnifying_glass.png" 
+						image-display="auto"
+					></sc-image-column>
+				</sc-group-column>
 				<sc-checkbox-column 
 					data-field="svc_use_yn" 
 					header-text="사용상태" 
 					text-align="center" 
-					display-checkbox="false" 
+					display-checkbox="false"
+					checked-value="1" 
+					un-checked-value="0"
 					editable="true"
 				></sc-checkbox-column>
 			</sc-grid-columns>
@@ -150,24 +156,22 @@
     		},
     		onItemClick: function() {
     			const me = this,
-	                  data = event.detail.data,
-	                  item = event.detail.item,
-	                  yn = data[item.columnName] == "Y" ? "N" : "Y";
-    			
-    			switch(item.columnName){
-    			case "svc_use_yn":
-    				me.set("useYnObj", {
-    					"svc_ctl_id": data["svc_ctl_id"],
-    					"svc_use_yn": yn
-   					})
-    				UT.request(this.$.updateServiceUseYn);
-    				break;
-    			case "magnifying_glass":
-    				me.fire("open-service-detail-pop", data);
-    				break;
-    			default:
-    				break;
-    			}
+                	{data: d} = event.detail,
+	       		  	{columnName: cn} = event.detail.item,
+	                yn = d[cn] == "1" ? "0" : "1";
+				switch(cn){
+				case "svc_use_yn":
+					me.set("useYnObj", {
+						"svc_ctl_id": d["svc_ctl_id"],
+						"svc_use_yn": yn
+						})
+					UT.request(this.$.updateServiceUseYn);
+					break;
+				default:
+					if(cn == "svc_ctl_nm" || cn == "magnifying_glass")
+						me.fire("open-service-detail-pop", d);
+					break;
+				}
     		}
     	})
     </script>
