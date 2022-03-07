@@ -1,25 +1,25 @@
-<sc-link rel="import" href="es-catalog-service-list.html"></sc-link>
-<sc-link rel="import" href="ep-catalog-service-detail.html"></sc-link>
-<sc-link rel="import" href="ep-catalog-service-apply.html"></sc-link>
+<sc-link rel="import" href="es-company-catalog-service-list.html"></sc-link>
+<sc-link rel="import" href="ep-company-catalog-service-detail.html"></sc-link>
+<sc-link rel="import" href="ep-company-catalog-service-apply.html"></sc-link>
 
 
-<dom-module id="em-catalog-service">
+<dom-module id="em-company-catalog-service">
 	<template>
 		<cc-page-title-bar></cc-page-title-bar>
-		<es-catalog-service-list
+		<es-company-catalog-service-list
 			on-open-service-detail-pop="openServiceDetailPop"
 			on-open-service-apply-pop="openServiceApplyPop"
-		></es-catalog-service-list>
+		></es-company-catalog-service-list>
     </template>
     <script>
     	Polymer({
-    		is: "em-catalog-service",
+    		is: "em-company-catalog-service",
     		openServiceDetailPop: function(event) {
     			const param = event.detail;
     			const me = this;
     			const { svc_ctl_nm } = param;
     			me.popup = UT.popup(
-    					"ep-catalog-service-detail", 
+    					"ep-company-catalog-service-detail", 
     					me,
     					800,
     					800,
@@ -37,7 +37,7 @@
     			const me = this;
     			const { svc_ctl_nm } = param;
     			me.popup = UT.popup(
-    					"ep-catalog-service-apply", 
+    					"ep-company-catalog-service-apply", 
     					me,
     					800,
     					500,
