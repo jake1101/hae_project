@@ -1,0 +1,154 @@
+<dom-module id="ep-company-status-service-update">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+	<template>
+		<cc-sub-title-bar
+			id="subTitle"
+			title-text="자세히"
+		></cc-sub-title-bar>
+		<div class="vspace-10"></div>
+		<div style="color: red;">(*표시는 필수 입력 항목)</div>
+		<table class="tb-form">
+			<tr>
+				<th rowspan=3>
+					<sc-label text="변경 사유*"></sc-label>
+				</th>
+				<td colspan=3>
+					<sc-combobox-field
+						placeholder="구독기간 변경"
+					></sc-combobox-field>
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3>
+					<sc-combobox-field
+						placeholder="디바이스 수량 변경"
+					></sc-combobox-field>
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3>
+					<sc-text-field
+						placeholder="(변경 사유 내용 상세 입력)"
+						style="height: 100px;"
+					></sc-text-field>
+				</td>
+			</tr>
+			<tr>
+				<th style="background: #ccc !important;"></th>
+				<th></th>
+				<th>
+					<sc-label text="번경 전"></sc-label>
+				</th>
+				<th>
+					<sc-label text="변경 후"></sc-label>
+				</th>
+			</tr>
+			<tr>
+				<th style="background: #ccc !important;"></th>
+				<th>
+					<sc-label text="구독기간(약정기간)*"></sc-label>
+				</th>
+				<td>
+					12개월
+				</td>
+				<td>
+					<sc-combobox-field
+						placeholder="12개월"
+					></sc-combobox-field>
+				</td>
+			</tr>
+			<tr>
+				<th rowspan=3>
+					<sc-label text="디바이스 수량"></sc-label>
+				</th>
+				<th>
+					<sc-label text="스마트태그*"></sc-label>
+				</th>
+				<td>
+					100대
+				</td>
+				<td>
+					<div style="display: flex; gap: 10px; align-items: center;">
+						<sc-text-field></sc-text-field>
+						대
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="비콘*"></sc-label>
+				</th>
+				<td>
+					100대
+				</td>
+				<td>
+					<div style="display: flex; gap: 10px; align-items: center;">
+						<sc-text-field></sc-text-field>
+						대
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="중계기*"></sc-label>
+				</th>
+				<td>
+					10대
+				</td>
+				<td>
+					<div style="display: flex; gap: 10px; align-items: center;">
+						<sc-text-field></sc-text-field>
+						대
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th style="background: #ccc !important;"></th>
+				<th>
+					<sc-label text="서비스 만료 예정일"></sc-label>
+				</th>
+				<td>
+					2023.02.14
+				</td>
+				<td>
+					<div style="display: flex; gap: 10px;">
+						<sc-button text="조회"></sc-button>
+						<div></div>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th style="background: #ccc !important;"></th>
+				<th>
+					<sc-label text="예상 월 구독료"></sc-label>
+				</th>
+				<td>
+					1,200,000
+				</td>
+				<td>
+					<div style="display: flex; gap: 10px;">
+						<sc-button text="조회"></sc-button>
+						<div></div>
+					</div>
+				</td>
+			</tr>
+		</table>
+		<div style="margin-top: 30px; margin-right: 50px; display: flex; justify-content: flex-end; gap: 20px;">
+			<sc-button text="변경 신청" style="width: 100px; padding: 10px;"></sc-button>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is: "ep-company-status-service-update",
+			load: function(param) {
+				console.log(param)
+				const me = this;
+				me.$.subTitle.titleText = `이동형 비전센서 > 이동형 비전센서 활용 작업자 안전 관리`;
+			}
+		})
+	</script>
+</dom-module>

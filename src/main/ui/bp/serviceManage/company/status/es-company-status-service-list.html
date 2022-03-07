@@ -1,19 +1,23 @@
-<dom-module id="es-payment-subscription-list">
+<dom-module id="es-company-status-service-list">
 	<style>
         :host {
             @apply(--vbox-layout);
         }
     </style>
-    <template>
-   		<cc-sub-title-bar title-text="구독료 관리 목록"></cc-sub-title-bar>
-   		<cc-search-container>
+	<template>
+		<cc-sub-title-bar title-text="서비스 이용 목록"></cc-sub-title-bar>
+		<cc-search-container>
 			<table>
 				<colgroup>
 					<col style="width: 50px;">
 					<col style="width: 150px;">
 					<col style="width: 50px;">
 					<col style="width: 150px;">
-					<col style="width: 100px;">
+					<col style="width: 80px;">
+					<col style="width: 300px;">
+					<col style="width: 95px;">
+					<col style="width: 60px;">
+					<col style="width: 95px;">
 					<col>
 					<col style="width: 100px;">
 					<col>
@@ -43,6 +47,20 @@
                 			placeholder="신청 서비스"
                 		></sc-combobox-field>
                 	</td>
+                	<th>
+                		<sc-label text="이용중인 서비스만 조회"></sc-label>
+                	</th>
+              	    <td>
+                		<sc-checkbox-field>
+                		</sc-checkbox-field>
+                	</td>
+                	<th>
+                		<sc-label text="장바구니 저장 서비스만 조회"></sc-label>
+                	</th>
+              	    <td>
+                		<sc-checkbox-field>
+                		</sc-checkbox-field>
+                	</td>
                 	<th rowspan=2>
 						<sc-label text="키워드 검색"></sc-label>
 					</th>
@@ -61,38 +79,38 @@
 			editable="true"
 		>
 			<cc-grid-toolbar></cc-grid-toolbar>
-			<sc-grid-columns>
+			<sc-grid-columns >
 				<sc-data-column data-field="b" header-text="계열사" width="150" text-align="center"></sc-data-column>
 				<sc-data-column data-field="c" header-text="사업장" width="150" text-align="center"></sc-data-column>
 				<sc-data-column data-field="d" header-text="신청 서비스" width="400" text-align="center"></sc-data-column>
 				<sc-data-column data-field="e" header-text="서비스 게시일" width="200" text-align="center"></sc-data-column>
 				<sc-data-column data-field="a" header-text="서비스 만료일" width="200" text-align="center"></sc-data-column>
 				<sc-data-column data-field="a" header-text="구독 기간" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="a" header-text="월 구독료" width="150" text-align="center"></sc-data-column>	
+				<sc-data-column data-field="a" header-text="월 구독료" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="a" header-text="상태" width="100" text-align="center"></sc-data-column>
+				<sc-group-column
+					hide-child-headers="true" 
+					header-text=""  
+					width="150"
+				>
+					<sc-button-column data-field="a" header-text="" width="100" text-align="center"></sc-data-column>
+					<sc-image-column 
+						data-field="magnifying_glass" 
+						singular-source="/ui/assets/img/serviceManage/icon_magnifying_glass.png" 
+						image-display="auto"
+					></sc-image-column>
+				</sc-group-column>
 			</sc-grid-columns>
 		</sc-grid>
-		<div class="vspace-10"></div>
-		<sc-grid
-			id="detailGridPanel"
-			use-selection="false"
-			use-state="false"
-			editable="true"
-		>
-			<cc-grid-toolbar title-text="구독료 납부 상세 내역"></cc-grid-toolbar>
-			<sc-grid-columns>
-				<sc-data-column data-field="b" header-text="계열사" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="c" header-text="사업장" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="d" header-text="신청 서비스" width="400" text-align="center"></sc-data-column>
-				<sc-data-column data-field="e" header-text="서비스 게시일" width="200" text-align="center"></sc-data-column>
-				<sc-data-column data-field="a" header-text="서비스 만료일" width="200" text-align="center"></sc-data-column>
-				<sc-data-column data-field="a" header-text="구독 기간" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="a" header-text="월 구독료" width="150" text-align="center"></sc-data-column>	
-			</sc-grid-columns>
-		</sc-grid>
-    </template>
-    <script>
-    	Polymer({
-    		is: "es-payment-subscription-list"
-    	})
-    </script>
+	</template>
+
+	<script>
+		Polymer({
+			is: "es-company-status-service-list",
+			initialized: function() {
+                const me = this;               
+                me.fire("open-service-update-pop", "");
+            },
+		})
+	</script>
 </dom-module>
