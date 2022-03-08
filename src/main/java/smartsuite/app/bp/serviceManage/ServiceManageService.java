@@ -165,6 +165,29 @@ public class ServiceManageService {
 		
 		return resultMap;
 	}
+	
+	/**
+	 * 사업장 목록 조회
+	 *
+	 * @author : 
+	 * @param param the param
+	 * @Date : 2022. 2. 24
+	 * @Method Name : 
+	 */
+	public Map getWPCList(Map<String,Object> param) {
+		
+		if (param.containsKey("access_level") && param.get("access_level").equals("company")) {
+			param.put("user_company_id", Auth.getCurrentUserInfo().get("user_company_id") );
+		}
+
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+		
+		List list =  sqlSession.selectList("serviceManageApi.getWPCList", param);
+		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
+		resultMap.put(Const.RESULT_DATA, list);
+		
+		return resultMap;
+	}
 		
 	
 	/**

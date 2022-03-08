@@ -96,4 +96,19 @@ public class ServiceManageController {
 	public @ResponseBody Map<String,Object> getDevicesByCatalogId(@RequestBody Map param) {
 		return ServiceManageService.getDevicesByCatalogId(param);
 	}	
+	
+	/**
+	 * 사업장 목록 조회
+	 *
+	 * @author : hjh
+	 * @param isSelectAll String Optional 0: 해당 회사의 사업장 목록만 조회, 1: 회사와 관계없이 전체 사업장 목록 조회
+	 * @return the map<string, object>: result_status String, result_data List
+	 * @Date : 2022. 02. 24
+	 * @Method Name : getWPCList
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "getWPCList.do")
+	public @ResponseBody Map<String,Object> getWPCList(@RequestBody Map param) {
+		return ServiceManageService.getWPCList(param);
+	}	
 }
