@@ -1,0 +1,95 @@
+<dom-module id="ep-company-status-service-detail">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+	<template>
+		<cc-sub-title-bar
+			id="subTitle"
+			title-text="서비스 이용 상세 내역 [바디캠 활용 작업자 위험상황 관제]"
+		></cc-sub-title-bar>
+		<div class="vspace-10"></div>
+		<table class="tb-form">
+			<tr>
+				<th>사업장</th>
+				<td>당진제철소</td>
+				<th>서비스 신청일</th>
+				<td>2021-12-20</td>
+			</tr>
+			<tr>
+				<th>서비스 개시 요청일</th>
+				<td>2022-01-02</td>
+				<th>서비스 만료 예정일</th>
+				<td>2023-12-20</td>
+			</tr>
+			<tr>
+				<th>구독기간(약정기간)</th>
+				<td colspan=3>
+					<div style="display: flex;">
+						<div>12</div>
+						개월
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th rowspan=3>디바이스 수량</th>
+				<th>바디캠*</th>
+				<td colspan=2>
+					<div style="display: flex;">
+						<div>100</div>
+						대
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th>CCTV</th>
+				<td colspan=2>
+					<div style="display: flex;">
+						<div>15</div>
+						대
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th>무선중계기</th>
+				<td colspan=2>
+					<div style="display: flex;">
+						<div>0</div>
+						대
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th>월 구독료</th>
+				<td colspan=3>
+					<div style="display: flex;">
+						<div>1,200,000</div>
+						원 (VAT별도)
+					</div>
+				</td>
+			</tr>
+		</table>
+		
+		<sc-grid
+			id="gridPanel"
+			use-selection="false"
+			use-state="false"
+			editable="true"
+		>
+			<cc-grid-toolbar title-text="구독료 납부 현황"></cc-grid-toolbar>
+			<sc-grid-columns >
+				<sc-data-column data-field="b" header-text="납부 예정일" width="180" text-align="center"></sc-data-column>
+				<sc-data-column data-field="c" header-text="납부 상태" width="180" text-align="center"></sc-data-column>
+				<sc-data-column data-field="d" header-text="납부 완료일" width="180" text-align="center"></sc-data-column>
+				<sc-data-column data-field="e" header-text="확인자" width="180" text-align="center"></sc-data-column>
+			</sc-grid-columns>
+		</sc-grid>
+	</template>
+
+<script>
+	Polymer({
+		is: "ep-company-status-service-detail"
+	})
+</script>
+</dom-module>

@@ -28,7 +28,7 @@ import smartsuite.security.annotation.AuthCheck;
  */
 @SuppressWarnings ({ "rawtypes", "unchecked" })
 @Controller
-@RequestMapping (value = "**/bp/**/")
+@RequestMapping (value = "**/bp/serviceManage/**/")
 public class ServiceManageController {
 
 	/** The user service. */
@@ -79,6 +79,50 @@ public class ServiceManageController {
 	@RequestMapping (value = "updateServiceUseYn.do")
 	public @ResponseBody Map<String,Object> updateServiceUseYn(@RequestBody Map param) {
 		return ServiceManageService.updateServiceUseYn(param);
+	}
+	
+	/**
+	 * 서비스 신청하기. 
+	 *
+	 * @author : jake
+	 * @param param the param
+	 * @Date : 2022. 3. 8
+	 * @Method Name : applyService
+	 */ 
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "applyService.do")
+	public @ResponseBody Map<String,Object> applyService(@RequestBody Map param) {
+		return ServiceManageService.applyService(param);
 	}	
 	
+	/**
+	 * 서비스카타로그별 디바이스 목록 조회
+	 *
+	 * @author : hjh
+	 * @param SVC_CTL_ID String
+	 * @param SVC_USE_YN String Optional
+	 * @return the map<string, object>: result_status String, result_data List
+	 * @Date : 2022. 02. 24
+	 * @Method Name : getDevicesByCatalogId
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "getDevicesByCatalogId.do")
+	public @ResponseBody Map<String,Object> getDevicesByCatalogId(@RequestBody Map param) {
+		return ServiceManageService.getDevicesByCatalogId(param);
+	}	
+	
+	/**
+	 * 사업장 목록 조회
+	 *
+	 * @author : hjh
+	 * @param isSelectAll String Optional 0: 해당 회사의 사업장 목록만 조회, 1: 회사와 관계없이 전체 사업장 목록 조회
+	 * @return the map<string, object>: result_status String, result_data List
+	 * @Date : 2022. 02. 24
+	 * @Method Name : getWPCList
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "getWPCList.do")
+	public @ResponseBody Map<String,Object> getWPCList(@RequestBody Map param) {
+		return ServiceManageService.getWPCList(param);
+	}	
 }
