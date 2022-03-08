@@ -148,6 +148,26 @@ public class ServiceManageService {
 	}
 
 	/**
+	 * 서비스카타로그별 디바이스 목록 조회
+	 *
+	 * @author : 
+	 * @param param the param
+	 * @Date : 2022. 2. 24
+	 * @Method Name : 
+	 */
+	public Map getDevicesByCatalogId(Map<String,Object> param) {
+		
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+		
+		List list =  sqlSession.selectList("serviceManageApi.getDevicesByCatalogId", param);
+		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
+		resultMap.put(Const.RESULT_DATA, list);
+		
+		return resultMap;
+	}
+		
+	
+	/**
 	 * 메일을 전송한다. 
 	 *
 	 * @author : JongHyeok Choi

@@ -34,6 +34,29 @@
 		</where>
     </select>
     
+    <select id="getDevicesByCatalogId" resultType="map">
+		SELECT A.DVC_ID, A.MDT_YN, B.DVC_NM
+		FROM CORNERS.SVC_CTL_DVC A
+			JOIN CORNERS.DEVICE_TEMP B ON A.DVC_ID = B.DVC_ID
+		<where>
+			AND A.SVC_CTL_ID = #{p.svc_ctl_id}
+			
+			<if test="p.mdt_yn != null">
+				and A.MDT_YN = #{p.mdt_yn}
+			</if>
+		</where>
+    </select>
+    
+    <select id="TEST2" resultType="map">
+
+		SELECT 'CD0012', '12개월'
+		UNION ALL
+		SELECT 'CD0024', '24개월'
+		UNION ALL
+		SELECT 'CD0036', '36개월'
+
+    </select>
+    
     
     <!-- 사용여부(SVC_CTL.SVC_USE_YN)을 수정한다. -->
 	<update id="updateServiceUseYn">

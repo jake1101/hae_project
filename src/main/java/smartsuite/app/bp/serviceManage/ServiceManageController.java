@@ -28,7 +28,7 @@ import smartsuite.security.annotation.AuthCheck;
  */
 @SuppressWarnings ({ "rawtypes", "unchecked" })
 @Controller
-@RequestMapping (value = "**/bp/**/")
+@RequestMapping (value = "**/bp/serviceManage/**/")
 public class ServiceManageController {
 
 	/** The user service. */
@@ -81,4 +81,19 @@ public class ServiceManageController {
 		return ServiceManageService.updateServiceUseYn(param);
 	}	
 	
+	/**
+	 * 서비스카타로그별 디바이스 목록 조회
+	 *
+	 * @author : hjh
+	 * @param SVC_CTL_ID String
+	 * @param SVC_USE_YN String Optional
+	 * @return the map<string, object>: result_status String, result_data List
+	 * @Date : 2022. 02. 24
+	 * @Method Name : getDevicesByCatalogId
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "getDevicesByCatalogId.do")
+	public @ResponseBody Map<String,Object> getDevicesByCatalogId(@RequestBody Map param) {
+		return ServiceManageService.getDevicesByCatalogId(param);
+	}	
 }
