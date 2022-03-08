@@ -5,6 +5,12 @@
 		}
 	</style>
 	<template>
+		<sc-ajax
+			id="applyService"
+			url="applyService.do"
+			body="{{applyService}}"
+		></sc-ajax>
+		
 		<cc-sub-title-bar
 			id="subTitle"
 			title-text="자세히"
@@ -104,16 +110,41 @@
 		</table>
 		<div style="margin-top: 30px; display: flex; justify-content: center; gap: 20px;">
 			<sc-button text="장바구니 저장" style="width: 100px; padding: 10px;"></sc-button>
-			<sc-button text="신청" style="width: 100px; padding: 10px;"></sc-button>
+			<sc-button text="신청" style="width: 100px; padding: 10px;" on-click="onApplyClick"></sc-button>
 		</div>
 	</template>
 	<script>
 		Polymer({
 			is: "ep-company-catalog-service-apply",
+			properties: {
+				selectedService: {
+					type: Object,
+    				value: function() {
+    					return {};
+    				}
+				},
+				applyService: {
+					type: Object,
+    				value: function() {
+    					return {};
+    				}
+				}
+			},
 			load: function(param) {
-				const {svc_ctl_nm} = param
-				const me = this;
+				const {
+					svc_ctl_id,
+					svc_ctl_nm
+					} = param,
+					me = this;
 				me.$.subTitle.titleText = `서비스 신청하기 (${svc_ctl_nm})`;
+				me.set("selectedService", param);
+			},
+			onApplyClick: function(){
+				const me = this
+				svc_id = "svc"+me.get("selectedService")["svc_ctl_id"].substr(-5);
+
+				me.set("applyService", {svc_id});
+				UT.request(this.$.applyService);
 			}
 		})
 	</script>
