@@ -79,6 +79,20 @@ public class ServiceManageController {
 	@RequestMapping (value = "updateServiceUseYn.do")
 	public @ResponseBody Map<String,Object> updateServiceUseYn(@RequestBody Map param) {
 		return ServiceManageService.updateServiceUseYn(param);
+	}
+	
+	/**
+	 * 서비스 신청하기. 
+	 *
+	 * @author : jake
+	 * @param param the param
+	 * @Date : 2022. 3. 8
+	 * @Method Name : applyService
+	 */ 
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "applyService.do")
+	public @ResponseBody Map<String,Object> applyService(@RequestBody Map param) {
+		return ServiceManageService.applyService(param);
 	}	
 	
 	/**

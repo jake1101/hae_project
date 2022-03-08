@@ -42,6 +42,16 @@
 		SET SVC_USE_YN = #{p.svc_use_yn}
 		WHERE SVC_CTL_ID = #{p.svc_ctl_id}
 	</update>
+	
+	<!-- 서비스 신청하기 -->
+	<!-- by jake -->
+	<insert id="applyService">
+		INSERT INTO
+			corners.svc_req
+		VALUES (
+			#{p.svc_id}
+		);
+	</insert>
     
     <select id="findListUserByLevel" resultType="map">
     /* user.findListUserByLevel: 내부 사용자 목록 조회 */	
