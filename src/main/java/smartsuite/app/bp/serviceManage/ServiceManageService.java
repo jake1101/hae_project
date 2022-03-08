@@ -146,7 +146,67 @@ public class ServiceManageService {
 		return resultMap;
 		
 	}
+	
+	/**
+	 * 서비스 신청하기. 
+	 *
+	 * @author : jake
+	 * @param param the param
+	 * @Date : 2022. 3. 8
+	 * @Method Name : applyService
+	 */ 
+	public Map<String,Object> applyService(Map param) {
 
+		sqlSession.insert("serviceManageApi.applyService", param);
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		return resultMap;
+	}
+
+	/**
+	 * 서비스카타로그별 디바이스 목록 조회
+	 *
+	 * @author : 
+	 * @param param the param
+	 * @Date : 2022. 2. 24
+	 * @Method Name : 
+	 */
+	public Map getDevicesByCatalogId(Map<String,Object> param) {
+		
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+		
+		List list =  sqlSession.selectList("serviceManageApi.getDevicesByCatalogId", param);
+		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
+		resultMap.put(Const.RESULT_DATA, list);
+		
+		return resultMap;
+	}
+	
+	/**
+	 * 사업장 목록 조회
+	 *
+	 * @author : 
+	 * @param param the param
+	 * @Date : 2022. 2. 24
+	 * @Method Name : 
+	 */
+	public Map getWPCList(Map<String,Object> param) {
+		
+		Map userInfo = Auth.getCurrentUserInfo();
+
+		if (!(userInfo.get("access_level").equals("system"))) {
+			param.put("user_company_id", userInfo.get("user_company_id") );
+		}
+
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+		
+		List list =  sqlSession.selectList("serviceManageApi.getWPCList", param);
+		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
+		resultMap.put(Const.RESULT_DATA, list);
+		
+		return resultMap;
+	}
+	
 	/**
 	 * 메일을 전송한다. 
 	 *
