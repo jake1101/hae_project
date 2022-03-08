@@ -192,8 +192,10 @@ public class ServiceManageService {
 	 */
 	public Map getWPCList(Map<String,Object> param) {
 		
-		if (param.containsKey("access_level") && param.get("access_level").equals("company")) {
-			param.put("user_company_id", Auth.getCurrentUserInfo().get("user_company_id") );
+		Map userInfo = Auth.getCurrentUserInfo();
+
+		if (!(userInfo.get("access_level").equals("system"))) {
+			param.put("user_company_id", userInfo.get("user_company_id") );
 		}
 
 		Map<String,Object> resultMap = new HashMap<String, Object>();
@@ -204,7 +206,6 @@ public class ServiceManageService {
 		
 		return resultMap;
 	}
-		
 	
 	/**
 	 * 메일을 전송한다. 
