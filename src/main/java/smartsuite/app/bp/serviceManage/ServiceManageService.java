@@ -146,6 +146,22 @@ public class ServiceManageService {
 		return resultMap;
 		
 	}
+	
+	/**
+	 * 서비스 신청하기. 
+	 *
+	 * @author : jake
+	 * @param param the param
+	 * @Date : 2022. 3. 8
+	 * @Method Name : applyService
+	 */ 
+	public Map<String,Object> applyService(Map param) {
+
+		sqlSession.insert("serviceManageApi.applyService", param);
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		return resultMap;
+	}
 
 	/**
 	 * 서비스카타로그별 디바이스 목록 조회
