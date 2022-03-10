@@ -9,6 +9,11 @@
 			<sc-code-group>
                 <sc-code code="CRN001" value="{{codes.term}}" ></sc-code> <!-- 사용여부 -->
             </sc-code-group>
+            <sc-ajax
+            	id="getWPCList"
+            	url="getWPCList.do"
+            	last-response="{{wpcResult}}"
+            ></sc-ajax>
 		</sc-request-group>
 		
 			
@@ -37,6 +42,11 @@
 				</th>
 				<td colspan=2>
 					<sc-combobox-field
+						id="wpc_list"
+					 	items="{{wpcList}}"
+					 	value="{{setParam.wpc_id}}"
+					 	display-field="name" 
+					 	value-field="id" 
 						placeholder="사업장"
 					></sc-combobox-field>
 				</td>
@@ -68,12 +78,12 @@
 				</th>
 				<td colspan=2>
 					<sc-combobox-field
-						id="sst_term"
+						id="sst_trm"
 					 	items="{{codes.term}}"
+						value="{{setParam.sst_trm}}"
 					 	display-field="label" 
 					 	value-field="data" 
 						placeholder="기간"
-						value="{{setParam.sst_trm}}"
 					></sc-combobox-field>
 				</td>
 			</tr>
@@ -98,8 +108,12 @@
 				</th>
 				<td colspan=2>
 					<div style="display: flex; align-items: center; gap: 10px;">
-						<sc-button text="조회"></sc-button>
-						<div></div>
+						<sc-button 
+							text="조회"
+							on-click="onEstimatedFeeClick"
+						></sc-button>
+						<div id="estimatedFee">
+						</div>
 					</div>
 				</td>
 			</tr>
@@ -122,6 +136,26 @@
                         };
                     }
                 },
+                companyId: {
+                	type: Object,
+                	value: function() {
+                		return {
+                			user_company_id: "1"
+                		}
+                	}
+                },
+                wpcResult: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				},
+				wpcList: {
+					type: Object,
+					value: function() {
+						return [];
+					}
+				},
 				selectedService: {
 					type: Object,
     				value: function() {
@@ -132,6 +166,12 @@
 					type: Object,
 					value: function() {
 						return {};
+					}
+				},
+				deviceList: {
+					type: Array,
+					value: function() {
+						return [];
 					}
 				},
 				applyParam: {
@@ -148,10 +188,9 @@
 				}	
 			},
 			initialized: function() {
-                var me = this;
-                
-                var term = me.get("codes.term") || [];
-                console.log(term)
+                const me = this;
+                const term = me.get("codes.term") || [];
+                me.set("wpcList", me.get("wpcResult").result_data);
             },
 			load: function(param) {
 				const {
@@ -185,6 +224,7 @@
 							</tr>
 						`);
 					})
+					me.set("deviceList", list);
 				});
 			},
 			onEndDateClick: function() {
@@ -195,24 +235,34 @@
 					  
 				date.setMonth(date.getMonth() + term);
 				
-				const y = date.getFullYear(),
-					  m = date.getMonth()+1,
-					  d = date.getDate();
+				const y = date.getFullYear() || "",
+					  m = date.getMonth()+1 || "",
+					  d = date.getDate() || "";
 				
 				me.$.term.textContent = `${y}. ${m}. ${d}`;
 			},
+			onEstimatedFeeClick: function() {
+				const me = this;
+				const commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+				const num = 100000;
+				let total = 0;
+				
+				const dvcList = me.get("deviceList").map(l => {
+					const qtt = document.getElementById(l.dvc_id).value;
+					const price = l.dvc_nm.length * num * Number(qtt);
+					total += price;
+					
+					return Object.assign(l, {qtt, price})
+				});
+				
+				me.$.estimatedFee.textContent = `${commaNum(total)} (VAT별도)`;
+				Object.assign(me.get("setParam"), {"dvc_list": dvcList, "fee": commaNum(total)});
+			},
 			onApplyClick: function(){
 				const me = this,
-					  svc_id = "SVC"+me.get("selectedService")["svc_ctl_id"].substr(-5),
-					  dvcFieldList = document.getElementsByClassName("dvcField"),
-					  dvcList = [];
-				
-				for(let i=0; i<dvcFieldList.length; i++){
-					dvcList.push({svc_id, "dvc_id": dvcFieldList[i].id, "qtt": dvcFieldList[i].value});
-				}
+					  svc_id = "SVC"+me.get("selectedService")["svc_ctl_id"].substr(-5);
 
 				Object.assign(me.get("applyParam"), {svc_id});
-				Object.assign(me.get("applyParam"), {"device": dvcList});
 				Object.assign(me.get("applyParam"), me.get("setParam"));
 
 				UT.request(this.$.applyService);
