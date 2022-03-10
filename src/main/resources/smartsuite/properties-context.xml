@@ -16,6 +16,8 @@
 	<util:properties id="loggingProperties" location="classpath:smartsuite/properties/logging.properties" />	
 	<util:properties id="file" location="classpath:smartsuite/properties/file.properties" />
 	<util:properties id="raycomAPI" location="classpath:smartsuite/properties/raycomAPI.properties" />
+	<!-- 일반 프로퍼티 To Corners -->
+	<util:properties id="cornersAPI" location="classpath:smartsuite/properties/cornersAPI.properties" />
 <!-- 	<util:properties id="mimeTypes" location="classpath:smartsuite/properties/mime-types.properties" /> -->
 
 	<!-- 암호화 적용 -->

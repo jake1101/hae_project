@@ -26,7 +26,7 @@ import smartsuite.security.authentication.Auth;
 @Service
 public class RestfulUtilServiceToCorners {
 	
-	@Value ("#{raycomAPI['corners.api.url']}")
+	@Value ("#{cornersAPI['corners.api.url']}")
 	String CORNERSURL;
 	
 	@Value ("#{raycomAPI['raycom.api.url']}")
