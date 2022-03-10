@@ -46,17 +46,14 @@
 			</if>
 		</where>
     </select>
-    
-    <select id="TEST2" resultType="map">
 
-		SELECT 'CD0012', '12개월'
-		UNION ALL
-		SELECT 'CD0024', '24개월'
-		UNION ALL
-		SELECT 'CD0036', '36개월'
-
-    </select>
-    
+	<select id="getWPCList" resultType="map">
+		select id, name
+		from v4.site
+		<if test='p.user_company_id != ""'>
+			where company_id = #{p.user_company_id}
+		</if>
+	</select>
     
     <!-- 사용여부(SVC_CTL.SVC_USE_YN)을 수정한다. -->
 	<update id="updateServiceUseYn">
