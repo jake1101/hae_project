@@ -50,7 +50,11 @@
 	<select id="getWPCList" resultType="map">
 		select id, name
 		from v4.site
+<<<<<<< HEAD
 		<if test='p.user_company_id != ""'>
+=======
+		<if test='p.user_company_id != null'>
+>>>>>>> branch 'dev' of https://github.com/jake1101/hae_project.git
 			where company_id = #{p.user_company_id}
 		</if>
 	</select>
