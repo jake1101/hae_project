@@ -50,7 +50,7 @@
 	<select id="getWPCList" resultType="map">
 		select id, name
 		from v4.site
-		<if test='p.user_company_id != ""'>
+		<if test='p.user_company_id != null'>
 			where company_id = #{p.user_company_id}
 		</if>
 	</select>
