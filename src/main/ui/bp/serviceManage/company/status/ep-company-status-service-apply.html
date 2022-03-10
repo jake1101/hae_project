@@ -1,0 +1,119 @@
+<dom-module id="ep-company-status-service-apply">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+	<template>
+		<cc-sub-title-bar
+			id="subTitle"
+			title-text="자세히"
+		></cc-sub-title-bar>
+		<div class="vspace-10"></div>
+		<div style="color: red;">(*표시는 필수 입력 항목)</div>
+		<table class="tb-form">
+			<tr>
+				<th>
+					<sc-label text="사업장*"></sc-label>
+				</th>
+				<td colspan=2>
+					<sc-combobox-field
+						placeholder="사업장"
+					></sc-combobox-field>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="서비스 개시 요청일*"></sc-label>
+				</th>
+				<td colspan=2>
+					<div style="display: flex; gap: 10px; align-items: center;">
+						<sc-date-field style="width: 150px;"></sc-date-field>
+   						~
+  						</div>
+				</td>
+			</tr>
+			<tr>
+				<th rowspan=3>
+					<sc-label text="디바이스 수량"></sc-label>
+				</th>
+				<th>
+					<sc-label text="이동형 비전센서*"></sc-label>
+				</th>
+				<td>
+					<div style="display: flex; gap: 10px; align-items: center;">
+						<sc-text-field></sc-text-field>
+						대
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="CCTV"></sc-label>
+				</th>
+				<td>
+					<div style="display: flex; gap: 10px; align-items: center;">
+						<sc-text-field></sc-text-field>
+						대
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="무선 중계기"></sc-label>
+				</th>
+				<td>
+					<div style="display: flex; gap: 10px; align-items: center;">
+						<sc-text-field></sc-text-field>
+						대
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="구독기간(약정기간)*"></sc-label>
+				</th>
+				<td colspan=2>
+					<sc-combobox-field
+						placeholder="기간"
+					></sc-combobox-field>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="서비스 만료 예정일"></sc-label>
+				</th>
+				<td colspan=2>
+					<div style="display: flex; gap: 10px;">
+						<sc-button text="조회"></sc-button>
+						<div></div>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="예상 월 구독료"></sc-label>
+				</th>
+				<td colspan=2>
+					<div style="display: flex; gap: 10px;">
+						<sc-button text="조회"></sc-button>
+						<div></div>
+					</div>
+				</td>
+			</tr>
+		</table>
+		<div style="margin-top: 30px; display: flex; justify-content: center; gap: 20px;">
+			<sc-button text="장바구니 저장" style="width: 100px; padding: 10px;"></sc-button>
+			<sc-button text="신청" style="width: 100px; padding: 10px;"></sc-button>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is: "ep-company-status-service-apply",
+			load: function(param) {
+				const me = this;
+				me.$.subTitle.titleText = `서비스 신청하기`;
+			}
+		})
+	</script>
+</dom-module>

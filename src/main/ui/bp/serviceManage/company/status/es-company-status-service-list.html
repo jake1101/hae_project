@@ -1,21 +1,23 @@
-<dom-module id="es-status-service-list">
+<dom-module id="es-company-status-service-list">
 	<style>
         :host {
             @apply(--vbox-layout);
         }
     </style>
-    <template>
-   		<cc-sub-title-bar title-text="서비스 목록"></cc-sub-title-bar>
-   		<cc-search-container>
+	<template>
+		<cc-sub-title-bar title-text="서비스 이용 목록"></cc-sub-title-bar>
+		<cc-search-container>
 			<table>
 				<colgroup>
 					<col style="width: 60px;">
-					<col>
+					<col style="width: 150px;">
 					<col style="width: 60px;">
-					<col>
+					<col style="width: 150px;">
 					<col style="width: 90px;">
-					<col>
-					<col style="width: 160px;">
+					<col style="width: 300px;">
+					<col style="width: 95px;">
+					<col style="width: 60px;">
+					<col style="width: 95px;">
 					<col>
 					<col style="width: 90px;">
 					<col>
@@ -52,6 +54,13 @@
                 		<sc-checkbox-field>
                 		</sc-checkbox-field>
                 	</td>
+                	<th>
+                		<sc-label text="장바구니 저장 서비스만 조회"></sc-label>
+                	</th>
+              	    <td>
+                		<sc-checkbox-field>
+                		</sc-checkbox-field>
+                	</td>
                 	<th rowspan=2>
 						<sc-label text="키워드 검색"></sc-label>
 					</th>
@@ -78,13 +87,30 @@
 				<sc-data-column data-field="a" header-text="서비스 만료일" width="200" text-align="center"></sc-data-column>
 				<sc-data-column data-field="a" header-text="구독 기간" width="150" text-align="center"></sc-data-column>
 				<sc-data-column data-field="a" header-text="월 구독료" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="a" header-text="상태" width="100" text-align="center"></sc-data-column>	
+				<sc-data-column data-field="a" header-text="상태" width="100" text-align="center"></sc-data-column>
+				<sc-group-column
+					hide-child-headers="true" 
+					header-text=""  
+					width="150"
+				>
+					<sc-button-column data-field="a" header-text="" width="100" text-align="center"></sc-data-column>
+					<sc-image-column 
+						data-field="magnifying_glass" 
+						singular-source="/ui/assets/img/serviceManage/icon_magnifying_glass.png" 
+						image-display="auto"
+					></sc-image-column>
+				</sc-group-column>
 			</sc-grid-columns>
 		</sc-grid>
-    </template>
-    <script>
-    	Polymer({
-    		is: "es-status-service-list"
-    	})
-    </script>
+	</template>
+
+	<script>
+		Polymer({
+			is: "es-company-status-service-list",
+			initialized: function() {
+                const me = this;               
+                me.fire("open-service-detail-pop", "");
+            },
+		})
+	</script>
 </dom-module>

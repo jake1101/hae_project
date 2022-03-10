@@ -34,6 +34,26 @@
 		</where>
     </select>
     
+    <select id="getDevicesByCatalogId" resultType="map">
+		SELECT A.DVC_ID, A.MDT_YN, B.DVC_NM
+		FROM CORNERS.SVC_CTL_DVC A
+			JOIN CORNERS.DEVICE_TEMP B ON A.DVC_ID = B.DVC_ID
+		<where>
+			AND A.SVC_CTL_ID = #{p.svc_ctl_id}
+			
+			<if test="p.mdt_yn != null">
+				and A.MDT_YN = #{p.mdt_yn}
+			</if>
+		</where>
+    </select>
+
+	<select id="getWPCList" resultType="map">
+		select id, name
+		from v4.site
+		<if test='p.user_company_id != ""'>
+			where company_id = #{p.user_company_id}
+		</if>
+	</select>
     
     <!-- 사용여부(SVC_CTL.SVC_USE_YN)을 수정한다. -->
 	<update id="updateServiceUseYn">
@@ -42,6 +62,16 @@
 		SET SVC_USE_YN = #{p.svc_use_yn}
 		WHERE SVC_CTL_ID = #{p.svc_ctl_id}
 	</update>
+	
+	<!-- 서비스 신청하기 -->
+	<!-- by jake -->
+	<insert id="applyService">
+		INSERT INTO
+			corners.svc_req
+		VALUES (
+			#{p.svc_id}
+		);
+	</insert>
     
     <select id="findListUserByLevel" resultType="map">
     /* user.findListUserByLevel: 내부 사용자 목록 조회 */	

@@ -1,0 +1,272 @@
+<dom-module id="ep-company-catalog-service-apply">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+	<template>
+		<sc-request-group init>
+			<sc-code-group>
+                <sc-code code="CRN001" value="{{codes.term}}" ></sc-code> <!-- 사용여부 -->
+            </sc-code-group>
+            <sc-ajax
+            	id="getWPCList"
+            	url="getWPCList.do"
+            	last-response="{{wpcResult}}"
+            ></sc-ajax>
+		</sc-request-group>
+		
+			
+		<sc-ajax
+			id="getDevicesByCatalogId"
+			url="getDevicesByCatalogId.do"
+			body="{{selectedService}}"
+			last-response="{{deviceResult}}"
+		></sc-ajax>
+		<sc-ajax
+			id="applyService"
+			url="applyService.do"
+			body="{{applyParam}}"
+		></sc-ajax>
+		
+		<cc-sub-title-bar
+			id="subTitle"
+			title-text="자세히"
+		></cc-sub-title-bar>
+		<div class="vspace-10"></div>
+		<div style="color: red;">(*표시는 필수 입력 항목)</div>
+		<table class="tb-form">
+			<tr>
+				<th>
+					<sc-label text="사업장*"></sc-label>
+				</th>
+				<td colspan=2>
+					<sc-combobox-field
+						id="wpc_list"
+					 	items="{{wpcList}}"
+					 	value="{{setParam.wpc_id}}"
+					 	display-field="name" 
+					 	value-field="id" 
+						placeholder="사업장"
+					></sc-combobox-field>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="서비스 개시 요청일*"></sc-label>
+				</th>
+				<td colspan=2>
+					<div style="display: flex; gap: 10px; align-items: center;">
+						<sc-date-field 
+							id="dsr_str_dt" 
+							value={{setParam.dsr_str_dt}} 
+							style="width: 150px;"
+							placeholder="요청일"
+						></sc-date-field>
+   						~
+  						</div>
+				</td>
+			</tr>
+			<tr id="dvcTr">
+				<th rowspan=4>
+					<sc-label text="디바이스 수량"></sc-label>
+				</th>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="구독기간(약정기간)*"></sc-label>
+				</th>
+				<td colspan=2>
+					<sc-combobox-field
+						id="sst_trm"
+					 	items="{{codes.term}}"
+						value="{{setParam.sst_trm}}"
+					 	display-field="label" 
+					 	value-field="data" 
+						placeholder="기간"
+					></sc-combobox-field>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="서비스 만료 예정일"></sc-label>
+				</th>
+				<td colspan=2>
+					<div style="display: flex; align-items: center; gap: 10px;">
+						<sc-button 
+							text="조회"
+							on-click="onEndDateClick"
+						></sc-button>
+						<div id="term">
+						</div>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="예상 월 구독료"></sc-label>
+				</th>
+				<td colspan=2>
+					<div style="display: flex; align-items: center; gap: 10px;">
+						<sc-button 
+							text="조회"
+							on-click="onEstimatedFeeClick"
+						></sc-button>
+						<div id="estimatedFee">
+						</div>
+					</div>
+				</td>
+			</tr>
+		</table>
+		<div style="margin-top: 30px; display: flex; justify-content: center; gap: 20px;">
+			<sc-button text="장바구니 저장" style="width: 100px; padding: 10px;"></sc-button>
+			<sc-button text="신청" style="width: 100px; padding: 10px;" on-click="onApplyClick"></sc-button>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is: "ep-company-catalog-service-apply",
+			properties: {
+				codes: {
+                    type: Object,
+                    reset: false,
+                    value: function() {
+                        return {
+                            term: []
+                        };
+                    }
+                },
+                companyId: {
+                	type: Object,
+                	value: function() {
+                		return {
+                			user_company_id: "1"
+                		}
+                	}
+                },
+                wpcResult: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				},
+				wpcList: {
+					type: Object,
+					value: function() {
+						return [];
+					}
+				},
+				selectedService: {
+					type: Object,
+    				value: function() {
+    					return {};
+    				}
+				},
+				deviceResult: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				},
+				deviceList: {
+					type: Array,
+					value: function() {
+						return [];
+					}
+				},
+				applyParam: {
+					type: Object,
+    				value: function() {
+    					return {};
+    				}
+				},
+				setParam: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				}	
+			},
+			initialized: function() {
+                const me = this;
+                const term = me.get("codes.term") || [];
+                me.set("wpcList", me.get("wpcResult").result_data);
+            },
+			load: function(param) {
+				const {
+					svc_ctl_id,
+					svc_ctl_nm
+				} = param,
+				me = this,
+				dvcTr = me.$.dvcTr,
+				dvcTh = dvcTr.children[0];
+				
+				me.$.subTitle.titleText = `서비스 신청하기 (${svc_ctl_nm})`;
+				me.set("selectedService", param);
+				
+				UT.request(this.$.getDevicesByCatalogId, function(e, res){
+					const {result_data: list} = res.response;
+					dvcTh.setAttribute('rowspan', list.length + 1);
+					list.forEach(l => {
+						const {dvc_id, dvc_nm, mdt_yn} = l;
+						const makeDataset = l => Object.keys(l).map(k => `data-${k.replace('_', '-')}="${l[k]}"`).join(" ");
+						dvcTr.insertAdjacentHTML('afterEnd', `
+							<tr>
+								<th>
+									<sc-label text="${dvc_nm}${Number(mdt_yn) ? '*' : ''}"></sc-label>
+								</th>
+								<td>
+									<div style="display: flex; gap: 10px; align-items: center;">
+										<sc-text-field id="${dvc_id}" class="dvcField" value="0" ${makeDataset(l)}></sc-text-field>
+										대
+									</div>
+								</td>
+							</tr>
+						`);
+					})
+					me.set("deviceList", list);
+				});
+			},
+			onEndDateClick: function() {
+				const me = this,
+					  param = me.get("setParam"),
+					  date = new Date(param.dsr_str_dt),
+					  term = Number(param.sst_trm);
+					  
+				date.setMonth(date.getMonth() + term);
+				
+				const y = date.getFullYear() || "",
+					  m = date.getMonth()+1 || "",
+					  d = date.getDate() || "";
+				
+				me.$.term.textContent = `${y}. ${m}. ${d}`;
+			},
+			onEstimatedFeeClick: function() {
+				const me = this;
+				const commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+				const num = 100000;
+				let total = 0;
+				
+				const dvcList = me.get("deviceList").map(l => {
+					const qtt = document.getElementById(l.dvc_id).value;
+					const price = l.dvc_nm.length * num * Number(qtt);
+					total += price;
+					
+					return Object.assign(l, {qtt, price})
+				});
+				
+				me.$.estimatedFee.textContent = `${commaNum(total)} (VAT별도)`;
+				Object.assign(me.get("setParam"), {"dvc_list": dvcList, "fee": commaNum(total)});
+			},
+			onApplyClick: function(){
+				const me = this,
+					  svc_id = "SVC"+me.get("selectedService")["svc_ctl_id"].substr(-5);
+
+				Object.assign(me.get("applyParam"), {svc_id});
+				Object.assign(me.get("applyParam"), me.get("setParam"));
+
+				UT.request(this.$.applyService);
+			}
+		})
+	</script>
+</dom-module>
