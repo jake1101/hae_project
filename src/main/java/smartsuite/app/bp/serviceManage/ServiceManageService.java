@@ -194,7 +194,9 @@ public class ServiceManageService {
 		
 		Map userInfo = Auth.getCurrentUserInfo();
 
-		if (!(userInfo.get("access_level").equals("system"))) {
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		} else {
 			param.put("user_company_id", userInfo.get("user_company_id") );
 		}
 
