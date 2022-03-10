@@ -20,6 +20,7 @@ import smartsuite.app.bp.admin.job.JobService;
 import smartsuite.app.bp.admin.org.OperOrgService;
 import smartsuite.app.common.mail.CommonMailService;
 import smartsuite.app.common.restful.RestfulUtilService;
+import smartsuite.app.common.restful.RestfulUtilServiceToCorners;
 import smartsuite.app.common.shared.Const;
 import smartsuite.security.authentication.Auth;
 import smartsuite.security.authentication.AuthenticationPostService;
@@ -92,6 +93,9 @@ public class ServiceManageService {
 	@Inject
 	RestfulUtilService restfulUtilService;
 	
+	@Inject
+	RestfulUtilServiceToCorners restfulUtilServiceToCorners;
+	
 	/**
 	 * 서비스 그룹 리스트
 	 *
@@ -100,13 +104,29 @@ public class ServiceManageService {
 	 * @Date : 2022. 2. 24
 	 * @Method Name : 
 	 */
-	public Map regSafetyServiceGroupList(Map<String,Object> param) {
+	public Map<String,Object> regSafetyServiceGroupList(Map<String,Object> param) {
 		
 		Map<String,Object> resultMap = new HashMap<String, Object>();
+//		Map<String,Object> apiToResultMap = new HashMap<String, Object>();
+//		
+//		List<Map<String, Object>> returnlistMap = new ArrayList<Map<String, Object>>();
 		
-		List list =  sqlSession.selectList("serviceManageApi.regSafetyServiceGroupList", param);
-		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
-		resultMap.put(Const.RESULT_DATA, list);
+//		List list =  sqlSession.selectList("serviceManageApi.regSafetyServiceGroupList", param);
+//		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
+//		resultMap.put(Const.RESULT_DATA, list);
+				
+		try {
+			resultMap = restfulUtilServiceToCorners.callCornersApi("searchAllSvcGrpList", param);
+			//apiToResultMap.put(Const.RESULT_DATA, resultMap.get("body"));
+			//apiToResultMap.remove("body");
+			
+			//returnlistMap.add(apiToResultMap);
+			
+		}catch (Exception e) {
+			LOG.info( "regSafetyServiceGroupList : " + e.getMessage() );
+		}
+		
+//		return returnlistMap;
 		
 		return resultMap;
 	}
@@ -118,12 +138,39 @@ public class ServiceManageService {
 	 * @param param the param
 	 * @Date : 2022. 2. 24
 	 * @Method Name : findRegSafetyServiceList
-	 */
+	 
 	public List<Map<String,Object>> findRegSafetyServiceList(Map searchParam) {
 		
 		//Map userInfo = Auth.getCurrentUserInfo();
 				
 		return sqlSession.selectList("serviceManageApi.findRegSafetyServiceList", searchParam);
+		
+	}
+	*/
+	
+	/**
+	 * 등록 서비스 리스트
+	 *
+	 * @author : 
+	 * @param param the param
+	 * @Date : 2022. 2. 24
+	 * @Method Name : findRegSafetyServiceList
+	*/
+	public List<Map<String,Object>> findRegSafetyServiceList(Map searchParam) {
+		
+		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
+		//Map userInfo = Auth.getCurrentUserInfo();
+		Map<String, Object> gridResultMap = new HashMap<String, Object>();
+		
+		try {
+			gridResultMap = restfulUtilServiceToCorners.callCornersApi("findRegSafetyServiceList", searchParam);
+			resultMap = (List<Map<String, Object>>) gridResultMap.get("result_data");
+			
+		}catch (Exception e) {
+			LOG.info( "findRegSafetyServiceList log : " + e.getMessage() );
+		}
+		
+		return resultMap;
 		
 	}
 	
@@ -138,11 +185,17 @@ public class ServiceManageService {
 	 */
 	public Map<String,Object> updateServiceUseYn(Map param) {
 		
-		sqlSession.update("serviceManageApi.updateServiceUseYn", param);
-		
-		// 결과물 리턴
+//		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
+		//Map userInfo = Auth.getCurrentUserInfo();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
+		
+		try {
+			resultMap = restfulUtilServiceToCorners.callCornersApi("updateServiceUseYn", param);
+			
+		}catch (Exception e) {
+			LOG.info( "updateServiceUseYn log : " + e.getMessage() );
+		}
+		
 		return resultMap;
 		
 	}
