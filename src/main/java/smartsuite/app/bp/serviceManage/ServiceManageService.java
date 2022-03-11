@@ -314,9 +314,9 @@ public class ServiceManageService {
 				
 				for (Map<String, Object> row : list) {
 					
-					if((Integer)device.get("dvc_id") == (Integer)row.get("dvc_id")) {
+					if((Integer)device.get("dvc_id") == ((Long)row.get("dvc_id")).intValue()) {
 						
-						estimatedMonthlyFee += (Integer)device.get("sst_trm") * (Integer) row.get("mon_fee");
+						estimatedMonthlyFee += (Integer)device.get("qtt") * (Integer) row.get("mon_fee");
 						break;
 					}
 				}
