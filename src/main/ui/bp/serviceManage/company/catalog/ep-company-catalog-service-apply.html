@@ -12,6 +12,7 @@
             <sc-ajax
             	id="getWPCList"
             	url="getWPCList.do"
+            	body="{}"
             	last-response="{{wpcResult}}"
             ></sc-ajax>
 		</sc-request-group>
@@ -26,8 +27,7 @@
 		<sc-ajax
 			id="estimateMonthlyFee"
 			url="estimateMonthlyFee.do"
-			body="{{feeParam}}"
-			last-response="{{feeResult}}"
+			body="{{setParam}}"
 		></sc-ajax>
 		<sc-ajax
 			id="applyService"
@@ -44,12 +44,12 @@
 		<table class="tb-form">
 			<tr>
 				<th>
-					<sc-label text="사업장*" name="dm_danger"></sc-label>
+					<sc-label class="wpc_list dm_required" text="사업장*"></sc-label>
 				</th>
 				<td colspan=2>
 					<sc-combobox-field
 						id="wpc_list"
-						class="dm_danger"
+						class="dm_required"
 					 	items="{{wpcList}}"
 					 	value="{{setParam.wpc_id}}"
 					 	display-field="name" 
@@ -61,13 +61,13 @@
 			</tr>
 			<tr>
 				<th>
-					<sc-label text="서비스 개시 요청일*" name="dm_danger"></sc-label>
+					<sc-label class="dsr_str_dt dm_required" text="서비스 개시 요청일*"></sc-label>
 				</th>
 				<td colspan=2>
 					<div style="display: flex; gap: 10px; align-items: center;">
 						<sc-date-field 
 							id="dsr_str_dt"
-							class="dm_danger"
+							class="dm_required"
 							value={{setParam.dsr_str_dt}} 
 							style="width: 150px;"
 							placeholder="요청일"
@@ -84,12 +84,12 @@
 			</tr>
 			<tr>
 				<th>
-					<sc-label text="구독기간(약정기간)*" name="dm_danger"></sc-label>
+					<sc-label class="sst_trm dm_required" text="구독기간(약정기간)*"></sc-label>
 				</th>
 				<td colspan=2>
 					<sc-combobox-field
 						id="sst_trm"
-						class="dm_danger"
+						class="dm_required"
 					 	items="{{codes.term}}"
 						value="{{setParam.sst_trm}}"
 					 	display-field="label" 
@@ -186,18 +186,6 @@
 						return [];
 					}
 				},
-				feeParam: {
-					type: Object,
-					value: function() {
-						return {};
-					}
-				},
-				feeResult: {
-					type: Object,
-					value: function() {
-						return {};
-					}
-				},
 				setParam: {
 					type: Object,
 					value: function() {
@@ -233,16 +221,14 @@
 					dvcTh.setAttribute('rowspan', list.length + 1);
 					list.forEach(l => {
 						const {dvc_id, dvc_nm, mdt_yn} = l;
-						const makeDataset = l => Object.keys(l).map(k => `data-${k.replace('_', '-')}="${l[k]}"`).join(" ");
-						const onInput = () => {console.log(1)}
 						dvcTr.insertAdjacentHTML('afterEnd', `
 							<tr>
 								<th>
-									<sc-label text="${dvc_nm}${Number(mdt_yn) ? '*' : ''}" name="${Number(mdt_yn) ? 'dm_danger' : ''}"></sc-label>
+									<sc-label class="dvc_label ${Number(mdt_yn) ? 'dm_required' : ''}" text="${dvc_nm}${Number(mdt_yn) ? '*' : ''}"></sc-label>
 								</th>
 								<td>
 									<div style="display: flex; gap: 10px; align-items: center;">
-										<sc-text-field id="${dvc_id}" class="dvcField ${Number(mdt_yn) ? 'dm_danger' : ''}" ${makeDataset(l)} required="${Number(mdt_yn) ? 'true' : 'false'}"></sc-text-field>
+										<sc-text-field id="${dvc_id}" class="dvc_field ${Number(mdt_yn) ? 'dm_required' : ''}" required="${Number(mdt_yn) ? 'true' : 'false'}"></sc-text-field>
 										대
 									</div>
 								</td>
@@ -251,6 +237,19 @@
 					})
 					me.set("deviceList", list);
 				});
+			},
+			requiredCheck: function(requiredElements) {
+				const labelElements = Array.prototype.slice.call(requiredElements.labels),
+					  fieldElements = Array.prototype.slice.call(requiredElements.fields),
+					  labelTextList = labelElements.map(label => label.textContent.trim().replace("*", ""));
+					  fieldResult = fieldElements.map(element => {
+						  return element.value ? 1 : 0;
+					  });
+				
+				return {
+					"label": labelTextList,
+					"field": fieldResult
+				};
 			},
 			onEndDateClick: function() {
 				const me = this,
@@ -268,42 +267,37 @@
 			},
 			onEstimatedFeeClick: function() {
 				const me = this,
-					  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
-				
-				const num = 10000;
-				let total = 0;
-				
-				const dvcList = me.get("deviceList").map(l => {
-					const qtt = document.getElementById(l.dvc_id).value;
-					const price = l.dvc_nm.length * num * Number(qtt);
-					total += price;
+					  param = me.get("setParam"),
+					  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","),
+					  term = Number(param.sst_trm),
+					  getQtt = id => Number(document.getElementById(id).value),
+					  dvcList = me.get("deviceList").map(l => Object.assign(l, {"qtt": getQtt(l.dvc_id)})),
+					  re = {
+							  labels: document.querySelectorAll(".dvc_label.dm_required, .sst_trm.dm_required"),
+							  fields: document.querySelectorAll(".dvc_field.dm_required, #sst_trm")
+					  };
+
+				console.log(me.requiredCheck(re))
+				if(!me.requiredCheck(re).includes(0)){
+					Object.assign(me.get("setParam"), {"dvc_list": dvcList, "sst_trm": term});
+					UT.request(me.$.estimateMonthlyFee, (e, {response: {result_data : r}}) => {
+						const fee = commaNum(r);
+						me.$.estimatedFee.textContent = `${fee} (VAT별도)`;
+						Object.assign(me.get("setParam"), {fee});
+					});
+				}else{
 					
-					return Object.assign(l, {qtt, price})
-				});
-				UT.request(me.$.estimateMonthlyFee, res => {
-					console.log(res);
-				})
-				/* const num = 10000;
-				let total = 0;
-				
-				const dvcList = me.get("deviceList").map(l => {
-					const qtt = document.getElementById(l.dvc_id).value;
-					const price = l.dvc_nm.length * num * Number(qtt);
-					total += price;
-					
-					return Object.assign(l, {qtt, price})
-				});
-				
-				me.$.estimatedFee.textContent = `${commaNum(total)} (VAT별도)`;
-				Object.assign(me.get("setParam"), {"dvc_list": dvcList, "fee": commaNum(total)}); */
+				}
 			},
 			onApplyClick: function(){
 				const me = this,
 					  svc_id = "SVC"+me.get("selectedService")["svc_ctl_id"].substr(-5);
 				
-				const dlList = Array.prototype.slice.call(document.querySelectorAll('sc-label[name="dm_danger"]')),
-					  dfList = Array.prototype.slice.call(document.querySelectorAll(".dm_danger")),
+				const dlList = Array.prototype.slice.call(document.querySelectorAll('sc-label[name="dm_required"]')),
+					  dfList = Array.prototype.slice.call(document.querySelectorAll(".dm_required")),
 					  rArr = dfList.map(f => f.value ? 1 : 0);
+				
+				console.log(me.get("setParam"))
 				
 				/* if(!rArr.includes(0)){
 					me.onEndDateClick();
