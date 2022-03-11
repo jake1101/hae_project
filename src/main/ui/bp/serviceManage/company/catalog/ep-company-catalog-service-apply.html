@@ -275,46 +275,33 @@
 					  re = {
 							  labels: document.querySelectorAll(".dvc_label.dm_required, .sst_trm.dm_required"),
 							  fields: document.querySelectorAll(".dvc_field.dm_required, #sst_trm")
-					  };
+					  },
+					  {label, field} = me.requiredCheck(re);
 
-				console.log(me.requiredCheck(re))
-				if(!me.requiredCheck(re).includes(0)){
+				if(!field.includes(0)){
 					Object.assign(me.get("setParam"), {"dvc_list": dvcList, "sst_trm": term});
 					UT.request(me.$.estimateMonthlyFee, (e, {response: {result_data : r}}) => {
 						const fee = commaNum(r);
 						me.$.estimatedFee.textContent = `${fee} (VAT별도)`;
 						Object.assign(me.get("setParam"), {fee});
 					});
+					return 1;
 				}else{
-					
+					const i = field.indexOf(0);
+				  	SCAlert.show('error', `${label[i]} 입력란에 데이터를 입력해 주십시오.`);
+				  	return 0;
 				}
 			},
 			onApplyClick: function(){
 				const me = this,
 					  svc_id = "SVC"+me.get("selectedService")["svc_ctl_id"].substr(-5);
 				
-				const dlList = Array.prototype.slice.call(document.querySelectorAll('sc-label[name="dm_required"]')),
-					  dfList = Array.prototype.slice.call(document.querySelectorAll(".dm_required")),
-					  rArr = dfList.map(f => f.value ? 1 : 0);
-				
-				console.log(me.get("setParam"))
-				
-				/* if(!rArr.includes(0)){
-					me.onEndDateClick();
-					me.onEstimatedFeeClick();
+				me.onEndDateClick();
+				if(me.onEstimatedFeeClick()){
 					Object.assign(me.get("applyParam"), {svc_id});
 					Object.assign(me.get("applyParam"), me.get("setParam"));
-					UT.request(this.$.applyService);
-				}else{
-					const i = rArr.indexOf(0),
-						  label = dlList[i].textContent.replace('*','');
-					SCAlert.show('error', `${label} 입력란에 데이터를 입력해 주십시오.`);
-				} */
-				me.onEndDateClick();
-				me.onEstimatedFeeClick();
-				Object.assign(me.get("applyParam"), {svc_id});
-				Object.assign(me.get("applyParam"), me.get("setParam"));
-				UT.request(me.$.applyService); 
+					UT.request(me.$.applyService); 
+				}
 			},
 			onSaveCartClick: function() {
 				SCAlert.show('장바구니 저장', '장바구니 저장');
