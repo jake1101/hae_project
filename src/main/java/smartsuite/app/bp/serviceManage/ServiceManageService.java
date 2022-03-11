@@ -299,8 +299,6 @@ public class ServiceManageService {
 		
 		int estimatedMonthlyFee = 0;
 		
-		int sst_trm = (Integer)param.get("sst_trm");
-		
 		ArrayList devices = (ArrayList)param.get("dvc_list");
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		
@@ -316,7 +314,7 @@ public class ServiceManageService {
 					
 					if((Integer)device.get("dvc_id") == ((Long)row.get("dvc_id")).intValue()) {
 						
-						estimatedMonthlyFee += (Integer)device.get("qtt") * (Integer) row.get("mon_fee");
+						estimatedMonthlyFee += (Integer)device.get("qtt") * (Integer) row.get("mon_fee") * (Integer)param.get("sst_trm");
 						break;
 					}
 				}
