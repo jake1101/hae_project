@@ -9,11 +9,11 @@
 			<sc-code-group>
                 <sc-code code="CRN001" value="{{codes.term}}" ></sc-code> <!-- 사용여부 -->
             </sc-code-group>
-            <sc-ajax
+            <!-- <sc-ajax
             	id="getWPCList"
             	url="getWPCList.do"
             	last-response="{{wpcResult}}"
-            ></sc-ajax>
+            ></sc-ajax> -->
 		</sc-request-group>
 		
 			
@@ -38,52 +38,58 @@
 		<table class="tb-form">
 			<tr>
 				<th>
-					<sc-label text="사업장*"></sc-label>
+					<sc-label text="사업장*" name="dm_danger"></sc-label>
 				</th>
 				<td colspan=2>
 					<sc-combobox-field
 						id="wpc_list"
+						class="dm_danger"
 					 	items="{{wpcList}}"
 					 	value="{{setParam.wpc_id}}"
 					 	display-field="name" 
 					 	value-field="id" 
 						placeholder="사업장"
+					    required="true"
 					></sc-combobox-field>
 				</td>
 			</tr>
 			<tr>
 				<th>
-					<sc-label text="서비스 개시 요청일*"></sc-label>
+					<sc-label text="서비스 개시 요청일*" name="dm_danger"></sc-label>
 				</th>
 				<td colspan=2>
 					<div style="display: flex; gap: 10px; align-items: center;">
 						<sc-date-field 
-							id="dsr_str_dt" 
+							id="dsr_str_dt"
+							class="dm_danger"
 							value={{setParam.dsr_str_dt}} 
 							style="width: 150px;"
 							placeholder="요청일"
+							required="true"
 						></sc-date-field>
    						~
   						</div>
 				</td>
 			</tr>
 			<tr id="dvcTr">
-				<th rowspan=4>
+				<th>
 					<sc-label text="디바이스 수량"></sc-label>
 				</th>
 			</tr>
 			<tr>
 				<th>
-					<sc-label text="구독기간(약정기간)*"></sc-label>
+					<sc-label text="구독기간(약정기간)*" name="dm_danger"></sc-label>
 				</th>
 				<td colspan=2>
 					<sc-combobox-field
 						id="sst_trm"
+						class="dm_danger"
 					 	items="{{codes.term}}"
 						value="{{setParam.sst_trm}}"
 					 	display-field="label" 
 					 	value-field="data" 
 						placeholder="기간"
+						required="true"
 					></sc-combobox-field>
 				</td>
 			</tr>
@@ -119,7 +125,7 @@
 			</tr>
 		</table>
 		<div style="margin-top: 30px; display: flex; justify-content: center; gap: 20px;">
-			<sc-button text="장바구니 저장" style="width: 100px; padding: 10px;"></sc-button>
+			<sc-button text="장바구니 저장" style="width: 100px; padding: 10px;" on-click="onSaveCartClick"></sc-button>
 			<sc-button text="신청" style="width: 100px; padding: 10px;" on-click="onApplyClick"></sc-button>
 		</div>
 	</template>
@@ -174,18 +180,24 @@
 						return [];
 					}
 				},
+				setParam: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				},
 				applyParam: {
 					type: Object,
     				value: function() {
     					return {};
     				}
 				},
-				setParam: {
+				temp: {
 					type: Object,
 					value: function() {
 						return {};
 					}
-				}	
+				}
 			},
 			initialized: function() {
                 const me = this;
@@ -210,14 +222,15 @@
 					list.forEach(l => {
 						const {dvc_id, dvc_nm, mdt_yn} = l;
 						const makeDataset = l => Object.keys(l).map(k => `data-${k.replace('_', '-')}="${l[k]}"`).join(" ");
+						const onInput = () => {console.log(1)}
 						dvcTr.insertAdjacentHTML('afterEnd', `
 							<tr>
 								<th>
-									<sc-label text="${dvc_nm}${Number(mdt_yn) ? '*' : ''}"></sc-label>
+									<sc-label text="${dvc_nm}${Number(mdt_yn) ? '*' : ''}" name="${Number(mdt_yn) ? 'dm_danger' : ''}"></sc-label>
 								</th>
 								<td>
 									<div style="display: flex; gap: 10px; align-items: center;">
-										<sc-text-field id="${dvc_id}" class="dvcField" value="0" ${makeDataset(l)}></sc-text-field>
+										<sc-text-field id="${dvc_id}" class="dvcField ${Number(mdt_yn) ? 'dm_danger' : ''}" ${makeDataset(l)} required="${Number(mdt_yn) ? 'true' : 'false'}"></sc-text-field>
 										대
 									</div>
 								</td>
@@ -244,7 +257,7 @@
 			onEstimatedFeeClick: function() {
 				const me = this;
 				const commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
-				const num = 100000;
+				const num = 10000;
 				let total = 0;
 				
 				const dvcList = me.get("deviceList").map(l => {
@@ -261,11 +274,30 @@
 			onApplyClick: function(){
 				const me = this,
 					  svc_id = "SVC"+me.get("selectedService")["svc_ctl_id"].substr(-5);
-
+				
+				const dlList = Array.prototype.slice.call(document.querySelectorAll('sc-label[name="dm_danger"]')),
+					  dfList = Array.prototype.slice.call(document.querySelectorAll(".dm_danger")),
+					  rArr = dfList.map(f => f.value ? 1 : 0);
+				
+				/* if(!rArr.includes(0)){
+					me.onEndDateClick();
+					me.onEstimatedFeeClick();
+					Object.assign(me.get("applyParam"), {svc_id});
+					Object.assign(me.get("applyParam"), me.get("setParam"));
+					UT.request(this.$.applyService);
+				}else{
+					const i = rArr.indexOf(0),
+						  label = dlList[i].textContent.replace('*','');
+					SCAlert.show('error', `${label} 입력란에 데이터를 입력해 주십시오.`);
+				} */
+				me.onEndDateClick();
+				me.onEstimatedFeeClick();
 				Object.assign(me.get("applyParam"), {svc_id});
 				Object.assign(me.get("applyParam"), me.get("setParam"));
-
-				UT.request(this.$.applyService);
+				UT.request(this.$.applyService); 
+			},
+			onSaveCartClick: function() {
+				SCAlert.show('장바구니 저장', '장바구니 저장');
 			}
 		})
 	</script>
