@@ -228,10 +228,6 @@ public class ServiceManageService {
 		
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		
-//		List list =  sqlSession.selectList("serviceManageApi.getDevicesByCatalogId", param);
-//		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
-//		resultMap.put(Const.RESULT_DATA, list);
-		
 		try {
 			resultMap = restfulUtilServiceToCorners.callCornersApi("getDevicesByCatalogId", param);
 			
