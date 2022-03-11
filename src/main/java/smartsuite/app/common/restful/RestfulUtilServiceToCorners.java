@@ -29,18 +29,6 @@ public class RestfulUtilServiceToCorners {
 	@Value ("#{cornersAPI['corners.api.url']}")
 	String CORNERSURL;
 	
-	@Value ("#{raycomAPI['raycom.api.url']}")
-	String RAYCOMURL;
-	
-	@Value ("#{raycomAPI['rino.api.url']}")
-	String URL;
-	
-	@Value ("#{raycomAPI['rino.api.systemkey']}")
-	String SYSTEMKEY;
-	
-	@Value ("#{raycomAPI['rino.api.secret']}")
-	String SECRET;
-	
 	public HttpEntity<String> createHttpEntity(Map<String, Object> param){
 		Gson gson = new GsonBuilder().serializeNulls().create();
 		String userToken = (String)Auth.getCurrentUser().getUserInfo().get("userToken");
@@ -122,10 +110,7 @@ public class RestfulUtilServiceToCorners {
 		Map<String, Object> jsonObject = resultGson.fromJson(result.getBody(), new TypeToken<Map<String, Object>>(){}.getType());
 	
 		String checked =  (String) jsonObject.get("code");
-		
-		//Map<String, Object> dataMap = (Map)jsonObject.get("body");
-		//Map<String, Object> headerMap = (Map)jsonObject.get("header");
-		
+
 		if( checked.equals("1")){
 			resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
 			resultMap.put("result_message", jsonObject.get("message").toString() );
@@ -134,15 +119,7 @@ public class RestfulUtilServiceToCorners {
 			resultMap.put(Const.RESULT_STATUS, Const.FAIL);
 			resultMap.put("result_message", jsonObject.get("message").toString() );
 		}
-		
-//		if( (Double)headerMap.get("code") == 1){
-//			resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
-//			resultMap.put("result_message", headerMap.get("message") );
-//		}else{
-//			resultMap.put(Const.RESULT_STATUS, Const.FAIL);
-//			resultMap.put("result_message", headerMap.get("message") );
-//		}
-		
+
 		return resultMap;
 	}
 }
