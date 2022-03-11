@@ -142,7 +142,7 @@ public class ServiceManageService {
 	public List<Map<String,Object>> findRegSafetyServiceList(Map searchParam) {
 		
 		//Map userInfo = Auth.getCurrentUserInfo();
-				
+
 		return sqlSession.selectList("serviceManageApi.findRegSafetyServiceList", searchParam);
 		
 	}
@@ -215,7 +215,7 @@ public class ServiceManageService {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		return resultMap;
 	}
-
+	
 	/**
 	 * 서비스카타로그별 디바이스 목록 조회
 	 *
@@ -228,12 +228,39 @@ public class ServiceManageService {
 		
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		
+//		List list =  sqlSession.selectList("serviceManageApi.getDevicesByCatalogId", param);
+//		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
+//		resultMap.put(Const.RESULT_DATA, list);
+		
+		try {
+			resultMap = restfulUtilServiceToCorners.callCornersApi("getDevicesByCatalogId", param);
+			
+		}catch (Exception e) {
+			LOG.info( "updateServiceUseYn log : " + e.getMessage() );
+		}
+		
+		return resultMap;
+	}
+
+	/**
+	 * 서비스카타로그별 디바이스 목록 조회
+	 *
+	 * @author : 
+	 * @param param the param
+	 * @Date : 2022. 2. 24
+	 * @Method Name : 
+	 
+	public Map getDevicesByCatalogId(Map<String,Object> param) {
+		
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+		
 		List list =  sqlSession.selectList("serviceManageApi.getDevicesByCatalogId", param);
 		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
 		resultMap.put(Const.RESULT_DATA, list);
 		
 		return resultMap;
 	}
+	*/
 	
 	/**
 	 * 사업장 목록 조회
