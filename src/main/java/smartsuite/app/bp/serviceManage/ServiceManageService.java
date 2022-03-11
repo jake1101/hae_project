@@ -285,6 +285,50 @@ public class ServiceManageService {
 		return resultMap;
 	}
 	
+	
+	/**
+	 * 예상월구독룍조회
+	 *
+	 * @author : 
+	 * @param param the param
+	 * @Date : 2022. 2. 24
+	 * @Method Name : 
+	 */
+	public Map estimateMonthlyFee(Map<String,Object> param) {
+		
+		
+		int estimatedMonthlyFee = 0;
+		
+		int sst_trm = (Integer)param.get("sst_trm");
+		
+		ArrayList devices = (ArrayList)param.get("dvc_list");
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+		
+		List<Map<String,Object>> list =  sqlSession.selectList("serviceManageApi.getDeviceMonthlyFee", param);
+		
+		if (list != null && !list.isEmpty()) {
+			
+			for (int i = 0; i < devices.size(); i++) {
+				
+				HashMap<String, Object> device = (HashMap<String, Object>)devices.get(i);
+				
+				for (Map<String, Object> row : list) {
+					
+					if((Integer)device.get("dvc_id") == (Integer)row.get("dvc_id")) {
+						
+						estimatedMonthlyFee += (Integer)device.get("sst_trm") * (Integer) row.get("mon_fee");
+						break;
+					}
+				}
+			}
+		}
+		
+		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
+		resultMap.put(Const.RESULT_DATA, estimatedMonthlyFee);
+		
+		return resultMap;
+	}	
+	
 	/**
 	 * 메일을 전송한다. 
 	 *

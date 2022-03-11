@@ -112,6 +112,22 @@ public class ServiceManageController {
 	}	
 	
 	/**
+	 * 예상월구독룍조회
+	 *
+	 * @author : hjh
+	 * @param dvc_list Array device 및 수량 목록 
+	 * @param sst_trm int 구독기간
+	 * @return the map<string, object>: result_status String, result_data int 예상구독료
+	 * @Date : 2022. 02. 24
+	 * @Method Name : getDevicesByCatalogId
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "estimateMonthlyFee.do")
+	public @ResponseBody Map<String,Object> estimateMonthlyFee(@RequestBody Map param) {
+		return ServiceManageService.estimateMonthlyFee(param);
+	}		
+	
+	/**
 	 * 사업장 목록 조회
 	 *
 	 * @author : hjh
