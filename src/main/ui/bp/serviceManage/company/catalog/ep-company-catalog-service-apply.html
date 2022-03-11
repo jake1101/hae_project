@@ -9,11 +9,11 @@
 			<sc-code-group>
                 <sc-code code="CRN001" value="{{codes.term}}" ></sc-code> <!-- 사용여부 -->
             </sc-code-group>
-            <!-- <sc-ajax
+            <sc-ajax
             	id="getWPCList"
             	url="getWPCList.do"
             	last-response="{{wpcResult}}"
-            ></sc-ajax> -->
+            ></sc-ajax>
 		</sc-request-group>
 		
 			
@@ -22,6 +22,12 @@
 			url="getDevicesByCatalogId.do"
 			body="{{selectedService}}"
 			last-response="{{deviceResult}}"
+		></sc-ajax>
+		<sc-ajax
+			id="estimateMonthlyFee"
+			url="estimateMonthlyFee.do"
+			body="{{feeParam}}"
+			last-response="{{feeResult}}"
 		></sc-ajax>
 		<sc-ajax
 			id="applyService"
@@ -180,6 +186,18 @@
 						return [];
 					}
 				},
+				feeParam: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				},
+				feeResult: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				},
 				setParam: {
 					type: Object,
 					value: function() {
@@ -191,12 +209,6 @@
     				value: function() {
     					return {};
     				}
-				},
-				temp: {
-					type: Object,
-					value: function() {
-						return {};
-					}
 				}
 			},
 			initialized: function() {
@@ -255,9 +267,23 @@
 				me.$.term.textContent = `${y}. ${m}. ${d}`;
 			},
 			onEstimatedFeeClick: function() {
-				const me = this;
-				const commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+				const me = this,
+					  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+				
 				const num = 10000;
+				let total = 0;
+				
+				const dvcList = me.get("deviceList").map(l => {
+					const qtt = document.getElementById(l.dvc_id).value;
+					const price = l.dvc_nm.length * num * Number(qtt);
+					total += price;
+					
+					return Object.assign(l, {qtt, price})
+				});
+				UT.request(me.$.estimateMonthlyFee, res => {
+					console.log(res);
+				})
+				/* const num = 10000;
 				let total = 0;
 				
 				const dvcList = me.get("deviceList").map(l => {
@@ -269,7 +295,7 @@
 				});
 				
 				me.$.estimatedFee.textContent = `${commaNum(total)} (VAT별도)`;
-				Object.assign(me.get("setParam"), {"dvc_list": dvcList, "fee": commaNum(total)});
+				Object.assign(me.get("setParam"), {"dvc_list": dvcList, "fee": commaNum(total)}); */
 			},
 			onApplyClick: function(){
 				const me = this,
@@ -294,7 +320,7 @@
 				me.onEstimatedFeeClick();
 				Object.assign(me.get("applyParam"), {svc_id});
 				Object.assign(me.get("applyParam"), me.get("setParam"));
-				UT.request(this.$.applyService); 
+				UT.request(me.$.applyService); 
 			},
 			onSaveCartClick: function() {
 				SCAlert.show('장바구니 저장', '장바구니 저장');
