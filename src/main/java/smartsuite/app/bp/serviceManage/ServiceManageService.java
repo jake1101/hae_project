@@ -266,21 +266,23 @@ public class ServiceManageService {
 	 * @Date : 2022. 2. 24
 	 * @Method Name : 
 	 */
-	public Map getWPCList(Map<String,Object> param) {
+	public Map getWPCList(Map param) {
 		
-		Map userInfo = Auth.getCurrentUserInfo();
-
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
 		if (userInfo.get("access_level").equals("system")) {
 			param.put("user_company_id", "" );
-		} else {
-			param.put("user_company_id", userInfo.get("user_company_id") );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
 		}
 
-		Map<String,Object> resultMap = new HashMap<String, Object>();
-		
-		List list =  sqlSession.selectList("serviceManageApi.getWPCList", param);
-		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
-		resultMap.put(Const.RESULT_DATA, list);
+		try {
+			resultMap = restfulUtilServiceToCorners.callCornersApi("getWPCList", param);
+			
+		}catch (Exception e) {
+			LOG.info( "updateServiceUseYn log : " + e.getMessage() );
+		}
 		
 		return resultMap;
 	}
