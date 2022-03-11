@@ -314,7 +314,7 @@ public class ServiceManageService {
 					
 					if((Integer)device.get("dvc_id") == ((Long)row.get("dvc_id")).intValue()) {
 						
-						estimatedMonthlyFee += (Integer)device.get("qtt") * (Integer) row.get("mon_fee") * (Integer)param.get("sst_trm");
+						estimatedMonthlyFee += (Integer)device.get("qtt") * (Integer)row.get("mon_fee") * (Integer)param.get("sst_trm");
 						break;
 					}
 				}
