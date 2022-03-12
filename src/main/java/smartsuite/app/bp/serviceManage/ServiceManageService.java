@@ -210,11 +210,48 @@ public class ServiceManageService {
 	 */ 
 	public Map<String,Object> applyService(Map param) {
 
-		sqlSession.insert("serviceManageApi.applyService", param);
-		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			//todo: svc_id 처리방안 고민, sequence?
+			
+			//1. 기등록 서비스 존재여부 조회
+			if (isExistingService(param)) {
+				resultMap.put(Const.RESULT_STATUS, Const.FAIL);
+				resultMap.put(Const.RESULT_MSG, "이미 신청된 서비스가 있습니다.");
+	
+			}  else {
+				//2. svc_req 등록
+				//3. svc_dvc 등록 (멀티)
+				
+				sqlSession.insert("serviceManageApi.applyService", param);
+				
+				resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
+			}
+		}catch (Exception e) {
+			resultMap.put(Const.RESULT_STATUS, Const.FAIL);
+			resultMap.put(Const.RESULT_MSG, e.getMessage());
+		}
+		
 		return resultMap;
 	}
+	
+	/**
+	 * 기신청 서비스 존재여부 조회 
+	 *
+	 * @author : 
+	 * @param param the param
+	 * @Date : 2022. 3. 8
+	 * @Method Name : isExistingService
+	 */ 
+	private boolean isExistingService(Map param) {
+
+		int cnt = sqlSession.selectOne("serviceManageApi.getExistingServiceCnt", param);
+		
+		return (cnt > 0);
+		
+	}
+	
 	
 	/**
 	 * 서비스카타로그별 디바이스 목록 조회

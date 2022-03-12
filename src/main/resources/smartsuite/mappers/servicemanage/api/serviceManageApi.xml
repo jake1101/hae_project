@@ -73,6 +73,14 @@
 		);
 	</insert>
     
+	<select id="getExistingServiceCnt" resultType="int">
+		select count(1) cnt
+		from corners.svc_req
+		where svc_ctl_id = #{p.svc_ctl_id}
+		and wpc_cd = #{p.wpc_id}
+		and stt_cd = '0'
+	</select>	
+    
 	<select id="getDeviceMonthlyFee" resultType="map">
 		select *
 		from corners.dvc_fee
