@@ -17,7 +17,6 @@
             ></sc-ajax>
 		</sc-request-group>
 		
-			
 		<sc-ajax
 			id="getDevicesByCatalogId"
 			url="getDevicesByCatalogId.do"
@@ -28,6 +27,7 @@
 			id="estimateMonthlyFee"
 			url="estimateMonthlyFee.do"
 			body="{{setParam}}"
+			on-response="complateMonthlyFee"
 		></sc-ajax>
 		<sc-ajax
 			id="applyService"
@@ -69,6 +69,7 @@
 							id="dsr_str_dt"
 							class="dm_required"
 							value={{setParam.dsr_str_dt}} 
+							on-change="onChangeDsrStrDt"
 							style="width: 150px;"
 							placeholder="요청일"
 							required="true"
@@ -94,6 +95,7 @@
 						value="{{setParam.sst_trm}}"
 					 	display-field="label" 
 					 	value-field="data" 
+					 	on-change="onChangeTerm"
 						placeholder="기간"
 						required="true"
 					></sc-combobox-field>
@@ -125,6 +127,7 @@
 							on-click="onEstimatedFeeClick"
 						></sc-button>
 						<div id="estimatedFee">
+							{{estimatedFee.result_data}}
 						</div>
 					</div>
 				</td>
@@ -197,6 +200,15 @@
     				value: function() {
     					return {};
     				}
+				},
+				clickFlag: {
+					type: Object,
+					value: function() {
+						return {
+							term: 0,
+							fee: 0,
+						};
+					}
 				}
 			},
 			initialized: function() {
@@ -218,6 +230,7 @@
 				
 				UT.request(this.$.getDevicesByCatalogId, function(e, res){
 					const {result_data: list} = res.response;
+					
 					dvcTh.setAttribute('rowspan', list.length + 1);
 					list.forEach(l => {
 						const {dvc_id, dvc_nm, mdt_yn} = l;
@@ -228,7 +241,12 @@
 								</th>
 								<td>
 									<div style="display: flex; gap: 10px; align-items: center;">
-										<sc-text-field id="${dvc_id}" class="dvc_field ${Number(mdt_yn) ? 'dm_required' : ''}" required="${Number(mdt_yn) ? 'true' : 'false'}"></sc-text-field>
+										<sc-text-field 
+											type="number"
+											id="dvc_field${dvc_id}" 
+											class="dvc_field ${Number(mdt_yn) ? 'dm_required' : ''}" 
+											required="${Number(mdt_yn) ? 'true' : 'false'}"
+										></sc-text-field>
 										대
 									</div>
 								</td>
@@ -236,34 +254,87 @@
 						`);
 					})
 					me.set("deviceList", list);
+					
+					for(f of document.querySelectorAll(".dvc_field")) f.oninput = me.onInputField;
 				});
 			},
-			requiredCheck: function(requiredElements) {
-				const labelElements = Array.prototype.slice.call(requiredElements.labels),
-					  fieldElements = Array.prototype.slice.call(requiredElements.fields),
-					  labelTextList = labelElements.map(label => label.textContent.trim().replace("*", ""));
-					  fieldResult = fieldElements.map(element => {
-						  return element.value ? 1 : 0;
-					  });
-				
-				return {
-					"label": labelTextList,
-					"field": fieldResult
-				};
+			complateMonthlyFee: function(e, {response: {result_data: r}}){
+				const me = this,
+				  	  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","),
+				  	  fee = commaNum(r);
+				  	  
+				Object.assign(me.get("setParam"), {"exp_mon_fee": r});
+				me.$.estimatedFee.textContent = `${fee} (VAT별도)`;
 			},
-			onEndDateClick: function() {
+			onChangeDsrStrDt: function(a, b) {
+				console.log(1);
+				console.log(a);
+				console.log(b);
+				const me = this,
+				  	  param = me.get("setParam"),
+				  	  date = new Date(param.dsr_str_dt);
+			},
+			onInputField: function(e){
+				const me = document.querySelector("ep-company-catalog-service-apply"),
+					  param = me.get("setParam"),
+					  term = param.sst_trm,
+					  field = e.path.find(t => t.id.includes("dvc_field"));
+				
+				me.get("deviceList").find(d => d.dvc_id == field.id.replace("dvc_field", "")).qtt = Number(e.target.value);
+				
+				const dvcList = me.get("deviceList").filter(d => d.qtt && d.qtt != 0 && d)
+				dvcList.length && Object.assign(me.get("setParam"), {"dvc_list": dvcList});
+				if(term && me.get("clickFlag").fee){
+					UT.request(me.$.estimateMonthlyFee);
+				}				
+			},
+			onChangeTerm: function() {
 				const me = this,
 					  param = me.get("setParam"),
-					  date = new Date(param.dsr_str_dt),
-					  term = Number(param.sst_trm);
-					  
-				date.setMonth(date.getMonth() + term);
+					  date = new Date(param.dsr_str_dt);
+				
+				param.sst_trm = Number(param.sst_trm);
+				date.setMonth(date.getMonth() + param.sst_trm);
 				
 				const y = date.getFullYear() || "",
 					  m = date.getMonth()+1 || "",
 					  d = date.getDate() || "";
 				
-				me.$.term.textContent = `${y}. ${m}. ${d}`;
+				Object.assign(me.get("setParam"), {"exp_end_dt": date})
+				
+				if(me.get("clickFlag").term){
+					me.$.term.textContent = `${y}. ${m}. ${d}`;
+				}
+				
+				if(Object.keys(param).includes('dvc_list') && me.get("clickFlag").fee){
+					UT.request(me.$.estimateMonthlyFee);
+				}
+				
+			},
+			requiredCheck: function(requiredElements, callback = null) {
+				const labelElements = Array.prototype.slice.call(requiredElements.labels),
+					  fieldElements = Array.prototype.slice.call(requiredElements.fields),
+					  labelTextList = labelElements.map(label => label.textContent.trim().replace("*", ""));
+					  fieldResult = fieldElements.map(element => element.value && element.value != 0 ? 1 : 0);
+				
+				if(!fieldResult.includes(0)){
+					callback();
+					return 1;
+				}else{
+					const i = fieldResult.indexOf(0);
+			  	  	SCAlert.show('error', `${labelTextList[i]} 입력란에 데이터를 입력해 주십시오.`);
+			  	  	return 0;
+				}
+			},
+			onEndDateClick: function() {
+				const me = this;
+				return me.requiredCheck({
+					labels: document.querySelectorAll(".dsr_str_dt.dm_required, .sst_trm.dm_required"),
+					fields: document.querySelectorAll("#dsr_str_dt, #sst_trm")
+		  	  	}, () => {
+		  	  		me.get("clickFlag").term = 1;
+		  	  		me.onChangeTerm()
+		  	  	});
 			},
 			onEstimatedFeeClick: function() {
 				const me = this,
@@ -271,37 +342,42 @@
 					  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","),
 					  term = Number(param.sst_trm),
 					  getQtt = id => Number(document.getElementById(id).value),
-					  dvcList = me.get("deviceList").map(l => Object.assign(l, {"qtt": getQtt(l.dvc_id)})),
-					  re = {
-							  labels: document.querySelectorAll(".dvc_label.dm_required, .sst_trm.dm_required"),
-							  fields: document.querySelectorAll(".dvc_field.dm_required, #sst_trm")
-					  },
-					  {label, field} = me.requiredCheck(re);
-
-				if(!field.includes(0)){
-					Object.assign(me.get("setParam"), {"dvc_list": dvcList, "sst_trm": term});
-					UT.request(me.$.estimateMonthlyFee, (e, {response: {result_data : r}}) => {
-						const fee = commaNum(r);
-						me.$.estimatedFee.textContent = `${fee} (VAT별도)`;
-						Object.assign(me.get("setParam"), {fee});
-					});
-					return 1;
-				}else{
-					const i = field.indexOf(0);
-				  	SCAlert.show('error', `${label[i]} 입력란에 데이터를 입력해 주십시오.`);
-				  	return 0;
-				}
+					  dvcList = me.get("deviceList").filter(l => getQtt(`dvc_field${l.dvc_id}`) && Object.assign(l, {"qtt": getQtt(`dvc_field${l.dvc_id}`)}));
+					  
+				return me.requiredCheck({
+					labels: document.querySelectorAll(".dvc_label.dm_required, .sst_trm.dm_required"),
+					fields: document.querySelectorAll(".dvc_field.dm_required, #sst_trm")
+				}, () => {
+					me.get("clickFlag").fee = 1;
+					UT.request(me.$.estimateMonthlyFee)
+				});
 			},
 			onApplyClick: function(){
 				const me = this,
 					  svc_id = "SVC"+me.get("selectedService")["svc_ctl_id"].substr(-5);
+				  	  
+				const checkWpc = me.requiredCheck({
+					labels: document.querySelectorAll(".wpc_list.dm_required"),
+				  	fields: document.querySelectorAll("#wpc_list")
+				}, () => {});
 				
-				me.onEndDateClick();
-				if(me.onEstimatedFeeClick()){
-					Object.assign(me.get("applyParam"), {svc_id});
-					Object.assign(me.get("applyParam"), me.get("setParam"));
-					UT.request(me.$.applyService); 
-				}
+				if(!checkWpc) return;
+				if(!me.onEndDateClick()) return;
+				if(!me.onEstimatedFeeClick()) return;
+
+				Object.assign(me.get("applyParam"), {svc_id});
+				Object.assign(me.get("applyParam"), me.get("setParam"));
+				UT.request(me.$.applyService); 
+				
+				/* if(checkWpc){
+					if(me.onEndDateClick()){
+						if(me.onEstimatedFeeClick()){
+							Object.assign(me.get("applyParam"), {svc_id});
+							Object.assign(me.get("applyParam"), me.get("setParam"));
+							UT.request(me.$.applyService); 
+						}
+					}
+				} */
 			},
 			onSaveCartClick: function() {
 				SCAlert.show('장바구니 저장', '장바구니 저장');

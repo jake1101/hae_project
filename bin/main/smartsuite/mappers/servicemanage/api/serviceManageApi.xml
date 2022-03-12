@@ -73,6 +73,7 @@
 		);
 	</insert>
     
+<<<<<<< Updated upstream
 	<select id="getExistingServiceCnt" resultType="int">
 		select count(1) cnt
 		from corners.svc_req
@@ -81,6 +82,8 @@
 		and stt_cd = '0'
 	</select>	
     
+=======
+>>>>>>> Stashed changes
 	<select id="getDeviceMonthlyFee" resultType="map">
 		select *
 		from corners.dvc_fee
