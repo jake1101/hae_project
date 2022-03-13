@@ -35,14 +35,14 @@
     </select>
     
     <select id="getDevicesByCatalogId" resultType="map">
-		SELECT A.DVC_ID, A.MDT_YN, B.DVC_NM
-		FROM CORNERS.SVC_CTL_DVC A
-			JOIN CORNERS.DEVICE_TEMP B ON A.DVC_ID = B.DVC_ID
+		select a.dvc_id, a.mdt_yn, b.product_name as dvc_nm
+		from corners.svc_ctl_dvc a
+			join v4.product b on a.dvc_id = b.product_id
 		<where>
-			AND A.SVC_CTL_ID = #{p.svc_ctl_id}
+			and a.svc_ctl_id = #{p.svc_ctl_id}
 			
 			<if test="p.mdt_yn != null">
-				and A.MDT_YN = #{p.mdt_yn}
+				and a.mdt_yn = #{p.mdt_yn}
 			</if>
 		</where>
     </select>
@@ -72,6 +72,27 @@
 			#{p.svc_id}
 		);
 	</insert>
+    
+<<<<<<< Updated upstream
+	<select id="getExistingServiceCnt" resultType="int">
+		select count(1) cnt
+		from corners.svc_req
+		where svc_ctl_id = #{p.svc_ctl_id}
+		and wpc_cd = #{p.wpc_id}
+		and stt_cd = '0'
+	</select>	
+    
+=======
+>>>>>>> Stashed changes
+	<select id="getDeviceMonthlyFee" resultType="map">
+		select *
+		from corners.dvc_fee
+		where sst_trm = #{p.sst_trm}
+		and dvc_id IN
+		<foreach collection="p.dvc_list" item="item" separator="," open="(" close=")">
+                  #{item.dvc_id}
+            </foreach>		
+	</select>
     
     <select id="findListUserByLevel" resultType="map">
     /* user.findListUserByLevel: 내부 사용자 목록 조회 */	
