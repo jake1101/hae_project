@@ -212,25 +212,26 @@ public class ServiceManageService {
 
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
-		try {
-			//todo: svc_id 처리방안 고민, sequence?
 			
-			//1. 기등록 서비스 존재여부 조회
-			if (isExistingService(param)) {
-				resultMap.put(Const.RESULT_STATUS, Const.FAIL);
-				resultMap.put(Const.RESULT_MSG, "이미 신청된 서비스가 있습니다.");
-	
-			}  else {
-				//2. svc_req 등록
-				//3. svc_dvc 등록 (멀티)
-				
-				sqlSession.insert("serviceManageApi.applyService", param);
-				
-				resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
-			}
-		}catch (Exception e) {
+		//1. 기등록 서비스 존재여부 조회
+		if (isExistingService(param)) {
 			resultMap.put(Const.RESULT_STATUS, Const.FAIL);
-			resultMap.put(Const.RESULT_MSG, e.getMessage());
+			resultMap.put(Const.RESULT_MSG, "이미 신청된 서비스가 있습니다.");
+
+		}  else {
+			//2. svc_id 채번
+			int nextSVCId = sqlSession.selectOne("serviceManageApi.getNextSVCId", param);
+			param.put("svc_id", nextSVCId);
+			
+			//3. svc_req 등록
+			sqlSession.insert("serviceManageApi.insertSVCREQ", param);
+			
+			//4. svc_dvc 등록 (멀티)
+			sqlSession.insert("serviceManageApi.insertSVCDVC", param);
+			
+			resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
+			resultMap.put(Const.RESULT_DATA, nextSVCId);
+
 		}
 		
 		return resultMap;
