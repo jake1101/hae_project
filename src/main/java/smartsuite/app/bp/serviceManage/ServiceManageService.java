@@ -211,13 +211,11 @@ public class ServiceManageService {
 	public Map<String,Object> applyService(Map param) {
 
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-
 			
 		//1. 기등록 서비스 존재여부 조회
 		if (isExistingService(param)) {
 			resultMap.put(Const.RESULT_STATUS, Const.FAIL);
 			resultMap.put(Const.RESULT_MSG, "이미 신청된 서비스가 있습니다.");
-
 		}  else {
 			//2. svc_id 채번
 			int nextSVCId = sqlSession.selectOne("serviceManageApi.getNextSVCId", param);
@@ -231,7 +229,6 @@ public class ServiceManageService {
 			
 			resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
 			resultMap.put(Const.RESULT_DATA, nextSVCId);
-
 		}
 		
 		return resultMap;
