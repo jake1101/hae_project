@@ -71,11 +71,11 @@
 	
 		insert into corners.svc_req
 		(
-			 svc_id, wpc_cd, svc_ctl_id, sst_trm, dsr_str_dt, exp_end_dt, 
-			exp_mon_fee, bsk_itm_yn, req_usr_id, req_dt
+			svc_id, wpc_cd, svc_ctl_id, sst_trm, dsr_str_dt, exp_end_dt, 
+			exp_mon_fee, bsk_itm_yn, stt_cd, req_usr_id, req_dt
 		) values (
-			 #{next_svc_id}, #{p.wpc_cd}, #{p.svc_ctl_id}, #{p.sst_trm}, #{p.dsr_str_dt}, #{p.exp_end_dt},
-			#{p.exp_mon_fee}, #{p.bsk_itm_yn}, #{g.username}, #{g.now} 
+			#{next_svc_id}, #{p.wpc_cd}, #{p.svc_ctl_id}, #{p.sst_trm}, #{p.dsr_str_dt}, #{p.exp_end_dt},
+			#{p.exp_mon_fee}, #{p.bsk_itm_yn}, '0', #{p.usr_id}, now()
 		);
 	
 		insert into corners.svc_dvc

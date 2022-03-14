@@ -217,6 +217,10 @@ public class ServiceManageService {
 			resultMap.put(Const.RESULT_STATUS, Const.FAIL);
 			resultMap.put(Const.RESULT_MSG, "이미 신청된 서비스가 있습니다.");
 		}  else {
+			Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+			param.put("usr_id", userInfo.get("usr_id"));
+
+
 			//2. svc_id 채번
 			int nextSVCId = sqlSession.selectOne("serviceManageApi.getNextSVCId", param);
 			param.put("svc_id", nextSVCId);
