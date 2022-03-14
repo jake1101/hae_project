@@ -114,19 +114,10 @@ public class ServiceManageService {
 //		List list =  sqlSession.selectList("serviceManageApi.regSafetyServiceGroupList", param);
 //		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
 //		resultMap.put(Const.RESULT_DATA, list);
-				
-		try {
-			resultMap = restfulUtilServiceToCorners.callCornersApi("searchAllSvcGrpList", param);
-			//apiToResultMap.put(Const.RESULT_DATA, resultMap.get("body"));
-			//apiToResultMap.remove("body");
-			
-			//returnlistMap.add(apiToResultMap);
-			
-		}catch (Exception e) {
-			LOG.info( "regSafetyServiceGroupList : " + e.getMessage() );
-		}
 		
 //		return returnlistMap;
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("searchAllSvcGrpList", param);
 		
 		return resultMap;
 	}
@@ -162,13 +153,9 @@ public class ServiceManageService {
 		//Map userInfo = Auth.getCurrentUserInfo();
 		Map<String, Object> gridResultMap = new HashMap<String, Object>();
 		
-		try {
-			gridResultMap = restfulUtilServiceToCorners.callCornersApi("findRegSafetyServiceList", searchParam);
-			resultMap = (List<Map<String, Object>>) gridResultMap.get("result_data");
-			
-		}catch (Exception e) {
-			LOG.info( "findRegSafetyServiceList log : " + e.getMessage() );
-		}
+		gridResultMap = restfulUtilServiceToCorners.callCornersApi("findRegSafetyServiceList", searchParam);
+		
+		resultMap = (List<Map<String, Object>>) gridResultMap.get("result_data");
 		
 		return resultMap;
 		
@@ -189,12 +176,7 @@ public class ServiceManageService {
 		//Map userInfo = Auth.getCurrentUserInfo();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
-		try {
-			resultMap = restfulUtilServiceToCorners.callCornersApi("updateServiceUseYn", param);
-			
-		}catch (Exception e) {
-			LOG.info( "updateServiceUseYn log : " + e.getMessage() );
-		}
+		resultMap = restfulUtilServiceToCorners.callCornersApi("updateServiceUseYn", param);
 		
 		return resultMap;
 		
@@ -267,12 +249,7 @@ public class ServiceManageService {
 		
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		
-		try {
-			resultMap = restfulUtilServiceToCorners.callCornersApi("getDevicesByCatalogId", param);
-			
-		}catch (Exception e) {
-			LOG.info( "updateServiceUseYn log : " + e.getMessage() );
-		}
+		resultMap = restfulUtilServiceToCorners.callCornersApi("getDevicesByCatalogId", param);
 		
 		return resultMap;
 	}
@@ -316,14 +293,7 @@ public class ServiceManageService {
 			param.put("user_company_id", userInfo.get("user_company_id"));
 		}
 
-		try {
-			resultMap = restfulUtilServiceToCorners.callCornersApi("getWPCList", param);
-			
-		}catch (Exception e) {
-			LOG.info( "updateServiceUseYn log : " + e.getMessage() );
-		}
-		
-		return resultMap;
+		return resultMap = restfulUtilServiceToCorners.callCornersApi("getWPCList", param);
 	}
 	
 	/**
@@ -338,12 +308,7 @@ public class ServiceManageService {
 		
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		
-		try {
-			resultMap = restfulUtilServiceToCorners.callCornersApi("estimateMonthlyFee", param);
-			
-		}catch (Exception e) {
-			LOG.info( "estimateMonthlyFee log : " + e.getMessage() );
-		}
+		resultMap = restfulUtilServiceToCorners.callCornersApi("estimateMonthlyFee", param);
 		
 		return resultMap;
 	}
