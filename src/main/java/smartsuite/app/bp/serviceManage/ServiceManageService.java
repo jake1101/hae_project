@@ -326,6 +326,27 @@ public class ServiceManageService {
 		return resultMap;
 	}
 	
+	/**
+	 * 예상월구독룍조회
+	 *
+	 * @author : 
+	 * @param param the param
+	 * @Date : 2022. 3. 14
+	 * @Method Name : 
+	 */
+	public Map estimateMonthlyFee(Map<String,Object> param) {
+		
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+		
+		try {
+			resultMap = restfulUtilServiceToCorners.callCornersApi("estimateMonthlyFee", param);
+			
+		}catch (Exception e) {
+			LOG.info( "estimateMonthlyFee log : " + e.getMessage() );
+		}
+		
+		return resultMap;
+	}
 	
 	/**
 	 * 예상월구독룍조회
@@ -334,7 +355,7 @@ public class ServiceManageService {
 	 * @param param the param
 	 * @Date : 2022. 2. 24
 	 * @Method Name : 
-	 */
+	 
 	public Map estimateMonthlyFee(Map<String,Object> param) {
 		
 		
@@ -367,6 +388,7 @@ public class ServiceManageService {
 		
 		return resultMap;
 	}	
+	*/
 	
 	/**
 	 * 메일을 전송한다. 
