@@ -113,12 +113,12 @@ public class RestfulUtilServiceToCorners {
 
 		if( checked.equals("1")){
 			resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
-			resultMap.put("result_message", jsonObject.get("message").toString() );
 			resultMap.put(Const.RESULT_DATA, jsonObject.get("data") );
 		}else{
 			resultMap.put(Const.RESULT_STATUS, Const.FAIL);
-			resultMap.put("result_message", jsonObject.get("message").toString() );
 		}
+		
+		resultMap.put("result_message", jsonObject.get("message").toString() );
 
 		return resultMap;
 	}

@@ -193,6 +193,26 @@ public class ServiceManageService {
 	public Map<String,Object> applyService(Map param) {
 
 		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		param.put("usr_id", userInfo.get("usr_id"));
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("applyService", param);
+			
+		return resultMap;
+	}
+	
+	/**
+	 * 서비스 신청하기. 
+	 *
+	 * @author : jake
+	 * @param param the param
+	 * @Date : 2022. 3. 8
+	 * @Method Name : applyService
+	 
+	public Map<String,Object> applyService(Map param) {
+
+		Map<String, Object> resultMap = new HashMap<String, Object>();
 			
 		//1. 기등록 서비스 존재여부 조회
 		if (isExistingService(param)) {
@@ -219,6 +239,7 @@ public class ServiceManageService {
 		
 		return resultMap;
 	}
+	*/ 
 	
 	/**
 	 * 기신청 서비스 존재여부 조회 
@@ -227,7 +248,7 @@ public class ServiceManageService {
 	 * @param param the param
 	 * @Date : 2022. 3. 8
 	 * @Method Name : isExistingService
-	 */ 
+	  
 	private boolean isExistingService(Map param) {
 
 		int cnt = sqlSession.selectOne("serviceManageApi.getExistingServiceCnt", param);
@@ -235,7 +256,7 @@ public class ServiceManageService {
 		return (cnt > 0);
 		
 	}
-	
+	*/
 	
 	/**
 	 * 서비스카타로그별 디바이스 목록 조회
@@ -354,44 +375,4 @@ public class ServiceManageService {
 		return resultMap;
 	}	
 	*/
-	
-	/**
-	 * 메일을 전송한다. 
-	 *
-	 * @author : JongHyeok Choi
-	 * @param param the param
-	 * @Date : 2016. 8. 16
-	 * @Method Name : mailSend
-	 */
-	private void mailSend(Map user) {
-		Map<String, Object> mailParam = new HashMap<String, Object>();
-		Map<String, Object> data = new HashMap<String, Object>();
-
-		//필수 데이터 
-		data.put("pw"	 	, user.get("tempPw"));
-		data.put("usr_nm"	, user.get("usr_nm"));
-		data.put("url"		, spUrl); 
-		
-		mailParam.put("to_addr"	, user.get("email"));
-		mailParam.put("to_nm"	, user.get("usr_nm"));
-		mailParam.put("data"	, data);
-		
-		commonMailService.addMail("INIT_PW_ML", mailParam);
-	}
-	
-	/**
-	 * 비밀번호 주기를 오늘날짜로 초기화
-	 *
-	 * @author : JongHoon Baek
-	 * @param param the param
-	 * @Date : 2020. 7. 20
-	 * @Method Name : initPwTerm
-	 */
-	public Map initPwTerm(Map<String,Object> param) {
-		Map<String,Object> resultMap = new HashMap<String, Object>();
-		sqlSession.update("user.initPwTerm", param);
-		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
-		return resultMap;
-	}
-	
 }

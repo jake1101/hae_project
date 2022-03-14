@@ -93,7 +93,7 @@ public class ServiceManageController {
 	@RequestMapping (value = "applyService.do")
 	public @ResponseBody Map<String,Object> applyService(@RequestBody Map param) {
 		return ServiceManageService.applyService(param);
-	}	
+	}
 	
 	/**
 	 * 서비스카타로그별 디바이스 목록 조회
