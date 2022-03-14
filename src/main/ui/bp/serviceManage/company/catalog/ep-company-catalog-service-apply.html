@@ -51,7 +51,7 @@
 						id="wpc_list"
 						class="dm_required"
 					 	items="{{wpcList}}"
-					 	value="{{setParam.wpc_id}}"
+					 	value="{{setParam.wpc_cd}}"
 					 	display-field="name" 
 					 	value-field="id" 
 						placeholder="사업장"
@@ -69,7 +69,6 @@
 							id="dsr_str_dt"
 							class="dm_required"
 							value={{setParam.dsr_str_dt}} 
-							on-change="onChangeDsrStrDt"
 							style="width: 150px;"
 							placeholder="요청일"
 							required="true"
@@ -134,8 +133,8 @@
 			</tr>
 		</table>
 		<div style="margin-top: 30px; display: flex; justify-content: center; gap: 20px;">
-			<sc-button text="장바구니 저장" style="width: 100px; padding: 10px;" on-click="onSaveCartClick"></sc-button>
-			<sc-button text="신청" style="width: 100px; padding: 10px;" on-click="onApplyClick"></sc-button>
+			<sc-button id="dm_cart" text="장바구니 저장" style="width: 100px; padding: 10px;" on-click="onApplyClick"></sc-button>
+			<sc-button id="dm_apply" text="신청" style="width: 100px; padding: 10px;" on-click="onApplyClick"></sc-button>
 		</div>
 	</template>
 	<script>
@@ -264,15 +263,9 @@
 				  	  fee = commaNum(r);
 				  	  
 				Object.assign(me.get("setParam"), {"exp_mon_fee": r});
-				me.$.estimatedFee.textContent = `${fee} (VAT별도)`;
-			},
-			onChangeDsrStrDt: function(a, b) {
-				console.log(1);
-				console.log(a);
-				console.log(b);
-				const me = this,
-				  	  param = me.get("setParam"),
-				  	  date = new Date(param.dsr_str_dt);
+				if(me.get("clickFlag").fee){
+					me.$.estimatedFee.textContent = `${fee} (VAT별도)`;
+				}
 			},
 			onInputField: function(e){
 				const me = document.querySelector("ep-company-catalog-service-apply"),
@@ -284,9 +277,12 @@
 				
 				const dvcList = me.get("deviceList").filter(d => d.qtt && d.qtt != 0 && d)
 				dvcList.length && Object.assign(me.get("setParam"), {"dvc_list": dvcList});
-				if(term && me.get("clickFlag").fee){
+				
+				
+				term && UT.request(me.$.estimateMonthlyFee);
+				/* if(term && me.get("clickFlag").fee){
 					UT.request(me.$.estimateMonthlyFee);
-				}				
+				}	 */			
 			},
 			onChangeTerm: function() {
 				const me = this,
@@ -306,10 +302,11 @@
 					me.$.term.textContent = `${y}. ${m}. ${d}`;
 				}
 				
-				if(Object.keys(param).includes('dvc_list') && me.get("clickFlag").fee){
-					UT.request(me.$.estimateMonthlyFee);
-				}
+				Object.keys(param).includes('dvc_list') && UT.request(me.$.estimateMonthlyFee);
 				
+				/* if(Object.keys(param).includes('dvc_list') && me.get("clickFlag").fee){
+					UT.request(me.$.estimateMonthlyFee);
+				} */
 			},
 			requiredCheck: function(requiredElements, callback = null) {
 				const labelElements = Array.prototype.slice.call(requiredElements.labels),
@@ -352,10 +349,10 @@
 					UT.request(me.$.estimateMonthlyFee)
 				});
 			},
-			onApplyClick: function(){
+			onApplyClick: function(e){
 				const me = this,
-					  svc_id = "SVC"+me.get("selectedService")["svc_ctl_id"].substr(-5);
-				  	  
+					  svc_ctl_id = "SVC"+me.get("selectedService")["svc_ctl_id"].substr(-5);
+				
 				const checkWpc = me.requiredCheck({
 					labels: document.querySelectorAll(".wpc_list.dm_required"),
 				  	fields: document.querySelectorAll("#wpc_list")
@@ -365,13 +362,24 @@
 				if(!me.onEndDateClick()) return;
 				if(!me.onEstimatedFeeClick()) return;
 
-				Object.assign(me.get("applyParam"), {svc_id});
+				Object.assign(me.get("applyParam"), {svc_ctl_id});
 				Object.assign(me.get("applyParam"), me.get("setParam"));
-				UT.request(me.$.applyService); 
+
+				if(e.target.id == "dm_cart"){
+					Object.assign(me.get("applyParam"), {"bsk_itm_yn": "1"});
+				}else{
+					Object.assign(me.get("applyParam"), {"bsk_itm_yn": "0"});
+				}
 				
-			},
-			onSaveCartClick: function() {
-				SCAlert.show('장바구니 저장', '장바구니 저장');
+				UT.request(me.$.applyService, function(event, {response}){
+					if(response.result_status == "E"){
+						SCAlert.show(`${e.target.textContent}`, response.result_message);
+					}else{
+						SCAlert.show(`${e.target.textContent}`, `${e.target.textContent} 완료되었습니다.`);
+					}
+					me.$.dm_cart.disabled = "true";
+					me.$.dm_apply.disabled = "true";
+				})
 			}
 		})
 	</script>
