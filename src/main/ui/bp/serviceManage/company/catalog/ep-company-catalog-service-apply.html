@@ -22,6 +22,7 @@
 			url="getDevicesByCatalogId.do"
 			body="{{selectedService}}"
 			last-response="{{deviceResult}}"
+			on-response="complateDeviceResult"
 		></sc-ajax>
 		<sc-ajax
 			id="estimateMonthlyFee"
@@ -50,7 +51,7 @@
 					<sc-combobox-field
 						id="wpc_list"
 						class="dm_required"
-					 	items="{{wpcList}}"
+					 	items="{{wpcResult.result_data}}"
 					 	value="{{setParam.wpc_cd}}"
 					 	display-field="name" 
 					 	value-field="id" 
@@ -74,7 +75,7 @@
 							required="true"
 						></sc-date-field>
    						~
-  						</div>
+					</div>
 				</td>
 			</tr>
 			<tr id="dvcTr">
@@ -150,34 +151,22 @@
                         };
                     }
                 },
+                selectedService: {
+					type: Object,
+    				value: function() {
+    					return {};
+    				}
+				},
                 wpcResult: {
 					type: Object,
 					value: function() {
 						return {};
 					}
 				},
-				wpcList: {
-					type: Object,
-					value: function() {
-						return [];
-					}
-				},
-				selectedService: {
-					type: Object,
-    				value: function() {
-    					return {};
-    				}
-				},
 				deviceResult: {
 					type: Object,
 					value: function() {
 						return {};
-					}
-				},
-				deviceList: {
-					type: Array,
-					value: function() {
-						return [];
 					}
 				},
 				setParam: {
@@ -205,49 +194,44 @@
 			initialized: function() {
                 const me = this;
                 const term = me.get("codes.term") || [];
-                me.set("wpcList", me.get("wpcResult").result_data);
             },
 			load: function(param) {
 				const {
 					svc_ctl_id,
 					svc_ctl_nm
 				} = param,
-				me = this,
-				dvcTr = me.$.dvcTr,
-				dvcTh = dvcTr.children[0];
+				me = this;
 				
 				me.$.subTitle.titleText = `서비스 신청하기 (${svc_ctl_nm})`;
 				me.set("selectedService", param);
 				
-				UT.request(this.$.getDevicesByCatalogId, function(e, res){
-					const {result_data: list} = res.response;
-					
-					dvcTh.setAttribute('rowspan', list.length + 1);
-					list.forEach(l => {
-						const {dvc_id, dvc_nm, mdt_yn} = l;
-						dvcTr.insertAdjacentHTML('afterEnd', `
-							<tr>
-								<th>
-									<sc-label class="dvc_label ${Number(mdt_yn) ? 'dm_required' : ''}" text="${dvc_nm}${Number(mdt_yn) ? '*' : ''}"></sc-label>
-								</th>
-								<td>
-									<div style="display: flex; gap: 10px; align-items: center;">
-										<sc-text-field 
-											type="number"
-											id="dvc_field${dvc_id}" 
-											class="dvc_field ${Number(mdt_yn) ? 'dm_required' : ''}" 
-											required="${Number(mdt_yn) ? 'true' : 'false'}"
-										></sc-text-field>
-										대
-									</div>
-								</td>
-							</tr>
-						`);
-					})
-					me.set("deviceList", list);
-					
-					for(f of document.querySelectorAll(".dvc_field")) f.oninput = me.onInputField;
-				});
+				UT.request(this.$.getDevicesByCatalogId);
+			},
+			complateDeviceResult: function(e, {response: {result_data: list}}){
+				const me = this;
+				list.forEach(l => {
+					const {dvc_id, dvc_nm, mdt_yn} = l;
+					const tr = document.createElement('tr');
+					tr.innerHTML = `
+						<th>
+							<sc-label class="dvc_label ${Number(mdt_yn) ? 'dm_required' : ''}" text="${dvc_nm}${Number(mdt_yn) ? '*' : ''}"></sc-label>
+						</th>
+						<td>
+							<div style="display: flex; gap: 10px; align-items: center;">
+								<sc-text-field 
+									type="number"
+									id="dvc_field${dvc_id}" 
+									class="dvc_field ${Number(mdt_yn) ? 'dm_required' : ''}" 
+									required="${Number(mdt_yn) ? 'true' : 'false'}"
+								></sc-text-field>
+								대
+							</div>
+						</td>
+					`;
+					me.$.dvcTr.after(tr);
+				})
+				me.$.dvcTr.children[0].setAttribute('rowspan', list.length + 1);
+				for(f of document.querySelectorAll(".dvc_field")) f.oninput = me.onInputField;
 			},
 			complateMonthlyFee: function(e, {response: {result_data: {estimatedMonthlyFee: r}}}){
 				const me = this,
@@ -265,13 +249,13 @@
 					  term = param.sst_trm,
 					  field = e.path.find(t => t.id.includes("dvc_field"));
 				
-				me.get("deviceList").find(d => d.dvc_id == field.id.replace("dvc_field", "")).qtt = Number(e.target.value);
+				me.get("deviceResult").result_data.find(d => d.dvc_id == field.id.replace("dvc_field", "")).qtt = Number(e.target.value);
 				
-				const dvcList = me.get("deviceList").filter(d => d.qtt && d.qtt != 0 && d)
+				const dvcList = me.get("deviceResult").result_data.filter(d => d.qtt && d.qtt != 0 && d)
 				dvcList.length && Object.assign(me.get("setParam"), {"dvc_list": dvcList});
 				
-				
-				term && UT.request(me.$.estimateMonthlyFee);
+				me.$.estimatedFee.textContent = ""
+				/* term && UT.request(me.$.estimateMonthlyFee); */
 				/* if(term && me.get("clickFlag").fee){
 					UT.request(me.$.estimateMonthlyFee);
 				}	 */			
@@ -294,7 +278,9 @@
 					me.$.term.textContent = `${y}. ${m}. ${d}`;
 				}
 				
-				Object.keys(param).includes('dvc_list') && UT.request(me.$.estimateMonthlyFee);
+				me.$.estimatedFee.textContent = ""
+				
+				/* Object.keys(param).includes('dvc_list') && UT.request(me.$.estimateMonthlyFee); */
 				
 				/* if(Object.keys(param).includes('dvc_list') && me.get("clickFlag").fee){
 					UT.request(me.$.estimateMonthlyFee);
@@ -331,7 +317,8 @@
 					  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","),
 					  term = Number(param.sst_trm),
 					  getQtt = id => Number(document.getElementById(id).value),
-					  dvcList = me.get("deviceList").filter(l => getQtt(`dvc_field${l.dvc_id}`) && Object.assign(l, {"qtt": getQtt(`dvc_field${l.dvc_id}`)}));
+					  setList = l => getQtt(`dvc_field${l.dvc_id}`) && Object.assign(l, {"qtt": getQtt(`dvc_field${l.dvc_id}`)}),
+					  dvcList = me.get("deviceResult").result_data.filter(setList);
 					  
 				return me.requiredCheck({
 					labels: document.querySelectorAll(".dvc_label.dm_required, .sst_trm.dm_required"),

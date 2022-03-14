@@ -63,35 +63,50 @@
 		WHERE SVC_CTL_ID = #{p.svc_ctl_id}
 	</update>
 	
-	<!-- 서비스 신청하기 -->
-	<!-- by jake -->
-	<insert id="applyService">
-		INSERT INTO
-			corners.svc_req
-		VALUES (
-			#{p.svc_id}
+   
+   	<insert id="insertSVCREQ">
+		insert into corners.svc_req
+		(
+			 svc_id, wpc_cd, svc_ctl_id, sst_trm, dsr_str_dt, exp_end_dt, 
+			exp_mon_fee, bsk_itm_yn, stt_cd, req_usr_id, req_dt
+		) values (
+			 #{p.svc_id}, #{p.wpc_cd}, #{p.svc_ctl_id}, #{p.sst_trm}, #{p.dsr_str_dt}, #{p.exp_end_dt},
+			#{p.exp_mon_fee}, #{p.bsk_itm_yn}, '0', #{p.usr_id}, now() 
 		);
 	</insert>
-    
-<<<<<<< Updated upstream
+   
+    <insert id="insertSVCDVC">
+		insert into corners.svc_dvc
+		(
+			svc_id, dvc_id, qtt
+		) 
+		values 
+		<foreach collection="p.dvc_list" item="item" separator=",">
+			( #{p.svc_id}, #{item.dvc_id}, #{item.qtt} )
+		</foreach>
+		;
+	</insert>
+   
+   	<select id="getNextSVCId" resultType="int">
+		select nextval('corners.svc_req_svc_id_seq')  
+	</select>
+   
 	<select id="getExistingServiceCnt" resultType="int">
 		select count(1) cnt
 		from corners.svc_req
 		where svc_ctl_id = #{p.svc_ctl_id}
-		and wpc_cd = #{p.wpc_id}
+		and wpc_cd = #{p.wpc_cd}
 		and stt_cd = '0'
-	</select>	
-    
-=======
->>>>>>> Stashed changes
+	</select>
+
 	<select id="getDeviceMonthlyFee" resultType="map">
 		select *
 		from corners.dvc_fee
 		where sst_trm = #{p.sst_trm}
 		and dvc_id IN
 		<foreach collection="p.dvc_list" item="item" separator="," open="(" close=")">
-                  #{item.dvc_id}
-            </foreach>		
+			#{item.dvc_id}
+		</foreach>
 	</select>
     
     <select id="findListUserByLevel" resultType="map">
