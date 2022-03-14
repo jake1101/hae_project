@@ -254,11 +254,7 @@
 				const dvcList = me.get("deviceResult").result_data.filter(d => d.qtt && d.qtt != 0 && d)
 				dvcList.length && Object.assign(me.get("setParam"), {"dvc_list": dvcList});
 				
-				me.$.estimatedFee.textContent = ""
-				/* term && UT.request(me.$.estimateMonthlyFee); */
-				/* if(term && me.get("clickFlag").fee){
-					UT.request(me.$.estimateMonthlyFee);
-				}	 */			
+				me.$.estimatedFee.textContent = "";	
 			},
 			onChangeTerm: function() {
 				const me = this,
@@ -278,13 +274,7 @@
 					me.$.term.textContent = `${y}. ${m}. ${d}`;
 				}
 				
-				me.$.estimatedFee.textContent = ""
-				
-				/* Object.keys(param).includes('dvc_list') && UT.request(me.$.estimateMonthlyFee); */
-				
-				/* if(Object.keys(param).includes('dvc_list') && me.get("clickFlag").fee){
-					UT.request(me.$.estimateMonthlyFee);
-				} */
+				me.$.estimatedFee.textContent = "";
 			},
 			requiredCheck: function(requiredElements, callback = null) {
 				const labelElements = Array.prototype.slice.call(requiredElements.labels),
@@ -358,7 +348,7 @@
 					}
 					me.$.dm_cart.disabled = "true";
 					me.$.dm_apply.disabled = "true";
-				})
+				});
 			}
 		})
 	</script>
