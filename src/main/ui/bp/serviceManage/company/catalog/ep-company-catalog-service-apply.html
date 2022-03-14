@@ -150,14 +150,6 @@
                         };
                     }
                 },
-                companyId: {
-                	type: Object,
-                	value: function() {
-                		return {
-                			user_company_id: "1"
-                		}
-                	}
-                },
                 wpcResult: {
 					type: Object,
 					value: function() {
@@ -257,7 +249,7 @@
 					for(f of document.querySelectorAll(".dvc_field")) f.oninput = me.onInputField;
 				});
 			},
-			complateMonthlyFee: function(e, {response: {result_data: r}}){
+			complateMonthlyFee: function(e, {response: {result_data: {estimatedMonthlyFee: r}}}){
 				const me = this,
 				  	  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","),
 				  	  fee = commaNum(r);
