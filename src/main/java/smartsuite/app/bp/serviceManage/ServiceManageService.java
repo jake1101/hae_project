@@ -129,23 +129,6 @@ public class ServiceManageService {
 	 * @param param the param
 	 * @Date : 2022. 2. 24
 	 * @Method Name : findRegSafetyServiceList
-	 
-	public List<Map<String,Object>> findRegSafetyServiceList(Map searchParam) {
-		
-		//Map userInfo = Auth.getCurrentUserInfo();
-
-		return sqlSession.selectList("serviceManageApi.findRegSafetyServiceList", searchParam);
-		
-	}
-	*/
-	
-	/**
-	 * 등록 서비스 리스트
-	 *
-	 * @author : 
-	 * @param param the param
-	 * @Date : 2022. 2. 24
-	 * @Method Name : findRegSafetyServiceList
 	*/
 	public List<Map<String,Object>> findRegSafetyServiceList(Map searchParam) {
 		
@@ -203,62 +186,6 @@ public class ServiceManageService {
 	}
 	
 	/**
-	 * 서비스 신청하기. 
-	 *
-	 * @author : jake
-	 * @param param the param
-	 * @Date : 2022. 3. 8
-	 * @Method Name : applyService
-	 
-	public Map<String,Object> applyService(Map param) {
-
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-			
-		//1. 기등록 서비스 존재여부 조회
-		if (isExistingService(param)) {
-			resultMap.put(Const.RESULT_STATUS, Const.FAIL);
-			resultMap.put(Const.RESULT_MSG, "이미 신청된 서비스가 있습니다.");
-		}  else {
-			Map<String,Object> userInfo = Auth.getCurrentUserInfo();
-			param.put("usr_id", userInfo.get("usr_id"));
-
-
-			//2. svc_id 채번
-			int nextSVCId = sqlSession.selectOne("serviceManageApi.getNextSVCId", param);
-			param.put("svc_id", nextSVCId);
-			
-			//3. svc_req 등록
-			sqlSession.insert("serviceManageApi.insertSVCREQ", param);
-			
-			//4. svc_dvc 등록 (멀티)
-			sqlSession.insert("serviceManageApi.insertSVCDVC", param);
-			
-			resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
-			resultMap.put(Const.RESULT_DATA, nextSVCId);
-		}
-		
-		return resultMap;
-	}
-	*/ 
-	
-	/**
-	 * 기신청 서비스 존재여부 조회 
-	 *
-	 * @author : 
-	 * @param param the param
-	 * @Date : 2022. 3. 8
-	 * @Method Name : isExistingService
-	  
-	private boolean isExistingService(Map param) {
-
-		int cnt = sqlSession.selectOne("serviceManageApi.getExistingServiceCnt", param);
-		
-		return (cnt > 0);
-		
-	}
-	*/
-	
-	/**
 	 * 서비스카타로그별 디바이스 목록 조회
 	 *
 	 * @author : 
@@ -275,26 +202,6 @@ public class ServiceManageService {
 		return resultMap;
 	}
 
-	/**
-	 * 서비스카타로그별 디바이스 목록 조회
-	 *
-	 * @author : 
-	 * @param param the param
-	 * @Date : 2022. 2. 24
-	 * @Method Name : 
-	 
-	public Map getDevicesByCatalogId(Map<String,Object> param) {
-		
-		Map<String,Object> resultMap = new HashMap<String, Object>();
-		
-		List list =  sqlSession.selectList("serviceManageApi.getDevicesByCatalogId", param);
-		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
-		resultMap.put(Const.RESULT_DATA, list);
-		
-		return resultMap;
-	}
-	*/
-	
 	/**
 	 * 사업장 목록 조회
 	 *
@@ -335,44 +242,42 @@ public class ServiceManageService {
 	}
 	
 	/**
-	 * 예상월구독룍조회
+	 * C-서비스 이용 현황 - 조회
 	 *
 	 * @author : 
 	 * @param param the param
-	 * @Date : 2022. 2. 24
+	 * @Date : 2022. 3. 14
 	 * @Method Name : 
-	 
-	public Map estimateMonthlyFee(Map<String,Object> param) {
+	 */
+	public Map getServiceUseList(Map<String,Object> param) {
 		
-		
-		int estimatedMonthlyFee = 0;
-		
-		ArrayList devices = (ArrayList)param.get("dvc_list");
 		Map<String,Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
 		
-		List<Map<String,Object>> list =  sqlSession.selectList("serviceManageApi.getDeviceMonthlyFee", param);
-		
-		if (list != null && !list.isEmpty()) {
-			
-			for (int i = 0; i < devices.size(); i++) {
-				
-				HashMap<String, Object> device = (HashMap<String, Object>)devices.get(i);
-				
-				for (Map<String, Object> row : list) {
-					
-					if((Integer)device.get("dvc_id") == ((Long)row.get("dvc_id")).intValue()) {
-						
-						estimatedMonthlyFee += (Integer)device.get("qtt") * (Integer)row.get("mon_fee") * (Integer)param.get("sst_trm");
-						break;
-					}
-				}
-			}
-		}
-		
-		resultMap.put(Const.RESULT_STATUS, Const.SUCCESS);
-		resultMap.put(Const.RESULT_DATA, estimatedMonthlyFee);
+		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceUseList", param);
 		
 		return resultMap;
-	}	
-	*/
+	}
+	
+	/**
+	 * C-서비스 이용 현황 - 서비스 삭제
+	 *
+	 * @author : 
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 3. 15
+	 * @Method Name : updateServiceUseYn
+	 */
+	public Map<String,Object> delteApplyService(Map param) {
+		
+//		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
+		//Map userInfo = Auth.getCurrentUserInfo();
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("delteApplyService", param);
+		
+		return resultMap;
+		
+	}
+	
 }

@@ -36,13 +36,13 @@ public class ServiceManageController {
 	ServiceManageService ServiceManageService;
 	
 	/**
-	 * user list 조회를 요청한다.
+	 * 등록 서비스 그룹 조회
 	 *
 	 * @author : hjh
-	 * @param param the param
-	 * @return the list
+	 * @param 
+	 * @return 
 	 * @Date : 2022. 02. 24
-	 * @Method Name : findUserList
+	 * @Method Name : regSafetyServiceGroupList
 	 */
 	@AuthCheck (authCode = Const.READ)
 	@RequestMapping (value = "regSafetyServiceGroupList.do")
@@ -51,11 +51,11 @@ public class ServiceManageController {
 	}
 	
 	/**
-	 * user list 조회를 요청한다.
+	 * 등록 서비스 조회
 	 *
 	 * @author : hjh
-	 * @param param the param
-	 * @return the list
+	 * @param 
+	 * @return 
 	 * @Date : 2022. 02. 24
 	 * @Method Name : findUserList
 	 */
@@ -99,8 +99,8 @@ public class ServiceManageController {
 	 * 서비스카타로그별 디바이스 목록 조회
 	 *
 	 * @author : hjh
-	 * @param SVC_CTL_ID String
-	 * @param SVC_USE_YN String Optional
+	 * @param : svc_ctl_id 서비스 카타로그 아이디
+	 * @param : mdt_yn 필수 여부
 	 * @return the map<string, object>: result_status String, result_data List
 	 * @Date : 2022. 02. 24
 	 * @Method Name : getDevicesByCatalogId
@@ -140,5 +140,35 @@ public class ServiceManageController {
 	@RequestMapping (value = "getWPCList.do")
 	public @ResponseBody Map<String,Object> getWPCList(@RequestBody Map param) {
 		return ServiceManageService.getWPCList(param);
-	}	
+	}
+	
+	/**
+	 * C-서비스 이용 현황 - 조회
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return the map<string, object>: result_status String, result_data List
+	 * @Date : 2022. 02. 24
+	 * @Method Name : getWPCList
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "getServiceUseList.do")
+	public @ResponseBody Map<String,Object> getServiceUseList(@RequestBody Map param) {
+		return ServiceManageService.getServiceUseList(param);
+	}
+	
+	/**
+	 * C-서비스 이용 현황 - 서비스 삭제
+	 *
+	 * @author : hjh
+	 * @param svc_id
+	 * @return delete Success ture 1 false 0
+	 * @Date : 2022. 02. 24
+	 * @Method Name : getWPCList
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "delteApplyService.do")
+	public @ResponseBody Map<String,Object> delteApplyService(@RequestBody Map param) {
+		return ServiceManageService.delteApplyService(param);
+	}
 }
