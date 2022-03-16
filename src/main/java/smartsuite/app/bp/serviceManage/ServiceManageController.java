@@ -143,6 +143,21 @@ public class ServiceManageController {
 	}
 	
 	/**
+	 * C-서비스 이용 현황 - 사업장별 신청 서비스 조회
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return the map<string, object>: result_status String, result_data List
+	 * @Date : 2022. 02. 24
+	 * @Method Name : getWPCList
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "getWpcServiceList.do")
+	public @ResponseBody Map<String,Object> getWpcServiceList(@RequestBody Map param) {
+		return ServiceManageService.getWpcServiceList(param);
+	}
+	
+	/**
 	 * C-서비스 이용 현황 - 조회
 	 *
 	 * @author : hjh

@@ -15,6 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import smartsuite.app.bp.admin.job.JobService;
 import smartsuite.app.bp.admin.org.OperOrgService;
@@ -22,6 +25,7 @@ import smartsuite.app.common.mail.CommonMailService;
 import smartsuite.app.common.restful.RestfulUtilService;
 import smartsuite.app.common.restful.RestfulUtilServiceToCorners;
 import smartsuite.app.common.shared.Const;
+import smartsuite.security.annotation.AuthCheck;
 import smartsuite.security.authentication.Auth;
 import smartsuite.security.authentication.AuthenticationPostService;
 import smartsuite.security.authentication.PasswordGenerator;
@@ -242,6 +246,30 @@ public class ServiceManageService {
 	}
 	
 	/**
+	 * C-서비스 이용 현황 - 사업장별 신청 서비스 조회
+	 *
+	 * @author : 
+	 * @param param the param
+	 * @Date : 2022. 3. 16
+	 * @Method Name : 
+	 */
+	public Map getWpcServiceList(Map<String,Object> param) {
+		
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("getWpcServiceList", param);
+		
+		return resultMap;
+	}
+	
+	/**
 	 * C-서비스 이용 현황 - 조회
 	 *
 	 * @author : 
@@ -253,6 +281,12 @@ public class ServiceManageService {
 		
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
 		
 		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceUseList", param);
 		
