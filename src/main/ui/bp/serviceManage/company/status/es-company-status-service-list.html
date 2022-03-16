@@ -26,6 +26,7 @@
 				url="getServiceUseList.do"
 				body="{{searchParam}}"
 				last-response="{{serviceResult}}"
+				on-response = "complateServiceResult"
 			></sc-ajax>
 		</sc-request-group>
 		<cc-sub-title-bar title-text="서비스 이용 목록"></cc-sub-title-bar>
@@ -121,8 +122,8 @@
 					width="150"
 				>
 					<sc-button-column 
-						data-field="custom_btn" 
-						header-text="custom" 
+						data-field="stt_cd" 
+						text="{{stt_cd}}" 
 						width="100" 
 						text-align="center"
 					></sc-data-column>
@@ -156,6 +157,12 @@
     					return {};
     				}
     			},
+    			wpcList: {
+    				type: Array,
+    				value: function() {
+    					return [];
+    				}
+    			},
     			wpcSerivceResult: {
     				type: Object,
     				value: function() {
@@ -172,14 +179,10 @@
 			observers: [
 
 			],
-			initialized: function() {
-                const me = this;
-                let result_data;
-             	
-                result_data = me.get("wpcResult").result_data.map(wpc => wpc = {"wpc_cd": wpc.id, "wpc_nm": wpc.name});
-                me.set("wpcResult", {result_data});
-                
-                const setReqDt = dt => {
+			complateServiceResult(e, {response: {result_data: serviceList}}){
+				const me = this;
+
+				const setReqDt = dt => {
 					const date = new Date(dt);
 					const a = b => b > 10 ? b : '0'+b;
 					
@@ -189,27 +192,37 @@
 					
                 	return `${y}.${a(m)}.${a(d)}`;
                 }
+				
+				const setTerm = t => {
+					const term = me.get("codes").term;
+					return term.find(trm => t == Number(trm.data)).label
+				}
                 
 				const commaNum = n => {
 					return n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 				}
-				
-				const setState = s => {
-					
-				}
                 
                 const setService = s => Object.assign(s, {
-                	"sst_trm": s.sst_trm + " 개월",
                 	"req_dt": setReqDt(s.req_dt),
+                	"sst_trm": setTerm(s.sst_trm),
                 	"exp_mon_fee": commaNum(s.exp_mon_fee)
                 });
                 
-                result_data = me.get("serviceResult").result_data.map(setService);
-                me.set("serviceResult", {result_data});
+                if(serviceList){
+                	result_data = serviceList.map(setService);
+                    me.set("serviceResult", {result_data});
+    				return serviceList;
+                }
+                
+			},
+			initialized: function() {
+                const me = this;
+             	
+                const result_data = me.get("wpcResult").result_data.map(wpc => wpc = {"wpc_cd": wpc.id, "wpc_nm": wpc.name});
+                me.set("wpcResult", {result_data});
             },
             onFindService: function() {
             	const me = this;
-            	console.log(me.get("searchParam"));
             	UT.request(me.$.getServiceUseList);
             }
 		})

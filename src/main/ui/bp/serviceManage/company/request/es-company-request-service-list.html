@@ -1,0 +1,167 @@
+<dom-module id="es-company-request-service-list">
+	<template>
+		<sc-request-group init>
+			<sc-ajax 
+				id="searchQaA" 
+				url="searchQaA.do"
+				body="{{searchParam}}"
+				last-response="{{requestServiceResult}}"
+			></sc-ajax>
+		</sc-request-group>
+		
+		<sc-button 
+			text="신규 요청" 
+			style=" width: 200px; 
+					height: 35px; 
+					display: flex; 
+					justify-content: center; 
+					align-items: center;"
+			on-click="onClickNewRequest"
+			></sc-button>
+		<div class="vspace-10"></div>
+		<div class="vspace-10"></div>
+		<cc-search-container on-search="onFindRegSafetyServiceList">
+			<table>
+				<colgroup>
+					<col style="width: 40px;">
+					<col>
+					
+					<col style="width: 60px;">
+					<col>
+					
+					<col style="width: 90px;">
+					<col>
+					
+					<col style="width: 120px;">
+					<col>
+					
+					<col style="width: 90px;">
+					<col>
+				</colgroup>
+				<tr style="height: 50px;">
+					<th>
+						<sc-label text="상태"></sc-label>
+					</th>
+                	<td>
+                		<sc-combobox-field 
+                			placeholder="상태"
+                		></sc-combobox-field>
+                	</td>
+					<th>
+						<sc-label text="사업장"></sc-label>
+					</th>
+                	<td>
+                		<sc-combobox-field 
+                			placeholder="사업장"
+                		></sc-combobox-field>
+                	</td>
+                	<th>
+						<sc-label text="이용 서비스"></sc-label>
+					</th>
+                	<td>
+                		<sc-combobox-field 
+                			placeholder="이용 서비스"
+                		></sc-combobox-field>
+                	</td>
+                	<th>
+						<sc-label text="서비스 요청 유형"></sc-label>
+					</th>
+                	<td>
+                		<sc-combobox-field 
+                			placeholder="서비스 요청 유형"
+                		></sc-combobox-field>
+                	</td>
+                	
+                	<th rowspan=2>
+						<sc-label text="키워드 검색"></sc-label>
+					</th>
+					<td rowspan=2>
+						<sc-text-field value="{{searchParam.search}}"></sc-text-field>
+					</td>
+				</tr>
+				<tr></tr>
+			</table>
+		</cc-search-container>
+		<sc-grid 
+			id="gridPanel" 
+			data-provider="{{}}" 
+			on-item-click="onItemClick"
+			on-button-click="onItemClick"
+			use-selection="false"
+			use-state="false"
+		>
+			<cc-grid-toolbar></cc-grid-toolbar>
+			<sc-grid-columns>
+				<sc-data-column 
+					data-field="a" 
+					header-text="상태" 
+					width="200" 
+					text-align="center"
+				></sc-data-column>
+				<sc-data-column 
+					data-field="b" 
+					header-text="사업장" 
+					width="200" 
+					text-align="center"
+				></sc-data-column>
+				<sc-data-column 
+					data-field="c" 
+					header-text="이용 서비스" 
+					width="500" 
+					text-align="center"
+				></sc-data-column>
+				<sc-data-column 
+					data-field="d" 
+					header-text="서비스 요청 유형" 
+					width="200" 
+					text-align="center"
+				></sc-data-column>
+				<sc-data-column 
+					data-field="e" 
+					header-text="요청 일시" 
+					width="300" 
+					text-align="center"
+				></sc-data-column>
+			</sc-grid-columns>
+		</sc-grid>
+    </template>
+    <script>
+    	Polymer({
+    		is: "es-company-request-service-list",
+    		properties: {
+    			searchParam: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			},
+    			requestServiceResult: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			}
+    		},
+    		initialized: function() {
+    			
+            },
+            onClickNewRequest: function() {
+            	const me = this;
+            	me.fire("open-service-new-pop", {});
+            },
+    		onItemClick: function() {
+    			const me = this,
+	                  {data: d} = event.detail,
+             		  {columnName: cn} = event.detail.item;
+             		  
+    			switch(cn){
+    			case "new_request":
+    				me.fire("open-service-new-pop", d);
+    				break;
+    			default:
+    				break;
+    			}
+    		}
+    	})
+    </script>
+</dom-module>
