@@ -183,7 +183,7 @@ public class ServiceManageController {
 	 */
 	@AuthCheck (authCode = Const.READ)
 	@RequestMapping (value = "delteApplyService.do")
-	public @ResponseBody Map<String,Object> delteApplyService(@RequestBody Map param) {
-		return ServiceManageService.delteApplyService(param);
+	public @ResponseBody Map<String,Object> changeApplyService(@RequestBody Map param) {
+		return ServiceManageService.changeApplyService(param);
 	}
 }

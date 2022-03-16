@@ -302,13 +302,13 @@ public class ServiceManageService {
 	 * @Date : 2022. 3. 15
 	 * @Method Name : updateServiceUseYn
 	 */
-	public Map<String,Object> delteApplyService(Map param) {
+	public Map<String,Object> changeApplyService(Map param) {
 		
 //		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
 		//Map userInfo = Auth.getCurrentUserInfo();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
-		resultMap = restfulUtilServiceToCorners.callCornersApi("delteApplyService", param);
+		resultMap = restfulUtilServiceToCorners.callCornersApi("changeApplyService", param);
 		
 		return resultMap;
 		
