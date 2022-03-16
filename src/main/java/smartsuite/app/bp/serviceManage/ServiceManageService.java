@@ -323,13 +323,13 @@ public class ServiceManageService {
 	 * @Date : 2022. 3. 15
 	 * @Method Name : searchQaA
 	 */
-	public Map<String,Object> searchQaA(Map param) {
+	public Map<String,Object> searchQNA(Map param) {
 		
 //		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
 		//Map userInfo = Auth.getCurrentUserInfo();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
-		resultMap = restfulUtilServiceToCorners.callCornersApi("searchQaA", param);
+		resultMap = restfulUtilServiceToCorners.callCornersApi("searchQNA", param);
 		
 		return resultMap;
 		

@@ -197,8 +197,8 @@ public class ServiceManageController {
 	 * @Method Name : searchQaA
 	 */
 	@AuthCheck (authCode = Const.READ)
-	@RequestMapping (value = "searchQaA.do")
+	@RequestMapping (value = "searchQNA.do")
 	public @ResponseBody Map<String,Object> searchQaA(@RequestBody Map param) {
-		return ServiceManageService.searchQaA(param);
+		return ServiceManageService.searchQNA(param);
 	}
 }
