@@ -28,7 +28,7 @@
 			id="estimateMonthlyFee"
 			url="estimateMonthlyFee.do"
 			body="{{setParam}}"
-			on-response="complateMonthlyFee"
+			last-response="{{feeResult}}"
 		></sc-ajax>
 		<sc-ajax
 			id="applyService"
@@ -42,16 +42,16 @@
 		></cc-sub-title-bar>
 		<div class="vspace-10"></div>
 		<div style="color: red;">(*표시는 필수 입력 항목)</div>
-		<table class="tb-form">
+		<table class="tb-form" validation-group="apply">
 			<tr>
 				<th>
-					<sc-label class="wpc_list dm_required" text="사업장*"></sc-label>
+					<sc-label text="사업장*"></sc-label>
 				</th>
 				<td colspan=2>
 					<sc-combobox-field
-						id="wpc_list"
-						class="dm_required"
+						id="wpcList__dm_required"
 					 	items="{{wpcResult.result_data}}"
+					 	name="사업장"
 					 	value="{{setParam.wpc_cd}}"
 					 	display-field="name" 
 					 	value-field="id" 
@@ -62,13 +62,13 @@
 			</tr>
 			<tr>
 				<th>
-					<sc-label class="dsr_str_dt dm_required" text="서비스 개시 요청일*"></sc-label>
+					<sc-label text="서비스 개시 요청일*"></sc-label>
 				</th>
 				<td colspan=2>
 					<div style="display: flex; gap: 10px; align-items: center;">
 						<sc-date-field 
-							id="dsr_str_dt"
-							class="dm_required"
+							id="dsr_str_dt__dm_required"
+							name="서비스 개시 요청일"
 							value={{setParam.dsr_str_dt}} 
 							style="width: 150px;"
 							placeholder="요청일"
@@ -78,19 +78,40 @@
 					</div>
 				</td>
 			</tr>
-			<tr id="dvcTr">
-				<th>
+			<tr>
+				<th id="dvcTh">
 					<sc-label text="디바이스 수량"></sc-label>
 				</th>
 			</tr>
+			<template id="dvcTemplate" is="dom-repeat" items="{{deviceResult.result_data}}">
+	          <tr>
+	          	<th>
+					<sc-label
+						text="{{item.dvc_th}}"
+					></sc-label>
+				</th>
+				<td>
+					<div style="display: flex; gap: 10px; align-items: center;">
+						<sc-text-field
+							id="{{item.dvc_id}}{{item.dvc_required_id}}"
+							type="number"
+							on-input="onInputField"
+							value="{{item.qtt}}"
+							required="{{item.dvc_required}}"
+						></sc-text-field>
+						대
+					</div>
+				</td>
+	          </tr>
+	        </template>
 			<tr>
 				<th>
-					<sc-label class="sst_trm dm_required" text="구독기간(약정기간)*"></sc-label>
+					<sc-label text="구독기간(약정기간)*"></sc-label>
 				</th>
 				<td colspan=2>
 					<sc-combobox-field
-						id="sst_trm"
-						class="dm_required"
+						id="sst_trm__dm_required"
+						name="구독기간(약정기간)"
 					 	items="{{codes.term}}"
 						value="{{setParam.sst_trm}}"
 					 	display-field="label" 
@@ -111,7 +132,8 @@
 							text="조회"
 							on-click="onEndDateClick"
 						></sc-button>
-						<div id="term">
+						<div id="term" style="display: none;">
+							[[_computedTerm(setParam.dsr_str_dt, setParam.sst_trm)]]
 						</div>
 					</div>
 				</td>
@@ -126,8 +148,8 @@
 							text="조회"
 							on-click="onEstimatedFeeClick"
 						></sc-button>
-						<div id="estimatedFee">
-							{{estimatedFee.result_data}}
+						<div id="estimatedFee" style="display: none;">
+							[[_computedFee(feeResult.result_data.estimatedMonthlyFee)]]
 						</div>
 					</div>
 				</td>
@@ -169,6 +191,12 @@
 						return {};
 					}
 				},
+				feeResult: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				},
 				setParam: {
 					type: Object,
 					value: function() {
@@ -191,6 +219,46 @@
 					}
 				}
 			},
+			observers: [
+				"_dsrStrDtObs(setParam.dsr_str_dt)",
+				"_sstTtmObs(setParam.sst_trm)"
+			],
+			_dsrStrDtObs: function(str) {
+				const me = this;
+				me.$.term.style.display = "none";
+			},
+			_sstTtmObs: function(term) {
+				const me = this;
+				if(term){
+					me.set("setParam", Object.assign(me.get("setParam"), {"sst_trm": Number(term)}));
+				}
+			},
+			_computedTerm: function(str, trm){
+				const me = this,
+					  date = new Date(str),
+					  param = me.get("setParam");
+			
+				date.setMonth(date.getMonth() + Number(trm));
+				
+				const y = date.getFullYear() || "",
+					  m = date.getMonth()+1 || "",
+					  d = date.getDate() || "";
+				
+				Object.assign(me.get("setParam"), {"exp_end_dt": date});
+				
+				if(str && trm){
+					me.$.term.textContent = `${y}. ${m}. ${d}`;
+				}
+			},
+			_computedFee: function(fee){
+				const me = this,
+		  	  	  	  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+		  	  
+		  	 	if(fee){
+		  	 		me.set("setParam", Object.assign(me.get("setParam"), {"exp_mon_fee": commaNum(fee)}));
+		  	 		return commaNum(fee)+" (VAT 별도)";
+		  	 	}
+			},
 			initialized: function() {
                 const me = this;
                 const term = me.get("codes.term") || [];
@@ -208,143 +276,117 @@
 				UT.request(this.$.getDevicesByCatalogId);
 			},
 			complateDeviceResult: function(e, {response: {result_data: list}}){
-				const me = this;
-				list.forEach(l => {
-					const {dvc_id, dvc_nm, mdt_yn} = l;
-					const tr = document.createElement('tr');
-					tr.innerHTML = `
-						<th>
-							<sc-label class="dvc_label ${Number(mdt_yn) ? 'dm_required' : ''}" text="${dvc_nm}${Number(mdt_yn) ? '*' : ''}"></sc-label>
-						</th>
-						<td>
-							<div style="display: flex; gap: 10px; align-items: center;">
-								<sc-text-field 
-									type="number"
-									id="dvc_field${dvc_id}" 
-									class="dvc_field ${Number(mdt_yn) ? 'dm_required' : ''}" 
-									required="${Number(mdt_yn) ? 'true' : 'false'}"
-								></sc-text-field>
-								대
-							</div>
-						</td>
-					`;
-					me.$.dvcTr.after(tr);
-				})
-				me.$.dvcTr.children[0].setAttribute('rowspan', list.length + 1);
-				for(f of document.querySelectorAll(".dvc_field")) f.oninput = me.onInputField;
-			},
-			complateMonthlyFee: function(e, {response: {result_data: {estimatedMonthlyFee: r}}}){
 				const me = this,
-				  	  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","),
-				  	  fee = commaNum(r);
-				  	  
-				Object.assign(me.get("setParam"), {"exp_mon_fee": r});
-				if(me.get("clickFlag").fee){
-					me.$.estimatedFee.textContent = `${fee} (VAT별도)`;
-				}
+					  setDevice = l => {
+							if(Number(l.mdt_yn)) {
+								Object.assign(l, {
+									dvc_th: l.dvc_nm+"*", 
+									dvc_required: "true",
+									dvc_required_id: "__dm_required",
+								}) 
+							}else{
+								Object.assign(l, {
+									dvc_th: l.dvc_nm, 
+									dvc_required: "false",
+									dvc_required_id: "",
+								})
+							}
+							return l;
+					  },
+					  dvc_list = Object.assign(me.get("deviceResult").result_data, list.map(setDevice));
+					  
+				Object.assign(me.get("setParam"), {dvc_list});
+				me.$.dvcTh.setAttribute('rowspan', list.length + 1);
 			},
-			onInputField: function(e){
-				const me = document.querySelector("ep-company-catalog-service-apply"),
-					  param = me.get("setParam"),
-					  term = param.sst_trm,
-					  field = e.path.find(t => t.id.includes("dvc_field"));
+			onInputField: function(){
+				const me = this,
+					  item = event.model.item;
 				
-				me.get("deviceResult").result_data.find(d => d.dvc_id == field.id.replace("dvc_field", "")).qtt = Number(e.target.value);
-				
-				const dvcList = me.get("deviceResult").result_data.filter(d => d.qtt && d.qtt != 0 && d)
-				dvcList.length && Object.assign(me.get("setParam"), {"dvc_list": dvcList});
-				
-				me.$.estimatedFee.textContent = "";	
+				item.qtt = Number(item.qtt);
+				me.$.estimatedFee.style.display = "none";
 			},
 			onChangeTerm: function() {
-				const me = this,
-					  param = me.get("setParam"),
-					  date = new Date(param.dsr_str_dt);
-				
-				param.sst_trm = Number(param.sst_trm);
-				date.setMonth(date.getMonth() + param.sst_trm);
-				
-				const y = date.getFullYear() || "",
-					  m = date.getMonth()+1 || "",
-					  d = date.getDate() || "";
-				
-				Object.assign(me.get("setParam"), {"exp_end_dt": date})
-				
-				if(me.get("clickFlag").term){
-					me.$.term.textContent = `${y}. ${m}. ${d}`;
-				}
-				
-				me.$.estimatedFee.textContent = "";
-			},
-			requiredCheck: function(requiredElements, callback = null) {
-				const labelElements = Array.prototype.slice.call(requiredElements.labels),
-					  fieldElements = Array.prototype.slice.call(requiredElements.fields),
-					  labelTextList = labelElements.map(label => label.textContent.trim().replace("*", ""));
-					  fieldResult = fieldElements.map(element => element.value && element.value != 0 ? 1 : 0);
-				
-				if(!fieldResult.includes(0)){
-					callback();
-					return 1;
-				}else{
-					const i = fieldResult.indexOf(0);
-			  	  	SCAlert.show('error', `${labelTextList[i]} 입력란에 데이터를 입력해 주십시오.`);
-			  	  	return 0;
-				}
+				const me = this;
+				me.$.term.style.display = "none";
+				me.$.estimatedFee.style.display = "none";
 			},
 			onEndDateClick: function() {
-				const me = this;
-				return me.requiredCheck({
-					labels: document.querySelectorAll(".dsr_str_dt.dm_required, .sst_trm.dm_required"),
-					fields: document.querySelectorAll("#dsr_str_dt, #sst_trm")
-		  	  	}, () => {
-		  	  		me.get("clickFlag").term = 1;
-		  	  		me.onChangeTerm()
-		  	  	});
+				const me = this,
+					  param = me.get("setParam");
+				
+				if(!param.dsr_str_dt){
+					SCAlert.show('error', `서비스 개시 요청일 입력란에 데이터를 입력해 주십시오.`);
+					return;
+				}
+				
+				if(!param.sst_trm){
+					SCAlert.show('error', `구독기간(약정기간) 입력란에 데이터를 입력해 주십시오.`);
+					return;
+				}
+				
+				me.$.term.style.display = "block";
 			},
 			onEstimatedFeeClick: function() {
 				const me = this,
-					  param = me.get("setParam"),
-					  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","),
-					  term = Number(param.sst_trm),
-					  getQtt = id => Number(document.getElementById(id).value),
-					  setList = l => getQtt(`dvc_field${l.dvc_id}`) && Object.assign(l, {"qtt": getQtt(`dvc_field${l.dvc_id}`)}),
-					  dvcList = me.get("deviceResult").result_data.filter(setList);
-					  
-				return me.requiredCheck({
-					labels: document.querySelectorAll(".dvc_label.dm_required, .sst_trm.dm_required"),
-					fields: document.querySelectorAll(".dvc_field.dm_required, #sst_trm")
-				}, () => {
-					me.get("clickFlag").fee = 1;
-					UT.request(me.$.estimateMonthlyFee)
-				});
+					  param = me.get("setParam");
+				
+				if(!param.dvc_list){
+					SCAlert.show('error', `디바이스 수량을 입력해 주십시오.`);
+					return;
+				}else{
+					const requiredList = param.dvc_list.filter(d => d.mdt_yn == "1").filter(d => !d.qtt);
+					if(requiredList.length){
+						SCAlert.show('error', `${requiredList[0].dvc_nm} 수량을 입력해 주십시오.`);
+						return;
+					}
+				}
+				
+				if(!param.sst_trm){
+					SCAlert.show('error', `구독기간(약정기간) 입력란에 데이터를 입력해 주십시오.`);
+					return;
+				}
+				
+				param.dvc_list.map(d => !d.qtt ? Object.assign(d, {"qtt": 0}) : d)
+				UT.request(me.$.estimateMonthlyFee);
+				me.$.estimatedFee.style.display = "block";
 			},
 			onApplyClick: function(e){
 				const me = this,
-					  svc_ctl_id = "SVC"+me.get("selectedService")["svc_ctl_id"].substr(-5);
-				
-				const checkWpc = me.requiredCheck({
-					labels: document.querySelectorAll(".wpc_list.dm_required"),
-				  	fields: document.querySelectorAll("#wpc_list")
-				}, () => {});
-				
-				if(!checkWpc) return;
-				if(!me.onEndDateClick()) return;
-				if(!me.onEstimatedFeeClick()) return;
+					  param = me.get("setParam"),
+					  {dvcTemplate: {items: dvcList}} = me.$,
+					  svc_ctl_id = "SVC"+me.get("selectedService")["svc_ctl_id"].substr(-5),
+					  requiredList = Object.values(me.$).filter(o => o.id.includes("__dm_required"));
+					  
+				dvcList.forEach(d => d.dvc_required=="true" && requiredList.push({"name": d.dvc_nm, "value": d.qtt}));
 
-				Object.assign(me.get("applyParam"), {svc_ctl_id});
-				Object.assign(me.get("applyParam"), me.get("setParam"));
-
-				if(e.target.id == "dm_cart"){
-					Object.assign(me.get("applyParam"), {"bsk_itm_yn": "1"});
-				}else{
-					Object.assign(me.get("applyParam"), {"bsk_itm_yn": "0"});
+				if(!me.validate("apply")){
+					const i = requiredList.findIndex(m => !m.value)
+					SCAlert.show('error', `${requiredList[i].name} 입력란에 데이터를 입력해 주십시오.`);
+					return;
 				}
 				
-				UT.request(me.$.applyService, function(event, {response}){
+				if(me.$.term.style.display == "none"){
+					SCAlert.show('error', `"서비스 만료 예정일 조회 버튼"을 클릭해 주십시오.`);
+					return;
+				};
+				if(me.$.estimatedFee.style.display == "none"){
+					SCAlert.show('error', `"예상 월 구독료 조회 버튼"을 클릭해 주십시오.`);
+					return;
+				};
+				
+				if(e.target.id == "dm_cart"){
+					Object.assign(me.get("applyParam"), {"bsk_itm_yn": 1});
+				}else{
+					Object.assign(me.get("applyParam"), {"bsk_itm_yn": 0});
+				}
+				Object.assign(me.get("applyParam"), {svc_ctl_id});
+				Object.assign(me.get("applyParam"), me.get("setParam"));
+				
+				UT.request(me.$.applyService, function(e, {response}){
 					if(response.result_status == "E"){
 						SCAlert.show(`${e.target.textContent}`, response.result_message);
 					}else{
-						SCAlert.show(`${e.target.textContent}`, `${e.target.textContent} 완료되었습니다.`);
+						SCAlert.show(`${e.target.textContent}`, `${result_message}`);
 					}
 					me.$.dm_cart.disabled = "true";
 					me.$.dm_apply.disabled = "true";
