@@ -155,7 +155,7 @@ public class ServiceManageController {
 	@RequestMapping (value = "getWpcServiceList.do")
 	public @ResponseBody Map<String,Object> getWpcServiceList(@RequestBody Map param) {
 		return ServiceManageService.getWpcServiceList(param);
-	}
+	} 
 	
 	/**
 	 * C-서비스 이용 현황 - 조회

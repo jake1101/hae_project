@@ -253,7 +253,7 @@ public class ServiceManageService {
 	 * @Date : 2022. 3. 16
 	 * @Method Name : 
 	 */
-	public Map getWpcServiceList(Map<String,Object> param) {
+	public Map getWpcServiceList(Map<String,Object> param) { 
 		
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
