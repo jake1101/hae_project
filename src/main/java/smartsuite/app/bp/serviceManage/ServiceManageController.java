@@ -186,4 +186,19 @@ public class ServiceManageController {
 	public @ResponseBody Map<String,Object> changeApplyService(@RequestBody Map param) {
 		return ServiceManageService.changeApplyService(param);
 	}
+	
+	/**
+	 * 1:1 문의 게시판 조회
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return
+	 * @Date : 2022. 03. 16
+	 * @Method Name : searchQaA
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "searchQaA.do")
+	public @ResponseBody Map<String,Object> searchQaA(@RequestBody Map param) {
+		return ServiceManageService.searchQaA(param);
+	}
 }

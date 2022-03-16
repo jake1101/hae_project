@@ -314,4 +314,25 @@ public class ServiceManageService {
 		
 	}
 	
+	/**
+	 * 1:1 문의 게시판 조회
+	 *
+	 * @author : 
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 3. 15
+	 * @Method Name : searchQaA
+	 */
+	public Map<String,Object> searchQaA(Map param) {
+		
+//		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
+		//Map userInfo = Auth.getCurrentUserInfo();
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("searchQaA", param);
+		
+		return resultMap;
+		
+	}
+	
 }
