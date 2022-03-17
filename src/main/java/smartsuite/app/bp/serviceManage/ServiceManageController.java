@@ -246,4 +246,19 @@ public class ServiceManageController {
 	public @ResponseBody Map<String,Object> addQNA(@RequestBody Map param) {
 		return ServiceManageService.addQNA(param);
 	}
+	
+	/**
+	 * 1:1 문의 게시판 문의 내역 삭제
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return
+	 * @Date : 2022. 03. 16
+	 * @Method Name : addQNA
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "deleteQNA.do")
+	public @ResponseBody Map<String,Object> deleteQNA(@RequestBody Map param) {
+		return ServiceManageService.deleteQNA(param);
+	}
 }

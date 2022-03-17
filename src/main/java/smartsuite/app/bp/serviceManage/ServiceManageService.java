@@ -422,4 +422,32 @@ public class ServiceManageService {
 		
 	}
 	
+	/**
+	 * 1:1 문의 게시판 문의하기
+	 *
+	 * @author : 
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 3. 17
+	 * @Method Name : deleteQNA
+	 */
+	public Map<String,Object> deleteQNA(Map param) {
+		
+//		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
+		//Map userInfo = Auth.getCurrentUserInfo();
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("deleteQNA", param);
+		
+		return resultMap;
+		
+	}
+	
 }
