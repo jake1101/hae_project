@@ -246,7 +246,7 @@ public class ServiceManageService {
 	}
 	
 	/**
-	 * C-서비스 이용 현황 - 사업장별 신청 서비스 조회
+	 * C-서비스 이용 현황 - 사업장별 신청 서비스 그룹핑 조회
 	 *
 	 * @author : 
 	 * @param param the param
@@ -265,6 +265,30 @@ public class ServiceManageService {
 		}
 		
 		resultMap = restfulUtilServiceToCorners.callCornersApi("getWpcServiceList", param);
+		
+		return resultMap;
+	}
+	
+	/**
+	 * C-서비스 이용 현황 - 사업장별 신청 서비스 전체 조회
+	 *
+	 * @author : 
+	 * @param param the param
+	 * @Date : 2022. 3. 16
+	 * @Method Name : 
+	 */
+	public Map getWpcServiceListAll(Map<String,Object> param) { 
+		
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("getWpcServiceListAll", param);
 		
 		return resultMap;
 	}
