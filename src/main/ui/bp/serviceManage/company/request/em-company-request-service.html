@@ -19,7 +19,7 @@
     					"ep-company-request-service-new", 
     					me,
     					800,
-    					800,
+    					345,
     					{},
     					{ 
     						maximizable: true, 
@@ -30,12 +30,13 @@
     			me.popup.getWindowContent().load()
     		},
     		openServiceRequestPop: function(event) {
+    			const param = event.detail;
 				const me = this;
 				me.popup = UT.popup(
 						"ep-company-request-service-request", 
 						me,
 						800,
-						800,
+						435,
 						{},
 						{ 
 							maximizable: true, 
@@ -43,7 +44,7 @@
 						}
 				);
 				me.popup.show();
-				me.popup.getWindowContent().load()
+				me.popup.getWindowContent().load(param)
 			}
 		})
 	</script>

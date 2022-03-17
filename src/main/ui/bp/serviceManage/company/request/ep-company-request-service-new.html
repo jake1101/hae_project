@@ -5,13 +5,179 @@
 		}
 	</style>
 	<template>
-	
+		<sc-request-group init>
+			<sc-code-group>
+				<sc-code code="CRN003" value="{{codes.req_tp_cd}}" ></sc-code>
+			</sc-code-group>
+			<sc-ajax
+            	id="getWPCList"
+            	url="getWPCList.do"
+            	body="{}"
+            	last-response="{{wpcResult}}"
+            ></sc-ajax>
+           	<sc-ajax 
+				id="getWpcServiceListAll" 
+				url="getWpcServiceListAll.do"
+				body="{}"
+				last-response="{{wpcSerivceAllResult}}"
+			></sc-ajax>
+		</sc-request-group>
+		<sc-ajax
+			id="addQNA"
+			url="addQNA.do"
+			body={{applyParam}}
+		></sc-ajax>
+		<cc-sub-title-bar
+			id="subTitle"
+			title-text="신규 요청"
+		></cc-sub-title-bar>
+
+		<table class="tb-form" style="margin-top: 20px;">
+			<colgroup>
+				
+			</colgroup>
+			<tr>
+				<th>
+					<sc-label text="사업장"></sc-label>
+				</th>
+               	<td>
+               		<sc-combobox-field 
+               			items="{{wpcResult.result_data}}"
+					 	value="{{applyParam.wpc_cd}}"
+					 	display-field="wpc_nm" 
+					 	value-field="wpc_cd" 
+						placeholder="사업장"
+						on-change="onChangeWpc"
+               		></sc-combobox-field>
+               	</td>
+               	<th>
+					<sc-label text="이용 서비스"></sc-label>
+				</th>
+               	<td>
+               		<sc-combobox-field 
+               			items="{{wpcSerivceResult.result_data}}"
+					 	value="{{applyParam.svc_id}}"
+					 	display-field="svc_ctl_nm" 
+					 	value-field="svc_id" 
+               			placeholder="이용 서비스"
+               		></sc-combobox-field>
+               	</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="요청 유형"></sc-label>
+				</th>
+               	<td>
+               		<sc-combobox-field 
+               			items="{{codes.req_tp_cd}}"
+					 	value="{{applyParam.req_tp_cd}}"
+					 	display-field="label" 
+					 	value-field="data" 
+               			placeholder="요청 유형"
+               		></sc-combobox-field>
+               	</td>
+			</tr>
+		</table>
+
+		<table class="tb-form" style="margin-top: 20px;">
+			<tr>
+				<th>
+					<sc-label text="요청 내용"></sc-label>
+				</th>
+				<td colspan="3">
+					<sc-textarea-field style="height: 75px;" value="{{applyParam.req_ctt}}"></sc-textarea-field>
+				</td>
+			</tr>
+		</table>
+		<div style="margin-top: 20px; display: flex; justify-content: center; gap: 20px;">
+			<sc-button id="dm_cancel" text="취소" style="width: 100px; padding: 10px;" on-click="onCancelClick"></sc-button>
+			<sc-button id="dm_apply" text="신청" style="width: 100px; padding: 10px;" on-click="onApplyClick"></sc-button>
+		</div>
 	</template>
 	<script>
 		Polymer({
 			is: "ep-company-request-service-new",
+			properties: {
+				codes: {
+                    type: Object,
+                    reset: false,
+                    value: function() {
+                        return {
+                            req_tp_cd: []
+                        };
+                    }
+                },
+                wpcResult: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			},
+    			wpcSerivceAllResult: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			},
+    			wpcSerivceResult: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			},
+    			applyParam: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			}
+			},
+			initialized: function() {
+				const me = this;
+				const result_data = me.get("wpcResult").result_data.map(wpc => wpc = {"wpc_cd": wpc.id, "wpc_nm": wpc.name});
+                me.set("wpcResult", {result_data});
+                
+                const req_tp_cd = me.get("codes").req_tp_cd.filter(c => c.data != "99")
+                me.set("codes", {req_tp_cd})
+            },
 			load: function(param) {
 				const me = this;
+			},
+			onChangeWpc: function() {
+				const me = this;
+				const wpc_cd = event.detail.value;
+				const wpcSerivceAllResult = me.get("wpcSerivceAllResult").result_data;
+				
+				const result_data = wpcSerivceAllResult.filter(s => s.wpc_cd == wpc_cd);
+				
+				me.set("wpcSerivceResult", {result_data});
+			},
+			onCancelClick: function() {
+				const me = this;
+				me.fire('close');
+			},
+			onApplyClick: function() {
+				const me = this,
+					  applyParam = me.get("applyParam");
+				if(!applyParam.wpc_cd) {
+					SCAlert.show('error', `사업장을 선택해 주십시오.`);
+					return;
+				}
+				if(!applyParam.svc_id) {
+					SCAlert.show('error', `이용 서비스를 선택해 주십시오.`);
+					return;
+				}
+				if(!applyParam.req_tp_cd) {
+					SCAlert.show('error', `요청 유형을 선택해 주십시오.`);
+					return;
+				}
+				if(!applyParam.req_ctt) {
+					SCAlert.show('error', `요청 내용을 입력해 주십시오.`);
+					return;
+				}
+				UT.request(me.$.addQNA, function(){
+					me.fire("close");
+				});
 			}
 		})
 	</script>
