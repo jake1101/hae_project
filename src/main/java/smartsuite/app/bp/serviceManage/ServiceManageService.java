@@ -342,4 +342,60 @@ public class ServiceManageService {
 		
 	}
 	
+	/**
+	 * 1:1 문의 게시판 조회
+	 *
+	 * @author : 
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 3. 15
+	 * @Method Name : searchQaA
+	 */
+	public Map<String,Object> searchQNADetail(Map param) {
+		
+//		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
+		//Map userInfo = Auth.getCurrentUserInfo();
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("searchQNADetail", param);
+		
+		return resultMap;
+		
+	}
+	
+	/**
+	 * 1:1 문의 게시판 문의하기
+	 *
+	 * @author : 
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 3. 15
+	 * @Method Name : addQNA
+	 */
+	public Map<String,Object> addQNA(Map param) {
+		
+//		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
+		//Map userInfo = Auth.getCurrentUserInfo();
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("addQNA", param);
+		
+		return resultMap;
+		
+	}
+	
 }

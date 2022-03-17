@@ -201,4 +201,34 @@ public class ServiceManageController {
 	public @ResponseBody Map<String,Object> searchQNA(@RequestBody Map param) {
 		return ServiceManageService.searchQNA(param);
 	}
+	
+	/**
+	 * 1:1 문의 게시판 문의하기 상세 조회
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return
+	 * @Date : 2022. 03. 16
+	 * @Method Name : addQNA
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "searchQNADetail.do")
+	public @ResponseBody Map<String,Object> searchQNADetail(@RequestBody Map param) {
+		return ServiceManageService.searchQNADetail(param);
+	}
+	
+	/**
+	 * 1:1 문의 게시판 문의하기
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return
+	 * @Date : 2022. 03. 16
+	 * @Method Name : addQNA
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "addQNA.do")
+	public @ResponseBody Map<String,Object> addQNA(@RequestBody Map param) {
+		return ServiceManageService.addQNA(param);
+	}
 }
