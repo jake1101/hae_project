@@ -136,9 +136,6 @@
 				const me = this;
 				const result_data = me.get("wpcResult").result_data.map(wpc => wpc = {"wpc_cd": wpc.id, "wpc_nm": wpc.name});
                 me.set("wpcResult", {result_data});
-                
-                const req_tp_cd = me.get("codes").req_tp_cd.filter(c => c.data != "99")
-                me.set("codes", {req_tp_cd})
             },
 			load: function(param) {
 				const me = this;
@@ -151,10 +148,6 @@
 				const result_data = wpcSerivceAllResult.filter(s => s.wpc_cd == wpc_cd);
 				
 				me.set("wpcSerivceResult", {result_data});
-			},
-			onCancelClick: function() {
-				const me = this;
-				me.fire('close');
 			},
 			onApplyClick: function() {
 				const me = this,

@@ -1,7 +1,35 @@
+<sc-link rel="import" href="ep-company-status-service-apply.html"></sc-link>
+
 <dom-module id="es-company-status-service-list">
 	<style>
         :host {
             @apply(--vbox-layout);
+        }
+        
+        #notification {
+        	position: absolute;
+        	top: 10px;
+        	right: 0;
+        	padding-right: 10px;
+        }
+        
+        #notification < div {
+        	position: relative;
+        	width: 100%;
+        }
+        
+        #notiCnt {
+        	position: absolute;
+        	bottom: -5px;
+        	right: 0;
+        	width: 20px;
+        	height: 20px;
+        	border-radius: 50%;
+        	background-color: red;
+        	color: #fff;
+        	font-weight: 600;
+        	text-align: center;
+        	user-select: none;
         }
     </style>
 	<template>
@@ -29,7 +57,15 @@
 				on-response = "complateServiceResult"
 			></sc-ajax>
 		</sc-request-group>
+		<div id="notification" class="dm_notification_wrap" on-click="onClickAlarm">
+			<div>
+				<img src="/ui/assets/img/serviceManage/icon_notification.png" width="32">
+				<div id="notiCnt">1</div>
+			</div>
+		</div>
+		
 		<cc-sub-title-bar title-text="서비스 이용 목록"></cc-sub-title-bar>
+		
 		<cc-search-container on-search="onFindService">
 			<table>
 				<colgroup>
@@ -106,9 +142,10 @@
 			use-selection="false"
 			use-state="false"
 			editable="true"
+			on-item-click="onItemClick"
 		>
 			<cc-grid-toolbar></cc-grid-toolbar>
-			<sc-grid-columns >
+			<sc-grid-columns>
 				<sc-data-column data-field="wpc_nm" header-text="사업장" width="150" text-align="center"></sc-data-column>
 				<sc-data-column data-field="svc_ctl_nm" header-text="신청 서비스" width="400" text-align="center"></sc-data-column>
 				<sc-data-column data-field="req_dt" header-text="서비스 게시일" width="200" text-align="center"></sc-data-column>
@@ -116,18 +153,11 @@
 				<sc-data-column data-field="sst_trm" header-text="구독 기간" width="150" text-align="center"></sc-data-column>
 				<sc-data-column data-field="exp_mon_fee" header-text="월 구독료" width="150" text-align="center"></sc-data-column>
 				<sc-data-column data-field="status_nm" header-text="상태" width="100" text-align="center"></sc-data-column>
-				<sc-group-column
-					hide-child-headers="true" 
-					header-text=""  
-					width="150"
-				>
-					<sc-button-column 
-						data-field="stt_cd" 
-						text="{{stt_cd}}" 
-						width="100" 
-						text-align="center"
-					></sc-data-column>
+				<sc-group-column header-text="서비스 신청/변경" hide-child-headers="true" data-field="status_code">
+					<sc-data-column data-field="btn_l" text-align="center"></sc-data-column>
+					<sc-data-column data-field="btn_r" text-align="center"></sc-data-column>
 				</sc-group-column>
+				
 			</sc-grid-columns>
 		</sc-grid>
 	</template>
@@ -174,12 +204,63 @@
     				value: function() {
     					return {};
     				}
+    			},
+    			btnList: {
+    				type: Array,
+    				value: function() {
+    					return [];
+    				}
     			}
 			},
 			observers: [
 
 			],
-			complateServiceResult(e, {response: {result_data: serviceList}}){
+			onItemClick: function() {
+				const me = this,
+					  {data: d} = event.detail,
+       		  		  {columnName: cn} = event.detail.item;
+
+       		  	if(cn == "btn_l" && d.btn_l == "신청"){
+       		  		const alarmPop = UT.popup(
+       					"ep-company-status-service-apply", 
+       					me,
+       					800,
+       					800,
+       					{
+       						"close": function(popup, e) {
+       		                   	popup.close();
+                           	}
+       					},
+       					{ 
+    						maximizable: true, 
+    						titleText: `${d.svc_ctl_nm} 신청하기`
+    					}
+        			);
+                	alarmPop.show();
+                	alarmPop.getWindowContent().load(d)
+       		  	}
+			},
+			onClickAlarm: function() {
+				const me = this;
+            	const alarmPop = UT.popup(
+   					"ep-company-status-service-alarm", 
+   					me,
+   					800,
+   					345,
+   					{
+   						"refresh": function(popup, e) {
+   		                   	popup.close();
+                       	}
+   					},
+   					{ 
+   						maximizable: true, 
+   						titleText: "구독 만료 임박 알림"
+   					}
+    			);
+            	alarmPop.show();
+            	alarmPop.getWindowContent().load()
+			},
+			complateServiceResult: function(e, {response: {result_data: serviceList}}){
 				const me = this;
 
 				const setReqDt = dt => {
@@ -201,28 +282,64 @@
 				const commaNum = n => {
 					return n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 				}
+				
+				const setBtn = ({status_code: s, bsk_itm_yn: b}) => {
+					let l = ""
+					let r = ""
+					if(s == "98") {
+						l = "";
+						r = "";
+					}else if(s == "99") {
+						l = "신청";
+						r = "삭제";
+					}else if(s == "0") {
+						l = "신청";
+						r = "삭제";
+					}else if(s == "1") {
+						l = "취소";
+						r = "";
+					}else if(s == "2") {
+						l = "변경";
+						r = "";
+					}else if(s == "3") {
+						l = "취소";
+						r = "";
+					}else if(s == "4") {
+						l = "변경";
+						r = "";
+					}else if(s == "5") {
+						l = "취소";
+						r = "";
+					}else if(s == "8") {
+						l = "";
+						r = "삭제";
+					}else if(s == "9") {
+						l = "";
+						r = "";
+					}
+					return {l, r};
+				}
                 
                 const setService = s => Object.assign(s, {
                 	"req_dt": setReqDt(s.req_dt),
                 	"sst_trm": setTerm(s.sst_trm),
-                	"exp_mon_fee": commaNum(s.exp_mon_fee)
+                	"exp_mon_fee": commaNum(s.exp_mon_fee),
+                	"btn_l": setBtn(s).l,
+                	"btn_r": setBtn(s).r
                 });
                 
                 if(serviceList){
                 	result_data = serviceList.map(setService);
                     me.set("serviceResult", {result_data});
-    				return serviceList;
                 }
                 
+                me.applyFormula('btnLCtl');
 			},
 			initialized: function() {
                 const me = this;
-             	
-                const result_data = me.get("wpcResult").result_data.map(wpc => wpc = {"wpc_cd": wpc.id, "wpc_nm": wpc.name});
-                result_data.unshift({"wpc_cd": "99", "wpc_nm": "전체"});
-                me.set("wpcResult", {result_data});
                 
-                me.get("wpcSerivceResult").result_data.unshift({"svc_ctl_id": "99", "svc_ctl_nm": "전체"});
+                const result_data = me.get("wpcResult").result_data.map(wpc => wpc = {"wpc_cd": wpc.id, "wpc_nm": wpc.name});
+                me.set("wpcResult", {result_data});
             },
             onFindService: function() {
             	const me = this;

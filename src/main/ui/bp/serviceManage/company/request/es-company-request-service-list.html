@@ -235,10 +235,7 @@
 				const me = this;
 				
                 const result_data = me.get("wpcResult").result_data.map(wpc => wpc = {"wpc_cd": wpc.id, "wpc_nm": wpc.name});
-                result_data.unshift({"wpc_cd": "99", "wpc_nm": "전체"});
                 me.set("wpcResult", {result_data});
-                
-                me.get("wpcSerivceResult").result_data.unshift({"svc_ctl_id": "99", "svc_ctl_nm": "전체"});
             },
             onSearchRequest: function() {
             	const me = this;
