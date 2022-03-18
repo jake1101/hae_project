@@ -488,7 +488,31 @@ public class ServiceManageService {
 		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceUseListDetailPayList", param);
 		
 		return resultMap;
+	}
+	
+	/**
+	 * 서비스 이용 승인( 신청-> 승인 -> 개시대기 -> 구독 -> 변경 )
+	 *
+	 * @author : 
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 3. 18
+	 * @Method Name : serviceUseApprove
+	 */
+	public Map<String,Object> serviceUseApproveProcess(Map param) {
 		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("serviceUseApproveProcess", param);
+		
+		return resultMap;
 	}
 	
 }

@@ -276,4 +276,19 @@ public class ServiceManageController {
 	public @ResponseBody Map<String,Object> getServiceUseListDetailPayList(@RequestBody Map param) {
 		return ServiceManageService.getServiceUseListDetailPayList(param);
 	}
+	
+	/**
+	 * 서비스 이용 승인( 신청-> 승인 -> 개시대기 -> 구독 -> 변경 )
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 03. 18
+	 * @Method Name : serviceUseApproveProcess
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "serviceUseApproveProcess.do")
+	public @ResponseBody Map<String,Object> serviceUseApproveProcess(@RequestBody Map param) {
+		return ServiceManageService.serviceUseApproveProcess(param);
+	}
 }
