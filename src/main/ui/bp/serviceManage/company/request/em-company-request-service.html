@@ -1,51 +1,13 @@
-<sc-link rel="import" href="ep-company-request-service-new.html"></sc-link>
-<sc-link rel="import" href="ep-company-request-service-request.html"></sc-link>
 <sc-link rel="import" href="es-company-request-service-list.html"></sc-link>
 
 <dom-module id="em-company-request-service">
 	<template>
 		<cc-page-title-bar></cc-page-title-bar>
-		<es-company-request-service-list
-			on-open-service-new-pop="openServiceNewPop"
-			on-open-service-request-pop="openServiceRequestPop"
-		></es-company-request-service-list>
+		<es-company-request-service-list></es-company-request-service-list>
 	</template>
 	<script>
 		Polymer({
-			is: "em-company-request-service",
-			openServiceNewPop: function(event) {
-    			const me = this;
-    			me.popup = UT.popup(
-    					"ep-company-request-service-new", 
-    					me,
-    					800,
-    					345,
-    					{},
-    					{ 
-    						maximizable: true, 
-    						titleText: "1:1 서비스 요청"
-    					}
-    			);
-    			me.popup.show();
-    			me.popup.getWindowContent().load()
-    		},
-    		openServiceRequestPop: function(event) {
-    			const param = event.detail;
-				const me = this;
-				me.popup = UT.popup(
-						"ep-company-request-service-request", 
-						me,
-						800,
-						435,
-						{},
-						{ 
-							maximizable: true, 
-							titleText: "1:1 서비스 요청"
-						}
-				);
-				me.popup.show();
-				me.popup.getWindowContent().load(param)
-			}
+			is: "em-company-request-service"
 		})
 	</script>
 </dom-module>

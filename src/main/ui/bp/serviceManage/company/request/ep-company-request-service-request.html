@@ -137,8 +137,10 @@
 			},
 			onDeleteClick: function() {
 				const me = this;
-				UT.request(me.$.deleteQNA);
-				me.fire("close");
+				UT.request(me.$.deleteQNA, function(){
+					me.fire("refresh");
+				});
+				
 			}
 		})
 	</script>

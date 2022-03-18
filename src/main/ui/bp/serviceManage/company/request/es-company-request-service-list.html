@@ -1,3 +1,6 @@
+<sc-link rel="import" href="ep-company-request-service-new.html"></sc-link>
+<sc-link rel="import" href="ep-company-request-service-request.html"></sc-link>
+
 <dom-module id="es-company-request-service-list">
 	<template>
 		<sc-request-group init>
@@ -243,14 +246,48 @@
             },
             onClickNewRequest: function() {
             	const me = this;
-            	me.fire("open-service-new-pop", {});
+            	const newRequestPop = UT.popup(
+    					"ep-company-request-service-new", 
+    					me,
+    					800,
+    					345,
+    					{
+    						"refresh": function(popup, e) {
+    		                   	UT.request(me.$.searchQNA);
+    		                   	popup.close();
+                        	}
+    					},
+    					{ 
+    						maximizable: true, 
+    						titleText: "1:1 서비스 요청"
+    					}
+    			);
+    			newRequestPop.show();
+    			newRequestPop.getWindowContent().load()
             },
     		onItemClick: function() {
     			const me = this,
 	                  {data: d} = event.detail,
              		  {columnName: cn} = event.detail.item;
              		  
-         		me.fire("open-service-request-pop", d);
+   				const requestPop = UT.popup(
+   					"ep-company-request-service-request", 
+   					me,
+   					800,
+   					435,
+   					{
+   						"refresh": function(popup, e) {
+  		                   	UT.request(me.$.searchQNA);
+  		                   	popup.close();
+                      	}
+   					},
+   					{ 
+   						maximizable: true, 
+   						titleText: "1:1 서비스 요청"
+   					}
+   				);
+   				requestPop.show();
+   				requestPop.getWindowContent().load(d)
     		}
     	})
     </script>
