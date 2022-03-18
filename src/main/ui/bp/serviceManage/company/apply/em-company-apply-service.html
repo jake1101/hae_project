@@ -1,39 +1,13 @@
 <sc-link rel="import" href="es-company-apply-service-list.html"></sc-link>
-<sc-link rel="import" href="ep-company-apply-service-apply.html"></sc-link>
-
 
 <dom-module id="em-company-apply-service">
 	<template>
 		<cc-page-title-bar></cc-page-title-bar>
-		<es-company-apply-service-list
-			on-open-service-apply-pop="openServiceApplyPop"
-		></es-company-apply-service-list>
+		<es-company-apply-service-list></es-company-apply-service-list>
     </template>
     <script>
     	Polymer({
-    		is: "em-company-apply-service",
-    		openServiceApplyPop: function(event) {
-    			const param = event.detail;
-    			const me = this;
-    			const { svc_ctl_nm } = param;
-    			me.popup = UT.popup(
-    					"ep-company-apply-service-apply", 
-    					me,
-    					800,
-    					800,
-    					{
-    						"close": function(popup, e) {
-    							popup.colse();
-    						}
-    					},
-    					{ 
-    						maximizable: true, 
-    						titleText: `${svc_ctl_nm} 신청하기`
-    					}
-    			);
-    			me.popup.show();
-    			me.popup.getWindowContent().load(param)
-    		}
+    		is: "em-company-apply-service"
     	})
     </script>
 </dom-module>

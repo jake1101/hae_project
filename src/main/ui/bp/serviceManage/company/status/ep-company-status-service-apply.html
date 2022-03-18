@@ -255,7 +255,7 @@
 		  	  	  	  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 		  	  
 		  	 	if(fee){
-		  	 		me.set("setParam", Object.assign(me.get("setParam"), {"exp_mon_fee": commaNum(fee)}));
+		  	 		me.set("setParam", Object.assign(me.get("setParam"), {"exp_mon_fee": fee}));
 		  	 		return commaNum(fee)+" (VAT 별도)";
 		  	 	}
 			},
@@ -379,21 +379,21 @@
 					Object.assign(me.get("applyParam"), {"bsk_itm_yn": 1});
 				}else{
 					Object.assign(me.get("applyParam"), {"bsk_itm_yn": 0});
-				}
+				};
 				
-				Object.assign(me.get("applyParam"), {svc_ctl_id});
+				Object.assign(me.get("applyParam"), {svc_ctl_id, "stt_cd": "1"});
 				Object.assign(me.get("applyParam"), me.get("setParam"));
 				
 				UT.request(me.$.applyService, function(e, {response}){
 					if(response.result_status == "E"){
 						SCAlert.show(`${e.target.textContent}`, response.result_message);
 					}else{
-						SCAlert.show(`${e.target.textContent}`, `${result_message}`);
+						SCAlert.show(`${e.target.textContent}`, `${response.result_message}`);
 					}
 					me.$.dm_cart.disabled = "true";
 					me.$.dm_apply.disabled = "true";
 					
-					me.fire("close");
+					me.fire("refresh");
 				});
 			}
 		})

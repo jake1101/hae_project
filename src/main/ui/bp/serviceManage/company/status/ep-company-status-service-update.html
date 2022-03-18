@@ -5,6 +5,17 @@
 		}
 	</style>
 	<template>
+		<sc-request-group init>
+			<sc-code-group>
+                <sc-code code="CRN001" value="{{codes.term}}"></sc-code> <!-- 사용여부 -->
+            </sc-code-group>
+		</sc-request-group>
+        <sc-ajax
+           	id="getServiceUseListDetail"
+           	url="getServiceUseListDetail.do"
+           	body="{}"
+           	on-response="complateServiceResult"
+        ></sc-ajax>
 		<cc-sub-title-bar
 			id="subTitle"
 			title-text="자세히"
@@ -18,14 +29,30 @@
 				</th>
 				<td colspan=3>
 					<sc-combobox-field
-						placeholder="구독기간 변경"
+						id="sst_trm_reason"
+						name="구독기간(약정기간)"
+					 	items="{{sstTrmReasonList.label}}"
+						value="[1,2,3,0]"
+					 	display-field="label" 
+					 	value-field="data" 
+					 	on-change=""
+						placeholder="구독 기간 변경"
+						required="true"
 					></sc-combobox-field>
 				</td>
 			</tr>
 			<tr>
 				<td colspan=3>
 					<sc-combobox-field
+						id="sst_trm_reason"
+						name="구독기간(약정기간)"
+					 	items="{{codes.term}}"
+						value="{{setParam.sst_trm}}"
+					 	display-field="label" 
+					 	value-field="data" 
+					 	on-change="onChangeTerm"
 						placeholder="디바이스 수량 변경"
+						required="true"
 					></sc-combobox-field>
 				</td>
 			</tr>
@@ -52,67 +79,57 @@
 				<th>
 					<sc-label text="구독기간(약정기간)*"></sc-label>
 				</th>
-				<td>
-					12개월
+				<td id="sst_trm__bf">
 				</td>
 				<td>
 					<sc-combobox-field
-						placeholder="12개월"
+						id="sst_trm__dm_required"
+						name="구독기간(약정기간)"
+					 	items="{{codes.term}}"
+						value="{{setParam.sst_trm}}"
+					 	display-field="label" 
+					 	value-field="data" 
+					 	on-change="onChangeTerm"
+						placeholder="기간"
+						required="true"
 					></sc-combobox-field>
 				</td>
 			</tr>
 			<tr>
-				<th rowspan=3>
+				<th id="dvcTh">
 					<sc-label text="디바이스 수량"></sc-label>
 				</th>
-				<th>
-					<sc-label text="스마트태그*"></sc-label>
-				</th>
-				<td>
-					100대
-				</td>
-				<td>
-					<div style="display: flex; gap: 10px; align-items: center;">
-						<sc-text-field></sc-text-field>
-						대
-					</div>
-				</td>
 			</tr>
-			<tr>
-				<th>
-					<sc-label text="비콘*"></sc-label>
-				</th>
-				<td>
-					100대
-				</td>
-				<td>
-					<div style="display: flex; gap: 10px; align-items: center;">
-						<sc-text-field></sc-text-field>
-						대
-					</div>
-				</td>
-			</tr>
-			<tr>
-				<th>
-					<sc-label text="중계기*"></sc-label>
-				</th>
-				<td>
-					10대
-				</td>
-				<td>
-					<div style="display: flex; gap: 10px; align-items: center;">
-						<sc-text-field></sc-text-field>
-						대
-					</div>
-				</td>
-			</tr>
+			<template id="dvcTemplate" is="dom-repeat" items="{{deviceList}}">
+				<tr>
+       				<th>
+						<sc-label
+							text="{{item.dvc_th}}"
+						></sc-label>
+					</th>
+					<td>
+						{{item.qtt}} 대
+					</td>
+					<td>
+						<div style="display: flex; gap: 10px; align-items: center;">
+							<sc-text-field
+								id="{{item.dvc_id}}{{item.dvc_required_id}}"
+								type="number"
+								on-input="onInputField"
+								value="{{setParam.qtt}}"
+								required="{{item.dvc_required}}"
+							></sc-text-field>
+							대
+						</div>
+					</td>
+       			</tr>
+	        </template>
 			<tr>
 				<th style="background: #ccc !important;"></th>
 				<th>
 					<sc-label text="서비스 만료 예정일"></sc-label>
 				</th>
-				<td>
-					2023.02.14
+				<td id="exp_end_dt__bf">
 				</td>
 				<td>
 					<div style="display: flex; gap: 10px;">
@@ -126,8 +143,7 @@
 				<th>
 					<sc-label text="예상 월 구독료"></sc-label>
 				</th>
-				<td>
-					1,200,000
+				<td id="exp_mon_fee__bf">
 				</td>
 				<td>
 					<div style="display: flex; gap: 10px;">
@@ -144,10 +160,95 @@
 	<script>
 		Polymer({
 			is: "ep-company-status-service-update",
+			properties: {
+				codes: {
+                    type: Object,
+                    reset: false,
+                    value: function() {
+                        return {
+                            term: []
+                        };
+                    }
+                },
+                sstTrmReasonList: {
+                	type: Array,
+                	value: function() {
+                		return [
+                			{"label": "기간 변경"},
+                			{"label": "연장"},
+                			{"label": "중단"},
+                			{"label": "해당없음"}
+                			
+                		];
+                	}
+                },
+				deviceList: {
+					type: Array,
+					value: function(){
+						return [];
+					}
+				},
+				serviceData: {
+					type: Object,
+					value: function(){
+						return {};
+					}
+				},
+				setParam: {
+					type: Object,
+					value: function(){
+						return {};
+					}
+				}
+			},
+			complateServiceResult(e, {response: {result_data}}){
+				const me = this,
+				  {
+					  serviceUseDeviceListDetail,
+					  serviceUseListDetail
+				  } = result_data[0],
+				  setDevice = l => {
+						if(Number(l.mdt_yn)) {
+							Object.assign(l, {
+								dvc_th: l.product_name+"*", 
+								dvc_required: "true",
+								dvc_required_id: "__dm_required",
+							}) 
+						}else{
+							Object.assign(l, {
+								dvc_th: l.product_name, 
+								dvc_required: "false",
+								dvc_required_id: "",
+							})
+						}
+						return l;
+				  },
+				  setEndDt = (dt, trm) => {
+				  	const date = new Date(dt);
+					
+					const y = date.getFullYear() || "",
+						  m = date.getMonth()+1 || "",
+						  d = date.getDate() || "";
+					
+					return `${y}. ${m}. ${d}`;
+				},
+				commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+					  
+			    me.$.dvcTh.setAttribute('rowspan', serviceUseDeviceListDetail.length + 1);
+			    me.$.sst_trm__bf.textContent = serviceUseListDetail[0].sst_trm + " 개월";
+			    me.$.exp_end_dt__bf.textContent = setEndDt(serviceUseListDetail[0].exp_end_dt, serviceUseListDetail[0].sst_trm);
+			    me.$.exp_mon_fee__bf.textContent = commaNum(serviceUseListDetail[0].exp_mon_fee);
+			    
+				me.set("deviceList", serviceUseDeviceListDetail.map(setDevice));
+				me.set("serviceData", serviceUseListDetail[0]);
+			},
 			load: function(param) {
-				console.log(param)
 				const me = this;
+				console.log(param);
 				me.$.subTitle.titleText = `이동형 비전센서 > 이동형 비전센서 활용 작업자 안전 관리`;
+				
+				me.$.getServiceUseListDetail.body = {"svc_id": Number(param.svc_id)}
+				UT.request(me.$.getServiceUseListDetail)
 			}
 		})
 	</script>

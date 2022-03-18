@@ -221,14 +221,16 @@
        		  		  {columnName: cn} = event.detail.item;
 
        		  	if(cn == "btn_l" && d.btn_l == "신청"){
-       		  		const alarmPop = UT.popup(
+       		  		const applyPop = UT.popup(
        					"ep-company-status-service-apply", 
        					me,
        					800,
        					800,
        					{
-       						"close": function(popup, e) {
-       		                   	popup.close();
+       						"refresh": function(popup, e) {
+       							UT.request(me.$.getServiceUseList, function() {
+       								popup.close();
+       							});
                            	}
        					},
        					{ 
@@ -236,8 +238,28 @@
     						titleText: `${d.svc_ctl_nm} 신청하기`
     					}
         			);
-                	alarmPop.show();
-                	alarmPop.getWindowContent().load(d)
+	       		  	applyPop.show();
+	       		 	applyPop.getWindowContent().load(d)
+       		  	}else if(cn == "btn_l" && d.btn_l == "변경"){
+       		  	const updatePop = UT.popup(
+   					"ep-company-status-service-update", 
+   					me,
+   					800,
+   					800,
+   					{
+   						"refresh": function(popup, e) {
+   							UT.request(me.$.getServiceUseList, function() {
+   								popup.close();
+   							});
+                       	}
+   					},
+   					{ 
+   						maximizable: true, 
+   						titleText: `${d.svc_ctl_nm} 변경 신청`
+   					}
+       			);
+       		 	updatePop.show();
+       			updatePop.getWindowContent().load(d)
        		  	}
 			},
 			onClickAlarm: function() {
@@ -249,7 +271,9 @@
    					345,
    					{
    						"refresh": function(popup, e) {
-   		                   	popup.close();
+   							UT.request(me.$.getServiceUseList, function() {
+   								popup.close();
+   							});
                        	}
    					},
    					{ 
