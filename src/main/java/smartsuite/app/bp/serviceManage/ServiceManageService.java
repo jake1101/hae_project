@@ -137,7 +137,6 @@ public class ServiceManageService {
 	public List<Map<String,Object>> findRegSafetyServiceList(Map searchParam) {
 		
 		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
-		//Map userInfo = Auth.getCurrentUserInfo();
 		Map<String, Object> gridResultMap = new HashMap<String, Object>();
 		
 		gridResultMap = restfulUtilServiceToCorners.callCornersApi("findRegSafetyServiceList", searchParam);
@@ -328,8 +327,6 @@ public class ServiceManageService {
 	 */
 	public Map<String,Object> changeApplyService(Map param) {
 		
-//		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
-		//Map userInfo = Auth.getCurrentUserInfo();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		
 		resultMap = restfulUtilServiceToCorners.callCornersApi("changeApplyService", param);
@@ -349,8 +346,6 @@ public class ServiceManageService {
 	 */
 	public Map<String,Object> searchQNA(Map param) {
 		
-//		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
-		//Map userInfo = Auth.getCurrentUserInfo();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
 		
@@ -377,8 +372,6 @@ public class ServiceManageService {
 	 */
 	public Map<String,Object> searchQNADetail(Map param) {
 		
-//		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
-		//Map userInfo = Auth.getCurrentUserInfo();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
 		
@@ -405,8 +398,6 @@ public class ServiceManageService {
 	 */
 	public Map<String,Object> addQNA(Map param) {
 		
-//		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
-		//Map userInfo = Auth.getCurrentUserInfo();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
 		
@@ -433,8 +424,6 @@ public class ServiceManageService {
 	 */
 	public Map<String,Object> deleteQNA(Map param) {
 		
-//		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
-		//Map userInfo = Auth.getCurrentUserInfo();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
 		
@@ -445,6 +434,58 @@ public class ServiceManageService {
 		}
 		
 		resultMap = restfulUtilServiceToCorners.callCornersApi("deleteQNA", param);
+		
+		return resultMap;
+		
+	}
+	
+	/**
+	 * 서비스 이용 현황 / 서비스 이용 상세 내역 
+	 *
+	 * @author : 
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 3. 18
+	 * @Method Name : getServiceUseListDetail
+	 */
+	public Map<String,Object> getServiceUseListDetail(Map param) {
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceUseListDetail", param);
+		
+		return resultMap;
+		
+	}
+	
+	/**
+	 * 서비스 이용 현황 / 서비스 이용 상세 내역 구독료 납부 현황
+	 *
+	 * @author : 
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 3. 18
+	 * @Method Name : getServiceUseListDetailPayList
+	 */
+	public Map<String,Object> getServiceUseListDetailPayList(Map param) {
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceUseListDetailPayList", param);
 		
 		return resultMap;
 		
