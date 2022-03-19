@@ -5,66 +5,64 @@
 		}
 	</style>
 	<template>
-		<cc-sub-title-bar
-			id="subTitle"
-			title-text="서비스 이용 상세 내역 [바디캠 활용 작업자 위험상황 관제]"
-		></cc-sub-title-bar>
+		<sc-ajax
+           	id="getServiceUseListDetail"
+           	url="getServiceUseListDetail.do"
+           	last-response="{{serviceResult}}"
+           	on-response="complateServiceResult"
+        ></sc-ajax>
+
 		<div class="vspace-10"></div>
 		<table class="tb-form">
 			<tr>
 				<th>사업장</th>
-				<td>당진제철소</td>
+				<td>
+					<div id="wpc_nm">
+					</div>
+				</td>
 				<th>서비스 신청일</th>
-				<td>2021-12-20</td>
+				<td>
+					<div id="req_dt"></div>
+				</td>
 			</tr>
 			<tr>
 				<th>서비스 개시 요청일</th>
-				<td>2022-01-02</td>
+				<td>
+					<div id="dsr_str_dt"></div>
+				</td>
 				<th>서비스 만료 예정일</th>
-				<td>2023-12-20</td>
+				<td>
+					<div id="exp_end_dt"></div>
+				</td>
 			</tr>
 			<tr>
 				<th>구독기간(약정기간)</th>
 				<td colspan=3>
-					<div style="display: flex;">
-						<div>12</div>
-						개월
-					</div>
+					<div id="sst_trm"></div>
 				</td>
 			</tr>
 			<tr>
-				<th rowspan=3>디바이스 수량</th>
-				<th>바디캠*</th>
-				<td colspan=2>
-					<div style="display: flex;">
-						<div>100</div>
-						대
-					</div>
-				</td>
+				<th id="dvcTh">
+					<sc-label text="디바이스 수량"></sc-label>
+				</th>
 			</tr>
-			<tr>
-				<th>CCTV</th>
-				<td colspan=2>
-					<div style="display: flex;">
-						<div>15</div>
-						대
-					</div>
-				</td>
-			</tr>
-			<tr>
-				<th>무선중계기</th>
-				<td colspan=2>
-					<div style="display: flex;">
-						<div>0</div>
-						대
-					</div>
-				</td>
-			</tr>
+			<template id="dvcTemplate" is="dom-repeat" items="{{deviceList}}">
+				<tr>
+       				<th>
+						<sc-label
+							text="{{item.dvc_th}}"
+						></sc-label>
+					</th>
+					<td colspan=2>
+						{{item.qtt}} 대
+					</td>
+       			</tr>
+	        </template>
 			<tr>
 				<th>월 구독료</th>
 				<td colspan=3>
 					<div style="display: flex;">
-						<div>1,200,000</div>
+						<div id="exp_mon_fee"></div>
 						원 (VAT별도)
 					</div>
 				</td>
@@ -89,7 +87,90 @@
 
 <script>
 	Polymer({
-		is: "ep-company-status-service-detail"
+		is: "ep-company-status-service-detail",
+		properties: {
+			selectedService: {
+				type: Object,
+				value: function() {
+					return {};
+				}
+			},
+			serviceResult: {
+				type: Object,
+				value: function() {
+					return {};
+				}
+			},
+			deviceList: {
+				type: Array,
+				value: function() {
+					return [];
+				}
+			},
+			serviceData: {
+				type: Object,
+				value: function() {
+					return {};
+				}
+			}
+		},
+		load: function(param) {
+			const {
+				svc_id,
+				svc_ctl_id,
+				svc_ctl_nm
+			} = param,
+			me = this;
+			
+			me.set("selectedService", param);
+			
+			me.$.getServiceUseListDetail.body = {"svc_id": Number(svc_id)}
+			UT.request(me.$.getServiceUseListDetail);
+		},
+		complateServiceResult(e, {response: {result_data}}){
+			const me = this,
+			  {
+				  serviceUseDeviceListDetail,
+				  serviceUseListDetail
+			  } = result_data[0],
+			  setDevice = l => {
+					if(Number(l.mdt_yn)) {
+						Object.assign(l, {
+							dvc_th: l.product_name+"*", 
+							dvc_required: "true",
+							dvc_required_id: "__dm_required",
+						}) 
+					}else{
+						Object.assign(l, {
+							dvc_th: l.product_name, 
+							dvc_required: "false",
+							dvc_required_id: "",
+						})
+					}
+					return l;
+			  },
+			  setDate = (dt) => {
+			  	const date = new Date(dt);
+				
+				const y = date.getFullYear() || "",
+					  m = date.getMonth()+1 || "",
+					  d = date.getDate() || "";
+				
+				return `${y}-${m}-${d}`;
+			},
+			commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+				  
+		    me.$.dvcTh.setAttribute('rowspan', serviceUseDeviceListDetail.length + 1);
+		  	me.$.wpc_nm.textContent = me.get("selectedService").wpc_nm;
+			me.$.req_dt.textContent = setDate(serviceUseListDetail[0].req_dt);
+			me.$.dsr_str_dt.textContent = setDate(serviceUseListDetail[0].dsr_str_dt);
+			me.$.exp_end_dt.textContent = setDate(serviceUseListDetail[0].exp_end_dt);
+	     	me.$.sst_trm.textContent = serviceUseListDetail[0].sst_trm + " 개월";
+		    me.$.exp_mon_fee.textContent = commaNum(serviceUseListDetail[0].exp_mon_fee);
+		    
+			me.set("deviceList", serviceUseDeviceListDetail.map(setDevice));
+			me.set("serviceData", serviceUseListDetail[0]);
+		},
 	})
 </script>
 </dom-module>

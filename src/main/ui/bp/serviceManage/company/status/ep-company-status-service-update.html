@@ -259,7 +259,7 @@
 						}
 						return l;
 				  },
-				  setEndDt = (dt, trm) => {
+				  setDate = (dt) => {
 				  	const date = new Date(dt);
 					
 					const y = date.getFullYear() || "",
@@ -272,11 +272,11 @@
 					  
 			    me.$.dvcTh.setAttribute('rowspan', serviceUseDeviceListDetail.length + 1);
 			    me.$.sst_trm__bf.textContent = serviceUseListDetail[0].sst_trm + " 개월";
-			    me.$.exp_end_dt__bf.textContent = setEndDt(serviceUseListDetail[0].exp_end_dt, serviceUseListDetail[0].sst_trm);
+			    me.$.exp_end_dt__bf.textContent = setDate(serviceUseListDetail[0].exp_end_dt);
 			    me.$.exp_mon_fee__bf.textContent = commaNum(serviceUseListDetail[0].exp_mon_fee);
 			    
+			    Object.assign(me.get("setParam"), {"dvc_list": serviceUseDeviceListDetail.map(setDevice)});
 				me.set("deviceList", serviceUseDeviceListDetail.map(setDevice));
-				Object.assign(me.get("setParam"), {"dvc_list": serviceUseDeviceListDetail.map(setDevice)});
 				me.set("serviceData", serviceUseListDetail[0]);
 			},
 			_computedTerm: function(trm){

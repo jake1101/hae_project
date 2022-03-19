@@ -1,4 +1,6 @@
+<sc-link rel="import" href="ep-company-status-service-detail.html"></sc-link>
 <sc-link rel="import" href="ep-company-status-service-apply.html"></sc-link>
+<sc-link rel="import" href="ep-company-status-service-update.html"></sc-link>
 
 <dom-module id="es-company-status-service-list">
 	<style>
@@ -220,7 +222,21 @@
 					  {data: d} = event.detail,
        		  		  {columnName: cn} = event.detail.item;
 
-       		  	if(cn == "btn_l" && d.btn_l == "신청"){
+       		  	if(cn == "svc_ctl_nm"){
+       		  		const detailPop = UT.popup(
+       					"ep-company-status-service-detail", 
+       					me,
+       					800,
+       					800,
+       					{},
+       					{ 
+       						maximizable: true, 
+       						titleText: `서비스 이용 상세 내역`
+       					}
+        			);
+	       		 	detailPop.show();
+	       			detailPop.getWindowContent().load(d)
+       		  	}else if(cn == "btn_l" && d.btn_l == "신청"){
        		  		const applyPop = UT.popup(
        					"ep-company-status-service-apply", 
        					me,
@@ -235,7 +251,7 @@
        					},
        					{ 
     						maximizable: true, 
-    						titleText: `${d.svc_ctl_nm} 신청하기`
+    						titleText: `${d.svc_ctl_nm} 서비스 이용 상세 내역`
     					}
         			);
 	       		  	applyPop.show();
