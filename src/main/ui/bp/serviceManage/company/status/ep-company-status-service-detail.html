@@ -71,12 +71,13 @@
 		
 		<sc-grid
 			id="gridPanel"
+			data-provider="{{payList}}"
 			use-selection="false"
 			use-state="false"
 			editable="true"
 		>
 			<cc-grid-toolbar title-text="구독료 납부 현황"></cc-grid-toolbar>
-			<sc-grid-columns >
+			<sc-grid-columns>
 				<sc-data-column data-field="b" header-text="납부 예정일" width="180" text-align="center"></sc-data-column>
 				<sc-data-column data-field="c" header-text="납부 상태" width="180" text-align="center"></sc-data-column>
 				<sc-data-column data-field="d" header-text="납부 완료일" width="180" text-align="center"></sc-data-column>
@@ -112,6 +113,12 @@
 				value: function() {
 					return {};
 				}
+			},
+			payList: {
+				type: Array,
+				value: function() {
+					return [];
+				}
 			}
 		},
 		load: function(param) {
@@ -131,7 +138,8 @@
 			const me = this,
 			  {
 				  serviceUseDeviceListDetail,
-				  serviceUseListDetail
+				  serviceUseListDetail,
+				  serviceUseListDetailPayList
 			  } = result_data[0],
 			  setDevice = l => {
 					if(Number(l.mdt_yn)) {
@@ -170,6 +178,7 @@
 		    
 			me.set("deviceList", serviceUseDeviceListDetail.map(setDevice));
 			me.set("serviceData", serviceUseListDetail[0]);
+			me.set("payList", serviceUseListDetailPayList)
 		},
 	})
 </script>
