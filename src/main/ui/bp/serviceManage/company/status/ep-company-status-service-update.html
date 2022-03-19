@@ -7,7 +7,9 @@
 	<template>
 		<sc-request-group init>
 			<sc-code-group>
-                <sc-code code="CRN001" value="{{codes.term}}"></sc-code> <!-- 사용여부 -->
+                <sc-code code="CRN001" value="{{codes.term}}"></sc-code>
+                <sc-code code="CRN004" value="{{codes.reason}}"></sc-code>
+                <sc-code code="CRN005" value="{{codes.device}}"></sc-code>
             </sc-code-group>
 		</sc-request-group>
         <sc-ajax
@@ -16,26 +18,31 @@
            	body="{}"
            	on-response="complateServiceResult"
         ></sc-ajax>
+        <sc-ajax
+			id="estimateMonthlyFee"
+			url="estimateMonthlyFee.do"
+			body="{{setParam}}"
+			last-response="{{feeResult}}"
+		></sc-ajax>
 		<cc-sub-title-bar
 			id="subTitle"
 			title-text="자세히"
 		></cc-sub-title-bar>
 		<div class="vspace-10"></div>
 		<div style="color: red;">(*표시는 필수 입력 항목)</div>
-		<table class="tb-form">
+		<table class="tb-form" validation-group="apply">
 			<tr>
 				<th rowspan=3>
 					<sc-label text="변경 사유*"></sc-label>
 				</th>
 				<td colspan=3>
 					<sc-combobox-field
-						id="sst_trm_reason"
-						name="구독기간(약정기간)"
-					 	items="{{sstTrmReasonList.label}}"
-						value="[1,2,3,0]"
+						id="trm_r__dm_required"
+						name="구독 기간 변경"
+					 	items="{{codes.reason}}"
+						value="{{setParam.trm_r}}"
 					 	display-field="label" 
 					 	value-field="data" 
-					 	on-change=""
 						placeholder="구독 기간 변경"
 						required="true"
 					></sc-combobox-field>
@@ -44,13 +51,12 @@
 			<tr>
 				<td colspan=3>
 					<sc-combobox-field
-						id="sst_trm_reason"
-						name="구독기간(약정기간)"
-					 	items="{{codes.term}}"
-						value="{{setParam.sst_trm}}"
+						id="dvc_r__dm_required"
+						name="디바이스 수량 변경"
+					 	items="{{codes.device}}"
+						value="{{setParam.dvc_r}}"
 					 	display-field="label" 
 					 	value-field="data" 
-					 	on-change="onChangeTerm"
 						placeholder="디바이스 수량 변경"
 						required="true"
 					></sc-combobox-field>
@@ -59,7 +65,11 @@
 			<tr>
 				<td colspan=3>
 					<sc-text-field
+						id="upd_r__dm_required"
+						name="변경 사유 내용"
 						placeholder="(변경 사유 내용 상세 입력)"
+						on-input="onTextareaInput"
+						required="true"
 						style="height: 100px;"
 					></sc-text-field>
 				</td>
@@ -116,7 +126,7 @@
 								id="{{item.dvc_id}}{{item.dvc_required_id}}"
 								type="number"
 								on-input="onInputField"
-								value="{{setParam.qtt}}"
+								value="{{item.qtt__af}}"
 								required="{{item.dvc_required}}"
 							></sc-text-field>
 							대
@@ -133,8 +143,13 @@
 				</td>
 				<td>
 					<div style="display: flex; gap: 10px;">
-						<sc-button text="조회"></sc-button>
-						<div></div>
+						<sc-button 
+							text="조회"
+							on-click="onEndDateClick"
+						></sc-button>
+						<div id="term" style="display: none;">
+							[[_computedTerm(setParam.sst_trm)]]
+						</div>
 					</div>
 				</td>
 			</tr>
@@ -147,14 +162,19 @@
 				</td>
 				<td>
 					<div style="display: flex; gap: 10px;">
-						<sc-button text="조회"></sc-button>
-						<div></div>
+						<sc-button 
+							text="조회"
+							on-click="onEstimatedFeeClick"
+						></sc-button>
+						<div id="estimatedFee" style="display: none;">
+							[[_computedFee(feeResult.result_data.estimatedMonthlyFee)]]
+						</div>
 					</div>
 				</td>
 			</tr>
 		</table>
 		<div style="margin-top: 30px; margin-right: 50px; display: flex; justify-content: flex-end; gap: 20px;">
-			<sc-button text="변경 신청" style="width: 100px; padding: 10px;"></sc-button>
+			<sc-button text="변경 신청" style="width: 100px; padding: 10px;" on-click="onApplyClick"></sc-button>
 		</div>
 	</template>
 	<script>
@@ -166,22 +186,18 @@
                     reset: false,
                     value: function() {
                         return {
-                            term: []
+                            term: [],
+                            reason: [],
+                            device: []
                         };
                     }
                 },
-                sstTrmReasonList: {
-                	type: Array,
-                	value: function() {
-                		return [
-                			{"label": "기간 변경"},
-                			{"label": "연장"},
-                			{"label": "중단"},
-                			{"label": "해당없음"}
-                			
-                		];
-                	}
-                },
+                selectedService: {
+					type: Object,
+					value: function(){
+						return {};
+					}
+				},
 				deviceList: {
 					type: Array,
 					value: function(){
@@ -194,12 +210,32 @@
 						return {};
 					}
 				},
+				feeResult: {
+					type: Object,
+					value: function() {
+						return {};
+					}
+				},
 				setParam: {
 					type: Object,
 					value: function(){
 						return {};
 					}
+				},
+				applyParam: {
+					type: Object,
+					value: function(){
+						return {};
+					}
 				}
+			},
+			load: function(param) {
+				const me = this;
+				me.$.subTitle.titleText = `이동형 비전센서 > 이동형 비전센서 활용 작업자 안전 관리`;
+				me.set("selectedService", param);
+				
+				me.$.getServiceUseListDetail.body = {"svc_id": Number(param.svc_id)}
+				UT.request(me.$.getServiceUseListDetail)
 			},
 			complateServiceResult(e, {response: {result_data}}){
 				const me = this,
@@ -240,15 +276,130 @@
 			    me.$.exp_mon_fee__bf.textContent = commaNum(serviceUseListDetail[0].exp_mon_fee);
 			    
 				me.set("deviceList", serviceUseDeviceListDetail.map(setDevice));
+				Object.assign(me.get("setParam"), {"dvc_list": serviceUseDeviceListDetail.map(setDevice)});
 				me.set("serviceData", serviceUseListDetail[0]);
 			},
-			load: function(param) {
-				const me = this;
-				console.log(param);
-				me.$.subTitle.titleText = `이동형 비전센서 > 이동형 비전센서 활용 작업자 안전 관리`;
+			_computedTerm: function(trm){
+				const me = this,
+					  date = new Date(me.get('serviceData').dsr_str_dt),
+					  param = me.get("setParam");
+			
+				date.setMonth(date.getMonth() + Number(trm));
 				
-				me.$.getServiceUseListDetail.body = {"svc_id": Number(param.svc_id)}
-				UT.request(me.$.getServiceUseListDetail)
+				const y = date.getFullYear() || "",
+					  m = date.getMonth()+1 || "",
+					  d = date.getDate() || "";
+				
+				Object.assign(me.get("setParam"), {"exp_end_dt": date});
+				
+				if(trm){
+					me.$.term.textContent = `${y}. ${m}. ${d}`;
+				}
+			},
+			_computedFee: function(fee){
+				const me = this,
+		  	  	  	  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+		  	  
+		  	 	if(fee){
+		  	 		me.set("setParam", Object.assign(me.get("setParam"), {"exp_mon_fee": fee}));
+		  	 		return commaNum(fee)+" (VAT 별도)";
+		  	 	}
+			},
+			onTextareaInput: function() {
+				console.log(event.target.value);
+				const me = this;
+				      upd_r = event.target.value;
+				Object.assign(me.get("setParam"), {upd_r})
+			},
+			onChangeTerm: function() {
+				const me = this,
+					  param = me.get("setParam");
+				param.sst_trm = Number(param.sst_trm);
+				me.$.term.style.display = "none";
+				me.$.estimatedFee.style.display = "none";
+			},
+			onInputField: function(){
+				const me = this,
+					  item = event.model.item;
+				
+				item.qtt = Number(item.qtt__af);
+				me.$.estimatedFee.style.display = "none";
+			},
+			onEndDateClick: function() {
+				const me = this,
+					  param = me.get("setParam");
+				
+				if(!param.sst_trm){
+					SCAlert.show('error', `구독기간(약정기간) 입력란에 데이터를 입력해 주십시오.`);
+					return;
+				}
+				
+				me.$.term.style.display = "block";
+			},
+			onEstimatedFeeClick: function() {
+				const me = this,
+					  param = me.get("setParam");
+
+				if(!param.dvc_list){
+					SCAlert.show('error', `디바이스 수량을 입력해 주십시오.`);
+					return;
+				}else{
+					const requiredList = param.dvc_list.filter(d => d.mdt_yn == "1").filter(d => !d.qtt);
+					if(requiredList.length){
+						SCAlert.show('error', `${requiredList[0].dvc_nm} 수량을 입력해 주십시오.`);
+						return;
+					}
+				}
+				
+				if(!param.sst_trm){
+					SCAlert.show('error', `구독기간(약정기간) 입력란에 데이터를 입력해 주십시오.`);
+					return;
+				}
+				
+				param.dvc_list.map(d => !d.qtt ? Object.assign(d, {"qtt": 0}) : d)
+				UT.request(me.$.estimateMonthlyFee);
+				me.$.estimatedFee.style.display = "block";
+			},
+			onApplyClick: function(e){
+				const me = this,
+					  param = me.get("setParam"),
+					  {dvcTemplate: {items: dvcList}} = me.$,
+					  {svc_id, svc_ctl_id} = me.get("selectedService"),
+					  requiredList = Object.values(me.$).filter(o => o.id.includes("__dm_required"));
+					  
+				dvcList.forEach(d => d.dvc_required=="true" && requiredList.push({"name": d.dvc_nm, "value": d.qtt}));
+
+				if(!me.validate("apply")){
+					const i = requiredList.findIndex(m => !m.value)
+					SCAlert.show('error', `${requiredList[i].name} 입력란에 데이터를 입력해 주십시오.`);
+					return;
+				}
+				
+				if(me.$.term.style.display == "none"){
+					SCAlert.show('error', `"서비스 만료 예정일 조회 버튼"을 클릭해 주십시오.`);
+					return;
+				};
+				if(me.$.estimatedFee.style.display == "none"){
+					SCAlert.show('error', `"예상 월 구독료 조회 버튼"을 클릭해 주십시오.`);
+					return;
+				};
+				
+				Object.assign(me.get("applyParam"), {svc_ctl_id, svc_id, "stt_cd": "1"});
+				Object.assign(me.get("applyParam"), me.get("setParam"));
+				
+				console.log(me.get("applyParam"));
+				
+				/* UT.request(me.$.applyService, function(e, {response}){
+					if(response.result_status == "E"){
+						SCAlert.show(`${e.target.textContent}`, response.result_message);
+					}else{
+						SCAlert.show(`${e.target.textContent}`, `${response.result_message}`);
+					}
+					me.$.dm_cart.disabled = "true";
+					me.$.dm_apply.disabled = "true";
+					
+					me.fire("refresh");
+				}); */
 			}
 		})
 	</script>
