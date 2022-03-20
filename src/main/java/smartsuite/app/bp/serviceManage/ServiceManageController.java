@@ -248,6 +248,23 @@ public class ServiceManageController {
 	}
 	
 	/**
+	 * 1:1 문의 게시판 문의내용 삭제
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return
+	 * @Date : 2022. 03. 16
+	 * @Method Name : deleteQNA
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "deleteQNA.do")
+	public @ResponseBody Map<String,Object> deleteQNA(@RequestBody Map param) {
+		return ServiceManageService.deleteQNA(param);
+	}
+	
+	
+	
+	/**
 	 * 서비스 이용 현황 / 서비스 이용 상세 내역 
 	 *
 	 * @author : hjh
@@ -275,6 +292,21 @@ public class ServiceManageController {
 	@RequestMapping (value = "getServiceUseListDetailPayList.do")
 	public @ResponseBody Map<String,Object> getServiceUseListDetailPayList(@RequestBody Map param) {
 		return ServiceManageService.getServiceUseListDetailPayList(param);
+	}
+	
+	/**
+	 * 서비스 변경 신청
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 03. 18
+	 * @Method Name : serviceUseChange
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "serviceUseChange.do")
+	public @ResponseBody Map<String,Object> serviceUseChange(@RequestBody Map param) {
+		return ServiceManageService.serviceUseChange(param);
 	}
 	
 	/**

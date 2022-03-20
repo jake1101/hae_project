@@ -317,9 +317,9 @@ public class ServiceManageService {
 	}
 	
 	/**
-	 * C-서비스 이용 현황 - 서비스 삭제
+	 * C-서비스 이용 현황 - 서비스 삭제(사용여부 변경)
 	 *
-	 * @author : 
+	 * @author :
 	 * @param 
 	 * @return 
 	 * @Date : 2022. 3. 15
@@ -486,6 +486,33 @@ public class ServiceManageService {
 		}
 		
 		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceUseListDetailPayList", param);
+		
+		return resultMap;
+	}
+	
+	/**
+	 * 서비스 변경 신청
+	 *
+	 * @author : 
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 3. 18
+	 * @Method Name : serviceUseChange
+	 */
+	public Map<String,Object> serviceUseChange(Map param) {
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
+		param.put("usr_id", userInfo.get("usr_id"));
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("serviceUseChange", param);
 		
 		return resultMap;
 	}
