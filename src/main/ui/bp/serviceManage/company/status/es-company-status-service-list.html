@@ -1,6 +1,7 @@
 <sc-link rel="import" href="ep-company-status-service-detail.html"></sc-link>
 <sc-link rel="import" href="ep-company-status-service-apply.html"></sc-link>
 <sc-link rel="import" href="ep-company-status-service-update.html"></sc-link>
+<sc-link rel="import" href="ep-company-status-service-alarm.html"></sc-link>
 
 <dom-module id="es-company-status-service-list">
 	<style>
@@ -58,11 +59,15 @@
 				last-response="{{serviceResult}}"
 				on-response = "complateServiceResult"
 			></sc-ajax>
+			<sc-ajax 
+				id="deleteApplyService" 
+				url="deleteApplyService.do"
+			></sc-ajax>
 		</sc-request-group>
 		<div id="notification" class="dm_notification_wrap" on-click="onClickAlarm">
 			<div>
 				<img src="/ui/assets/img/serviceManage/icon_notification.png" width="32">
-				<div id="notiCnt">1</div>
+				<div id="notiCnt">[[_computedAlarmListLength(alarmList)]]</div>
 			</div>
 		</div>
 		
@@ -207,101 +212,35 @@
     					return {};
     				}
     			},
-    			btnList: {
+    			alarmList: {
     				type: Array,
     				value: function() {
     					return [];
     				}
-    			}
+    			},
 			},
-			observers: [
-
-			],
-			onItemClick: function() {
-				const me = this,
-					  {data: d} = event.detail,
-       		  		  {columnName: cn} = event.detail.item;
-
-       		  	if(cn == "svc_ctl_nm"){
-       		  		const detailPop = UT.popup(
-       					"ep-company-status-service-detail", 
-       					me,
-       					800,
-       					800,
-       					{},
-       					{ 
-       						maximizable: true, 
-       						titleText: `서비스 이용 상세 내역`
-       					}
-        			);
-	       		 	detailPop.show();
-	       			detailPop.getWindowContent().load(d)
-       		  	}else if(cn == "btn_l" && d.btn_l == "신청"){
-       		  		const applyPop = UT.popup(
-       					"ep-company-status-service-apply", 
-       					me,
-       					800,
-       					800,
-       					{
-       						"refresh": function(popup, e) {
-       							UT.request(me.$.getServiceUseList, function() {
-       								popup.close();
-       							});
-                           	}
-       					},
-       					{ 
-    						maximizable: true, 
-    						titleText: `${d.svc_ctl_nm} 서비스 이용 상세 내역`
-    					}
-        			);
-	       		  	applyPop.show();
-	       		 	applyPop.getWindowContent().load(d)
-       		  	}else if(cn == "btn_l" && d.btn_l == "변경"){
-       		  	const updatePop = UT.popup(
-   					"ep-company-status-service-update", 
-   					me,
-   					800,
-   					800,
-   					{
-   						"refresh": function(popup, e) {
-   							UT.request(me.$.getServiceUseList, function() {
-   								popup.close();
-   							});
-                       	}
-   					},
-   					{ 
-   						maximizable: true, 
-   						titleText: `${d.svc_ctl_nm} 변경 신청`
-   					}
-       			);
-       		 	updatePop.show();
-       			updatePop.getWindowContent().load(d)
-       		  	}
-			},
-			onClickAlarm: function() {
+			initialized: function() {
+                const me = this;
+                
+                const result_data = me.get("wpcResult").result_data.map(wpc => wpc = {"wpc_cd": wpc.id, "wpc_nm": wpc.name});
+                me.set("wpcResult", {result_data});
+            },
+            complateServiceResult: function(e, {response: {result_data: serviceList}}){
 				const me = this;
-            	const alarmPop = UT.popup(
-   					"ep-company-status-service-alarm", 
-   					me,
-   					800,
-   					345,
-   					{
-   						"refresh": function(popup, e) {
-   							UT.request(me.$.getServiceUseList, function() {
-   								popup.close();
-   							});
-                       	}
-   					},
-   					{ 
-   						maximizable: true, 
-   						titleText: "구독 만료 임박 알림"
-   					}
-    			);
-            	alarmPop.show();
-            	alarmPop.getWindowContent().load()
-			},
-			complateServiceResult: function(e, {response: {result_data: serviceList}}){
-				const me = this;
+				
+				me.set(
+					"alarmList", 
+					JSON.parse(JSON.stringify(serviceList))
+					.filter(d => {
+						if(d.sst_str_dt != 253402182000000 && d.sst_end_dt != 253402182000000){
+							diff = d.sst_end_dt - d.sst_str_dt;
+							d.diff = diff/24/60/60/1000;
+							if(0 < diff && diff < 90){
+								return d;
+							}
+						}
+					})
+				);
 
 				const setReqDt = dt => {
 					const date = new Date(dt);
@@ -372,15 +311,120 @@
                 	result_data = serviceList.map(setService);
                     me.set("serviceResult", {result_data});
                 }
-                
-                me.applyFormula('btnLCtl');
 			},
-			initialized: function() {
-                const me = this;
-                
-                const result_data = me.get("wpcResult").result_data.map(wpc => wpc = {"wpc_cd": wpc.id, "wpc_nm": wpc.name});
-                me.set("wpcResult", {result_data});
-            },
+			_computedAlarmListLength: function(al) {
+				return al.length;
+			},
+			onItemClick: function() {
+				const me = this,
+					  {data: d} = event.detail,
+       		  		  {columnName: cn} = event.detail.item;
+       		  		  
+       		  	
+       		  		  
+       		  	d.svc_id = Number(d.svc_id);
+
+       		  	if(cn == "svc_ctl_nm"){
+       		  		const detailPop = UT.popup(
+       					"ep-company-status-service-detail", 
+       					me,
+       					800,
+       					800,
+       					{},
+       					{ 
+       						maximizable: true, 
+       						titleText: `서비스 이용 상세 내역`
+       					}
+        			);
+	       		 	detailPop.show();
+	       			detailPop.getWindowContent().load(d)
+       		  	}else if(cn == "btn_l" && d.btn_l == "신청"){
+       		  		const applyPop = UT.popup(
+       					"ep-company-status-service-apply", 
+       					me,
+       					800,
+       					800,
+       					{
+       						"refresh": function(popup, e) {
+       							UT.request(me.$.getServiceUseList, function() {
+       								popup.close();
+       							});
+                           	}
+       					},
+       					{ 
+    						maximizable: true, 
+    						titleText: `${d.svc_ctl_nm} 서비스 이용 상세 내역`
+    					}
+        			);
+	       		  	applyPop.show();
+	       		 	applyPop.getWindowContent().load(d)
+       		  	}else if(cn == "btn_l" && d.btn_l == "변경"){
+	       		  	const updatePop = UT.popup(
+	   					"ep-company-status-service-update", 
+	   					me,
+	   					800,
+	   					800,
+	   					{
+	   						"refresh": function(popup, e) {
+	   							UT.request(me.$.getServiceUseList, function() {
+	   								popup.close();
+	   							});
+	                       	}
+	   					},
+	   					{ 
+	   						maximizable: true, 
+	   						titleText: `${d.svc_ctl_nm} 변경 신청`
+	   					}
+	       			);
+	       		 	updatePop.show();
+	       			updatePop.getWindowContent().load(d)
+       		  	}else if(cn == "btn_r" && d.btn_r == "삭제" || cn=="btn_l" && d.btn_l == "취소"){
+	       		  	SCAlert.confirm(`서비스${cn == "btn_r" ? "삭제" : "신청 취소"}`, `정말 ${cn == "btn_r" ? "삭제" : "취소"}하시겠습니까?`, function(btn){
+						if(btn === 'yes'){
+							me.$.deleteApplyService.body = {"svc_id": d.svc_id}
+		       		  		UT.request(me.$.deleteApplyService);
+		       		  		UT.request(me.$.getServiceUseList);
+						}
+	    			});
+       		  	}
+			},
+			onClickAlarm: function() {
+				const me = this;
+            	const alarmPop = UT.popup(
+   					"ep-company-status-service-alarm", 
+   					me,
+   					450,
+   					400,
+   					{
+   						"click-button": function(popup, e) {
+   							popup.close();
+   							const serviceList = me.get("serviceResult").result_data,
+   							 	  bId = e.detail.btn_id,
+   								  sId = e.detail.svc_id,
+   								  svc = serviceList.find(s => s.svc_id == sId);
+   							
+ 							e.detail = {"data": svc}
+   							if(bId.includes("detail")) {
+   								e.detail.item={"columnName": "svc_ctl_nm"}
+   							}else if(bId.includes("update") && svc.status_code == "4") {
+   								Object.assign(e.detail, {"btn_l": "변경"})
+   								e.detail.item={"columnName": "btn_l"}
+   							}else{
+   								return;
+   							}
+ 							
+ 							me.onItemClick();
+                       	}
+   					},
+   					{ 
+   						maximizable: true, 
+   						titleText: "구독 만료 임박 알림"
+   					}
+    			);
+            	
+            	alarmPop.show();
+            	alarmPop.getWindowContent().load(me.get("alarmList"));
+			},
             onFindService: function() {
             	const me = this;
             	UT.request(me.$.getServiceUseList);
