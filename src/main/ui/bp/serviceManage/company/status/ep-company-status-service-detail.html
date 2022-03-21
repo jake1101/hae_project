@@ -11,6 +11,11 @@
            	last-response="{{serviceResult}}"
            	on-response="complateServiceResult"
         ></sc-ajax>
+        
+        <div style="display: flex; align-items: center; gap: 10px;">
+        	<cc-sub-title-bar id="subTitle" title-text="서비스 이용 상세 내역"></cc-sub-title-bar>
+        	<div id="svcPath" style="font-size: 15px; font-weight: 600; color: #2eadd9;">[{{selectedService.svc_ctl_nm}}]</div>
+        </div>
 
 		<div class="vspace-10"></div>
 		<table class="tb-form">
@@ -46,15 +51,15 @@
 					<sc-label text="디바이스 수량"></sc-label>
 				</th>
 			</tr>
-			<template id="dvcTemplate" is="dom-repeat" items="{{deviceList}}">
+			<template id="dvcTemplate" is="dom-repeat" items="[[deviceList]]">
 				<tr>
        				<th>
 						<sc-label
-							text="{{item.dvc_th}}"
+							text="[[item.dvc_th]]"
 						></sc-label>
 					</th>
 					<td colspan=2>
-						{{item.qtt}} 대
+						[[item.qtt]] 대
 					</td>
        			</tr>
 	        </template>
@@ -125,13 +130,13 @@
 			const {
 				svc_id,
 				svc_ctl_id,
-				svc_ctl_nm
+				svc_ctl_nm,
+				stt_cd
 			} = param,
 			me = this;
 			
 			me.set("selectedService", param);
-			
-			me.$.getServiceUseListDetail.body = {"svc_id": Number(svc_id)}
+			me.$.getServiceUseListDetail.body = {svc_id, stt_cd}
 			UT.request(me.$.getServiceUseListDetail);
 		},
 		complateServiceResult(e, {response: {result_data}}){
@@ -178,8 +183,8 @@
 		    
 			me.set("deviceList", serviceUseDeviceListDetail.map(setDevice));
 			me.set("serviceData", serviceUseListDetail[0]);
-			me.set("payList", serviceUseListDetailPayList)
-		},
+			me.set("payList", serviceUseListDetailPayList);
+		}
 	})
 </script>
 </dom-module>

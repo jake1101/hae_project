@@ -24,10 +24,13 @@
 			body="{{setParam}}"
 			last-response="{{feeResult}}"
 		></sc-ajax>
-		<cc-sub-title-bar
-			id="subTitle"
-			title-text="자세히"
-		></cc-sub-title-bar>
+		<sc-ajax
+			id="serviceUseChange"
+			url="serviceUseChange.do"
+			body="{{applyParam}}"
+		></sc-ajax>
+		<cc-sub-title-bar title-text="서비스 변경 신청"></cc-sub-title-bar>
+		<div id="svcPath" style="font-weight: 600; color: #2eadd9;">[{{selectedService.wpc_nm}} > {{selectedService.svc_ctl_nm}}]</div>
 		<div class="vspace-10"></div>
 		<div style="color: red;">(*표시는 필수 입력 항목)</div>
 		<table class="tb-form" validation-group="apply">
@@ -40,7 +43,7 @@
 						id="trm_r__dm_required"
 						name="구독 기간 변경"
 					 	items="{{codes.reason}}"
-						value="{{setParam.trm_r}}"
+						value="{{setParam.trm_chg_cd}}"
 					 	display-field="label" 
 					 	value-field="data" 
 						placeholder="구독 기간 변경"
@@ -54,7 +57,7 @@
 						id="dvc_r__dm_required"
 						name="디바이스 수량 변경"
 					 	items="{{codes.device}}"
-						value="{{setParam.dvc_r}}"
+						value="{{setParam.dvc_chg_yn}}"
 					 	display-field="label" 
 					 	value-field="data" 
 						placeholder="디바이스 수량 변경"
@@ -230,11 +233,12 @@
 				}
 			},
 			load: function(param) {
-				const me = this;
-				me.$.subTitle.titleText = `이동형 비전센서 > 이동형 비전센서 활용 작업자 안전 관리`;
+				const me = this,
+				{svc_id, stt_cd} = param;
+				
 				me.set("selectedService", param);
 				
-				me.$.getServiceUseListDetail.body = {"svc_id": Number(param.svc_id)}
+				me.$.getServiceUseListDetail.body = {svc_id, stt_cd}
 				UT.request(me.$.getServiceUseListDetail)
 			},
 			complateServiceResult(e, {response: {result_data}}){
@@ -306,10 +310,9 @@
 		  	 	}
 			},
 			onTextareaInput: function() {
-				console.log(event.target.value);
 				const me = this;
-				      upd_r = event.target.value;
-				Object.assign(me.get("setParam"), {upd_r})
+				      chg_rsn = event.target.value;
+				Object.assign(me.get("setParam"), {chg_rsn})
 			},
 			onChangeTerm: function() {
 				const me = this,
@@ -364,7 +367,7 @@
 				const me = this,
 					  param = me.get("setParam"),
 					  {dvcTemplate: {items: dvcList}} = me.$,
-					  {svc_id, svc_ctl_id} = me.get("selectedService"),
+					  {svc_id, svc_ctl_id, stt_cd} = me.get("selectedService"),
 					  requiredList = Object.values(me.$).filter(o => o.id.includes("__dm_required"));
 					  
 				dvcList.forEach(d => d.dvc_required=="true" && requiredList.push({"name": d.dvc_nm, "value": d.qtt}));
@@ -384,22 +387,18 @@
 					return;
 				};
 				
-				Object.assign(me.get("applyParam"), {svc_ctl_id, svc_id});
+				Object.assign(me.get("applyParam"), {svc_ctl_id, svc_id, stt_cd, "status": "5"});
 				Object.assign(me.get("applyParam"), me.get("setParam"));
 				
-				console.log(me.get("applyParam"));
-				
-				/* UT.request(me.$.applyService, function(e, {response}){
+				UT.request(me.$.serviceUseChange, function(e, {response}){
 					if(response.result_status == "E"){
 						SCAlert.show(`${e.target.textContent}`, response.result_message);
 					}else{
 						SCAlert.show(`${e.target.textContent}`, `${response.result_message}`);
 					}
-					me.$.dm_cart.disabled = "true";
-					me.$.dm_apply.disabled = "true";
 					
 					me.fire("refresh");
-				}); */
+				});
 			}
 		})
 	</script>

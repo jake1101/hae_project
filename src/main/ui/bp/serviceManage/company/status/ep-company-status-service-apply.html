@@ -16,14 +16,12 @@
             	last-response="{{wpcResult}}"
             ></sc-ajax>
 		</sc-request-group>
-		
 		<sc-ajax
-			id="getDevicesByCatalogId"
-			url="getDevicesByCatalogId.do"
-			body="{{selectedService}}"
-			last-response="{{deviceResult}}"
-			on-response="complateDeviceResult"
-		></sc-ajax>
+           	id="getServiceUseListDetail"
+           	url="getServiceUseListDetail.do"
+           	last-response="{{serviceResult}}"
+           	on-response="complateServiceResult"
+        ></sc-ajax>
 		<sc-ajax
 			id="estimateMonthlyFee"
 			url="estimateMonthlyFee.do"
@@ -36,10 +34,7 @@
 			body="{{applyParam}}"
 		></sc-ajax>
 		
-		<cc-sub-title-bar
-			id="subTitle"
-			title-text="자세히"
-		></cc-sub-title-bar>
+		<cc-sub-title-bar title-text="서비스 변경 신청"></cc-sub-title-bar>
 		<div class="vspace-10"></div>
 		<div style="color: red;">(*표시는 필수 입력 항목)</div>
 		<table class="tb-form" validation-group="apply">
@@ -83,7 +78,7 @@
 					<sc-label text="디바이스 수량"></sc-label>
 				</th>
 			</tr>
-			<template id="dvcTemplate" is="dom-repeat" items="{{deviceResult.result_data}}">
+			<template id="dvcTemplate" is="dom-repeat" items="{{deviceList}}">
 	          <tr>
 	          	<th>
 					<sc-label
@@ -173,22 +168,34 @@
                         };
                     }
                 },
-                selectedService: {
-					type: Object,
-    				value: function() {
-    					return {};
-    				}
-				},
                 wpcResult: {
 					type: Object,
 					value: function() {
 						return {};
 					}
 				},
-				deviceResult: {
+				serviceResult: {
+					type: Object,
+    				value: function() {
+    					return {};
+    				}
+				},
+				deviceList: {
+					type: Array,
+					value: function() {
+						return [];
+					}
+				},
+				serviceData: {
 					type: Object,
 					value: function() {
 						return {};
+					}
+				},
+				payList: {
+					type: Array,
+					value: function() {
+						return [];
 					}
 				},
 				feeResult: {
@@ -223,6 +230,70 @@
 				"_dsrStrDtObs(setParam.dsr_str_dt)",
 				"_sstTtmObs(setParam.sst_trm)"
 			],
+			initialized: function() {
+                const me = this;
+                const term = me.get("codes.term") || [];
+            },
+			load: function(param) {
+				const {
+					svc_id,
+					svc_ctl_id,
+					svc_ctl_nm,
+					stt_cd
+				} = param,
+				me = this;
+				
+				me.$.getServiceUseListDetail.body = {svc_id, stt_cd}
+				UT.request(me.$.getServiceUseListDetail);
+			},
+			complateServiceResult(e, {response: {result_data}}){
+				const me = this,
+					  {
+						  serviceUseDeviceListDetail,
+						  serviceUseListDetail,
+						  serviceUseListDetailPayList
+					  } = result_data[0],
+					  setDevice = l => {
+							if(Number(l.mdt_yn)) {
+								Object.assign(l, {
+									dvc_th: l.product_name+"*", 
+									dvc_required: "true",
+									dvc_required_id: "__dm_required",
+								}) 
+							}else{
+								Object.assign(l, {
+									dvc_th: l.product_name, 
+									dvc_required: "false",
+									dvc_required_id: "",
+								})
+							}
+							return l;
+					  },
+					  setDate = (dt) => {
+						  	const date = new Date(dt);
+							
+							const y = date.getFullYear() || "",
+								  m = date.getMonth()+1 || "",
+								  d = date.getDate() || "";
+							
+							return `${y}.${m}.${d}`;
+					  },
+					  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+				  
+				Object.assign(me.get("setParam"), serviceUseListDetail[0]);
+				Object.assign(me.get("setParam"), {"dvc_list": serviceUseDeviceListDetail.map(setDevice)});
+					  
+				me.$.dvcTh.setAttribute('rowspan', serviceUseDeviceListDetail.length + 1);
+				me.$.wpcList__dm_required.value = serviceUseListDetail[0].wpc_cd;
+				me.$.dsr_str_dt__dm_required.value = new Date(serviceUseListDetail[0].dsr_str_dt);
+				me.$.sst_trm__dm_required.value = `${serviceUseListDetail[0].sst_trm}`;
+				me.onEndDateClick();
+				me.onEstimatedFeeClick();
+				
+			  	me.set("deviceList", serviceUseDeviceListDetail.map(setDevice));
+				me.set("serviceData", serviceUseListDetail[0]);
+				me.set("payList", serviceUseListDetailPayList);
+			},
 			_dsrStrDtObs: function(str) {
 				const me = this;
 				me.$.term.style.display = "none";
@@ -247,56 +318,18 @@
 				Object.assign(me.get("setParam"), {"exp_end_dt": date});
 				
 				if(str && trm){
-					me.$.term.textContent = `${y}. ${m}. ${d}`;
+					return `${y}. ${m}. ${d}`;
 				}
 			},
 			_computedFee: function(fee){
+				console.log(fee)
 				const me = this,
 		  	  	  	  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 		  	  
 		  	 	if(fee){
-		  	 		me.set("setParam", Object.assign(me.get("setParam"), {"exp_mon_fee": fee}));
+		  	 		Object.assign(me.get("setParam"), {"exp_mon_fee": fee});
 		  	 		return commaNum(fee)+" (VAT 별도)";
 		  	 	}
-			},
-			initialized: function() {
-                const me = this;
-                const term = me.get("codes.term") || [];
-            },
-			load: function(param) {
-				const {
-					svc_ctl_id,
-					svc_ctl_nm
-				} = param,
-				me = this;
-				
-				me.$.subTitle.titleText = `서비스 신청하기 (${svc_ctl_nm})`;
-				me.set("selectedService", param);
-				
-				UT.request(this.$.getDevicesByCatalogId);
-			},
-			complateDeviceResult: function(e, {response: {result_data: list}}){
-				const me = this,
-					  setDevice = l => {
-							if(Number(l.mdt_yn)) {
-								Object.assign(l, {
-									dvc_th: l.dvc_nm+"*", 
-									dvc_required: "true",
-									dvc_required_id: "__dm_required",
-								}) 
-							}else{
-								Object.assign(l, {
-									dvc_th: l.dvc_nm, 
-									dvc_required: "false",
-									dvc_required_id: "",
-								})
-							}
-							return l;
-					  },
-					  dvc_list = Object.assign(me.get("deviceResult").result_data, list.map(setDevice));
-					  
-				Object.assign(me.get("setParam"), {dvc_list});
-				me.$.dvcTh.setAttribute('rowspan', list.length + 1);
 			},
 			onInputField: function(){
 				const me = this,
@@ -354,9 +387,8 @@
 				const me = this,
 					  param = me.get("setParam"),
 					  {dvcTemplate: {items: dvcList}} = me.$,
-					  svc_ctl_id = me.get("selectedService")["svc_ctl_id"],
+					  svc_ctl_id = me.get("serviceData")["svc_ctl_id"],
 					  requiredList = Object.values(me.$).filter(o => o.id.includes("__dm_required"));
-					  /* svc_ctl_id = "SVC"+me.get("selectedService")["svc_ctl_id"].substr(-5), */
 					  
 				dvcList.forEach(d => d.dvc_required=="true" && requiredList.push({"name": d.dvc_nm, "value": d.qtt}));
 
