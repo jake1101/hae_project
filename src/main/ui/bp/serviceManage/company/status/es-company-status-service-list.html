@@ -155,8 +155,8 @@
 			<sc-grid-columns>
 				<sc-data-column data-field="wpc_nm" header-text="사업장" width="150" text-align="center"></sc-data-column>
 				<sc-data-column data-field="svc_ctl_nm" header-text="신청 서비스" width="400" text-align="center"></sc-data-column>
-				<sc-data-column data-field="req_dt" header-text="서비스 게시일" width="200" text-align="center"></sc-data-column>
-				<sc-data-column data-field="req_dt" header-text="서비스 만료일" width="200" text-align="center"></sc-data-column>
+				<sc-data-column data-field="sst_str_dt" header-text="서비스 게시일" width="200" text-align="center"></sc-data-column>
+				<sc-data-column data-field="sst_end_dt" header-text="서비스 만료일" width="200" text-align="center"></sc-data-column>
 				<sc-data-column data-field="sst_trm" header-text="구독 기간" width="150" text-align="center"></sc-data-column>
 				<sc-data-column data-field="exp_mon_fee" header-text="월 구독료" width="150" text-align="center"></sc-data-column>
 				<sc-data-column data-field="status_nm" header-text="상태" width="100" text-align="center"></sc-data-column>
@@ -242,15 +242,19 @@
 					})
 				);
 
-				const setReqDt = dt => {
-					const date = new Date(dt);
-					const a = b => b > 10 ? b : '0'+b;
-					
-					const y = date.getFullYear() || "",
-						  m = date.getMonth()+1 || "",
-						  d = date.getDate() || "";
-					
-                	return `${y}.${a(m)}.${a(d)}`;
+				const setDate = dt => {
+					if(dt != 253402182000000){
+						const date = new Date(dt);
+						const a = b => b > 10 ? b : '0'+b;
+						
+						const y = date.getFullYear() || "",
+							  m = date.getMonth()+1 || "",
+							  d = date.getDate() || "";
+						
+	                	return `${y}.${a(m)}.${a(d)}`;
+					}else{
+						return "";
+					}
                 }
 				
 				const setTerm = t => {
@@ -300,7 +304,9 @@
 				}
                 
                 const setService = s => Object.assign(s, {
-                	"req_dt": setReqDt(s.req_dt),
+                	"req_dt": setDate(s.req_dt),
+                	"sst_end_dt": setDate(s.sst_end_dt),
+                	"sst_str_dt": setDate(s.sst_str_dt),
                 	"sst_trm": setTerm(s.sst_trm),
                 	"exp_mon_fee": commaNum(s.exp_mon_fee),
                 	"btn_l": setBtn(s).l,
