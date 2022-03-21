@@ -197,7 +197,7 @@ public class ServiceManageController {
 	 * @Method Name : getWPCList
 	 */
 	@AuthCheck (authCode = Const.READ)
-	@RequestMapping (value = "delteApplyService.do")
+	@RequestMapping (value = "deleteApplyService.do")
 	public @ResponseBody Map<String,Object> changeApplyService(@RequestBody Map param) {
 		return ServiceManageService.changeApplyService(param);
 	}
