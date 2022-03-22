@@ -209,12 +209,12 @@ public class ServiceManageController {
 	 * @param 
 	 * @return
 	 * @Date : 2022. 03. 16
-	 * @Method Name : searchQaA
+	 * @Method Name : searchHotLine
 	 */
 	@AuthCheck (authCode = Const.READ)
-	@RequestMapping (value = "searchQNA.do")
-	public @ResponseBody Map<String,Object> searchQNA(@RequestBody Map param) {
-		return ServiceManageService.searchQNA(param);
+	@RequestMapping (value = "searchHotLine.do")
+	public @ResponseBody Map<String,Object> searchHotLine(@RequestBody Map param) {
+		return ServiceManageService.searchHotLine(param);
 	}
 	
 	/**
@@ -224,12 +224,12 @@ public class ServiceManageController {
 	 * @param 
 	 * @return
 	 * @Date : 2022. 03. 16
-	 * @Method Name : addQNA
+	 * @Method Name : searchHotLineDetail
 	 */
 	@AuthCheck (authCode = Const.READ)
-	@RequestMapping (value = "searchQNADetail.do")
-	public @ResponseBody Map<String,Object> searchQNADetail(@RequestBody Map param) {
-		return ServiceManageService.searchQNADetail(param);
+	@RequestMapping (value = "searchHotLineDetail.do")
+	public @ResponseBody Map<String,Object> searchHotLineDetail(@RequestBody Map param) {
+		return ServiceManageService.searchHotLineDetail(param);
 	}
 	
 	/**
@@ -242,9 +242,9 @@ public class ServiceManageController {
 	 * @Method Name : addQNA
 	 */
 	@AuthCheck (authCode = Const.READ)
-	@RequestMapping (value = "addQNA.do")
-	public @ResponseBody Map<String,Object> addQNA(@RequestBody Map param) {
-		return ServiceManageService.addQNA(param);
+	@RequestMapping (value = "addHotLine.do")
+	public @ResponseBody Map<String,Object> addHotLine(@RequestBody Map param) {
+		return ServiceManageService.addHotLine(param);
 	}
 	
 	/**
@@ -257,9 +257,9 @@ public class ServiceManageController {
 	 * @Method Name : deleteQNA
 	 */
 	@AuthCheck (authCode = Const.READ)
-	@RequestMapping (value = "deleteQNA.do")
-	public @ResponseBody Map<String,Object> deleteQNA(@RequestBody Map param) {
-		return ServiceManageService.deleteQNA(param);
+	@RequestMapping (value = "deleteHotLine.do")
+	public @ResponseBody Map<String,Object> deleteHotLine(@RequestBody Map param) {
+		return ServiceManageService.deleteHotLine(param);
 	}
 	
 	

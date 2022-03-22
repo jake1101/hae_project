@@ -342,9 +342,9 @@ public class ServiceManageService {
 	 * @param 
 	 * @return 
 	 * @Date : 2022. 3. 15
-	 * @Method Name : searchQaA
+	 * @Method Name : searchHotLine
 	 */
-	public Map<String,Object> searchQNA(Map param) {
+	public Map<String,Object> searchHotLine(Map param) {
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
@@ -355,7 +355,7 @@ public class ServiceManageService {
 			param.put("user_company_id", userInfo.get("user_company_id"));
 		}
 		
-		resultMap = restfulUtilServiceToCorners.callCornersApi("searchQNA", param);
+		resultMap = restfulUtilServiceToCorners.callCornersApi("searchHotLine", param);
 		
 		return resultMap;
 		
@@ -368,9 +368,9 @@ public class ServiceManageService {
 	 * @param 
 	 * @return 
 	 * @Date : 2022. 3. 15
-	 * @Method Name : searchQaA
+	 * @Method Name : searchHotLineDetail
 	 */
-	public Map<String,Object> searchQNADetail(Map param) {
+	public Map<String,Object> searchHotLineDetail(Map param) {
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
@@ -381,7 +381,7 @@ public class ServiceManageService {
 			param.put("user_company_id", userInfo.get("user_company_id"));
 		}
 		
-		resultMap = restfulUtilServiceToCorners.callCornersApi("searchQNADetail", param);
+		resultMap = restfulUtilServiceToCorners.callCornersApi("searchHotLineDetail", param);
 		
 		return resultMap;
 		
@@ -394,9 +394,9 @@ public class ServiceManageService {
 	 * @param 
 	 * @return 
 	 * @Date : 2022. 3. 15
-	 * @Method Name : addQNA
+	 * @Method Name : addHotLine
 	 */
-	public Map<String,Object> addQNA(Map param) {
+	public Map<String,Object> addHotLine(Map param) {
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
@@ -407,7 +407,7 @@ public class ServiceManageService {
 			param.put("user_company_id", userInfo.get("user_company_id"));
 		}
 		
-		resultMap = restfulUtilServiceToCorners.callCornersApi("addQNA", param);
+		resultMap = restfulUtilServiceToCorners.callCornersApi("addHotLine", param);
 		
 		return resultMap;
 		
@@ -420,9 +420,9 @@ public class ServiceManageService {
 	 * @param 
 	 * @return 
 	 * @Date : 2022. 3. 17
-	 * @Method Name : deleteQNA
+	 * @Method Name : deleteHotLine
 	 */
-	public Map<String,Object> deleteQNA(Map param) {
+	public Map<String,Object> deleteHotLine(Map param) {
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
@@ -433,7 +433,7 @@ public class ServiceManageService {
 			param.put("user_company_id", userInfo.get("user_company_id"));
 		}
 		
-		resultMap = restfulUtilServiceToCorners.callCornersApi("deleteQNA", param);
+		resultMap = restfulUtilServiceToCorners.callCornersApi("deleteHotLine", param);
 		
 		return resultMap;
 		
