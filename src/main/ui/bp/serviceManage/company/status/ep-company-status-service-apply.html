@@ -29,8 +29,8 @@
 			last-response="{{feeResult}}"
 		></sc-ajax>
 		<sc-ajax
-			id="applyService"
-			url="applyService.do"
+			id="serviceUseChange"
+			url="serviceUseChange.do"
 			body="{{applyParam}}"
 		></sc-ajax>
 		
@@ -412,10 +412,10 @@
 					Object.assign(me.get("applyParam"), {"bsk_itm_yn": 0});
 				};
 				
-				Object.assign(me.get("applyParam"), {svc_ctl_id, "stt_cd": "1"});
+				Object.assign(me.get("applyParam"), {svc_ctl_id, "status": "0"});
 				Object.assign(me.get("applyParam"), me.get("setParam"));
 				
-				UT.request(me.$.applyService, function(e, {response}){
+				UT.request(me.$.serviceUseChange, function(e, {response}){
 					if(response.result_status == "E"){
 						SCAlert.show(`${e.target.textContent}`, response.result_message);
 					}else{

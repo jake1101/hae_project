@@ -1,0 +1,63 @@
+<dom-module id="ep-apply-service-apply">
+	<style>
+		:host {
+            @apply(--vbox-layout);
+        }
+	</style>
+	<template>
+		<cc-sub-title-bar title-text="서비스 신청 상세 내용 조회"></cc-sub-title-bar>
+		<table class="tb-form">
+			<tr>
+				<th>계열사</th>
+				<td>현대제철</td>
+				<th>담당자</th>
+				<td>홍길동</td>
+			</tr>
+			<tr>
+				<th>사업장</th>
+				<td>당진제철소</td>
+				<th>이메일</th>
+				<td>abc@abc.com</td>
+			</tr>
+			<tr>
+				<th>주소</th>
+				<td>충청남도 당진시 송악읍</td>
+				<th>연락처</th>
+				<td>000-1234-5678</td>
+			</tr>
+		</table>
+		
+		<!-- <sc-splitter split-type="horizontal"></sc-splitter> -->
+		<div style="border-bottom: 1px solid #dedede; margin: 10px 10px;"></div>
+		
+		<table class="tb-form">
+			<tr>
+				<th>계열사</th>
+				<td>현대제철</td>
+				<th>담당자</th>
+				<td>홍길동</td>
+			</tr>
+			<tr>
+				<th>사업장</th>
+				<td>당진제철소</td>
+				<th>이메일</th>
+				<td>abc@abc.com</td>
+			</tr>
+			<tr>
+				<th>주소</th>
+				<td>충청남도 당진시 송악읍</td>
+				<th>연락처</th>
+				<td>000-1234-5678</td>
+			</tr>
+		</table>
+		
+	</template>
+	<script>
+		Polymer({
+			is: "ep-apply-service-apply",
+			properties: {
+				
+			}
+		})
+	</script>
+</dom-module>
