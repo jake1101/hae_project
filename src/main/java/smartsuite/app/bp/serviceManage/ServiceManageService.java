@@ -133,7 +133,7 @@ public class ServiceManageService {
 	 * @param param the param
 	 * @Date : 2022. 2. 24
 	 * @Method Name : findRegSafetyServiceList
-	*/
+	
 	public Map<String,Object> findRegSafetyServiceList(Map param) {
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -148,6 +148,34 @@ public class ServiceManageService {
 		resultMap = restfulUtilServiceToCorners.callCornersApi("findRegSafetyServiceList", param);
 		
 //		resultMap = (List<Map<String, Object>>) gridResultMap.get("result_data");
+		
+		return resultMap;
+		
+	}
+	*/
+	/**
+	 * 등록 서비스 리스트
+	 *
+	 * @author : 
+	 * @param param the param
+	 * @Date : 2022. 2. 24
+	 * @Method Name : findRegSafetyServiceList
+	*/
+	public List<Map<String,Object>> findRegSafetyServiceList(Map param) {
+		
+		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
+		Map<String, Object> gridResultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
+		gridResultMap = restfulUtilServiceToCorners.callCornersApi("findRegSafetyServiceList", param);
+		
+		resultMap = (List<Map<String, Object>>) gridResultMap.get("result_data");
 		
 		return resultMap;
 		

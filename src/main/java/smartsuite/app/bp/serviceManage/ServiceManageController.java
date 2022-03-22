@@ -1,5 +1,6 @@
 package smartsuite.app.bp.serviceManage;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -57,7 +58,7 @@ public class ServiceManageController {
 	 */
 	@AuthCheck (authCode = Const.READ)
 	@RequestMapping (value = "findRegSafetyServiceList.do")
-	public @ResponseBody Map<String,Object> findRegSafetyServiceList(@RequestBody Map param) {
+	public @ResponseBody List<Map<String,Object>> findRegSafetyServiceList(@RequestBody Map param) {
 		return ServiceManageService.findRegSafetyServiceList(param);
 	}
 	
