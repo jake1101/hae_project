@@ -59,11 +59,15 @@
 				last-response="{{serviceResult}}"
 				on-response = "complateServiceResult"
 			></sc-ajax>
-			<sc-ajax 
-				id="deleteApplyService" 
-				url="deleteApplyService.do"
-			></sc-ajax>
 		</sc-request-group>
+		<sc-ajax
+			id="serviceUseChange"
+			url="serviceUseChange.do"
+		></sc-ajax>
+		<sc-ajax 
+			id="deleteApplyService" 
+			url="deleteApplyService.do"
+		></sc-ajax>
 		<div id="notification" class="dm_notification_wrap" on-click="onClickAlarm">
 			<div>
 				<img src="/ui/assets/img/serviceManage/icon_notification.png" width="32">
@@ -154,15 +158,15 @@
 			<cc-grid-toolbar></cc-grid-toolbar>
 			<sc-grid-columns>
 				<sc-data-column data-field="wpc_nm" header-text="사업장" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="svc_ctl_nm" header-text="신청 서비스" width="400" text-align="center"></sc-data-column>
+				<sc-data-column data-field="svc_ctl_nm" header-text="신청 서비스" width="400" text-align="center" style-name="link"></sc-data-column>
 				<sc-data-column data-field="sst_str_dt" header-text="서비스 게시일" width="200" text-align="center"></sc-data-column>
 				<sc-data-column data-field="sst_end_dt" header-text="서비스 만료일" width="200" text-align="center"></sc-data-column>
 				<sc-data-column data-field="sst_trm" header-text="구독 기간" width="150" text-align="center"></sc-data-column>
 				<sc-data-column data-field="exp_mon_fee" header-text="월 구독료" width="150" text-align="center"></sc-data-column>
 				<sc-data-column data-field="status_nm" header-text="상태" width="100" text-align="center"></sc-data-column>
 				<sc-group-column header-text="서비스 신청/변경" hide-child-headers="true" data-field="status_code">
-					<sc-data-column data-field="btn_l" text-align="center"></sc-data-column>
-					<sc-data-column data-field="btn_r" text-align="center"></sc-data-column>
+					<sc-data-column data-field="btn_l" text-align="center" style-name="link"></sc-data-column>
+					<sc-data-column data-field="btn_r" text-align="center" style-name="link"></sc-data-column>
 				</sc-group-column>
 				
 			</sc-grid-columns>
@@ -384,8 +388,16 @@
 	       			);
 	       		 	updatePop.show();
 	       			updatePop.getWindowContent().load(d)
-       		  	}else if(cn == "btn_r" && d.btn_r == "삭제" || cn=="btn_l" && d.btn_l == "취소"){
-	       		  	SCAlert.confirm(`서비스${cn == "btn_r" ? "삭제" : "신청 취소"}`, `정말 ${cn == "btn_r" ? "삭제" : "취소"}하시겠습니까?`, function(btn){
+       		  	}else if(cn=="btn_l" && d.btn_l == "취소"){
+	       		  	SCAlert.confirm(`서비스 신청 취소`, `정말 취소하시겠습니까?`, function(btn){
+						if(btn === 'yes'){
+							me.$.serviceUseChange.body = {"svc_id": d.svc_id, "status": "8"}
+		       		  		UT.request(me.$.serviceUseChange);
+		       		  		UT.request(me.$.getServiceUseList);
+						}
+	    			});
+       		  	}else if(cn == "btn_r" && d.btn_r == "삭제"){
+	       		  	SCAlert.confirm(`서비스 삭제`, `정말 삭제하시겠습니까?`, function(btn){
 						if(btn === 'yes'){
 							me.$.deleteApplyService.body = {"svc_id": d.svc_id}
 		       		  		UT.request(me.$.deleteApplyService);

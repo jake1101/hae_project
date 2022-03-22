@@ -74,22 +74,13 @@
 					header-text="서비스 그룹" width="500" 
 					text-align="center"
 				></sc-data-column>
-				<sc-group-column 
-					hide-child-headers="true" 
-					header-text="서비스 명"  
-					width="600"
-				>
-					<sc-data-column
-						data-field="svc_ctl_nm"  
-						width="600" 
-						text-align="center"
-					></sc-data-column>
-					<sc-image-column 
-						data-field="magnifying_glass" 
-						singular-source="/ui/assets/img/serviceManage/icon_magnifying_glass.png" 
-						image-display="auto"
-					></sc-image-column>
-				</sc-group-column>
+				<sc-data-column
+					data-field="svc_ctl_nm"
+					header-text="서비스 명"   
+					width="600" 
+					text-align="center"
+					style-name="link"
+				></sc-data-column>
 				<sc-checkbox-column 
 					data-field="svc_use_yn" 
 					header-text="사용상태" 
@@ -169,7 +160,7 @@
 					console.log("YN", me.useYnObj);
 					break;
 				default:
-					if(cn == "svc_ctl_nm" || cn == "magnifying_glass")
+					if(cn == "svc_ctl_nm")
 						me.fire("open-service-detail-pop", d);
 					break;
 				}

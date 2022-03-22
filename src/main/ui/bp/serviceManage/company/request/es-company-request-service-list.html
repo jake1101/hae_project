@@ -21,8 +21,8 @@
 				last-response="{{wpcSerivceResult}}"
 			></sc-ajax>
 			<sc-ajax 
-				id="searchQNA" 
-				url="searchQNA.do"
+				id="searchHotLine" 
+				url="searchHotLine.do"
 				body="{{searchParam}}"
 				last-response="{{requestServiceResult}}"
 			></sc-ajax>
@@ -150,6 +150,7 @@
 					header-text="이용 서비스" 
 					width="500" 
 					text-align="center"
+					style-name="link"
 				></sc-data-column>
 				<sc-data-column 
 					data-field="req_tp_cd" 
@@ -239,7 +240,7 @@
             },
             onSearchRequest: function() {
             	const me = this;
-            	UT.request(me.$.searchQNA)
+            	UT.request(me.$.searchHotLine)
             },
             onClickNewRequest: function() {
             	const me = this;
@@ -250,7 +251,7 @@
     					345,
     					{
     						"refresh": function(popup, e) {
-    		                   	UT.request(me.$.searchQNA);
+    		                   	UT.request(me.$.searchHotLine);
     		                   	popup.close();
                         	}
     					},
@@ -274,7 +275,7 @@
    					435,
    					{
    						"refresh": function(popup, e) {
-  		                   	UT.request(me.$.searchQNA);
+  		                   	UT.request(me.$.searchHotLine);
   		                   	popup.close();
                       	}
    					},

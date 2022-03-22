@@ -23,8 +23,8 @@
 			></sc-ajax>
 		</sc-request-group>
 		<sc-ajax
-			id="addQNA"
-			url="addQNA.do"
+			id="addHotLine"
+			url="addHotLine.do"
 			body={{applyParam}}
 		></sc-ajax>
 		<cc-sub-title-bar
@@ -168,7 +168,7 @@
 					SCAlert.show('error', `요청 내용을 입력해 주십시오.`);
 					return;
 				}
-				UT.request(me.$.addQNA, function(){
+				UT.request(me.$.addHotLine, function(){
 					me.fire("refresh");
 				});
 			}

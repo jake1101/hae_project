@@ -11,8 +11,8 @@
 			</sc-code-group>
 		</sc-request-group>
 		<sc-ajax
-			id="searchQNADetail"
-			url="searchQNADetail.do"
+			id="searchHotLineDetail"
+			url="searchHotLineDetail.do"
 			last-response="{{detailResult}}"
 		></sc-ajax>
 		<sc-ajax
@@ -102,9 +102,9 @@
 			load: function(param) {
 				const me = this;
 				
-				me.$.searchQNADetail.body = {"pst_seq": Number(param.pst_seq)}
+				me.$.searchHotLineDetail.body = {"pst_seq": Number(param.pst_seq)}
 				me.$.deleteQNA.body = {"pst_seq": Number(param.pst_seq)}
-				UT.request(me.$.searchQNADetail, function(event, {response: {result_data: d}}) {
+				UT.request(me.$.searchHotLineDetail, function(event, {response: {result_data: d}}) {
 					const req_tp_cd = me.get('codes').req_tp_cd.find(r => r.data == d[0].req_tp_cd).label
 					const setDt = dt => {
 						const date = new Date(dt);
