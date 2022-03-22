@@ -5,13 +5,63 @@
 		}
 	</style>
 	<template>
-	
+		<template id="alarmList" is="dom-repeat" items="[[alarmList]]">
+			<div style="margin-bottom: 5px;">
+				<div>[[_computedEndDate(item.sst_end_dt)]]</div>
+				<div style="display: flex; gap: 20px;">
+					<div><span style="color: #2eadd9; font-weight: 600;">[ {{item.wpc_nm}} > {{item.svc_ctl_nm}} ]</span> 서비스의 구독이 [[item.diff]]개월 남았습니다. 필요하시다면 구독 연장을 신청해주세요.</div>
+					<div>
+						<sc-button id="dm_detail__{{item.svc_id}}" text="조회" on-click="onClickButton" style="margin-bottom: 10px; min-width: max-content;"></sc-button>
+						<sc-button id="dm_update__{{item.svc_id}}" text="연장" on-click="onClickButton"></sc-button>
+					</div>
+				</div>
+			</div>
+        </template>
 	</template>
 	<script>
 		Polymer({
 			is: "ep-company-status-service-alarm",
+			properties: {
+				alarmList: {
+    				type: Array,
+    				value: function() {
+    					return [];
+    				}
+    			}
+			},
 			load: function(param) {
+				const me = this,
+					  setDate = (dt) => {
+					  	  const date = new Date(dt);
+						
+						  const y = date.getFullYear() || "",
+							    m = date.getMonth()+1 || "",
+							    d = date.getDate() || "";
+						
+						  return `${y}.${m}.${d}`;
+				  	  };
+				  	  
+				me.set("alarmList", param);
+				
+				if(!param.length){
+					me.textContent = "구독 만료 임박 서비스가 없습니다."
+				}
+			},
+			_computedEndDate: function(dt) {
+				const date = new Date(dt);
+				
+			  	const y = date.getFullYear() || "",
+   					  m = date.getMonth()+1 || "",
+				      d = date.getDate() || "";
+				
+			  	return `( ${y}-${m}-${d} )`;
+			},
+			onClickButton: function() {
 				const me = this;
+				const btn_id = event.target.id,
+					  svc_id = Number(btn_id.split("__")[1]);
+				
+				me.fire("click-button", {btn_id, svc_id});
 			}
 		})
 	</script>
