@@ -134,18 +134,54 @@ public class ServiceManageService {
 	 * @Date : 2022. 2. 24
 	 * @Method Name : findRegSafetyServiceList
 	*/
-	public List<Map<String,Object>> findRegSafetyServiceList(Map searchParam) {
+	public Map<String,Object> findRegSafetyServiceList(Map param) {
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("findRegSafetyServiceList", param);
+		
+//		resultMap = (List<Map<String, Object>>) gridResultMap.get("result_data");
+		
+		return resultMap;
+		
+	}
+	
+	/**
+	 * 등록 서비스 리스트
+	 *
+	 * @author : 
+	 * @param param the param
+	 * @Date : 2022. 2. 24
+	 * @Method Name : findRegSafetyServiceList
+	
+	public List<Map<String,Object>> findRegSafetyServiceList(Map param) {
 		
 		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
 		Map<String, Object> gridResultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
 		
-		gridResultMap = restfulUtilServiceToCorners.callCornersApi("findRegSafetyServiceList", searchParam);
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
+		gridResultMap = restfulUtilServiceToCorners.callCornersApi("findRegSafetyServiceList", param);
 		
 		resultMap = (List<Map<String, Object>>) gridResultMap.get("result_data");
 		
 		return resultMap;
 		
 	}
+	
+	*/
 	
 	/**
 	 * 사용여부(SVC_CTL.SVC_USE_YN)을 수정한다
@@ -161,6 +197,13 @@ public class ServiceManageService {
 //		List<Map<String, Object>> resultMap = new ArrayList<Map<String, Object>>();
 		//Map userInfo = Auth.getCurrentUserInfo();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
 		
 		resultMap = restfulUtilServiceToCorners.callCornersApi("updateServiceUseYn", param);
 		
@@ -181,6 +224,12 @@ public class ServiceManageService {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
 		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
 		param.put("usr_id", userInfo.get("usr_id"));
 		
 		resultMap = restfulUtilServiceToCorners.callCornersApi("applyService", param);
@@ -199,6 +248,13 @@ public class ServiceManageService {
 	public Map getDevicesByCatalogId(Map<String,Object> param) {
 		
 		Map<String,Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
 		
 		resultMap = restfulUtilServiceToCorners.callCornersApi("getDevicesByCatalogId", param);
 		
@@ -238,6 +294,13 @@ public class ServiceManageService {
 	public Map estimateMonthlyFee(Map<String,Object> param) {
 		
 		Map<String,Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
 		
 		resultMap = restfulUtilServiceToCorners.callCornersApi("estimateMonthlyFee", param);
 		
@@ -328,6 +391,13 @@ public class ServiceManageService {
 	public Map<String,Object> changeApplyService(Map param) {
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "system" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
 		
 		resultMap = restfulUtilServiceToCorners.callCornersApi("changeApplyService", param);
 		
