@@ -1,6 +1,5 @@
 package smartsuite.app.bp.serviceManage;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -8,10 +7,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 
 import smartsuite.app.common.shared.Const;
 import smartsuite.security.annotation.AuthCheck;
@@ -61,7 +57,7 @@ public class ServiceManageController {
 	 */
 	@AuthCheck (authCode = Const.READ)
 	@RequestMapping (value = "findRegSafetyServiceList.do")
-	public @ResponseBody List findRegSafetyServiceList(@RequestBody Map param) {
+	public @ResponseBody Map<String,Object> findRegSafetyServiceList(@RequestBody Map param) {
 		return ServiceManageService.findRegSafetyServiceList(param);
 	}
 	
@@ -198,7 +194,7 @@ public class ServiceManageController {
 	 */
 	@AuthCheck (authCode = Const.READ)
 	@RequestMapping (value = "deleteApplyService.do")
-	public @ResponseBody Map<String,Object> changeApplyService(@RequestBody Map param) {
+	public @ResponseBody Map<String,Object> deleteApplyService(@RequestBody Map param) {
 		return ServiceManageService.changeApplyService(param);
 	}
 	
