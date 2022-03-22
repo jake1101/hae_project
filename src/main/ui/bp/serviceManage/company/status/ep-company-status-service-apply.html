@@ -407,12 +407,13 @@
 				};
 				
 				if(e.target.id == "dm_cart"){
+					Object.assign(me.get("applyParam"), {svc_ctl_id, "status": "1"});
 					Object.assign(me.get("applyParam"), {"bsk_itm_yn": 1});
 				}else{
+					Object.assign(me.get("applyParam"), {svc_ctl_id, "status": "0"});
 					Object.assign(me.get("applyParam"), {"bsk_itm_yn": 0});
 				};
 				
-				Object.assign(me.get("applyParam"), {svc_ctl_id, "status": "0"});
 				Object.assign(me.get("applyParam"), me.get("setParam"));
 				
 				UT.request(me.$.serviceUseChange, function(e, {response}){
