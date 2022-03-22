@@ -1,5 +1,6 @@
 package smartsuite.app.bp.serviceManage;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -57,7 +58,7 @@ public class ServiceManageController {
 	 */
 	@AuthCheck (authCode = Const.READ)
 	@RequestMapping (value = "findRegSafetyServiceList.do")
-	public @ResponseBody Map<String,Object> findRegSafetyServiceList(@RequestBody Map param) {
+	public @ResponseBody List<Map<String,Object>> findRegSafetyServiceList(@RequestBody Map param) {
 		return ServiceManageService.findRegSafetyServiceList(param);
 	}
 	
@@ -121,7 +122,22 @@ public class ServiceManageController {
 	@RequestMapping (value = "estimateMonthlyFee.do")
 	public @ResponseBody Map<String,Object> estimateMonthlyFee(@RequestBody Map param) {
 		return ServiceManageService.estimateMonthlyFee(param);
-	}		
+	}
+
+	/**
+	 * 계열사 목록 조회
+	 *
+	 * @author : hjh
+	 * @param isSelectAll String Optional 0: 해당 회사의 사업장 목록만 조회, 1: 회사와 관계없이 전체 사업장 목록 조회
+	 * @return the map<string, object>: result_status String, result_data List
+	 * @Date : 2022. 02. 24
+	 * @Method Name : getWPCList
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "getCompanyList.do")
+	public @ResponseBody Map<String,Object> getCompanyList(@RequestBody Map param) {
+		return ServiceManageService.getCompanyList(param);
+	}
 	
 	/**
 	 * 사업장 목록 조회
