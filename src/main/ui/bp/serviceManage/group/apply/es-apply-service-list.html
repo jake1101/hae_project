@@ -1,4 +1,5 @@
 <sc-link rel="import" href="ep-apply-service-apply.html"></sc-link>
+<sc-link rel="import" href="ep-apply-service-update.html"></sc-link>
 
 <dom-module id="es-apply-service-list">
 	<style>
@@ -174,10 +175,10 @@
                 const result_data = me.get("wpcResult").result_data.map(wpc => wpc = {"wpc_cd": wpc.id, "wpc_nm": wpc.name});
                 me.set("wpcResult", {result_data});
                 
-                const applyPop = UT.popup(
+                /* const applyPop = UT.popup(
        					"ep-apply-service-apply", 
        					me,
-       					800,
+       					1000,
        					800,
        					{},
        					{ 
@@ -186,7 +187,21 @@
        					}
         			);
                 applyPop.show();
-                applyPop.getWindowContent();
+                applyPop.getWindowContent(); */
+                
+                const updatePop = UT.popup(
+       					"ep-apply-service-update", 
+       					me,
+       					1000,
+       					800,
+       					{},
+       					{ 
+       						maximizable: true, 
+       						titleText: `서비스 변경 상세 내용 조회`
+       					}
+        			);
+                updatePop.show();
+                updatePop.getWindowContent();
             },
 			complateServiceResult: function(e, {response: {result_data: serviceList}}) {
 				const me = this;

@@ -296,7 +296,7 @@
 					  m = date.getMonth()+1 || "",
 					  d = date.getDate() || "";
 				
-				if(trm){
+				if(trm && trm != "0"){
 					Object.assign(me.get("setParam"), {"exp_end_dt": date});
 					return `${y}. ${m}. ${d}`;
 				}
@@ -401,7 +401,7 @@
 					return;
 				}
 				
-				const eed = param.exp_end_dt;
+				/* const eed = param.exp_end_dt;
 				const now = `${new Date().getFullYear()}. ${new Date().getMonth()}. ${new Date().getDate()}`.split(".");
 				const fEeed = `${eed.getFullYear()}. ${eed.getMonth()}. ${eed.getDate()}`.split(".");
 				const bfNow = now.find((d, i) => d > fEeed[i]);
@@ -409,11 +409,22 @@
 				if(bfNow){
 					SCAlert.show('error', `서비스 만료 예정일이 오늘보다 느립니다. 구독기간을 변경해 주십시오.`);
 					return;
-				}
+				} */
+				
+				Object.keys(me.get("serviceData")).forEach(k => {
+				    if(!me.get("setParam")[k]){
+				    	let data = me.get("serviceData")[k];
+				    	if(k == "dsr_str_dt" || k == "exp_end_dt" || k == "req_dt") {
+				    		data = new Date(data);
+				    	}
+				    	
+				    	Object.assign(me.get("setParam"), {[k]: data})
+				    }
+				});
 				
 				Object.assign(me.get("applyParam"), {svc_ctl_id, svc_id, stt_cd, "status": "5"});
 				Object.assign(me.get("applyParam"), me.get("setParam"));
-				
+
 				UT.request(me.$.serviceUseChange, function(e, {response}){
 					if(response.result_status == "E"){
 						SCAlert.show(`${e.target.textContent}`, response.result_message);

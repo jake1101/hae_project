@@ -1,0 +1,260 @@
+<dom-module id="ep-apply-service-update">
+	<style>
+		:host {
+            @apply(--vbox-layout);
+        }
+        
+        #foldCtl {
+        	position: relative;
+        	box-sizing: border-box;
+        	padding: 10px 20px 10px 40px;
+        	width: 100px;
+        	height: 100%;
+        	text-align: right;
+        }
+        
+        .fold-detali.dm-activate {
+        	display: block;
+        }
+        
+        .fold-detali.dm-deactivate {
+        	display: none;
+        }
+        
+        .fold-btn.dm-activate::before {
+        	position: absolute;
+        	top: calc(50% + 9px);
+        	left: 10px;
+        	transform: translateY(calc(-50%));
+           	content: "";
+           	background: url(/ui/assets/img/serviceManage/icon_fold_unfold.png);
+           	background-size: 30px;
+           	clip: rect(0, 30px, 17px, 0);
+           	display: inline-block;
+           	width: 30px;
+           	height: 30px;
+        }
+        
+        .fold-btn.dm-deactivate::before {
+           	position: absolute;
+        	top: calc(50% - 7px);
+        	left: 10px;
+        	transform: translateY(calc(-50%));
+           	content: "";
+           	background: url(/ui/assets/img/serviceManage/icon_fold_unfold.png);
+           	background-size: 30px;
+           	clip: rect(15px, 30px, 30px, 0);
+           	display: inline-block;
+           	width: 30px;
+           	height: 30px;
+        }
+	</style>
+	<template>
+		<sc-ajax
+           	id="getServiceUseListDetail"
+           	url="getServiceUseListDetail.do"
+           	body="{}"
+           	on-response="complateServiceResult"
+        ></sc-ajax>
+		<cc-sub-title-bar title-text="서비스 변경 상세 내용 조회"></cc-sub-title-bar>
+		<div style="border-bottom: 1px solid #dedede; padding-top: 10px; padding-bottom: 10px; margin-bottom: 10px;">
+			<div id="foldDiv" class="fold-detali dm-deactivate" style="margin-bottom: 10px;">
+				<table class="tb-form">
+					<tr>
+						<th>계열사</th>
+						<td>현대제철</td>
+						<th>담당자</th>
+						<td>홍길동</td>
+					</tr>
+					<tr>
+						<th>사업장</th>
+						<td>당진제철소</td>
+						<th>이메일</th>
+						<td>abc@abc.com</td>
+					</tr>
+					<tr>
+						<th>주소</th>
+						<td>충청남도 당진시 송악읍</td>
+						<th>연락처</th>
+						<td>000-1234-5678</td>
+					</tr>
+				</table>
+				<div style="border-bottom: 1px solid #dedede; margin-top: 10px; margin-bottom: 10px;"></div>
+				<table class="tb-form">
+					<tr>
+						<th>신청 서비스</th>
+						<td>바디캠 활용 작업자 위험상황 관제</td>
+					</tr>
+					<tr>
+						<th>신청 일시</th>
+						<td>2022-01-15 18:13:11</td>
+					</tr>
+					<tr>
+						<th>서비스 개시 요청일</th>
+						<td>2022-02-01</td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<sc-button id="foldCtl" class="fold-btn dm-deactivate" text="펼치기" on-click="onFoldCtlClick"></sc-button>
+			</div>
+		</div>
+		<table class="tb-form">
+			<tr>
+				<th rowspan=3>
+					<sc-label text="변경 사유"></sc-label>
+				</th>
+				<td colspan=3>
+					<sc-text-field
+						id="trm_r"
+						name="구독 기간 변경"
+						value="연장"
+						placeholder="구독 기간 변경"
+					></sc-text-field>
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3>
+					<sc-text-field
+						id="dvc_r"
+						name="디바이스 수량 변경"
+						placeholder="디바이스 수량 변경"
+					></sc-text-field>
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3>
+					<sc-textarea-field
+						id="upd_r"
+						name="변경 사유 내용"
+						style="height: 100px;"
+						readonly="true"
+					></sc-textarea-field>
+				</td>
+			</tr>
+			<tr>
+				<th style="background: #ccc !important;"></th>
+				<th></th>
+				<th>
+					<sc-label text="번경 전"></sc-label>
+				</th>
+				<th>
+					<sc-label text="변경 후"></sc-label>
+				</th>
+			</tr>
+			<tr>
+				<th style="background: #ccc !important;"></th>
+				<th>
+					<sc-label text="구독기간(약정기간)"></sc-label>
+				</th>
+				<td id="sst_trm__bf">
+				</td>
+				<td>
+					<sc-text-field
+						id="sst_trm"
+						name="구독기간(약정기간)"
+						value="{{setParam.sst_trm}}"
+					></sc-text-field>
+				</td>
+			</tr>
+			<tr>
+				<th id="dvcTh">
+					<sc-label text="디바이스 수량"></sc-label>
+				</th>
+			</tr>
+			<template id="dvcTemplate" is="dom-repeat" items="{{deviceList}}">
+				<tr>
+       				<th>
+						<sc-label
+							text="{{item.product_name}}"
+						></sc-label>
+					</th>
+					<td>
+						{{item.qtt}} 대
+					</td>
+					<td>
+						<div style="display: flex; gap: 10px; align-items: center;">
+							<sc-text-field
+								id="{{item.dvc_id}}"
+								type="number"
+								on-input="onInputField"
+								value="{{item.qtt__af}}"
+								readonly="{{dvcReason.r}}"
+							></sc-text-field>
+							대
+						</div>
+					</td>
+       			</tr>
+	        </template>
+			<tr>
+				<th style="background: #ccc !important;"></th>
+				<th>
+					<sc-label text="서비스 만료 예정일"></sc-label>
+				</th>
+				<td id="exp_end_dt__bf">
+				</td>
+				<td>
+					<div style="display: flex; gap: 10px;">
+						<sc-button 
+							text="조회"
+							on-click="onEndDateClick"
+						></sc-button>
+						<div id="term" style="display: none;">
+							[[_computedTerm(setParam.sst_trm)]]
+						</div>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th style="background: #ccc !important;"></th>
+				<th>
+					<sc-label text="예상 월 구독료"></sc-label>
+				</th>
+				<td id="exp_mon_fee__bf">
+				</td>
+				<td>
+					<div style="display: flex; gap: 10px;">
+						<sc-button 
+							text="조회"
+							on-click="onEstimatedFeeClick"
+						></sc-button>
+						<div id="estimatedFee" style="display: none;">
+							[[_computedFee(feeResult.result_data.estimatedMonthlyFee)]]
+						</div>
+					</div>
+				</td>
+			</tr>
+		</table>
+	</template>
+	<script>
+		Polymer({
+			is: "ep-apply-service-update",
+			properties: {
+				foldCtl: {
+					 type : Object,
+					 value : function(){
+						 return {
+							 btn: "dm-deactivate"
+						 };
+					 }
+				 }
+			},
+			onFoldCtlClick: function() {
+				const me = this,
+				  	  foldDiv = me.$.foldDiv,
+					  foldCtl = me.$.foldCtl;
+
+				const text = foldCtl.text == "펼치기" ? "접기" : "펼치기";
+				const before = foldCtl.classList[1];
+				const after = before == "dm-deactivate" ? "dm-activate" : "dm-deactivate";
+				
+				foldDiv.classList.replace(before, after)
+				foldCtl.classList.replace(before, after)
+				foldCtl.text = text;
+				
+				me.set("foldCtl",{"btn": after});
+				console.log(me.get("foldCtl"))
+			}
+		})
+	</script>
+</dom-module>

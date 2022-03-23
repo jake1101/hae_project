@@ -5,6 +5,17 @@
         }
 	</style>
 	<template>
+		<sc-request-group init>
+			<sc-code-group>
+                <sc-code code="CRN001" value="{{codes.term}}"></sc-code>
+            </sc-code-group>
+		</sc-request-group>
+        <sc-ajax
+           	id="getServiceUseListDetail"
+           	url="getServiceUseListDetail.do"
+           	body="{}"
+           	on-response="complateServiceResult"
+        ></sc-ajax>
 		<cc-sub-title-bar title-text="서비스 신청 상세 내용 조회"></cc-sub-title-bar>
 		<table class="tb-form">
 			<tr>
@@ -32,31 +43,145 @@
 		
 		<table class="tb-form">
 			<tr>
-				<th>계열사</th>
-				<td>현대제철</td>
-				<th>담당자</th>
-				<td>홍길동</td>
+				<th>신청 서비스</th>
+				<td>바디캠 활용 작업자 위험상황 관제</td>
 			</tr>
 			<tr>
-				<th>사업장</th>
-				<td>당진제철소</td>
-				<th>이메일</th>
-				<td>abc@abc.com</td>
+				<th>신청 일시</th>
+				<td>2022-01-15 18:13:11</td>
 			</tr>
 			<tr>
-				<th>주소</th>
-				<td>충청남도 당진시 송악읍</td>
-				<th>연락처</th>
-				<td>000-1234-5678</td>
+				<th>서비스 개시 요청일</th>
+				<td>2022-02-01</td>
 			</tr>
+			<tr>
+				<th id="dvcTh">
+					디바이스 수량
+				</th>
+			</tr>
+			<template id="dvcTemplate" is="dom-repeat" items="{{deviceList}}">
+				<tr>
+       				<th>
+						<sc-label
+							text="{{item.product_name}}"
+						></sc-label>
+					</th>
+					<td>
+						{{item.qtt}} 대
+					</td>
+					<td>
+						<div style="display: flex; gap: 10px; align-items: center;">
+							<sc-text-field
+								id="{{item.dvc_id}}"
+								type="number"
+								on-input="onInputField"
+								value="{{item.qtt__af}}"
+								readonly="{{dvcReason.r}}"
+							></sc-text-field>
+							대
+						</div>
+					</td>
+       			</tr>
+	        </template>
+	        <tr>
+	        	<th>구독기간(약정기간)</th>
+	        	<td>12개월</td>
+	        </tr>
+	        <tr>
+	        	<th>서비스 만료 예정일</th>
+	        	<td>2023-01-31</td>
+	        </tr>
+	        <tr>
+	        	<th>예상 월 구독료</th>
+	        	<td>1,200,000 원 (VAT 별도)</td>
+	        </tr>
+	        <tr>
+	        	<th>최종 월 구독료</th>
+	        	<td>
+	        		<div style="display: flex; gap: 10px; align-items: center; width: 200px;">
+						<sc-text-field
+							id=""
+							type="number"
+							on-input=""
+							value=""
+						></sc-text-field>
+						<div style="width: 200px;">원 (VAT 별도)</div>
+					</div>
+	        	</td>
+	        </tr>
 		</table>
-		
+		<div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 20px;">
+			<sc-button id="dm-apply" text="승인" style="width: 100px; padding: 10px;" on-click="onApplyClick"></sc-button>
+			<sc-button id="dm-text" text="서비스 테스트" style="width: 100px; padding: 10px;" on-click="onApplyClick"></sc-button>
+			<sc-button id="dm-initiate" text="서비스 개시" style="width: 100px; padding: 10px;" on-click="onApplyClick"></sc-button>
+		</div>
 	</template>
 	<script>
 		Polymer({
 			is: "ep-apply-service-apply",
 			properties: {
+				codes: {
+                    type: Object,
+                    reset: false,
+                    value: function() {
+                        return {
+                            term: []
+                        };
+                    }
+                },
+                deviceList: {
+					type: Array,
+					value: function(){
+						return [];
+					}
+				},
+				serviceData: {
+					type: Object,
+					value: function(){
+						return {};
+					}
+				},
+				setParam: {
+					type: Object,
+					value: function(){
+						return {};
+					}
+				}
+			},
+			load: function(param){
+				const me = this,
+				{svc_id, stt_cd} = param;
 				
+				me.set("selectedService", param);
+				
+				me.$.getServiceUseListDetail.body = {svc_id, stt_cd}
+				UT.request(me.$.getServiceUseListDetail)
+			},
+			complateServiceResult(e, {response: {result_data}}){
+				const me = this,
+				  {
+					  serviceUseDeviceListDetail,
+					  serviceUseListDetail
+				  } = result_data[0],
+				  setDate = (dt) => {
+				  	const date = new Date(dt);
+					
+					const y = date.getFullYear() || "",
+						  m = date.getMonth()+1 || "",
+						  d = date.getDate() || "";
+					
+					return `${y}. ${m}. ${d}`;
+				},
+				commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+					  
+			    me.$.dvcTh.setAttribute('rowspan', serviceUseDeviceListDetail.length + 1);
+			    me.$.sst_trm__bf.textContent = serviceUseListDetail[0].sst_trm + " 개월";
+			    me.$.exp_end_dt__bf.textContent = setDate(serviceUseListDetail[0].exp_end_dt);
+			    me.$.exp_mon_fee__bf.textContent = commaNum(serviceUseListDetail[0].exp_mon_fee);
+			    
+			    Object.assign(me.get("setParam"), {"dvc_list": serviceUseDeviceListDetail});
+				me.set("deviceList", serviceUseDeviceListDetail);
+				me.set("serviceData", serviceUseListDetail[0]);
 			}
 		})
 	</script>
