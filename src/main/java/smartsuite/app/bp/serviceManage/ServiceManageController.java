@@ -350,4 +350,19 @@ public class ServiceManageController {
 	public @ResponseBody Map<String,Object> getServiceArpList(@RequestBody Map param) {
 		return ServiceManageService.getServiceArpList(param);
 	}
+	
+	/**
+	 * 서비스 신청 관리 : 산세조회
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 03. 23
+	 * @Method Name : getServiceArpListDetail
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "getServiceArpListDetail.do")
+	public @ResponseBody Map<String,Object> getServiceArpListDetail(@RequestBody Map param) {
+		return ServiceManageService.getServiceArpListDetail(param);
+	}
 }
