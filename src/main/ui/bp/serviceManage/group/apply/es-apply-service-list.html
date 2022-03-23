@@ -13,6 +13,12 @@
                 <sc-code code="CRN001" value="{{codes.term}}" ></sc-code> <!-- 사용여부 -->
             </sc-code-group>
             <sc-ajax
+            	id="getCompanyList"
+            	url="getCompanyList.do"
+            	body="{}"
+            	last-response="{{companyList}}"
+            ></sc-ajax>
+            <sc-ajax
             	id="getWPCList"
             	url="getWPCList.do"
             	body="{}"
@@ -64,6 +70,10 @@
                 	<td>
                 		<sc-combobox-field 
                 			placeholder="계열사"
+                			items="{{companyList}}"
+						 	value="{{searchParam.company_id}}"
+						 	display-field="name" 
+						 	value-field="id" 
                 		></sc-combobox-field>
                 	</td>
                 	<th>
@@ -110,18 +120,20 @@
 		</cc-search-container>
 		<sc-grid
 			id="gridPanel"
+			data-provider="{{serviceResult.result_data}}"
 			use-selection="false"
 			use-state="false"
 			editable="true"
+			on-item-click="onItemClick"
 		>
 			<cc-grid-toolbar></cc-grid-toolbar>
 			<sc-grid-columns >
 				<sc-data-column data-field="a" header-text="구분" width="100" text-align="center"></sc-data-column>
 				<sc-data-column data-field="b" header-text="계열사" width="200" text-align="center"></sc-data-column>
-				<sc-data-column data-field="wpc_nm" header-text="사업장" width="200" text-align="center"></sc-data-column>
-				<sc-data-column data-field="svc_ctl_nm" header-text="신청 서비스" width="600" text-align="center"></sc-data-column>
+				<sc-data-column data-field="wpc_nm" header-text="사업장" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="svc_ctl_nm" header-text="신청 서비스" width="400" text-align="center" style-name="link"></sc-data-column>
 				<sc-data-column data-field="e" header-text="상태" width="300" text-align="center"></sc-data-column>
-				<sc-data-column data-field="f" header-text="신청 일시" width="300" text-align="center"></sc-data-column>
+				<sc-data-column data-field="req_dt" header-text="신청 일시" width="300" text-align="center"></sc-data-column>
 			</sc-grid-columns>
 		</sc-grid>
 	</template>
@@ -138,10 +150,10 @@
                         };
                     }
                 },
-				searchParam: {
-    				type: Object,
+                companyList: {
+    				type: Array,
     				value: function() {
-    					return {};
+    					return [];
     				}
     			},
 				wpcResult: {
@@ -167,7 +179,13 @@
     				value: function() {
     					return {};
     				}
-    			}
+    			},
+    			searchParam: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			},
     		},
     		initialized: function() {
                 const me = this;
@@ -189,7 +207,7 @@
                 applyPop.show();
                 applyPop.getWindowContent(); */
                 
-                const updatePop = UT.popup(
+                /* const updatePop = UT.popup(
        					"ep-apply-service-update", 
        					me,
        					1000,
@@ -201,7 +219,7 @@
        					}
         			);
                 updatePop.show();
-                updatePop.getWindowContent();
+                updatePop.getWindowContent(); */
             },
 			complateServiceResult: function(e, {response: {result_data: serviceList}}) {
 				const me = this;
@@ -242,6 +260,13 @@
                 	result_data = serviceList.map(setService);
                     me.set("serviceResult", {result_data});
                 }
+			},
+			onItemClick: function() {
+				const {data, item} = event;
+				
+				if(item.columnName == "svc_ctl_nm"){
+					
+				}
 			}
     	})
     </script>

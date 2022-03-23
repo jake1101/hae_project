@@ -106,7 +106,7 @@
 					 	value-field="data" 
 					 	on-change="onChangeTerm"
 						placeholder="기간"
-						readonly="{{trmReason.r}}"
+						readonly="true"
 					></sc-combobox-field>
 				</td>
 			</tr>
@@ -128,11 +128,12 @@
 					<td>
 						<div style="display: flex; gap: 10px; align-items: center;">
 							<sc-text-field
-								id="{{item.dvc_id}}"
+								id="dvc_{{item.dvc_id}}"
+								name="{{item.product_name}}"
 								type="number"
 								on-input="onInputField"
 								value="{{item.qtt__af}}"
-								readonly="{{dvcReason.r}}"
+								readonly="true"
 							></sc-text-field>
 							대
 						</div>
@@ -203,23 +204,13 @@
 						return {};
 					}
 				},
-				trmReason: {
-					type: Object,
-					value: function(){
-						return {
-							r: "true"
-						};
-					}
-				},
-				dvcReason: {
-					type: Object,
-					value: function(){
-						return {
-							r: "true"
-						};
-					}
-				},
 				deviceList: {
+					type: Array,
+					value: function(){
+						return [];
+					}
+				},
+				deviceList2: {
 					type: Array,
 					value: function(){
 						return [];
@@ -283,6 +274,7 @@
 			    
 			    Object.assign(me.get("setParam"), {"dvc_list": serviceUseDeviceListDetail});
 				me.set("deviceList", serviceUseDeviceListDetail);
+				me.set("deviceList2", JSON.parse(JSON.stringify(serviceUseDeviceListDetail)));
 				me.set("serviceData", serviceUseListDetail[0]);
 			},
 			_computedTerm: function(trm){
@@ -291,7 +283,7 @@
 					  param = me.get("setParam");
 			
 				date.setMonth(date.getMonth() + Number(trm));
-				
+
 				const y = date.getFullYear() || "",
 					  m = date.getMonth()+1 || "",
 					  d = date.getDate() || "";
@@ -310,19 +302,33 @@
 		  	 		return commaNum(fee)+" (VAT 별도)";
 		  	 	}
 			},
-			onChangeReason: function(e, target) {
+			onChangeReason: function() {
 				const me = this,
-					  rId = e.target.id.split("_r__dm_required")[0]+"Reason";
-
-				if(target.selectedItem && target.selectedItem.data == "1"){
-					me.set(rId, {"r": "false"});
-				}else{
-					if(rId.includes('trm')){
-						me.$.sst_trm.value = "0";
-					}
-					me.set(rId, {"r": "true"});
-				}
+					  {id} = event.target,
+					  {value} = event.detail;
 				
+				if(id.includes("trm")){
+					if(value && value.includes("e")) {
+						me.$.sst_trm.value = "";
+						me.$.sst_trm.readonly = "false";
+					}else if(value){
+						me.$.sst_trm.value = me.get("serviceData").sst_trm.toString();
+						me.$.sst_trm.readonly = "true";
+					}
+				}else{
+					const template = me.$.dvcTemplate;
+					const list = me.get("deviceList2");
+					list.forEach(d => {
+						if(value == "1") {
+							me.$$(`#dvc_${d.dvc_id}`).value = "";
+							me.$$(`#dvc_${d.dvc_id}`).readonly = "false";
+						}else{
+							/* me.get("deviceList").find(({dvc_id, qtt}) => dvc_id == d.dvc_id).qtt; */
+							me.$$(`#dvc_${d.dvc_id}`).value = d.qtt;
+							me.$$(`#dvc_${d.dvc_id}`).readonly = "true";
+						}
+					})
+				}
 			},
 			onTextareaInput: function() {
 				const me = this;
@@ -357,16 +363,17 @@
 			onEstimatedFeeClick: function() {
 				const me = this,
 					  param = me.get("setParam");
-
-				if(!param.dvc_list){
-					SCAlert.show('error', `디바이스 수량을 입력해 주십시오.`);
+				
+				const changeList = Array.prototype.slice.call(document.querySelectorAll("sc-text-field[id*='dvc_']"));
+				
+				let dvcNum = 0;
+				changeList.forEach(d => {
+					dvcNum += Number(d.value);
+				});
+				
+				if(!dvcNum) {
+					SCAlert.show('error', `최소 1개 이상의 디바이스 수량을 입력해 주십시오.`);
 					return;
-				}else{
-					const requiredList = param.dvc_list.filter(d => d.mdt_yn == "1").filter(d => !d.qtt);
-					if(requiredList.length){
-						SCAlert.show('error', `${requiredList[0].dvc_nm} 수량을 입력해 주십시오.`);
-						return;
-					}
 				}
 				
 				if(!param.sst_trm){
@@ -374,7 +381,7 @@
 					return;
 				}
 				
-				param.dvc_list.map(d => !d.qtt ? Object.assign(d, {"qtt": 0}) : d)
+				console.log(param.dvc_list)
 				UT.request(me.$.estimateMonthlyFee);
 				me.$.estimatedFee.style.display = "block";
 			},
@@ -391,12 +398,12 @@
 					return;
 				}
 				
-				if(me.$.trm_r__dm_required.value == "1" && me.$.term.style.display == "none"){
+				if(me.$.term.style.display == "none"){
 					SCAlert.show('error', `"서비스 만료 예정일 조회 버튼"을 클릭해 주십시오.`);
 					return;
 				}
 				
-				if(me.$.dvc_r__dm_required.value == "1" && me.$.estimatedFee.style.display == "none"){
+				if(me.$.estimatedFee.style.display == "none"){
 					SCAlert.show('error', `"예상 월 구독료 조회 버튼"을 클릭해 주십시오.`);
 					return;
 				}

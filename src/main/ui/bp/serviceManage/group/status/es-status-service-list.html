@@ -5,6 +5,36 @@
         }
     </style>
     <template>
+    	<sc-request-group init>
+    		<sc-code-group>
+                <sc-code code="CRN001" value="{{codes.term}}" ></sc-code> <!-- 사용여부 -->
+            </sc-code-group>
+            <sc-ajax
+            	id="getCompanyList"
+            	url="getCompanyList.do"
+            	body="{}"
+            	last-response="{{companyList}}"
+            ></sc-ajax>
+            <sc-ajax
+            	id="getWPCList"
+            	url="getWPCList.do"
+            	body="{}"
+            	last-response="{{wpcResult}}"
+            ></sc-ajax>
+            <sc-ajax 
+				id="getWpcServiceList" 
+				url="getWpcServiceList.do"
+				body="{}"
+				last-response="{{wpcSerivceResult}}"
+			></sc-ajax>
+			<sc-ajax 
+				id="getServiceUseList" 
+				url="getServiceUseList.do"
+				body="{{searchParam}}"
+				last-response="{{serviceResult}}"
+				on-response = "complateServiceResult"
+			></sc-ajax>
+        </sc-request-group>
    		<cc-sub-title-bar title-text="서비스 목록"></cc-sub-title-bar>
    		<cc-search-container>
 			<table>
@@ -27,6 +57,10 @@
                 	<td>
                 		<sc-combobox-field 
                 			placeholder="계열사"
+                			items="{{companyList}}"
+						 	value="{{searchParam.company_id}}"
+						 	display-field="name" 
+						 	value-field="id" 
                 		></sc-combobox-field>
                 	</td>
                 	<th>
@@ -34,14 +68,22 @@
 					</th>
                 	<td>
                 		<sc-combobox-field 
-                			placeholder="사업장"
+						 	items="{{wpcResult.result_data}}"
+						 	value="{{searchParam.wpc_cd}}"
+						 	display-field="wpc_nm" 
+						 	value-field="wpc_cd" 
+							placeholder="사업장"
                 		></sc-combobox-field>
                 	</td>
                 	<th>
 						<sc-label text="신청 서비스"></sc-label>
 					</th>
                 	<td>
-                		<sc-combobox-field 
+                		<sc-combobox-field
+						 	items="{{wpcSerivceResult.result_data}}"
+						 	value="{{searchParam.svc_ctl_id}}"
+						 	display-field="svc_ctl_nm" 
+						 	value-field="svc_ctl_id" 
                 			placeholder="신청 서비스"
                 		></sc-combobox-field>
                 	</td>
@@ -65,26 +107,162 @@
 		</cc-search-container>
 		<sc-grid
 			id="gridPanel"
+			data-provider="{{serviceResult.result_data}}"
 			use-selection="false"
 			use-state="false"
 			editable="true"
+			on-item-click="onItemClick"
 		>
 			<cc-grid-toolbar></cc-grid-toolbar>
 			<sc-grid-columns >
 				<sc-data-column data-field="b" header-text="계열사" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="c" header-text="사업장" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="d" header-text="신청 서비스" width="400" text-align="center"></sc-data-column>
-				<sc-data-column data-field="e" header-text="서비스 게시일" width="200" text-align="center"></sc-data-column>
-				<sc-data-column data-field="a" header-text="서비스 만료일" width="200" text-align="center"></sc-data-column>
-				<sc-data-column data-field="a" header-text="구독 기간" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="a" header-text="월 구독료" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="a" header-text="상태" width="100" text-align="center"></sc-data-column>	
+				<sc-data-column data-field="wpc_nm" header-text="사업장" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="svc_ctl_nm" header-text="신청 서비스" width="400" text-align="center" style-name="link"></sc-data-column>
+				<sc-data-column data-field="sst_str_dt" header-text="서비스 게시일" width="200" text-align="center"></sc-data-column>
+				<sc-data-column data-field="sst_end_dt" header-text="서비스 만료일" width="200" text-align="center"></sc-data-column>
+				<sc-data-column data-field="sst_trm" header-text="구독 기간" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="exp_mon_fee" header-text="월 구독료" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="status_nm" header-text="상태" width="100" text-align="center"></sc-data-column>	
 			</sc-grid-columns>
 		</sc-grid>
     </template>
     <script>
     	Polymer({
-    		is: "es-status-service-list"
+    		is: "es-status-service-list",
+    		properties: {
+    			codes: {
+                    type: Object,
+                    reset: false,
+                    value: function() {
+                        return {
+                            term: []
+                        };
+                    }
+                },
+                companyList: {
+    				type: Array,
+    				value: function() {
+    					return [];
+    				}
+    			},
+    			companyList: {
+    				type: Array,
+    				value: function() {
+    					return [];
+    				}
+    			},
+				wpcResult: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			},
+    			wpcSerivceResult: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			},
+    			wpcList: {
+    				type: Array,
+    				value: function() {
+    					return [];
+    				}
+    			},
+    			serviceResult: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			},
+    			searchParam: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			}
+    		},
+    		initialized: function() {
+                const me = this;
+                
+                const result_data = me.get("wpcResult").result_data.map(wpc => wpc = {"wpc_cd": wpc.id, "wpc_nm": wpc.name});
+                me.set("wpcResult", {result_data});
+                
+                /* const applyPop = UT.popup(
+       					"ep-apply-service-apply", 
+       					me,
+       					1000,
+       					800,
+       					{},
+       					{ 
+       						maximizable: true, 
+       						titleText: `서비스 이용 상세 내역`
+       					}
+        			);
+                applyPop.show();
+                applyPop.getWindowContent(); */
+                
+                /* const updatePop = UT.popup(
+       					"ep-apply-service-update", 
+       					me,
+       					1000,
+       					800,
+       					{},
+       					{ 
+       						maximizable: true, 
+       						titleText: `서비스 변경 상세 내용 조회`
+       					}
+        			);
+                updatePop.show();
+                updatePop.getWindowContent(); */
+            },
+            complateServiceResult: function(e, {response: {result_data: serviceList}}) {
+				const me = this;
+				
+				const setDate = dt => {
+					if(dt != 253402182000000){
+						const date = new Date(dt);
+						const a = b => b > 10 ? b : '0'+b;
+						
+						const y = date.getFullYear() || "",
+							  m = date.getMonth()+1 || "",
+							  d = date.getDate() || "";
+						
+	                	return `${y}.${a(m)}.${a(d)}`;
+					}else{
+						return "";
+					}
+                }
+				
+				const setTerm = t => {
+					const term = me.get("codes").term;
+					return term.find(trm => t == Number(trm.data)).label
+				}
+                
+				const commaNum = n => {
+					return n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+				}
+                
+                const setService = s => Object.assign(s, {
+                	"req_dt": setDate(s.req_dt),
+                	"sst_end_dt": setDate(s.sst_end_dt),
+                	"sst_str_dt": setDate(s.sst_str_dt),
+                	"sst_trm": setTerm(s.sst_trm),
+                	"exp_mon_fee": commaNum(s.exp_mon_fee)
+                });
+                
+                if(serviceList){
+                	result_data = serviceList.map(setService);
+                    me.set("serviceResult", {result_data});
+                }
+			},
+			onItemClick: function() {
+				const {data, item} = event;
+				
+				if(item.columnName == "svc_ctl_nm"){
+					
+				}
+			}
     	})
     </script>
 </dom-module>
