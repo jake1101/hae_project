@@ -383,7 +383,6 @@
 					Object.assign(me.get("applyParam"), {"bsk_itm_yn": 0});
 				};
 				
-				Object.assign(me.get("applyParam"), {svc_ctl_id, "stt_cd": "1"});
 				Object.assign(me.get("applyParam"), me.get("setParam"));
 				
 				UT.request(me.$.applyService, function(e, {response}){
