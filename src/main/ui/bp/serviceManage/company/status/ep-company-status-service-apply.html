@@ -400,11 +400,12 @@
 				if(me.$.term.style.display == "none"){
 					SCAlert.show('error', `"서비스 만료 예정일 조회 버튼"을 클릭해 주십시오.`);
 					return;
-				};
+				}
+				
 				if(me.$.estimatedFee.style.display == "none"){
 					SCAlert.show('error', `"예상 월 구독료 조회 버튼"을 클릭해 주십시오.`);
 					return;
-				};
+				}
 				
 				if(e.target.id == "dm_cart"){
 					Object.assign(me.get("applyParam"), {svc_ctl_id, "status": "0"});
@@ -412,7 +413,7 @@
 				}else{
 					Object.assign(me.get("applyParam"), {svc_ctl_id, "status": "1"});
 					Object.assign(me.get("applyParam"), {"bsk_itm_yn": 0});
-				};
+				}
 				
 				Object.assign(me.get("applyParam"), me.get("setParam"));
 				

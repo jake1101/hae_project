@@ -273,36 +273,21 @@
 				const setBtn = ({status_code: s, bsk_itm_yn: b}) => {
 					let l = ""
 					let r = ""
-					if(s == "98") {
-						l = "";
-						r = "";
-					}else if(s == "99") {
-						l = "신청";
-						r = "삭제";
-					}else if(s == "0") {
-						l = "신청";
-						r = "삭제";
-					}else if(s == "1") {
+					if(s == "8") {
 						l = "취소";
 						r = "";
-					}else if(s == "2") {
-						l = "변경";
-						r = "";
-					}else if(s == "3") {
-						l = "취소";
-						r = "";
-					}else if(s == "4") {
-						l = "변경";
-						r = "";
-					}else if(s == "5") {
-						l = "취소";
-						r = "";
-					}else if(s == "8") {
-						l = "";
-						r = "삭제";
 					}else if(s == "9") {
 						l = "";
+						r = "삭제";
+					}else if(s == "5") {
+						l = "변경";
 						r = "";
+					}else if(s == "2") {
+						l = "신청";
+						r = "";
+					}else if(s == "0") {
+						l = "신청";
+						r = "취소";
 					}
 					return {l, r};
 				}

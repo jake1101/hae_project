@@ -313,13 +313,13 @@
 			onChangeReason: function(e, target) {
 				const me = this,
 					  rId = e.target.id.split("_r__dm_required")[0]+"Reason";
-				
-				console.log(e);
-				console.log(target);
 
 				if(target.selectedItem && target.selectedItem.data == "1"){
 					me.set(rId, {"r": "false"});
-				}else{ 
+				}else{
+					if(rId.includes('trm')){
+						me.$.sst_trm.value = "0";
+					}
 					me.set(rId, {"r": "true"});
 				}
 				
@@ -383,11 +383,30 @@
 					  param = me.get("setParam"),
 					  {dvcTemplate: {items: dvcList}} = me.$,
 					  {svc_id, svc_ctl_id, stt_cd} = me.get("selectedService"),
-					  requiredList = Object.values(me.$).filter(o => o.id.includes("__dm_required"));
-
-				if(!me.validate("apply")){
+					  requiredList = Object.values(me.$).filter(o => o.id.includes("__dm_required"));	  
+					  
+			  	if(!me.validate("apply")){
 					const i = requiredList.findIndex(m => !m.value)
 					SCAlert.show('error', `${requiredList[i].name} 입력란에 데이터를 입력해 주십시오.`);
+					return;
+				}
+				
+				if(me.$.term.style.display == "none"){
+					SCAlert.show('error', `"서비스 만료 예정일 조회 버튼"을 클릭해 주십시오.`);
+					return;
+				}
+				
+				if(me.$.estimatedFee.style.display == "none"){
+					SCAlert.show('error', `"예상 월 구독료 조회 버튼"을 클릭해 주십시오.`);
+					return;
+				}
+				
+				const now = `${new Date().getFullYear()}. ${new Date().getMonth()}. ${new Date().getDate()}`.split(".");
+				const eed = param.exp_end_dt.split(".");
+				const bfNow = now.find((d, i) => d > eed[i]);
+				
+				if(bfNow){
+					SCAlert.show('error', `서비스 만료 예정일이 오늘보다 느립니다. 구독기간을 변경해 주십시오.`);
 					return;
 				}
 				
