@@ -69,14 +69,14 @@
 			</tr>
 			<tr>
 				<td colspan=3>
-					<sc-text-field
+					<sc-textarea-field
 						id="upd_r__dm_required"
 						name="변경 사유 내용"
 						placeholder="(변경 사유 내용 상세 입력)"
 						on-input="onTextareaInput"
 						required="true"
 						style="height: 100px;"
-					></sc-text-field>
+					></sc-textarea-field>
 				</td>
 			</tr>
 			<tr>
@@ -391,19 +391,20 @@
 					return;
 				}
 				
-				if(me.$.term.style.display == "none"){
+				if(me.$.trm_r__dm_required.value == "1" && me.$.term.style.display == "none"){
 					SCAlert.show('error', `"서비스 만료 예정일 조회 버튼"을 클릭해 주십시오.`);
 					return;
 				}
 				
-				if(me.$.estimatedFee.style.display == "none"){
+				if(me.$.dvc_r__dm_required.value == "1" && me.$.estimatedFee.style.display == "none"){
 					SCAlert.show('error', `"예상 월 구독료 조회 버튼"을 클릭해 주십시오.`);
 					return;
 				}
 				
+				const eed = param.exp_end_dt;
 				const now = `${new Date().getFullYear()}. ${new Date().getMonth()}. ${new Date().getDate()}`.split(".");
-				const eed = param.exp_end_dt.split(".");
-				const bfNow = now.find((d, i) => d > eed[i]);
+				const fEeed = `${eed.getFullYear()}. ${eed.getMonth()}. ${eed.getDate()}`.split(".");
+				const bfNow = now.find((d, i) => d > fEeed[i]);
 				
 				if(bfNow){
 					SCAlert.show('error', `서비스 만료 예정일이 오늘보다 느립니다. 구독기간을 변경해 주십시오.`);
