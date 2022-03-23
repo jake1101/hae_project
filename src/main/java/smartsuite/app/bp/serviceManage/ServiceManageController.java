@@ -335,4 +335,19 @@ public class ServiceManageController {
 	public @ResponseBody Map<String,Object> serviceUseApproveProcess(@RequestBody Map param) {
 		return ServiceManageService.serviceUseApproveProcess(param);
 	}
+	
+	/**
+	 * 서비스 신청 관리 : 조회
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 03. 23
+	 * @Method Name : getServiceArpList
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "getServiceArpList.do")
+	public @ResponseBody Map<String,Object> getServiceArpList(@RequestBody Map param) {
+		return ServiceManageService.getServiceArpList(param);
+	}
 }

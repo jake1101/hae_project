@@ -662,4 +662,29 @@ public class ServiceManageService {
 		return resultMap;
 	}
 	
+	/**
+	 * 서비스 신청 관리 : 조회
+	 *
+	 * @author : 
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 3. 18
+	 * @Method Name : getServiceArpList
+	 */
+	public Map<String,Object> getServiceArpList(Map param) {
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceArpList", param);
+		
+		return resultMap;
+	}
+	
 }
