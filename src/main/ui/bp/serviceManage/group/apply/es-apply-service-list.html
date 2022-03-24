@@ -20,13 +20,6 @@
             	last-response="{{companyList}}"
             ></sc-ajax>
             <sc-ajax
-            	id="getServiceArpList"
-            	url="getServiceArpList.do"
-            	body="{{searchParam}}"
-            	last-response="{{serviceResult}}"
-            	on-response="complateServiceResult"
-            ></sc-ajax>
-            <sc-ajax
             	id="getWPCList"
             	url="getWPCList.do"
             	body="{}"
@@ -38,7 +31,19 @@
 				body="{}"
 				last-response="{{wpcSerivceResult}}"
 			></sc-ajax>
+			<sc-ajax
+            	id="getServiceAprList"
+            	url="getServiceAprList.do"
+            	body="{{searchParam}}"
+            	last-response="{{serviceResult}}"
+            	on-response="complateServiceResult"
+            ></sc-ajax>
 		</sc-request-group>
+        <sc-ajax
+           	id="getServiceAprListDetail"
+           	url="getServiceAprListDetail.do"
+           	body="{}"
+        ></sc-ajax>
 		<cc-sub-title-bar title-text="서비스 목록"></cc-sub-title-bar>
 		<cc-search-container on-search="onFindService">
 			<table>
@@ -234,43 +239,71 @@
 			},
             onFindService: function() {
             	const me = this;
-            	UT.request(me.$.getServiceArpList);
+            	UT.request(me.$.getServiceAprList);
             },
 			onItemClick: function() {
 				const me = this;
 				const {data, item} = event.detail;
-				console.log(data);
-				console.log(item);
+				data.svc_id = Number(data.svc_id);
 				
-				if(data.service_gb_cd == "1"){
-					const applyPop = UT.popup(
-       					"ep-apply-service-apply", 
-       					me,
-       					1000,
-       					800,
-       					{},
-       					{ 
-       						maximizable: true, 
-       						titleText: `서비스 이용 상세 내역`
-       					}
-        			);
-	                applyPop.show();
-	                applyPop.getWindowContent();
-				}else if(data.service_gb_cd == "2"){
-					const updatePop = UT.popup(
-       					"ep-apply-service-update", 
-       					me,
-       					1000,
-       					800,
-       					{},
-       					{ 
-       						maximizable: true, 
-       						titleText: `서비스 변경 상세 내용 조회`
-       					}
-        			);
-	                updatePop.show();
-	                updatePop.getWindowContent();
-				}
+				const {svc_id, stt_cd} = data;
+				me.$.getServiceAprListDetail.body = {svc_id, stt_cd}
+				
+				UT.request(me.$.getServiceAprListDetail, 
+				function(e, {response: {result_data}}){
+					const {
+							  getServiceAprListDetail,
+							  getServiceAprListDvcDetail
+					  	  } = result_data[0];
+			  	 	const setDate = (dt) => {
+			  	  		const date = new Date(dt);
+				
+					  	const y = date.getFullYear() || "",
+			    			  m = date.getMonth()+1 || "",
+						      d = date.getDate() || "";
+				
+				  		return `${y}-${m}-${d}`;
+			 	 	};	
+				  	const commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+			  	
+				  	getServiceAprListDetail[0].dsr_str_dt = setDate(getServiceAprListDetail[0].dsr_str_dt);
+				  	getServiceAprListDetail[0].exp_end_dt = setDate(getServiceAprListDetail[0].dsr_str_dt);
+				  	getServiceAprListDetail[0].req_dt = setDate(getServiceAprListDetail[0].dsr_str_dt);
+				  	getServiceAprListDetail[0].exp_mon_fee = commaNum(getServiceAprListDetail[0].exp_mon_fee);
+				  	
+				  	Object.assign(data, getServiceAprListDetail[0]);
+				  	Object.assign(data, {"dvc_list": getServiceAprListDvcDetail});
+				  	
+				  	if(data.service_gb_cd == "1"){
+						const applyPop = UT.popup(
+	       					"ep-apply-service-apply", 
+	       					me,
+	       					1000,
+	       					800,
+	       					{},
+	       					{ 
+	       						maximizable: true, 
+	       						titleText: `서비스 이용 상세 내역`
+	       					}
+	        			);
+		                applyPop.show();
+		                applyPop.getWindowContent().load(data);
+					}else if(data.service_gb_cd == "2"){
+						const updatePop = UT.popup(
+	       					"ep-apply-service-update", 
+	       					me,
+	       					1000,
+	       					800,
+	       					{},
+	       					{ 
+	       						maximizable: true, 
+	       						titleText: `서비스 변경 상세 내용 조회`
+	       					}
+	        			);
+		                updatePop.show();
+		                updatePop.getWindowContent().load(data);
+					}
+				})
 			}
     	})
     </script>
