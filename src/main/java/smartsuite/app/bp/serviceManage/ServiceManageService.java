@@ -711,6 +711,31 @@ public class ServiceManageService {
 		
 		return resultMap;
 	}
+	
+	/**
+	 * 서비스별 상세조회_장비
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 03. 23
+	 * @Method Name : getServiceAprListDvcDetail
+	 */
+	public Map<String,Object> getServiceAprListDvcDetail(Map param) {
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceAprListDvcDetail", param);
+		
+		return resultMap;
+	}
 		
 	/**
 	 * 서비스 신청 관리 : 변경 신청 상세

@@ -367,6 +367,21 @@ public class ServiceManageController {
 	}
 	
 	/**
+	 * 서비스별 상세조회_장비
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 03. 23
+	 * @Method Name : getServiceAprListDvcDetail
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "getServiceAprListDvcDetail.do")
+	public @ResponseBody Map<String,Object> getServiceAprListDvcDetail(@RequestBody Map param) {
+		return ServiceManageService.getServiceAprListDvcDetail(param);
+	}
+	
+	/**
 	 * 서비스 신청 관리 : 변경신청 상세조회
 	 *
 	 * @author : hjh
