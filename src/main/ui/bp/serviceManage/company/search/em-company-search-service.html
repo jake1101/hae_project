@@ -1,34 +1,13 @@
 <sc-link rel="import" href="es-company-search-service-list.html"></sc-link>
-<sc-link rel="import" href="ep-company-search-service-detail.html"></sc-link>
 
 <dom-module id="em-company-search-service">
 	<template>
 		<cc-page-title-bar></cc-page-title-bar>
-		<es-company-search-service-list
-			on-open-service-detail-pop="openServiceDetailPop"
-		></es-company-search-service-list>
+		<es-company-search-service-list></es-company-search-service-list>
     </template>
     <script>
     	Polymer({
-    		is: "em-company-search-service",
-    		openServiceDetailPop: function(event) {
-    			const param = event.detail;
-    			const me = this;
-    			const { svc_ctl_nm } = param;
-    			me.popup = UT.popup(
-    					"ep-company-search-service-detail", 
-    					me,
-    					800,
-    					800,
-    					{},
-    					{ 
-    						maximizable: true, 
-    						titleText: `${svc_ctl_nm} 자세히 보기`
-    					}
-    			);
-    			me.popup.show();
-    			me.popup.getWindowContent().load(param)
-    		}
+    		is: "em-company-search-service"
     	})
     </script>
 </dom-module>
