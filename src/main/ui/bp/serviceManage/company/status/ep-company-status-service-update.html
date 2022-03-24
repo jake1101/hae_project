@@ -364,6 +364,11 @@
 				const me = this,
 					  param = me.get("setParam");
 				
+				if(!param.sst_trm){
+					SCAlert.show('error', `구독기간(약정기간) 입력란에 데이터를 입력해 주십시오.`);
+					return;
+				}
+				
 				const changeList = Array.prototype.slice.call(document.querySelectorAll("sc-text-field[id*='dvc_']"));
 				
 				let dvcNum = 0;
@@ -376,12 +381,6 @@
 					return;
 				}
 				
-				if(!param.sst_trm){
-					SCAlert.show('error', `구독기간(약정기간) 입력란에 데이터를 입력해 주십시오.`);
-					return;
-				}
-				
-				console.log(param.dvc_list)
 				UT.request(me.$.estimateMonthlyFee);
 				me.$.estimatedFee.style.display = "block";
 			},
