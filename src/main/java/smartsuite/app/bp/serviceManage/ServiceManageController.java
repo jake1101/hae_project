@@ -352,7 +352,7 @@ public class ServiceManageController {
 	}
 	
 	/**
-	 * 서비스 신청 관리 : 산세조회
+	 * 서비스 신청 관리 : 신규신청 상세조회
 	 *
 	 * @author : hjh
 	 * @param 
@@ -365,4 +365,20 @@ public class ServiceManageController {
 	public @ResponseBody Map<String,Object> getServiceArpListDetail(@RequestBody Map param) {
 		return ServiceManageService.getServiceArpListDetail(param);
 	}
+	
+	/**
+	 * 서비스 신청 관리 : 변경신청 상세조회
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 03. 23
+	 * @Method Name : getServiceChgArpListDetail
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "getServiceChgArpListDetail.do")
+	public @ResponseBody Map<String,Object> getServiceChgArpListDetail(@RequestBody Map param) {
+		return ServiceManageService.getServiceArpListDetail(param);
+	}
+	
 }

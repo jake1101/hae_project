@@ -688,7 +688,7 @@ public class ServiceManageService {
 	}
 	
 	/**
-	 * 서비스 신청 관리 : 상세
+	 * 서비스 신청 관리 : 신청 상세
 	 *
 	 * @author : 
 	 * @param 
@@ -707,7 +707,42 @@ public class ServiceManageService {
 			param.put("user_company_id", userInfo.get("user_company_id"));
 		}
 		
+		param.put("usr_nm", userInfo.get("usr_nm"));
+		param.put("email", userInfo.get("email"));
+		param.put("phone_no", userInfo.get("phone_no"));
+		param.put("mobile_no", userInfo.get("mobile_no"));
+		
 		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceArpListDetail", param);
+		
+		return resultMap;
+	}
+		
+	/**
+	 * 서비스 신청 관리 : 변경 신청 상세
+	 *
+	 * @author : 
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 3. 18
+	 * @Method Name : getServiceChgArpListDetail
+	 */
+	public Map<String,Object> getServiceChgArpListDetail(Map param) {
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		
+		param.put("usr_nm", userInfo.get("usr_nm"));
+		param.put("email", userInfo.get("email"));
+		param.put("phone_no", userInfo.get("phone_no"));
+		param.put("mobile_no", userInfo.get("mobile_no"));
+		
+		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceChgArpListDetail", param);
 		
 		return resultMap;
 	}
