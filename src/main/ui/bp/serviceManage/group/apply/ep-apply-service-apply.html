@@ -98,9 +98,9 @@
 	        </tr>
 		</table>
 		<div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 20px;">
-			<sc-button id="dm-apply" text="승인" style="width: 100px; padding: 10px;" on-click="onBtnClick"></sc-button>
-			<sc-button id="dm-text" text="서비스 테스트" style="width: 100px; padding: 10px;" on-click="onBtnClick"></sc-button>
-			<sc-button id="dm-initiate" text="서비스 개시" style="width: 100px; padding: 10px;" on-click="onBtnClick"></sc-button>
+			<sc-button id="apply" text="승인" style="width: 100px; padding: 10px; display: block;" on-click="onBtnClick"></sc-button>
+			<sc-button id="test" text="서비스 테스트" style="width: 100px; padding: 10px; display: none;" on-click="onBtnClick"></sc-button>
+			<sc-button id="start" text="서비스 개시" style="width: 100px; padding: 10px; display: none;" on-click="onBtnClick"></sc-button>
 		</div>
 	</template>
 	<script>
@@ -131,13 +131,32 @@
 			},
 			load: function(param){
 				const me = this;
+				const {stt_cd} = param;
 				
-				console.log(param)
+				if(stt_cd == "1"){
+					me.$.apply.style.display = "block";
+					me.$.test.style.display = "none";
+					me.$.start.style.display = "none";
+					
+					me.$.mon_fee.readonly = "false";
+				}else if(stt_cd == "2"){
+					me.$.apply.style.display = "none";
+					me.$.test.style.display = "block";
+					me.$.start.style.display = "none";
+					
+					me.$.mon_fee.readonly = "true";
+					me.$.mon_fee.value = param.mon_fee;
+				}else if(stt_cd == "3"){
+					me.$.apply.style.display = "none";
+					me.$.test.style.display = "none";
+					me.$.start.style.display = "block";
+					
+					me.$.mon_fee.readonly = "true";
+					me.$.mon_fee.value = param.mon_fee;
+				}
 				
 				me.set("selectedService", param);
 				me.$.dvcTh.setAttribute('rowspan', param.dvc_list.length + 1);
-				/* me.$.getServiceUseListDetail.body = {svc_id, stt_cd} */
-				/* UT.request(me.$.getServiceUseListDetail) */
 			},
 			onBtnClick: function() {
 				const me = this;
@@ -146,18 +165,52 @@
 					svc_id,
 					service_gb_cd,
 					stt_cd
-				} = me.get("selectedService")
+				} = me.get("selectedService");
 
 				if(!me.$.mon_fee.value){
 					SCAlert.show('error', `최종 월 구독료를 입력해 주십시오.`);
 					return;
 				}
 				
-				Object.assign(me.get("setParam"), {svc_id, service_gb_cd, stt_cd})
-				Object.assign(me.get("setParam"), {"mon_fee": Number(me.get("setParam").mon_fee)})
+				Object.assign(me.get("setParam"), {svc_id, service_gb_cd, stt_cd});
 				
-				if(btnId.includes("apply")){
-					UT.request(me.$.serviceAplAprProcess);
+				if(btnId == "apply"){
+					Object.assign(me.get("setParam"), {"mon_fee": Number(me.get("setParam").mon_fee)});
+					SCAlert.confirm("승인", "승인하시겠습니까?", function(btn){
+						if(btn == "yes"){
+							UT.request(me.$.serviceAplAprProcess, function(e, {response}){
+								me.fire("refresh");
+							});
+						}else{
+							SCAlert.show('error', `승인 실패하였습니다.`);
+						}
+					})
+				}else if(btnId == "test"){
+					SCAlert.confirm("서비스 테스트", "서비스 테스트를 진행하시겠습니까?", function(btn){
+						if(btn == "yes"){
+							UT.request(me.$.serviceAplAprProcess, function(e, {response}){
+								me.fire("refresh");
+							});
+						}else{
+							SCAlert.show('error', `테스트 실패하였습니다.`);
+						}
+					})
+				}else if(btnId == "start"){
+					const date = new Date();
+					const {sst_trm} = me.get("selectedService");
+					
+					date.setMonth(date.getMonth() + Number(sst_trm));
+					
+					Object.assign(me.get("setParam"), {"sst_str_dt": new Date() ,"sst_end_dt": date});
+					SCAlert.confirm("서비스 개시", "서비스를 개시하시겠습니까?", function(btn){
+						if(btn == "yes"){
+							UT.request(me.$.serviceAplAprProcess, function(e, {response}){
+								me.fire("refresh");
+							});
+						}else{
+							SCAlert.show('error', `테스트 실패하였습니다.`);
+						}
+					})
 				}
 			}
 		})

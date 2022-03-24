@@ -1,0 +1,143 @@
+<dom-module id="ep-request-service-request">
+	<style>
+		:host {
+			@apply(--vbox-layout);
+		}
+	</style>
+	<template>
+		<sc-request-group init>
+			<sc-code-group>
+				<sc-code code="CRN003" value="{{codes.req_tp_cd}}" ></sc-code>
+			</sc-code-group>
+		</sc-request-group>
+		<sc-ajax
+			id="searchHotLineDetail"
+			url="searchHotLineDetail.do"
+			last-response="{{detailResult}}"
+		></sc-ajax>
+		<sc-ajax
+			id="deleteQNA"
+			url="deleteQNA.do"
+		></sc-ajax>
+		
+		<cc-sub-title-bar
+			id="subTitle"
+			title-text="요청 상세"
+		></cc-sub-title-bar>
+		<table class="tb-form" style="margin-top: 20px;">
+			<colgroup>
+				
+			</colgroup>
+			<tr>
+				<th>
+					<sc-label text="사업장"></sc-label>
+				</th>
+               	<td>
+               		{{detailResult.wpc_nm}}
+               	</td>
+               	<th>
+					<sc-label text="이용 서비스"></sc-label>
+				</th>
+               	<td>
+               		{{detailResult.svc_ctl_nm}}
+               	</td>
+			</tr>
+			<tr>
+				<th>
+					<sc-label text="요청 유형"></sc-label>
+				</th>
+               	<td>
+               		{{detailResult.req_tp_cd}}
+               	</td>
+			</tr>
+		</table>
+
+		<table class="tb-form" style="margin-top: 20px;">
+			<tr>
+				<th>
+					<sc-label text="요청 내용"></sc-label>
+				</th>
+				<td colspan="3" style="height: 75px; vertical-align: baseline;">
+					<div id="req_dt"></div>
+					{{detailResult.req_ctt}}
+				</td>
+			</tr>
+		</table>
+		
+		<table class="tb-form" style="margin-top: 10px;">
+			<tr>
+				<th>
+					<sc-label text="답변 내용"></sc-label>
+				</th>
+				<td colspan="3" style="height: 75px; vertical-align: baseline;">
+					<div id="res_dt"></div>
+					{{detailResult.res_ctt}}
+				</td>
+			</tr>
+		</table>
+		<div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+			<sc-button id="dm_send" text="답변 발송" style="width: 100px; padding: 10px;" on-click="onSendClick"></sc-button>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is: "ep-request-service-request",
+			properties: {
+				codes: {
+                    type: Object,
+                    reset: false,
+                    value: function() {
+                        return {
+                            req_tp_cd: []
+                        };
+                    }
+                },
+				detailResult: {
+					type: Object,
+					value: function() {
+						return {};
+					},
+				}
+			},
+			load: function(param) {
+				const me = this;
+				
+				me.$.searchHotLineDetail.body = {"pst_seq": Number(param.pst_seq)}
+				me.$.deleteQNA.body = {"pst_seq": Number(param.pst_seq)}
+				UT.request(me.$.searchHotLineDetail, function(event, {response: {result_data: d}}) {
+					const req_tp_cd = me.get('codes').req_tp_cd.find(r => r.data == d[0].req_tp_cd).label
+					const setDt = dt => {
+						const date = new Date(dt);
+						const a = b => b > 10 ? b : !b ? '00' : '0'+b;
+						
+						const y = date.getFullYear() || "",
+							  m = date.getMonth()+1 || "",
+							  d = date.getDate() || "",
+							  h = date.getHours() || "",
+							  mn = date.getMinutes() || "",
+							  s = date.getSeconds() || "";
+						
+	                	return `(${y}.${a(m)}.${a(d)} ${a(h)}:${a(mn)}:${a(s)})`;
+	                }
+					
+					Object.assign(d[0], {req_tp_cd});
+					me.set("detailResult", d[0]);
+					
+					me.$.req_dt.textContent = setDt(me.get("detailResult").req_dt);
+					
+					if(me.get("detailResult").res_ctt){
+						me.$.dm_delete.disabled = "true";
+					}
+					
+					if(me.get("detailResult").res_dt){
+						me.$.res_dt.textContent = setDt(me.get("detailResult").res_dt);
+					}
+					
+				});
+			},
+			onSendClick: function() {
+				const me = this;
+			}
+		})
+	</script>
+</dom-module>

@@ -268,17 +268,7 @@
 								})
 							}
 							return l;
-					  },
-					  setDate = (dt) => {
-						  	const date = new Date(dt);
-							
-							const y = date.getFullYear() || "",
-								  m = date.getMonth()+1 || "",
-								  d = date.getDate() || "";
-							
-							return `${y}.${m}.${d}`;
-					  },
-					  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+					  };
 				  
 				Object.assign(me.get("setParam"), serviceUseListDetail[0]);
 				Object.assign(me.get("setParam"), {"dvc_list": serviceUseDeviceListDetail.map(setDevice)});

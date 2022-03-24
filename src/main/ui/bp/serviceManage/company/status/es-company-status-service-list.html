@@ -38,7 +38,7 @@
 	<template>
 		<sc-request-group init>
 			<sc-code-group>
-                <sc-code code="CRN001" value="{{codes.term}}" ></sc-code> <!-- 사용여부 -->
+                <sc-code code="CRN001" value="{{codes.term}}"></sc-code>
             </sc-code-group>
             <sc-ajax
             	id="getWPCList"
@@ -287,7 +287,7 @@
 						r = "";
 					}else if(s == "0") {
 						l = "신청";
-						r = "취소";
+						r = "삭제";
 					}
 					return {l, r};
 				}

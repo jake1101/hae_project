@@ -1,7 +1,5 @@
-<sc-link rel="import" href="ep-apply-service-apply.html"></sc-link>
-<sc-link rel="import" href="ep-apply-service-update.html"></sc-link>
-
-<dom-module id="es-apply-service-list">
+<sc-link rel="import" href="ep-request-service-request.html"></sc-link>
+<dom-module id="es-request-service-list">
 	<style>
 		:host{
 			@apply(--vbox-layout);
@@ -10,8 +8,8 @@
 	<template>
 		<sc-request-group init>
 			<sc-code-group>
+				<sc-code code="CRN003" value="{{codes.req}}" ></sc-code>
                 <sc-code code="CRN006" value="{{codes.division}}" ></sc-code>
-                <sc-code code="CRN007" value="{{codes.stt}}" ></sc-code>
             </sc-code-group>
             <sc-ajax
             	id="getCompanyList"
@@ -56,7 +54,7 @@
 					<col>
 					<col style="width: 90px;">
 					<col>
-					<col style="width: 50px;">
+					<col style="width: 80px;">
 					<col>
 					<col style="width: 90px;">
 					<col>
@@ -99,7 +97,7 @@
                 		></sc-combobox-field>
                 	</td>
                 	<th>
-						<sc-label text="신청 서비스"></sc-label>
+						<sc-label text="이용 서비스"></sc-label>
 					</th>
                 	<td>
                 		<sc-combobox-field
@@ -111,15 +109,15 @@
                 		></sc-combobox-field>
                 	</td>
                 	<th>
-						<sc-label text="상태"></sc-label>
+						<sc-label text="요청 유형"></sc-label>
 					</th>
                 	<td>
                 		<sc-combobox-field 
-                			items="{{codes.stt}}"
-						 	value="{{searchParam.stt_cd}}"
+                			items="{{codes.req}}"
+						 	value="{{searchParam.req_tp_cd}}"
 						 	display-field="label" 
 						 	value-field="data" 
-                			placeholder="상태"
+                			placeholder="요청 유형"
                 		></sc-combobox-field>
                 	</td>
 					<th colspan=2 style="text-align: right;">
@@ -146,23 +144,22 @@
 				<sc-data-column data-field="group_nm" header-text="계열사" width="200" text-align="center"></sc-data-column>
 				<sc-data-column data-field="wpc_nm" header-text="사업장" width="150" text-align="center"></sc-data-column>
 				<sc-data-column data-field="svc_ctl_nm" header-text="신청 서비스" width="400" text-align="center" style-name="link"></sc-data-column>
-				<sc-data-column data-field="status_nm" header-text="상태" width="200" text-align="center"></sc-data-column>
-				<sc-data-column data-field="req_dt" header-text="신청 일시" width="200" text-align="center"></sc-data-column>
-				<sc-data-column data-field="sst_str_dt" header-text="서비스 개시일" width="200" text-align="center"></sc-data-column>
+				<sc-data-column data-field="a" header-text="서비스 요청 유형" width="300" text-align="center"></sc-data-column>
+				<sc-data-column data-field="b" header-text="요청 일시" width="300" text-align="center"></sc-data-column>
 			</sc-grid-columns>
 		</sc-grid>
 	</template>
     <script>
     	Polymer({
-    		is: "es-apply-service-list",
+    		is: "es-request-service-list",
     		properties: {
     			codes: {
                     type: Object,
                     reset: false,
                     value: function() {
                         return {
-                        	division: [],
-                        	stt: []
+                        	req: [],
+                        	division: []
                         };
                     }
                 },
@@ -208,8 +205,10 @@
                 
                 const result_data = me.get("wpcResult").result_data.map(wpc => wpc = {"wpc_cd": wpc.id, "wpc_nm": wpc.name, "company_id": wpc.company_id});
                 me.set("wpcResult", {result_data});
+                
+                console.log(me.get("serviceResult"))
             },
-			complateServiceResult: function(e, {response: {result_data: serviceList}}) {
+            complateServiceResult: function(e, {response: {result_data: serviceList}}) {
 				const me = this;
 				
 				const setDate = dt => {
@@ -238,80 +237,34 @@
                     me.set("serviceResult", {result_data});
                 }
 			},
+			onItemClick: function() {
+				const me = this,
+                {data: d} = event.detail,
+       		  	{columnName: cn} = event.detail.item;
+       		  
+				const requestPop = UT.popup(
+					"ep-request-service-request", 
+					me,
+					800,
+					435,
+					{
+						"refresh": function(popup, e) {
+	                   	UT.request(me.$.searchHotLine);
+	                   	popup.close();
+                	}
+					},
+					{ 
+						maximizable: true, 
+						titleText: "1:1 서비스 요청"
+					}
+				);
+				requestPop.show();
+				requestPop.getWindowContent().load(d)
+			},
             onFindService: function() {
             	const me = this;
             	UT.request(me.$.getServiceAprList);
-            },
-			onItemClick: function() {
-				const me = this;
-				const {data, item} = event.detail;
-				data.svc_id = Number(data.svc_id);
-				
-				const {svc_id, stt_cd} = data;
-				me.$.getServiceAprListDetail.body = {svc_id, stt_cd}
-				
-				UT.request(me.$.getServiceAprListDetail, 
-				function(e, {response: {result_data}}){
-					const {
-							  getServiceAprListDetail,
-							  getServiceAprListDvcDetail
-					  	  } = result_data[0];
-			  	 	const setDate = (dt) => {
-			  	  		const date = new Date(dt);
-				
-					  	const y = date.getFullYear() || "",
-			    			  m = date.getMonth()+1 || "",
-						      d = date.getDate() || "";
-				
-				  		return `${y}-${m}-${d}`;
-			 	 	};	
-				  	const commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
-			  	
-				  	getServiceAprListDetail[0].dsr_str_dt = setDate(getServiceAprListDetail[0].dsr_str_dt);
-				  	getServiceAprListDetail[0].exp_end_dt = setDate(getServiceAprListDetail[0].exp_end_dt);
-				  	getServiceAprListDetail[0].req_dt = setDate(getServiceAprListDetail[0].req_dt);
-				  	getServiceAprListDetail[0].exp_mon_fee = commaNum(getServiceAprListDetail[0].exp_mon_fee);
-				  	
-				  	Object.assign(data, getServiceAprListDetail[0]);
-				  	Object.assign(data, {"dvc_list": getServiceAprListDvcDetail});
-				  	
-				  	if(data.service_gb_cd == "1"){
-						const applyPop = UT.popup(
-	       					"ep-apply-service-apply", 
-	       					me,
-	       					1000,
-	       					800,
-	       					{
-	       						"refresh": function(popup, e) {
-	       							UT.request(me.$.getServiceAprList, function() {
-	       								popup.close();
-	       							});
-	                           	}
-	       					},
-	       					{ 
-	       						maximizable: true, 
-	       						titleText: `서비스 이용 상세 내역`
-	       					}
-	        			);
-		                applyPop.show();
-		                applyPop.getWindowContent().load(data);
-					}else if(data.service_gb_cd == "2"){
-						const updatePop = UT.popup(
-	       					"ep-apply-service-update", 
-	       					me,
-	       					1000,
-	       					800,
-	       					{},
-	       					{ 
-	       						maximizable: true, 
-	       						titleText: `서비스 변경 상세 내용 조회`
-	       					}
-	        			);
-		                updatePop.show();
-		                updatePop.getWindowContent().load(data);
-					}
-				})
-			}
+            }
     	})
     </script>
 </dom-module>

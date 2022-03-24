@@ -1,0 +1,56 @@
+<dom-module id="ep-status-service-detail">
+	<style>
+        :host {
+            @apply(--vbox-layout);
+        }
+    </style>
+	<template>
+		<table class="tb-form">
+			<tr>
+				<th colspan=2>디바이스 수량</th>
+			</tr>
+			<template id="dvcTemplate" is="dom-repeat" items="[[selectedService.dvc_list]]">
+				<tr>
+					<th>[[item.product_name]]</th>
+					<td>[[item.qtt]] 대</td>
+				</tr>
+        	</template>
+		</table>
+		
+		<table class="tb-form">
+			<tr>
+				<th colspan=2>담당자 정보</th>
+			</tr>
+			<tr>
+				<th>이름</th>
+				<td>[[selectedService.status_nm]]</td>
+			</tr>
+			<tr>
+				<th>이메일</th>
+				<td>[[selectedService.email]]</td>
+			</tr>
+			<tr>
+				<th>연락처</th>
+				<td>[[selectedService.mobile_no]]</td>
+			</tr>
+		</table>
+	</template>
+	<script>
+		Polymer({
+			is: "ep-status-service-detail",
+			properties: {
+				selectedService: {
+					type: Object,
+					value: function(){
+						return {};
+					}
+				}
+			},
+			load: function(param){
+				const me = this;
+				me.set("selectedService", param);
+				console.log(param)
+			}
+		})
+	</script>
+</dom-module>

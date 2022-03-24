@@ -1,3 +1,5 @@
+<sc-link rel="import" href="ep-status-service-detail.html"></sc-link>
+
 <dom-module id="es-status-service-list">
 	<style>
         :host {
@@ -7,7 +9,7 @@
     <template>
     	<sc-request-group init>
     		<sc-code-group>
-                <sc-code code="CRN001" value="{{codes.term}}" ></sc-code> <!-- 사용여부 -->
+                <sc-code code="CRN007" value="{{codes.stt}}" ></sc-code> <!-- 사용여부 -->
             </sc-code-group>
             <sc-ajax
             	id="getCompanyList"
@@ -27,14 +29,18 @@
 				body="{}"
 				last-response="{{wpcSerivceResult}}"
 			></sc-ajax>
-			<sc-ajax 
-				id="getServiceUseList" 
-				url="getServiceUseList.do"
-				body="{{searchParam}}"
-				last-response="{{serviceResult}}"
-				on-response = "complateServiceResult"
-			></sc-ajax>
+			<sc-ajax
+            	id="grpAdmServiceUseList"
+            	url="grpAdmServiceUseList.do"
+            	body="{{searchParam}}"
+            	last-response="{{serviceResult}}"
+            	on-response="complateServiceResult"
+            ></sc-ajax>
         </sc-request-group>
+        <sc-ajax
+           	id="getServiceAprListDvcDetail"
+           	url="getServiceAprListDvcDetail.do"
+        ></sc-ajax>
    		<cc-sub-title-bar title-text="서비스 목록"></cc-sub-title-bar>
    		<cc-search-container>
 			<table>
@@ -58,7 +64,7 @@
                 		<sc-combobox-field 
                 			placeholder="계열사"
                 			items="{{companyList}}"
-						 	value="{{searchParam.company_id}}"
+						 	value="{{searchParam.group_id}}"
 						 	display-field="name" 
 						 	value-field="id" 
                 		></sc-combobox-field>
@@ -91,14 +97,17 @@
                 		<sc-label text="이용중인 서비스만 조회"></sc-label>
                 	</th>
               	    <td>
-                		<sc-checkbox-field>
-                		</sc-checkbox-field>
+                		<sc-checkbox-field
+                			input-value="{{searchParam.stt_cd}}"
+                			checked-value="1" 
+                			un-checked-value="0"
+                		></sc-checkbox-field>
                 	</td>
                 	<th rowspan=2>
 						<sc-label text="키워드 검색"></sc-label>
 					</th>
 					<td rowspan=2>
-						<sc-text-field></sc-text-field>
+						<sc-text-field value="{{searchParam.search}}"></sc-text-field>
 					</td>
    	            </tr>
                	<tr>
@@ -115,13 +124,13 @@
 		>
 			<cc-grid-toolbar></cc-grid-toolbar>
 			<sc-grid-columns >
-				<sc-data-column data-field="b" header-text="계열사" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="group_nm" header-text="계열사" width="150" text-align="center"></sc-data-column>
 				<sc-data-column data-field="wpc_nm" header-text="사업장" width="150" text-align="center"></sc-data-column>
 				<sc-data-column data-field="svc_ctl_nm" header-text="신청 서비스" width="400" text-align="center" style-name="link"></sc-data-column>
 				<sc-data-column data-field="sst_str_dt" header-text="서비스 게시일" width="200" text-align="center"></sc-data-column>
 				<sc-data-column data-field="sst_end_dt" header-text="서비스 만료일" width="200" text-align="center"></sc-data-column>
 				<sc-data-column data-field="sst_trm" header-text="구독 기간" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="exp_mon_fee" header-text="월 구독료" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="mon_fee" header-text="월 구독료" width="150" text-align="center"></sc-data-column>
 				<sc-data-column data-field="status_nm" header-text="상태" width="100" text-align="center"></sc-data-column>	
 			</sc-grid-columns>
 		</sc-grid>
@@ -135,16 +144,10 @@
                     reset: false,
                     value: function() {
                         return {
-                            term: []
+                        	stt: []
                         };
                     }
                 },
-                companyList: {
-    				type: Array,
-    				value: function() {
-    					return [];
-    				}
-    			},
     			companyList: {
     				type: Array,
     				value: function() {
@@ -161,12 +164,6 @@
     				type: Object,
     				value: function() {
     					return {};
-    				}
-    			},
-    			wpcList: {
-    				type: Array,
-    				value: function() {
-    					return [];
     				}
     			},
     			serviceResult: {
@@ -187,34 +184,6 @@
                 
                 const result_data = me.get("wpcResult").result_data.map(wpc => wpc = {"wpc_cd": wpc.id, "wpc_nm": wpc.name});
                 me.set("wpcResult", {result_data});
-                
-                /* const applyPop = UT.popup(
-       					"ep-apply-service-apply", 
-       					me,
-       					1000,
-       					800,
-       					{},
-       					{ 
-       						maximizable: true, 
-       						titleText: `서비스 이용 상세 내역`
-       					}
-        			);
-                applyPop.show();
-                applyPop.getWindowContent(); */
-                
-                /* const updatePop = UT.popup(
-       					"ep-apply-service-update", 
-       					me,
-       					1000,
-       					800,
-       					{},
-       					{ 
-       						maximizable: true, 
-       						titleText: `서비스 변경 상세 내용 조회`
-       					}
-        			);
-                updatePop.show();
-                updatePop.getWindowContent(); */
             },
             complateServiceResult: function(e, {response: {result_data: serviceList}}) {
 				const me = this;
@@ -232,35 +201,50 @@
 					}else{
 						return "";
 					}
-                }
+                };
 				
-				const setTerm = t => {
-					const term = me.get("codes").term;
-					return term.find(trm => t == Number(trm.data)).label
-				}
-                
-				const commaNum = n => {
-					return n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
-				}
-                
+				const commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+				
+				const setSttNm = function(cd) {
+					const obj = me.get("codes").stt.find(s => s.data == cd);
+					return obj && obj.label;
+				};
+				
                 const setService = s => Object.assign(s, {
                 	"req_dt": setDate(s.req_dt),
                 	"sst_end_dt": setDate(s.sst_end_dt),
                 	"sst_str_dt": setDate(s.sst_str_dt),
-                	"sst_trm": setTerm(s.sst_trm),
-                	"exp_mon_fee": commaNum(s.exp_mon_fee)
+                	"mon_fee": s.mon_fee && commaNum(s.mon_fee),
+                	"status_nm": setSttNm(s.stt_cd)
                 });
                 
                 if(serviceList){
                 	result_data = serviceList.map(setService);
                     me.set("serviceResult", {result_data});
-                }
+                };
 			},
 			onItemClick: function() {
-				const {data, item} = event;
-				
-				if(item.columnName == "svc_ctl_nm"){
-					
+				const me = this;
+				const {data, item} = event.detail;
+
+				if(item.columnName == "svc_ctl_nm") {
+					me.$.getServiceAprListDvcDetail.body = {"svc_id": Number(data.svc_id)}
+					UT.request(me.$.getServiceAprListDvcDetail, function(e, {response: {result_data}}){
+						Object.assign(data, {"dvc_list": result_data[0].getServiceAprListDvcDetail})
+						const detailPop = UT.popup(
+		       					"ep-status-service-detail", 
+		       					me,
+		       					400,
+		       					400,
+		       					{},
+		       					{ 
+		       						maximizable: true, 
+		       						titleText: `자세히 보기`
+		       					}
+		        			);
+						detailPop.show();
+						detailPop.getWindowContent().load(data);
+					})
 				}
 			}
     	})
