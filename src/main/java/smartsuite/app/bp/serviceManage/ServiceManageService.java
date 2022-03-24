@@ -707,11 +707,6 @@ public class ServiceManageService {
 			param.put("user_company_id", userInfo.get("user_company_id"));
 		}
 		
-		param.put("usr_nm", userInfo.get("usr_nm"));
-		param.put("email", userInfo.get("email"));
-		param.put("phone_no", userInfo.get("phone_no"));
-		param.put("mobile_no", userInfo.get("mobile_no"));
-		
 		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceAprListDetail", param);
 		
 		return resultMap;
@@ -761,6 +756,8 @@ public class ServiceManageService {
 		}else {
 			param.put("user_company_id", userInfo.get("user_company_id"));
 		}
+		param.put("usr_id", userInfo.get("usr_id"));
+		param.put("usr_nm", userInfo.get("usr_nm"));
 
 		resultMap = restfulUtilServiceToCorners.callCornersApi("serviceAplAprProcess", param);
 		
