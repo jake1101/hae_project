@@ -669,9 +669,9 @@ public class ServiceManageService {
 	 * @param 
 	 * @return 
 	 * @Date : 2022. 3. 18
-	 * @Method Name : getServiceArpList
+	 * @Method Name : getServiceAprList
 	 */
-	public Map<String,Object> getServiceArpList(Map param) {
+	public Map<String,Object> getServiceAprList(Map param) {
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
@@ -682,7 +682,7 @@ public class ServiceManageService {
 			param.put("user_company_id", userInfo.get("user_company_id"));
 		}
 		
-		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceArpList", param);
+		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceAprList", param);
 		
 		return resultMap;
 	}
@@ -694,9 +694,9 @@ public class ServiceManageService {
 	 * @param 
 	 * @return 
 	 * @Date : 2022. 3. 18
-	 * @Method Name : getServiceArpListDetail
+	 * @Method Name : getServiceAprListDetail
 	 */
-	public Map<String,Object> getServiceArpListDetail(Map param) {
+	public Map<String,Object> getServiceAprListDetail(Map param) {
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
@@ -712,7 +712,7 @@ public class ServiceManageService {
 		param.put("phone_no", userInfo.get("phone_no"));
 		param.put("mobile_no", userInfo.get("mobile_no"));
 		
-		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceArpListDetail", param);
+		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceAprListDetail", param);
 		
 		return resultMap;
 	}
@@ -724,9 +724,9 @@ public class ServiceManageService {
 	 * @param 
 	 * @return 
 	 * @Date : 2022. 3. 18
-	 * @Method Name : getServiceChgArpListDetail
+	 * @Method Name : getServiceChgAprListDetail
 	 */
-	public Map<String,Object> getServiceChgArpListDetail(Map param) {
+	public Map<String,Object> getServiceChgAprListDetail(Map param) {
 		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
@@ -742,7 +742,7 @@ public class ServiceManageService {
 		param.put("phone_no", userInfo.get("phone_no"));
 		param.put("mobile_no", userInfo.get("mobile_no"));
 		
-		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceChgArpListDetail", param);
+		resultMap = restfulUtilServiceToCorners.callCornersApi("getServiceChgAprListDetail", param);
 		
 		return resultMap;
 	}

@@ -343,12 +343,12 @@ public class ServiceManageController {
 	 * @param 
 	 * @return 
 	 * @Date : 2022. 03. 23
-	 * @Method Name : getServiceArpList
+	 * @Method Name : getServiceAprList
 	 */
 	@AuthCheck (authCode = Const.READ)
-	@RequestMapping (value = "getServiceArpList.do")
-	public @ResponseBody Map<String,Object> getServiceArpList(@RequestBody Map param) {
-		return ServiceManageService.getServiceArpList(param);
+	@RequestMapping (value = "getServiceAprList.do")
+	public @ResponseBody Map<String,Object> getServiceAprList(@RequestBody Map param) {
+		return ServiceManageService.getServiceAprList(param);
 	}
 	
 	/**
@@ -358,12 +358,12 @@ public class ServiceManageController {
 	 * @param 
 	 * @return 
 	 * @Date : 2022. 03. 23
-	 * @Method Name : getServiceArpListDetail
+	 * @Method Name : getServiceAprListDetail
 	 */
 	@AuthCheck (authCode = Const.READ)
-	@RequestMapping (value = "getServiceArpListDetail.do")
-	public @ResponseBody Map<String,Object> getServiceArpListDetail(@RequestBody Map param) {
-		return ServiceManageService.getServiceArpListDetail(param);
+	@RequestMapping (value = "getServiceAprListDetail.do")
+	public @ResponseBody Map<String,Object> getServiceAprListDetail(@RequestBody Map param) {
+		return ServiceManageService.getServiceAprListDetail(param);
 	}
 	
 	/**
@@ -373,12 +373,12 @@ public class ServiceManageController {
 	 * @param 
 	 * @return 
 	 * @Date : 2022. 03. 23
-	 * @Method Name : getServiceChgArpListDetail
+	 * @Method Name : getServiceChgAprListDetail
 	 */
 	@AuthCheck (authCode = Const.READ)
-	@RequestMapping (value = "getServiceChgArpListDetail.do")
-	public @ResponseBody Map<String,Object> getServiceChgArpListDetail(@RequestBody Map param) {
-		return ServiceManageService.getServiceArpListDetail(param);
+	@RequestMapping (value = "getServiceChgAprListDetail.do")
+	public @ResponseBody Map<String,Object> getServiceChgAprListDetail(@RequestBody Map param) {
+		return ServiceManageService.getServiceAprListDetail(param);
 	}
 	
 }
