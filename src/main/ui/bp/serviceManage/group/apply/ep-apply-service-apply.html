@@ -10,6 +10,11 @@
                 <sc-code code="CRN001" value="{{codes.term}}"></sc-code>
             </sc-code-group>
 		</sc-request-group>
+		<sc-ajax
+	       	id="serviceAplAprProcess"
+	       	url="serviceAplAprProcess.do"
+	       	body="{{setParam}}"
+        ></sc-ajax>
 
 		<cc-sub-title-bar title-text="서비스 신청 상세 내용 조회"></cc-sub-title-bar>
 		<table class="tb-form">
@@ -83,10 +88,9 @@
 	        	<td colspan=2>
 	        		<div style="display: flex; gap: 10px; align-items: center; width: 200px;">
 						<sc-text-field
-							id=""
+							id="mon_fee"
 							type="number"
-							on-input=""
-							value=""
+							value="{{setParam.mon_fee}}"
 						></sc-text-field>
 						<div style="width: 200px;">원 (VAT 별도)</div>
 					</div>
@@ -94,9 +98,9 @@
 	        </tr>
 		</table>
 		<div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 20px;">
-			<sc-button id="dm-apply" text="승인" style="width: 100px; padding: 10px;" on-click="onApplyClick"></sc-button>
-			<sc-button id="dm-text" text="서비스 테스트" style="width: 100px; padding: 10px;" on-click="onApplyClick"></sc-button>
-			<sc-button id="dm-initiate" text="서비스 개시" style="width: 100px; padding: 10px;" on-click="onApplyClick"></sc-button>
+			<sc-button id="dm-apply" text="승인" style="width: 100px; padding: 10px;" on-click="onBtnClick"></sc-button>
+			<sc-button id="dm-text" text="서비스 테스트" style="width: 100px; padding: 10px;" on-click="onBtnClick"></sc-button>
+			<sc-button id="dm-initiate" text="서비스 개시" style="width: 100px; padding: 10px;" on-click="onBtnClick"></sc-button>
 		</div>
 	</template>
 	<script>
@@ -135,8 +139,26 @@
 				/* me.$.getServiceUseListDetail.body = {svc_id, stt_cd} */
 				/* UT.request(me.$.getServiceUseListDetail) */
 			},
-			complateServiceResult(e, {response: {result_data}}){
+			onBtnClick: function() {
+				const me = this;
+				const btnId = event.target.id;
+				const {
+					svc_id,
+					service_gb_cd,
+					stt_cd
+				} = me.get("selectedService")
+
+				if(!me.$.mon_fee.value){
+					SCAlert.show('error', `최종 월 구독료를 입력해 주십시오.`);
+					return;
+				}
 				
+				Object.assign(me.get("setParam"), {svc_id, service_gb_cd, stt_cd})
+				Object.assign(me.get("setParam"), {"mon_fee": Number(me.get("setParam").mon_fee)})
+				
+				if(btnId.includes("apply")){
+					UT.request(me.$.serviceAplAprProcess);
+				}
 			}
 		})
 	</script>
