@@ -396,4 +396,19 @@ public class ServiceManageController {
 		return ServiceManageService.serviceAplAprProcess(param);
 	}
 	
+	/**
+	 * 그룹관리자 서비스 이용 현황 : 조회
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 03. 24
+	 * @Method Name : grpAdmServiceUseList
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "grpAdmServiceUseList.do")
+	public @ResponseBody Map<String,Object> grpAdmServiceUseList(@RequestBody Map param) {
+		return ServiceManageService.grpAdmServiceUseList(param);
+	}
+	
 }
