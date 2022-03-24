@@ -381,4 +381,19 @@ public class ServiceManageController {
 		return ServiceManageService.getServiceAprListDetail(param);
 	}
 	
+	/**
+	 * 서비스 신청 관리 : 신청 승인 처리
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 03. 24
+	 * @Method Name : serviceAplAprProcess
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "serviceAplAprProcess.do")
+	public @ResponseBody Map<String,Object> serviceAplAprProcess(@RequestBody Map param) {
+		return ServiceManageService.serviceAplAprProcess(param);
+	}
+	
 }
