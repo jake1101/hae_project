@@ -182,7 +182,7 @@
 				Object.assign(me.get("setParam"), {svc_id, service_gb_cd, stt_cd});
 				
 				if(btnId == "apply"){
-					Object.assign(me.get("setParam"), {"mon_fee": Number(me.get("setParam").mon_fee)});
+					Object.assign(me.get("setParam"), {"mon_fee": Number(me.get("setParam").mon_fee.split(',').join(""))});
 					SCAlert.confirm("승인", "승인하시겠습니까?", function(btn){
 						if(btn == "yes"){
 							UT.request(me.$.serviceAplAprProcess, function(e, {response}){
