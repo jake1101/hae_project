@@ -816,4 +816,58 @@ public class ServiceManageService {
 		return resultMap;
 	}
 	
+	/**
+	 * 구독료 납부 관리 : 구독료 관리 목록 조회
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 03. 24
+	 * @Method Name : serviceSstList
+	 */
+	public Map<String,Object> serviceSstList(Map param) {
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		param.put("usr_id", userInfo.get("usr_id"));
+		param.put("usr_nm", userInfo.get("usr_nm"));
+
+		resultMap = restfulUtilServiceToCorners.callCornersApi("serviceSstList", param);
+		
+		return resultMap;
+	}
+	
+	/**
+	 * 구독료 납부 관리 : 구독료 관리 목록 상세 조회
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 03. 24
+	 * @Method Name : serviceSstListDetail
+	 */
+	public Map<String,Object> serviceSstListDetail(Map param) {
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> userInfo = Auth.getCurrentUserInfo();
+		
+		if (userInfo.get("access_level").equals("system")) {
+			param.put("user_company_id", "" );
+		}else {
+			param.put("user_company_id", userInfo.get("user_company_id"));
+		}
+		param.put("usr_id", userInfo.get("usr_id"));
+		param.put("usr_nm", userInfo.get("usr_nm"));
+
+		resultMap = restfulUtilServiceToCorners.callCornersApi("serviceSstListDetail", param);
+		
+		return resultMap;
+	}
+	
 }

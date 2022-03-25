@@ -426,4 +426,33 @@ public class ServiceManageController {
 		return ServiceManageService.grpAdmServiceUseList(param);
 	}
 	
+	/**
+	 * 구독료 납부 관리 : 구독료 관리 목록 조회
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 03. 25
+	 * @Method Name : serviceSstList
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "serviceSstList.do")
+	public @ResponseBody Map<String,Object> serviceSstList(@RequestBody Map param) {
+		return ServiceManageService.serviceSstList(param);
+	}
+	
+	/**
+	 * 구독료 납부 관리 : 구독료 관리 목록 상세 조회
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 03. 25
+	 * @Method Name : serviceSstListDetail
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "serviceSstListDetail.do")
+	public @ResponseBody Map<String,Object> serviceSstListDetail(@RequestBody Map param) {
+		return ServiceManageService.serviceSstListDetail(param);
+	}
 }
