@@ -455,4 +455,36 @@ public class ServiceManageController {
 	public @ResponseBody Map<String,Object> serviceSstListDetail(@RequestBody Map param) {
 		return ServiceManageService.serviceSstListDetail(param);
 	}
+	
+	/**
+	 * 구독료 납부 관리 : 구독료 관리 목록 상세 조회 : 날짜 수정
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 03. 25
+	 * @Method Name : serviceSstListDetailChgDay
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "serviceSstListDetailChgDay.do")
+	public @ResponseBody Map<String,Object> serviceSstListDetailChgDay(@RequestBody Map param) {
+		return ServiceManageService.serviceSstListDetailChgDay(param);
+	}
+	
+	/**
+	 * 구독료 납부 관리 : 구독료 관리 목록 상세 조회 : 납부 확인
+	 *
+	 * @author : hjh
+	 * @param 
+	 * @return 
+	 * @Date : 2022. 03. 25
+	 * @Method Name : serviceSstListDetailChgFee
+	 */
+	@AuthCheck (authCode = Const.READ)
+	@RequestMapping (value = "serviceSstListDetailChgFee.do")
+	public @ResponseBody Map<String,Object> serviceSstListDetailChgFee(@RequestBody Map param) {
+		return ServiceManageService.serviceSstListDetailChgFee(param);
+	}
+	
+	
 }
