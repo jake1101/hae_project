@@ -98,7 +98,7 @@
 	        </tr>
 		</table>
 		<div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 20px;">
-			<sc-button id="apply" text="승인" style="width: 100px; padding: 10px; display: block;" on-click="onBtnClick"></sc-button>
+			<sc-button id="apply" text="승인" style="width: 100px; padding: 10px; display: none;" on-click="onBtnClick"></sc-button>
 			<sc-button id="test" text="서비스 테스트" style="width: 100px; padding: 10px; display: none;" on-click="onBtnClick"></sc-button>
 			<sc-button id="start" text="서비스 개시" style="width: 100px; padding: 10px; display: none;" on-click="onBtnClick"></sc-button>
 		</div>
@@ -132,6 +132,7 @@
 			load: function(param){
 				const me = this;
 				const {stt_cd} = param;
+				const commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 				
 				if(stt_cd == "1"){
 					me.$.apply.style.display = "block";
@@ -144,15 +145,21 @@
 					me.$.test.style.display = "block";
 					me.$.start.style.display = "none";
 					
+					me.$.mon_fee.type = "text";
+					me.$.mon_fee.value = commaNum(param.mon_fee);
 					me.$.mon_fee.readonly = "true";
-					me.$.mon_fee.value = param.mon_fee;
 				}else if(stt_cd == "3"){
 					me.$.apply.style.display = "none";
 					me.$.test.style.display = "none";
 					me.$.start.style.display = "block";
 					
+					me.$.mon_fee.type = "text";
+					me.$.mon_fee.value = commaNum(param.mon_fee);
 					me.$.mon_fee.readonly = "true";
-					me.$.mon_fee.value = param.mon_fee;
+				}else{
+					me.$.mon_fee.type = "text";
+					me.$.mon_fee.value = commaNum(param.mon_fee);
+					me.$.mon_fee.readonly = "true";
 				}
 				
 				me.set("selectedService", param);
@@ -208,7 +215,7 @@
 								me.fire("refresh");
 							});
 						}else{
-							SCAlert.show('error', `테스트 실패하였습니다.`);
+							SCAlert.show('error', `개시 실패하였습니다.`);
 						}
 					})
 				}

@@ -1,3 +1,4 @@
+<sc-link rel="import" href="ep-payment-subscription-pmtdt.html"></sc-link>
 <dom-module id="es-payment-subscription-list">
 	<style>
         :host {
@@ -5,6 +6,39 @@
         }
     </style>
     <template>
+    	<sc-request-group init>
+            <sc-ajax
+            	id="getCompanyList"
+            	url="getCompanyList.do"
+            	body="{}"
+            	last-response="{{companyList}}"
+            ></sc-ajax>
+            <sc-ajax
+            	id="getWPCList"
+            	url="getWPCList.do"
+            	body="{}"
+            	last-response="{{wpcResult}}"
+            ></sc-ajax>
+            <sc-ajax 
+				id="getWpcServiceList" 
+				url="getWpcServiceList.do"
+				body="{}"
+				last-response="{{wpcSerivceResult}}"
+			></sc-ajax>
+			<sc-ajax 
+				id="serviceSstList" 
+				url="serviceSstList.do"
+				body="{}"
+				last-response="{{serviceResult}}"
+				on-response="complateServiceResult"
+			></sc-ajax>
+		</sc-request-group>
+		<sc-ajax 
+			id="serviceSstListDetail" 
+			url="serviceSstListDetail.do"
+			last-response="{{detailResult}}"
+			on-response="complateDetailResult"
+		></sc-ajax>
    		<cc-sub-title-bar title-text="구독료 관리 목록"></cc-sub-title-bar>
    		<cc-search-container>
 			<table>
@@ -24,7 +58,11 @@
 					</th>
                 	<td>
                 		<sc-combobox-field 
-                			placeholder="계열사"
+   			                placeholder="계열사"
+                			items="{{companyList}}"
+						 	value="{{searchParam.group_id}}"
+						 	display-field="name" 
+						 	value-field="id" 
                 		></sc-combobox-field>
                 	</td>
                 	<th>
@@ -32,14 +70,22 @@
 					</th>
                 	<td>
                 		<sc-combobox-field 
-                			placeholder="사업장"
+						 	items="{{wpcResult.result_data}}"
+						 	value="{{searchParam.wpc_cd}}"
+						 	display-field="name" 
+						 	value-field="id" 
+							placeholder="사업장"
                 		></sc-combobox-field>
                 	</td>
                 	<th>
 						<sc-label text="신청 서비스"></sc-label>
 					</th>
                 	<td>
-                		<sc-combobox-field 
+                		<sc-combobox-field
+						 	items="{{wpcSerivceResult.result_data}}"
+						 	value="{{searchParam.svc_ctl_id}}"
+						 	display-field="svc_ctl_nm" 
+						 	value-field="svc_ctl_id" 
                 			placeholder="신청 서비스"
                 		></sc-combobox-field>
                 	</td>
@@ -47,7 +93,7 @@
 						<sc-label text="키워드 검색"></sc-label>
 					</th>
 					<td rowspan=2>
-						<sc-text-field></sc-text-field>
+						<sc-text-field value="{{searchParam.search}}"></sc-text-field>
 					</td>
    	            </tr>
                	<tr>
@@ -56,43 +102,187 @@
 		</cc-search-container>
 		<sc-grid
 			id="gridPanel"
+			data-provider="{{serviceResult.result_data}}"
 			use-selection="false"
 			use-state="false"
 			editable="true"
 		>
 			<cc-grid-toolbar></cc-grid-toolbar>
 			<sc-grid-columns>
-				<sc-data-column data-field="b" header-text="계열사" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="c" header-text="사업장" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="d" header-text="신청 서비스" width="400" text-align="center"></sc-data-column>
-				<sc-data-column data-field="e" header-text="서비스 게시일" width="200" text-align="center"></sc-data-column>
-				<sc-data-column data-field="a" header-text="서비스 만료일" width="200" text-align="center"></sc-data-column>
-				<sc-data-column data-field="a" header-text="구독 기간" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="a" header-text="월 구독료" width="150" text-align="center"></sc-data-column>	
+				<sc-data-column data-field="group_nm" header-text="계열사" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="wpc_nm" header-text="사업장" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="svc_ctl_nm" header-text="신청 서비스" width="400" text-align="center"></sc-data-column>
+				<sc-date-column data-field="sst_str_dt" header-text="서비스 게시일" width="200" text-align="center" display-format="yyyy-MM-dd"></sc-date-column>
+				<sc-date-column data-field="sst_end_dt" header-text="서비스 만료일" width="200" text-align="center" display-format="yyyy-MM-dd"></sc-date-column>
+				<sc-data-column data-field="sst_trm" header-text="구독 기간" width="150" text-align="center"></sc-data-column>
+				<sc-data-column data-field="mon_fee" header-text="월 구독료" width="150" text-align="center"></sc-data-column>	
 			</sc-grid-columns>
 		</sc-grid>
 		<div class="vspace-10"></div>
 		<sc-grid
 			id="detailGridPanel"
+			data-provider="{{detailResult.result_data}}"
 			use-selection="false"
 			use-state="false"
 			editable="true"
+		 	on-button-click="onButtonClick"
 		>
 			<cc-grid-toolbar title-text="구독료 납부 상세 내역"></cc-grid-toolbar>
 			<sc-grid-columns>
-				<sc-data-column data-field="b" header-text="계열사" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="c" header-text="사업장" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="d" header-text="신청 서비스" width="400" text-align="center"></sc-data-column>
-				<sc-data-column data-field="e" header-text="서비스 게시일" width="200" text-align="center"></sc-data-column>
-				<sc-data-column data-field="a" header-text="서비스 만료일" width="200" text-align="center"></sc-data-column>
-				<sc-data-column data-field="a" header-text="구독 기간" width="150" text-align="center"></sc-data-column>
-				<sc-data-column data-field="a" header-text="월 구독료" width="150" text-align="center"></sc-data-column>	
+				<sc-data-column data-field="rownum" header-text="" width="100" text-align="center"></sc-data-column>
+				<sc-group-column hide-child-headers="true" header-text="납부 예정일" width="250" text-align="center">
+                   	<sc-date-column data-field="pmt_dt_stringify" width="200" text-align="center" display-format="yyyy-MM-dd"></sc-date-column>
+                   	<sc-button-column data-field="exp_pmt_dt_stt" text="수정" width="50" text-align="center" image="bower_components/sc-grid/resources/img/btn_normal.png" disabled-image="bower_components/sc-grid/resources/img/btn_disabled.png" enabled-function="enabledUpdate"></sc-image-column>
+                </sc-group-column>
+				<sc-data-column data-field="exp_stt_text" header-text="납부 상태" width="150" text-align="center" item-style-function="onStyleFontColor"></sc-data-column>
+				<sc-date-column 
+					data-field="cnf_dt_stringify" 
+					header-text="납부 완료일" 
+					width="200" 
+					text-align="center" 
+					display-format="yyyy-MM-dd"
+				></sc-date-column>
+				<sc-data-column data-field="cnf_usr_id" header-text="확인자" width="150" text-align="center"></sc-data-column>
+				<sc-button-column data-field="complate_stt" header-text="납부 확인" text="완료" width="150" text-align="center" image="bower_components/sc-grid/resources/img/btn_normal.png" disabled-image="bower_components/sc-grid/resources/img/btn_disabled.png" enabled-function="enabledComplate"></sc-button-column>
 			</sc-grid-columns>
 		</sc-grid>
     </template>
     <script>
     	Polymer({
-    		is: "es-payment-subscription-list"
+    		is: "es-payment-subscription-list",
+    		properties: {
+    			companyList: {
+    				type: Array,
+    				value: function() {
+    					return [];
+    				}
+    			},
+				wpcResult: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			},
+    			wpcList: {
+    				type: Array,
+    				value: function() {
+    					return [];
+    				}
+    			},
+    			wpcSerivceResult: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			},
+    			searchParam: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			},
+				serviceResult: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			},
+    			detailResult: {
+    				type: Object,
+    				value: function() {
+    					return {};
+    				}
+    			}
+    		},
+    		complateServiceResult: function(e, {response: {result_data: serviceList}}){
+    			const me = this;
+    			
+    			const setDate = dt => dt == 253402182000000 ? "" : dt;
+                
+                const commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+                
+                const setService = s => Object.assign(s, {
+                	"mon_fee": commaNum(s.mon_fee),
+                	"sst_trm": s.sst_trm + "개월",
+                	"sst_end_dt": setDate(s.sst_end_dt),
+                	"sst_str_dt": setDate(s.sst_str_dt),
+                });
+                
+                if(serviceList){
+                	result_data = serviceList.map(setService);
+                    me.set("serviceResult", {result_data});
+                    
+                    me.$.serviceSstListDetail.body = {"svc_id": 54}
+                    UT.request(me.$.serviceSstListDetail);
+                }
+    		},
+    		complateDetailResult: function(e, {response: {result_data: detailList}}){
+    			const me = this;
+    			
+    			const setText = t => t != "0" ? (t == "1" ? "납부대기" : "납부완료") : "미납";
+    			
+    			const setDate = dt => dt == 253402182000000 ? "" : dt;
+                
+                const commaNum = n => n && n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+                
+                const setDetail = s => Object.assign(s, {
+                	"mon_fee": commaNum(s.mon_fee),
+                	"rownum": s.rownum + "회차",
+                	"exp_stt_text": setText(s.exp_stt),
+                	"pmt_dt_stringify": setDate(s.pmt_dt),
+                	"cnf_dt_stringify": setDate(s.cnf_dt),
+                	"exp_pmt_dt_stt": s.exp_pmt_dt_stt,
+                	"complate_stt": s.exp_stt == "2" ? 0 : 1
+                });
+                
+                if(detailList){
+                	result_data = detailList.map(setDetail);
+                    me.set("detailResult", {result_data});
+                }
+    		},
+			onStyleFontColor: function(data, item){
+           	 	/* return (data.labelColor)?{fontColor: data.labelColor}:null; */
+           	 	
+           	 	return data.exp_stt == "0" ? {fontColor: "#ff0000" } : null;
+       	 	},
+    		enabledUpdate: function(e){
+    			return Number(e.exp_pmt_dt_stt);
+    		},
+			enabledComplate: function(e){
+				return Number(e.complate_stt);
+			},
+			onButtonClick: function() {
+				const me = this;
+				const {data, item, provider} = event.detail;
+				console.log(data);
+				console.log(item)
+				console.log(provider);
+				if(item.columnName == "exp_pmt_dt_stt") {
+					const pmtDtPop = UT.popup(
+       					"ep-payment-subscription-pmtdt", 
+       					me,
+       					500,
+       					100,
+       					{
+       						"update": function(popup, e) {
+       							provider.setItemAt(item.rowIndex, Object.assign(data, {"pmt_dt": e.detail, "pmt_dt_stringify": e.detail}));
+       							data.pmt_dt_stringify = e.detail;
+       							console.log(data);
+       							popup.close();
+                           	}
+       					},
+       					{ 
+       						maximizable: false, 
+       						titleText: `납부 예정일 수정`
+       					}
+        			);
+					pmtDtPop.show();
+					console.log(data.pmt_dt)
+					pmtDtPop.getWindowContent().load(data.pmt_dt);
+				}else if(item.cloumnName == "complate_stt"){
+					
+				}
+			}
     	})
     </script>
 </dom-module>

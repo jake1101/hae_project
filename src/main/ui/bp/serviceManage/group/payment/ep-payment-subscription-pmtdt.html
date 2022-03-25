@@ -1,0 +1,55 @@
+<dom-module id="ep-payment-subscription-pmtdt">
+	<template>
+		<table class="tb-form" validation-group="update">
+			<tr>
+				<th>
+					납부 예정일
+				</th>
+				<td colspan=2 style="text-align: center;">
+					<sc-date-field 
+						id="pmtDt"
+						value={{date.pmt_dt}} 
+						placeholder="납부 예정일"
+						required="true"
+						style="width: 200px;"
+					></sc-date-field>
+				</td>
+				<td style="text-align: center;">
+					<sc-button id="update" text="수정" style="width: 50px; padding: 10px;" on-click="onUpdateClick"></sc-button>
+				</td>
+			</tr>
+		</table>
+	</template>
+	<script>
+		Polymer({
+			is: "ep-payment-subscription-pmtdt",
+			properties: {
+				date: {
+					type: Object,
+	   				value: function() {
+	   					return {};
+	   				}
+				}
+			},
+			load: function(param){
+				const me = this;
+				me.$.pmtDt.value = new Date(Number(param));
+			},	
+			onUpdateClick: function(){
+				const me = this;
+				const now = new Date();
+
+				if(now.valueOf() >= me.get("date").pmt_dt.valueOf()){
+					SCAlert.show('error', `납부 예정일은 오늘 이후인 날짜로 선택해 주십시오.`);
+					return;
+				}
+				if(!me.validate("update")){
+					SCAlert.show('error', `납부 예정일을 입력해 주십시오.`);
+					return;
+				}
+				
+				me.fire("update", me.get("date").pmt_dt);
+			}
+		})
+	</script>
+</dom-module>
