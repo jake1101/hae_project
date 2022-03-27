@@ -292,18 +292,22 @@
 					return {l, r};
 				}
                 
-                const setService = s => Object.assign(s, {
-                	"req_dt": setDate(s.req_dt),
-                	"sst_end_dt": setDate(s.sst_end_dt),
-                	"sst_str_dt": setDate(s.sst_str_dt),
-                	"sst_trm": setTerm(s.sst_trm),
-                	"exp_mon_fee": commaNum(s.exp_mon_fee),
-                	"btn_l": setBtn(s).l,
-                	"btn_r": setBtn(s).r
-                });
+                const setService = s => {
+                	if(s.status_nm != "삭제"){
+                		return Object.assign(s, {
+    	                   	"req_dt": setDate(s.req_dt),
+    	                   	"sst_end_dt": setDate(s.sst_end_dt),
+    	                   	"sst_str_dt": setDate(s.sst_str_dt),
+    	                   	"sst_trm": setTerm(s.sst_trm),
+    	                   	"exp_mon_fee": commaNum(s.exp_mon_fee),
+    	                   	"btn_l": setBtn(s).l,
+    	                   	"btn_r": setBtn(s).r
+                        });
+                	}
+                }
                 
                 if(serviceList){
-                	result_data = serviceList.map(setService);
+                	result_data = serviceList.filter(setService);
                     me.set("serviceResult", {result_data});
                 }
 			},
@@ -357,7 +361,7 @@
 	       		  	const updatePop = UT.popup(
 	   					"ep-company-status-service-update", 
 	   					me,
-	   					800,
+	   					1000,
 	   					800,
 	   					{
 	   						"refresh": function(popup, e) {
