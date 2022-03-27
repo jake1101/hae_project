@@ -124,12 +124,13 @@
 						use-selection="false"
 						use-state="false"
 						editable="true"
+						on-item-click="onItemClick"
 					>
 						<cc-grid-toolbar></cc-grid-toolbar>
 						<sc-grid-columns>
 							<sc-data-column data-field="group_nm" header-text="계열사" width="150" text-align="center"></sc-data-column>
 							<sc-data-column data-field="wpc_nm" header-text="사업장" width="150" text-align="center"></sc-data-column>
-							<sc-data-column data-field="svc_ctl_nm" header-text="신청 서비스" width="400" text-align="center"></sc-data-column>
+							<sc-data-column data-field="svc_ctl_nm" header-text="신청 서비스" width="400" text-align="center" style-name="link"></sc-data-column>
 							<sc-date-column data-field="sst_str_dt" header-text="서비스 게시일" width="200" text-align="center" display-format="yyyy-MM-dd"></sc-date-column>
 							<sc-date-column data-field="sst_end_dt" header-text="서비스 만료일" width="200" text-align="center" display-format="yyyy-MM-dd"></sc-date-column>
 							<sc-data-column data-field="sst_trm" header-text="구독 기간" width="150" text-align="center"></sc-data-column>
@@ -249,6 +250,15 @@
                     UT.request(me.$.serviceSstListDetail);
                 }
     		},
+    		onItemClick: function() {
+    			const me = this;
+    			const {data, item} = event.detail;
+    			console.log(event);
+    			if(item.columnName == "svc_ctl_nm"){
+    				me.$.serviceSstListDetail.body = {svc_id: Number(data.svc_id)};
+    				UT.request(me.$.serviceSstListDetail)
+    			}
+    		},
     		complateDetailResult: function(e, {response: {result_data: detailList}}){
     			console.log()
     			const me = this;
@@ -280,7 +290,7 @@
            	 	return data.exp_stt == "0" ? {fontColor: "#ff0000" } : null;
        	 	},
     		enabledUpdate: function(e){
-    			return Number(e.exp_pmt_dt_stt);
+    			return Number(e.complate_stt) ? 1 : 0;
     		},
 			enabledComplate: function(e){
 				return Number(e.complate_stt);
