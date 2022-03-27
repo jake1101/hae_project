@@ -135,9 +135,6 @@
     			const groupObj = me.get("svcGrpObj") || {};
                 me.set("groupList", groupObj.result_data);
                 
-                const list = me.get("groupList") || [];
-                list.unshift({svc_grp_id: "all", svc_grp_nm: "전체"})
-                
     			me.onFindRegSafetyServiceList();
             },
     		onFindRegSafetyServiceList: function() {
