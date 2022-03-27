@@ -16,8 +16,8 @@
 			last-response="{{detailResult}}"
 		></sc-ajax>
 		<sc-ajax
-			id="deleteQNA"
-			url="deleteQNA.do"
+			id="deleteHotLine"
+			url="deleteHotLine.do"
 		></sc-ajax>
 		
 		<cc-sub-title-bar
@@ -103,7 +103,7 @@
 				const me = this;
 				
 				me.$.searchHotLineDetail.body = {"pst_seq": Number(param.pst_seq)}
-				me.$.deleteQNA.body = {"pst_seq": Number(param.pst_seq)}
+				me.$.deleteHotLine.body = {"pst_seq": Number(param.pst_seq)}
 				UT.request(me.$.searchHotLineDetail, function(event, {response: {result_data: d}}) {
 					const req_tp_cd = me.get('codes').req_tp_cd.find(r => r.data == d[0].req_tp_cd).label
 					const setDt = dt => {
@@ -137,7 +137,7 @@
 			},
 			onDeleteClick: function() {
 				const me = this;
-				UT.request(me.$.deleteQNA, function(){
+				UT.request(me.$.deleteHotLine, function(){
 					me.fire("refresh");
 				});
 				
