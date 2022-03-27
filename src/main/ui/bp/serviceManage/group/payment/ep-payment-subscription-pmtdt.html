@@ -40,17 +40,20 @@
 			onUpdateClick: function(){
 				const me = this;
 				const now = new Date();
-
-				if(now.valueOf() > me.get("date").pmt_dt.valueOf()){
-					SCAlert.show('error', `납부 예정일은 오늘 이후인 날짜로 선택해 주십시오.`);
-					return;
+				
+				if(now.getDate() != me.get("date").pmt_dt.getDate()){
+					if(now.valueOf() > me.get("date").pmt_dt.valueOf()){
+						SCAlert.show('error', `납부 예정일은 오늘 이후인 날짜로 선택해 주십시오.`);
+						return;
+					}
 				}
+				
 				if(!me.validate("update")){
 					SCAlert.show('error', `납부 예정일을 입력해 주십시오.`);
 					return;
 				}
 				
-				me.fire("update", me.get("date").pmt_dt);
+				/* me.fire("update", me.get("date").pmt_dt); */
 			}
 		})
 	</script>
