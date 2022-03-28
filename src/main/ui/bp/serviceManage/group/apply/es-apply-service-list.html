@@ -227,14 +227,18 @@
 					}
                 }
                 
-                const setService = s => Object.assign(s, {
-                	"req_dt": setDate(s.req_dt),
-                	"sst_end_dt": setDate(s.sst_end_dt),
-                	"sst_str_dt": setDate(s.sst_str_dt),
-                });
+                const setService = s =>{
+                	if(s.status_nm != "이용중"){
+                		return Object.assign(s, {
+                        	"req_dt": setDate(s.req_dt),
+                        	"sst_end_dt": setDate(s.sst_end_dt),
+                        	"sst_str_dt": setDate(s.sst_str_dt),
+                        });
+                	}
+                }
                 
                 if(serviceList){
-                	result_data = serviceList.map(setService);
+                	result_data = serviceList.filter(setService);
                     me.set("serviceResult", {result_data});
                 }
 			},
