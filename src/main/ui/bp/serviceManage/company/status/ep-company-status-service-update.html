@@ -399,7 +399,9 @@
 					if(k.includes("__af")){
 						return serviceData[k.split("__af")[0]] = isNaN(serviceData[k]) ? serviceData[k] : Number(serviceData[k]);
 					}
-				}); 
+				});
+				
+				serviceData.dsr_str_dt = new Date(serviceData.dsr_str_dt);
 				
 				deviceList.forEach(d => {
 					Object.keys(d).filter(k => {
