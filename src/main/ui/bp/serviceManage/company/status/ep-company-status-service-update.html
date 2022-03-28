@@ -147,7 +147,7 @@
 					<sc-label text="서비스 만료 예정일"></sc-label>
 				</th>
 				<td id="exp_end_dt__bf">
-					{{selectedService.sst_end_dt}}
+					{{selectedService.exp_end_dt}}
 				</td>
 				<td>
 					<div style="display: flex; gap: 10px;">
@@ -217,6 +217,7 @@
 				{svc_id, stt_cd} = param;
 				
 				me.set("selectedService", param);
+				console.log(param)
 				
 				me.$.getServiceUseListDetail.body = {svc_id, stt_cd}
 				UT.request(me.$.getServiceUseListDetail)
@@ -326,7 +327,12 @@
 				}
 				
 				me.$.expEndDt.style.display = "block";
-				me.$.expEndDt.textContent = `${d.getFullYear()}. ${d.getMonth() + 1}, ${d.getDate()}`;
+				
+				const ye = d.getFullYear();
+				const mo = d.getMonth() + 1;
+				const da = d.getDate()
+				
+				me.$.expEndDt.textContent = `${ye}.${mo>10 ? mo : "0"+mo}.${da>10 ? da : "0"+da}`;
 			},
 			onEstimatedFeeClick: function() {
 				const me = this,
