@@ -171,7 +171,8 @@
 				const {
 					svc_id,
 					service_gb_cd,
-					stt_cd
+					stt_cd,
+					sst_trm
 				} = me.get("selectedService");
 
 				if(!me.$.mon_fee.value){
@@ -179,7 +180,7 @@
 					return;
 				}
 				
-				Object.assign(me.get("setParam"), {svc_id, service_gb_cd, stt_cd});
+				Object.assign(me.get("setParam"), {svc_id, service_gb_cd, stt_cd, sst_trm});
 				
 				if(btnId == "apply"){
 					Object.assign(me.get("setParam"), {"mon_fee": Number(me.get("setParam").mon_fee.split(',').join(""))});
