@@ -203,7 +203,7 @@
 					}
                 };
 				
-				const commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+				const commaNum = n => n && n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 				
 				const setSttNm = function(cd) {
 					const obj = me.get("codes").stt.find(s => s.data == cd);

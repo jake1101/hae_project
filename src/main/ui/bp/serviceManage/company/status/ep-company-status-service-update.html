@@ -362,7 +362,7 @@
 				UT.request(me.$.estimateMonthlyFee, function(e, {response: {result_data: {estimatedMonthlyFee: fee}}}){
 					me.get("serviceData").exp_mon_fee__af = fee;
 					
-					const commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+					const commaNum = n => n && n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 					me.$.estimatedFee.style.display = "block";
 					me.$.estimatedFee.textContent = commaNum(fee) + " (VAT 별도)";
 				});

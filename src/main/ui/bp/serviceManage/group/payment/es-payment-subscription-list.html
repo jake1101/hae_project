@@ -233,7 +233,7 @@
     			
     			const setDate = dt => dt == 253402182000000 ? "" : dt;
                 
-                const commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+                const commaNum = n => n && n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
                 
                 const setService = s => Object.assign(s, {
                 	"mon_fee": commaNum(s.mon_fee),

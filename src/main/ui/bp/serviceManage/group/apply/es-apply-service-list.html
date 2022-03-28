@@ -269,7 +269,7 @@
 				
 				  		return `${y}-${m}-${d}`;
 			 	 	};	
-				  	const commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+				  	const commaNum = n => n&& n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 			  	
 				  	getServiceAprListDetail[0].dsr_str_dt = setDate(getServiceAprListDetail[0].dsr_str_dt);
 				  	getServiceAprListDetail[0].exp_end_dt = setDate(getServiceAprListDetail[0].exp_end_dt);

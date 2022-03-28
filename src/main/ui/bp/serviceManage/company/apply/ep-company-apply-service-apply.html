@@ -251,7 +251,7 @@
 			},
 			_computedFee: function(fee){
 				const me = this,
-		  	  	  	  commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+		  	  	  	  commaNum = n => n && n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 		  	  
 		  	 	if(fee){
 		  	 		me.set("setParam", Object.assign(me.get("setParam"), {"exp_mon_fee": fee}));

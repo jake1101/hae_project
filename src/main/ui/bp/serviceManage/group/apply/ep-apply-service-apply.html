@@ -132,7 +132,7 @@
 			load: function(param){
 				const me = this;
 				const {stt_cd} = param;
-				const commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+				const commaNum = n => n&& n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 				
 				if(stt_cd == "1"){
 					me.$.apply.style.display = "block";

@@ -171,7 +171,7 @@
 				
 				return `${y}-${m}-${d}`;
 			},
-			commaNum = n => n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+			commaNum = n => n && n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 				  
 		    me.$.dvcTh.setAttribute('rowspan', serviceUseDeviceListDetail.length + 1);
 		  	me.$.wpc_nm.textContent = me.get("selectedService").wpc_nm;

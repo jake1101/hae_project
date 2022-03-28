@@ -266,9 +266,7 @@
 					return term.find(trm => t == Number(trm.data)).label
 				}
                 
-				const commaNum = n => {
-					return n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
-				}
+				const commaNum = n => n && n.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 				
 				const setBtn = ({status_code: s}) => {
 					let l = ""
