@@ -205,8 +205,6 @@
                 
                 const result_data = me.get("wpcResult").result_data.map(wpc => wpc = {"wpc_cd": wpc.id, "wpc_nm": wpc.name, "company_id": wpc.company_id});
                 me.set("wpcResult", {result_data});
-                
-                console.log(me.get("serviceResult"))
             },
             complateServiceResult: function(e, {response: {result_data: serviceList}}) {
 				const me = this;
